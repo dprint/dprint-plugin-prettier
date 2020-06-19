@@ -1,0 +1,23 @@
+[package]
+name = "dprint-plugin-prettier"
+description = "Prittier wrapper plugin for dprint."
+keywords = ["formatting", "formatter", "prettier"]
+version = "0.1.0"
+authors = ["David Sherret <dsherret@gmail.com>"]
+license-file = "LICENSE"
+edition = "2018"
+homepage = "https://github.com/dprint/dprint-plugin-prettier"
+repository = "https://github.com/dprint/dprint-plugin-prettier"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+dprint-core = "0.22.0"
+quick-js = "0.3.3"
+serde = { version = "1.0.88", features = ["derive"] }
+serde_json = "1.0"
+
+[dev-dependencies]
+dprint-development = "0.2.2"
+debug-here = "0.2"
