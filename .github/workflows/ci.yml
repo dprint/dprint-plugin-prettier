@@ -9,8 +9,8 @@ jobs:
     strategy:
       matrix:
         config:
-          # - os: ubuntu-16.04
-          #   kind: test_release
+          - os: ubuntu-16.04
+            kind: test_release
           - os: ubuntu-16.04
             kind: test_debug
 
