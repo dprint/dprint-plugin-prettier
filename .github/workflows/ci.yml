@@ -4,73 +4,69 @@ on: [push, pull_request]
 
 jobs:
   build:
-    name: ${{ matrix.config.kind }} ${{ matrix.config.os }}
-    runs-on: ${{ matrix.config.os }}
-    strategy:
-      matrix:
-        config:
-          - os: ubuntu-16.04
-            kind: test_release
-          - os: ubuntu-16.04
-            kind: test_debug
-
-    env:
-      CARGO_INCREMENTAL: 0
-      RUST_BACKTRACE: full
+    name: test_release
+    runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Install wasm32 target
-      if: matrix.config.kind == 'test_release'
-      run: rustup target add wasm32-unknown-unknown
-
-    - name: Cache cargo registry
-      uses: actions/cache@v1
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Cache node_modules
+      uses: actions/cache@v2
       with:
-        path: ~/.cargo/registry
-        key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
-    - name: Cache cargo index
-      uses: actions/cache@v1
-      with:
-        path: ~/.cargo/git
-        key: ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}
-    - name: Cache cargo build
-      uses: actions/cache@v1
-      with:
-        path: target
-        key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
+        path: |
+          **/node_modules
+        key: ${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
 
-    - name: Build debug
-      if: matrix.config.kind == 'test_debug'
-      run: cargo build --verbose
-    - name: Build release
-      if: matrix.config.kind == 'test_release'
-      run: cargo build --target wasm32-unknown-unknown --release --locked --verbose
+    - name: NPM install
+      run: npm install
+    - name: Build
+      run: npm run build
 
-    - name: Test debug
-      if: matrix.config.kind == 'test_debug'
-      run: cargo test --verbose
-    - name: Test release
-      if: matrix.config.kind == 'test_release'
-      run: cargo test --release --locked --verbose
+    - name: Package
+      run: |
+        mv index-macos dprint-plugin-prettier
+        zip -r dprint-plugin-prettier-x86_64-apple-darwin.zip dprint-plugin-prettier
+        rm dprint-plugin-prettier
+        mv index-linux dprint-plugin-prettier
+        zip -r dprint-plugin-prettier-x86_64-unknown-linux-gnu.zip dprint-plugin-prettier
+        mv index-win.exe dprint-plugin-prettier.exe
+        zip -r dprint-plugin-prettier-x86_64-pc-windows-msvc.zip dprint-plugin-prettier
+
+    - name: Create plugin file
+      run: node scripts/createPluginFile.js
 
     - name: Get tag version
-      if: matrix.config.kind == 'test_release' && startsWith(github.ref, 'refs/tags/')
+      if: startsWith(github.ref, 'refs/tags/')
       id: get_tag_version
       run: echo ::set-output name=TAG_VERSION::${GITHUB_REF/refs\/tags\//}
 
-    - name: Pre-release
-      if: matrix.config.kind == 'test_release' && startsWith(github.ref, 'refs/tags/')
-      run: |
-        cd target/wasm32-unknown-unknown/release/
-        mv dprint_plugin_prettier.wasm prettier-${{ steps.get_tag_version.outputs.TAG_VERSION }}.wasm
+    - name: Get plugin file checksum
+      if: startsWith(github.ref, 'refs/tags/')
+      id: get_plugin_file_checksum
+      run: echo "::set-output name=CHECKSUM::$(shasum -a 256 prettier.plugin | awk '{print $1}')"
 
     - name: Release
       uses: softprops/action-gh-release@v1
-      if: matrix.config.kind == 'test_release' && startsWith(github.ref, 'refs/tags/')
+      if: startsWith(github.ref, 'refs/tags/')
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         files: |
-          target/wasm32-unknown-unknown/release/prettier-${{ steps.get_tag_version.outputs.TAG_VERSION }}.wasm
+          dprint-plugin-prettier-x86_64-apple-darwin.zip
+          dprint-plugin-prettier-x86_64-unknown-linux-gnu.zip
+          dprint-plugin-prettier-x86_64-pc-windows-msvc.zip
+          prettier.plugin
+        body: |
+          ## Install
+
+          Add the following entry to your `plugins` array in *.dprintrc.json*:
+
+          ```jsonc
+          {
+            // etc...
+            "plugins": [
+              "https://plugins.dprint.dev/prettier-${{ steps.get_tag_version.outputs.TAG_VERSION }}.plugin@${{ steps.get_plugin_file_checksum.CHECKSUM }}"
+            ]
+          }
+          ```
         draft: true

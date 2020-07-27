@@ -1,0 +1,32 @@
+name: Package Publish
+
+on:
+  release:
+    types: [published]
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Get tag version
+      id: get_tag_version
+      run: echo ::set-output name=TAG_VERSION::${GITHUB_REF/refs\/tags\//}
+
+    - name: Download plugin file
+      run: curl -L https://github.com/dprint/dprint-plugin-prettier/releases/download/${{ steps.get_tag_version.outputs.TAG_VERSION }}/prettier.plugin --output prettier.plugin
+
+      # PLUGIN PUBLISH
+    - name: Checkout plugins repo
+      uses: actions/checkout@v2
+      with:
+        repository: dprint/plugins
+        token: ${{ secrets.CI_REPO_PAT }} # github.token is scoped to current repo, so use this to push to other repo
+        path: dprint-plugins
+    - name: Plugin publish
+      run: |
+          cd dprint-plugins
+          mv ../prettier.plugin prettier-${{ steps.get_tag_version.outputs.TAG_VERSION }}.plugin
+          git add .
+          git config user.name "David Sherret"
+          git config user.email "dsherret@users.noreply.github.com"
+          git commit -m "dprint-plugin-prettier ${{ steps.get_tag_version.outputs.TAG_VERSION }}"
+          git push origin master
