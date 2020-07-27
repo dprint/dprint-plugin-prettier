@@ -30,7 +30,7 @@ jobs:
         mv index-linux dprint-plugin-prettier
         zip -r dprint-plugin-prettier-x86_64-unknown-linux-gnu.zip dprint-plugin-prettier
         mv index-win.exe dprint-plugin-prettier.exe
-        zip -r dprint-plugin-prettier-x86_64-pc-windows-msvc.zip dprint-plugin-prettier
+        zip -r dprint-plugin-prettier-x86_64-pc-windows-msvc.zip dprint-plugin-prettier.exe
 
     - name: Create plugin file
       run: node scripts/createPluginFile.js
