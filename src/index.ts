@@ -172,7 +172,7 @@ function getPluginInfo() {
         name: "dprint-plugin-prettier",
         version: "2.0.5",
         configKey: "prettier",
-        fileExtensions: ["js", "ts", "md"], // todo: more
+        fileExtensions: getExtensions(),
         helpUrl: "https://dprint.dev/plugins/prettier",
         configSchemaUrl: "",
     };
@@ -210,4 +210,14 @@ function formatText(filePath: string, fileText: string, config: prettier.Options
         filepath: filePath,
         ...config,
     });
+}
+
+function getExtensions() {
+    const set = new Set<string>();
+    for (const language of prettier.getSupportInfo().languages) {
+        for (const ext of language.extensions ?? []) {
+            set.add(ext.replace(/^\./, ""));
+        }
+    }
+    return Array.from(set.values());
 }
