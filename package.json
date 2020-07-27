@@ -1,7 +1,7 @@
 {
   "name": "dprint-plugin-prettier",
   "private": true,
-  "version": "1.0.0",
+  "version": "2.0.5",
   "main": "output/index.js",
   "scripts": {
     "build": "rollup --config rollup.config.js && pkg dist/index.js"

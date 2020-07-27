@@ -170,7 +170,7 @@ function sendErrorResponse(message: string) {
 function getPluginInfo() {
     return {
         name: "dprint-plugin-prettier",
-        version: "0.1.0",
+        version: "2.0.5",
         configKey: "prettier",
         fileExtensions: ["js", "ts", "md"], // todo: more
         helpUrl: "https://dprint.dev/plugins/prettier",

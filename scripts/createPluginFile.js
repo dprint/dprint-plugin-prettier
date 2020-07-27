@@ -3,6 +3,9 @@ const crypto = require("crypto");
 
 const packageJson = JSON.parse(fs.readFileSync("package.json", { encoding: "utf8" }));
 const version = packageJson.version;
+
+ensureCodeHasVersion();
+
 const outputFile = {
     schemaVersion: 1,
     name: "dprint-plugin-prettier",
@@ -21,4 +24,12 @@ function getPlatformObject(zipFileName) {
         "reference": `https://github.com/dprint/dprint-plugin-prettier/releases/download/${version}/${zipFileName}`,
         "checksum": hash.digest("hex"),
     };
+}
+
+function ensureCodeHasVersion() {
+    // just in case...
+    const fileText = fs.readFileSync("./src/index.ts", { encoding: "utf8" });
+    if (!fileText.includes(`"${version}"`)) {
+        throw new Error(`Could not find version (${version}) in index.ts`);
+    }
 }

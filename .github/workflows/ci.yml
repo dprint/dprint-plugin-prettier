@@ -65,7 +65,7 @@ jobs:
           {
             // etc...
             "plugins": [
-              "https://plugins.dprint.dev/prettier-${{ steps.get_tag_version.outputs.TAG_VERSION }}.plugin@${{ steps.get_plugin_file_checksum.CHECKSUM }}"
+              "https://plugins.dprint.dev/prettier-${{ steps.get_tag_version.outputs.TAG_VERSION }}.plugin@${{ steps.get_plugin_file_checksum.outputs.CHECKSUM }}"
             ]
           }
           ```
