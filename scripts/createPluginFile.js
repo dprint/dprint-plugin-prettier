@@ -20,9 +20,11 @@ function getPlatformObject(zipFileName) {
     const fileBytes = fs.readFileSync(zipFileName);
     const hash = crypto.createHash("sha256");
     hash.update(fileBytes);
+    const checksum = hash.digest("hex");
+    console.log(zipFileName + ": " + checksum);
     return {
         "reference": `https://github.com/dprint/dprint-plugin-prettier/releases/download/${version}/${zipFileName}`,
-        "checksum": hash.digest("hex"),
+        "checksum": checksum,
     };
 }
 
