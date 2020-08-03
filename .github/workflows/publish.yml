@@ -12,7 +12,7 @@ jobs:
       run: echo ::set-output name=TAG_VERSION::${GITHUB_REF/refs\/tags\//}
 
     - name: Download plugin file
-      run: curl -L https://github.com/dprint/dprint-plugin-prettier/releases/download/${{ steps.get_tag_version.outputs.TAG_VERSION }}/prettier.plugin --output prettier.plugin
+      run: curl -L https://github.com/dprint/dprint-plugin-prettier/releases/download/${{ steps.get_tag_version.outputs.TAG_VERSION }}/prettier.exe-plugin --output prettier.exe-plugin
 
       # PLUGIN PUBLISH
     - name: Checkout plugins repo
@@ -24,7 +24,7 @@ jobs:
     - name: Plugin publish
       run: |
           cd dprint-plugins
-          mv ../prettier.plugin prettier-${{ steps.get_tag_version.outputs.TAG_VERSION }}.plugin
+          mv ../prettier.exe-plugin prettier-${{ steps.get_tag_version.outputs.TAG_VERSION }}.exe-plugin
           git add .
           git config user.name "David Sherret"
           git config user.email "dsherret@users.noreply.github.com"
