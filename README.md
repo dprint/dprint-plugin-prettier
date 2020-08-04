@@ -8,3 +8,18 @@ Wrapper around [prettier](https://prettier.io/) in order to use it as a dprint p
 
 1. Install [dprint](https://dprint.dev/install/)
 2. Follow instructions at https://github.com/dprint/dprint-plugin-prettier/releases/
+
+## Configuration
+
+See Prettier's configuration [here](https://prettier.io/docs/en/options.html). Specify using the "API Override" column.
+
+```jsonc
+{
+  // ...etc...
+  "prettier": {
+    "trailingComma": "all",
+    "singleQuote": true,
+    "proseWrap": "always"
+  }
+}
+```
