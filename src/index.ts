@@ -149,9 +149,9 @@ function sendResponse(parts: (Buffer | string | number)[]) {
         const buffers: Buffer[] = [];
         for (const part of parts) {
             if (typeof part === "string") {
-                buffers.push(new Buffer(textEncoder.encode(part)));
+                buffers.push(Buffer.from(textEncoder.encode(part)));
             } else if (typeof part === "number") {
-                const buf = new Buffer(4);
+                const buf = Buffer.alloc(4);
                 buf.writeUInt32BE(part);
                 buffers.push(buf);
             } else {
@@ -164,7 +164,7 @@ function sendResponse(parts: (Buffer | string | number)[]) {
 
 function sendErrorResponse(message: string) {
     stdInOut.sendMessageKind(ResponseKind.Error);
-    stdInOut.sendMessagePart(new Buffer(textEncoder.encode(message)));
+    stdInOut.sendMessagePart(Buffer.from(textEncoder.encode(message)));
 }
 
 function getPluginInfo() {
