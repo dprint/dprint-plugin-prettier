@@ -1,6 +1,7 @@
 import * as fs from "fs";
 
 const BUFFER_SIZE = 1024;
+const isWindows = process.platform === "win32";
 const textDecoder = new TextDecoder();
 
 export class StdInOutReaderWriter {
@@ -77,11 +78,21 @@ export class StdInOutReaderWriter {
 }
 
 function withStdin<T = void>(action: (stdin: number) => T) {
-    return withDescriptor("/dev/stdin", "rs", action);
+    if (isWindows) {
+        return action(process.stdin.fd);
+    } else {
+        // This is necessary on linux because it errors with process.stdin.fd
+        // and on windows it can't find /dev/stdin
+        return withDescriptor("/dev/stdin", "rs", action);
+    }
 }
 
 function withStdout<T = void>(action: (stdout: number) => T) {
-    return withDescriptor("/dev/stdout", "w", action);
+    if (isWindows) {
+        return action(process.stdout.fd);
+    } else {
+        return withDescriptor("/dev/stdout", "w", action);
+    }
 }
 
 function withDescriptor<T = void>(name: string, flags: string, action: (fd: number) => T) {

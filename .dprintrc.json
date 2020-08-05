@@ -11,6 +11,7 @@
   },
   "includes": ["**/*.{ts,tsx,js,jsx,json,md,rs}"],
   "excludes": [
+    "**/dist",
     "**/node_modules",
     "**/*-lock.json",
     "**/target"
