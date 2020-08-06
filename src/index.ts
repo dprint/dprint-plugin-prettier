@@ -40,7 +40,7 @@ function main() {
                 case MessageKind.Close:
                     return;
                 case MessageKind.GetPluginSchemaVersion:
-                    sendInt(1);
+                    sendInt(2);
                     break;
                 case MessageKind.GetPluginInfo:
                     sendString(JSON.stringify(getPluginInfo()));
@@ -67,7 +67,11 @@ function main() {
                 case MessageKind.FormatText:
                     const filePath = stdInOut.readMessagePartAsString();
                     const fileText = stdInOut.readMessagePartAsString();
-                    const formattedText = formatText(filePath, fileText, getResolvedConfig());
+                    const overrideConfig = JSON.parse(stdInOut.readMessagePartAsString());
+                    const config = Object.keys(overrideConfig).length === 0
+                        ? getResolvedConfig()
+                        : createResolvedConfig(overrideConfig);
+                    const formattedText = formatText(filePath, fileText, config);
 
                     if (formattedText === fileText) {
                         sendResponse([FormatResult.NoChange]);
@@ -90,23 +94,61 @@ function main() {
             return resolvedConfig;
         }
 
-        resolvedConfig = {};
-        resolvedConfig.printWidth = globalConfig.lineWidth;
-        resolvedConfig.tabWidth = globalConfig.indentWidth;
-        resolvedConfig.useTabs = globalConfig.useTabs;
-        resolvedConfig.endOfLine = getEndOfLine();
+        resolvedConfig = createResolvedConfig({});
+        return resolvedConfig;
+    }
 
-        for (const key of Object.keys(pluginConfig)) {
-            (resolvedConfig as any)[key] = pluginConfig[key];
-        }
+    function createResolvedConfig(overrideConfig: object) {
+        const resolvedConfig: prettier.Options = {};
+        updateGlobalPropertiesForConfig(globalConfig);
+        updateForPluginConfig(pluginConfig);
+        updateForPluginConfig(overrideConfig);
 
         return resolvedConfig;
 
-        function getEndOfLine(): prettier.Options["endOfLine"] {
-            if (globalConfig.newLineKind == null) {
+        function updateForPluginConfig(pluginConfig: any) {
+            for (const key of Object.keys(pluginConfig)) {
+                if (!isGlobalProperty(key)) {
+                    (resolvedConfig as any)[key] = pluginConfig[key];
+                }
+            }
+
+            updateGlobalPropertiesForConfig(pluginConfig);
+        }
+
+        function isGlobalProperty(propName: string) {
+            switch (propName) {
+                case "printWidth":
+                case "indentWidth":
+                case "tabWidth":
+                case "useTabs":
+                case "newLineKind":
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        function updateGlobalPropertiesForConfig(config: any) {
+            if (config.lineWidth != null) {
+                resolvedConfig.printWidth = config.lineWidth;
+            }
+            if (config.indentWidth != null) {
+                resolvedConfig.tabWidth = config.indentWidth;
+            }
+            if (config.useTabs != null) {
+                resolvedConfig.useTabs = config.useTabs;
+            }
+            if (config.newLineKind != null) {
+                resolvedConfig.endOfLine = getEndOfLine(config.newLineKind);
+            }
+        }
+
+        function getEndOfLine(newLineKind: string): prettier.Options["endOfLine"] {
+            if (newLineKind == null) {
                 return undefined;
             }
-            switch (globalConfig.newLineKind) {
+            switch (newLineKind) {
                 case "auto":
                     return "auto";
                 case "lf":
@@ -170,7 +212,7 @@ function sendErrorResponse(message: string) {
 function getPluginInfo() {
     return {
         name: "dprint-plugin-prettier",
-        version: "2.0.5",
+        version: "0.1.0",
         configKey: "prettier",
         fileExtensions: getExtensions(),
         helpUrl: "https://dprint.dev/plugins/prettier",
