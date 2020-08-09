@@ -34,7 +34,7 @@ function main() {
     let pluginConfig: any = {};
     let resolvedConfig: prettier.Options | undefined = undefined;
     while (true) {
-        const messageKind = stdInOut.readMessageKind() as MessageKind;
+        const messageKind = stdInOut.readInt() as MessageKind;
         try {
             switch (messageKind) {
                 case MessageKind.Close:
@@ -181,32 +181,41 @@ function sendSuccess() {
 }
 
 function sendResponse(parts: (Buffer | string | number)[]) {
-    const buffers = getBuffers(); // do this before setting a success message kind
-    stdInOut.sendMessageKind(ResponseKind.Success);
-    for (const buffer of buffers) {
-        stdInOut.sendMessagePart(buffer);
-    }
-
-    function getBuffers() {
-        const buffers: Buffer[] = [];
-        for (const part of parts) {
-            if (typeof part === "string") {
-                buffers.push(Buffer.from(textEncoder.encode(part)));
-            } else if (typeof part === "number") {
-                const buf = Buffer.alloc(4);
-                buf.writeUInt32BE(part);
-                buffers.push(buf);
+    const encodedParts = getEncodedParts(); // do this before setting a success message kind
+    try {
+        stdInOut.sendInt(ResponseKind.Success);
+        for (const part of encodedParts) {
+            if (typeof part === "number") {
+                stdInOut.sendInt(part);
             } else {
-                buffers.push(part);
+                stdInOut.sendVariableWidth(part);
             }
         }
-        return buffers;
+    } catch (err) {
+        try {
+            console.error(`Error sending response at point of no recovery: ${err}`);
+        } finally {
+            process.exit(1);
+        }
+    }
+
+    function getEncodedParts() {
+        const encodedParts: (Buffer | number)[] = new Array(parts.length);
+        for (const part of parts) {
+            if (typeof part === "string") {
+                encodedParts.push(Buffer.from(textEncoder.encode(part)));
+            } else {
+                encodedParts.push(part);
+            }
+        }
+        return encodedParts;
     }
 }
 
 function sendErrorResponse(message: string) {
-    stdInOut.sendMessageKind(ResponseKind.Error);
-    stdInOut.sendMessagePart(Buffer.from(textEncoder.encode(message)));
+    const errorBuffer = Buffer.from(textEncoder.encode(message));
+    stdInOut.sendInt(ResponseKind.Error);
+    stdInOut.sendVariableWidth(errorBuffer);
 }
 
 function getPluginInfo() {

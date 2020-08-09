@@ -5,30 +5,24 @@ const isWindows = process.platform === "win32";
 const textDecoder = new TextDecoder();
 
 export class StdInOutReaderWriter {
-    readMessageKind() {
-        return withStdin(stdin => this.readInt(stdin));
+    readInt() {
+        return withStdin(stdin => this.readIntFromStdIn(stdin));
     }
 
-    private readInt(stdin: number) {
-        const buf = Buffer.alloc(4);
-        fs.readSync(stdin, buf, 0, 4, null);
-        return buf.readUInt32BE();
+    sendInt(value: number) {
+        withStdout(stdout => this.writeIntToStdOut(stdout, value));
     }
 
-    sendMessageKind(messageKind: number) {
-        withStdout(stdout => this.writeInt(stdout, messageKind));
-    }
-
-    sendMessagePart(buffer: Buffer) {
+    sendVariableWidth(buffer: Buffer) {
         return withStdin(stdin =>
             withStdout(stdout => {
-                this.writeInt(stdout, buffer.length);
+                this.writeIntToStdOut(stdout, buffer.length);
                 fs.writeSync(stdout, buffer, 0, Math.min(buffer.length, BUFFER_SIZE));
 
                 let index = BUFFER_SIZE;
                 while (index < buffer.length) {
                     // wait for "ready" from the server
-                    this.readInt(stdin);
+                    this.readIntFromStdIn(stdin);
 
                     fs.writeSync(stdout, buffer, index, Math.min(buffer.length - index, BUFFER_SIZE));
                     index += BUFFER_SIZE;
@@ -44,7 +38,7 @@ export class StdInOutReaderWriter {
     readMessagePart() {
         return withStdin(stdin =>
             withStdout(stdout => {
-                const size = this.readInt(stdin);
+                const size = this.readIntFromStdIn(stdin);
                 const buffer = Buffer.alloc(size);
                 if (size > 0) {
                     // read the first part of the message part
@@ -53,7 +47,7 @@ export class StdInOutReaderWriter {
                     let index = BUFFER_SIZE;
                     while (index < size) {
                         // send "ready" to the client
-                        this.writeInt(stdout, 0);
+                        this.writeIntToStdOut(stdout, 0);
 
                         // read from buffer
                         fs.readSync(stdin, buffer, index, Math.min(size - index, BUFFER_SIZE), null);
@@ -66,7 +60,13 @@ export class StdInOutReaderWriter {
         );
     }
 
-    private writeInt(stdout: number, value: number) {
+    private readIntFromStdIn(stdin: number) {
+        const buf = Buffer.alloc(4);
+        fs.readSync(stdin, buf, 0, 4, null);
+        return buf.readUInt32BE();
+    }
+
+    private writeIntToStdOut(stdout: number, value: number) {
         const buf = Buffer.alloc(4);
         buf.writeUInt32BE(value);
         this.writeBuf(stdout, buf);
