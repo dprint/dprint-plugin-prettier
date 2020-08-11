@@ -19,7 +19,6 @@ export class StdInOutReaderWriter {
     sendVariableWidth(buffer: Buffer) {
         return withStdin(stdin =>
             withStdout(async stdout => {
-
                 await this.writeIntToStdOut(stdout, buffer.length);
                 await this.writeBuf(stdout, buffer, 0, Math.min(buffer.length, BUFFER_SIZE));
 
@@ -81,7 +80,7 @@ export class StdInOutReaderWriter {
             try {
                 fs.read(stdin, buffer, offset, length, null, (err, bytesRead) => {
                     if (err) {
-                        reject(err)
+                        reject(err);
                     } else if (bytesRead !== length) {
                         // be strict here because this indicates an error
                         reject(new Error(`The number of bytes read was ${bytesRead}, but expected ${length}`));
@@ -108,7 +107,7 @@ export class StdInOutReaderWriter {
             try {
                 fs.write(stdout, buffer, offset, length, (err, bytesWritten) => {
                     if (err) {
-                        reject(err)
+                        reject(err);
                     } else if (bytesWritten !== length) {
                         // be strict here because this indicates an error
                         reject(new Error(`The number of bytes written was ${bytesWritten}, but expected ${length}`));
@@ -132,7 +131,9 @@ export class StdInOutReaderWriter {
 
     private verifyNotReadingOrWriting() {
         if (this._isWriting || this._isReading) {
-            console.error("[dprint-plugin-prettier]: Catastrophic error. The process attempted to read or write from stdin/out while already doing so.")
+            console.error(
+                "[dprint-plugin-prettier]: Catastrophic error. The process attempted to read or write from stdin/out while already doing so.",
+            );
             process.exit(1);
         }
     }
