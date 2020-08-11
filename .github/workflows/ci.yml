@@ -59,14 +59,29 @@ jobs:
         body: |
           ## Install
 
-          Add the following entry to your `plugins` array in *.dprintrc.json*:
+          In *.dprintrc.json*:
 
-          ```jsonc
-          {
-            // etc...
-            "plugins": [
-              "https://plugins.dprint.dev/prettier-${{ steps.get_tag_version.outputs.TAG_VERSION }}.exe-plugin@${{ steps.get_plugin_file_checksum.outputs.CHECKSUM }}"
-            ]
-          }
-          ```
+          1. Specify the plugin url and checksum in the `"plugins"` array:
+
+             ```jsonc
+             {
+               // etc...
+               "plugins": [
+                 "https://plugins.dprint.dev/prettier-${{ steps.get_tag_version.outputs.TAG_VERSION }}.exe-plugin@${{ steps.get_plugin_file_checksum.outputs.CHECKSUM }}"
+               ]
+             }
+             ```
+          2. Ensure the file extensions supported by prettier are matched in an `"includes"` pattern.
+          3. Add a `"prettier"` configuration property if desired.
+
+             ```jsonc
+             {
+               // ...etc...
+               "prettier": {
+                 "trailingComma": "all",
+                 "singleQuote": true,
+                 "proseWrap": "always"
+               }
+             }
+             ```
         draft: true
