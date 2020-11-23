@@ -2,9 +2,8 @@ import * as fs from "fs";
 
 const BUFFER_SIZE = 1024;
 const isWindows = process.platform === "win32";
-const textDecoder = new TextDecoder();
 
-export class StdInOutReaderWriter {
+export class StdIoReaderWriter {
     private _isReading = false;
     private _isWriting = false;
 
@@ -12,33 +11,20 @@ export class StdInOutReaderWriter {
         return withStdin(stdin => this.readIntFromStdIn(stdin));
     }
 
-    sendInt(value: number) {
-        return withStdout(stdout => this.writeIntToStdOut(stdout, value));
-    }
-
-    sendVariableWidth(buffer: Buffer) {
-        return withStdin(stdin =>
-            withStdout(async stdout => {
-                await this.writeIntToStdOut(stdout, buffer.length);
-                await this.writeBuf(stdout, buffer, 0, Math.min(buffer.length, BUFFER_SIZE));
-
-                let index = BUFFER_SIZE;
-                while (index < buffer.length) {
-                    // wait for "ready" from the server
-                    await this.readIntFromStdIn(stdin);
-
-                    await this.writeBuf(stdout, buffer, index, Math.min(buffer.length - index, BUFFER_SIZE));
-                    index += BUFFER_SIZE;
+    readSuccessBytes() {
+        return withStdin(async stdin => {
+            const buf = Buffer.alloc(4);
+            await this.readBuf(stdin, buf, 0, 4);
+            for (let i = 0; i < buf.length; i++) {
+                if (buf[i] !== 255) {
+                    console.error(`Catastrophic error. Expected success bytes, but found: [${buf.join(", ")}]`);
+                    process.exit(1);
                 }
-            })
-        );
+            }
+        });
     }
 
-    async readMessagePartAsString() {
-        return textDecoder.decode(await this.readMessagePart());
-    }
-
-    readMessagePart() {
+    readVariableData() {
         return withStdin(stdin =>
             withStdout(async stdout => {
                 const size = await this.readIntFromStdIn(stdin);
@@ -63,6 +49,35 @@ export class StdInOutReaderWriter {
         );
     }
 
+    sendInt(value: number) {
+        return withStdout(stdout => this.writeIntToStdOut(stdout, value));
+    }
+
+    sendVariableData(buffer: Buffer) {
+        return withStdin(stdin =>
+            withStdout(async stdout => {
+                await this.writeIntToStdOut(stdout, buffer.length);
+                await this.writeBuf(stdout, buffer, 0, Math.min(buffer.length, BUFFER_SIZE));
+
+                let index = BUFFER_SIZE;
+                while (index < buffer.length) {
+                    // wait for "ready" from the server
+                    await this.readIntFromStdIn(stdin);
+
+                    await this.writeBuf(stdout, buffer, index, Math.min(buffer.length - index, BUFFER_SIZE));
+                    index += BUFFER_SIZE;
+                }
+            })
+        );
+    }
+
+    sendSuccessBytes() {
+        return withStdout(stdout => {
+            const buf = Buffer.alloc(4, 255); // fill 4 bytes with value 255
+            return this.writeBuf(stdout, buf, 0, 4);
+        });
+    }
+
     private async readIntFromStdIn(stdin: number) {
         const buf = Buffer.alloc(4);
         await this.readBuf(stdin, buf, 0, 4);
@@ -76,7 +91,7 @@ export class StdInOutReaderWriter {
     }
 
     private async readBuf(stdin: number, buffer: Buffer, offset: number, length: number) {
-        const task = new Promise((resolve, reject) => {
+        const task = new Promise<void>((resolve, reject) => {
             try {
                 fs.read(stdin, buffer, offset, length, null, (err, bytesRead) => {
                     if (err) {
@@ -103,7 +118,7 @@ export class StdInOutReaderWriter {
     }
 
     private async writeBuf(stdout: number, buffer: Buffer, offset: number, length: number) {
-        const task = new Promise((resolve, reject) => {
+        const task = new Promise<void>((resolve, reject) => {
             try {
                 fs.write(stdout, buffer, offset, length, (err, bytesWritten) => {
                     if (err) {
@@ -132,7 +147,7 @@ export class StdInOutReaderWriter {
     private verifyNotReadingOrWriting() {
         if (this._isWriting || this._isReading) {
             console.error(
-                "[dprint-plugin-prettier]: Catastrophic error. The process attempted to read or write from stdin/out while already doing so.",
+                "Catastrophic error. The process attempted to read or write from stdin/out while already doing so.",
             );
             process.exit(1);
         }

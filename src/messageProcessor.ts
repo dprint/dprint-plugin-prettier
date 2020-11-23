@@ -1,6 +1,6 @@
 import * as os from "os";
 import prettier from "prettier";
-import { StdInOutReaderWriter } from "./StdInOutReaderWriter";
+import { MessagePart, StdIoMessenger } from "./messenger/index";
 
 enum MessageKind {
     GetPluginSchemaVersion = 0,
@@ -24,8 +24,7 @@ enum FormatResult {
     Change = 1,
 }
 
-const textEncoder = new TextEncoder();
-const stdInOut = new StdInOutReaderWriter();
+const messenger = new StdIoMessenger();
 
 export async function startMessageProcessor() {
     let globalConfig: any = {};
@@ -33,50 +32,59 @@ export async function startMessageProcessor() {
     let resolvedConfig: prettier.Options | undefined = undefined;
 
     while (true) {
-        const messageKind = await stdInOut.readInt() as MessageKind;
+        const messageKind = await messenger.readCode() as MessageKind;
         try {
             switch (messageKind) {
                 case MessageKind.Close:
                     process.exit(0); // need to kill parent process checker
                     return;
                 case MessageKind.GetPluginSchemaVersion:
-                    await sendInt(2);
+                    await messenger.readZeroPartMessage();
+                    await sendSuccess(MessagePart.fromNumber(3));
                     break;
                 case MessageKind.GetPluginInfo:
-                    await sendString(JSON.stringify(getPluginInfo()));
+                    await messenger.readZeroPartMessage();
+                    await sendSuccess(MessagePart.fromString(JSON.stringify(getPluginInfo())));
                     break;
                 case MessageKind.GetLicenseText:
-                    await sendString(getLicenseText());
+                    await messenger.readZeroPartMessage();
+                    await sendSuccess(MessagePart.fromString(getLicenseText()));
                     break;
                 case MessageKind.GetResolvedConfig:
-                    await sendString(JSON.stringify(getResolvedConfig()));
+                    await messenger.readZeroPartMessage();
+                    await sendSuccess(MessagePart.fromString(JSON.stringify(getResolvedConfig())));
                     break;
                 case MessageKind.SetGlobalConfig:
                     resolvedConfig = undefined;
-                    globalConfig = JSON.parse(await stdInOut.readMessagePartAsString());
+                    globalConfig = (await messenger.readSinglePartMessage()).intoString();
                     await sendSuccess();
                     break;
                 case MessageKind.SetPluginConfig:
                     resolvedConfig = undefined;
-                    pluginConfig = JSON.parse(await stdInOut.readMessagePartAsString());
+                    pluginConfig = JSON.parse((await messenger.readSinglePartMessage()).intoString());
                     await sendSuccess();
                     break;
                 case MessageKind.GetConfigDiagnostics:
-                    await sendString("[]"); // todo
+                    await messenger.readZeroPartMessage();
+                    await sendSuccess(MessagePart.fromString("[]")); // todo
                     break;
                 case MessageKind.FormatText:
-                    const filePath = await stdInOut.readMessagePartAsString();
-                    const fileText = await stdInOut.readMessagePartAsString();
-                    const overrideConfig = JSON.parse(await stdInOut.readMessagePartAsString());
+                    const messageParts = await messenger.readMultiPartMessage(3);
+                    const filePath = messageParts[0].intoString();
+                    const fileText = messageParts[1].intoString();
+                    const overrideConfig = JSON.parse(messageParts[2].intoString());
                     const config = Object.keys(overrideConfig).length === 0
                         ? getResolvedConfig()
                         : createResolvedConfig(overrideConfig);
                     const formattedText = formatText(filePath, fileText, config);
 
                     if (formattedText === fileText) {
-                        await sendResponse([FormatResult.NoChange]);
+                        await sendSuccess(MessagePart.fromNumber(FormatResult.NoChange));
                     } else {
-                        await sendResponse([FormatResult.Change, formattedText]);
+                        await sendSuccess(
+                            MessagePart.fromNumber(FormatResult.Change),
+                            MessagePart.fromString(formattedText),
+                        );
                     }
                     break;
                 default:
@@ -168,61 +176,18 @@ export async function startMessageProcessor() {
     }
 }
 
-function sendInt(value: number) {
-    return sendResponse([value]);
+function sendSuccess(...parts: MessagePart[]) {
+    return messenger.sendMessage(ResponseKind.Success, ...parts);
 }
 
-function sendString(value: string) {
-    return sendResponse([value]);
-}
-
-function sendSuccess() {
-    return sendResponse([]);
-}
-
-async function sendResponse(parts: (Buffer | string | number)[]) {
-    const encodedParts = getEncodedParts(); // do this before setting a success message kind
-    try {
-        await stdInOut.sendInt(ResponseKind.Success);
-        for (const part of encodedParts) {
-            if (typeof part === "number") {
-                await stdInOut.sendInt(part);
-            } else {
-                await stdInOut.sendVariableWidth(part);
-            }
-        }
-    } catch (err) {
-        try {
-            console.error(`Error sending response at point of no recovery: ${err}\n${err.stack}`);
-        } finally {
-            process.exit(1);
-        }
-    }
-
-    function getEncodedParts() {
-        const encodedParts: (Buffer | number)[] = new Array(parts.length);
-        for (let i = 0; i < parts.length; i++) {
-            const part = parts[i];
-            if (typeof part === "string") {
-                encodedParts[i] = Buffer.from(textEncoder.encode(part));
-            } else {
-                encodedParts[i] = part;
-            }
-        }
-        return encodedParts;
-    }
-}
-
-async function sendErrorResponse(message: string) {
-    const errorBuffer = Buffer.from(textEncoder.encode(message));
-    await stdInOut.sendInt(ResponseKind.Error);
-    await stdInOut.sendVariableWidth(errorBuffer);
+function sendErrorResponse(message: string) {
+    return messenger.sendMessage(ResponseKind.Error, MessagePart.fromString(message));
 }
 
 function getPluginInfo() {
     return {
         name: "dprint-plugin-prettier",
-        version: "0.1.0",
+        version: "0.2.0",
         configKey: "prettier",
         fileExtensions: getExtensions(),
         helpUrl: "https://dprint.dev/plugins/prettier",

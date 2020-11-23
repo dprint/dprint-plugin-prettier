@@ -24,7 +24,7 @@ function isProcessRunning(pid: number) {
 
 function killCurrentProcessWithErrorMessage() {
     try {
-        console.error("[dprint-plugin-prettier]: Parent process lost. Exiting.");
+        console.error("Parent process lost. Exiting.");
     } finally {
         process.exit(1);
     }
