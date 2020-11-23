@@ -1,5 +1,5 @@
 import { StdIoReaderWriter } from "./StdIoReaderWriter";
-import { MessagePart, VariableMessagePart, NumberMessagePart } from "./MessagePart";
+import { MessagePart, NumberMessagePart, VariableMessagePart } from "./MessagePart";
 
 export class StdIoMessenger {
     constructor(private readonly readerWriter = new StdIoReaderWriter()) {
