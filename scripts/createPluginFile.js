@@ -35,6 +35,6 @@ function ensureCodeHasVersion() {
     // just in case...
     const fileText = fs.readFileSync("./src/messageProcessor.ts", { encoding: "utf8" });
     if (!fileText.includes(`"${version}"`)) {
-        throw new Error(`Could not find version (${version}) in index.ts`);
+        throw new Error(`Could not find version (${version}) in messageProcessor.ts`);
     }
 }
