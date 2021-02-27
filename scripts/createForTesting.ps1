@@ -17,4 +17,4 @@ rm dprint-plugin-prettier
 mv index-win.exe dprint-plugin-prettier.exe
 Compress-Archive -Force -Path dprint-plugin-prettier.exe -DestinationPath dprint-plugin-prettier-x86_64-pc-windows-msvc.zip
 rm dprint-plugin-prettier.exe
-node ./scripts/createPluginFile.js
+node ./scripts/createPluginFile.js --test

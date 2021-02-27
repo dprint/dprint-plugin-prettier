@@ -172,10 +172,10 @@ function withStdout<T = void>(action: (stdout: number) => Promise<T>) {
     }
 }
 
-function withDescriptor<T = void>(name: string, flags: string, action: (fd: number) => Promise<T>) {
+async function withDescriptor<T = void>(name: string, flags: string, action: (fd: number) => Promise<T>) {
     const fd = fs.openSync(name, flags); // todo: async
     try {
-        return action(fd);
+        return await action(fd);
     } finally {
         fs.closeSync(fd);
     }

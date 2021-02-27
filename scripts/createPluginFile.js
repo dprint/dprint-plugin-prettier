@@ -1,6 +1,7 @@
 const fs = require("fs");
 const crypto = require("crypto");
 
+const hasTestArg = process.argv.slice(2).some(arg => arg === "--test");
 const packageJson = JSON.parse(fs.readFileSync("package.json", { encoding: "utf8" }));
 const version = packageJson.version;
 
@@ -23,7 +24,9 @@ function getPlatformObject(zipFileName) {
     const checksum = hash.digest("hex");
     console.log(zipFileName + ": " + checksum);
     return {
-        "reference": `https://github.com/dprint/dprint-plugin-prettier/releases/download/${version}/${zipFileName}`,
+        "reference": hasTestArg
+            ? `./${zipFileName}`
+            : `https://github.com/dprint/dprint-plugin-prettier/releases/download/${version}/${zipFileName}`,
         "checksum": checksum,
     };
 }
