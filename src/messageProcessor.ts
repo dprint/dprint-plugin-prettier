@@ -23,12 +23,13 @@ enum FormatResult {
     NoChange = 0,
     Change = 1,
 }
+type JsonObject = { [key: string]: string | number | boolean };
 
 const messenger = new StdIoMessenger();
 
 export async function startMessageProcessor() {
-    let globalConfig: any = {};
-    let pluginConfig: any = {};
+    let globalConfig: JsonObject = {};
+    let pluginConfig: JsonObject = {};
     let resolvedConfig: prettier.Options | undefined = undefined;
 
     while (true) {
@@ -56,7 +57,7 @@ export async function startMessageProcessor() {
                     break;
                 case MessageKind.SetGlobalConfig:
                     resolvedConfig = undefined;
-                    globalConfig = (await messenger.readSinglePartMessage()).intoString();
+                    globalConfig = JSON.parse((await messenger.readSinglePartMessage()).intoString());
                     await sendSuccess();
                     break;
                 case MessageKind.SetPluginConfig:
@@ -72,7 +73,7 @@ export async function startMessageProcessor() {
                     const messageParts = await messenger.readMultiPartMessage(3);
                     const filePath = messageParts[0].intoString();
                     const fileText = messageParts[1].intoString();
-                    const overrideConfig = JSON.parse(messageParts[2].intoString());
+                    const overrideConfig = JSON.parse(messageParts[2].intoString()) as JsonObject;
                     const config = Object.keys(overrideConfig).length === 0
                         ? getResolvedConfig()
                         : createResolvedConfig(overrideConfig);
@@ -106,7 +107,7 @@ export async function startMessageProcessor() {
         return resolvedConfig;
     }
 
-    function createResolvedConfig(overrideConfig: object) {
+    function createResolvedConfig(overrideConfig: JsonObject) {
         const resolvedConfig: prettier.Options = {};
         updateGlobalPropertiesForConfig(globalConfig);
         updateForPluginConfig(pluginConfig);
@@ -114,27 +115,12 @@ export async function startMessageProcessor() {
 
         return resolvedConfig;
 
-        function updateForPluginConfig(pluginConfig: any) {
+        function updateForPluginConfig(pluginConfig: JsonObject) {
             for (const key of Object.keys(pluginConfig)) {
-                if (!isGlobalProperty(key)) {
-                    (resolvedConfig as any)[key] = pluginConfig[key];
-                }
+                (resolvedConfig as JsonObject)[key] = pluginConfig[key];
             }
 
             updateGlobalPropertiesForConfig(pluginConfig);
-        }
-
-        function isGlobalProperty(propName: string) {
-            switch (propName) {
-                case "printWidth":
-                case "indentWidth":
-                case "tabWidth":
-                case "useTabs":
-                case "newLineKind":
-                    return true;
-                default:
-                    return false;
-            }
         }
 
         function updateGlobalPropertiesForConfig(config: any) {
@@ -187,7 +173,7 @@ function sendErrorResponse(message: string) {
 function getPluginInfo() {
     return {
         name: "dprint-plugin-prettier",
-        version: "0.2.1",
+        version: "0.2.2",
         configKey: "prettier",
         fileExtensions: getExtensions(),
         helpUrl: "https://dprint.dev/plugins/prettier",
