@@ -59,7 +59,7 @@ jobs:
         body: |
           ## Install
 
-          In *.dprintrc.json*:
+          In *dprint.json*:
 
           1. Specify the plugin url and checksum in the `"plugins"` array:
 
