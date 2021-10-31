@@ -1,6 +1,6 @@
 import { startMessageProcessor } from "./messageProcessor";
-import { parseCliArgs } from "./parseCliArgs";
 import { startParentProcessChecker } from "./parentProcessChecker";
+import { parseCliArgs } from "./parseCliArgs";
 
 const cliArgs = parseCliArgs();
 
