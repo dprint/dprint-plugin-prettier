@@ -21,13 +21,14 @@
   },
   "dependencies": {
     "prettier": "^2.4.1",
+    "prettier-plugin-svelte": "^2.4.0",
+    "svelte": "^3.44.0",
     "tslib": "^2.3.1"
   },
   "devDependencies": {
-    "@types/node": "^16.11.6",
-    "@rollup/plugin-node-resolve": "^13.0.6",
+    "@rollup/plugin-commonjs": "^21.0.1",
     "@rollup/plugin-typescript": "^8.3.0",
-    "rollup-plugin-typescript2": "^0.30.0",
+    "@types/node": "^16.11.6",
     "@types/prettier": "^2.4.1",
     "copyfiles": "^2.4.1",
     "pkg": "^5.4.1",
