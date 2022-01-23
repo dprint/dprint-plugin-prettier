@@ -1,10 +1,12 @@
 import * as os from "os";
 import prettier from "prettier";
+import * as prettierPluginAstro from "prettier-plugin-astro";
 import * as prettierPluginSvelte from "prettier-plugin-svelte";
 import { MessagePart, StdIoMessenger } from "./messenger/index";
 
 const plugins: prettier.Plugin[] = [
   prettierPluginSvelte,
+  prettierPluginAstro,
 ];
 
 enum MessageKind {
@@ -179,7 +181,7 @@ function sendErrorResponse(message: string) {
 function getPluginInfo() {
   return {
     name: "dprint-plugin-prettier",
-    version: "0.4.0",
+    version: "0.5.0",
     configKey: "prettier",
     fileExtensions: getExtensions(),
     helpUrl: "https://dprint.dev/plugins/prettier",
@@ -192,7 +194,7 @@ function getLicenseText() {
 
 The MIT License (MIT)
 
-Copyright (c) 2020-2021 David Sherret
+Copyright (c) 2020-2022 David Sherret
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

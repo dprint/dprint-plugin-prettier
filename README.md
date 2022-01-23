@@ -27,4 +27,5 @@ See Prettier's configuration [here](https://prettier.io/docs/en/options.html). S
 ## Included Prettier Plugins
 
 - [prettier-plugin-svelte](https://github.com/sveltejs/prettier-plugin-svelte)
+- [prettier-plugin-astro](https://github.com/withastro/prettier-plugin-astro)
 - Want more? Open an issue.
