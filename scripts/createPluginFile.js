@@ -15,7 +15,7 @@ const outputFile = {
   "linux-x86_64": getPlatformObject("dprint-plugin-prettier-x86_64-unknown-linux-gnu.zip"),
   "windows-x86_64": getPlatformObject("dprint-plugin-prettier-x86_64-pc-windows-msvc.zip"),
 };
-fs.writeFileSync("prettier.exe-plugin", JSON.stringify(outputFile, undefined, 2), { encoding: "utf8" });
+fs.writeFileSync("plugin.exe-plugin", JSON.stringify(outputFile, undefined, 2), { encoding: "utf8" });
 
 function getPlatformObject(zipFileName) {
   const fileBytes = fs.readFileSync(zipFileName);

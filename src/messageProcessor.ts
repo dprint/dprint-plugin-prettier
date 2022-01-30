@@ -186,6 +186,7 @@ function getPluginInfo() {
     fileExtensions: getExtensions(),
     helpUrl: "https://dprint.dev/plugins/prettier",
     configSchemaUrl: "",
+    updateUrl: "https://plugins.dprint.dev/dprint/dprint-plugin-prettier/latest.json",
   };
 }
 

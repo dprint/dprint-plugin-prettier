@@ -2,7 +2,7 @@
 # To run:
 # 1. Change the one line to `reference": `./${zipFileName}`,` in scripts/createPluginFile.js
 # 2. Run `./scripts/createForTesting.ps1`
-# 3. Update dprint.json to point at ./prettier.exe-plugin then update checksum
+# 3. Update dprint.json to point at ./plugin.exe-plugin then update checksum
 #    as shown when initially run.
 
 $ErrorActionPreference = "Stop"
