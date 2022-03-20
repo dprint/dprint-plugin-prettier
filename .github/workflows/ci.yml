@@ -5,7 +5,8 @@ on: [push, pull_request]
 jobs:
   build:
     name: test_release
-    runs-on: ubuntu-latest
+    # uses an older version of ubuntu because of issue dprint/#483
+    runs-on: ubuntu-18.04
 
     steps:
     - name: Checkout
@@ -67,6 +68,7 @@ jobs:
              {
                // etc...
                "plugins": [
+                 // ...add other dprint plugins here that you want to take precedence over prettier...
                  "https://plugins.dprint.dev/prettier-${{ steps.get_tag_version.outputs.TAG_VERSION }}.exe-plugin@${{ steps.get_plugin_file_checksum.outputs.CHECKSUM }}"
                ]
              }
