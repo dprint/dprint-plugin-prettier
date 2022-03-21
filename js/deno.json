@@ -1,6 +1,0 @@
-{
-  "tasks": {
-    "build": "cd node && npm run build:script",
-    "test": "deno test --no-check startup.test.ts"
-  }
-}

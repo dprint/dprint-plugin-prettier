@@ -1,22 +1,22 @@
-use deno_core::serde_v8;
-use deno_core::v8;
+use dprint_core::plugins::process::get_parent_process_id_from_cli_args;
+use dprint_core::plugins::process::handle_process_stdio_messages;
+use dprint_core::plugins::process::start_parent_process_checker_task;
+use handler::PrettierPluginHandler;
 
-use crate::runtime::create_js_runtime;
+use crate::utils::create_tokio_runtime;
 
+mod formatter;
+mod handler;
 mod runtime;
-
+mod utils;
 
 fn main() {
-  let mut runtime = create_js_runtime();
-  let global = runtime.execute_script("/file.js", "dprint.formatText('test.ts', 'const t   = {   }', 1, {})").unwrap();
-  let scope = &mut runtime.handle_scope();
-  let local = v8::Local::new(scope, global);
-  let deserialized_value =
-    serde_v8::from_v8::<String>(scope, local);
+  let runtime = create_tokio_runtime();
+  runtime.block_on(async {
+    if let Some(parent_process_id) = get_parent_process_id_from_cli_args() {
+      start_parent_process_checker_task(parent_process_id);
+    }
 
-  let result = match deserialized_value {
-    Ok(value) => Ok(value),
-    Err(err) => Err(format!("Cannot deserialize value: {:?}", err)),
-  };
-  eprint!("{:?}", result);
+    handle_process_stdio_messages(PrettierPluginHandler::new()).await
+  });
 }

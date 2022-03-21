@@ -1,18 +1,15 @@
-
+use deno_core::anyhow::Error;
+use deno_core::op;
 use deno_core::Extension;
 use deno_core::JsRuntime;
+use deno_core::OpDecl;
 use deno_core::RuntimeOptions;
 use deno_core::Snapshot;
-use deno_core::anyhow::Error;
-use deno_core::OpDecl;
-use deno_core::op;
 use once_cell::sync::Lazy;
 
 pub fn create_js_runtime() -> JsRuntime {
   let snapshot = Snapshot::Static(&*STARTUP_SNAPSHOT);
-  let ext = Extension::builder()
-    .ops(all_ops())
-    .build();
+  let ext = Extension::builder().ops(all_ops()).build();
 
   JsRuntime::new(RuntimeOptions {
     startup_snapshot: Some(snapshot),
@@ -32,8 +29,7 @@ static STARTUP_SNAPSHOT: Lazy<Box<[u8]>> = Lazy::new(
 
     zstd::block::decompress(
       &COMPRESSED_COMPILER_SNAPSHOT[4..],
-      u32::from_le_bytes(COMPRESSED_COMPILER_SNAPSHOT[0..4].try_into().unwrap())
-        as usize,
+      u32::from_le_bytes(COMPRESSED_COMPILER_SNAPSHOT[0..4].try_into().unwrap()) as usize,
     )
     .unwrap()
     .into_boxed_slice()
@@ -43,16 +39,10 @@ static STARTUP_SNAPSHOT: Lazy<Box<[u8]>> = Lazy::new(
 // Note: update build.rs if changing anything here
 
 fn all_ops() -> Vec<OpDecl> {
-  vec![
-    op_is_windows::decl(),
-  ]
+  vec![op_is_windows::decl()]
 }
 
 #[op]
 fn op_is_windows() -> Result<bool, Error> {
-  Ok(if cfg!(windows) {
-    true
-  } else {
-    false
-  })
+  Ok(if cfg!(windows) { true } else { false })
 }
