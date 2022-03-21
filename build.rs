@@ -1,0 +1,76 @@
+// Code in this file is largely copy and pasted from Deno's codebase
+// https://github.com/denoland/deno/blob/main/cli/build.rs
+
+use std::env;
+use std::path::PathBuf;
+
+use deno_core::Extension;
+use deno_core::JsRuntime;
+use deno_core::RuntimeOptions;
+use deno_core::anyhow::Error;
+use deno_core::op;
+
+fn main() {
+  let c = PathBuf::from(env::var_os("CARGO_MANIFEST_DIR").unwrap());
+  let o = PathBuf::from(env::var_os("OUT_DIR").unwrap());
+  let startup_snapshot_path = o.join("STARTUP_SNAPSHOT.bin");
+  let startup_code_path = c.join("js").join("startup.js");
+
+  // ensure the build is invalidated if the startup file changes
+  println!(
+    "cargo:rerun-if-changed={}",
+    startup_code_path.display()
+  );
+  let mut js_runtime = JsRuntime::new(RuntimeOptions {
+    will_snapshot: true,
+    extensions: vec![Extension::builder()
+      .ops(vec![op_is_windows::decl()]).build()],
+    ..Default::default()
+  });
+
+  js_runtime
+    .execute_script(
+      &"deno:startup.js",
+      &std::fs::read_to_string(&startup_code_path).unwrap(),
+    )
+    .unwrap();
+
+  let snapshot = js_runtime.snapshot();
+  let snapshot_slice: &[u8] = &*snapshot;
+  println!("Snapshot size: {}", snapshot_slice.len());
+
+  let compressed_snapshot_with_size = {
+    let mut vec = vec![];
+
+    vec.extend_from_slice(
+      &u32::try_from(snapshot.len())
+        .expect("snapshot larger than 4gb")
+        .to_le_bytes(),
+    );
+
+    vec.extend_from_slice(
+      &zstd::block::compress(snapshot_slice, 22)
+        .expect("snapshot compression failed"),
+    );
+
+    vec
+  };
+
+  println!(
+    "Snapshot compressed size: {}",
+    compressed_snapshot_with_size.len()
+  );
+
+  std::fs::write(&startup_snapshot_path, compressed_snapshot_with_size).unwrap();
+  println!("Snapshot written to: {} ", startup_snapshot_path.display());
+}
+
+
+#[op]
+pub fn op_is_windows() -> Result<bool, Error> {
+  Ok(if cfg!(windows) {
+    true
+  } else {
+    false
+  })
+}
