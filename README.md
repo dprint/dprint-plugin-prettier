@@ -32,6 +32,6 @@ See Prettier's configuration [here](https://prettier.io/docs/en/options.html). S
 
 ## Why Does This Exist?
 
-The main reason this exists is to be able to use Prettier with dprint's CLI. So you can format with all the plugins that dprint supports and still use Prettier and only have to run `dprint fmt`.
+The main reason this exists is to be able to use Prettier with dprint's CLI. That way, you can format with all the plugins that dprint supports, still use Prettier, and only have to run `dprint fmt`.
 
-An additional benefit is that dprint's CLI will format files in parallel with Prettier
+Additionally it's much faster. This plugin will format files in parallel and you can take advantage of the speed of dprint's incremental formatting if enabled.
