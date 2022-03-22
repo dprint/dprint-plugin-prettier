@@ -5,8 +5,6 @@ use std::env;
 use std::path::Path;
 use std::path::PathBuf;
 
-use deno_core::anyhow::Error;
-use deno_core::op;
 use deno_core::serde_v8;
 use deno_core::v8;
 use deno_core::Extension;
@@ -70,22 +68,16 @@ fn get_runtime(startup_code_path: &Path, will_snapshot: bool) -> JsRuntime {
   let mut js_runtime = JsRuntime::new(RuntimeOptions {
     will_snapshot,
     extensions: vec![Extension::builder()
-      .ops(vec![op_is_windows::decl()])
       .build()],
     ..Default::default()
   });
 
   js_runtime
     .execute_script(
-      &"deno:startup.js",
+      &"dprint:prettier.js",
       &std::fs::read_to_string(startup_code_path).unwrap(),
     )
     .unwrap();
 
   js_runtime
-}
-
-#[op]
-pub fn op_is_windows() -> Result<bool, Error> {
-  Ok(if cfg!(windows) { true } else { false })
 }

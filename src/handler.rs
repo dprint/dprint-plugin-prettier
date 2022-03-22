@@ -1,7 +1,6 @@
 use std::sync::Arc;
-use std::time::Duration;
 
-use deno_core::serde::Serialize;
+use deno_core::serde_json;
 use dprint_core::configuration::ConfigKeyMap;
 use dprint_core::configuration::GlobalConfiguration;
 use dprint_core::configuration::ResolveConfigurationResult;
@@ -12,10 +11,9 @@ use dprint_core::plugins::FormatResult;
 use dprint_core::plugins::Host;
 use dprint_core::plugins::PluginInfo;
 use once_cell::sync::Lazy;
-use tokio::sync::oneshot;
 
-use crate::formatter::Formatter;
-use crate::utils::create_tokio_runtime;
+use crate::channel::Channel;
+use crate::config::resolve_config;
 
 static SUPPORTED_EXTENSIONS: Lazy<Vec<String>> = Lazy::new(|| {
   let json_bytes = include_bytes!(concat!(env!("OUT_DIR"), "/SUPPORTED_EXTENSIONS.json"));
@@ -23,26 +21,27 @@ static SUPPORTED_EXTENSIONS: Lazy<Vec<String>> = Lazy::new(|| {
   deno_core::serde_json::from_slice(json_bytes).unwrap()
 });
 
-#[derive(Clone, Serialize)]
-pub struct Configuration(ConfigKeyMap, GlobalConfiguration);
-
-type Request = (FormatRequest<Configuration>, oneshot::Sender<FormatResult>);
-
+#[derive(Clone)]
 pub struct PrettierPluginHandler {
-  // todo: monitor the number of receivers and increase them when the queue starts filling up
-  sender: async_channel::Sender<Request>,
-  receiver: async_channel::Receiver<Request>,
+  channel: Channel,
+}
+
+impl Drop for PrettierPluginHandler {
+  fn drop(&mut self) {
+    self.channel.dispose()
+  }
 }
 
 impl PrettierPluginHandler {
   pub fn new() -> Self {
-    let (sender, receiver) = async_channel::unbounded();
-    Self { sender, receiver }
+    Self {
+      channel: Channel::new(),
+    }
   }
 }
 
 impl AsyncPluginHandler for PrettierPluginHandler {
-  type Configuration = Configuration;
+  type Configuration = serde_json::Value;
 
   fn plugin_info(&self) -> PluginInfo {
     PluginInfo {
@@ -67,11 +66,8 @@ impl AsyncPluginHandler for PrettierPluginHandler {
     &self,
     config: ConfigKeyMap,
     global_config: GlobalConfiguration,
-  ) -> ResolveConfigurationResult<Configuration> {
-    ResolveConfigurationResult {
-      config: Configuration(config, global_config),
-      diagnostics: Vec::new(),
-    }
+  ) -> ResolveConfigurationResult<serde_json::Value> {
+    resolve_config(config, global_config)
   }
 
   fn format(
@@ -79,29 +75,7 @@ impl AsyncPluginHandler for PrettierPluginHandler {
     request: FormatRequest<Self::Configuration>,
     _host: Arc<dyn Host>,
   ) -> BoxFuture<FormatResult> {
-    // todo
-    let (s, r) = oneshot::channel();
-    Box::pin(async move {})
+    let channel = self.channel.clone();
+    Box::pin(async move { channel.format(request).await })
   }
-}
-
-fn create_js_runtime(receiver: async_channel::Receiver<Request>) {
-  std::thread::spawn(|| {
-    let tokio_runtime = create_tokio_runtime();
-    tokio_runtime.block_on(async move {
-      let mut formatter = Formatter::new();
-      loop {
-        tokio::select! {
-          // automatically shut down after a certain amount of time
-          _ = tokio::time::sleep(Duration::from_secs(30)) => {
-            return;
-          }
-          request = receiver.recv() => {
-            // todo: implement cancellation
-            // todo: implement this
-          }
-        }
-      }
-    });
-  });
 }

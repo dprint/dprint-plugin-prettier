@@ -1,54 +1,134 @@
 name: CI
 
-on: [push, pull_request]
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+    tags:
+    - '*'
 
 jobs:
   build:
-    name: test_release
-    # uses an older version of ubuntu because of issue dprint/#483
-    runs-on: ubuntu-18.04
+    name: ${{ matrix.config.kind }} ${{ matrix.config.os }}
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      matrix:
+        config:
+            # uses an older version of ubuntu because of issue dprint/#483
+          - os: ubuntu-18.04
+            kind: test_release
+          - os: macOS-latest
+            kind: test_release
+          - os: windows-2019
+            kind: test_release
 
+    outputs:
+      LINUX_ZIP_CHECKSUM: ${{steps.linux_pre_release.outputs.ZIP_CHECKSUM}}
+      MAC_ZIP_CHECKSUM: ${{steps.mac_pre_release.outputs.ZIP_CHECKSUM}}
+      WINDOWS_ZIP_CHECKSUM: ${{steps.windows_pre_release.outputs.ZIP_CHECKSUM}}
+
+    env:
+      CARGO_INCREMENTAL: 0
+      RUST_BACKTRACE: full
+      CFG_RELEASE_CHANNEL: nightly
+
+    steps:
+    # Setup
+    - uses: actions/checkout@v2
+    - uses: dtolnay/rust-toolchain@stable
+    - uses: Swatinem/rust-cache@v1
+
+    # Build
+    - name: Build release
+      if: matrix.config.kind == 'test_release'
+      run: cargo build --release
+
+    - name: Test release
+      if: matrix.config.kind == 'test_release'
+      run: cargo test --release
+
+    # Release
+    - name: Pre-release (Linux)
+      id: linux_pre_release
+      if: startsWith(matrix.config.os, 'ubuntu') && matrix.config.kind == 'test_release' && startsWith(github.ref, 'refs/tags/')
+      run: |
+          cd target/release
+          zip -r dprint-plugin-prettier-x86_64-unknown-linux-gnu.zip dprint-plugin-prettier dprint-plugin-prettier
+          echo "::set-output name=ZIP_CHECKSUM::$(shasum -a 256 dprint-plugin-prettier-x86_64-unknown-linux-gnu.zip | awk '{print $1}')"
+    - name: Pre-release (Mac)
+      id: mac_pre_release
+      if: startsWith(matrix.config.os, 'macOS') && matrix.config.kind == 'test_release' && startsWith(github.ref, 'refs/tags/')
+      run: |
+          cd target/release
+          zip -r dprint-plugin-prettier-x86_64-apple-darwin.zip dprint-plugin-prettier dprint-plugin-prettier
+          echo "::set-output name=ZIP_CHECKSUM::$(shasum -a 256 dprint-plugin-prettier-x86_64-apple-darwin.zip | awk '{print $1}')"
+    - name: Pre-release (Windows)
+      id: windows_pre_release
+      if: startsWith(matrix.config.os, 'windows') && matrix.config.kind == 'test_release' && startsWith(github.ref, 'refs/tags/')
+      run: |
+          cd target/release
+          Compress-Archive -CompressionLevel Optimal -Force -Path dprint-plugin-prettier.exe -DestinationPath dprint-plugin-prettier-x86_64-pc-windows-msvc.zip
+          echo "::set-output name=ZIP_CHECKSUM::$(shasum -a 256 dprint-plugin-prettier-x86_64-pc-windows-msvc.zip | awk '{print $1}')"
+
+    # Upload Artifacts
+    - name: Upload Artifacts (Linux)
+      uses: actions/upload-artifact@v2
+      if: startsWith(matrix.config.os, 'ubuntu') && matrix.config.kind == 'test_release' && startsWith(github.ref, 'refs/tags/')
+      with:
+        name: linux-artifacts
+        path: target/release/dprint-plugin-prettier-x86_64-unknown-linux-gnu.zip
+    - name: Upload Artifacts (Mac)
+      uses: actions/upload-artifact@v2
+      if: startsWith(matrix.config.os, 'macOS') && matrix.config.kind == 'test_release' && startsWith(github.ref, 'refs/tags/')
+      with:
+        name: mac-artifacts
+        path: target/release/dprint-plugin-prettier-x86_64-apple-darwin.zip
+    - name: Upload Artifacts (Windows)
+      uses: actions/upload-artifact@v2
+      if: startsWith(matrix.config.os, 'windows') && matrix.config.kind == 'test_release' && startsWith(github.ref, 'refs/tags/')
+      with:
+        name: windows-artifacts
+        path: target/release/dprint-plugin-prettier-x86_64-pc-windows-msvc.zip
+
+
+  draft_release:
+    name: draft_release
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: build
+    runs-on: ubuntu-latest
     steps:
     - name: Checkout
       uses: actions/checkout@v2
-    - name: Cache node_modules
-      uses: actions/cache@v2
-      with:
-        path: |
-          **/node_modules
-        key: ${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+    - uses: denoland/setup-deno@v1
+    - name: Download artifacts
+      uses: actions/download-artifact@v2
 
-    - name: NPM install
-      run: npm ci
-    - name: Build
-      run: npm run build
-
-    - name: Package
+    - name: Move downloaded artifacts
       run: |
-        mv index-macos dprint-plugin-prettier
-        zip -r dprint-plugin-prettier-x86_64-apple-darwin.zip dprint-plugin-prettier
-        rm dprint-plugin-prettier
-        mv index-linux dprint-plugin-prettier
-        zip -r dprint-plugin-prettier-x86_64-unknown-linux-gnu.zip dprint-plugin-prettier
-        mv index-win.exe dprint-plugin-prettier.exe
-        zip -r dprint-plugin-prettier-x86_64-pc-windows-msvc.zip dprint-plugin-prettier.exe
+        mv linux-artifacts/dprint-plugin-prettier-x86_64-unknown-linux-gnu.zip .
+        mv mac-artifacts/dprint-plugin-prettier-x86_64-apple-darwin.zip .
+        mv windows-artifacts/dprint-plugin-prettier-x86_64-pc-windows-msvc.zip .
+
+    - name: Output checksums
+      run: |
+        echo "Linux zip: ${{needs.build.outputs.LINUX_ZIP_CHECKSUM}}"
+        echo "Mac zip: ${{needs.build.outputs.MAC_ZIP_CHECKSUM}}"
+        echo "Windows zip: ${{needs.build.outputs.WINDOWS_ZIP_CHECKSUM}}"
 
     - name: Create plugin file
-      run: node scripts/createPluginFile.js
+      run: deno run --allow-read --allow-write scripts/createPluginFile.ts
 
     - name: Get tag version
-      if: startsWith(github.ref, 'refs/tags/')
       id: get_tag_version
       run: echo ::set-output name=TAG_VERSION::${GITHUB_REF/refs\/tags\//}
 
     - name: Get plugin file checksum
-      if: startsWith(github.ref, 'refs/tags/')
       id: get_plugin_file_checksum
       run: echo "::set-output name=CHECKSUM::$(shasum -a 256 plugin.exe-plugin | awk '{print $1}')"
 
     - name: Release
       uses: softprops/action-gh-release@v1
-      if: startsWith(github.ref, 'refs/tags/')
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:

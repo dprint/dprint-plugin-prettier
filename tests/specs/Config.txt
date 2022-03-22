@@ -1,0 +1,10 @@
+~~ indentWidth: 4 ~~
+== should respect indentation ==
+function test() {
+  test;
+}
+
+[expect]
+function test() {
+    test;
+}

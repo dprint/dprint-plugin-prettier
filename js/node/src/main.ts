@@ -14,8 +14,6 @@ import * as parserPostCss from "prettier/parser-postcss";
 import * as parserTypeScript from "prettier/parser-typescript";
 import * as parserYaml from "prettier/parser-yaml";
 
-type JsonObject = { [key: string]: string | number | boolean };
-
 const plugins: prettier.Plugin[] = [
   parserTypeScript,
   parserBabel,
@@ -33,13 +31,8 @@ const plugins: prettier.Plugin[] = [
   prettierPluginAstro,
 ];
 
-let globalConfig: { [id: number]: JsonObject | undefined } = {};
-let pluginConfig: { [id: number]: JsonObject | undefined } = {};
-let resolvedConfig: { [id: number]: prettier.Options | undefined } = {};
-
-globalThis.dprint = {
+(globalThis as any).dprint = {
   getExtensions,
-  getResolvedConfig,
   formatText,
 };
 
@@ -62,89 +55,19 @@ function getExtensions() {
   }
 }
 
-function getResolvedConfig(configId: number) {
-  let config = resolvedConfig[configId];
-  if (config == null) {
-    config = createResolvedConfig(configId, {});
-    resolvedConfig[configId] = config;
-  }
-  return config;
-}
-
-function formatText(filePath: string, fileText: string, configId: number, overrideConfig: JsonObject) {
-  const config = Object.keys(overrideConfig).length === 0
-    ? getResolvedConfig(configId)
-    : createResolvedConfig(configId, overrideConfig);
-  const formattedText = formatTextWithPrettierConfig(filePath, fileText, config);
-  if (formattedText === fileText) {
-    return undefined;
-  } else {
-    return formattedText;
-  }
-}
-
-function formatTextWithPrettierConfig(filePath: string, fileText: string, config: prettier.Options) {
-  return prettier.format(fileText, {
+function formatText(
+  filePath: string,
+  fileText: string,
+  config: prettier.Options,
+) {
+  const formattedText = prettier.format(fileText, {
     filepath: filePath,
     plugins,
     ...config,
   });
-}
-
-function createResolvedConfig(configId: number, overrideConfig: JsonObject) {
-  const resolvedConfig: prettier.Options = {};
-  updateGlobalPropertiesForConfig(globalConfig[configId]);
-  updateForPluginConfig(pluginConfig[configId]);
-  updateForPluginConfig(overrideConfig);
-  return resolvedConfig;
-
-  function updateForPluginConfig(pluginConfig: JsonObject | undefined) {
-    if (pluginConfig == null) {
-      return;
-    }
-    for (const key of Object.keys(pluginConfig)) {
-      (resolvedConfig as JsonObject)[key] = pluginConfig[key];
-    }
-
-    updateGlobalPropertiesForConfig(pluginConfig);
-  }
-
-  function updateGlobalPropertiesForConfig(config: JsonObject | undefined) {
-    if (config == null) {
-      return;
-    }
-    if (typeof config.lineWidth === "number") {
-      resolvedConfig.printWidth = config.lineWidth;
-    }
-    if (typeof config.indentWidth === "number") {
-      resolvedConfig.tabWidth = config.indentWidth;
-    }
-    if (typeof config.useTabs === "boolean") {
-      resolvedConfig.useTabs = config.useTabs;
-    }
-    if (typeof config.newLineKind === "string") {
-      resolvedConfig.endOfLine = getEndOfLine(config.newLineKind);
-    }
-  }
-
-  function getEndOfLine(newLineKind: string): prettier.Options["endOfLine"] {
-    if (newLineKind == null) {
-      return undefined;
-    }
-    switch (newLineKind) {
-      case "auto":
-        return "auto";
-      case "lf":
-        return "lf";
-      case "crlf":
-        return "crlf";
-      case "system":
-        if ((Deno as any).core.opSync("op_is_windows")) {
-          return "crlf";
-        } else {
-          return "lf";
-        }
-    }
+  if (formattedText === fileText) {
     return undefined;
+  } else {
+    return formattedText;
   }
 }
