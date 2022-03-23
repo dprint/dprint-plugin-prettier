@@ -55,11 +55,7 @@ function getExtensions() {
   }
 }
 
-function formatText(
-  filePath: string,
-  fileText: string,
-  config: prettier.Options,
-) {
+function formatText({ filePath, fileText }: { filePath: string; fileText: string }, config: prettier.Options) {
   const formattedText = prettier.format(fileText, {
     filepath: filePath,
     plugins,

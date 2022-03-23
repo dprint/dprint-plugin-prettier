@@ -33,7 +33,7 @@ pub fn resolve_config(
   let dprint_tab_width = get_value(
     &mut config,
     "indentWidth",
-    global_config.line_width.unwrap_or(2),
+    global_config.indent_width.unwrap_or(2),
     &mut diagnostics,
   );
   map.insert(

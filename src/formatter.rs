@@ -17,17 +17,26 @@ impl Formatter {
     Self { runtime }
   }
 
-  pub fn format_text(&mut self, file_path: &str, file_text: &str, config: &serde_json::Value) -> Result<Option<String>, Error> {
-    // todo: improve... just doing simple for now
+  pub fn format_text(
+    &mut self,
+    file_path: &str,
+    file_text: String,
+    config: &serde_json::Value,
+  ) -> Result<Option<String>, Error> {
+    let request_value = serde_json::Value::Object({
+      let mut obj = serde_json::Map::new();
+      obj.insert("filePath".to_string(), file_path.into());
+      obj.insert("fileText".to_string(), file_text.into());
+      obj
+    });
     let code = format!(
-      "dprint.formatText(\"{}\", \"{}\", 1, {})",
-      sanitize_string(file_path),
-      sanitize_string(file_text),
+      "dprint.formatText({}, {})",
+      request_value.to_string(),
       if config.is_null() {
         "{}".to_string()
       } else {
-        serde_json::to_string(config)?
-      },
+        config.to_string()
+      }
     );
     let global = self.runtime.execute_script("format.js", &code)?;
     let scope = &mut self.runtime.handle_scope();
@@ -42,11 +51,4 @@ impl Formatter {
       }
     }
   }
-}
-
-fn sanitize_string(text: &str) -> String {
-  text
-    .replace("\r\n", "\\r\\n")
-    .replace("\n", "\\n")
-    .replace("\"", "\\\"")
 }

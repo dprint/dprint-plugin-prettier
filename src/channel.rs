@@ -1,7 +1,6 @@
 use std::sync::Arc;
 use std::time::Duration;
 
-use deno_core::anyhow::Result;
 use deno_core::parking_lot::Mutex;
 use deno_core::serde_json;
 use dprint_core::plugins::FormatRequest;
@@ -13,7 +12,10 @@ use crate::formatter::Formatter;
 use crate::utils::create_tokio_runtime;
 use crate::utils::get_system_available_memory;
 
-type Request = (FormatRequest<serde_json::Value>, oneshot::Sender<FormatResult>);
+type Request = (
+  FormatRequest<serde_json::Value>,
+  oneshot::Sender<FormatResult>,
+);
 
 struct Stats {
   pending_runtimes: usize,
@@ -60,13 +62,6 @@ impl Channel {
     recv.await?
   }
 
-  async fn recv(&self) -> Result<Request> {
-    self.stats.lock().pending_runtimes += 1;
-    let result = self.receiver.recv().await;
-    self.stats.lock().pending_runtimes -= 1;
-    Ok(result?)
-  }
-
   /// Attempts to decrement the runtime count.
   ///
   /// Returns false if the runtime should stay alive
@@ -96,6 +91,7 @@ fn create_js_runtime(channel: Channel) {
     let tokio_runtime = create_tokio_runtime();
     tokio_runtime.block_on(async move {
       let mut formatter = Formatter::new();
+      channel.stats.lock().pending_runtimes += 1;
       loop {
         tokio::select! {
           // exit when dispose
@@ -109,11 +105,12 @@ fn create_js_runtime(channel: Channel) {
               return;
             }
           }
-          request = channel.recv() => {
+          request = channel.receiver.recv() => {
             // todo: implement cancellation
-            // todo: implement configuration
+            channel.stats.lock().pending_runtimes -= 1;
             let (request, response) = request.unwrap();
-            let result = formatter.format_text(&request.file_path.to_string_lossy(), &request.file_text, &request.config);
+            let result = formatter.format_text(&request.file_path.to_string_lossy(), request.file_text, &request.config);
+            channel.stats.lock().pending_runtimes += 1; // set this before sending the response back
             let _ = response.send(result);
           }
         }
