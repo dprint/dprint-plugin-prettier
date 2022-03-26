@@ -7,14 +7,9 @@
 
 $ErrorActionPreference = "Stop"
 
-npm run build
-mv index-macos dprint-plugin-prettier
-Compress-Archive -Force -Path dprint-plugin-prettier -DestinationPath dprint-plugin-prettier-x86_64-apple-darwin.zip
-rm dprint-plugin-prettier
-mv index-linux dprint-plugin-prettier
-Compress-Archive -Force -Path dprint-plugin-prettier -DestinationPath dprint-plugin-prettier-x86_64-unknown-linux-gnu.zip
-rm dprint-plugin-prettier
-mv index-win.exe dprint-plugin-prettier.exe
-Compress-Archive -Force -Path dprint-plugin-prettier.exe -DestinationPath dprint-plugin-prettier-x86_64-pc-windows-msvc.zip
-rm dprint-plugin-prettier.exe
-node ./scripts/createPluginFile.js --test
+deno task build
+
+# todo: support more operating systems
+cargo build --release
+Compress-Archive -Force -Path target/release/dprint-plugin-prettier.exe -DestinationPath target/release/dprint-plugin-prettier-x86_64-pc-windows-msvc.zip
+pwsh -Command { cd target/release && deno run --allow-read=../../ --allow-write=. ../../scripts/create_plugin_file.ts --test }

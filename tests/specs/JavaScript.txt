@@ -1,0 +1,12 @@
+-- file.js --
+== should format ==
+class Test   {
+method (  ) { console .log ( 5  )}
+}
+
+[expect]
+class Test {
+  method() {
+    console.log(5);
+  }
+}

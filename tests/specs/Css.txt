@@ -1,0 +1,12 @@
+-- file.css --
+== should format ==
+.selector {
+
+    display   :   none
+
+}
+
+[expect]
+.selector {
+  display: none;
+}

@@ -29,3 +29,9 @@ See Prettier's configuration [here](https://prettier.io/docs/en/options.html). S
 - [prettier-plugin-svelte](https://github.com/sveltejs/prettier-plugin-svelte)
 - [prettier-plugin-astro](https://github.com/withastro/prettier-plugin-astro)
 - Want more? Open an issue.
+
+## Why Does This Exist?
+
+The main reason this exists is to be able to use Prettier with dprint's CLI. That way, you can format with all the plugins that dprint supports, still use Prettier, and only have to run `dprint fmt`.
+
+Additionally it's much faster. This plugin will format files in parallel and you can take advantage of the speed of dprint's incremental formatting if enabled.

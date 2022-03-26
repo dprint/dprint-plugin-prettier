@@ -12,3 +12,5 @@
 
 *.jpg binary
 *.png binary
+
+js/startup.js linguist-generated=true

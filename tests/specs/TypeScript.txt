@@ -1,0 +1,10 @@
+-- file.ts --
+== should format ==
+function test  ( t  : any, u = 5,
+v = 'text' )
+{ console .log ( 5  )}
+
+[expect]
+function test(t: any, u = 5, v = "text") {
+  console.log(5);
+}

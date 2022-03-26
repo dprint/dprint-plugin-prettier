@@ -1,8 +1,12 @@
 {
   "incremental": true,
   "indentWidth": 2,
-  "includes": ["**/*.{ts,tsx,js,jsx,json,md}"],
+  "rustfmt": {
+    "imports_granularity": "Item"
+  },
+  "includes": ["**/*.{ts,tsx,js,jsx,json,md,rs}"],
   "excludes": [
+    "js/startup.js",
     "**/dist",
     "**/node_modules",
     "**/*-lock.json",
@@ -11,6 +15,7 @@
   "plugins": [
     "https://plugins.dprint.dev/typescript-0.59.0.wasm",
     "https://plugins.dprint.dev/json-0.7.2.wasm",
-    "https://plugins.dprint.dev/markdown-0.11.1.wasm"
+    "https://plugins.dprint.dev/markdown-0.11.1.wasm",
+    "https://plugins.dprint.dev/rustfmt-0.5.3.exe-plugin@50d39f72a7be52d8a05d6099ed5fbbc1710b6acc57a5b389aabd0b9774ce6fde"
   ]
 }
