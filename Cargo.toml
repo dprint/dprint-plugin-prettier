@@ -20,5 +20,5 @@ deno_core = "0.123.0"
 zstd = "0.9.2"
 
 [dev-dependencies]
-dprint-development = { path = "../dprint/crates/development" }
+dprint-development = "0.8.0"
 pretty_assertions = "1.1.0"
