@@ -1,4 +1,3 @@
-use deno_core::Extension;
 use deno_core::JsRuntime;
 use deno_core::RuntimeOptions;
 use deno_core::Snapshot;
@@ -6,11 +5,9 @@ use once_cell::sync::Lazy;
 
 pub fn create_js_runtime() -> JsRuntime {
   let snapshot = Snapshot::Static(&*STARTUP_SNAPSHOT);
-  let ext = Extension::builder().build();
 
   JsRuntime::new(RuntimeOptions {
     startup_snapshot: Some(snapshot),
-    extensions: vec![ext],
     ..Default::default()
   })
 }
