@@ -1,11 +1,11 @@
+use dprint_core::configuration::get_nullable_value;
+use dprint_core::configuration::get_value;
 use dprint_core::configuration::ConfigKeyMap;
 use dprint_core::configuration::ConfigKeyValue;
-use dprint_core::configuration::DEFAULT_GLOBAL_CONFIGURATION;
 use dprint_core::configuration::GlobalConfiguration;
 use dprint_core::configuration::NewLineKind;
 use dprint_core::configuration::ResolveConfigurationResult;
-use dprint_core::configuration::get_nullable_value;
-use dprint_core::configuration::get_value;
+use dprint_core::configuration::DEFAULT_GLOBAL_CONFIGURATION;
 use serde_json;
 
 pub fn resolve_config(
@@ -18,7 +18,9 @@ pub fn resolve_config(
   let dprint_line_width = get_value(
     &mut config,
     "lineWidth",
-    global_config.line_width.unwrap_or(DEFAULT_GLOBAL_CONFIGURATION.line_width),
+    global_config
+      .line_width
+      .unwrap_or(DEFAULT_GLOBAL_CONFIGURATION.line_width),
     &mut diagnostics,
   );
   map.insert(
@@ -28,7 +30,8 @@ pub fn resolve_config(
       "printWidth",
       dprint_line_width,
       &mut diagnostics,
-    ).into(),
+    )
+    .into(),
   );
   let dprint_tab_width = get_value(
     &mut config,
@@ -38,33 +41,30 @@ pub fn resolve_config(
   );
   map.insert(
     "tabWidth".to_string(),
-    get_value(
-      &mut config,
-      "tabWidth",
-      dprint_tab_width,
-      &mut diagnostics,
-    ).into(),
+    get_value(&mut config, "tabWidth", dprint_tab_width, &mut diagnostics).into(),
   );
   map.insert(
     "useTabs".to_string(),
     get_value(
       &mut config,
       "useTabs",
-      global_config.use_tabs.unwrap_or(DEFAULT_GLOBAL_CONFIGURATION.use_tabs),
+      global_config
+        .use_tabs
+        .unwrap_or(DEFAULT_GLOBAL_CONFIGURATION.use_tabs),
       &mut diagnostics,
-    ).into(),
+    )
+    .into(),
   );
   let dprint_newline_kind: NewLineKind = get_value(
     &mut config,
     "newLineKind",
-    global_config.new_line_kind.unwrap_or(DEFAULT_GLOBAL_CONFIGURATION.new_line_kind),
+    global_config
+      .new_line_kind
+      .unwrap_or(DEFAULT_GLOBAL_CONFIGURATION.new_line_kind),
     &mut diagnostics,
   );
-  let prettier_end_of_line: Option<String> = get_nullable_value(
-    &mut config,
-    "endOfLine",
-    &mut diagnostics,
-  );
+  let prettier_end_of_line: Option<String> =
+    get_nullable_value(&mut config, "endOfLine", &mut diagnostics);
   if let Some(prettier_end_of_line) = prettier_end_of_line {
     map.insert("endOfLine".to_string(), prettier_end_of_line.into());
   } else {
@@ -74,12 +74,15 @@ pub fn resolve_config(
         NewLineKind::Auto => "auto",
         NewLineKind::CarriageReturnLineFeed => "cflf",
         NewLineKind::LineFeed => "lf",
-        NewLineKind::System => if cfg!(windows) {
-          "crlf"
-        } else {
-          "lf"
-        },
-      }.into(),
+        NewLineKind::System => {
+          if cfg!(windows) {
+            "crlf"
+          } else {
+            "lf"
+          }
+        }
+      }
+      .into(),
     );
   }
 

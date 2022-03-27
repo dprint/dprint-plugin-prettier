@@ -67,8 +67,7 @@ fn main() {
 fn get_runtime(startup_code_path: &Path, will_snapshot: bool) -> JsRuntime {
   let mut js_runtime = JsRuntime::new(RuntimeOptions {
     will_snapshot,
-    extensions: vec![Extension::builder()
-      .build()],
+    extensions: vec![Extension::builder().build()],
     ..Default::default()
   });
 

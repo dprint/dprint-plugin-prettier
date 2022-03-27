@@ -5,8 +5,8 @@ use handler::PrettierPluginHandler;
 
 use crate::utils::create_tokio_runtime;
 
-mod config;
 mod channel;
+mod config;
 mod formatter;
 mod handler;
 mod runtime;

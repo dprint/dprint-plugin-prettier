@@ -1,7 +1,7 @@
 extern crate dprint_core;
 
-pub mod config;
 mod channel;
+pub mod config;
 mod formatter;
 mod handler;
 mod runtime;
