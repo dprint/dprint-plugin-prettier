@@ -1,3 +1,4 @@
+use deno_core::v8;
 use deno_core::JsRuntime;
 use deno_core::RuntimeOptions;
 use deno_core::Snapshot;
@@ -5,9 +6,11 @@ use once_cell::sync::Lazy;
 
 pub fn create_js_runtime() -> JsRuntime {
   let snapshot = Snapshot::Static(&*STARTUP_SNAPSHOT);
+  let platform = v8::new_default_platform(1, false).make_shared();
 
   JsRuntime::new(RuntimeOptions {
     startup_snapshot: Some(snapshot),
+    v8_platform: Some(platform),
     ..Default::default()
   })
 }

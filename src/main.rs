@@ -23,7 +23,7 @@ fn main() {
   });
 
   if let Err(err) = result {
-    eprintln!("Shutting down due to error. {}", err);
+    eprintln!("Shutting down due to error: {}", err);
     std::process::exit(1);
   }
 }
