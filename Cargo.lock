@@ -175,9 +175,9 @@ checksum = "0e25ea47919b1560c4e3b7fe0aaab9becf5b84a10325ddf7db0f0ba5e1026499"
 
 [[package]]
 name = "dprint-core"
-version = "0.53.0"
+version = "0.53.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3fd76b7077b6ae550f8b4b72ee619548e22c579679fa7b0362261297b9fbd42a"
+checksum = "9764a29146aec0a5878ce780a212b05458b482e6bb63df4857c6d1781e2afe8d"
 dependencies = [
  "anyhow",
  "bumpalo",
@@ -207,7 +207,7 @@ dependencies = [
 
 [[package]]
 name = "dprint-plugin-prettier"
-version = "0.6.0"
+version = "0.6.1"
 dependencies = [
  "async-channel",
  "deno_core",
