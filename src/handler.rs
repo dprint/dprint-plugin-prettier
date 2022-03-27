@@ -26,12 +26,6 @@ pub struct PrettierPluginHandler {
   channel: Channel,
 }
 
-impl Drop for PrettierPluginHandler {
-  fn drop(&mut self) {
-    self.channel.dispose()
-  }
-}
-
 impl PrettierPluginHandler {
   pub fn new() -> Self {
     Self {
