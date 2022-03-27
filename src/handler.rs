@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+use deno_core::futures::future;
 use deno_core::serde_json;
 use dprint_core::configuration::ConfigKeyMap;
 use dprint_core::configuration::GlobalConfiguration;
@@ -69,6 +70,11 @@ impl AsyncPluginHandler for PrettierPluginHandler {
     request: FormatRequest<Self::Configuration>,
     _host: Arc<dyn Host>,
   ) -> BoxFuture<FormatResult> {
+    if request.range.is_some() {
+      // no support for range formatting
+      return Box::pin(future::ready(Ok(None)));
+    }
+
     let channel = self.channel.clone();
     Box::pin(async move { channel.format(request).await })
   }

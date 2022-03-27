@@ -2,7 +2,8 @@ use sysinfo::System;
 use sysinfo::SystemExt;
 
 pub fn create_tokio_runtime() -> tokio::runtime::Runtime {
-  // use a single thread for tasks because we need that for deno_core
+  // use a single thread for the communication and for
+  // each of the isolates
   tokio::runtime::Builder::new_current_thread()
     .enable_time()
     .build()

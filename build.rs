@@ -7,7 +7,6 @@ use std::path::PathBuf;
 
 use deno_core::serde_v8;
 use deno_core::v8;
-use deno_core::Extension;
 use deno_core::JsRuntime;
 use deno_core::RuntimeOptions;
 
@@ -65,9 +64,10 @@ fn main() {
 }
 
 fn get_runtime(startup_code_path: &Path, will_snapshot: bool) -> JsRuntime {
+  let platform = v8::new_default_platform(1, false).make_shared();
   let mut js_runtime = JsRuntime::new(RuntimeOptions {
     will_snapshot,
-    extensions: vec![Extension::builder().build()],
+    v8_platform: Some(platform),
     ..Default::default()
   });
 
