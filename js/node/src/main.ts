@@ -27,8 +27,8 @@ const plugins: prettier.Plugin[] = [
   parserMeriyah,
   parserPostCss,
   parserYaml,
-  prettierPluginSvelte,
   prettierPluginAstro,
+  prettierPluginSvelte,
 ];
 
 (globalThis as any).dprint = {
