@@ -125,7 +125,7 @@ jobs:
 
     - name: Get plugin file checksum
       id: get_plugin_file_checksum
-      run: echo "::set-output name=CHECKSUM::$(shasum -a 256 plugin.exe-plugin | awk '{print $1}')"
+      run: echo "::set-output name=CHECKSUM::$(shasum -a 256 plugin.json | awk '{print $1}')"
 
     - name: Release
       uses: softprops/action-gh-release@v1
@@ -136,7 +136,7 @@ jobs:
           dprint-plugin-prettier-x86_64-apple-darwin.zip
           dprint-plugin-prettier-x86_64-unknown-linux-gnu.zip
           dprint-plugin-prettier-x86_64-pc-windows-msvc.zip
-          plugin.exe-plugin
+          plugin.json
         body: |
           ## Install
 
@@ -149,7 +149,7 @@ jobs:
                // etc...
                "plugins": [
                  // ...add other dprint plugins here that you want to take precedence over prettier...
-                 "https://plugins.dprint.dev/prettier-${{ steps.get_tag_version.outputs.TAG_VERSION }}.exe-plugin@${{ steps.get_plugin_file_checksum.outputs.CHECKSUM }}"
+                 "https://plugins.dprint.dev/prettier-${{ steps.get_tag_version.outputs.TAG_VERSION }}.json@${{ steps.get_plugin_file_checksum.outputs.CHECKSUM }}"
                ]
              }
              ```
