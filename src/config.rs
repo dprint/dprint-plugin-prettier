@@ -5,7 +5,6 @@ use dprint_core::configuration::ConfigKeyValue;
 use dprint_core::configuration::GlobalConfiguration;
 use dprint_core::configuration::NewLineKind;
 use dprint_core::configuration::ResolveConfigurationResult;
-use dprint_core::configuration::DEFAULT_GLOBAL_CONFIGURATION;
 use serde_json;
 
 pub fn resolve_config(
@@ -18,9 +17,7 @@ pub fn resolve_config(
   let dprint_line_width = get_value(
     &mut config,
     "lineWidth",
-    global_config
-      .line_width
-      .unwrap_or(DEFAULT_GLOBAL_CONFIGURATION.line_width),
+    global_config.line_width.unwrap_or(80),
     &mut diagnostics,
   );
   map.insert(
@@ -48,9 +45,7 @@ pub fn resolve_config(
     get_value(
       &mut config,
       "useTabs",
-      global_config
-        .use_tabs
-        .unwrap_or(DEFAULT_GLOBAL_CONFIGURATION.use_tabs),
+      global_config.use_tabs.unwrap_or(false),
       &mut diagnostics,
     )
     .into(),
@@ -58,9 +53,7 @@ pub fn resolve_config(
   let dprint_newline_kind: NewLineKind = get_value(
     &mut config,
     "newLineKind",
-    global_config
-      .new_line_kind
-      .unwrap_or(DEFAULT_GLOBAL_CONFIGURATION.new_line_kind),
+    global_config.new_line_kind.unwrap_or(NewLineKind::LineFeed),
     &mut diagnostics,
   );
   let prettier_end_of_line: Option<String> =
