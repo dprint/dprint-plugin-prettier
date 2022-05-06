@@ -1,4 +1,6 @@
+use deno_core::include_js_files;
 use deno_core::v8;
+use deno_core::Extension;
 use deno_core::JsRuntime;
 use deno_core::RuntimeOptions;
 use deno_core::Snapshot;
@@ -11,6 +13,17 @@ pub fn create_js_runtime() -> JsRuntime {
   JsRuntime::new(RuntimeOptions {
     startup_snapshot: Some(snapshot),
     v8_platform: Some(platform),
+    extensions: vec![
+      deno_webidl::init(),
+      deno_console::init(),
+      deno_url::init(),
+      Extension::builder()
+        .js(include_js_files!(
+          prefix "deno:main",
+          "main.js",
+        ))
+        .build(),
+    ],
     ..Default::default()
   })
 }

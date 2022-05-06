@@ -14,6 +14,7 @@
 <script>
   let files;
 </script>
+
 <input type="file" bind:files />
 {#if files && files[0]}
   <p>
