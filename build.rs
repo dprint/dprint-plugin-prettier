@@ -5,8 +5,10 @@ use std::env;
 use std::path::Path;
 use std::path::PathBuf;
 
+use deno_core::include_js_files;
 use deno_core::serde_v8;
 use deno_core::v8;
+use deno_core::Extension;
 use deno_core::JsRuntime;
 use deno_core::RuntimeOptions;
 
@@ -68,6 +70,17 @@ fn get_runtime(startup_code_path: &Path, will_snapshot: bool) -> JsRuntime {
   let mut js_runtime = JsRuntime::new(RuntimeOptions {
     will_snapshot,
     v8_platform: Some(platform),
+    extensions: vec![
+      deno_webidl::init(),
+      deno_console::init(),
+      deno_url::init(),
+      Extension::builder()
+        .js(include_js_files!(
+          prefix "deno:main",
+          "src/main.js",
+        ))
+        .build(),
+    ],
     ..Default::default()
   });
 
