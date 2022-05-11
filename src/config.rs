@@ -80,18 +80,30 @@ pub fn resolve_config(
   }
 
   for (key, value) in config {
-    map.insert(
-      key,
-      match value {
-        ConfigKeyValue::Bool(value) => value.into(),
-        ConfigKeyValue::String(value) => value.into(),
-        ConfigKeyValue::Number(value) => value.into(),
-      },
-    );
+    map.insert(key, config_key_value_to_json(value));
   }
 
   ResolveConfigurationResult {
     config: serde_json::Value::Object(map),
     diagnostics,
+  }
+}
+
+fn config_key_value_to_json(value: ConfigKeyValue) -> serde_json::Value {
+  match value {
+    ConfigKeyValue::Bool(value) => value.into(),
+    ConfigKeyValue::String(value) => value.into(),
+    ConfigKeyValue::Number(value) => value.into(),
+    ConfigKeyValue::Object(value) => {
+      let mut values = serde_json::Map::new();
+      for (key, value) in value.into_iter() {
+        values.insert(key, config_key_value_to_json(value));
+      }
+      serde_json::Value::Object(values)
+    }
+    ConfigKeyValue::Array(value) => {
+      serde_json::Value::Array(value.into_iter().map(config_key_value_to_json).collect())
+    }
+    ConfigKeyValue::Null => serde_json::Value::Null,
   }
 }
