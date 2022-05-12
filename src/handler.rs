@@ -1,7 +1,6 @@
 use std::sync::Arc;
 
 use deno_core::futures::future;
-use deno_core::serde_json;
 use dprint_core::configuration::ConfigKeyMap;
 use dprint_core::configuration::GlobalConfiguration;
 use dprint_core::configuration::ResolveConfigurationResult;
@@ -15,6 +14,7 @@ use once_cell::sync::Lazy;
 
 use crate::channel::Channel;
 use crate::config::resolve_config;
+use crate::config::PrettierConfig;
 
 static SUPPORTED_EXTENSIONS: Lazy<Vec<String>> = Lazy::new(|| {
   let json_bytes = include_bytes!(concat!(env!("OUT_DIR"), "/SUPPORTED_EXTENSIONS.json"));
@@ -36,7 +36,7 @@ impl PrettierPluginHandler {
 }
 
 impl AsyncPluginHandler for PrettierPluginHandler {
-  type Configuration = serde_json::Value;
+  type Configuration = PrettierConfig;
 
   fn plugin_info(&self) -> PluginInfo {
     PluginInfo {
@@ -61,7 +61,7 @@ impl AsyncPluginHandler for PrettierPluginHandler {
     &self,
     config: ConfigKeyMap,
     global_config: GlobalConfiguration,
-  ) -> ResolveConfigurationResult<serde_json::Value> {
+  ) -> ResolveConfigurationResult<Self::Configuration> {
     resolve_config(config, global_config)
   }
 

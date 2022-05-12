@@ -1,0 +1,7 @@
+-- file.d.TS --
+~~ singleQuote: false, js.singleQuote: false, ts.singleQuote: true ~~
+== should format with double quotes ==
+'test';
+
+[expect]
+'test';

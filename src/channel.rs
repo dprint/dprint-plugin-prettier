@@ -2,19 +2,16 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use deno_core::parking_lot::Mutex;
-use deno_core::serde_json;
 use dprint_core::plugins::FormatRequest;
 use dprint_core::plugins::FormatResult;
 use tokio::sync::oneshot;
 
+use crate::config::PrettierConfig;
 use crate::formatter::Formatter;
 use crate::utils::create_tokio_runtime;
 use crate::utils::get_system_available_memory;
 
-type Request = (
-  FormatRequest<serde_json::Value>,
-  oneshot::Sender<FormatResult>,
-);
+type Request = (FormatRequest<PrettierConfig>, oneshot::Sender<FormatResult>);
 
 struct Stats {
   pending_runtimes: usize,
@@ -41,7 +38,7 @@ impl Channel {
     }
   }
 
-  pub async fn format(&self, request: FormatRequest<serde_json::Value>) -> FormatResult {
+  pub async fn format(&self, request: FormatRequest<PrettierConfig>) -> FormatResult {
     let (send, recv) = oneshot::channel::<FormatResult>();
     let mut should_inc_pending_runtimes = false;
     {

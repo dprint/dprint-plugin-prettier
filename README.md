@@ -24,6 +24,23 @@ See Prettier's configuration [here](https://prettier.io/docs/en/options.html). S
 }
 ```
 
+### File extension specific configuration
+
+Add the file extension to the start of the configuration option. For example:
+
+```jsonc
+{
+  // ...etc...
+  "prettier": {
+    "singleQuote": true,
+    // use double quotes in js files
+    "js.singleQuote": false,
+    // use double quotes in ts files
+    "ts.singleQuote": false
+  }
+}
+```
+
 ## Included Prettier Plugins
 
 - [prettier-plugin-svelte](https://github.com/sveltejs/prettier-plugin-svelte)

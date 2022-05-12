@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use deno_core::anyhow::anyhow;
 use deno_core::anyhow::Error;
 use deno_core::serde_json;
@@ -5,6 +7,7 @@ use deno_core::serde_v8;
 use deno_core::v8;
 use deno_core::JsRuntime;
 
+use crate::config::PrettierConfig;
 use crate::runtime::create_js_runtime;
 
 pub struct Formatter {
@@ -21,7 +24,7 @@ impl Formatter {
     &mut self,
     file_path: &str,
     file_text: String,
-    config: &serde_json::Value,
+    config: &PrettierConfig,
   ) -> Result<Option<String>, Error> {
     let request_value = serde_json::Value::Object({
       let mut obj = serde_json::Map::new();
@@ -32,11 +35,7 @@ impl Formatter {
     let code = format!(
       "dprint.formatText({}, {})",
       request_value.to_string(),
-      if config.is_null() {
-        "{}".to_string()
-      } else {
-        config.to_string()
-      }
+      serde_json::to_string(&resolve_config(file_path, config)).unwrap(),
     );
     let global = self.runtime.execute_script("format.js", &code)?;
     let scope = &mut self.runtime.handle_scope();
@@ -50,5 +49,25 @@ impl Formatter {
         Err(err) => Err(anyhow!("Cannot deserialize serde_v8 value: {:?}", err)),
       }
     }
+  }
+}
+
+fn resolve_config<'a>(
+  file_path: &str,
+  config: &'a PrettierConfig,
+) -> Cow<'a, serde_json::Map<String, serde_json::Value>> {
+  let ext = if let Some(index) = file_path.rfind('.') {
+    file_path[index + 1..].to_lowercase()
+  } else {
+    return Cow::Borrowed(&config.main);
+  };
+  if let Some(override_config) = config.extension_overrides.get(&ext) {
+    let mut new_config = config.main.clone();
+    for (key, value) in override_config.as_object().unwrap().iter() {
+      new_config.insert(key.to_string(), value.clone());
+    }
+    Cow::Owned(new_config)
+  } else {
+    Cow::Borrowed(&config.main)
   }
 }

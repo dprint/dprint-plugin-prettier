@@ -1,0 +1,7 @@
+-- file.js --
+~~ singleQuote: true, js.singleQuote: false, ts.singleQuote: true ~~
+== should format with double quotes ==
+'test';
+
+[expect]
+"test";

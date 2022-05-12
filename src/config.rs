@@ -5,14 +5,22 @@ use dprint_core::configuration::ConfigKeyValue;
 use dprint_core::configuration::GlobalConfiguration;
 use dprint_core::configuration::NewLineKind;
 use dprint_core::configuration::ResolveConfigurationResult;
+use serde::Serialize;
 use serde_json;
+
+#[derive(Clone, Serialize, Default)]
+pub struct PrettierConfig {
+  pub main: serde_json::Map<String, serde_json::Value>,
+  pub extension_overrides: serde_json::Map<String, serde_json::Value>,
+}
 
 pub fn resolve_config(
   mut config: ConfigKeyMap,
   global_config: GlobalConfiguration,
-) -> ResolveConfigurationResult<serde_json::Value> {
+) -> ResolveConfigurationResult<PrettierConfig> {
   let mut diagnostics = Vec::new();
-  let mut map: serde_json::Map<String, serde_json::Value> = Default::default();
+  let mut main: serde_json::Map<String, serde_json::Value> = Default::default();
+  let mut extension_overrides: serde_json::Map<String, serde_json::Value> = Default::default();
 
   let dprint_line_width = get_value(
     &mut config,
@@ -20,7 +28,7 @@ pub fn resolve_config(
     global_config.line_width.unwrap_or(80),
     &mut diagnostics,
   );
-  map.insert(
+  main.insert(
     "printWidth".to_string(),
     get_value(
       &mut config,
@@ -36,11 +44,11 @@ pub fn resolve_config(
     global_config.indent_width.unwrap_or(2),
     &mut diagnostics,
   );
-  map.insert(
+  main.insert(
     "tabWidth".to_string(),
     get_value(&mut config, "tabWidth", dprint_tab_width, &mut diagnostics).into(),
   );
-  map.insert(
+  main.insert(
     "useTabs".to_string(),
     get_value(
       &mut config,
@@ -59,9 +67,9 @@ pub fn resolve_config(
   let prettier_end_of_line: Option<String> =
     get_nullable_value(&mut config, "endOfLine", &mut diagnostics);
   if let Some(prettier_end_of_line) = prettier_end_of_line {
-    map.insert("endOfLine".to_string(), prettier_end_of_line.into());
+    main.insert("endOfLine".to_string(), prettier_end_of_line.into());
   } else {
-    map.insert(
+    main.insert(
       "endOfLine".to_string(),
       match dprint_newline_kind {
         NewLineKind::Auto => "auto",
@@ -80,11 +88,26 @@ pub fn resolve_config(
   }
 
   for (key, value) in config {
-    map.insert(key, config_key_value_to_json(value));
+    let value = config_key_value_to_json(value);
+    if let Some(index) = key.rfind('.') {
+      let extension = key[..index].to_lowercase();
+      let key = &key[index + 1..];
+      extension_overrides
+        .entry(extension)
+        .or_insert_with(|| serde_json::Value::Object(Default::default()))
+        .as_object_mut()
+        .unwrap()
+        .insert(key.to_string(), value);
+    } else {
+      main.insert(key, value);
+    }
   }
 
   ResolveConfigurationResult {
-    config: serde_json::Value::Object(map),
+    config: PrettierConfig {
+      main,
+      extension_overrides,
+    },
     diagnostics,
   }
 }
