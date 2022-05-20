@@ -49,7 +49,7 @@ Add the file extension to the start of the configuration option. For example:
 
 ## Making the plugins work
 
-If for example you want to use [prettier-plugin-svelte](https://github.com/sveltejs/prettier-plugin-svelte) plugin. In your config, change `"includes:"` field to include svelte file names too. For example for the case with svelte it will be:
+If for example you want to use [prettier-plugin-svelte](https://github.com/sveltejs/prettier-plugin-svelte) plugin. In your config, change `"includes:"` field to include svelte file name too. For example for the case with svelte it will be:
 
 `"includes": ["**/*.{ts,tsx,js,jsx,cjs,mjs,json,md,toml,svelte}"],`
 
