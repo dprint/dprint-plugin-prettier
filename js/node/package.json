@@ -26,6 +26,7 @@
     "esbuild": "^0.14.36",
     "prettier": "^2.6.2",
     "prettier-plugin-astro": "^0.0.12",
+    "prettier-plugin-fixpack": "^0.1.0",
     "prettier-plugin-svelte": "^2.7.0",
     "process": "^0.11.10",
     "svelte": "^3.47.0"

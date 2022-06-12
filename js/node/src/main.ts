@@ -1,6 +1,7 @@
 import prettier from "prettier";
 import * as prettierPluginAstro from "prettier-plugin-astro";
 import * as prettierPluginSvelte from "prettier-plugin-svelte";
+import * as prettierPluginFixPack from "prettier-plugin-fixpack";
 import * as parserAngular from "prettier/parser-angular";
 import * as parserBabel from "prettier/parser-babel";
 import * as parserEspree from "prettier/parser-espree";
@@ -29,6 +30,7 @@ const plugins: prettier.Plugin[] = [
   parserYaml,
   prettierPluginAstro,
   prettierPluginSvelte,
+  prettierPluginFixPack,
 ];
 
 (globalThis as any).dprint = {
