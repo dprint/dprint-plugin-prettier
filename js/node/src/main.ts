@@ -1,4 +1,5 @@
 import prettier from "prettier";
+import * as prettierPluginJsDoc from "prettier-plugin-jsdoc";
 import * as prettierPluginAstro from "prettier-plugin-astro";
 import * as prettierPluginSvelte from "prettier-plugin-svelte";
 import * as parserAngular from "prettier/parser-angular";
@@ -27,6 +28,7 @@ const plugins: prettier.Plugin[] = [
   parserMeriyah,
   parserPostCss,
   parserYaml,
+  prettierPluginJsDoc,
   prettierPluginAstro,
   prettierPluginSvelte,
 ];
