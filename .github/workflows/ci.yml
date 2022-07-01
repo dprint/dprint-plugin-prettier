@@ -40,6 +40,9 @@ jobs:
     - uses: Swatinem/rust-cache@v1
     - uses: denoland/setup-deno@v1
 
+    - name: npm install
+      run: cd js/node && npm ci
+
     # Build
     - name: Build release
       if: matrix.config.kind == 'test_release'

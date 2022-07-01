@@ -9,9 +9,9 @@ const rootDirPath = path.dirname(path.dirname(path.fromFileUrl(import.meta.url))
 
 console.log("Upgrading prettier...");
 const npmCommand = Deno.build.os === "windows" ? "npm.cmd" : "npm";
-await runCommand(`${npmCommand} install --save prettier`.split(" "), {
-  cwd: path.join(rootDirPath, "./js/node"),
-});
+const jsNodePath = path.join(rootDirPath, "./js/node");
+await runCommand(`${npmCommand} install`.split(" "), { cwd: jsNodePath });
+await runCommand(`${npmCommand} install --save prettier`.split(" "), { cwd: jsNodePath });
 
 if (!await hasFileChanged("./js/node/package.json")) {
   console.log("No changes.");
