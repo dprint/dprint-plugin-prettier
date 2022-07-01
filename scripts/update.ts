@@ -13,7 +13,7 @@ await runCommand(`${npmCommand} install --save prettier`.split(" "), {
   cwd: path.join(rootDirPath, "./js/node"),
 });
 
-if (!hasFileChanged("./js/node/package.json")) {
+if (!await hasFileChanged("./js/node/package.json")) {
   console.log("No changes.");
   Deno.exit(0);
 }
