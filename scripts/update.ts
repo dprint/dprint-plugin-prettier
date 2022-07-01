@@ -8,7 +8,8 @@ import * as semver from "https://deno.land/x/semver@v1.4.0/mod.ts";
 const rootDirPath = path.dirname(path.dirname(path.fromFileUrl(import.meta.url)));
 
 console.log("Upgrading prettier...");
-await runCommand("npm install --save prettier".split(" "), {
+const npmCommand = Deno.build.os === "windows" ? "npm.cmd" : "npm";
+await runCommand(`${npmCommand} install --save prettier`.split(" "), {
   cwd: path.join(rootDirPath, "./js/node"),
 });
 
