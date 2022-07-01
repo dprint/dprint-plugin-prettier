@@ -1,4 +1,5 @@
 import { assertEquals } from "https://deno.land/std@0.130.0/testing/asserts.ts";
+// running cargo build will generate this file
 import "./startup.js";
 
 const { formatText } = (globalThis as any).dprint;

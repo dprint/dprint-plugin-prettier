@@ -4,6 +4,7 @@
 use std::env;
 use std::path::Path;
 use std::path::PathBuf;
+use std::process::Command;
 
 use deno_core::include_js_files;
 use deno_core::serde_v8;
@@ -16,15 +17,44 @@ fn main() {
   let c = PathBuf::from(env::var_os("CARGO_MANIFEST_DIR").unwrap());
   let o = PathBuf::from(env::var_os("OUT_DIR").unwrap());
   let startup_snapshot_path = o.join("STARTUP_SNAPSHOT.bin");
-  let startup_code_path = c.join("js").join("startup.js");
+  let js_dir = c.join("js");
+  let js_src_dir = js_dir.join("src");
+  let startup_code_path = js_dir.join("startup.js");
   let supported_extensions_path = o.join("SUPPORTED_EXTENSIONS.json");
 
-  // ensure the build is invalidated if the startup file changes
-  println!("cargo:rerun-if-changed={}", startup_code_path.display());
+  let status = Command::new("deno")
+    .args(["task", "build"])
+    .status()
+    .unwrap();
+  if status.code() != Some(0) {
+    panic!("Error building.");
+  }
+
+  // ensure the build is invalidated if any of these files change
+  println!(
+    "cargo:rerun-if-changed={}",
+    js_src_dir.join("main.ts").display()
+  );
+  println!(
+    "cargo:rerun-if-changed={}",
+    js_src_dir.join("package.json").display()
+  );
+  println!(
+    "cargo:rerun-if-changed={}",
+    js_src_dir.join("package-lock.json").display()
+  );
+  println!(
+    "cargo:rerun-if-changed={}",
+    js_src_dir.join("shims/node-shim.js").display()
+  );
+  println!(
+    "cargo:rerun-if-changed={}",
+    js_src_dir.join("shims/url.js").display()
+  );
+
   let mut js_runtime = get_runtime(&startup_code_path, true);
   let snapshot = js_runtime.snapshot();
   let snapshot_slice: &[u8] = &*snapshot;
-  println!("Snapshot size: {}", snapshot_slice.len());
 
   let compressed_snapshot_with_size = {
     let mut vec = vec![];
@@ -42,13 +72,7 @@ fn main() {
     vec
   };
 
-  println!(
-    "Snapshot compressed size: {}",
-    compressed_snapshot_with_size.len()
-  );
-
   std::fs::write(&startup_snapshot_path, compressed_snapshot_with_size).unwrap();
-  println!("Snapshot written to: {} ", startup_snapshot_path.display());
 
   // serialize the supported extensions
   let mut js_runtime = get_runtime(&startup_code_path, false); // panics otherwise
