@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "scripts": {
-    "build:script": "esbuild src/main.ts --bundle --inject:./shims/node-shim.js --outfile=../startup.js --target=chrome58"
+    "build:script": "esbuild src/main.ts --bundle --minify --inject:./shims/node-shim.js --outfile=../startup.js --target=chrome58"
   },
   "browser": {
     "url": "./shims/url.js"
@@ -23,7 +23,7 @@
   },
   "dependencies": {
     "buffer": "^6.0.3",
-    "esbuild": "^0.14.36",
+    "esbuild": "^0.14.48",
     "prettier": "^2.7.1",
     "prettier-plugin-astro": "^0.0.12",
     "prettier-plugin-svelte": "^2.7.0",
