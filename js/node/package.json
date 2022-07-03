@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "scripts": {
-    "build:script": "esbuild src/main.ts --bundle --inject:./shims/node-shim.js --outfile=../startup.js --target=chrome58"
+    "build:script": "node ./scripts/build.mjs"
   },
   "browser": {
     "url": "./shims/url.js"
@@ -34,6 +34,7 @@
   "devDependencies": {
     "@types/node": "^17.0.24",
     "@types/prettier": "^2.6.0",
+    "esbuild-plugin-alias": "^0.2.1",
     "typescript": "^4.6.3"
   }
 }
