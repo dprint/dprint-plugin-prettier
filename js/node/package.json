@@ -24,7 +24,7 @@
   "dependencies": {
     "buffer": "^6.0.3",
     "esbuild": "^0.14.36",
-    "prettier": "^2.6.2",
+    "prettier": "^2.7.1",
     "prettier-plugin-astro": "^0.0.12",
     "prettier-plugin-fixpack": "^0.1.0",
     "prettier-plugin-svelte": "^2.7.0",
