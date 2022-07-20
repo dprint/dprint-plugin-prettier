@@ -2,39 +2,39 @@
  * This script checks for any prettier updates and then automatically
  * publishes a new version of the plugin if so.
  */
-import * as path from "https://deno.land/std@0.146.0/path/mod.ts";
+import $ from "https://deno.land/x/dax@0.7.1/mod.ts";
 import * as semver from "https://deno.land/x/semver@v1.4.0/mod.ts";
 
-const rootDirPath = path.dirname(path.dirname(path.fromFileUrl(import.meta.url)));
+const rootDirPath = $.path.dirname($.path.dirname($.path.fromFileUrl(import.meta.url)));
 
-console.log("Upgrading prettier...");
-const npmCommand = Deno.build.os === "windows" ? "npm.cmd" : "npm";
-const jsNodePath = path.join(rootDirPath, "./js/node");
-await runCommand(`${npmCommand} install`.split(" "), { cwd: jsNodePath });
-await runCommand(`${npmCommand} install --save prettier`.split(" "), { cwd: jsNodePath });
+$.logStep("Upgrading prettier...");
+const jsNodePath = $.path.join(rootDirPath, "./js/node");
+await $`npm install`.cwd(jsNodePath);
+await $`npm install --save prettier`.cwd(jsNodePath);
 
 if (!await hasFileChanged("./js/node/package.json")) {
-  console.log("No changes.");
+  $.log("No changes.");
   Deno.exit(0);
 }
 
-console.log("Found changes. Bumping version...");
+$.log("Found changes.");
+$.logStep("Bumping version...");
 const newVersion = await bumpMinorVersion();
 
 // run the tests
-console.log("Running tests...");
-await runCommand("cargo test".split(" "));
+$.logStep("Running tests...");
+await $`cargo test`;
 
 // release
-console.log(`Committing and publishing ${newVersion}...`);
-await runCommand("git add .".split(" "));
-await runCommand(`git commit -m ${newVersion}`.split(" "));
-await runCommand(`git push origin main`.split(" "));
-await runCommand(`git tag ${newVersion}`.split(" "));
-await runCommand(`git push origin ${newVersion}`.split(" "));
+$.logStep(`Committing and publishing ${newVersion}...`);
+await $`git add .`;
+await $`git commit -m ${newVersion}`;
+await $`git push origin main`;
+await $`git tag ${newVersion}`;
+await $`git push origin ${newVersion}`;
 
 async function bumpMinorVersion() {
-  const projectFile = path.join(rootDirPath, "./Cargo.toml");
+  const projectFile = $.path.join(rootDirPath, "./Cargo.toml");
   const text = await Deno.readTextFile(projectFile);
   const versionRegex = /^version = "([0-9]+\.[0-9]+\.[0-9]+)"/m;
   const currentVersion = text.match(versionRegex)?.[1];
@@ -49,23 +49,9 @@ async function bumpMinorVersion() {
 
 async function hasFileChanged(file: string) {
   try {
-    await runCommand(["git", "diff", "--exit-code", file]);
+    await $`git diff --exit-code ${file}`;
     return false;
   } catch {
     return true;
-  }
-}
-
-async function runCommand(cmd: string[], opts?: {
-  cwd?: string;
-}) {
-  const p = Deno.run({
-    cmd,
-    cwd: opts?.cwd ?? rootDirPath,
-  });
-  const status = await p.status();
-  p.close();
-  if (status.code !== 0) {
-    throw new Error("Failed.");
   }
 }
