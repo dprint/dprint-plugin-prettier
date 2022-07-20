@@ -33,9 +33,10 @@ impl Formatter {
       obj
     });
     let code = format!(
-      "dprint.formatText({}, {})",
+      "dprint.formatText({{ ...{}, config: {}, pluginsConfig: {} }})",
       request_value.to_string(),
       serde_json::to_string(&resolve_config(file_path, config)).unwrap(),
+      serde_json::to_string(&config.plugins).unwrap(),
     );
     let global = self.runtime.execute_script("format.js", &code)?;
     let scope = &mut self.runtime.handle_scope();

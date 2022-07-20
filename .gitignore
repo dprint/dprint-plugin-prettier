@@ -1,4 +1,6 @@
 js/node/node_modules
 js/node/dist
 js/startup.js
+js/startup.js.map
 target
+.parcel-cache/

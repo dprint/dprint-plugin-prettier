@@ -1,6 +1,6 @@
 {
   "tasks": {
-    "build": "cd js/node && npm run build:script",
-    "test": "cargo build && deno test --no-check js/startup.test.ts"
+    "setup": "cd js/node && npm ci",
+    "build": "cd js/node && npm run build:script"
   }
 }
