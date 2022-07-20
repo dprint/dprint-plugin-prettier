@@ -19,7 +19,9 @@ See Prettier's configuration [here](https://prettier.io/docs/en/options.html). S
   "prettier": {
     "trailingComma": "all",
     "singleQuote": true,
-    "proseWrap": "always"
+    "proseWrap": "always",
+    // enable prettier-plugin-jsdoc
+    "plugin.jsDoc": true
   }
 }
 ```
@@ -44,7 +46,11 @@ Add the file extension to the start of the configuration option. For example:
 ## Included Prettier Plugins
 
 - [prettier-plugin-svelte](https://github.com/sveltejs/prettier-plugin-svelte)
+  - Enabled by default.
 - [prettier-plugin-astro](https://github.com/withastro/prettier-plugin-astro)
+  - Enabled by default.
+- [prettier-plugin-jsdoc](https://github.com/hosseinmd/prettier-plugin-jsdoc)
+  - Enable with `"plugin.jsDoc": true` configuration
 - Want more? Open an issue.
 
 ## Why Does This Exist?

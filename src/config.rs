@@ -9,9 +9,15 @@ use serde::Serialize;
 use serde_json;
 
 #[derive(Clone, Serialize, Default)]
+pub struct PrettierPluginConfig {
+  pub js_doc: bool,
+}
+
+#[derive(Clone, Serialize, Default)]
 pub struct PrettierConfig {
   pub main: serde_json::Map<String, serde_json::Value>,
   pub extension_overrides: serde_json::Map<String, serde_json::Value>,
+  pub plugins: PrettierPluginConfig,
 }
 
 pub fn resolve_config(
@@ -21,6 +27,10 @@ pub fn resolve_config(
   let mut diagnostics = Vec::new();
   let mut main: serde_json::Map<String, serde_json::Value> = Default::default();
   let mut extension_overrides: serde_json::Map<String, serde_json::Value> = Default::default();
+
+  let plugins = PrettierPluginConfig {
+    js_doc: get_value(&mut config, "plugin.jsDoc", false, &mut diagnostics),
+  };
 
   let dprint_line_width = get_value(
     &mut config,
@@ -107,6 +117,7 @@ pub fn resolve_config(
     config: PrettierConfig {
       main,
       extension_overrides,
+      plugins,
     },
     diagnostics,
   }

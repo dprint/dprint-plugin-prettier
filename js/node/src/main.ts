@@ -1,6 +1,6 @@
 import prettier from "prettier";
-import * as prettierPluginJsDoc from "prettier-plugin-jsdoc";
 import * as prettierPluginAstro from "prettier-plugin-astro";
+import * as prettierPluginJsDoc from "prettier-plugin-jsdoc";
 import * as prettierPluginSvelte from "prettier-plugin-svelte";
 import * as parserAngular from "prettier/parser-angular";
 import * as parserBabel from "prettier/parser-babel";
@@ -28,7 +28,6 @@ const plugins: prettier.Plugin[] = [
   parserMeriyah,
   parserPostCss,
   parserYaml,
-  prettierPluginJsDoc,
   prettierPluginAstro,
   prettierPluginSvelte,
 ];
@@ -57,15 +56,34 @@ function getExtensions() {
   }
 }
 
-function formatText({ filePath, fileText }: { filePath: string; fileText: string }, config: prettier.Options) {
+interface FormatTextOptions {
+  filePath: string;
+  fileText: string;
+  config: prettier.Options;
+  pluginsConfig: PluginsConfig;
+}
+
+interface PluginsConfig {
+  js_doc: boolean;
+}
+
+function formatText({ filePath, fileText, config, pluginsConfig }: FormatTextOptions) {
   const formattedText = prettier.format(fileText, {
     filepath: filePath,
-    plugins,
+    plugins: getPlugins(pluginsConfig),
     ...config,
   });
   if (formattedText === fileText) {
     return undefined;
   } else {
     return formattedText;
+  }
+}
+
+function getPlugins(pluginsConfig: PluginsConfig) {
+  if (pluginsConfig.js_doc) {
+    return [...plugins, prettierPluginJsDoc];
+  } else {
+    return plugins;
   }
 }
