@@ -48,9 +48,6 @@ jobs:
       if: matrix.config.kind == 'test_release'
       run: cargo build --release
 
-    - name: Test snapshot
-      run: deno task test
-
     - name: Test release
       if: matrix.config.kind == 'test_release'
       run: cargo test --release

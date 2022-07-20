@@ -45,10 +45,6 @@ fn main() {
   );
   println!(
     "cargo:rerun-if-changed={}",
-    js_src_dir.join("shims/node-shim.js").display()
-  );
-  println!(
-    "cargo:rerun-if-changed={}",
     js_src_dir.join("shims/url.js").display()
   );
 

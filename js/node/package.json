@@ -3,10 +3,28 @@
   "private": true,
   "version": "0.0.0",
   "scripts": {
-    "build:script": "esbuild src/main.ts --bundle --inject:./shims/node-shim.js --outfile=../startup.js --target=chrome58"
+    "build:script": "parcel build"
+  },
+  "source": "./src/main.ts",
+  "main": "../startup.js",
+  "targets": {
+    "main": {
+      "context": "browser",
+      "includeNodeModules": true,
+      "optimize": false
+    }
+  },
+  "alias": {
+    "prettier-plugin-jsdoc": "prettier-plugin-jsdoc/dist/index.min.mjs",
+    "comment-parser": "comment-parser/src/index.ts"
   },
   "browser": {
-    "url": "./shims/url.js"
+    "url": "./shims/url.js",
+    "process": "process/browser",
+    "buffer": "./node_modules/buffer"
+  },
+  "engines": {
+    "chrome": "58"
   },
   "repository": {
     "type": "git",
@@ -23,17 +41,19 @@
   },
   "dependencies": {
     "buffer": "^6.0.3",
-    "esbuild": "^0.14.36",
     "prettier": "^2.7.1",
     "prettier-plugin-astro": "^0.0.12",
     "prettier-plugin-fixpack": "^0.1.0",
+    "prettier-plugin-jsdoc": "^0.3.38",
     "prettier-plugin-svelte": "^2.7.0",
     "process": "^0.11.10",
-    "svelte": "^3.47.0"
+    "svelte": "^3.47.0",
+    "url": "^0.11.0"
   },
   "devDependencies": {
     "@types/node": "^17.0.24",
     "@types/prettier": "^2.6.0",
+    "parcel": "^2.6.2",
     "typescript": "^4.6.3"
   }
 }
