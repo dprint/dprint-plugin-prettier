@@ -11,7 +11,7 @@
     "main": {
       "context": "browser",
       "includeNodeModules": true,
-      "optimize": false
+      "optimize": true
     }
   },
   "alias": {
@@ -50,6 +50,7 @@
     "url": "^0.11.0"
   },
   "devDependencies": {
+    "@parcel/optimizer-esbuild": "^2.6.2",
     "@types/node": "^17.0.24",
     "@types/prettier": "^2.6.0",
     "parcel": "^2.6.2",
