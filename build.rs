@@ -47,6 +47,10 @@ fn main() {
     "cargo:rerun-if-changed={}",
     js_src_dir.join("shims/url.js").display()
   );
+  println!(
+    "cargo:rerun-if-changed={}",
+    js_src_dir.join("shims/timers.js").display()
+  );
 
   let mut js_runtime = get_runtime(&startup_code_path, true);
   let snapshot = js_runtime.snapshot();
