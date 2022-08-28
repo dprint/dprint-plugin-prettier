@@ -2,8 +2,8 @@
  * This script checks for any prettier updates and then automatically
  * publishes a new version of the plugin if so.
  */
-import $ from "https://deno.land/x/dax@0.7.1/mod.ts";
-import * as semver from "https://deno.land/x/semver@v1.4.0/mod.ts";
+import * as semver from "https://deno.land/std@0.153.0/semver/mod.ts";
+import $ from "https://deno.land/x/dax@0.10.0/mod.ts";
 
 const rootDirPath = $.path.dirname($.path.dirname($.path.fromFileUrl(import.meta.url)));
 
@@ -39,7 +39,7 @@ await $`git push origin ${newVersion}`;
 async function bumpMinorVersion() {
   const projectFile = $.path.join(rootDirPath, "./Cargo.toml");
   const text = await Deno.readTextFile(projectFile);
-  const versionRegex = /^version = "([0-9]+\.[0-9]+\.[0-9]+)"/m;
+  const versionRegex = /^version = "([0-9]+\.[0-9]+\.[0-9]+)"$/m;
   const currentVersion = text.match(versionRegex)?.[1];
   if (currentVersion == null) {
     throw new Error("Could not find version.");
