@@ -45,6 +45,7 @@
     "prettier-plugin-astro": "^0.0.12",
     "prettier-plugin-jsdoc": "^0.3.38",
     "prettier-plugin-svelte": "^2.8.0",
+    "prettier-plugin-java": "1.6.2",
     "process": "^0.11.10",
     "svelte": "^3.47.0",
     "url": "^0.11.0"

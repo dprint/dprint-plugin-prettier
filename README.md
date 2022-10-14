@@ -58,3 +58,13 @@ Add the file extension to the start of the configuration option. For example:
 The main reason this exists is to be able to use Prettier with dprint's CLI. That way, you can format with all the plugins that dprint supports, still use Prettier, and only have to run `dprint fmt`.
 
 Additionally it's much faster. This plugin will format files in parallel and you can take advantage of the speed of dprint's incremental formatting if enabled.
+
+## Development
+
+To experiment with adding a new plugin, you'll need to build the `dprint-plugin-prettier` plugin locally.
+
+Requirements:
+1. [deno](https://deno.land/) installed on your path.
+1. Inside `js/node`, run `npm install` or `yarn install`.
+
+To build, run `cargo build` from the root directory (that's here!).
