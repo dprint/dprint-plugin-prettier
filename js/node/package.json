@@ -16,12 +16,17 @@
   },
   "alias": {
     "prettier-plugin-jsdoc": "prettier-plugin-jsdoc/dist/index.min.mjs",
-    "comment-parser": "comment-parser/src/index.ts"
+    "comment-parser": "comment-parser/src/index.ts",
+    "prettier/parser-babylon": "prettier/parser-babel"
   },
   "browser": {
     "url": "./shims/url.js",
     "process": "process/browser",
-    "buffer": "./node_modules/buffer"
+    "buffer": "./node_modules/buffer",
+    "util": "./node_modules/util",
+    "path": "./node_modules/path-browserify",
+    "fs": "./node_modules/browser-fs",
+    "timers": "./shims/timers.js"
   },
   "engines": {
     "chrome": "58"
@@ -40,14 +45,19 @@
     "scripts": "dist/index.js"
   },
   "dependencies": {
+    "browser-fs": "https://github.com/DustinBrett/BrowserFS#d27e7c4b1f1f7c0e45c2a4d47859ed8d2ec6823a",
     "buffer": "^6.0.3",
+    "path-browserify": "^1.0.1",
     "prettier": "^2.7.1",
     "prettier-plugin-astro": "^0.0.12",
+    "prettier-plugin-fixpack": "^0.1.0",
     "prettier-plugin-jsdoc": "^0.3.38",
     "prettier-plugin-svelte": "^2.8.0",
     "process": "^0.11.10",
     "svelte": "^3.47.0",
-    "url": "^0.11.0"
+    "url": "^0.11.0",
+    "util": "^0.12.4",
+    "timers-browserify": "^2.0.12"
   },
   "devDependencies": {
     "@types/node": "^17.0.24",
