@@ -52,10 +52,11 @@ jobs:
     - name: Test release
       if: matrix.config.kind == 'test_release'
       run: cargo test --release
-    
-    - name: Build release(musl)
+
+    - name: Build release (Linux-musl)
       if: matrix.config.kind == 'test_release'
       run: |
+        sudo apt update
         sudo apt install musl musl-dev musl-tools
         rustup target add x86_64-unknown-linux-musl
         cargo build --release --target x86_64-unknown-linux-musl
