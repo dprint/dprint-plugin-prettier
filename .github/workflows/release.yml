@@ -34,4 +34,4 @@ jobs:
         run: |
           git config user.email "${{ github.actor }}@users.noreply.github.com"
           git config user.name "${{ github.actor }}"
-          deno run -A https://raw.githubusercontent.com/dprint/automation/0.5.1/tasks/publish_release.ts --${{github.event.inputs.releaseKind}}
+          deno run -A https://raw.githubusercontent.com/dprint/automation/0.6.0/tasks/publish_release.ts --${{github.event.inputs.releaseKind}}
