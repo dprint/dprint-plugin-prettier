@@ -83,7 +83,7 @@ pub fn resolve_config(
       "endOfLine".to_string(),
       match dprint_newline_kind {
         NewLineKind::Auto => "auto",
-        NewLineKind::CarriageReturnLineFeed => "cflf",
+        NewLineKind::CarriageReturnLineFeed => "crlf",
         NewLineKind::LineFeed => "lf",
         NewLineKind::System => {
           if cfg!(windows) {
