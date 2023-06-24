@@ -272,7 +272,7 @@ dependencies = [
 
 [[package]]
 name = "dprint-plugin-prettier"
-version = "0.26.0"
+version = "0.26.1"
 dependencies = [
  "async-channel",
  "deno_console",
