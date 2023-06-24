@@ -16,7 +16,7 @@ jobs:
       matrix:
         config:
             # uses an older version of ubuntu because of issue dprint/#483
-          - os: ubuntu-18.04
+          - os: ubuntu-20.04
             kind: test_release
           - os: macOS-latest
             kind: test_release
