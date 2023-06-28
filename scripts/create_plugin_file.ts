@@ -10,6 +10,7 @@ await processPlugin.createDprintOrgProcessPlugin({
   platforms: [
     "darwin-x86_64",
     "linux-x86_64",
+    "linux-x86_64-musl",
     "windows-x86_64",
   ],
   isTest: Deno.args.some(a => a == "--test"),

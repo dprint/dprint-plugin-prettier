@@ -25,6 +25,7 @@ jobs:
 
     outputs:
       LINUX_ZIP_CHECKSUM: ${{steps.linux_pre_release.outputs.ZIP_CHECKSUM}}
+      LINUX_MUSL_ZIP_CHECKSUM: ${{steps.linux_musl_pre_release.outputs.ZIP_CHECKSUM}}
       MAC_ZIP_CHECKSUM: ${{steps.mac_pre_release.outputs.ZIP_CHECKSUM}}
       WINDOWS_ZIP_CHECKSUM: ${{steps.windows_pre_release.outputs.ZIP_CHECKSUM}}
 
@@ -51,6 +52,13 @@ jobs:
     - name: Test release
       if: matrix.config.kind == 'test_release'
       run: cargo test --release
+    
+    - name: Build release(musl)
+      if: matrix.config.kind == 'test_release'
+      run: |
+        sudo apt install musl musl-dev musl-tools
+        rustup target add x86_64-unknown-linux-musl
+        cargo build --release --target x86_64-unknown-linux-musl
 
     # Release
     - name: Pre-release (Linux)
@@ -60,6 +68,14 @@ jobs:
           cd target/release
           zip -r dprint-plugin-prettier-x86_64-unknown-linux-gnu.zip dprint-plugin-prettier dprint-plugin-prettier
           echo "::set-output name=ZIP_CHECKSUM::$(shasum -a 256 dprint-plugin-prettier-x86_64-unknown-linux-gnu.zip | awk '{print $1}')"
+    - name: Pre-release (Linux-musl)
+      id: linux_musl_pre_release
+      if: startsWith(matrix.config.os, 'ubuntu') && matrix.config.kind == 'test_release' && startsWith(github.ref, 'refs/tags/')
+      run: |
+          cd target/x86_64-unknown-linux-musl/release
+          zip -r dprint-plugin-prettier-x86_64-unknown-linux-musl.zip dprint-plugin-prettier dprint-plugin-prettier
+          echo "::set-output name=ZIP_CHECKSUM::$(shasum -a 256 dprint-plugin-prettier-x86_64-unknown-linux-musl.zip | awk '{print $1}')"
+          mv dprint-plugin-prettier-x86_64-unknown-linux-musl.zip ../../release
     - name: Pre-release (Mac)
       id: mac_pre_release
       if: startsWith(matrix.config.os, 'macOS') && matrix.config.kind == 'test_release' && startsWith(github.ref, 'refs/tags/')
@@ -81,7 +97,9 @@ jobs:
       if: startsWith(matrix.config.os, 'ubuntu') && matrix.config.kind == 'test_release' && startsWith(github.ref, 'refs/tags/')
       with:
         name: linux-artifacts
-        path: target/release/dprint-plugin-prettier-x86_64-unknown-linux-gnu.zip
+        path: |
+          target/release/dprint-plugin-prettier-x86_64-unknown-linux-gnu.zip
+          target/release/dprint-plugin-prettier-x86_64-unknown-linux-musl.zip
     - name: Upload Artifacts (Mac)
       uses: actions/upload-artifact@v2
       if: startsWith(matrix.config.os, 'macOS') && matrix.config.kind == 'test_release' && startsWith(github.ref, 'refs/tags/')
@@ -111,12 +129,14 @@ jobs:
     - name: Move downloaded artifacts
       run: |
         mv linux-artifacts/dprint-plugin-prettier-x86_64-unknown-linux-gnu.zip .
+        mv linux-artifacts/dprint-plugin-prettier-x86_64-unknown-linux-musl.zip .
         mv mac-artifacts/dprint-plugin-prettier-x86_64-apple-darwin.zip .
         mv windows-artifacts/dprint-plugin-prettier-x86_64-pc-windows-msvc.zip .
 
     - name: Output checksums
       run: |
         echo "Linux zip: ${{needs.build.outputs.LINUX_ZIP_CHECKSUM}}"
+        echo "Linux-musl zip: ${{needs.build.outputs.LINUX_MUSL_ZIP_CHECKSUM}}"
         echo "Mac zip: ${{needs.build.outputs.MAC_ZIP_CHECKSUM}}"
         echo "Windows zip: ${{needs.build.outputs.WINDOWS_ZIP_CHECKSUM}}"
 
@@ -139,6 +159,7 @@ jobs:
         files: |
           dprint-plugin-prettier-x86_64-apple-darwin.zip
           dprint-plugin-prettier-x86_64-unknown-linux-gnu.zip
+          dprint-plugin-prettier-x86_64-unknown-linux-musl.zip
           dprint-plugin-prettier-x86_64-pc-windows-msvc.zip
           plugin.json
         body: |
