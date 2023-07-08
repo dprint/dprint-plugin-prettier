@@ -36,7 +36,7 @@ jobs:
     steps:
     # Setup
     - uses: actions/checkout@v2
-    - uses: dtolnay/rust-toolchain@stable
+    - uses: dsherret/rust-toolchain-file@v1
     - uses: Swatinem/rust-cache@v1
     - uses: denoland/setup-deno@v1
 
@@ -144,7 +144,7 @@ jobs:
         body: |
           ## Install
 
-          In dprint configuration file:
+          In a dprint configuration file:
 
           1. Specify the plugin url and checksum in the `"plugins"` array:
 
@@ -157,8 +157,7 @@ jobs:
                ]
              }
              ```
-          2. Ensure the file extensions supported by prettier are matched in an `"includes"` pattern.
-          3. Add a `"prettier"` configuration property if desired.
+          2. Add a `"prettier"` configuration property if desired.
 
              ```jsonc
              {
