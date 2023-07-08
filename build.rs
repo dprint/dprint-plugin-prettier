@@ -98,7 +98,7 @@ fn extensions() -> Vec<Extension> {
     deno_webidl::deno_webidl::init_ops(),
     deno_console::deno_console::init_ops(),
     deno_url::deno_url::init_ops(),
-    prettier::init_ops(),
+    prettier::init_ops_and_esm(),
   ]
 }
 
