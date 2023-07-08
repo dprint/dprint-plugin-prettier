@@ -1,12 +1,12 @@
-import * as path from "https://deno.land/std@0.130.0/path/mod.ts";
+import $ from "https://deno.land/x/dax@0.33.0/mod.ts";
 import { extractCargoVersion, processPlugin } from "https://raw.githubusercontent.com/dprint/automation/0.3.0/mod.ts";
 
-const currentDirPath = path.dirname(path.fromFileUrl(import.meta.url));
-const cargoFilePath = path.join(currentDirPath, "../", "Cargo.toml");
+const currentDirPath = $.path(import.meta).parentOrThrow().parentOrThrow();
+const packageJsonFilePath = currentDirPath.parentOrThrow().join("package.json");
 
 await processPlugin.createDprintOrgProcessPlugin({
   pluginName: "dprint-plugin-prettier",
-  version: await extractCargoVersion(cargoFilePath),
+  version: packageJsonFilePath.readJsonSync().version,
   platforms: [
     "darwin-x86_64",
     "linux-x86_64",

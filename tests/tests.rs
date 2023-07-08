@@ -2,14 +2,8 @@ use std::path::PathBuf;
 use std::sync::Arc;
 
 use dprint_core::configuration::parse_config_key_map;
-use dprint_core::plugins::AsyncPluginHandler;
-use dprint_core::plugins::FormatRequest;
-use dprint_core::plugins::NoopHost;
-use dprint_core::plugins::NullCancellationToken;
+
 use dprint_development::*;
-use dprint_plugin_prettier::config::resolve_config;
-use dprint_plugin_prettier::create_tokio_runtime;
-use dprint_plugin_prettier::PrettierPluginHandler;
 
 use pretty_assertions::assert_eq;
 

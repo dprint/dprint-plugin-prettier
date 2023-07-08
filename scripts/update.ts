@@ -3,19 +3,18 @@
  * publishes a new version of the plugin if so.
  */
 import * as semver from "https://deno.land/std@0.153.0/semver/mod.ts";
-import $ from "https://deno.land/x/dax@0.10.0/mod.ts";
+import $ from "https://deno.land/x/dax@0.33.0/mod.ts";
 
-const rootDirPath = $.path.dirname($.path.dirname($.path.fromFileUrl(import.meta.url)));
+const rootDirPath = $.path(import.meta).parentOrThrow().parentOrThrow();
 
 $.logStep("Upgrading prettier...");
-const jsNodePath = $.path.join(rootDirPath, "./js/node");
-await $`npm install`.cwd(jsNodePath);
-await $`npm install --save prettier`.cwd(jsNodePath);
-await $`npm install --save prettier-plugin-astro`.cwd(jsNodePath);
-await $`npm install --save prettier-plugin-jsdoc`.cwd(jsNodePath);
-await $`npm install --save prettier-plugin-svelte`.cwd(jsNodePath);
+await $`npm install`.cwd(rootDirPath);
+await $`npm install --save prettier`.cwd(rootDirPath);
+await $`npm install --save prettier-plugin-astro`.cwd(rootDirPath);
+await $`npm install --save prettier-plugin-jsdoc`.cwd(rootDirPath);
+await $`npm install --save prettier-plugin-svelte`.cwd(rootDirPath);
 
-if (!await hasFileChanged("./js/node/package.json")) {
+if (!await hasFileChanged("./package.json")) {
   $.log("No changes.");
   Deno.exit(0);
 }
@@ -37,22 +36,17 @@ await $`git tag ${newVersion}`;
 await $`git push origin ${newVersion}`;
 
 async function bumpMinorVersion() {
-  const projectFile = $.path.join(rootDirPath, "./Cargo.toml");
-  const text = await Deno.readTextFile(projectFile);
-  const versionRegex = /^version = "([0-9]+\.[0-9]+\.[0-9]+)"$/m;
-  const currentVersion = text.match(versionRegex)?.[1];
-  if (currentVersion == null) {
-    throw new Error("Could not find version.");
-  }
-  const newVersion = semver.parse(currentVersion)!.inc("minor").toString();
-  const newText = text.replace(versionRegex, `version = "${newVersion}"`);
-  await Deno.writeTextFile(projectFile, newText);
+  const projectFile = rootDirPath.join("./package.json");
+  const data = await projectFile.readJson();
+  const newVersion = semver.parse(data.version)!.inc("minor").toString();
+  data.version = newVersion;
+  await projectFile.writeJsonPretty(data);
   return newVersion;
 }
 
 async function hasFileChanged(file: string) {
   try {
-    await $`git diff --exit-code ${file}`;
+    await $`git diff --exit-code ${file}`.cwd(rootDirPath);
     return false;
   } catch {
     return true;
