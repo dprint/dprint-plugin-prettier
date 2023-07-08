@@ -6,7 +6,7 @@ on:
   push:
     branches: [main]
     tags:
-    - '*'
+      - "*"
 
 jobs:
   build:
@@ -15,7 +15,7 @@ jobs:
     strategy:
       matrix:
         config:
-            # uses an older version of ubuntu because of issue dprint/#483
+          # uses an older version of ubuntu because of issue dprint/#483
           - os: ubuntu-20.04
             kind: test_release
           - os: macOS-latest
@@ -34,67 +34,66 @@ jobs:
       CFG_RELEASE_CHANNEL: nightly
 
     steps:
-    # Setup
-    - uses: actions/checkout@v2
-    - uses: dtolnay/rust-toolchain@stable
-    - uses: Swatinem/rust-cache@v1
-    - uses: denoland/setup-deno@v1
+      # Setup
+      - uses: actions/checkout@v2
+      - uses: dsherret/rust-toolchain-file@v1
+      - uses: Swatinem/rust-cache@v1
+      - uses: denoland/setup-deno@v1
 
-    - name: npm install
-      run: cd js/node && npm ci
+      - name: npm install
+        run: cd js/node && npm ci
 
-    # Build
-    - name: Build release
-      if: matrix.config.kind == 'test_release'
-      run: cargo build --release
+      # Build
+      - name: Build release
+        if: matrix.config.kind == 'test_release'
+        run: cargo build --release
 
-    - name: Test release
-      if: matrix.config.kind == 'test_release'
-      run: cargo test --release
+      - name: Test release
+        if: matrix.config.kind == 'test_release'
+        run: cargo test --release
 
-    # Release
-    - name: Pre-release (Linux)
-      id: linux_pre_release
-      if: startsWith(matrix.config.os, 'ubuntu') && matrix.config.kind == 'test_release' && startsWith(github.ref, 'refs/tags/')
-      run: |
+      # Release
+      - name: Pre-release (Linux)
+        id: linux_pre_release
+        if: startsWith(matrix.config.os, 'ubuntu') && matrix.config.kind == 'test_release' && startsWith(github.ref, 'refs/tags/')
+        run: |
           cd target/release
           zip -r dprint-plugin-prettier-x86_64-unknown-linux-gnu.zip dprint-plugin-prettier dprint-plugin-prettier
           echo "::set-output name=ZIP_CHECKSUM::$(shasum -a 256 dprint-plugin-prettier-x86_64-unknown-linux-gnu.zip | awk '{print $1}')"
-    - name: Pre-release (Mac)
-      id: mac_pre_release
-      if: startsWith(matrix.config.os, 'macOS') && matrix.config.kind == 'test_release' && startsWith(github.ref, 'refs/tags/')
-      run: |
+      - name: Pre-release (Mac)
+        id: mac_pre_release
+        if: startsWith(matrix.config.os, 'macOS') && matrix.config.kind == 'test_release' && startsWith(github.ref, 'refs/tags/')
+        run: |
           cd target/release
           zip -r dprint-plugin-prettier-x86_64-apple-darwin.zip dprint-plugin-prettier dprint-plugin-prettier
           echo "::set-output name=ZIP_CHECKSUM::$(shasum -a 256 dprint-plugin-prettier-x86_64-apple-darwin.zip | awk '{print $1}')"
-    - name: Pre-release (Windows)
-      id: windows_pre_release
-      if: startsWith(matrix.config.os, 'windows') && matrix.config.kind == 'test_release' && startsWith(github.ref, 'refs/tags/')
-      run: |
+      - name: Pre-release (Windows)
+        id: windows_pre_release
+        if: startsWith(matrix.config.os, 'windows') && matrix.config.kind == 'test_release' && startsWith(github.ref, 'refs/tags/')
+        run: |
           cd target/release
           Compress-Archive -CompressionLevel Optimal -Force -Path dprint-plugin-prettier.exe -DestinationPath dprint-plugin-prettier-x86_64-pc-windows-msvc.zip
           echo "::set-output name=ZIP_CHECKSUM::$(shasum -a 256 dprint-plugin-prettier-x86_64-pc-windows-msvc.zip | awk '{print $1}')"
 
-    # Upload Artifacts
-    - name: Upload Artifacts (Linux)
-      uses: actions/upload-artifact@v2
-      if: startsWith(matrix.config.os, 'ubuntu') && matrix.config.kind == 'test_release' && startsWith(github.ref, 'refs/tags/')
-      with:
-        name: linux-artifacts
-        path: target/release/dprint-plugin-prettier-x86_64-unknown-linux-gnu.zip
-    - name: Upload Artifacts (Mac)
-      uses: actions/upload-artifact@v2
-      if: startsWith(matrix.config.os, 'macOS') && matrix.config.kind == 'test_release' && startsWith(github.ref, 'refs/tags/')
-      with:
-        name: mac-artifacts
-        path: target/release/dprint-plugin-prettier-x86_64-apple-darwin.zip
-    - name: Upload Artifacts (Windows)
-      uses: actions/upload-artifact@v2
-      if: startsWith(matrix.config.os, 'windows') && matrix.config.kind == 'test_release' && startsWith(github.ref, 'refs/tags/')
-      with:
-        name: windows-artifacts
-        path: target/release/dprint-plugin-prettier-x86_64-pc-windows-msvc.zip
-
+      # Upload Artifacts
+      - name: Upload Artifacts (Linux)
+        uses: actions/upload-artifact@v2
+        if: startsWith(matrix.config.os, 'ubuntu') && matrix.config.kind == 'test_release' && startsWith(github.ref, 'refs/tags/')
+        with:
+          name: linux-artifacts
+          path: target/release/dprint-plugin-prettier-x86_64-unknown-linux-gnu.zip
+      - name: Upload Artifacts (Mac)
+        uses: actions/upload-artifact@v2
+        if: startsWith(matrix.config.os, 'macOS') && matrix.config.kind == 'test_release' && startsWith(github.ref, 'refs/tags/')
+        with:
+          name: mac-artifacts
+          path: target/release/dprint-plugin-prettier-x86_64-apple-darwin.zip
+      - name: Upload Artifacts (Windows)
+        uses: actions/upload-artifact@v2
+        if: startsWith(matrix.config.os, 'windows') && matrix.config.kind == 'test_release' && startsWith(github.ref, 'refs/tags/')
+        with:
+          name: windows-artifacts
+          path: target/release/dprint-plugin-prettier-x86_64-pc-windows-msvc.zip
 
   draft_release:
     name: draft_release
@@ -102,72 +101,71 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2
-    - uses: denoland/setup-deno@v1
-    - name: Download artifacts
-      uses: actions/download-artifact@v2
+      - name: Checkout
+        uses: actions/checkout@v2
+      - uses: denoland/setup-deno@v1
+      - name: Download artifacts
+        uses: actions/download-artifact@v2
 
-    - name: Move downloaded artifacts
-      run: |
-        mv linux-artifacts/dprint-plugin-prettier-x86_64-unknown-linux-gnu.zip .
-        mv mac-artifacts/dprint-plugin-prettier-x86_64-apple-darwin.zip .
-        mv windows-artifacts/dprint-plugin-prettier-x86_64-pc-windows-msvc.zip .
+      - name: Move downloaded artifacts
+        run: |
+          mv linux-artifacts/dprint-plugin-prettier-x86_64-unknown-linux-gnu.zip .
+          mv mac-artifacts/dprint-plugin-prettier-x86_64-apple-darwin.zip .
+          mv windows-artifacts/dprint-plugin-prettier-x86_64-pc-windows-msvc.zip .
 
-    - name: Output checksums
-      run: |
-        echo "Linux zip: ${{needs.build.outputs.LINUX_ZIP_CHECKSUM}}"
-        echo "Mac zip: ${{needs.build.outputs.MAC_ZIP_CHECKSUM}}"
-        echo "Windows zip: ${{needs.build.outputs.WINDOWS_ZIP_CHECKSUM}}"
+      - name: Output checksums
+        run: |
+          echo "Linux zip: ${{needs.build.outputs.LINUX_ZIP_CHECKSUM}}"
+          echo "Mac zip: ${{needs.build.outputs.MAC_ZIP_CHECKSUM}}"
+          echo "Windows zip: ${{needs.build.outputs.WINDOWS_ZIP_CHECKSUM}}"
 
-    - name: Create plugin file
-      run: deno run --allow-read=. --allow-write=. scripts/create_plugin_file.ts
+      - name: Create plugin file
+        run: deno run --allow-read=. --allow-write=. scripts/create_plugin_file.ts
 
-    - name: Get tag version
-      id: get_tag_version
-      run: echo ::set-output name=TAG_VERSION::${GITHUB_REF/refs\/tags\//}
+      - name: Get tag version
+        id: get_tag_version
+        run: echo ::set-output name=TAG_VERSION::${GITHUB_REF/refs\/tags\//}
 
-    - name: Get plugin file checksum
-      id: get_plugin_file_checksum
-      run: echo "::set-output name=CHECKSUM::$(shasum -a 256 plugin.json | awk '{print $1}')"
+      - name: Get plugin file checksum
+        id: get_plugin_file_checksum
+        run: echo "::set-output name=CHECKSUM::$(shasum -a 256 plugin.json | awk '{print $1}')"
 
-    - name: Release
-      uses: softprops/action-gh-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        files: |
-          dprint-plugin-prettier-x86_64-apple-darwin.zip
-          dprint-plugin-prettier-x86_64-unknown-linux-gnu.zip
-          dprint-plugin-prettier-x86_64-pc-windows-msvc.zip
-          plugin.json
-        body: |
-          ## Install
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          files: |
+            dprint-plugin-prettier-x86_64-apple-darwin.zip
+            dprint-plugin-prettier-x86_64-unknown-linux-gnu.zip
+            dprint-plugin-prettier-x86_64-pc-windows-msvc.zip
+            plugin.json
+          body: |
+            ## Install
 
-          In dprint configuration file:
+            In a dprint configuration file:
 
-          1. Specify the plugin url and checksum in the `"plugins"` array:
+            1. Specify the plugin url and checksum in the `"plugins"` array or run `dprint config add prettier`:
 
-             ```jsonc
-             {
-               // etc...
-               "plugins": [
-                 // ...add other dprint plugins here that you want to take precedence over prettier...
-                 "https://plugins.dprint.dev/prettier-${{ steps.get_tag_version.outputs.TAG_VERSION }}.json@${{ steps.get_plugin_file_checksum.outputs.CHECKSUM }}"
-               ]
-             }
-             ```
-          2. Ensure the file extensions supported by prettier are matched in an `"includes"` pattern.
-          3. Add a `"prettier"` configuration property if desired.
-
-             ```jsonc
-             {
-               // ...etc...
-               "prettier": {
-                 "trailingComma": "all",
-                 "singleQuote": true,
-                 "proseWrap": "always"
+               ```jsonc
+               {
+                 // etc...
+                 "plugins": [
+                   // ...add other dprint plugins here that you want to take precedence over prettier...
+                   "https://plugins.dprint.dev/prettier-${{ steps.get_tag_version.outputs.TAG_VERSION }}.json@${{ steps.get_plugin_file_checksum.outputs.CHECKSUM }}"
+                 ]
                }
-             }
-             ```
-        draft: false
+               ```
+            2. Add a `"prettier"` configuration property if desired.
+
+               ```jsonc
+               {
+                 // ...etc...
+                 "prettier": {
+                   "trailingComma": "all",
+                   "singleQuote": true,
+                   "proseWrap": "always"
+                 }
+               }
+               ```
+          draft: false

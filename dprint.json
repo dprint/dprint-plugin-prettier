@@ -5,7 +5,6 @@
     "associations": "**/*.rs",
     "rustfmt": "rustfmt"
   },
-  "includes": ["**/*.{ts,tsx,js,jsx,json,md,rs}"],
   "excludes": [
     "js/startup.js",
     "**/dist",
@@ -17,6 +16,7 @@
     "https://plugins.dprint.dev/typescript-0.65.1.wasm",
     "https://plugins.dprint.dev/json-0.7.2.wasm",
     "https://plugins.dprint.dev/markdown-0.12.2.wasm",
-    "https://plugins.dprint.dev/exec-0.3.1.json@9351b67ec7a6b58a69201c2834cba38cb3d191080aefc6422fb1320f03c8fc4d"
+    "https://plugins.dprint.dev/exec-0.3.1.json@9351b67ec7a6b58a69201c2834cba38cb3d191080aefc6422fb1320f03c8fc4d",
+    "https://plugins.dprint.dev/prettier-0.26.1.json@fdbe31f6aecd24f9d6b924214710a6766050d03146163b4e241e6056b2462f2e"
   ]
 }
