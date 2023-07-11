@@ -1,6 +1,6 @@
 {
-  "tasks": {
-    "setup": "cd js/node && npm ci",
-    "build": "cd js/node && npm run build:script"
+  "nodeModulesDir": false,
+  "imports": {
+    "dax": "https://deno.land/x/dax@0.33.0/mod.ts"
   }
 }

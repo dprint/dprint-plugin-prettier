@@ -1,16 +1,16 @@
-import $ from "https://deno.land/x/dax@0.33.0/mod.ts";
-import { extractCargoVersion, processPlugin } from "https://raw.githubusercontent.com/dprint/automation/0.3.0/mod.ts";
+import { createPluginFile } from "@dprint/node-plugin-base/plugin_file.js";
+import $ from "dax";
 
-const currentDirPath = $.path(import.meta).parentOrThrow().parentOrThrow();
+const currentDirPath = $.path(import.meta).parentOrThrow();
 const packageJsonFilePath = currentDirPath.parentOrThrow().join("package.json");
 
-await processPlugin.createDprintOrgProcessPlugin({
-  pluginName: "dprint-plugin-prettier",
-  version: packageJsonFilePath.readJsonSync().version,
-  platforms: [
-    "darwin-x86_64",
-    "linux-x86_64",
-    "windows-x86_64",
-  ],
-  isTest: Deno.args.some(a => a == "--test"),
+const version = packageJsonFilePath.readJsonSync<{ version: string }>().version;
+const pluginFile = createPluginFile({
+  name: "dprint-plugin-prettier",
+  version,
+  zipPath: currentDirPath.join("../dist/plugin.zip").resolve().toString(),
+  zipUrl: Deno.args.includes("--test")
+    ? "./plugin.zip"
+    : `https://github.com/dprint/dprint-plugin-prettier/releases/download/${version}/plugin.zip`,
 });
+currentDirPath.join("../dist/plugin.json").writeJsonPrettySync(pluginFile);

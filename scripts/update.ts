@@ -2,8 +2,8 @@
  * This script checks for any prettier updates and then automatically
  * publishes a new version of the plugin if so.
  */
-import * as semver from "https://deno.land/std@0.153.0/semver/mod.ts";
-import $ from "https://deno.land/x/dax@0.33.0/mod.ts";
+import $ from "dax";
+import * as semver from "https://deno.land/std@0.192.0/semver/mod.ts";
 
 const rootDirPath = $.path(import.meta).parentOrThrow().parentOrThrow();
 
@@ -37,8 +37,8 @@ await $`git push origin ${newVersion}`;
 
 async function bumpMinorVersion() {
   const projectFile = rootDirPath.join("./package.json");
-  const data = await projectFile.readJson();
-  const newVersion = semver.parse(data.version)!.inc("minor").toString();
+  const data = await projectFile.readJson<{ version: string }>();
+  const newVersion = semver.format(semver.increment(semver.parse(data.version), "minor"));
   data.version = newVersion;
   await projectFile.writeJsonPretty(data);
   return newVersion;
