@@ -23,7 +23,6 @@ fn main() {
   let startup_snapshot_path = o.join("STARTUP_SNAPSHOT.bin");
   let js_dir = c.join("js");
   let js_src_dir = js_dir.join("node").join("src");
-  let startup_code_path = js_dir.join("startup.js");
   let supported_extensions_path = o.join("SUPPORTED_EXTENSIONS.json");
 
   let status = Command::new("deno")
@@ -52,10 +51,10 @@ fn main() {
     js_src_dir.join("shims/url.js").display()
   );
 
-  let output = create_snapshot(startup_snapshot_path.clone(), startup_code_path);
-  for path in output.files_loaded_during_snapshot {
-    println!("cargo:rerun-if-changed={}", path.display());
-  }
+  let _output = create_snapshot(startup_snapshot_path.clone(), &js_dir);
+  // for path in output.files_loaded_during_snapshot {
+  //   println!("cargo:rerun-if-changed={}", path.display());
+  // }
 
   // serialize the supported extensions
   let mut js_runtime = JsRuntime::new(runtime_options(&startup_snapshot_path));
@@ -75,7 +74,8 @@ fn main() {
   .unwrap();
 }
 
-fn create_snapshot(snapshot_path: PathBuf, startup_code_path: PathBuf) -> CreateSnapshotOutput {
+fn create_snapshot(snapshot_path: PathBuf, js_dir: &Path) -> CreateSnapshotOutput {
+  let startup_code_path = js_dir.join("startup.js");
   deno_core::snapshot_util::create_snapshot(deno_core::snapshot_util::CreateSnapshotOptions {
     cargo_manifest_dir: env!("CARGO_MANIFEST_DIR"),
     snapshot_path,
@@ -89,19 +89,32 @@ fn create_snapshot(snapshot_path: PathBuf, startup_code_path: PathBuf) -> Create
     })),
     snapshot_module_load_cb: None,
     with_runtime_cb: Some(Box::new(move |runtime| {
-      runtime.execute_script(
-        "dprint:prettier.js",
-        std::fs::read_to_string(&startup_code_path).unwrap().into(),
-      ).unwrap();
+      runtime
+        .execute_script(
+          "dprint:prettier.js",
+          std::fs::read_to_string(&startup_code_path).unwrap().into(),
+        )
+        .unwrap();
     })),
   })
 }
 
+deno_core::extension!(
+  main,
+  esm_entry_point = "ext:main/main.js",
+  esm = [
+    dir "js",
+    "globals.js",
+    "main.js",
+  ]
+);
+
 fn extensions() -> Vec<Extension> {
   vec![
-    deno_webidl::deno_webidl::init_ops(),
-    deno_console::deno_console::init_ops(),
-    deno_url::deno_url::init_ops(),
+    deno_webidl::deno_webidl::init_ops_and_esm(),
+    deno_console::deno_console::init_ops_and_esm(),
+    deno_url::deno_url::init_ops_and_esm(),
+    main::init_ops_and_esm(),
   ]
 }
 

@@ -40,7 +40,6 @@ impl Default for Channel {
 }
 
 impl Channel {
-
   pub async fn format(&self, request: FormatRequest<PrettierConfig>) -> FormatResult {
     let (send, recv) = oneshot::channel::<FormatResult>();
     let mut should_inc_pending_runtimes = false;
