@@ -38,7 +38,7 @@ impl Formatter {
       serde_json::to_string(&resolve_config(file_path, config)).unwrap(),
       serde_json::to_string(&config.plugins).unwrap(),
     );
-    let global = self.runtime.execute_script("format.js", &code)?;
+    let global = self.runtime.execute_script("format.js", code.into())?;
     let scope = &mut self.runtime.handle_scope();
     let local = v8::Local::new(scope, global);
     if local.is_undefined() {

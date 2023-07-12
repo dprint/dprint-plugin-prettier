@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "scripts": {
-    "build:script": "parcel build && node patch.mjs"
+    "build:script": "parcel build"
   },
   "source": "./src/main.ts",
   "main": "../startup.js",

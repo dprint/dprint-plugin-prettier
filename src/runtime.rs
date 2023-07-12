@@ -6,8 +6,6 @@ use deno_core::RuntimeOptions;
 use deno_core::Snapshot;
 use once_cell::sync::Lazy;
 
-deno_core::extension!(prettier, js = ["src/main.js", "js/startup.js"]);
-
 pub fn create_js_runtime() -> JsRuntime {
   let snapshot = Snapshot::Static(&*STARTUP_SNAPSHOT);
   let platform = v8::new_default_platform(1, false).make_shared();
@@ -19,7 +17,6 @@ pub fn create_js_runtime() -> JsRuntime {
       deno_webidl::deno_webidl::init_ops(),
       deno_console::deno_console::init_ops(),
       deno_url::deno_url::init_ops(),
-      prettier::init_ops,
     ],
     ..Default::default()
   })

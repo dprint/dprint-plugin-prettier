@@ -4,3 +4,4 @@ js/startup.js
 js/startup.js.map
 target
 .parcel-cache/
+.vscode

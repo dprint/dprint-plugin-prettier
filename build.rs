@@ -52,7 +52,7 @@ fn main() {
     js_src_dir.join("shims/url.js").display()
   );
 
-  let output = create_snapshot(startup_snapshot_path.clone());
+  let output = create_snapshot(startup_snapshot_path.clone(), startup_code_path);
   for path in output.files_loaded_during_snapshot {
     println!("cargo:rerun-if-changed={}", path.display());
   }
@@ -75,9 +75,7 @@ fn main() {
   .unwrap();
 }
 
-deno_core::extension!(prettier, js = ["src/main.js", "js/startup.js"]);
-
-fn create_snapshot(snapshot_path: PathBuf) -> CreateSnapshotOutput {
+fn create_snapshot(snapshot_path: PathBuf, startup_code_path: PathBuf) -> CreateSnapshotOutput {
   deno_core::snapshot_util::create_snapshot(deno_core::snapshot_util::CreateSnapshotOptions {
     cargo_manifest_dir: env!("CARGO_MANIFEST_DIR"),
     snapshot_path,
@@ -90,6 +88,12 @@ fn create_snapshot(snapshot_path: PathBuf) -> CreateSnapshotOutput {
       );
     })),
     snapshot_module_load_cb: None,
+    with_runtime_cb: Some(Box::new(move |runtime| {
+      runtime.execute_script(
+        &"dprint:prettier.js",
+        std::fs::read_to_string(&startup_code_path).unwrap().into(),
+      ).unwrap();
+    })),
   })
 }
 
@@ -98,7 +102,6 @@ fn extensions() -> Vec<Extension> {
     deno_webidl::deno_webidl::init_ops(),
     deno_console::deno_console::init_ops(),
     deno_url::deno_url::init_ops(),
-    prettier::init_ops_and_esm(),
   ]
 }
 
