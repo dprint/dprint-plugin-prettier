@@ -11,11 +11,7 @@ pub fn create_js_runtime() -> JsRuntime {
   JsRuntime::new(RuntimeOptions {
     startup_snapshot: Some(snapshot),
     v8_platform: Some(platform),
-    extensions: vec![
-      deno_webidl::deno_webidl::init_ops(),
-      deno_console::deno_console::init_ops(),
-      deno_url::deno_url::init_ops(),
-    ],
+    extensions: vec![],
     ..Default::default()
   })
 }
