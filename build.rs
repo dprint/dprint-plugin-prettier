@@ -22,7 +22,7 @@ fn main() {
   let o = PathBuf::from(env::var_os("OUT_DIR").unwrap());
   let startup_snapshot_path = o.join("STARTUP_SNAPSHOT.bin");
   let js_dir = c.join("js");
-  let js_src_dir = js_dir.join("src");
+  let js_src_dir = js_dir.join("node").join("src");
   let startup_code_path = js_dir.join("startup.js");
   let supported_extensions_path = o.join("SUPPORTED_EXTENSIONS.json");
 
@@ -90,7 +90,7 @@ fn create_snapshot(snapshot_path: PathBuf, startup_code_path: PathBuf) -> Create
     snapshot_module_load_cb: None,
     with_runtime_cb: Some(Box::new(move |runtime| {
       runtime.execute_script(
-        &"dprint:prettier.js",
+        "dprint:prettier.js",
         std::fs::read_to_string(&startup_code_path).unwrap().into(),
       ).unwrap();
     })),

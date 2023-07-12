@@ -6,7 +6,6 @@ use dprint_core::configuration::GlobalConfiguration;
 use dprint_core::configuration::NewLineKind;
 use dprint_core::configuration::ResolveConfigurationResult;
 use serde::Serialize;
-use serde_json;
 
 #[derive(Clone, Serialize, Default)]
 pub struct PrettierPluginConfig {

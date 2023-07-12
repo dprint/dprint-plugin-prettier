@@ -2,13 +2,13 @@
  * This script checks for any prettier updates and then automatically
  * publishes a new version of the plugin if so.
  */
-import * as semver from "https://deno.land/std@0.153.0/semver/mod.ts";
-import $ from "https://deno.land/x/dax@0.10.0/mod.ts";
+import $ from "dax";
+import * as semver from "https://deno.land/std@0.192.0/semver/mod.ts";
 
-const rootDirPath = $.path.dirname($.path.dirname($.path.fromFileUrl(import.meta.url)));
+const rootDirPath = $.path(import.meta).parentOrThrow().parentOrThrow();
 
 $.logStep("Upgrading prettier...");
-const jsNodePath = $.path.join(rootDirPath, "./js/node");
+const jsNodePath = rootDirPath.join("./js/node");
 await $`npm install`.cwd(jsNodePath);
 await $`npm install --save prettier`.cwd(jsNodePath);
 await $`npm install --save prettier-plugin-astro`.cwd(jsNodePath);
@@ -37,16 +37,16 @@ await $`git tag ${newVersion}`;
 await $`git push origin ${newVersion}`;
 
 async function bumpMinorVersion() {
-  const projectFile = $.path.join(rootDirPath, "./Cargo.toml");
-  const text = await Deno.readTextFile(projectFile);
+  const projectFile = rootDirPath.join("./Cargo.toml");
+  const text = await projectFile.readText();
   const versionRegex = /^version = "([0-9]+\.[0-9]+\.[0-9]+)"$/m;
   const currentVersion = text.match(versionRegex)?.[1];
   if (currentVersion == null) {
     throw new Error("Could not find version.");
   }
-  const newVersion = semver.parse(currentVersion)!.inc("minor").toString();
+  const newVersion = semver.format(semver.increment(semver.parse(currentVersion), "minor"));
   const newText = text.replace(versionRegex, `version = "${newVersion}"`);
-  await Deno.writeTextFile(projectFile, newText);
+  await projectFile.writeText(newText);
   return newVersion;
 }
 

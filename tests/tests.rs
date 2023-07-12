@@ -20,7 +20,7 @@ fn test_specs() {
 
   runtime.block_on(async move {
     tokio::task::spawn_blocking(move || {
-      let handler = PrettierPluginHandler::new();
+      let handler = PrettierPluginHandler::default();
       let mut tests_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
       tests_dir.push("tests");
       run_specs(
@@ -68,7 +68,7 @@ fn handle_syntax_error() {
   let runtime = create_tokio_runtime();
 
   runtime.block_on(async move {
-    let handler = PrettierPluginHandler::new();
+    let handler = PrettierPluginHandler::default();
     let err = handler
       .format(
         FormatRequest {
@@ -93,7 +93,7 @@ fn handle_invalid_file() {
   let runtime = create_tokio_runtime();
 
   runtime.block_on(async move {
-    let handler = PrettierPluginHandler::new();
+    let handler = PrettierPluginHandler::default();
     let err = handler
       .format(
         FormatRequest {

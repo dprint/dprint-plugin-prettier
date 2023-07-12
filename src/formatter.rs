@@ -34,7 +34,7 @@ impl Formatter {
     });
     let code = format!(
       "dprint.formatText({{ ...{}, config: {}, pluginsConfig: {} }})",
-      request_value.to_string(),
+      request_value,
       serde_json::to_string(&resolve_config(file_path, config)).unwrap(),
       serde_json::to_string(&config.plugins).unwrap(),
     );
