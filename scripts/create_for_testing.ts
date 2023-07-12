@@ -13,6 +13,7 @@ $.logStep("Compressing...");
 await compress(
   [
     distDir.join("main.mjs").toString(),
+    distDir.join("worker.mjs").toString(),
     distDir.join("package.json").toString(),
     distDir.join("package-lock.json").toString(),
   ],

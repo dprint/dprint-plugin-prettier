@@ -8,16 +8,18 @@ import {
   startParentProcessChecker,
 } from "@dprint/node-plugin-base";
 import os from "os";
+import path from "path";
 import { default as prettier } from "prettier";
 import * as prettierPluginAstro from "prettier-plugin-astro";
-import * as prettierPluginJsDoc from "prettier-plugin-jsdoc";
 import * as prettierPluginSvelte from "prettier-plugin-svelte";
+import url from "url";
+import { Worker } from "worker_threads";
+import type { ResolvedConfig } from "./common.js";
 import { VERSION } from "./version.js";
 
-interface ResolvedConfig {
-  prettier: prettier.Options;
-  jsDocPlugin: boolean;
-}
+const dirName = url.fileURLToPath(new URL(".", import.meta.url));
+const workerFilePath = path.join(dirName, "./worker.mjs");
+const pendingWorkers: Worker[] = [];
 
 const cliArgs = parseCliArgs();
 startParentProcessChecker(cliArgs.parentProcessId);
@@ -104,15 +106,31 @@ const plugin: PluginHandler<ResolvedConfig> = {
       return undefined;
     }
   },
-  formatText(request: FormatRequest<ResolvedConfig>) {
-    return Promise.resolve(prettier.format(request.fileText, {
-      filepath: request.filePath,
-      plugins: request.config.jsDocPlugin ? [prettierPluginJsDoc, ...plugins] : plugins,
-      ...request.config.prettier,
-    }));
+  async formatText(request: FormatRequest<ResolvedConfig>) {
+    console.error("Number workers: " + pendingWorkers.length);
+    const startTime = new Date();
+    const worker = pendingWorkers.pop() ?? new Worker(workerFilePath);
+    return new Promise<string>((resolve, reject) => {
+      worker.once("message", result => {
+        if (result.success) {
+          resolve(result.data);
+        } else {
+          reject(result.data);
+        }
+        console.error("Finished time: " + (new Date().getTime() - startTime.getTime()) + "ms");
+        pendingWorkers.push(worker);
+      });
+      worker.postMessage(request);
+    });
+    // return Promise.resolve(prettier.format(request.fileText, {
+    //   filepath: request.filePath,
+    //   plugins: request.config.jsDocPlugin ? [prettierPluginJsDoc, ...plugins] : plugins,
+    //   ...request.config.prettier,
+    // }));
   },
 };
 
+console.error("Listening...");
 startMessageProcessor(plugin);
 
 function getExtensions() {
