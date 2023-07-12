@@ -2,10 +2,9 @@
   "name": "dprint-plugin-prettier",
   "private": true,
   "version": "0.26.1",
-  "main": "output/index.js",
   "type": "module",
   "scripts": {
-    "build": "deno run --allow-write=. ./scripts/updateVersion.ts && rollup --config rollup.config.js"
+    "build": "deno run -A ./scripts/build.ts"
   },
   "repository": {
     "type": "git",
@@ -21,7 +20,7 @@
     "scripts": "dist/index.js"
   },
   "dependencies": {
-    "@dprint/node-plugin-base": "^0.0.2",
+    "@dprint/node-plugin-base": "0.0.3",
     "prettier": "^2.8.8",
     "prettier-plugin-astro": "^0.0.12",
     "prettier-plugin-jsdoc": "^0.3.38",
@@ -37,6 +36,7 @@
     "@types/node": "^20.4.1",
     "@types/prettier": "^2.7.3",
     "copyfiles": "^2.4.1",
+    "esbuild": "^0.18.11",
     "rollup": "^3.26.2",
     "typescript": "^5.1.6"
   }

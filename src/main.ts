@@ -8,7 +8,7 @@ import {
   startParentProcessChecker,
 } from "@dprint/node-plugin-base";
 import os from "os";
-import prettier from "prettier";
+import { default as prettier } from "prettier";
 import * as prettierPluginAstro from "prettier-plugin-astro";
 import * as prettierPluginJsDoc from "prettier-plugin-jsdoc";
 import * as prettierPluginSvelte from "prettier-plugin-svelte";
@@ -21,10 +21,6 @@ interface ResolvedConfig {
 
 const cliArgs = parseCliArgs();
 startParentProcessChecker(cliArgs.parentProcessId);
-
-if (cliArgs.isInit) {
-  throw new Error("Not implemented");
-}
 
 const plugins: prettier.Plugin[] = [
   prettierPluginSvelte,

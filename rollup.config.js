@@ -4,14 +4,12 @@ import nodeResolve from "@rollup/plugin-node-resolve";
 import typescript from "@rollup/plugin-typescript";
 
 export default {
-  input: "src/index.ts",
+  input: "src/main.ts",
   output: {
-    file: "dist/index.mjs",
+    file: "dist/main.mjs",
     format: "esm",
   },
   plugins: [
-    commonjs(),
-    nodeResolve(),
     pluginJson(),
     typescript({
       tsconfig: "tsconfig.json",

@@ -1,3 +1,4 @@
+#!/usr/bin/env -S deno run -A
 import packageJson from "../package.json" assert { type: "json" };
 
 Deno.writeTextFileSync(
