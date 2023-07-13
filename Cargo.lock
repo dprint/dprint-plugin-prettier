@@ -181,17 +181,16 @@ dependencies = [
 
 [[package]]
 name = "deno_console"
-version = "0.110.0"
+version = "0.111.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6996c5d4431db25218eb871efdf56b12993406066999528b07954537a7c803b1"
+checksum = "20a8ed702252d8d7b4523dbb24c4c64f4a3a610208cc9915f126c67d72caca03"
 dependencies = [
  "deno_core",
 ]
 
 [[package]]
 name = "deno_core"
-version = "0.194.0"
-source = "git+https://github.com/dsherret/deno_core/?branch=feat_with_runtime_cb#ba6880d2fdac95ffbf0431ed1fdb59503ec39ffd"
+version = "0.195.0"
 dependencies = [
  "anyhow",
  "bytes",
@@ -215,8 +214,7 @@ dependencies = [
 
 [[package]]
 name = "deno_ops"
-version = "0.72.0"
-source = "git+https://github.com/dsherret/deno_core/?branch=feat_with_runtime_cb#ba6880d2fdac95ffbf0431ed1fdb59503ec39ffd"
+version = "0.73.0"
 dependencies = [
  "deno-proc-macro-rules",
  "lazy-regex",
@@ -236,9 +234,9 @@ dependencies = [
 
 [[package]]
 name = "deno_url"
-version = "0.110.0"
+version = "0.111.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "240465bdf33f5d88f8da6bf5ececa7581bd0cb6943121edfd0cad2021d9731cd"
+checksum = "8db47c8e15cadd85f50516d27eb203db1d8a4431cd3abf23ac7470f2881118f9"
 dependencies = [
  "deno_core",
  "serde",
@@ -248,9 +246,9 @@ dependencies = [
 
 [[package]]
 name = "deno_webidl"
-version = "0.110.0"
+version = "0.111.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3abcf2b95c3a559651750ab60db99847e157da5a8e7a7d0dd21f1474561f94ba"
+checksum = "3da5abe3fc142ffdacd7c2eeb4e8cc9c777cfa213bc48782f0f39f1620dd783d"
 dependencies = [
  "deno_core",
 ]
@@ -966,8 +964,7 @@ dependencies = [
 
 [[package]]
 name = "serde_v8"
-version = "0.105.0"
-source = "git+https://github.com/dsherret/deno_core/?branch=feat_with_runtime_cb#ba6880d2fdac95ffbf0431ed1fdb59503ec39ffd"
+version = "0.106.0"
 dependencies = [
  "bytes",
  "derive_more",
@@ -1278,9 +1275,9 @@ dependencies = [
 
 [[package]]
 name = "v8"
-version = "0.74.1"
+version = "0.74.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1202e0bd078112bf8d521491560645e1fd6955c4afd975c75b05596a7e7e4eea"
+checksum = "7568bf38565bd5b350d96abbf3d09417e8c9dd74fbb38860e91b759e46f9009c"
 dependencies = [
  "bitflags",
  "fslock",
