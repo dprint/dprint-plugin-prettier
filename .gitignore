@@ -1,6 +1,7 @@
 js/node/node_modules
 js/node/dist
 js/startup.js.map
+js/startup.js
 target
 .parcel-cache/
 .vscode

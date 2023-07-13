@@ -25,13 +25,13 @@ fn main() {
   let js_src_dir = js_dir.join("node").join("src");
   let supported_extensions_path = o.join("SUPPORTED_EXTENSIONS.json");
 
-  // let status = Command::new("deno")
-  //   .args(["task", "build"])
-  //   .status()
-  //   .unwrap();
-  // if status.code() != Some(0) {
-  //   panic!("Error building.");
-  // }
+  let status = Command::new("deno")
+    .args(["task", "build"])
+    .status()
+    .unwrap();
+  if status.code() != Some(0) {
+    panic!("Error building.");
+  }
 
   // ensure the build is invalidated if any of these files change
   println!(
@@ -57,6 +57,7 @@ fn main() {
   // }
 
   // serialize the supported extensions
+  eprintln!("Creating runtime...");
   let mut js_runtime = JsRuntime::new(runtime_options(&startup_snapshot_path));
   let global = js_runtime
     .execute_script(
@@ -104,7 +105,6 @@ deno_core::extension!(
   esm_entry_point = "ext:main/main.js",
   esm = [
     dir "js",
-    "globals.js",
     "main.js",
   ]
 );
@@ -132,7 +132,7 @@ fn runtime_options(snapshot_path: &Path) -> RuntimeOptions {
 
   RuntimeOptions {
     v8_platform: Some(platform()),
-    extensions: extensions(),
+    extensions: Vec::new(),
     startup_snapshot: Some(snapshot),
     ..Default::default()
   }
