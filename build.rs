@@ -25,13 +25,13 @@ fn main() {
   let js_src_dir = js_dir.join("node").join("src");
   let supported_extensions_path = o.join("SUPPORTED_EXTENSIONS.json");
 
-  let status = Command::new("deno")
-    .args(["task", "build"])
-    .status()
-    .unwrap();
-  if status.code() != Some(0) {
-    panic!("Error building.");
-  }
+  // let status = Command::new("deno")
+  //   .args(["task", "build"])
+  //   .status()
+  //   .unwrap();
+  // if status.code() != Some(0) {
+  //   panic!("Error building.");
+  // }
 
   // ensure the build is invalidated if any of these files change
   println!(
