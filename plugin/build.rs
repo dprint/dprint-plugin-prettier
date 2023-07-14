@@ -6,16 +6,11 @@ use std::path::Path;
 use std::path::PathBuf;
 use std::process::Command;
 
-use deno_core::ascii_str;
-use deno_core::serde_v8;
-use deno_core::snapshot_util::CreateSnapshotOutput;
-use deno_core::v8;
-use deno_core::v8::Platform;
-use deno_core::v8::SharedRef;
 use deno_core::Extension;
-use deno_core::JsRuntime;
-use deno_core::RuntimeOptions;
-use deno_core::Snapshot;
+use dprint_plugin_deno_base::runtime::CreateRuntimeOptions;
+use dprint_plugin_deno_base::runtime::JsRuntime;
+use dprint_plugin_deno_base::runtime::StartupSnapshot;
+use dprint_plugin_deno_base::snapshot::Snapshot;
 
 fn main() {
   let crate_dir = PathBuf::from(env::var_os("CARGO_MANIFEST_DIR").unwrap());
@@ -52,32 +47,31 @@ fn main() {
     js_src_dir.join("shims/url.js").display()
   );
 
-  let _output = create_snapshot(startup_snapshot_path.clone(), &js_dir);
-  // for path in output.files_loaded_during_snapshot {
-  //   println!("cargo:rerun-if-changed={}", path.display());
-  // }
+  create_snapshot(startup_snapshot_path.clone(), &js_dir);
 
   // serialize the supported extensions
   eprintln!("Creating runtime...");
-  let mut js_runtime = JsRuntime::new(runtime_options(&startup_snapshot_path));
-  let global = js_runtime
-    .execute_script(
+  let snapshot = Snapshot::from_path(&startup_snapshot_path).unwrap();
+  let mut runtime = JsRuntime::new(CreateRuntimeOptions {
+    extensions: Vec::new(),
+    startup_snapshot: Some(StartupSnapshot::Boxed(snapshot)),
+  });
+  let file_extensions = runtime
+    .execute_script::<Vec<String>>(
       "deno:get_extensions.js",
-      ascii_str!("dprint.getExtensions()"),
+      "dprint.getExtensions()".to_string(),
     )
     .unwrap();
-  let scope = &mut js_runtime.handle_scope();
-  let local = v8::Local::new(scope, global);
-  let deserialized_value = serde_v8::from_v8::<Vec<String>>(scope, local).unwrap();
   std::fs::write(
     supported_extensions_path,
-    deno_core::serde_json::to_string(&deserialized_value).unwrap(),
+    deno_core::serde_json::to_string(&file_extensions).unwrap(),
   )
   .unwrap();
 }
 
-fn create_snapshot(snapshot_path: PathBuf, js_dir: &Path) -> CreateSnapshotOutput {
+fn create_snapshot(snapshot_path: PathBuf, js_dir: &Path) {
   let startup_code_path = js_dir.join("startup.js");
+  let startup_text = std::fs::read_to_string(startup_code_path).unwrap();
   dprint_plugin_deno_base::build::create_snapshot(
     dprint_plugin_deno_base::build::CreateSnapshotOptions {
       cargo_manifest_dir: env!("CARGO_MANIFEST_DIR"),
@@ -85,14 +79,11 @@ fn create_snapshot(snapshot_path: PathBuf, js_dir: &Path) -> CreateSnapshotOutpu
       extensions: extensions(),
       with_runtime_cb: Some(Box::new(move |runtime| {
         runtime
-          .execute_script(
-            "dprint:prettier.js",
-            std::fs::read_to_string(&startup_code_path).unwrap().into(),
-          )
+          .execute_script("dprint:prettier.js", startup_text.clone().into())
           .unwrap();
       })),
     },
-  )
+  );
 }
 
 deno_core::extension!(
@@ -111,25 +102,4 @@ fn extensions() -> Vec<Extension> {
     deno_url::deno_url::init_ops_and_esm(),
     main::init_ops_and_esm(),
   ]
-}
-
-fn runtime_options(snapshot_path: &Path) -> RuntimeOptions {
-  let snapshot_bytes = std::fs::read(snapshot_path).unwrap();
-
-  let snapshot = Snapshot::Boxed(
-    zstd::bulk::decompress(
-      &snapshot_bytes[4..],
-      u32::from_le_bytes(snapshot_bytes[0..4].try_into().unwrap()) as usize,
-    )
-    .unwrap()
-    .into_boxed_slice(),
-  );
-
-  let platform = v8::new_default_platform(1, false).make_shared();
-  RuntimeOptions {
-    v8_platform: Some(platform),
-    extensions: Vec::new(),
-    startup_snapshot: Some(snapshot),
-    ..Default::default()
-  }
 }

@@ -1,44 +1,45 @@
 use std::borrow::Cow;
 
-use deno_core::anyhow::anyhow;
 use deno_core::anyhow::Error;
 use deno_core::serde_json;
-use deno_core::serde_v8;
-use deno_core::v8;
-use deno_core::JsRuntime;
 use dprint_core::plugins::FormatRequest;
 use dprint_plugin_deno_base::channel::Formatter;
-use dprint_plugin_deno_base::formatting::FormatterJsRuntime;
 use dprint_plugin_deno_base::runtime::CreateRuntimeOptions;
+use dprint_plugin_deno_base::runtime::JsRuntime;
+use dprint_plugin_deno_base::runtime::StartupSnapshot;
+use dprint_plugin_deno_base::snapshot::Snapshot;
 use dprint_plugin_deno_base::util::set_v8_max_memory;
 use once_cell::sync::Lazy;
 
 use crate::config::PrettierConfig;
-use crate::runtime::create_js_runtime;
 
 // Copied from Deno's codebase:
 // https://github.com/denoland/deno/blob/daa7c6d32ab5a4029f8084e174d621f5562256be/cli/tsc.rs#L55
-static STARTUP_SNAPSHOT: Lazy<CompressedSnapshot> = Lazy::new(
+static STARTUP_SNAPSHOT: Lazy<Snapshot> = Lazy::new(
   #[cold]
   #[inline(never)]
   || {
+    // Also set the v8 max memory at the same time. This was added because
+    // on the DefinitelyTyped repo there would be some OOM errors after formatting
+    // for a while and this solved that for some reason.
     set_v8_max_memory(512);
+
     static COMPRESSED_COMPILER_SNAPSHOT: &[u8] =
       include_bytes!(concat!(env!("OUT_DIR"), "/STARTUP_SNAPSHOT.bin"));
 
-    CompressedSnapshot::deserialize(&COMPRESSED_COMPILER_SNAPSHOT).unwrap()
+    Snapshot::deserialize(COMPRESSED_COMPILER_SNAPSHOT).unwrap()
   },
 );
 
 pub struct PrettierFormatter {
-  runtime: FormatterJsRuntime,
+  runtime: JsRuntime,
 }
 
 impl Default for PrettierFormatter {
   fn default() -> Self {
-    let runtime = FormatterJsRuntime::new(CreateRuntimeOptions {
+    let runtime = JsRuntime::new(CreateRuntimeOptions {
       extensions: Vec::new(),
-      startup_snapshot: Some(&STARTUP_SNAPSHOT),
+      startup_snapshot: Some(StartupSnapshot::Static(&STARTUP_SNAPSHOT)),
     });
     Self { runtime }
   }
@@ -52,8 +53,11 @@ impl Formatter<PrettierConfig> for PrettierFormatter {
     // todo: implement cancellation and range formatting
     let request_value = serde_json::Value::Object({
       let mut obj = serde_json::Map::new();
-      obj.insert("filePath".to_string(), file_path.into());
-      obj.insert("fileText".to_string(), file_text.into());
+      obj.insert(
+        "filePath".to_string(),
+        request.file_path.to_string_lossy().into(),
+      );
+      obj.insert("fileText".to_string(), request.file_text.into());
       obj
     });
     let file_path = request.file_path.to_string_lossy();

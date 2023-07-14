@@ -14,7 +14,6 @@ use dprint_plugin_deno_base::channel::Channel;
 use dprint_plugin_deno_base::channel::CreateChannelOptions;
 use once_cell::sync::Lazy;
 
-use crate::channel::Channel;
 use crate::config::resolve_config;
 use crate::config::PrettierConfig;
 use crate::formatter::PrettierFormatter;
@@ -26,16 +25,16 @@ static SUPPORTED_EXTENSIONS: Lazy<Vec<String>> = Lazy::new(|| {
 });
 
 pub struct PrettierPluginHandler {
-  channel: Channel<PrettierConfig>,
+  channel: Arc<Channel<PrettierConfig>>,
 }
 
 impl Default for PrettierPluginHandler {
   fn default() -> Self {
     Self {
-      channel: Channel::new(CreateChannelOptions {
+      channel: Arc::new(Channel::new(CreateChannelOptions {
         avg_isolate_memory_usage: 600_000, // 600MB guess
-        create_formatter_cb: Box::new(|| PrettierFormatter::default()),
-      }),
+        create_formatter_cb: Arc::new(|| Box::<PrettierFormatter>::default()),
+      })),
     }
   }
 }

@@ -18,7 +18,7 @@ pub trait Formatter<TConfiguration> {
 }
 
 pub type CreateFormatterCb<TConfiguration> =
-  dyn Fn() -> Box<dyn Formatter<TConfiguration> + Send + Sync>;
+  dyn Fn() -> Box<dyn Formatter<TConfiguration>> + Send + Sync;
 
 pub struct CreateChannelOptions<TConfiguration> {
   /// The amount of memory that a single isolate might use. You can approximate
@@ -28,7 +28,7 @@ pub struct CreateChannelOptions<TConfiguration> {
   /// This provides some protection against using too much memory on the system,
   /// but is not perfect. It is better than nothing.
   pub avg_isolate_memory_usage: usize,
-  pub create_formatter_cb: Box<CreateFormatterCb<TConfiguration>>,
+  pub create_formatter_cb: Arc<CreateFormatterCb<TConfiguration>>,
 }
 
 type Request<TConfiguration> = (FormatRequest<TConfiguration>, oneshot::Sender<FormatResult>);
@@ -97,11 +97,11 @@ impl<TConfiguration: Send + Sync + 'static> Channel<TConfiguration> {
   fn create_js_runtime(&self) {
     let stats = self.stats.clone();
     let receiver = self.receiver.clone();
-    let formatter = (self.options.create_formatter_cb)();
+    let create_formatter_cb = self.options.create_formatter_cb.clone();
     std::thread::spawn(move || {
       let tokio_runtime = create_tokio_runtime();
       tokio_runtime.block_on(async move {
-        let mut formatter = formatter;
+        let mut formatter = (create_formatter_cb)();
         loop {
           tokio::select! {
             // automatically shut down after a certain amount of time to save memory

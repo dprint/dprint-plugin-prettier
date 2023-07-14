@@ -19,6 +19,9 @@ pub fn create_snapshot(options: CreateSnapshotOptions) -> CreateSnapshotOutput {
     snapshot_path: options.snapshot_path,
     startup_snapshot: None,
     extensions: options.extensions,
+    #[cfg(debug_assertions)]
+    compression_cb: None,
+    #[cfg(not(debug_assertions))]
     compression_cb: Some(Box::new(|vec, snapshot_slice| {
       eprintln!("Compressing snapshot...");
       vec.extend_from_slice(

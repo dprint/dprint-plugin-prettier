@@ -37,7 +37,7 @@ await $`git tag ${newVersion}`;
 await $`git push origin ${newVersion}`;
 
 async function bumpMinorVersion() {
-  const projectFile = rootDirPath.join("./Cargo.toml");
+  const projectFile = rootDirPath.join("./plugin/Cargo.toml");
   const text = await projectFile.readText();
   const versionRegex = /^version = "([0-9]+\.[0-9]+\.[0-9]+)"$/m;
   const currentVersion = text.match(versionRegex)?.[1];

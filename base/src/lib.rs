@@ -1,4 +1,4 @@
-#[cfg(feature = "snapshotting")]
+#[cfg(feature = "build")]
 pub mod build;
 pub mod channel;
 pub mod runtime;
