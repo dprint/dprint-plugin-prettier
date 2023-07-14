@@ -25,8 +25,8 @@ pub struct Channel {
   receiver: async_channel::Receiver<Request>,
 }
 
-impl Channel {
-  pub fn new() -> Self {
+impl Default for Channel {
+  fn default() -> Self {
     let (sender, receiver) = async_channel::unbounded();
     Self {
       stats: Arc::new(Mutex::new(Stats {
@@ -37,7 +37,9 @@ impl Channel {
       receiver,
     }
   }
+}
 
+impl Channel {
   pub async fn format(&self, request: FormatRequest<PrettierConfig>) -> FormatResult {
     let (send, recv) = oneshot::channel::<FormatResult>();
     let mut should_inc_pending_runtimes = false;
@@ -67,8 +69,8 @@ impl Channel {
 fn has_memory_available() -> bool {
   let available_memory = get_system_available_memory();
   // Only allow creating another instance if the amount of available
-  // memory on the system is greater than 500MB (comfortable amount)
-  available_memory > 500_000
+  // memory on the system is greater than 700MB (comfortable amount)
+  available_memory > 700_000
 }
 
 fn create_js_runtime(stats: Arc<Mutex<Stats>>, receiver: async_channel::Receiver<Request>) {

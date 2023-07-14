@@ -5,6 +5,7 @@
     "moduleResolution": "node",
     "strict": true,
     "esModuleInterop": true,
+    "removeComments": true,
     "importHelpers": false
   },
   "include": [

@@ -1,29 +1,17 @@
-use deno_core::include_js_files;
 use deno_core::v8;
-use deno_core::Extension;
 use deno_core::JsRuntime;
 use deno_core::RuntimeOptions;
 use deno_core::Snapshot;
 use once_cell::sync::Lazy;
 
 pub fn create_js_runtime() -> JsRuntime {
-  let snapshot = Snapshot::Static(&*STARTUP_SNAPSHOT);
+  let snapshot = Snapshot::Static(&STARTUP_SNAPSHOT);
   let platform = v8::new_default_platform(1, false).make_shared();
 
   JsRuntime::new(RuntimeOptions {
     startup_snapshot: Some(snapshot),
     v8_platform: Some(platform),
-    extensions: vec![
-      deno_webidl::init(),
-      deno_console::init(),
-      deno_url::init(),
-      Extension::builder()
-        .js(include_js_files!(
-          prefix "deno:main",
-          "main.js",
-        ))
-        .build(),
-    ],
+    extensions: vec![],
     ..Default::default()
   })
 }
@@ -34,10 +22,11 @@ static STARTUP_SNAPSHOT: Lazy<Box<[u8]>> = Lazy::new(
   #[cold]
   #[inline(never)]
   || {
+    set_v8_max_memory(512);
     static COMPRESSED_COMPILER_SNAPSHOT: &[u8] =
       include_bytes!(concat!(env!("OUT_DIR"), "/STARTUP_SNAPSHOT.bin"));
 
-    zstd::block::decompress(
+    zstd::bulk::decompress(
       &COMPRESSED_COMPILER_SNAPSHOT[4..],
       u32::from_le_bytes(COMPRESSED_COMPILER_SNAPSHOT[0..4].try_into().unwrap()) as usize,
     )
@@ -45,3 +34,8 @@ static STARTUP_SNAPSHOT: Lazy<Box<[u8]>> = Lazy::new(
     .into_boxed_slice()
   },
 );
+
+pub fn set_v8_max_memory(max_memory: usize) {
+  // todo: add as config option
+  deno_core::v8_set_flags(vec![format!("--max-old-space-size={}", max_memory)]);
+}

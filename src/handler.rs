@@ -22,17 +22,9 @@ static SUPPORTED_EXTENSIONS: Lazy<Vec<String>> = Lazy::new(|| {
   deno_core::serde_json::from_slice(json_bytes).unwrap()
 });
 
-#[derive(Clone)]
+#[derive(Clone, Default)]
 pub struct PrettierPluginHandler {
   channel: Channel,
-}
-
-impl PrettierPluginHandler {
-  pub fn new() -> Self {
-    Self {
-      channel: Channel::new(),
-    }
-  }
 }
 
 impl AsyncPluginHandler for PrettierPluginHandler {
