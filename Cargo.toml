@@ -30,4 +30,4 @@ dprint-development = "0.9.3"
 pretty_assertions = "1.4.0"
 
 [patch.crates-io]
-deno_core = { git = "https://github.com/dsherret/deno_core/", branch = "feat_with_runtime_cb" }
+deno_core = { git = "https://github.com/denoland/deno_core/", rev = "0d79f69a80c5dd207c35cfb814bb5e9164f2f457" }
