@@ -308,6 +308,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "dprint-plugin-deno-base"
+version = "0.0.1"
+dependencies = [
+ "async-channel",
+ "deno_core",
+ "dprint-core",
+ "dprint-development",
+ "once_cell",
+ "pretty_assertions",
+ "serde",
+ "serde_json",
+ "sysinfo",
+ "tokio",
+ "tokio-util",
+ "zstd",
+]
+
+[[package]]
 name = "dprint-plugin-prettier"
 version = "0.26.1"
 dependencies = [

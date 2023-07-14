@@ -92,7 +92,7 @@ fn create_js_runtime(stats: Arc<Mutex<Stats>>, receiver: async_channel::Receiver
             }
           }
           request = receiver.recv() => {
-            // todo: possible to implement cancellation?
+            // todo: implement cancellation
             let (request, response) = match request {
               Ok(result) => result,
               Err(_) => {

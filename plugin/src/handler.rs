@@ -46,7 +46,7 @@ impl AsyncPluginHandler for PrettierPluginHandler {
   }
 
   fn license_text(&self) -> String {
-    include_str!("../LICENSE").to_string()
+    include_str!("../../LICENSE").to_string()
   }
 
   fn resolve_config(

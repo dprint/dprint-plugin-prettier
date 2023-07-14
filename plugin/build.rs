@@ -18,12 +18,13 @@ use deno_core::RuntimeOptions;
 use deno_core::Snapshot;
 
 fn main() {
-  let c = PathBuf::from(env::var_os("CARGO_MANIFEST_DIR").unwrap());
-  let o = PathBuf::from(env::var_os("OUT_DIR").unwrap());
-  let startup_snapshot_path = o.join("STARTUP_SNAPSHOT.bin");
-  let js_dir = c.join("js");
+  let crate_dir = PathBuf::from(env::var_os("CARGO_MANIFEST_DIR").unwrap());
+  let root_dir = crate_dir.parent().unwrap();
+  let out_dir = PathBuf::from(env::var_os("OUT_DIR").unwrap());
+  let startup_snapshot_path = out_dir.join("STARTUP_SNAPSHOT.bin");
+  let js_dir = root_dir.join("js");
   let js_src_dir = js_dir.join("node").join("src");
-  let supported_extensions_path = o.join("SUPPORTED_EXTENSIONS.json");
+  let supported_extensions_path = out_dir.join("SUPPORTED_EXTENSIONS.json");
 
   let status = Command::new("deno")
     .args(["task", "build"])
@@ -104,7 +105,7 @@ deno_core::extension!(
   main,
   esm_entry_point = "ext:main/main.js",
   esm = [
-    dir "js",
+    dir "../js",
     "main.js",
   ]
 );

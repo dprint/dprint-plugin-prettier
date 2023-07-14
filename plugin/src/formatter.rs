@@ -47,7 +47,7 @@ impl Formatter {
       let deserialized_value = serde_v8::from_v8::<String>(scope, local);
       match deserialized_value {
         Ok(value) => Ok(Some(value)),
-        Err(err) => Err(anyhow!("Cannot deserialize serde_v8 value: {:?}", err)),
+        Err(err) => Err(anyhow!("Cannot deserialize serde_v8 value: {:#}", err)),
       }
     }
   }
