@@ -10,11 +10,13 @@ use dprint_core::plugins::FormatRequest;
 use dprint_core::plugins::FormatResult;
 use dprint_core::plugins::Host;
 use dprint_core::plugins::PluginInfo;
+use dprint_plugin_deno_base::channel::Channel;
+use dprint_plugin_deno_base::channel::CreateChannelOptions;
 use once_cell::sync::Lazy;
 
-use crate::channel::Channel;
 use crate::config::resolve_config;
 use crate::config::PrettierConfig;
+use crate::formatter::PrettierFormatter;
 
 static SUPPORTED_EXTENSIONS: Lazy<Vec<String>> = Lazy::new(|| {
   let json_bytes = include_bytes!(concat!(env!("OUT_DIR"), "/SUPPORTED_EXTENSIONS.json"));
@@ -22,9 +24,19 @@ static SUPPORTED_EXTENSIONS: Lazy<Vec<String>> = Lazy::new(|| {
   deno_core::serde_json::from_slice(json_bytes).unwrap()
 });
 
-#[derive(Clone, Default)]
 pub struct PrettierPluginHandler {
-  channel: Channel,
+  channel: Arc<Channel<PrettierConfig>>,
+}
+
+impl Default for PrettierPluginHandler {
+  fn default() -> Self {
+    Self {
+      channel: Arc::new(Channel::new(CreateChannelOptions {
+        avg_isolate_memory_usage: 600_000, // 600MB guess
+        create_formatter_cb: Arc::new(|| Box::<PrettierFormatter>::default()),
+      })),
+    }
+  }
 }
 
 impl AsyncPluginHandler for PrettierPluginHandler {
@@ -46,7 +58,7 @@ impl AsyncPluginHandler for PrettierPluginHandler {
   }
 
   fn license_text(&self) -> String {
-    include_str!("../LICENSE").to_string()
+    include_str!("../../LICENSE").to_string()
   }
 
   fn resolve_config(

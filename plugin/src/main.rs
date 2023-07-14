@@ -1,16 +1,12 @@
 use dprint_core::plugins::process::get_parent_process_id_from_cli_args;
 use dprint_core::plugins::process::handle_process_stdio_messages;
 use dprint_core::plugins::process::start_parent_process_checker_task;
+use dprint_plugin_deno_base::util::create_tokio_runtime;
 use handler::PrettierPluginHandler;
 
-use crate::utils::create_tokio_runtime;
-
-mod channel;
 mod config;
 mod formatter;
 mod handler;
-mod runtime;
-mod utils;
 
 fn main() {
   let runtime = create_tokio_runtime();
