@@ -310,12 +310,29 @@ dependencies = [
 [[package]]
 name = "dprint-plugin-deno-base"
 version = "0.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5de2ed8ec6d5488e52d2d3fc6ce66c6ab16b5ae44ee1bf209dca0252f552e70e"
+dependencies = [
+ "async-channel",
+ "deno_core",
+ "dprint-core",
+ "once_cell",
+ "serde",
+ "serde_json",
+ "sysinfo",
+ "tokio",
+ "tokio-util",
+ "zstd",
+]
+
+[[package]]
+name = "dprint-plugin-deno-base"
+version = "0.0.2"
 dependencies = [
  "async-channel",
  "deno_core",
  "dprint-core",
  "dprint-development",
- "once_cell",
  "pretty_assertions",
  "serde",
  "serde_json",
@@ -329,20 +346,17 @@ dependencies = [
 name = "dprint-plugin-prettier"
 version = "0.26.1"
 dependencies = [
- "async-channel",
  "deno_console",
  "deno_core",
  "deno_url",
  "deno_webidl",
  "dprint-core",
  "dprint-development",
+ "dprint-plugin-deno-base 0.0.1",
  "once_cell",
  "pretty_assertions",
  "serde",
  "serde_json",
- "sysinfo",
- "tokio",
- "tokio-util",
  "zstd",
 ]
 

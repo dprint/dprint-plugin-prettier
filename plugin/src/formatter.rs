@@ -6,50 +6,65 @@ use deno_core::serde_json;
 use deno_core::serde_v8;
 use deno_core::v8;
 use deno_core::JsRuntime;
+use dprint_core::plugins::FormatRequest;
+use dprint_plugin_deno_base::channel::Formatter;
+use dprint_plugin_deno_base::formatting::FormatterJsRuntime;
+use dprint_plugin_deno_base::runtime::CreateRuntimeOptions;
+use dprint_plugin_deno_base::util::set_v8_max_memory;
+use once_cell::sync::Lazy;
 
 use crate::config::PrettierConfig;
 use crate::runtime::create_js_runtime;
 
-pub struct Formatter {
-  runtime: JsRuntime,
+// Copied from Deno's codebase:
+// https://github.com/denoland/deno/blob/daa7c6d32ab5a4029f8084e174d621f5562256be/cli/tsc.rs#L55
+static STARTUP_SNAPSHOT: Lazy<CompressedSnapshot> = Lazy::new(
+  #[cold]
+  #[inline(never)]
+  || {
+    set_v8_max_memory(512);
+    static COMPRESSED_COMPILER_SNAPSHOT: &[u8] =
+      include_bytes!(concat!(env!("OUT_DIR"), "/STARTUP_SNAPSHOT.bin"));
+
+    CompressedSnapshot::deserialize(&COMPRESSED_COMPILER_SNAPSHOT).unwrap()
+  },
+);
+
+pub struct PrettierFormatter {
+  runtime: FormatterJsRuntime,
 }
 
-impl Formatter {
-  pub fn new() -> Self {
-    let runtime = create_js_runtime();
+impl Default for PrettierFormatter {
+  fn default() -> Self {
+    let runtime = FormatterJsRuntime::new(CreateRuntimeOptions {
+      extensions: Vec::new(),
+      startup_snapshot: Some(&STARTUP_SNAPSHOT),
+    });
     Self { runtime }
   }
+}
 
-  pub fn format_text(
+impl Formatter<PrettierConfig> for PrettierFormatter {
+  fn format_text(
     &mut self,
-    file_path: &str,
-    file_text: String,
-    config: &PrettierConfig,
+    request: FormatRequest<PrettierConfig>,
   ) -> Result<Option<String>, Error> {
+    // todo: implement cancellation and range formatting
     let request_value = serde_json::Value::Object({
       let mut obj = serde_json::Map::new();
       obj.insert("filePath".to_string(), file_path.into());
       obj.insert("fileText".to_string(), file_text.into());
       obj
     });
+    let file_path = request.file_path.to_string_lossy();
+    let config = &request.config;
     let code = format!(
       "dprint.formatText({{ ...{}, config: {}, pluginsConfig: {} }})",
       request_value,
-      serde_json::to_string(&resolve_config(file_path, config)).unwrap(),
+      serde_json::to_string(&resolve_config(&file_path, config)).unwrap(),
       serde_json::to_string(&config.plugins).unwrap(),
     );
-    let global = self.runtime.execute_script("format.js", code.into())?;
-    let scope = &mut self.runtime.handle_scope();
-    let local = v8::Local::new(scope, global);
-    if local.is_undefined() {
-      Ok(None)
-    } else {
-      let deserialized_value = serde_v8::from_v8::<String>(scope, local);
-      match deserialized_value {
-        Ok(value) => Ok(Some(value)),
-        Err(err) => Err(anyhow!("Cannot deserialize serde_v8 value: {:#}", err)),
-      }
-    }
+    self.runtime.execute_format_script(code)
   }
 }
 

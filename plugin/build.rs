@@ -78,27 +78,21 @@ fn main() {
 
 fn create_snapshot(snapshot_path: PathBuf, js_dir: &Path) -> CreateSnapshotOutput {
   let startup_code_path = js_dir.join("startup.js");
-  deno_core::snapshot_util::create_snapshot(deno_core::snapshot_util::CreateSnapshotOptions {
-    cargo_manifest_dir: env!("CARGO_MANIFEST_DIR"),
-    snapshot_path,
-    startup_snapshot: None,
-    extensions: extensions(),
-    compression_cb: Some(Box::new(|vec, snapshot_slice| {
-      eprintln!("Compressing snapshot...");
-      vec.extend_from_slice(
-        &zstd::bulk::compress(snapshot_slice, 22).expect("snapshot compression failed"),
-      );
-    })),
-    snapshot_module_load_cb: None,
-    with_runtime_cb: Some(Box::new(move |runtime| {
-      runtime
-        .execute_script(
-          "dprint:prettier.js",
-          std::fs::read_to_string(&startup_code_path).unwrap().into(),
-        )
-        .unwrap();
-    })),
-  })
+  dprint_plugin_deno_base::build::create_snapshot(
+    dprint_plugin_deno_base::build::CreateSnapshotOptions {
+      cargo_manifest_dir: env!("CARGO_MANIFEST_DIR"),
+      snapshot_path,
+      extensions: extensions(),
+      with_runtime_cb: Some(Box::new(move |runtime| {
+        runtime
+          .execute_script(
+            "dprint:prettier.js",
+            std::fs::read_to_string(&startup_code_path).unwrap().into(),
+          )
+          .unwrap();
+      })),
+    },
+  )
 }
 
 deno_core::extension!(
@@ -131,14 +125,11 @@ fn runtime_options(snapshot_path: &Path) -> RuntimeOptions {
     .into_boxed_slice(),
   );
 
+  let platform = v8::new_default_platform(1, false).make_shared();
   RuntimeOptions {
-    v8_platform: Some(platform()),
+    v8_platform: Some(platform),
     extensions: Vec::new(),
     startup_snapshot: Some(snapshot),
     ..Default::default()
   }
-}
-
-fn platform() -> SharedRef<Platform> {
-  v8::new_default_platform(1, false).make_shared()
 }

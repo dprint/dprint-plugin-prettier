@@ -20,3 +20,7 @@ pub fn system_available_memory() -> u64 {
   sys.refresh_memory();
   sys.available_memory()
 }
+
+pub fn set_v8_max_memory(max_memory: usize) {
+  deno_core::v8_set_flags(vec![format!("--max-old-space-size={}", max_memory)]);
+}

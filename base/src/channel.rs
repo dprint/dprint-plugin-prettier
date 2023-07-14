@@ -116,7 +116,6 @@ impl<TConfiguration: Send + Sync + 'static> Channel<TConfiguration> {
               }
             }
             request = receiver.recv() => {
-              // todo: implement cancellation
               let (request, response) = match request {
                 Ok(result) => result,
                 Err(_) => {

@@ -14,17 +14,17 @@ pub struct CreateRuntimeOptions {
   pub startup_snapshot: Option<&'static CompressedSnapshot>,
 }
 
-pub struct Runtime {
+pub struct FormatterJsRuntime {
   inner: JsRuntime,
 }
 
-impl Runtime {
-  pub fn new(options: CreateRuntimeOptions) -> Runtime {
+impl FormatterJsRuntime {
+  pub fn new(options: CreateRuntimeOptions) -> FormatterJsRuntime {
     let maybe_snapshot = options
       .startup_snapshot
       .map(|s| Snapshot::Static(s.inner()));
     let platform = v8::new_default_platform(1, false).make_shared();
-    Runtime {
+    FormatterJsRuntime {
       inner: JsRuntime::new(RuntimeOptions {
         startup_snapshot: maybe_snapshot,
         v8_platform: Some(platform),
@@ -47,9 +47,5 @@ impl Runtime {
         Err(err) => Err(anyhow!("Cannot deserialize serde_v8 value: {:#}", err)),
       }
     }
-  }
-
-  pub fn set_v8_max_memory(max_memory: usize) {
-    deno_core::v8_set_flags(vec![format!("--max-old-space-size={}", max_memory)]);
   }
 }
