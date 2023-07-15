@@ -3,7 +3,7 @@ import { extractCargoVersion, processPlugin } from "https://raw.githubuserconten
 
 const currentDir = $.path(import.meta).parentOrThrow();
 const rootDir = currentDir.join("../").resolve();
-const cargoFilePath = rootDir.join("Cargo.toml");
+const cargoFilePath = rootDir.join("plugin/Cargo.toml");
 
 await processPlugin.createDprintOrgProcessPlugin({
   pluginName: "dprint-plugin-prettier",
