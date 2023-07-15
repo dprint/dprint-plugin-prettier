@@ -1,3 +1,4 @@
+#!/usr/bin/env -S deno run --allow-env --allow-read --allow-write --allow-net=deno.land
 import $ from "dax";
 import { extractCargoVersion, processPlugin } from "https://raw.githubusercontent.com/dprint/automation/0.3.0/mod.ts";
 

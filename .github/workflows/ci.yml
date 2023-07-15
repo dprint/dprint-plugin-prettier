@@ -122,7 +122,7 @@ jobs:
           echo "Windows zip: ${{needs.build.outputs.WINDOWS_ZIP_CHECKSUM}}"
 
       - name: Create plugin file
-        run: deno run --allow-read=. --allow-write=. scripts/create_plugin_file.ts
+        run: ./scripts/create_plugin_file.ts
 
       - name: Get tag version
         id: get_tag_version
