@@ -6,10 +6,7 @@ members = [
 ]
 
 [workspace.dependencies]
-deno_core = "0.195.0"
-dprint-core = "0.62.1"
+deno_core = "0.197.0"
+dprint-core = "0.63.0"
 serde = { version = "1.0.149", features = ["derive"] }
 serde_json = { version = "1.0", features = ["preserve_order"] }
-
-[patch.crates-io]
-deno_core = { git = "https://github.com/denoland/deno_core/", rev = "0d79f69a80c5dd207c35cfb814bb5e9164f2f457" }
