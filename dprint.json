@@ -1,8 +1,10 @@
 {
   "indentWidth": 2,
   "exec": {
-    "associations": "**/*.rs",
-    "rustfmt": "rustfmt"
+    "commands": [{
+      "command": "rustfmt",
+      "exts": ["rs"]
+    }]
   },
   "excludes": [
     "js/startup.js",
@@ -15,8 +17,8 @@
     "https://plugins.dprint.dev/typescript-0.85.1.wasm",
     "https://plugins.dprint.dev/json-0.7.2.wasm",
     "https://plugins.dprint.dev/markdown-0.15.3.wasm",
-    "https://plugins.dprint.dev/exec-0.3.5.json@d687dda57be0fe9a0088ccdaefa5147649ff24127d8b3ea227536c68ee7abeab",
-    "https://plugins.dprint.dev/prettier-0.26.6.json@0118376786f37496e41bb19dbcfd1e7214e2dc859a55035c5e54d1107b4c9c57",
+    "https://plugins.dprint.dev/exec-0.4.2.json@ca3c3d1cc1105b4ac1c31afdb26791a90209f13a5950f8de00dcab5e5ee293a7",
+    "https://plugins.dprint.dev/prettier-0.27.0.json@3557a62b4507c55a47d8cde0683195b14d13c41dda66d0f0b0e111aed107e2fe",
     "https://plugins.dprint.dev/toml-0.5.4.wasm"
   ]
 }
