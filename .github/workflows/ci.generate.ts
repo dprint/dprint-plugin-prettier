@@ -11,6 +11,7 @@ interface ProfileData {
   os: OperatingSystem;
   target: string;
   runTests?: boolean;
+  cross?: boolean;
 }
 
 const profileDataItems: ProfileData[] = [{
@@ -25,6 +26,10 @@ const profileDataItems: ProfileData[] = [{
   os: OperatingSystem.Linux,
   target: "x86_64-unknown-linux-gnu",
   runTests: true,
+}, {
+  os: OperatingSystem.Linux,
+  target: "x86_64-unknown-linux-musl",
+  cross: true,
 }];
 const profiles = profileDataItems.map((profile) => {
   return {
@@ -56,6 +61,7 @@ const ci = {
             os: profile.os,
             run_tests: (profile.runTests ?? false).toString(),
             target: profile.target,
+            cross: (profile.runTests ?? false).toString(),
           })),
         },
       },
@@ -94,14 +100,30 @@ const ci = {
           run: "cd js/node && npm ci",
         },
         {
+          name: "Setup cross",
+          if: "matrix.config.cross == 'true'",
+          run:
+            "cargo install cross --git https://github.com/cross-rs/cross --rev 44011c8854cb2eaac83b173cc323220ccdff18ea",
+        },
+        {
           name: "Build (Debug)",
-          if: "!startsWith(github.ref, 'refs/tags/')",
+          if: "matrix.config.cross != 'true' && !startsWith(github.ref, 'refs/tags/')",
           run: "cargo build --locked --all-targets --target ${{matrix.config.target}}",
         },
         {
           name: "Build release",
-          if: "startsWith(github.ref, 'refs/tags/')",
+          if: "matrix.config.cross != 'true' && startsWith(github.ref, 'refs/tags/')",
           run: "cargo build --locked --all-targets --target ${{matrix.config.target}} --release",
+        },
+        {
+          name: "Build cross (Debug)",
+          if: "matrix.config.cross == 'true' && !startsWith(github.ref, 'refs/tags/')",
+          run: "cross build --locked --all-targets --target ${{matrix.config.target}}",
+        },
+        {
+          name: "Build cross (Release)",
+          if: "matrix.config.cross == 'true' && startsWith(github.ref, 'refs/tags/')",
+          run: "cross build --locked --all-targets --target ${{matrix.config.target}} --release",
         },
         {
           name: "Lint",
