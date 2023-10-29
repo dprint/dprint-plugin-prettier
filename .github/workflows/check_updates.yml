@@ -2,10 +2,10 @@ name: check_updates
 
 on:
   workflow_dispatch:
-  schedule:
-    # do this three times a week
-    # temporarily disabled until next release
-    # - cron: "0 7 * * 1,3,5"
+  # temporarily disabled until next release
+  # schedule:
+  # # do this three times a week
+  # - cron: "0 7 * * 1,3,5"
 
 jobs:
   build:
