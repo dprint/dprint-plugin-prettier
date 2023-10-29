@@ -9,6 +9,8 @@
     "importHelpers": false
   },
   "include": [
-    "./src"
+    "./src",
+    "main.ts",
+    "types.d.ts"
   ]
 }

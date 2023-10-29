@@ -5,13 +5,18 @@
   "scripts": {
     "build:script": "parcel build"
   },
-  "source": "./src/main.ts",
-  "main": "../startup.js",
+  "source": "./main.ts",
+  "main": "./dist/startup.js",
+  "type": "commonjs",
   "targets": {
-    "main": {
+    "main": false,
+    "default": {
       "context": "browser",
       "includeNodeModules": true,
-      "optimize": false
+      "optimize": false,
+      "sourceMap": false,
+      "outputFormat": "global",
+      "distDir": "./dist"
     }
   },
   "alias": {
@@ -36,23 +41,15 @@
     "url": "https://github.com/dprint/dprint-plugin-prettier/issues"
   },
   "homepage": "https://github.com/dprint/dprint-plugin-prettier#readme",
-  "pkg": {
-    "scripts": "dist/index.js"
-  },
   "dependencies": {
     "buffer": "^6.0.3",
-    "prettier": "^2.8.8",
-    "prettier-plugin-astro": "^0.0.12",
-    "prettier-plugin-jsdoc": "^0.3.38",
-    "prettier-plugin-svelte": "^2.10.1",
+    "prettier": "^3.0.3",
     "process": "^0.11.10",
-    "svelte": "^3.47.0",
-    "url": "^0.11.0"
+    "url": "^0.11.3"
   },
   "devDependencies": {
-    "@types/node": "^17.0.24",
-    "@types/prettier": "^2.6.0",
-    "parcel": "^2.6.2",
-    "typescript": "^4.9.5"
+    "@types/node": "^18",
+    "parcel": "^2.10.1",
+    "typescript": "^5.2.2"
   }
 }

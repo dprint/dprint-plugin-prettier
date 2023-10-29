@@ -3,6 +3,7 @@ use std::time::Duration;
 
 use deno_core::anyhow::Error;
 use deno_core::parking_lot::Mutex;
+use dprint_core::async_runtime::async_trait;
 use dprint_core::plugins::FormatRequest;
 use dprint_core::plugins::FormatResult;
 use tokio::sync::oneshot;
@@ -10,8 +11,9 @@ use tokio::sync::oneshot;
 use crate::util::create_tokio_runtime;
 use crate::util::system_available_memory;
 
+#[async_trait(?Send)]
 pub trait Formatter<TConfiguration> {
-  fn format_text(
+  async fn format_text(
     &mut self,
     request: FormatRequest<TConfiguration>,
   ) -> Result<Option<String>, Error>;
@@ -123,7 +125,7 @@ impl<TConfiguration: Send + Sync + 'static> Channel<TConfiguration> {
                   return;
                 }
               };
-              let result = formatter.format_text(request);
+              let result = formatter.format_text(request).await;
               let _ = response.send(result);
             }
           }

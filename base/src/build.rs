@@ -28,7 +28,6 @@ pub fn create_snapshot(options: CreateSnapshotOptions) -> CreateSnapshotOutput {
         &zstd::bulk::compress(snapshot_slice, 22).expect("snapshot compression failed"),
       );
     })),
-    snapshot_module_load_cb: None,
     with_runtime_cb: options.with_runtime_cb,
   })
 }
