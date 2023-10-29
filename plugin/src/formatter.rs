@@ -2,6 +2,7 @@ use std::borrow::Cow;
 
 use deno_core::anyhow::Error;
 use deno_core::serde_json;
+use dprint_core::async_runtime::async_trait;
 use dprint_core::plugins::FormatRequest;
 use dprint_plugin_deno_base::channel::Formatter;
 use dprint_plugin_deno_base::runtime::CreateRuntimeOptions;
@@ -45,8 +46,9 @@ impl Default for PrettierFormatter {
   }
 }
 
+#[async_trait(?Send)]
 impl Formatter<PrettierConfig> for PrettierFormatter {
-  fn format_text(
+  async fn format_text(
     &mut self,
     request: FormatRequest<PrettierConfig>,
   ) -> Result<Option<String>, Error> {
@@ -63,12 +65,12 @@ impl Formatter<PrettierConfig> for PrettierFormatter {
     let file_path = request.file_path.to_string_lossy();
     let config = &request.config;
     let code = format!(
-      "dprint.formatText({{ ...{}, config: {}, pluginsConfig: {} }})",
+      "(async () => {{ return await dprint.formatText({{ ...{}, config: {}, pluginsConfig: {} }}); }})()",
       request_value,
       serde_json::to_string(&resolve_config(&file_path, config)).unwrap(),
       serde_json::to_string(&config.plugins).unwrap(),
     );
-    self.runtime.execute_format_script(code)
+    self.runtime.execute_format_script(code).await
   }
 }
 
