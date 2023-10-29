@@ -23,19 +23,19 @@ jobs:
           - os: macOS-latest
             run_tests: 'true'
             target: x86_64-apple-darwin
-            cross: 'true'
+            cross: 'false'
           - os: windows-latest
             run_tests: 'true'
             target: x86_64-pc-windows-msvc
-            cross: 'true'
+            cross: 'false'
           - os: ubuntu-20.04
             run_tests: 'true'
             target: x86_64-unknown-linux-gnu
-            cross: 'true'
+            cross: 'false'
           - os: ubuntu-20.04
             run_tests: 'false'
             target: x86_64-unknown-linux-musl
-            cross: 'false'
+            cross: 'true'
     outputs:
       ZIP_CHECKSUM_X86_64_APPLE_DARWIN: '${{steps.pre_release_x86_64_apple_darwin.outputs.ZIP_CHECKSUM}}'
       ZIP_CHECKSUM_X86_64_PC_WINDOWS_MSVC: '${{steps.pre_release_x86_64_pc_windows_msvc.outputs.ZIP_CHECKSUM}}'

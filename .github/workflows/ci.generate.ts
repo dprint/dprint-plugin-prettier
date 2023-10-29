@@ -61,7 +61,7 @@ const ci = {
             os: profile.os,
             run_tests: (profile.runTests ?? false).toString(),
             target: profile.target,
-            cross: (profile.runTests ?? false).toString(),
+            cross: (profile.cross ?? false).toString(),
           })),
         },
       },
