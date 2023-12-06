@@ -12,4 +12,4 @@ deno task build
 # todo: support more operating systems
 cargo build --release
 Compress-Archive -Force -Path target/release/dprint-plugin-prettier.exe -DestinationPath target/release/dprint-plugin-prettier-x86_64-pc-windows-msvc.zip
-pwsh -Command { cd target/release && deno run --allow-read=../../ --allow-write=. --allow-env ../../scripts/create_plugin_file.ts --test }
+pwsh -Command { cd target/release && deno run -A ../../scripts/create_plugin_file.ts --test }

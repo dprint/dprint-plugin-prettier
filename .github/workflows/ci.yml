@@ -125,7 +125,7 @@ jobs:
           echo "dprint-plugin-prettier-x86_64-pc-windows-msvc.zip: ${{needs.build.outputs.ZIP_CHECKSUM_X86_64_PC_WINDOWS_MSVC}}"
           echo "dprint-plugin-prettier-x86_64-unknown-linux-gnu.zip: ${{needs.build.outputs.ZIP_CHECKSUM_X86_64_UNKNOWN_LINUX_GNU}}"
       - name: Create plugin file
-        run: deno run --allow-read=. --allow-write=. scripts/create_plugin_file.ts
+        run: deno run -A scripts/create_plugin_file.ts
       - name: Get tag version
         id: get_tag_version
         run: 'echo ::set-output name=TAG_VERSION::${GITHUB_REF/refs\/tags\//}'

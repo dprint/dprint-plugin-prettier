@@ -185,7 +185,7 @@ const ci = {
         },
         {
           name: "Create plugin file",
-          run: "deno run --allow-read=. --allow-write=. scripts/create_plugin_file.ts",
+          run: "deno run -A scripts/create_plugin_file.ts",
         },
         {
           name: "Get tag version",
