@@ -1,4 +1,6 @@
 import { format, getSupportInfo, type Options, type Plugin, type SupportLanguage } from "prettier";
+import * as pluginJsDoc from "prettier-plugin-jsdoc";
+import * as pluginSvelte from "prettier-plugin-svelte";
 import * as pluginAcorn from "prettier/plugins/acorn";
 import * as pluginAngular from "prettier/plugins/angular";
 import * as pluginBabel from "prettier/plugins/babel";
@@ -27,6 +29,7 @@ const plugins: Plugin[] = [
   pluginMeriyah,
   pluginPostCss,
   pluginYaml,
+  pluginSvelte,
 ];
 
 (globalThis as any).dprint = {
@@ -58,17 +61,30 @@ interface FormatTextOptions {
   filePath: string;
   fileText: string;
   config: Options;
+  pluginsConfig: PluginsConfig;
 }
 
-async function formatText({ filePath, fileText, config }: FormatTextOptions) {
+interface PluginsConfig {
+  js_doc: boolean;
+}
+
+async function formatText({ filePath, fileText, config, pluginsConfig }: FormatTextOptions) {
   const formattedText = await format(fileText, {
     filepath: filePath,
-    plugins,
+    plugins: getPlugins(pluginsConfig),
     ...config,
   });
   if (formattedText === fileText) {
     return undefined;
   } else {
     return formattedText;
+  }
+}
+
+function getPlugins(pluginsConfig: PluginsConfig) {
+  if (pluginsConfig.js_doc) {
+    return [...plugins, pluginJsDoc as Plugin<any>];
+  } else {
+    return plugins;
   }
 }

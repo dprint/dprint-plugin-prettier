@@ -1,0 +1,17 @@
+-- file.js --
+~~ plugin.jsDoc: true ~~
+== should format ==
+class Test   {
+  /** js doc
+     for method
+  */
+method (  ) { console .log ( 5  )}
+}
+
+[expect]
+class Test {
+  /** Js doc for method */
+  method() {
+    console.log(5);
+  }
+}
