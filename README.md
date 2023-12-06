@@ -47,11 +47,14 @@ Add the file extension to the start of the configuration option. For example:
 
 - [prettier-plugin-svelte](https://github.com/sveltejs/prettier-plugin-svelte)
   - Enabled by default.
-- [prettier-plugin-astro](https://github.com/withastro/prettier-plugin-astro)
-  - Enabled by default.
 - [prettier-plugin-jsdoc](https://github.com/hosseinmd/prettier-plugin-jsdoc)
   - Enable with `"plugin.jsDoc": true` configuration
-- Want more? Open an issue.
+
+Temporarily removed, but will be added back soon:
+
+- [prettier-plugin-astro](https://github.com/withastro/prettier-plugin-astro)
+
+See [issue #55](https://github.com/dprint/dprint-plugin-prettier/issues/55) for the new plugin system.
 
 ## Why Does This Exist?
 
