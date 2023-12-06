@@ -9,30 +9,30 @@ on:
     branches:
       - main
     tags:
-      - '*'
+      - "*"
 concurrency:
-  group: '${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}'
+  group: "${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}"
   cancel-in-progress: true
 jobs:
   build:
-    name: '${{ matrix.config.target }}'
-    runs-on: '${{ matrix.config.os }}'
+    name: "${{ matrix.config.target }}"
+    runs-on: "${{ matrix.config.os }}"
     strategy:
       matrix:
         config:
           - os: macOS-latest
-            run_tests: 'true'
+            run_tests: "true"
             target: x86_64-apple-darwin
           - os: windows-latest
-            run_tests: 'true'
+            run_tests: "true"
             target: x86_64-pc-windows-msvc
           - os: ubuntu-20.04
-            run_tests: 'true'
+            run_tests: "true"
             target: x86_64-unknown-linux-gnu
     outputs:
-      ZIP_CHECKSUM_X86_64_APPLE_DARWIN: '${{steps.pre_release_x86_64_apple_darwin.outputs.ZIP_CHECKSUM}}'
-      ZIP_CHECKSUM_X86_64_PC_WINDOWS_MSVC: '${{steps.pre_release_x86_64_pc_windows_msvc.outputs.ZIP_CHECKSUM}}'
-      ZIP_CHECKSUM_X86_64_UNKNOWN_LINUX_GNU: '${{steps.pre_release_x86_64_unknown_linux_gnu.outputs.ZIP_CHECKSUM}}'
+      ZIP_CHECKSUM_X86_64_APPLE_DARWIN: "${{steps.pre_release_x86_64_apple_darwin.outputs.ZIP_CHECKSUM}}"
+      ZIP_CHECKSUM_X86_64_PC_WINDOWS_MSVC: "${{steps.pre_release_x86_64_pc_windows_msvc.outputs.ZIP_CHECKSUM}}"
+      ZIP_CHECKSUM_X86_64_UNKNOWN_LINUX_GNU: "${{steps.pre_release_x86_64_unknown_linux_gnu.outputs.ZIP_CHECKSUM}}"
     env:
       CARGO_INCREMENTAL: 0
       RUST_BACKTRACE: full
@@ -43,7 +43,7 @@ jobs:
         uses: Swatinem/rust-cache@v2
         with:
           prefix-key: v3-rust
-          save-if: '${{ github.ref == ''refs/heads/main'' }}'
+          save-if: "${{ github.ref == 'refs/heads/main' }}"
       - uses: denoland/setup-deno@v1
       - uses: actions/setup-node@v3
         with:
@@ -51,61 +51,61 @@ jobs:
       - name: npm install
         run: cd js/node && npm ci
       - name: Build (Debug)
-        if: '!startsWith(github.ref, ''refs/tags/'')'
-        run: 'cargo build --locked --all-targets --target ${{matrix.config.target}}'
+        if: "!startsWith(github.ref, 'refs/tags/')"
+        run: "cargo build --locked --all-targets --target ${{matrix.config.target}}"
       - name: Build release
-        if: 'startsWith(github.ref, ''refs/tags/'')'
-        run: 'cargo build --locked --all-targets --target ${{matrix.config.target}} --release'
+        if: "startsWith(github.ref, 'refs/tags/')"
+        run: "cargo build --locked --all-targets --target ${{matrix.config.target}} --release"
       - name: Lint
-        if: '!startsWith(github.ref, ''refs/tags/'') && matrix.config.target == ''x86_64-unknown-linux-gnu'''
+        if: "!startsWith(github.ref, 'refs/tags/') && matrix.config.target == 'x86_64-unknown-linux-gnu'"
         run: cargo clippy
       - name: Test (Debug)
-        if: 'matrix.config.run_tests == ''true'' && !startsWith(github.ref, ''refs/tags/'')'
+        if: "matrix.config.run_tests == 'true' && !startsWith(github.ref, 'refs/tags/')"
         run: cargo test --locked --all-features
       - name: Test (Release)
-        if: 'matrix.config.run_tests == ''true'' && startsWith(github.ref, ''refs/tags/'')'
+        if: "matrix.config.run_tests == 'true' && startsWith(github.ref, 'refs/tags/')"
         run: cargo test --locked --all-features --release
       - name: Pre-release (x86_64-apple-darwin)
         id: pre_release_x86_64_apple_darwin
-        if: 'matrix.config.target == ''x86_64-apple-darwin'' && startsWith(github.ref, ''refs/tags/'')'
+        if: "matrix.config.target == 'x86_64-apple-darwin' && startsWith(github.ref, 'refs/tags/')"
         run: |-
           cd target/x86_64-apple-darwin/release
           zip -r dprint-plugin-prettier-x86_64-apple-darwin.zip dprint-plugin-prettier
           echo "::set-output name=ZIP_CHECKSUM::$(shasum -a 256 dprint-plugin-prettier-x86_64-apple-darwin.zip | awk '{print $1}')"
       - name: Pre-release (x86_64-pc-windows-msvc)
         id: pre_release_x86_64_pc_windows_msvc
-        if: 'matrix.config.target == ''x86_64-pc-windows-msvc'' && startsWith(github.ref, ''refs/tags/'')'
+        if: "matrix.config.target == 'x86_64-pc-windows-msvc' && startsWith(github.ref, 'refs/tags/')"
         run: |-
           Compress-Archive -CompressionLevel Optimal -Force -Path target/x86_64-pc-windows-msvc/release/dprint-plugin-prettier.exe -DestinationPath target/x86_64-pc-windows-msvc/release/dprint-plugin-prettier-x86_64-pc-windows-msvc.zip
           echo "::set-output name=ZIP_CHECKSUM::$(shasum -a 256 target/x86_64-pc-windows-msvc/release/dprint-plugin-prettier-x86_64-pc-windows-msvc.zip | awk '{print $1}')"
       - name: Pre-release (x86_64-unknown-linux-gnu)
         id: pre_release_x86_64_unknown_linux_gnu
-        if: 'matrix.config.target == ''x86_64-unknown-linux-gnu'' && startsWith(github.ref, ''refs/tags/'')'
+        if: "matrix.config.target == 'x86_64-unknown-linux-gnu' && startsWith(github.ref, 'refs/tags/')"
         run: |-
           cd target/x86_64-unknown-linux-gnu/release
           zip -r dprint-plugin-prettier-x86_64-unknown-linux-gnu.zip dprint-plugin-prettier
           echo "::set-output name=ZIP_CHECKSUM::$(shasum -a 256 dprint-plugin-prettier-x86_64-unknown-linux-gnu.zip | awk '{print $1}')"
       - name: Upload artifacts (x86_64-apple-darwin)
-        if: 'matrix.config.target == ''x86_64-apple-darwin'' && startsWith(github.ref, ''refs/tags/'')'
+        if: "matrix.config.target == 'x86_64-apple-darwin' && startsWith(github.ref, 'refs/tags/')"
         uses: actions/upload-artifact@v2
         with:
           name: x86_64-apple-darwin-artifacts
           path: target/x86_64-apple-darwin/release/dprint-plugin-prettier-x86_64-apple-darwin.zip
       - name: Upload artifacts (x86_64-pc-windows-msvc)
-        if: 'matrix.config.target == ''x86_64-pc-windows-msvc'' && startsWith(github.ref, ''refs/tags/'')'
+        if: "matrix.config.target == 'x86_64-pc-windows-msvc' && startsWith(github.ref, 'refs/tags/')"
         uses: actions/upload-artifact@v2
         with:
           name: x86_64-pc-windows-msvc-artifacts
           path: target/x86_64-pc-windows-msvc/release/dprint-plugin-prettier-x86_64-pc-windows-msvc.zip
       - name: Upload artifacts (x86_64-unknown-linux-gnu)
-        if: 'matrix.config.target == ''x86_64-unknown-linux-gnu'' && startsWith(github.ref, ''refs/tags/'')'
+        if: "matrix.config.target == 'x86_64-unknown-linux-gnu' && startsWith(github.ref, 'refs/tags/')"
         uses: actions/upload-artifact@v2
         with:
           name: x86_64-unknown-linux-gnu-artifacts
           path: target/x86_64-unknown-linux-gnu/release/dprint-plugin-prettier-x86_64-unknown-linux-gnu.zip
   draft_release:
     name: draft_release
-    if: 'startsWith(github.ref, ''refs/tags/'')'
+    if: "startsWith(github.ref, 'refs/tags/')"
     needs: build
     runs-on: ubuntu-latest
     steps:
@@ -135,7 +135,7 @@ jobs:
       - name: Release
         uses: softprops/action-gh-release@v1
         env:
-          GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
         with:
           files: |-
             dprint-plugin-prettier-x86_64-apple-darwin.zip
