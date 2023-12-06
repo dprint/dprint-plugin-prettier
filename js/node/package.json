@@ -7,7 +7,7 @@
   },
   "source": "./main.ts",
   "main": "./dist/startup.js",
-  "type": "commonjs",
+  "type": "module",
   "targets": {
     "main": false,
     "default": {
@@ -18,10 +18,6 @@
       "outputFormat": "global",
       "distDir": "./dist"
     }
-  },
-  "alias": {
-    "prettier-plugin-jsdoc": "prettier-plugin-jsdoc/dist/index.min.mjs",
-    "comment-parser": "comment-parser/src/index.ts"
   },
   "browser": {
     "url": "./shims/url.js",
@@ -43,13 +39,19 @@
   "homepage": "https://github.com/dprint/dprint-plugin-prettier#readme",
   "dependencies": {
     "buffer": "^6.0.3",
-    "prettier": "^3.0.3",
+    "prettier": "^3.1.0",
+    "prettier-plugin-jsdoc": "^1.1.1",
+    "prettier-plugin-svelte": "^3.1.2",
     "process": "^0.11.10",
     "url": "^0.11.3"
   },
   "devDependencies": {
-    "@types/node": "^18",
-    "parcel": "^2.10.1",
-    "typescript": "^5.2.2"
+    "@types/node": "^20",
+    "crypto-browserify": "^3.12.0",
+    "events": "^3.3.0",
+    "parcel": "^2.10.3",
+    "stream-browserify": "^3.0.0",
+    "typescript": "^5.3.2",
+    "util": "^0.12.5"
   }
 }
