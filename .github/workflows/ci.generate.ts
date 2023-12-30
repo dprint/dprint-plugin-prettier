@@ -26,6 +26,10 @@ const profileDataItems: ProfileData[] = [{
   os: OperatingSystem.Linux,
   target: "x86_64-unknown-linux-gnu",
   runTests: true,
+}, {
+  os: OperatingSystem.Linux,
+  target: "aarch64-unknown-linux-gnu",
+  runTests: false,
 }];
 const profiles = profileDataItems.map((profile) => {
   return {
