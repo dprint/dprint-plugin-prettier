@@ -12,7 +12,7 @@ interface ProfileData {
   os: OperatingSystem;
   target: string;
   runTests?: boolean;
-  installCargoTarget?: boolean;
+  cross?: boolean;
 }
 
 const profileDataItems: ProfileData[] = [{
@@ -31,7 +31,7 @@ const profileDataItems: ProfileData[] = [{
   os: OperatingSystem.Linux,
   target: "aarch64-unknown-linux-gnu",
   runTests: false,
-  installCargoTarget: true,
+  cross: true,
 }];
 const profiles = profileDataItems.map((profile) => {
   return {
@@ -62,7 +62,7 @@ const ci = {
           config: profiles.map((profile) => ({
             os: profile.os,
             run_tests: (profile.runTests ?? false).toString(),
-            install_cargo_target: (profile.installCargoTarget ?? false).toString(),
+            cross: (profile.cross ?? false).toString(),
             target: profile.target,
           })),
         },
@@ -102,19 +102,35 @@ const ci = {
           run: "cd js/node && npm ci",
         },
         {
-          name: "install rustup target",
-          if: "matrix.config.install_cargo_target == 'true'",
-          run: "rustup target add ${{matrix.config.target}}",
+          name: "Setup cross",
+          if: "matrix.config.cross == 'true'",
+          run: [
+            "cargo install cross --git https://github.com/cross-rs/cross --rev 44011c8854cb2eaac83b173cc323220ccdff18ea",
+          ].join("\n"),
         },
         {
           name: "Build (Debug)",
-          if: "!startsWith(github.ref, 'refs/tags/')",
+          if: "matrix.config.cross != 'true' && !startsWith(github.ref, 'refs/tags/')",
           run: "cargo build --locked --all-targets --target ${{matrix.config.target}}",
         },
         {
           name: "Build release",
-          if: "startsWith(github.ref, 'refs/tags/')",
+          if: "matrix.config.cross != 'true' && startsWith(github.ref, 'refs/tags/')",
           run: "cargo build --locked --all-targets --target ${{matrix.config.target}} --release",
+        },
+        {
+          name: "Build cross (Debug)",
+          if: "matrix.config.cross == 'true' && !startsWith(github.ref, 'refs/tags/')",
+          run: [
+            "cross build --locked --target ${{matrix.config.target}}",
+          ].join("\n"),
+        },
+        {
+          name: "Build cross (Release)",
+          if: "matrix.config.cross == 'true' && startsWith(github.ref, 'refs/tags/')",
+          run: [
+            "cross build --locked --target ${{matrix.config.target}} --release",
+          ].join("\n"),
         },
         {
           name: "Lint",
