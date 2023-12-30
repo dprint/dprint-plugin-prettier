@@ -22,12 +22,17 @@ fn main() {
   let js_src_dir = js_dir.join("node").join("src");
   let supported_extensions_path = out_dir.join("SUPPORTED_EXTENSIONS.json");
 
-  let status = Command::new("deno")
-    .args(["task", "build"])
-    .status()
-    .unwrap();
-  if status.code() != Some(0) {
-    panic!("Error building.");
+  let build_result = Command::new("deno").args(["task", "build"]).status();
+  match build_result {
+    Ok(status) => {
+      if status.code() != Some(0) {
+        panic!("Error building.");
+      }
+    }
+    Err(err) if err.kind() == std::io::ErrorKind::NotFound => {
+      eprintln!("Skipping build because deno executable not found.");
+    }
+    Err(err) => panic!("Error building to script: {}", err),
   }
 
   // ensure the build is invalidated if any of these files change
@@ -48,7 +53,11 @@ fn main() {
     js_src_dir.join("shims/url.js").display()
   );
 
-  create_snapshot(startup_snapshot_path.clone(), &js_dir);
+  let startup_code_path = js_dir.join("node/dist/main.js");
+  if !startup_code_path.exists() {
+    panic!("Run `deno task build` first.");
+  }
+  create_snapshot(startup_snapshot_path.clone(), &startup_code_path);
 
   // serialize the supported extensions
   eprintln!("Creating runtime...");
@@ -74,8 +83,7 @@ fn main() {
   eprintln!("Done");
 }
 
-fn create_snapshot(snapshot_path: PathBuf, js_dir: &Path) {
-  let startup_code_path = js_dir.join("node/dist/main.js");
+fn create_snapshot(snapshot_path: PathBuf, startup_code_path: &Path) {
   let startup_text = std::fs::read_to_string(startup_code_path).unwrap();
   dprint_plugin_deno_base::build::create_snapshot(
     dprint_plugin_deno_base::build::CreateSnapshotOptions {
