@@ -12,6 +12,7 @@ interface ProfileData {
   os: OperatingSystem;
   target: string;
   runTests?: boolean;
+  installCargoTarget?: boolean;
 }
 
 const profileDataItems: ProfileData[] = [{
@@ -30,6 +31,7 @@ const profileDataItems: ProfileData[] = [{
   os: OperatingSystem.Linux,
   target: "aarch64-unknown-linux-gnu",
   runTests: false,
+  installCargoTarget: true,
 }];
 const profiles = profileDataItems.map((profile) => {
   return {
@@ -60,6 +62,7 @@ const ci = {
           config: profiles.map((profile) => ({
             os: profile.os,
             run_tests: (profile.runTests ?? false).toString(),
+            install_cargo_target: (profile.installCargoTarget ?? false).toString(),
             target: profile.target,
           })),
         },
@@ -97,6 +100,11 @@ const ci = {
         {
           name: "npm install",
           run: "cd js/node && npm ci",
+        },
+        {
+          name: "install cargo target",
+          if: "matrix.config.install_cargo_target == 'true'",
+          run: "cargo target add ${{matrix.config.target}}",
         },
         {
           name: "Build (Debug)",
