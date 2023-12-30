@@ -102,9 +102,9 @@ const ci = {
           run: "cd js/node && npm ci",
         },
         {
-          name: "install cargo target",
+          name: "install rustup target",
           if: "matrix.config.install_cargo_target == 'true'",
-          run: "cargo target add ${{matrix.config.target}}",
+          run: "rustup target add ${{matrix.config.target}}",
         },
         {
           name: "Build (Debug)",

@@ -58,9 +58,9 @@ jobs:
           node-version: 18
       - name: npm install
         run: cd js/node && npm ci
-      - name: install cargo target
+      - name: install rustup target
         if: matrix.config.install_cargo_target == 'true'
-        run: "cargo target add ${{matrix.config.target}}"
+        run: "rustup target add ${{matrix.config.target}}"
       - name: Build (Debug)
         if: "!startsWith(github.ref, 'refs/tags/')"
         run: "cargo build --locked --all-targets --target ${{matrix.config.target}}"
