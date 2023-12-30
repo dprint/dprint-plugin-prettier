@@ -105,6 +105,7 @@ const ci = {
           name: "Setup cross",
           if: "matrix.config.cross == 'true'",
           run: [
+            "deno task build",
             "cargo install cross --git https://github.com/cross-rs/cross --rev 44011c8854cb2eaac83b173cc323220ccdff18ea",
           ].join("\n"),
         },
