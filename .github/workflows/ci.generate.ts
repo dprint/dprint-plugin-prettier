@@ -112,7 +112,7 @@ const ci = {
         {
           name: "Build (Debug)",
           if: "matrix.config.cross != 'true' && !startsWith(github.ref, 'refs/tags/')",
-          run: "cargo build --locked --all-targets --target ${{matrix.config.target}} --release",
+          run: "cargo build --locked --all-targets --target ${{matrix.config.target}}",
         },
         {
           name: "Build release",
@@ -123,7 +123,7 @@ const ci = {
           name: "Build cross (Debug)",
           if: "matrix.config.cross == 'true' && !startsWith(github.ref, 'refs/tags/')",
           run: [
-            "cross build --locked --target ${{matrix.config.target}}",
+            "cross build --locked --target ${{matrix.config.target}} --release",
           ].join("\n"),
         },
         {
