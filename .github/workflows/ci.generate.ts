@@ -86,7 +86,7 @@ const ci = {
           name: "Cache cargo",
           uses: "Swatinem/rust-cache@v2",
           with: {
-            "prefix-key": "v3-rust",
+            "prefix-key": "v3-${{matrix.config.target}}",
             "save-if": "${{ github.ref == 'refs/heads/main' }}",
           },
         },
