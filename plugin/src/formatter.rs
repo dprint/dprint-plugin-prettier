@@ -51,7 +51,7 @@ impl Formatter<PrettierConfig> for PrettierFormatter {
   async fn format_text(
     &mut self,
     request: FormatRequest<PrettierConfig>,
-  ) -> Result<Option<String>, Error> {
+  ) -> Result<Option<Vec<u8>>, Error> {
     // todo: implement cancellation and range formatting
     let request_value = serde_json::Value::Object({
       let mut obj = serde_json::Map::new();
@@ -59,7 +59,10 @@ impl Formatter<PrettierConfig> for PrettierFormatter {
         "filePath".to_string(),
         request.file_path.to_string_lossy().into(),
       );
-      obj.insert("fileText".to_string(), request.file_text.into());
+      obj.insert(
+        "fileText".to_string(),
+        String::from_utf8(request.file_bytes)?.into(),
+      );
       obj
     });
     let file_path = request.file_path.to_string_lossy();
@@ -70,7 +73,11 @@ impl Formatter<PrettierConfig> for PrettierFormatter {
       serde_json::to_string(&resolve_config(&file_path, config)).unwrap(),
       serde_json::to_string(&config.plugins).unwrap(),
     );
-    self.runtime.execute_format_script(code).await
+    self
+      .runtime
+      .execute_format_script(code)
+      .await
+      .map(|s| s.map(|s| s.into_bytes()))
   }
 }
 

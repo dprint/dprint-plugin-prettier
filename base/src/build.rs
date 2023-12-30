@@ -19,6 +19,7 @@ pub fn create_snapshot(options: CreateSnapshotOptions) -> CreateSnapshotOutput {
     snapshot_path: options.snapshot_path,
     startup_snapshot: None,
     extensions: options.extensions,
+    skip_op_registration: false,
     #[cfg(debug_assertions)]
     compression_cb: None,
     #[cfg(not(debug_assertions))]

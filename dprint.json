@@ -18,7 +18,7 @@
     "https://plugins.dprint.dev/json-0.19.1.wasm",
     "https://plugins.dprint.dev/markdown-0.16.3.wasm",
     "https://plugins.dprint.dev/exec-0.4.4.json@c207bf9b9a4ee1f0ecb75c594f774924baf62e8e53a2ce9d873816a408cecbf7",
-    "https://plugins.dprint.dev/prettier-0.28.1.json@a4808eb7b1edaa23e7df7f1facc9483b494b639c2de9f25034339f76c71d9636",
+    "https://plugins.dprint.dev/prettier-0.32.0.json@fa93f05ab38f00c6de138f7747372585c661f79dfb11d7f1209c069b56680820",
     "https://plugins.dprint.dev/toml-0.5.4.wasm"
   ]
 }

@@ -58,6 +58,8 @@ fn main() {
     extensions: Vec::new(),
     startup_snapshot: Some(StartupSnapshot::Boxed(snapshot)),
   });
+
+  eprintln!("Getting extensions...");
   let file_extensions = tokio_runtime
     .block_on(runtime.execute_async_fn::<Vec<String>>(
       "deno:get_extensions.js",
@@ -69,6 +71,7 @@ fn main() {
     deno_core::serde_json::to_string(&file_extensions).unwrap(),
   )
   .unwrap();
+  eprintln!("Done");
 }
 
 fn create_snapshot(snapshot_path: PathBuf, js_dir: &Path) {

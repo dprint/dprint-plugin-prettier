@@ -4,6 +4,7 @@ use deno_core::anyhow::Result;
 use deno_core::serde_v8;
 use deno_core::v8;
 use deno_core::Extension;
+use deno_core::PollEventLoopOptions;
 use deno_core::RuntimeOptions;
 use serde::Deserialize;
 
@@ -42,7 +43,11 @@ impl JsRuntime {
 
   pub async fn execute_format_script(&mut self, code: String) -> Result<Option<String>, Error> {
     let global = self.inner.execute_script("format.js", code.into())?;
-    let global = self.inner.resolve_value(global).await?;
+    let resolve = self.inner.resolve(global);
+    let global = self
+      .inner
+      .with_event_loop_promise(resolve, PollEventLoopOptions::default())
+      .await?;
     let scope = &mut self.inner.handle_scope();
     let local = v8::Local::new(scope, global);
     if local.is_undefined() {
@@ -66,12 +71,15 @@ impl JsRuntime {
   {
     let inner = &mut self.inner;
     let fn_value = inner.execute_script(script_name, fn_name.into())?;
-    let fn_value = inner.resolve_value(fn_value).await?;
+    let fn_value = inner.resolve(fn_value).await?;
     let mut scope = inner.handle_scope();
     let fn_func: v8::Local<v8::Function> = v8::Local::new(&mut scope, fn_value).try_into()?;
     let fn_func = v8::Global::new(&mut scope, fn_func);
     drop(scope);
-    let result = inner.call_and_await(&fn_func).await?;
+    let call = inner.call(&fn_func);
+    let result = inner
+      .with_event_loop_promise(call, PollEventLoopOptions::default())
+      .await?;
     let mut scope = inner.handle_scope();
     let local = v8::Local::new(&mut scope, result);
     Ok(serde_v8::from_v8::<T>(&mut scope, local)?)

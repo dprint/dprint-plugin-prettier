@@ -16,7 +16,7 @@ pub trait Formatter<TConfiguration> {
   async fn format_text(
     &mut self,
     request: FormatRequest<TConfiguration>,
-  ) -> Result<Option<String>, Error>;
+  ) -> Result<Option<Vec<u8>>, Error>;
 }
 
 pub type CreateFormatterCb<TConfiguration> =

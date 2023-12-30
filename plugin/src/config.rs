@@ -84,13 +84,6 @@ pub fn resolve_config(
         NewLineKind::Auto => "auto",
         NewLineKind::CarriageReturnLineFeed => "crlf",
         NewLineKind::LineFeed => "lf",
-        NewLineKind::System => {
-          if cfg!(windows) {
-            "crlf"
-          } else {
-            "lf"
-          }
-        }
       }
       .into(),
     );

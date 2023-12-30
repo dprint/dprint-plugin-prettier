@@ -37,13 +37,13 @@ fn test_specs() {
         let config_result = resolve_config(spec_config, Default::default());
         ensure_no_diagnostics(&config_result.diagnostics);
 
-        handle.block_on(async {
+        let result = handle.block_on(async {
           handler
             .format(
               FormatRequest {
                 config_id: FormatConfigId::from_raw(0),
                 file_path: file_name.to_path_buf(),
-                file_text: file_text.to_string(),
+                file_bytes: file_text.to_string().into_bytes(),
                 config: Arc::new(config_result.config),
                 range: None,
                 token: Arc::new(NullCancellationToken),
@@ -51,7 +51,8 @@ fn test_specs() {
               |_| std::future::ready(Ok(None)).boxed_local(),
             )
             .await
-        })
+        });
+        result.map(|r| r.map(|r| String::from_utf8(r).unwrap()))
       }
     },
     move |_file_name, _file_text, _spec_config| panic!("Not supported."),
@@ -69,7 +70,7 @@ fn handle_syntax_error() {
         FormatRequest {
           config_id: FormatConfigId::from_raw(0),
           file_path: PathBuf::from("file.js"),
-          file_text: "const v =".to_string(),
+          file_bytes: "const v =".to_string().into_bytes(),
           config: Arc::new(Default::default()),
           range: None,
           token: Arc::new(NullCancellationToken),
@@ -95,7 +96,7 @@ fn handle_invalid_file() {
         FormatRequest {
           config_id: FormatConfigId::from_raw(0),
           file_path: PathBuf::from("file.txt"),
-          file_text: "const v =".to_string(),
+          file_bytes: "const v =".to_string().into_bytes(),
           config: Arc::new(Default::default()),
           range: None,
           token: Arc::new(NullCancellationToken),
