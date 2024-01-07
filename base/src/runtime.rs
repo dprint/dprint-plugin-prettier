@@ -41,6 +41,11 @@ impl JsRuntime {
     }
   }
 
+  /// Call this once on the main thread.
+  pub fn initialize_main_thread() {
+    deno_core::JsRuntime::init_platform(None)
+  }
+
   pub async fn execute_format_script(&mut self, code: String) -> Result<Option<String>, Error> {
     let global = self.inner.execute_script("format.js", code.into())?;
     let resolve = self.inner.resolve(global);

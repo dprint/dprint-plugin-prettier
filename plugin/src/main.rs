@@ -1,6 +1,7 @@
 use dprint_core::plugins::process::get_parent_process_id_from_cli_args;
 use dprint_core::plugins::process::handle_process_stdio_messages;
 use dprint_core::plugins::process::start_parent_process_checker_task;
+use dprint_plugin_deno_base::runtime::JsRuntime;
 use dprint_plugin_deno_base::util::create_tokio_runtime;
 use handler::PrettierPluginHandler;
 
@@ -9,6 +10,7 @@ mod formatter;
 mod handler;
 
 fn main() {
+  JsRuntime::initialize_main_thread();
   let runtime = create_tokio_runtime();
   let result = runtime.block_on(async {
     if let Some(parent_process_id) = get_parent_process_id_from_cli_args() {

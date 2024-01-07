@@ -11,7 +11,7 @@ $.logStep("Upgrading prettier...");
 const jsNodePath = rootDirPath.join("./js/node");
 await $`npm install`.cwd(jsNodePath);
 await $`npm install --save prettier`.cwd(jsNodePath);
-await $`npm install --save prettier-plugin-astro`.cwd(jsNodePath);
+// await $`npm install --save prettier-plugin-astro`.cwd(jsNodePath);
 await $`npm install --save prettier-plugin-jsdoc`.cwd(jsNodePath);
 await $`npm install --save prettier-plugin-svelte`.cwd(jsNodePath);
 
