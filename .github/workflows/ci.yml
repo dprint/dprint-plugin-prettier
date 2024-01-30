@@ -24,6 +24,10 @@ jobs:
             run_tests: "true"
             cross: "false"
             target: x86_64-apple-darwin
+          - os: macOS-latest-xlarge
+            run_tests: "true"
+            cross: "false"
+            target: aarch64-apple-darwin
           - os: windows-latest
             run_tests: "true"
             cross: "false"
@@ -38,6 +42,7 @@ jobs:
             target: aarch64-unknown-linux-gnu
     outputs:
       ZIP_CHECKSUM_X86_64_APPLE_DARWIN: "${{steps.pre_release_x86_64_apple_darwin.outputs.ZIP_CHECKSUM}}"
+      ZIP_CHECKSUM_AARCH64_APPLE_DARWIN: "${{steps.pre_release_aarch64_apple_darwin.outputs.ZIP_CHECKSUM}}"
       ZIP_CHECKSUM_X86_64_PC_WINDOWS_MSVC: "${{steps.pre_release_x86_64_pc_windows_msvc.outputs.ZIP_CHECKSUM}}"
       ZIP_CHECKSUM_X86_64_UNKNOWN_LINUX_GNU: "${{steps.pre_release_x86_64_unknown_linux_gnu.outputs.ZIP_CHECKSUM}}"
       ZIP_CHECKSUM_AARCH64_UNKNOWN_LINUX_GNU: "${{steps.pre_release_aarch64_unknown_linux_gnu.outputs.ZIP_CHECKSUM}}"
@@ -91,6 +96,13 @@ jobs:
           cd target/x86_64-apple-darwin/release
           zip -r dprint-plugin-prettier-x86_64-apple-darwin.zip dprint-plugin-prettier
           echo "::set-output name=ZIP_CHECKSUM::$(shasum -a 256 dprint-plugin-prettier-x86_64-apple-darwin.zip | awk '{print $1}')"
+      - name: Pre-release (aarch64-apple-darwin)
+        id: pre_release_aarch64_apple_darwin
+        if: "matrix.config.target == 'aarch64-apple-darwin' && startsWith(github.ref, 'refs/tags/')"
+        run: |-
+          cd target/aarch64-apple-darwin/release
+          zip -r dprint-plugin-prettier-aarch64-apple-darwin.zip dprint-plugin-prettier
+          echo "::set-output name=ZIP_CHECKSUM::$(shasum -a 256 dprint-plugin-prettier-aarch64-apple-darwin.zip | awk '{print $1}')"
       - name: Pre-release (x86_64-pc-windows-msvc)
         id: pre_release_x86_64_pc_windows_msvc
         if: "matrix.config.target == 'x86_64-pc-windows-msvc' && startsWith(github.ref, 'refs/tags/')"
@@ -117,6 +129,12 @@ jobs:
         with:
           name: x86_64-apple-darwin-artifacts
           path: target/x86_64-apple-darwin/release/dprint-plugin-prettier-x86_64-apple-darwin.zip
+      - name: Upload artifacts (aarch64-apple-darwin)
+        if: "matrix.config.target == 'aarch64-apple-darwin' && startsWith(github.ref, 'refs/tags/')"
+        uses: actions/upload-artifact@v2
+        with:
+          name: aarch64-apple-darwin-artifacts
+          path: target/aarch64-apple-darwin/release/dprint-plugin-prettier-aarch64-apple-darwin.zip
       - name: Upload artifacts (x86_64-pc-windows-msvc)
         if: "matrix.config.target == 'x86_64-pc-windows-msvc' && startsWith(github.ref, 'refs/tags/')"
         uses: actions/upload-artifact@v2
@@ -149,12 +167,14 @@ jobs:
       - name: Move downloaded artifacts to root directory
         run: |-
           mv x86_64-apple-darwin-artifacts/dprint-plugin-prettier-x86_64-apple-darwin.zip .
+          mv aarch64-apple-darwin-artifacts/dprint-plugin-prettier-aarch64-apple-darwin.zip .
           mv x86_64-pc-windows-msvc-artifacts/dprint-plugin-prettier-x86_64-pc-windows-msvc.zip .
           mv x86_64-unknown-linux-gnu-artifacts/dprint-plugin-prettier-x86_64-unknown-linux-gnu.zip .
           mv aarch64-unknown-linux-gnu-artifacts/dprint-plugin-prettier-aarch64-unknown-linux-gnu.zip .
       - name: Output checksums
         run: |-
           echo "dprint-plugin-prettier-x86_64-apple-darwin.zip: ${{needs.build.outputs.ZIP_CHECKSUM_X86_64_APPLE_DARWIN}}"
+          echo "dprint-plugin-prettier-aarch64-apple-darwin.zip: ${{needs.build.outputs.ZIP_CHECKSUM_AARCH64_APPLE_DARWIN}}"
           echo "dprint-plugin-prettier-x86_64-pc-windows-msvc.zip: ${{needs.build.outputs.ZIP_CHECKSUM_X86_64_PC_WINDOWS_MSVC}}"
           echo "dprint-plugin-prettier-x86_64-unknown-linux-gnu.zip: ${{needs.build.outputs.ZIP_CHECKSUM_X86_64_UNKNOWN_LINUX_GNU}}"
           echo "dprint-plugin-prettier-aarch64-unknown-linux-gnu.zip: ${{needs.build.outputs.ZIP_CHECKSUM_AARCH64_UNKNOWN_LINUX_GNU}}"
@@ -173,6 +193,7 @@ jobs:
         with:
           files: |-
             dprint-plugin-prettier-x86_64-apple-darwin.zip
+            dprint-plugin-prettier-aarch64-apple-darwin.zip
             dprint-plugin-prettier-x86_64-pc-windows-msvc.zip
             dprint-plugin-prettier-x86_64-unknown-linux-gnu.zip
             dprint-plugin-prettier-aarch64-unknown-linux-gnu.zip

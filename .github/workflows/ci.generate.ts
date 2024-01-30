@@ -20,6 +20,10 @@ const profileDataItems: ProfileData[] = [{
   target: "x86_64-apple-darwin",
   runTests: true,
 }, {
+  os: OperatingSystem.Mac,
+  target: "aarch64-apple-darwin",
+  runTests: true,
+}, {
   os: OperatingSystem.Windows,
   target: "x86_64-pc-windows-msvc",
   runTests: true,
