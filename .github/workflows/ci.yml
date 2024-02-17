@@ -24,7 +24,7 @@ jobs:
             run_tests: "true"
             cross: "false"
             target: x86_64-apple-darwin
-          - os: macOS-latest-xlarge
+          - os: macOS-latest
             run_tests: "true"
             cross: "false"
             target: aarch64-apple-darwin
