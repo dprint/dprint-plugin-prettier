@@ -24,7 +24,7 @@ jobs:
             run_tests: "true"
             cross: "false"
             target: x86_64-apple-darwin
-          - os: macOS-latest
+          - os: macos-14
             run_tests: "true"
             cross: "false"
             target: aarch64-apple-darwin
@@ -57,6 +57,9 @@ jobs:
         with:
           prefix-key: "v3-${{matrix.config.target}}"
           save-if: "${{ github.ref == 'refs/heads/main' }}"
+      - name: Setup Rust (aarch64-apple-darwin)
+        if: matrix.config.target == 'aarch64-apple-darwin'
+        runs: rustup target add aarch64-apple-darwin
       - uses: denoland/setup-deno@v1
       - uses: actions/setup-node@v3
         with:
