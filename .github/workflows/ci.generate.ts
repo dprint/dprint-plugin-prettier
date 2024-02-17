@@ -95,6 +95,11 @@ const ci = {
             "save-if": "${{ github.ref == 'refs/heads/main' }}",
           },
         },
+        {
+          name: "Setup Rust (aarch64-apple-darwin)",
+          if: `matrix.config.target == 'aarch64-apple-darwin'`,
+          runs: "rustup target add aarch64-apple-darwin",
+        },
         { uses: "denoland/setup-deno@v1" },
         {
           uses: "actions/setup-node@v3",
