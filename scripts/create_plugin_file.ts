@@ -11,6 +11,7 @@ await processPlugin.createDprintOrgProcessPlugin({
   version: new CargoToml(cargoFilePath).version(),
   platforms: [
     "darwin-x86_64",
+    "darwin-aarch64",
     "linux-x86_64",
     "linux-aarch64",
     "windows-x86_64",

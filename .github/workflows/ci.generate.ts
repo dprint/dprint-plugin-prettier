@@ -1,34 +1,39 @@
 import * as yaml from "https://deno.land/std@0.170.0/encoding/yaml.ts";
 import $ from "https://deno.land/x/dax@0.35.0/mod.ts";
 
-enum OperatingSystem {
-  Mac = "macOS-latest",
+enum Runner {
+  MacLatest = "macOS-latest",
+  Mac14 = "macos-14",
   Windows = "windows-latest",
   //  uses an older version of ubuntu because of issue dprint/#483
   Linux = "ubuntu-20.04",
 }
 
 interface ProfileData {
-  os: OperatingSystem;
+  runner: Runner;
   target: string;
   runTests?: boolean;
   cross?: boolean;
 }
 
 const profileDataItems: ProfileData[] = [{
-  os: OperatingSystem.Mac,
+  runner: Runner.MacLatest,
   target: "x86_64-apple-darwin",
   runTests: true,
 }, {
-  os: OperatingSystem.Windows,
+  runner: Runner.Mac14,
+  target: "aarch64-apple-darwin",
+  runTests: true,
+}, {
+  runner: Runner.Windows,
   target: "x86_64-pc-windows-msvc",
   runTests: true,
 }, {
-  os: OperatingSystem.Linux,
+  runner: Runner.Linux,
   target: "x86_64-unknown-linux-gnu",
   runTests: true,
 }, {
-  os: OperatingSystem.Linux,
+  runner: Runner.Linux,
   target: "aarch64-unknown-linux-gnu",
   runTests: false,
   cross: true,
@@ -60,7 +65,7 @@ const ci = {
       strategy: {
         matrix: {
           config: profiles.map((profile) => ({
-            os: profile.os,
+            os: profile.runner,
             run_tests: (profile.runTests ?? false).toString(),
             cross: (profile.cross ?? false).toString(),
             target: profile.target,
@@ -89,6 +94,11 @@ const ci = {
             "prefix-key": "v3-${{matrix.config.target}}",
             "save-if": "${{ github.ref == 'refs/heads/main' }}",
           },
+        },
+        {
+          name: "Setup Rust (aarch64-apple-darwin)",
+          if: `matrix.config.target == 'aarch64-apple-darwin'`,
+          run: "rustup target add aarch64-apple-darwin",
         },
         { uses: "denoland/setup-deno@v1" },
         {
@@ -151,20 +161,21 @@ const ci = {
         // zip files
         ...profiles.map((profile) => {
           function getRunSteps() {
-            switch (profile.os) {
-              case OperatingSystem.Mac:
+            switch (profile.runner) {
+              case Runner.MacLatest:
+              case Runner.Mac14:
                 return [
                   `cd target/${profile.target}/release`,
                   `zip -r ${profile.zipFileName} dprint-plugin-prettier`,
                   `echo \"::set-output name=ZIP_CHECKSUM::$(shasum -a 256 ${profile.zipFileName} | awk '{print $1}')\"`,
                 ];
-              case OperatingSystem.Linux:
+              case Runner.Linux:
                 return [
                   `cd target/${profile.target}/release`,
                   `zip -r ${profile.zipFileName} dprint-plugin-prettier`,
                   `echo \"::set-output name=ZIP_CHECKSUM::$(shasum -a 256 ${profile.zipFileName} | awk '{print $1}')\"`,
                 ];
-              case OperatingSystem.Windows:
+              case Runner.Windows:
                 return [
                   `Compress-Archive -CompressionLevel Optimal -Force -Path target/${profile.target}/release/dprint-plugin-prettier.exe -DestinationPath target/${profile.target}/release/${profile.zipFileName}`,
                   `echo "::set-output name=ZIP_CHECKSUM::$(shasum -a 256 target/${profile.target}/release/${profile.zipFileName} | awk '{print $1}')"`,
