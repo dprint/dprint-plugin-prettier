@@ -67,11 +67,13 @@ impl AsyncPluginHandler for PrettierPluginHandler {
     global_config: GlobalConfiguration,
   ) -> PluginResolveConfigurationResult<Self::Configuration> {
     let result = resolve_config(config, global_config);
+
+    let file_extensions = get_file_extensions(&result.config.extension_overrides);
     PluginResolveConfigurationResult {
       config: result.config,
       diagnostics: result.diagnostics,
       file_matching: FileMatchingInfo {
-        file_extensions: SUPPORTED_EXTENSIONS.clone(),
+        file_extensions,
         file_names: vec![],
       },
     }
@@ -89,4 +91,21 @@ impl AsyncPluginHandler for PrettierPluginHandler {
 
     self.channel.format(request).await
   }
+}
+
+fn get_file_extensions(
+  extension_overrides: &serde_json::Map<String, serde_json::Value>,
+) -> Vec<String> {
+  let mut extension_parsers = extension_overrides
+    .iter()
+    .filter_map(|(key, value)| {
+      if value.get("parser").is_some() {
+        Some(key.clone())
+      } else {
+        None
+      }
+    })
+    .collect::<Vec<_>>();
+  extension_parsers.extend(SUPPORTED_EXTENSIONS.clone());
+  extension_parsers
 }
