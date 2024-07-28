@@ -3,21 +3,20 @@ use deno_core::anyhow::Error;
 use deno_core::anyhow::Result;
 use deno_core::serde_v8;
 use deno_core::v8;
+use deno_core::v8::Platform;
+use deno_core::v8::SharedRef;
 use deno_core::Extension;
 use deno_core::PollEventLoopOptions;
 use deno_core::RuntimeOptions;
+use once_cell::sync::Lazy;
 use serde::Deserialize;
 
-use super::snapshot::Snapshot;
-
-pub enum StartupSnapshot {
-  Static(&'static Snapshot),
-  Boxed(Snapshot),
-}
+static PLATFORM: Lazy<SharedRef<Platform>> =
+  Lazy::new(|| v8::new_default_platform(1, false).make_shared());
 
 pub struct CreateRuntimeOptions {
   pub extensions: Vec<Extension>,
-  pub startup_snapshot: Option<StartupSnapshot>,
+  pub startup_snapshot: Option<&'static [u8]>,
 }
 
 pub struct JsRuntime {
@@ -26,15 +25,10 @@ pub struct JsRuntime {
 
 impl JsRuntime {
   pub fn new(options: CreateRuntimeOptions) -> JsRuntime {
-    let maybe_snapshot = options.startup_snapshot.map(|s| match s {
-      StartupSnapshot::Static(s) => deno_core::Snapshot::Static(s.inner()),
-      StartupSnapshot::Boxed(s) => deno_core::Snapshot::Boxed(s.into_inner()),
-    });
-    let platform = v8::new_default_platform(1, false).make_shared();
     JsRuntime {
       inner: deno_core::JsRuntime::new(RuntimeOptions {
-        startup_snapshot: maybe_snapshot,
-        v8_platform: Some(platform),
+        startup_snapshot: options.startup_snapshot,
+        v8_platform: Some(PLATFORM.clone()),
         extensions: options.extensions,
         ..Default::default()
       }),
@@ -43,11 +37,11 @@ impl JsRuntime {
 
   /// Call this once on the main thread.
   pub fn initialize_main_thread() {
-    deno_core::JsRuntime::init_platform(None)
+    deno_core::JsRuntime::init_platform(Some(PLATFORM.clone()))
   }
 
   pub async fn execute_format_script(&mut self, code: String) -> Result<Option<String>, Error> {
-    let global = self.inner.execute_script("format.js", code.into())?;
+    let global = self.inner.execute_script("format.js", code)?;
     let resolve = self.inner.resolve(global);
     let global = self
       .inner
@@ -66,6 +60,10 @@ impl JsRuntime {
     }
   }
 
+  pub fn execute_script(&mut self, script_name: &'static str, code: String) -> Result<(), Error> {
+    self.inner.execute_script(script_name, code).map(|_| ())
+  }
+
   pub async fn execute_async_fn<'de, T>(
     &mut self,
     script_name: &'static str,
@@ -75,7 +73,7 @@ impl JsRuntime {
     T: Deserialize<'de>,
   {
     let inner = &mut self.inner;
-    let fn_value = inner.execute_script(script_name, fn_name.into())?;
+    let fn_value = inner.execute_script(script_name, fn_name)?;
     let fn_value = inner.resolve(fn_value).await?;
     let mut scope = inner.handle_scope();
     let fn_func: v8::Local<v8::Function> = v8::Local::new(&mut scope, fn_value).try_into()?;

@@ -7,8 +7,7 @@ use dprint_core::plugins::FormatRequest;
 use dprint_plugin_deno_base::channel::Formatter;
 use dprint_plugin_deno_base::runtime::CreateRuntimeOptions;
 use dprint_plugin_deno_base::runtime::JsRuntime;
-use dprint_plugin_deno_base::runtime::StartupSnapshot;
-use dprint_plugin_deno_base::snapshot::Snapshot;
+use dprint_plugin_deno_base::snapshot::deserialize_snapshot;
 use dprint_plugin_deno_base::util::set_v8_max_memory;
 use once_cell::sync::Lazy;
 
@@ -16,7 +15,7 @@ use crate::config::PrettierConfig;
 
 // Copied from Deno's codebase:
 // https://github.com/denoland/deno/blob/daa7c6d32ab5a4029f8084e174d621f5562256be/cli/tsc.rs#L55
-static STARTUP_SNAPSHOT: Lazy<Snapshot> = Lazy::new(
+static STARTUP_SNAPSHOT: Lazy<Box<[u8]>> = Lazy::new(
   #[cold]
   #[inline(never)]
   || {
@@ -28,7 +27,7 @@ static STARTUP_SNAPSHOT: Lazy<Snapshot> = Lazy::new(
     static COMPRESSED_COMPILER_SNAPSHOT: &[u8] =
       include_bytes!(concat!(env!("OUT_DIR"), "/STARTUP_SNAPSHOT.bin"));
 
-    Snapshot::deserialize(COMPRESSED_COMPILER_SNAPSHOT).unwrap()
+    deserialize_snapshot(COMPRESSED_COMPILER_SNAPSHOT).unwrap()
   },
 );
 
@@ -39,8 +38,12 @@ pub struct PrettierFormatter {
 impl Default for PrettierFormatter {
   fn default() -> Self {
     let runtime = JsRuntime::new(CreateRuntimeOptions {
-      extensions: Vec::new(),
-      startup_snapshot: Some(StartupSnapshot::Static(&STARTUP_SNAPSHOT)),
+      extensions: vec![
+        deno_webidl::deno_webidl::init_ops(),
+        deno_console::deno_console::init_ops(),
+        deno_url::deno_url::init_ops(),
+      ],
+      startup_snapshot: Some(&STARTUP_SNAPSHOT),
     });
     Self { runtime }
   }
