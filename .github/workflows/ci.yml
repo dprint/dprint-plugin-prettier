@@ -20,11 +20,11 @@ jobs:
     strategy:
       matrix:
         config:
-          - os: macOS-latest
+          - os: macos-13
             run_tests: "true"
             cross: "false"
             target: x86_64-apple-darwin
-          - os: macos-14
+          - os: macos-latest
             run_tests: "true"
             cross: "false"
             target: aarch64-apple-darwin
@@ -50,7 +50,7 @@ jobs:
       CARGO_INCREMENTAL: 0
       RUST_BACKTRACE: full
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - uses: dsherret/rust-toolchain-file@v1
       - name: Cache cargo
         uses: Swatinem/rust-cache@v2
@@ -61,7 +61,7 @@ jobs:
         if: matrix.config.target == 'aarch64-apple-darwin'
         run: rustup target add aarch64-apple-darwin
       - uses: denoland/setup-deno@v1
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: 18
       - name: npm install

@@ -2,8 +2,8 @@ import * as yaml from "https://deno.land/std@0.170.0/encoding/yaml.ts";
 import $ from "https://deno.land/x/dax@0.35.0/mod.ts";
 
 enum Runner {
-  MacLatest = "macOS-latest",
-  Mac14 = "macos-14",
+  Mac13 = "macos-13",
+  MacLatest = "macos-latest",
   Windows = "windows-latest",
   //  uses an older version of ubuntu because of issue dprint/#483
   Linux = "ubuntu-20.04",
@@ -17,11 +17,11 @@ interface ProfileData {
 }
 
 const profileDataItems: ProfileData[] = [{
-  runner: Runner.MacLatest,
+  runner: Runner.Mac13,
   target: "x86_64-apple-darwin",
   runTests: true,
 }, {
-  runner: Runner.Mac14,
+  runner: Runner.MacLatest,
   target: "aarch64-apple-darwin",
   runTests: true,
 }, {
@@ -85,7 +85,7 @@ const ci = {
         RUST_BACKTRACE: "full",
       },
       steps: [
-        { uses: "actions/checkout@v2" },
+        { uses: "actions/checkout@v4" },
         { uses: "dsherret/rust-toolchain-file@v1" },
         {
           name: "Cache cargo",
@@ -102,7 +102,7 @@ const ci = {
         },
         { uses: "denoland/setup-deno@v1" },
         {
-          uses: "actions/setup-node@v3",
+          uses: "actions/setup-node@v4",
           with: {
             "node-version": 18,
           },
@@ -162,8 +162,8 @@ const ci = {
         ...profiles.map((profile) => {
           function getRunSteps() {
             switch (profile.runner) {
+              case Runner.Mac13:
               case Runner.MacLatest:
-              case Runner.Mac14:
                 return [
                   `cd target/${profile.target}/release`,
                   `zip -r ${profile.zipFileName} dprint-plugin-prettier`,
