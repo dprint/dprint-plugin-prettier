@@ -53,7 +53,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: dsherret/rust-toolchain-file@v1
       - name: Cache cargo
-        uses: Swatinem/rust-cache@v2
+        uses: Swatinem/rust-cache@v4
         with:
           prefix-key: "v3-${{matrix.config.target}}"
           save-if: "${{ github.ref == 'refs/heads/main' }}"
@@ -98,61 +98,61 @@ jobs:
         run: |-
           cd target/x86_64-apple-darwin/release
           zip -r dprint-plugin-prettier-x86_64-apple-darwin.zip dprint-plugin-prettier
-          echo "::set-output name=ZIP_CHECKSUM::$(shasum -a 256 dprint-plugin-prettier-x86_64-apple-darwin.zip | awk '{print $1}')"
+          echo "ZIP_CHECKSUM=$(shasum -a 256 dprint-plugin-prettier-x86_64-apple-darwin.zip | awk '{print $1}')" >> $GITHUB_OUTPUT
       - name: Pre-release (aarch64-apple-darwin)
         id: pre_release_aarch64_apple_darwin
         if: "matrix.config.target == 'aarch64-apple-darwin' && startsWith(github.ref, 'refs/tags/')"
         run: |-
           cd target/aarch64-apple-darwin/release
           zip -r dprint-plugin-prettier-aarch64-apple-darwin.zip dprint-plugin-prettier
-          echo "::set-output name=ZIP_CHECKSUM::$(shasum -a 256 dprint-plugin-prettier-aarch64-apple-darwin.zip | awk '{print $1}')"
+          echo "ZIP_CHECKSUM=$(shasum -a 256 dprint-plugin-prettier-aarch64-apple-darwin.zip | awk '{print $1}')" >> $GITHUB_OUTPUT
       - name: Pre-release (x86_64-pc-windows-msvc)
         id: pre_release_x86_64_pc_windows_msvc
         if: "matrix.config.target == 'x86_64-pc-windows-msvc' && startsWith(github.ref, 'refs/tags/')"
         run: |-
           Compress-Archive -CompressionLevel Optimal -Force -Path target/x86_64-pc-windows-msvc/release/dprint-plugin-prettier.exe -DestinationPath target/x86_64-pc-windows-msvc/release/dprint-plugin-prettier-x86_64-pc-windows-msvc.zip
-          echo "::set-output name=ZIP_CHECKSUM::$(shasum -a 256 target/x86_64-pc-windows-msvc/release/dprint-plugin-prettier-x86_64-pc-windows-msvc.zip | awk '{print $1}')"
+          echo "ZIP_CHECKSUM=$(shasum -a 256 target/x86_64-pc-windows-msvc/release/dprint-plugin-prettier-x86_64-pc-windows-msvc.zip | awk '{print $1}')" >> $GITHUB_OUTPUT
       - name: Pre-release (x86_64-unknown-linux-gnu)
         id: pre_release_x86_64_unknown_linux_gnu
         if: "matrix.config.target == 'x86_64-unknown-linux-gnu' && startsWith(github.ref, 'refs/tags/')"
         run: |-
           cd target/x86_64-unknown-linux-gnu/release
           zip -r dprint-plugin-prettier-x86_64-unknown-linux-gnu.zip dprint-plugin-prettier
-          echo "::set-output name=ZIP_CHECKSUM::$(shasum -a 256 dprint-plugin-prettier-x86_64-unknown-linux-gnu.zip | awk '{print $1}')"
+          echo "ZIP_CHECKSUM=$(shasum -a 256 dprint-plugin-prettier-x86_64-unknown-linux-gnu.zip | awk '{print $1}')" >> $GITHUB_OUTPUT
       - name: Pre-release (aarch64-unknown-linux-gnu)
         id: pre_release_aarch64_unknown_linux_gnu
         if: "matrix.config.target == 'aarch64-unknown-linux-gnu' && startsWith(github.ref, 'refs/tags/')"
         run: |-
           cd target/aarch64-unknown-linux-gnu/release
           zip -r dprint-plugin-prettier-aarch64-unknown-linux-gnu.zip dprint-plugin-prettier
-          echo "::set-output name=ZIP_CHECKSUM::$(shasum -a 256 dprint-plugin-prettier-aarch64-unknown-linux-gnu.zip | awk '{print $1}')"
+          echo "ZIP_CHECKSUM=$(shasum -a 256 dprint-plugin-prettier-aarch64-unknown-linux-gnu.zip | awk '{print $1}')" >> $GITHUB_OUTPUT
       - name: Upload artifacts (x86_64-apple-darwin)
         if: "matrix.config.target == 'x86_64-apple-darwin' && startsWith(github.ref, 'refs/tags/')"
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: x86_64-apple-darwin-artifacts
           path: target/x86_64-apple-darwin/release/dprint-plugin-prettier-x86_64-apple-darwin.zip
       - name: Upload artifacts (aarch64-apple-darwin)
         if: "matrix.config.target == 'aarch64-apple-darwin' && startsWith(github.ref, 'refs/tags/')"
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: aarch64-apple-darwin-artifacts
           path: target/aarch64-apple-darwin/release/dprint-plugin-prettier-aarch64-apple-darwin.zip
       - name: Upload artifacts (x86_64-pc-windows-msvc)
         if: "matrix.config.target == 'x86_64-pc-windows-msvc' && startsWith(github.ref, 'refs/tags/')"
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: x86_64-pc-windows-msvc-artifacts
           path: target/x86_64-pc-windows-msvc/release/dprint-plugin-prettier-x86_64-pc-windows-msvc.zip
       - name: Upload artifacts (x86_64-unknown-linux-gnu)
         if: "matrix.config.target == 'x86_64-unknown-linux-gnu' && startsWith(github.ref, 'refs/tags/')"
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: x86_64-unknown-linux-gnu-artifacts
           path: target/x86_64-unknown-linux-gnu/release/dprint-plugin-prettier-x86_64-unknown-linux-gnu.zip
       - name: Upload artifacts (aarch64-unknown-linux-gnu)
         if: "matrix.config.target == 'aarch64-unknown-linux-gnu' && startsWith(github.ref, 'refs/tags/')"
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: aarch64-unknown-linux-gnu-artifacts
           path: target/aarch64-unknown-linux-gnu/release/dprint-plugin-prettier-aarch64-unknown-linux-gnu.zip
@@ -165,7 +165,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Download artifacts
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
       - uses: denoland/setup-deno@v1
       - name: Move downloaded artifacts to root directory
         run: |-
@@ -185,10 +185,10 @@ jobs:
         run: deno run -A scripts/create_plugin_file.ts
       - name: Get tag version
         id: get_tag_version
-        run: 'echo ::set-output name=TAG_VERSION::${GITHUB_REF/refs\/tags\//}'
+        run: 'echo TAG_VERSION=${GITHUB_REF/refs\/tags\//} >> $GITHUB_OUTPUT'
       - name: Get plugin file checksum
         id: get_plugin_file_checksum
-        run: 'echo "::set-output name=CHECKSUM::$(shasum -a 256 plugin.json | awk ''{print $1}'')"'
+        run: 'echo "CHECKSUM=$(shasum -a 256 plugin.json | awk ''{print $1}'')" >> $GITHUB_OUTPUT'
       - name: Release
         uses: softprops/action-gh-release@v1
         env:
