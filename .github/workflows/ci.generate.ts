@@ -1,5 +1,5 @@
-import $ from "jsr:@david/dax@0.42";
-import * as yaml from "jsr:@std/yaml@1";
+import * as yaml from "@std/yaml";
+import $ from "dax";
 
 enum Runner {
   Mac13 = "macos-13",

@@ -2,10 +2,10 @@
  * This script checks for any prettier updates and then automatically
  * publishes a new version of the plugin if so.
  */
+import * as semver from "@std/semver";
 import $ from "dax";
-import * as semver from "https://deno.land/std@0.192.0/semver/mod.ts";
 
-const rootDirPath = $.path(import.meta).parentOrThrow().parentOrThrow();
+const rootDirPath = $.path(import.meta.dirname!).parentOrThrow();
 
 $.logStep("Upgrading prettier...");
 const jsNodePath = rootDirPath.join("./js/node");
