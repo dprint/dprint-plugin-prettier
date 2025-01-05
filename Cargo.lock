@@ -501,7 +501,7 @@ dependencies = [
 
 [[package]]
 name = "dprint-plugin-prettier"
-version = "0.52.0"
+version = "0.52.1"
 dependencies = [
  "deno_console",
  "deno_core",
