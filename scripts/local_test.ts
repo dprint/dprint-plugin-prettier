@@ -1,5 +1,5 @@
 import $ from "dax";
-import { getChecksum } from "https://raw.githubusercontent.com/dprint/automation/0.8.1/hash.ts";
+import { getChecksum } from "https://raw.githubusercontent.com/dprint/automation/0.10.0/hash.ts";
 
 await $`./scripts/create_for_testing.ts`;
 const checksum = await getChecksum($.path("./target/release/plugin.json").readBytesSync());
