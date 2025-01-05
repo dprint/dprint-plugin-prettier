@@ -1,8 +1,8 @@
 #!/usr/bin/env -S deno run --allow-env --allow-read --allow-write --allow-net=deno.land
 import $ from "dax";
-import { CargoToml, processPlugin } from "https://raw.githubusercontent.com/dprint/automation/0.8.1/mod.ts";
+import { CargoToml, processPlugin } from "https://raw.githubusercontent.com/dprint/automation/0.10.0/mod.ts";
 
-const currentDir = $.path(import.meta).parentOrThrow();
+const currentDir = $.path(import.meta.dirname!).parentOrThrow();
 const rootDir = currentDir.join("../").resolve();
 const cargoFilePath = rootDir.join("plugin/Cargo.toml");
 
