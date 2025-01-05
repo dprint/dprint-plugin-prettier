@@ -78,6 +78,7 @@
   "workspace": {
     "dependencies": [
       "jsr:@david/dax@0.42",
+      "jsr:@std/semver@*",
       "jsr:@std/yaml@1"
     ]
   }

@@ -167,18 +167,18 @@ const ci = {
                 return [
                   `cd target/${profile.target}/release`,
                   `zip -r ${profile.zipFileName} dprint-plugin-prettier`,
-                  `echo \"::set-output name=ZIP_CHECKSUM::$(shasum -a 256 ${profile.zipFileName} | awk '{print $1}')\"`,
+                  `echo \"ZIP_CHECKSUM=$(shasum -a 256 ${profile.zipFileName} | awk '{print $1}')\" >> $GITHUB_OUTPUT`,
                 ];
               case Runner.Linux:
                 return [
                   `cd target/${profile.target}/release`,
                   `zip -r ${profile.zipFileName} dprint-plugin-prettier`,
-                  `echo \"::set-output name=ZIP_CHECKSUM::$(shasum -a 256 ${profile.zipFileName} | awk '{print $1}')\"`,
+                  `echo \"ZIP_CHECKSUM=$(shasum -a 256 ${profile.zipFileName} | awk '{print $1}')\" >> $GITHUB_OUTPUT`,
                 ];
               case Runner.Windows:
                 return [
                   `Compress-Archive -CompressionLevel Optimal -Force -Path target/${profile.target}/release/dprint-plugin-prettier.exe -DestinationPath target/${profile.target}/release/${profile.zipFileName}`,
-                  `echo "::set-output name=ZIP_CHECKSUM::$(shasum -a 256 target/${profile.target}/release/${profile.zipFileName} | awk '{print $1}')"`,
+                  `echo "ZIP_CHECKSUM=$(shasum -a 256 target/${profile.target}/release/${profile.zipFileName} | awk '{print $1}')" >> $GITHUB_OUTPUT`,
                 ];
             }
           }
@@ -231,12 +231,12 @@ const ci = {
         {
           name: "Get tag version",
           id: "get_tag_version",
-          run: "echo ::set-output name=TAG_VERSION::${GITHUB_REF/refs\\/tags\\//}",
+          run: "echo TAG_VERSION=${GITHUB_REF/refs\\/tags\\//} >> $GITHUB_OUTPUT",
         },
         {
           name: "Get plugin file checksum",
           id: "get_plugin_file_checksum",
-          run: "echo \"::set-output name=CHECKSUM::$(shasum -a 256 plugin.json | awk '{print $1}')\"",
+          run: "echo \"CHECKSUM=$(shasum -a 256 plugin.json | awk '{print $1}')\" >> $GITHUB_OUTPUT",
         },
         // todo: implement this
         // {
