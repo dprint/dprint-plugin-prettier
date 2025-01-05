@@ -100,7 +100,7 @@ const ci = {
           if: `matrix.config.target == 'aarch64-apple-darwin'`,
           run: "rustup target add aarch64-apple-darwin",
         },
-        { uses: "denoland/setup-deno@v1" },
+        { uses: "denoland/setup-deno@v2" },
         {
           uses: "actions/setup-node@v4",
           with: {
