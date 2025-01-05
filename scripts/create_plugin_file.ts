@@ -2,8 +2,7 @@
 import $ from "dax";
 import { CargoToml, processPlugin } from "https://raw.githubusercontent.com/dprint/automation/0.10.0/mod.ts";
 
-const currentDir = $.path(import.meta.dirname!).parentOrThrow();
-const rootDir = currentDir.join("../").resolve();
+const rootDir = $.path(import.meta.dirname!).parentOrThrow();
 const cargoFilePath = rootDir.join("plugin/Cargo.toml");
 
 await processPlugin.createDprintOrgProcessPlugin({
