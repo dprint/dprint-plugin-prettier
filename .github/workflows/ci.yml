@@ -186,6 +186,9 @@ jobs:
       - name: Get tag version
         id: get_tag_version
         run: 'echo TAG_VERSION=${GITHUB_REF/refs\/tags\//} >> $GITHUB_OUTPUT'
+      - name: Get prettier version
+        id: get_prettier_version
+        run: "echo PRETTIER_VERSION=$(deno run --allow-read scripts/output_prettier_version.ts) >> $GITHUB_OUTPUT"
       - name: Get plugin file checksum
         id: get_plugin_file_checksum
         run: 'echo "CHECKSUM=$(shasum -a 256 plugin.json | awk ''{print $1}'')" >> $GITHUB_OUTPUT'
