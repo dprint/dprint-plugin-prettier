@@ -60,17 +60,17 @@ jobs:
       - name: Setup Rust (aarch64-apple-darwin)
         if: matrix.config.target == 'aarch64-apple-darwin'
         run: rustup target add aarch64-apple-darwin
-      - uses: denoland/setup-deno@v1
+      - uses: denoland/setup-deno@v2
       - uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 21
       - name: npm install
         run: cd js/node && npm ci
       - name: Setup cross
         if: matrix.config.cross == 'true'
         run: |-
-          deno task build
-          cargo install cross --git https://github.com/cross-rs/cross --rev 44011c8854cb2eaac83b173cc323220ccdff18ea
+          cd js/node && npm run build:script
+          cargo install cross --locked --git https://github.com/cross-rs/cross --rev 44011c8854cb2eaac83b173cc323220ccdff18ea
       - name: Build (Debug)
         if: "matrix.config.cross != 'true' && !startsWith(github.ref, 'refs/tags/')"
         run: "cargo build --locked --all-targets --target ${{matrix.config.target}}"
@@ -163,10 +163,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: Download artifacts
         uses: actions/download-artifact@v4
-      - uses: denoland/setup-deno@v1
+      - uses: denoland/setup-deno@v2
       - name: Move downloaded artifacts to root directory
         run: |-
           mv x86_64-apple-darwin-artifacts/dprint-plugin-prettier-x86_64-apple-darwin.zip .
@@ -190,7 +190,7 @@ jobs:
         id: get_plugin_file_checksum
         run: 'echo "CHECKSUM=$(shasum -a 256 plugin.json | awk ''{print $1}'')" >> $GITHUB_OUTPUT'
       - name: Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
         with:

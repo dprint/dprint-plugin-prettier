@@ -1,9 +1,10 @@
 {
   "tasks": {
-    "setup": "cd js/node && npm ci",
-    "build": "cd js/node && npm run build:script"
+    "setup": "cd js/node && npm ci"
   },
   "imports": {
-    "dax": "https://deno.land/x/dax@0.35.0/mod.ts"
+    "dax": "jsr:@david/dax@0.42",
+    "@std/semver": "jsr:@std/semver",
+    "@std/yaml": "jsr:@std/yaml@1"
   }
 }

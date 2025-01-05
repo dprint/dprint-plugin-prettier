@@ -1,4 +1,5 @@
 use std::borrow::Cow;
+use std::sync::OnceLock;
 
 use deno_core::anyhow::Error;
 use deno_core::serde_json;
@@ -9,27 +10,30 @@ use dprint_plugin_deno_base::runtime::CreateRuntimeOptions;
 use dprint_plugin_deno_base::runtime::JsRuntime;
 use dprint_plugin_deno_base::snapshot::deserialize_snapshot;
 use dprint_plugin_deno_base::util::set_v8_max_memory;
-use once_cell::sync::Lazy;
 
 use crate::config::PrettierConfig;
 
-// Copied from Deno's codebase:
-// https://github.com/denoland/deno/blob/daa7c6d32ab5a4029f8084e174d621f5562256be/cli/tsc.rs#L55
-static STARTUP_SNAPSHOT: Lazy<Box<[u8]>> = Lazy::new(
-  #[cold]
-  #[inline(never)]
-  || {
-    // Also set the v8 max memory at the same time. This was added because
-    // on the DefinitelyTyped repo there would be some OOM errors after formatting
-    // for a while and this solved that for some reason.
-    set_v8_max_memory(512);
+fn get_startup_snapshot() -> &'static [u8] {
+  // Copied from Deno's codebase:
+  // https://github.com/denoland/deno/blob/daa7c6d32ab5a4029f8084e174d621f5562256be/cli/tsc.rs#L55
+  static STARTUP_SNAPSHOT: OnceLock<Box<[u8]>> = OnceLock::new();
 
-    static COMPRESSED_COMPILER_SNAPSHOT: &[u8] =
-      include_bytes!(concat!(env!("OUT_DIR"), "/STARTUP_SNAPSHOT.bin"));
+  STARTUP_SNAPSHOT.get_or_init(
+    #[cold]
+    #[inline(never)]
+    || {
+      // Also set the v8 max memory at the same time. This was added because
+      // on the DefinitelyTyped repo there would be some OOM errors after formatting
+      // for a while and this solved that for some reason.
+      set_v8_max_memory(512);
 
-    deserialize_snapshot(COMPRESSED_COMPILER_SNAPSHOT).unwrap()
-  },
-);
+      static COMPRESSED_COMPILER_SNAPSHOT: &[u8] =
+        include_bytes!(concat!(env!("OUT_DIR"), "/STARTUP_SNAPSHOT.bin"));
+
+      deserialize_snapshot(COMPRESSED_COMPILER_SNAPSHOT).unwrap()
+    },
+  )
+}
 
 pub struct PrettierFormatter {
   runtime: JsRuntime,
@@ -43,7 +47,7 @@ impl Default for PrettierFormatter {
         deno_console::deno_console::init_ops(),
         deno_url::deno_url::init_ops(),
       ],
-      startup_snapshot: Some(&STARTUP_SNAPSHOT),
+      startup_snapshot: Some(&get_startup_snapshot()),
     });
     Self { runtime }
   }
