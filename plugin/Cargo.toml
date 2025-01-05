@@ -10,7 +10,6 @@ deno_url.workspace = true
 deno_webidl.workspace = true
 dprint-core = { workspace = true, features = ["process"] }
 dprint-plugin-deno-base = { version = "0.1.0", path = "../base" }
-once_cell.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 
@@ -20,8 +19,8 @@ deno_core = { workspace = true, features = ["include_js_files_for_snapshotting"]
 dprint-plugin-deno-base = { version = "0.1.0", features = ["build"], path = "../base" }
 deno_url.workspace = true
 deno_webidl.workspace = true
-sha256 = "1.4.0"
-zstd = "0.13.0"
+sha256 = "1.5.0"
+zstd.workspace = true
 
 [dev-dependencies]
 dprint-development = "0.9.5"

@@ -19,6 +19,7 @@ fn main() {
   let js_dir = root_dir.join("js");
   let supported_extensions_path = out_dir.join("SUPPORTED_EXTENSIONS.json");
 
+  eprintln!("Running deno task build...");
   let build_result = Command::new("deno").args(["task", "build"]).status();
   match build_result {
     Ok(status) => {

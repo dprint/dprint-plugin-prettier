@@ -8,11 +8,15 @@ use deno_core::v8::SharedRef;
 use deno_core::Extension;
 use deno_core::PollEventLoopOptions;
 use deno_core::RuntimeOptions;
-use once_cell::sync::Lazy;
 use serde::Deserialize;
 
-static PLATFORM: Lazy<SharedRef<Platform>> =
-  Lazy::new(|| v8::new_default_platform(1, false).make_shared());
+fn get_platform() -> SharedRef<Platform> {
+  static PLATFORM: std::sync::OnceLock<SharedRef<Platform>> = std::sync::OnceLock::new();
+
+  PLATFORM
+    .get_or_init(|| v8::new_default_platform(1, false).make_shared())
+    .clone()
+}
 
 pub struct CreateRuntimeOptions {
   pub extensions: Vec<Extension>,
@@ -28,7 +32,7 @@ impl JsRuntime {
     JsRuntime {
       inner: deno_core::JsRuntime::new(RuntimeOptions {
         startup_snapshot: options.startup_snapshot,
-        v8_platform: Some(PLATFORM.clone()),
+        v8_platform: Some(get_platform()),
         extensions: options.extensions,
         ..Default::default()
       }),
@@ -37,7 +41,7 @@ impl JsRuntime {
 
   /// Call this once on the main thread.
   pub fn initialize_main_thread() {
-    deno_core::JsRuntime::init_platform(Some(PLATFORM.clone()))
+    deno_core::JsRuntime::init_platform(Some(get_platform()), false)
   }
 
   pub async fn execute_format_script(&mut self, code: String) -> Result<Option<String>, Error> {

@@ -1,4 +1,5 @@
 use std::sync::Arc;
+use std::sync::OnceLock;
 
 use dprint_core::async_runtime::async_trait;
 use dprint_core::async_runtime::LocalBoxFuture;
@@ -13,17 +14,19 @@ use dprint_core::plugins::PluginInfo;
 use dprint_core::plugins::PluginResolveConfigurationResult;
 use dprint_plugin_deno_base::channel::Channel;
 use dprint_plugin_deno_base::channel::CreateChannelOptions;
-use once_cell::sync::Lazy;
 
 use crate::config::resolve_config;
 use crate::config::PrettierConfig;
 use crate::formatter::PrettierFormatter;
 
-static SUPPORTED_EXTENSIONS: Lazy<Vec<String>> = Lazy::new(|| {
-  let json_bytes = include_bytes!(concat!(env!("OUT_DIR"), "/SUPPORTED_EXTENSIONS.json"));
+fn get_supported_extensions() -> &'static Vec<String> {
+  static SUPPORTED_EXTENSIONS: OnceLock<Vec<String>> = OnceLock::new();
+  SUPPORTED_EXTENSIONS.get_or_init(|| {
+    let json_bytes = include_bytes!(concat!(env!("OUT_DIR"), "/SUPPORTED_EXTENSIONS.json"));
 
-  deno_core::serde_json::from_slice(json_bytes).unwrap()
-});
+    deno_core::serde_json::from_slice(json_bytes).unwrap()
+  })
+}
 
 pub struct PrettierPluginHandler {
   channel: Arc<Channel<PrettierConfig>>,
@@ -71,7 +74,7 @@ impl AsyncPluginHandler for PrettierPluginHandler {
       config: result.config,
       diagnostics: result.diagnostics,
       file_matching: FileMatchingInfo {
-        file_extensions: SUPPORTED_EXTENSIONS.clone(),
+        file_extensions: get_supported_extensions().clone(),
         file_names: vec![],
       },
     }
