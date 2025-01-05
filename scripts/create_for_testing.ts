@@ -8,7 +8,7 @@
 
 import $ from "dax";
 
-await $`deno task build`;
+await $`npm run build:script`.cwd("js/node");
 await $`cargo build --release`;
 if (Deno.build.os === "windows") {
   await $`powershell -Command ${"Compress-Archive -Force -Path target/release/dprint-plugin-prettier.exe -DestinationPath target/release/dprint-plugin-prettier-x86_64-pc-windows-msvc.zip"}`;

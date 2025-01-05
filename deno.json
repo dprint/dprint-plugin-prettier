@@ -1,7 +1,6 @@
 {
   "tasks": {
-    "setup": "cd js/node && npm ci",
-    "build": "cd js/node && npm run build:script"
+    "setup": "cd js/node && npm ci"
   },
   "imports": {
     "dax": "jsr:@david/dax@0.42",
