@@ -205,6 +205,8 @@ jobs:
             dprint-plugin-prettier-aarch64-unknown-linux-gnu.zip
             plugin.json
           body: |
+            Prettier ${{ steps.get_prettier_version.outputs.PRETTIER_VERSION }}
+
             ## Install
 
             Dependencies:
