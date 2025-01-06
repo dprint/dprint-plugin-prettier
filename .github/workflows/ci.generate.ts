@@ -64,7 +64,7 @@ const ci = {
       name: "${{ matrix.config.target }}",
       "runs-on": "${{ matrix.config.os }}",
       if:
-        `matrix.config.os != '${Runner.LinuxArm} || github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')`,
+        `matrix.config.os != '${Runner.LinuxArm}' || github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')`,
       strategy: {
         matrix: {
           config: profiles.map((profile) => ({
