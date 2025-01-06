@@ -189,6 +189,9 @@ jobs:
           echo "dprint-plugin-prettier-aarch64-unknown-linux-gnu.zip: ${{needs.build.outputs.ZIP_CHECKSUM_AARCH64_UNKNOWN_LINUX_GNU}}"
       - name: Create plugin file
         run: deno run -A scripts/create_plugin_file.ts
+      - name: Get prettier version
+        id: get_prettier_version
+        run: echo PRETTIER_VERSION=$(deno run --allow-read scripts/output_prettier_version.ts) >> $GITHUB_OUTPUT
       - name: Get tag version
         id: get_tag_version
         run: 'echo TAG_VERSION=${GITHUB_REF/refs\/tags\//} >> $GITHUB_OUTPUT'
@@ -208,6 +211,7 @@ jobs:
             dprint-plugin-prettier-aarch64-unknown-linux-gnu.zip
             plugin.json
           body: |
+            Prettier ${{ steps.get_prettier_version.outputs.PRETTIER_VERSION }}
             ## Install
 
             Dependencies:

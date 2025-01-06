@@ -248,6 +248,11 @@ const ci = {
           run: "deno run -A scripts/create_plugin_file.ts",
         },
         {
+          name: "Get prettier version",
+          id: "get_prettier_version",
+          run: "echo PRETTIER_VERSION=$(deno run --allow-read scripts/output_prettier_version.ts) >> $GITHUB_OUTPUT",
+        },
+        {
           name: "Get tag version",
           id: "get_tag_version",
           run: "echo TAG_VERSION=${GITHUB_REF/refs\\/tags\\//} >> $GITHUB_OUTPUT",
@@ -274,7 +279,8 @@ const ci = {
               // todo: add this
               // "deployment/schema.json",
             ].join("\n"),
-            body: `## Install
+            body: `Prettier \${{ steps.get_prettier_version.outputs.PRETTIER_VERSION }}
+## Install
 
 Dependencies:
 
