@@ -7,13 +7,26 @@ enum Runner {
   Windows = "windows-latest",
   // uses an older version of ubuntu because of issue dprint/#483
   Linux = "ubuntu-20.04",
+  LinuxArm =
+    "${{ (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')) && 'buildjet-2vcpu-ubuntu-2204-arm' || 'ubuntu-latest' }}",
 }
 
 interface ProfileData {
   runner: Runner;
   target: string;
   runTests?: boolean;
+  // currently not used
   cross?: boolean;
+}
+
+function withCondition(
+  step: Record<string, unknown>,
+  condition: string,
+): Record<string, unknown> {
+  return {
+    ...step,
+    if: "if" in step ? `(${condition}) && (${step.if})` : condition,
+  };
 }
 
 const profileDataItems: ProfileData[] = [{
@@ -33,10 +46,9 @@ const profileDataItems: ProfileData[] = [{
   target: "x86_64-unknown-linux-gnu",
   runTests: true,
 }, {
-  runner: Runner.Linux,
+  runner: Runner.LinuxArm,
   target: "aarch64-unknown-linux-gnu",
-  runTests: false,
-  cross: true,
+  runTests: true,
 }];
 const profiles = profileDataItems.map((profile) => {
   return {
@@ -116,7 +128,7 @@ const ci = {
           if: "matrix.config.cross == 'true'",
           run: [
             "cd js/node && npm run build:script",
-            "cargo install cross --locked --git https://github.com/cross-rs/cross --rev 44011c8854cb2eaac83b173cc323220ccdff18ea",
+            "cargo install cross --locked --git https://github.com/cross-rs/cross --rev 4090beca3cfffa44371a5bba524de3a578aa46c3",
           ].join("\n"),
         },
         {
@@ -170,6 +182,7 @@ const ci = {
                   `echo \"ZIP_CHECKSUM=$(shasum -a 256 ${profile.zipFileName} | awk '{print $1}')\" >> $GITHUB_OUTPUT`,
                 ];
               case Runner.Linux:
+              case Runner.LinuxArm:
                 return [
                   `cd target/${profile.target}/release`,
                   `zip -r ${profile.zipFileName} dprint-plugin-prettier`,
@@ -201,7 +214,13 @@ const ci = {
             },
           };
         }),
-      ],
+      ].map((step) =>
+        withCondition(
+          step,
+          // only run arm64 linux on main or tags
+          "matrix.config.target != 'aarch64-unknown-linux-gnu' || github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')",
+        )
+      ),
     },
     draft_release: {
       name: "draft_release",
