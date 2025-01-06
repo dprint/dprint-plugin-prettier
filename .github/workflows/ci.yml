@@ -36,9 +36,9 @@ jobs:
             run_tests: "true"
             cross: "false"
             target: x86_64-unknown-linux-gnu
-          - os: ubuntu-20.04
-            run_tests: "false"
-            cross: "true"
+          - os: buildjet-2vcpu-ubuntu-2204-arm
+            run_tests: "true"
+            cross: "false"
             target: aarch64-unknown-linux-gnu
     outputs:
       ZIP_CHECKSUM_X86_64_APPLE_DARWIN: "${{steps.pre_release_x86_64_apple_darwin.outputs.ZIP_CHECKSUM}}"
@@ -70,7 +70,7 @@ jobs:
         if: matrix.config.cross == 'true'
         run: |-
           cd js/node && npm run build:script
-          cargo install cross --locked --git https://github.com/cross-rs/cross --rev 44011c8854cb2eaac83b173cc323220ccdff18ea
+          cargo install cross --locked --git https://github.com/cross-rs/cross --rev 4090beca3cfffa44371a5bba524de3a578aa46c3
       - name: Build (Debug)
         if: "matrix.config.cross != 'true' && !startsWith(github.ref, 'refs/tags/')"
         run: "cargo build --locked --all-targets --target ${{matrix.config.target}}"
@@ -186,9 +186,6 @@ jobs:
       - name: Get tag version
         id: get_tag_version
         run: 'echo TAG_VERSION=${GITHUB_REF/refs\/tags\//} >> $GITHUB_OUTPUT'
-      - name: Get prettier version
-        id: get_prettier_version
-        run: "echo PRETTIER_VERSION=$(deno run --allow-read scripts/output_prettier_version.ts) >> $GITHUB_OUTPUT"
       - name: Get plugin file checksum
         id: get_plugin_file_checksum
         run: 'echo "CHECKSUM=$(shasum -a 256 plugin.json | awk ''{print $1}'')" >> $GITHUB_OUTPUT'
@@ -205,8 +202,6 @@ jobs:
             dprint-plugin-prettier-aarch64-unknown-linux-gnu.zip
             plugin.json
           body: |
-            Prettier ${{ steps.get_prettier_version.outputs.PRETTIER_VERSION }}
-
             ## Install
 
             Dependencies:
