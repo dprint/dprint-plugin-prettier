@@ -4,7 +4,7 @@
   },
   "imports": {
     "dax": "jsr:@david/dax@0.42",
-    "@std/semver": "jsr:@std/semver",
+    "@std/semver": "jsr:@std/semver@1",
     "@std/yaml": "jsr:@std/yaml@1"
   }
 }
