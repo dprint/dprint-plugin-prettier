@@ -14,6 +14,7 @@ interface ProfileData {
   runner: Runner;
   target: string;
   runTests?: boolean;
+  // currently not used
   cross?: boolean;
 }
 
@@ -37,7 +38,6 @@ const profileDataItems: ProfileData[] = [{
   runner: Runner.LinuxArm,
   target: "aarch64-unknown-linux-gnu",
   runTests: true,
-  cross: false,
 }];
 const profiles = profileDataItems.map((profile) => {
   return {
@@ -63,6 +63,8 @@ const ci = {
     build: {
       name: "${{ matrix.config.target }}",
       "runs-on": "${{ matrix.config.os }}",
+      if:
+        `matrix.config.os != '${Runner.LinuxArm} || github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')`,
       strategy: {
         matrix: {
           config: profiles.map((profile) => ({
