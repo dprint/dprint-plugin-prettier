@@ -1,6 +1,6 @@
 [package]
 name = "dprint-plugin-prettier"
-version = "0.52.2"
+version = "0.53.0"
 edition = "2021"
 
 [dependencies]
