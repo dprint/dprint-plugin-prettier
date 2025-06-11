@@ -27,3 +27,12 @@ jobs:
           git config user.email "dprintbot@users.noreply.github.com"
           git config user.name "dprintbot"
           deno run -A ./scripts/update.ts
+
+  # This is necessary to prevent GH automatically dsiabling this workflow after 60 days.
+  workflow-keepalive:
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    steps:
+      - uses: liskin/gh-workflow-keepalive@f72ff1a1336129f29bf0166c0fd0ca6cf1bcb38c
