@@ -39,7 +39,7 @@
   "homepage": "https://github.com/dprint/dprint-plugin-prettier#readme",
   "dependencies": {
     "buffer": "^6.0.3",
-    "prettier": "^3.8.0",
+    "prettier": "^3.8.1",
     "prettier-plugin-jsdoc": "^1.8.0",
     "prettier-plugin-svelte": "^3.4.1",
     "process": "^0.11.10",
