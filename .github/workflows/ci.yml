@@ -20,7 +20,7 @@ jobs:
     strategy:
       matrix:
         config:
-          - os: macos-13
+          - os: macos-15-intel
             run_tests: "true"
             cross: "false"
             target: x86_64-apple-darwin
@@ -36,7 +36,7 @@ jobs:
             run_tests: "true"
             cross: "false"
             target: x86_64-unknown-linux-gnu
-          - os: "${{ (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')) && 'buildjet-2vcpu-ubuntu-2204-arm' || 'ubuntu-latest' }}"
+          - os: ubuntu-24.04-arm
             run_tests: "true"
             cross: "false"
             target: aarch64-unknown-linux-gnu

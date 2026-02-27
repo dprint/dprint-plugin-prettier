@@ -2,13 +2,12 @@ import * as yaml from "@std/yaml";
 import $ from "dax";
 
 enum Runner {
-  Mac13 = "macos-13",
+  Mac13 = "macos-15-intel",
   MacLatest = "macos-latest",
   Windows = "windows-latest",
   // uses an older version of ubuntu because of issue dprint/#483
   Linux = "ubuntu-22.04",
-  LinuxArm =
-    "${{ (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')) && 'buildjet-2vcpu-ubuntu-2204-arm' || 'ubuntu-latest' }}",
+  LinuxArm = "ubuntu-24.04-arm",
 }
 
 interface ProfileData {
