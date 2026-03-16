@@ -2,7 +2,7 @@ import * as yaml from "@std/yaml";
 import $ from "dax";
 
 enum Runner {
-  Mac13 = "macos-15-intel",
+  MacIntel = "macos-15-intel",
   MacLatest = "macos-latest",
   Windows = "windows-latest",
   // uses an older version of ubuntu because of issue dprint/#483
@@ -29,7 +29,7 @@ function withCondition(
 }
 
 const profileDataItems: ProfileData[] = [{
-  runner: Runner.Mac13,
+  runner: Runner.MacIntel,
   target: "x86_64-apple-darwin",
   runTests: true,
 }, {
@@ -173,7 +173,7 @@ const ci = {
         ...profiles.map((profile) => {
           function getRunSteps() {
             switch (profile.runner) {
-              case Runner.Mac13:
+              case Runner.MacIntel:
               case Runner.MacLatest:
                 return [
                   `cd target/${profile.target}/release`,
