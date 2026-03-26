@@ -1,8 +1,8 @@
+import { getChecksum } from "@dprint/automation";
 import $ from "dax";
-import { getChecksum } from "https://raw.githubusercontent.com/dprint/automation/0.10.0/hash.ts";
 
 await $`./scripts/create_for_testing.ts`;
-const checksum = await getChecksum($.path("./target/release/plugin.json").readBytesSync());
+const checksum = await getChecksum($.path("./target/release/plugin.json").readBytesSync() as Uint8Array<ArrayBuffer>);
 const dprintConfig = $.path("dprint.json");
 const data = dprintConfig.readJsonSync<{ plugins: string[] }>();
 const index = data.plugins.findIndex(d => d.startsWith("./target") || d.includes("prettier"));

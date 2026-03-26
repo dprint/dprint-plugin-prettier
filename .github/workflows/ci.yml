@@ -217,10 +217,11 @@ jobs:
             Dependencies:
 
             - Install dprint's CLI >= 0.40.0
+            - Create a config file via `dprint init`
 
-            In a dprint configuration file:
+            Then:
 
-            1. Specify the plugin url and checksum in the `"plugins"` array or run `dprint config add prettier`:
+            1. Run `dprint add prettier`, which will update the config file like so:
 
                ```jsonc
                {

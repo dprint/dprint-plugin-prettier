@@ -3,7 +3,8 @@
     "setup": "cd js/node && npm ci"
   },
   "imports": {
-    "dax": "jsr:@david/dax@0.42",
+    "@dprint/automation": "jsr:@dprint/automation@^0.10.3",
+    "dax": "jsr:@david/dax@0.45",
     "@std/semver": "jsr:@std/semver@1",
     "@std/yaml": "jsr:@std/yaml@1"
   }

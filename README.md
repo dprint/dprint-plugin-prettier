@@ -7,7 +7,8 @@ Wrapper around [prettier](https://prettier.io/) in order to use it as a dprint p
 ## Install
 
 1. Install [dprint](https://dprint.dev/install/)
-2. Follow instructions at https://github.com/dprint/dprint-plugin-prettier/releases/
+2. Run `dprint init` to create the config file.
+3. Run `dprint add prettier` to add this plugin.
 
 ## Configuration
 
@@ -21,8 +22,8 @@ See Prettier's configuration [here](https://prettier.io/docs/en/options.html). S
     "singleQuote": true,
     "proseWrap": "always",
     // enable prettier-plugin-jsdoc
-    "plugin.jsDoc": true
-  }
+    "plugin.jsDoc": true,
+  },
 }
 ```
 
@@ -38,8 +39,8 @@ Add the file extension to the start of the configuration option. For example:
     // use double quotes in js files
     "js.singleQuote": false,
     // use double quotes in ts files
-    "ts.singleQuote": false
-  }
+    "ts.singleQuote": false,
+  },
 }
 ```
 
