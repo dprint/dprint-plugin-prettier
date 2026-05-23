@@ -4,6 +4,7 @@
     "jsr:@david/console-static-text@0.3": "0.3.0",
     "jsr:@david/dax@0.45": "0.45.0",
     "jsr:@david/dax@0.45.0": "0.45.0",
+    "jsr:@david/gagen@0.5": "0.5.0",
     "jsr:@david/path@0.2": "0.2.0",
     "jsr:@david/which@~0.4.1": "0.4.1",
     "jsr:@dprint/automation@~0.10.3": "0.10.3",
@@ -15,7 +16,8 @@
     "jsr:@std/path@1": "1.1.4",
     "jsr:@std/path@^1.1.4": "1.1.4",
     "jsr:@std/semver@1": "1.0.8",
-    "jsr:@std/yaml@1": "1.0.11"
+    "jsr:@std/yaml@1": "1.0.11",
+    "jsr:@std/yaml@^1.0.11": "1.0.11"
   },
   "jsr": {
     "@david/console-static-text@0.3.0": {
@@ -31,6 +33,12 @@
         "jsr:@std/fs",
         "jsr:@std/io",
         "jsr:@std/path@1"
+      ]
+    },
+    "@david/gagen@0.5.0": {
+      "integrity": "7c61c97d9bc05a1d62e341464f6674378786a92909d47b25967661fb3c8a92b1",
+      "dependencies": [
+        "jsr:@std/yaml@^1.0.11"
       ]
     },
     "@david/path@0.2.0": {
@@ -88,6 +96,7 @@
   "workspace": {
     "dependencies": [
       "jsr:@david/dax@0.45",
+      "jsr:@david/gagen@0.5",
       "jsr:@dprint/automation@~0.10.3",
       "jsr:@std/semver@1",
       "jsr:@std/yaml@1"
