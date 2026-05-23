@@ -101,7 +101,7 @@ const preReleaseSteps = profiles.map((profile, i) => ({
 
 // deno-lint-ignore no-explicit-any
 const buildSteps: any[] = [
-  { uses: "actions/checkout@v4" },
+  { uses: "actions/checkout@v6" },
   { uses: "dsherret/rust-toolchain-file@v1" },
   {
     name: "Cache cargo",
@@ -118,8 +118,8 @@ const buildSteps: any[] = [
   },
   { uses: "denoland/setup-deno@v2" },
   {
-    uses: "actions/setup-node@v4",
-    with: { "node-version": 21 },
+    uses: "actions/setup-node@v6",
+    with: { "node-version": "24.x" },
   },
   {
     name: "npm install",
@@ -180,7 +180,7 @@ const buildSteps: any[] = [
   ...profiles.map((profile) => ({
     name: `Upload artifacts (${profile.target})`,
     if: target.equals(profile.target).and(isTag),
-    uses: "actions/upload-artifact@v4",
+    uses: "actions/upload-artifact@v7",
     with: {
       name: profile.artifactsName,
       path: `target/${profile.target}/release/${profile.zipFileName}`,
@@ -241,8 +241,8 @@ const draftReleaseJob = job("draft_release", {
   needs: [buildJob],
   runsOn: "ubuntu-latest",
   steps: [
-    { name: "Checkout", uses: "actions/checkout@v4" },
-    { name: "Download artifacts", uses: "actions/download-artifact@v4" },
+    { name: "Checkout", uses: "actions/checkout@v6" },
+    { name: "Download artifacts", uses: "actions/download-artifact@v8" },
     { uses: "denoland/setup-deno@v2" },
     {
       name: "Move downloaded artifacts to root directory",

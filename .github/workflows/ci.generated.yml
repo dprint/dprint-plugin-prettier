@@ -50,7 +50,7 @@ jobs:
       ZIP_CHECKSUM_X86_64_UNKNOWN_LINUX_GNU: '${{ steps.pre_release_x86_64_unknown_linux_gnu.outputs.ZIP_CHECKSUM }}'
       ZIP_CHECKSUM_AARCH64_UNKNOWN_LINUX_GNU: '${{ steps.pre_release_aarch64_unknown_linux_gnu.outputs.ZIP_CHECKSUM }}'
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         if: 'matrix.config.target != ''aarch64-unknown-linux-gnu'' || github.ref == ''refs/heads/main'' || startsWith(github.ref, ''refs/tags/'')'
       - uses: dsherret/rust-toolchain-file@3551321aa44dd44a0393eb3b6bdfbc5d25ecf621 # v1
         if: 'matrix.config.target != ''aarch64-unknown-linux-gnu'' || github.ref == ''refs/heads/main'' || startsWith(github.ref, ''refs/tags/'')'
@@ -65,10 +65,10 @@ jobs:
         run: rustup target add aarch64-apple-darwin
       - uses: denoland/setup-deno@667a34cdef165d8d2b2e98dde39547c9daac7282 # v2
         if: 'matrix.config.target != ''aarch64-unknown-linux-gnu'' || github.ref == ''refs/heads/main'' || startsWith(github.ref, ''refs/tags/'')'
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
         if: 'matrix.config.target != ''aarch64-unknown-linux-gnu'' || github.ref == ''refs/heads/main'' || startsWith(github.ref, ''refs/tags/'')'
         with:
-          node-version: 21
+          node-version: 24.x
       - name: npm install
         if: 'matrix.config.target != ''aarch64-unknown-linux-gnu'' || github.ref == ''refs/heads/main'' || startsWith(github.ref, ''refs/tags/'')'
         run: cd js/node && npm ci
@@ -138,31 +138,31 @@ jobs:
           zip -r dprint-plugin-prettier-aarch64-unknown-linux-gnu.zip dprint-plugin-prettier
           echo "ZIP_CHECKSUM=$(shasum -a 256 dprint-plugin-prettier-aarch64-unknown-linux-gnu.zip | awk '{print $1}')" >> $GITHUB_OUTPUT
       - name: Upload artifacts (x86_64-apple-darwin)
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         if: 'matrix.config.target == ''x86_64-apple-darwin'' && startsWith(github.ref, ''refs/tags/'')'
         with:
           name: x86_64-apple-darwin-artifacts
           path: target/x86_64-apple-darwin/release/dprint-plugin-prettier-x86_64-apple-darwin.zip
       - name: Upload artifacts (aarch64-apple-darwin)
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         if: 'matrix.config.target == ''aarch64-apple-darwin'' && startsWith(github.ref, ''refs/tags/'')'
         with:
           name: aarch64-apple-darwin-artifacts
           path: target/aarch64-apple-darwin/release/dprint-plugin-prettier-aarch64-apple-darwin.zip
       - name: Upload artifacts (x86_64-pc-windows-msvc)
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         if: 'matrix.config.target == ''x86_64-pc-windows-msvc'' && startsWith(github.ref, ''refs/tags/'')'
         with:
           name: x86_64-pc-windows-msvc-artifacts
           path: target/x86_64-pc-windows-msvc/release/dprint-plugin-prettier-x86_64-pc-windows-msvc.zip
       - name: Upload artifacts (x86_64-unknown-linux-gnu)
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         if: 'matrix.config.target == ''x86_64-unknown-linux-gnu'' && startsWith(github.ref, ''refs/tags/'')'
         with:
           name: x86_64-unknown-linux-gnu-artifacts
           path: target/x86_64-unknown-linux-gnu/release/dprint-plugin-prettier-x86_64-unknown-linux-gnu.zip
       - name: Upload artifacts (aarch64-unknown-linux-gnu)
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         if: 'matrix.config.target == ''aarch64-unknown-linux-gnu'' && startsWith(github.ref, ''refs/tags/'')'
         with:
           name: aarch64-unknown-linux-gnu-artifacts
@@ -175,9 +175,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - name: Download artifacts
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
       - uses: denoland/setup-deno@667a34cdef165d8d2b2e98dde39547c9daac7282 # v2
       - name: Move downloaded artifacts to root directory
         run: |-

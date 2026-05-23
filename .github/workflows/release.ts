@@ -27,7 +27,7 @@ workflow({
     steps: [
       {
         name: "Clone repository",
-        uses: "actions/checkout@v4",
+        uses: "actions/checkout@v6",
         with: { token: "${{ secrets.GH_DPRINTBOT_PAT }}" },
       },
       { uses: "denoland/setup-deno@v2" },
