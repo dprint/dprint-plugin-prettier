@@ -14,11 +14,11 @@
     "**/target"
   ],
   "plugins": [
-    "https://plugins.dprint.dev/typescript-0.95.15.wasm",
-    "https://plugins.dprint.dev/json-0.21.3.wasm",
-    "https://plugins.dprint.dev/markdown-0.21.1.wasm",
-    "https://plugins.dprint.dev/exec-0.6.2.json@df98f54ffd3092b8a841aedd6d098a2651f16d0a796a40535774f1a8b4b9d463",
-    "https://plugins.dprint.dev/prettier-0.67.0.json@7a864f83de170ad92f27df81366955606f87ea95b00d0de7263f061e72345f87",
-    "https://plugins.dprint.dev/toml-0.7.0.wasm"
+    "npm:@dprint/typescript@0.96.1",
+    "npm:@dprint/json@0.23.0",
+    "npm:@dprint/markdown@0.22.1",
+    "npm:@dprint/exec@0.7.3/plugin.json@704701df449dd7e942a71144773778ac529d68c2e4657bfc236d393b898b9a67",
+    "npm:@dprint/prettier@0.70.0/plugin.json@97c0dccf54ed5b7343e7a3f6418e77bd80afcd2b74beed3a632689d47e392ddc",
+    "npm:@dprint/toml@0.8.0"
   ]
 }

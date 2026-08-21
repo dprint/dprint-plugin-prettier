@@ -9,7 +9,6 @@ Wrapper around [prettier](https://prettier.io/) in order to use it as a dprint p
 1. Install [dprint](https://dprint.dev/install/)
 2. Run `dprint init` to create the config file.
 3. Run `dprint add prettier` to add this plugin.
-   - Or install from npm: `dprint add npm:@dprint/prettier`
 
 ## Configuration
 
