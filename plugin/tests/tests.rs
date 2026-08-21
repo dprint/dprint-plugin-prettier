@@ -1,3 +1,4 @@
+use std::path::Path;
 use std::path::PathBuf;
 use std::sync::Arc;
 
@@ -30,9 +31,9 @@ fn test_specs() {
       fix_failures: false,
       format_twice: true,
     },
-    {
+    Arc::new({
       let handler = PrettierPluginHandler::default();
-      move |file_name, file_text, spec_config| {
+      move |file_name: &Path, file_text: &str, spec_config: &SpecConfigMap| {
         let spec_config: ConfigKeyMap = serde_json::from_value(spec_config.clone().into()).unwrap();
         let config_result = resolve_config(spec_config, Default::default());
         ensure_no_diagnostics(&config_result.diagnostics);
@@ -52,10 +53,14 @@ fn test_specs() {
             )
             .await
         });
-        result.map(|r| r.map(|r| String::from_utf8(r).unwrap()))
+        result
+          .map(|r| r.map(|r| String::from_utf8(r).unwrap()))
+          .map_err(|err| err.into())
       }
-    },
-    move |_file_name, _file_text, _spec_config| panic!("Not supported."),
+    }),
+    Arc::new(|_file_name: &Path, _file_text: &str, _spec_config: &SpecConfigMap| {
+      panic!("Not supported.")
+    }),
   );
 }
 

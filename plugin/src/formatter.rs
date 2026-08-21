@@ -1,10 +1,11 @@
 use std::borrow::Cow;
 use std::sync::OnceLock;
 
-use deno_core::anyhow::Error;
 use deno_core::serde_json;
 use dprint_core::async_runtime::async_trait;
+use dprint_core::plugins::FormatError;
 use dprint_core::plugins::FormatRequest;
+use dprint_core::plugins::FormatResult;
 use dprint_plugin_deno_base::channel::Formatter;
 use dprint_plugin_deno_base::runtime::CreateRuntimeOptions;
 use dprint_plugin_deno_base::runtime::JsRuntime;
@@ -55,10 +56,7 @@ impl Default for PrettierFormatter {
 
 #[async_trait(?Send)]
 impl Formatter<PrettierConfig> for PrettierFormatter {
-  async fn format_text(
-    &mut self,
-    request: FormatRequest<PrettierConfig>,
-  ) -> Result<Option<Vec<u8>>, Error> {
+  async fn format_text(&mut self, request: FormatRequest<PrettierConfig>) -> FormatResult {
     // todo: implement cancellation and range formatting
     let request_value = serde_json::Value::Object({
       let mut obj = serde_json::Map::new();
@@ -85,6 +83,7 @@ impl Formatter<PrettierConfig> for PrettierFormatter {
       .execute_format_script(code)
       .await
       .map(|s| s.map(|s| s.into_bytes()))
+      .map_err(FormatError::new)
   }
 }
 
