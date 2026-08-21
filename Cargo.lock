@@ -465,9 +465,9 @@ dependencies = [
 
 [[package]]
 name = "dprint-core"
-version = "0.69.0"
+version = "0.69.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7554bfc77a03c35c5581d5f390b7f102c501e37841f7f43d29dd54a0b3c2284d"
+checksum = "67359cea061dd052fca921d3589a9ce59bc16fa23bfb9d06d5c669a1dbd23915"
 dependencies = [
  "async-trait",
  "bumpalo",
@@ -1797,7 +1797,7 @@ version = "0.1.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c2a7b1c03c876122aa43f3020e6c3c3ee5c05081c9a00739faf7503aeba10d22"
 dependencies = [
- "windows-sys 0.52.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]

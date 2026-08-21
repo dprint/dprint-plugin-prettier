@@ -10,7 +10,7 @@ deno_console = "0.184.0"
 deno_core = "0.326.0"
 deno_url = "0.184.0"
 deno_webidl = "0.184.0"
-dprint-core = "0.69.0"
+dprint-core = "0.69.1"
 serde = { version = "1.0.217", features = ["derive"] }
 serde_json = { version = "1", features = ["preserve_order"] }
 zstd = "0.13.2"
