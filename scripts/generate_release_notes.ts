@@ -3,26 +3,16 @@ const prettierVersion = Deno.args[0];
 const tagVersion = Deno.args[1];
 const pluginChecksum = Deno.args[2];
 
-// optional npm install block; only emitted if create_npm_packages.ts has
-// run and produced a manifest with the main package's tarball checksum.
-let npmBlock = "";
+// prefer the npm specifier, which is what `dprint add` outputs. it's only
+// available once create_npm_packages.ts has run and produced a manifest with
+// the main package's tarball checksum, so fall back to the plugin url.
+let pluginSpecifier = `https://plugins.dprint.dev/prettier-${tagVersion}.json@${pluginChecksum}`;
 try {
   const manifest = JSON.parse(await Deno.readTextFile("npm-dist/publish-manifest.json")) as {
     mainPackageName: string;
     mainPackageChecksum: string;
   };
-  npmBlock = `
-   Alternatively, run \`dprint add npm:${manifest.mainPackageName}\`, which will update the config file as follows:
-   \`\`\`jsonc
-   {
-     // etc...
-     "plugins": [
-       // ...add other dprint plugins here that you want to take precedence over prettier...
-       "npm:${manifest.mainPackageName}@${tagVersion}/plugin.json@${manifest.mainPackageChecksum}"
-     ]
-   }
-   \`\`\`
-`;
+  pluginSpecifier = `npm:${manifest.mainPackageName}@${tagVersion}/plugin.json@${manifest.mainPackageChecksum}`;
 } catch (err) {
   if (!(err instanceof Deno.errors.NotFound)) throw err;
 }
@@ -44,11 +34,11 @@ Then:
      // etc...
      "plugins": [
        // ...add other dprint plugins here that you want to take precedence over prettier...
-       "https://plugins.dprint.dev/prettier-${tagVersion}.json@${pluginChecksum}"
+       "${pluginSpecifier}"
      ]
    }
    \`\`\`
-${npmBlock}2. Add a \`"prettier"\` configuration property if desired.
+2. Add a \`"prettier"\` configuration property if desired.
 
    \`\`\`jsonc
    {
