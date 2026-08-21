@@ -1,21 +1,5 @@
 #!/usr/bin/env -S deno run -A
 const prettierVersion = Deno.args[0];
-const tagVersion = Deno.args[1];
-const pluginChecksum = Deno.args[2];
-
-// prefer the npm specifier, which is what `dprint add` outputs. it's only
-// available once create_npm_packages.ts has run and produced a manifest with
-// the main package's tarball checksum, so fall back to the plugin url.
-let pluginSpecifier = `https://plugins.dprint.dev/prettier-${tagVersion}.json@${pluginChecksum}`;
-try {
-  const manifest = JSON.parse(await Deno.readTextFile("npm-dist/publish-manifest.json")) as {
-    mainPackageName: string;
-    mainPackageChecksum: string;
-  };
-  pluginSpecifier = `npm:${manifest.mainPackageName}@${tagVersion}/plugin.json@${manifest.mainPackageChecksum}`;
-} catch (err) {
-  if (!(err instanceof Deno.errors.NotFound)) throw err;
-}
 
 const text = `Prettier ${prettierVersion}
 ## Install
@@ -27,17 +11,7 @@ Dependencies:
 
 Then:
 
-1. Run \`dprint add prettier\`, which will update the config file like so:
-
-   \`\`\`jsonc
-   {
-     // etc...
-     "plugins": [
-       // ...add other dprint plugins here that you want to take precedence over prettier...
-       "${pluginSpecifier}"
-     ]
-   }
-   \`\`\`
+1. Run \`dprint add prettier\`, which will add the plugin to your dprint configuration file.
 2. Add a \`"prettier"\` configuration property if desired.
 
    \`\`\`jsonc

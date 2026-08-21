@@ -221,20 +221,6 @@ const getPrettierVersion = step({
   outputs: ["PRETTIER_VERSION"],
 });
 
-const getTagVersion = step({
-  id: "get_tag_version",
-  name: "Get tag version",
-  run: "echo TAG_VERSION=${GITHUB_REF/refs\\/tags\\//} >> $GITHUB_OUTPUT",
-  outputs: ["TAG_VERSION"],
-});
-
-const getPluginFileChecksum = step({
-  id: "get_plugin_file_checksum",
-  name: "Get plugin file checksum",
-  run: `echo "CHECKSUM=$(shasum -a 256 plugin.json | awk '{print $1}')" >> $GITHUB_OUTPUT`,
-  outputs: ["CHECKSUM"],
-});
-
 const draftReleaseJob = job("draft_release", {
   name: "draft_release",
   if: isTag,
@@ -265,18 +251,14 @@ const draftReleaseJob = job("draft_release", {
       run: "deno run -A scripts/create_plugin_file.ts",
     },
     getPrettierVersion,
-    getTagVersion,
-    getPluginFileChecksum,
     {
-      // must run before "Create release notes" — the notes embed the main
-      // npm tarball's sha256 from npm-dist/publish-manifest.json.
       name: "Build npm packages",
       run: "deno run -A scripts/create_npm_packages.ts",
     },
     {
       name: "Create release notes",
       run:
-        `deno run -A ./scripts/generate_release_notes.ts ${getPrettierVersion.outputs.PRETTIER_VERSION} ${getTagVersion.outputs.TAG_VERSION} ${getPluginFileChecksum.outputs.CHECKSUM} > \${{ github.workspace }}-CHANGELOG.txt`,
+        `deno run -A ./scripts/generate_release_notes.ts ${getPrettierVersion.outputs.PRETTIER_VERSION} > \${{ github.workspace }}-CHANGELOG.txt`,
     },
     {
       name: "Release",

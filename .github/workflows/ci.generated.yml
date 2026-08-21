@@ -205,16 +205,10 @@ jobs:
       - name: Get prettier version
         id: get_prettier_version
         run: echo PRETTIER_VERSION=$(deno run --allow-read scripts/output_prettier_version.ts) >> $GITHUB_OUTPUT
-      - name: Get tag version
-        id: get_tag_version
-        run: 'echo TAG_VERSION=${GITHUB_REF/refs\/tags\//} >> $GITHUB_OUTPUT'
-      - name: Get plugin file checksum
-        id: get_plugin_file_checksum
-        run: 'echo "CHECKSUM=$(shasum -a 256 plugin.json | awk ''{print $1}'')" >> $GITHUB_OUTPUT'
       - name: Build npm packages
         run: deno run -A scripts/create_npm_packages.ts
       - name: Create release notes
-        run: "deno run -A ./scripts/generate_release_notes.ts ${{ steps.get_prettier_version.outputs.PRETTIER_VERSION }} ${{ steps.get_tag_version.outputs.TAG_VERSION }} ${{ steps.get_plugin_file_checksum.outputs.CHECKSUM }} > ${{ github.workspace }}-CHANGELOG.txt"
+        run: "deno run -A ./scripts/generate_release_notes.ts ${{ steps.get_prettier_version.outputs.PRETTIER_VERSION }} > ${{ github.workspace }}-CHANGELOG.txt"
       - name: Release
         uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2
         env:
