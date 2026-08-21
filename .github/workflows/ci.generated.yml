@@ -173,12 +173,19 @@ jobs:
       - build
     if: 'startsWith(github.ref, ''refs/tags/'')'
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - name: Download artifacts
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
       - uses: denoland/setup-deno@667a34cdef165d8d2b2e98dde39547c9daac7282 # v2
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22.x
+          registry-url: 'https://registry.npmjs.org'
       - name: Move downloaded artifacts to root directory
         run: |-
           mv x86_64-apple-darwin-artifacts/dprint-plugin-prettier-x86_64-apple-darwin.zip .
@@ -204,6 +211,10 @@ jobs:
       - name: Get plugin file checksum
         id: get_plugin_file_checksum
         run: 'echo "CHECKSUM=$(shasum -a 256 plugin.json | awk ''{print $1}'')" >> $GITHUB_OUTPUT'
+      - name: Build npm packages
+        run: deno run -A scripts/create_npm_packages.ts
+      - name: Create release notes
+        run: 'deno run -A ./scripts/generate_release_notes.ts ${{ steps.get_prettier_version.outputs.PRETTIER_VERSION }} ${{ steps.get_tag_version.outputs.TAG_VERSION }} ${{ steps.get_plugin_file_checksum.outputs.CHECKSUM }} > ${{ github.workspace }}-CHANGELOG.txt'
       - name: Release
         uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2
         env:
@@ -216,38 +227,9 @@ jobs:
             dprint-plugin-prettier-x86_64-unknown-linux-gnu.zip
             dprint-plugin-prettier-aarch64-unknown-linux-gnu.zip
             plugin.json
-          body: |
-            Prettier ${{ steps.get_prettier_version.outputs.PRETTIER_VERSION }}
-            ## Install
-
-            Dependencies:
-
-            - Install dprint's CLI >= 0.40.0
-            - Create a config file via `dprint init`
-
-            Then:
-
-            1. Run `dprint add prettier`, which will update the config file like so:
-
-               ```jsonc
-               {
-                 // etc...
-                 "plugins": [
-                   // ...add other dprint plugins here that you want to take precedence over prettier...
-                   "https://plugins.dprint.dev/prettier-${{ steps.get_tag_version.outputs.TAG_VERSION }}.json@${{ steps.get_plugin_file_checksum.outputs.CHECKSUM }}"
-                 ]
-               }
-               ```
-            2. Add a `"prettier"` configuration property if desired.
-
-               ```jsonc
-               {
-                 // ...etc...
-                 "prettier": {
-                   "trailingComma": "all",
-                   "singleQuote": true,
-                   "proseWrap": "always"
-                 }
-               }
-               ```
+          body_path: '${{ github.workspace }}-CHANGELOG.txt'
           draft: false
+      - name: Upgrade npm
+        run: npm install --global npm@latest
+      - name: Publish npm packages
+        run: deno run -A scripts/publish_npm_packages.ts

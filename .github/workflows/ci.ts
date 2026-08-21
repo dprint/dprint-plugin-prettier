@@ -240,10 +240,16 @@ const draftReleaseJob = job("draft_release", {
   if: isTag,
   needs: [buildJob],
   runsOn: "ubuntu-latest",
+  // id-token: write is required for npm --provenance
+  permissions: { contents: "write", "id-token": "write" },
   steps: [
     { name: "Checkout", uses: "actions/checkout@v6" },
     { name: "Download artifacts", uses: "actions/download-artifact@v8" },
     { uses: "denoland/setup-deno@v2" },
+    {
+      uses: "actions/setup-node@v4",
+      with: { "node-version": "22.x", "registry-url": "https://registry.npmjs.org" },
+    },
     {
       name: "Move downloaded artifacts to root directory",
       run: profiles.map((profile) => `mv ${profile.artifactsName}/${profile.zipFileName} .`),
@@ -262,6 +268,17 @@ const draftReleaseJob = job("draft_release", {
     getTagVersion,
     getPluginFileChecksum,
     {
+      // must run before "Create release notes" — the notes embed the main
+      // npm tarball's sha256 from npm-dist/publish-manifest.json.
+      name: "Build npm packages",
+      run: "deno run -A scripts/create_npm_packages.ts",
+    },
+    {
+      name: "Create release notes",
+      run:
+        `deno run -A ./scripts/generate_release_notes.ts ${getPrettierVersion.outputs.PRETTIER_VERSION} ${getTagVersion.outputs.TAG_VERSION} ${getPluginFileChecksum.outputs.CHECKSUM} > \${{ github.workspace }}-CHANGELOG.txt`,
+    },
+    {
       name: "Release",
       uses: "softprops/action-gh-release@v2",
       env: { GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}" },
@@ -270,42 +287,18 @@ const draftReleaseJob = job("draft_release", {
           ...profiles.map((profile) => profile.zipFileName),
           "plugin.json",
         ].join("\n"),
-        body: `Prettier ${getPrettierVersion.outputs.PRETTIER_VERSION}
-## Install
-
-Dependencies:
-
-- Install dprint's CLI >= 0.40.0
-- Create a config file via \`dprint init\`
-
-Then:
-
-1. Run \`dprint add prettier\`, which will update the config file like so:
-
-   \`\`\`jsonc
-   {
-     // etc...
-     "plugins": [
-       // ...add other dprint plugins here that you want to take precedence over prettier...
-       "https://plugins.dprint.dev/prettier-${getTagVersion.outputs.TAG_VERSION}.json@${getPluginFileChecksum.outputs.CHECKSUM}"
-     ]
-   }
-   \`\`\`
-2. Add a \`"prettier"\` configuration property if desired.
-
-   \`\`\`jsonc
-   {
-     // ...etc...
-     "prettier": {
-       "trailingComma": "all",
-       "singleQuote": true,
-       "proseWrap": "always"
-     }
-   }
-   \`\`\`
-`,
+        body_path: "${{ github.workspace }}-CHANGELOG.txt",
         draft: false,
       },
+    },
+    {
+      // npm trusted publishing (OIDC) requires npm >= 11.5.1.
+      name: "Upgrade npm",
+      run: "npm install --global npm@latest",
+    },
+    {
+      name: "Publish npm packages",
+      run: "deno run -A scripts/publish_npm_packages.ts",
     },
   ],
 });
