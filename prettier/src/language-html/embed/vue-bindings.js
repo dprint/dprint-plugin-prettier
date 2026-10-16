@@ -1,0 +1,18 @@
+// @nts-check
+import { formatAttributeValue } from "./utils.js";
+
+/**
+ * @import {Doc} from "../../document/builders.js"
+ */
+
+/**
+ * @returns {Promise<Doc>}
+ */
+function printVueBindings(/** @type {string} */ text, textToDoc, { parseWithTs }) {
+  return formatAttributeValue(`function _(${text}) {}`, textToDoc, {
+    parser: parseWithTs ? "babel-ts" : "babel",
+    __isVueBindings: true,
+  });
+}
+
+export { printVueBindings };

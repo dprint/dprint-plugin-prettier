@@ -20,7 +20,7 @@ workflow({
     },
   },
   jobs: [{
-    id: "rust",
+    id: "release",
     name: "release",
     runsOn: "ubuntu-latest",
     timeoutMinutes: 30,
@@ -28,20 +28,16 @@ workflow({
       {
         name: "Clone repository",
         uses: "actions/checkout@v6",
+        // pushing the tag with this token is what triggers the CI workflow that publishes
         with: { token: "${{ secrets.GH_DPRINTBOT_PAT }}" },
       },
       { uses: "denoland/setup-deno@v2" },
-      { uses: "dsherret/rust-toolchain-file@v1" },
       {
         name: "Bump version and tag",
-        env: {
-          GITHUB_TOKEN: "${{ secrets.GH_DPRINTBOT_PAT }}",
-          GH_WORKFLOW_ACTOR: actor,
-        },
         run: [
           `git config user.email "${actor}@users.noreply.github.com"`,
           `git config user.name "${actor}"`,
-          `deno run -A jsr:@dprint/automation@0.10.3/tasks/publish-release --${releaseKind} plugin/Cargo.toml`,
+          `deno run -A ./scripts/release.ts --${releaseKind}`,
         ],
       },
     ],

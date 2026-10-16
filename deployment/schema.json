@@ -1,0 +1,212 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://plugins.dprint.dev/dprint/dprint-plugin-prettier/0.0.0/schema.json",
+  "type": "object",
+  "properties": {
+    "lineWidth": {
+      "description": "The width of a line the printer will try to stay under. Defaults to the global `lineWidth`. Same as `printWidth`.",
+      "type": "number"
+    },
+    "indentWidth": {
+      "description": "The number of spaces for an indent. Defaults to the global `indentWidth`. Same as `tabWidth`.",
+      "type": "number"
+    },
+    "newLineKind": {
+      "description": "The kind of newline to use. Defaults to the global `newLineKind`. Same as `endOfLine`.",
+      "type": "string",
+      "enum": [
+        "auto",
+        "lf",
+        "crlf"
+      ]
+    },
+    "singleQuote": {
+      "description": "Use single quotes instead of double quotes.",
+      "type": "boolean",
+      "default": false
+    },
+    "bracketSpacing": {
+      "description": "Print spaces between brackets.",
+      "type": "boolean",
+      "default": true
+    },
+    "bracketSameLine": {
+      "description": "Put > of opening tags on the last line instead of on a new line.",
+      "type": "boolean",
+      "default": false
+    },
+    "htmlWhitespaceSensitivity": {
+      "description": "How to handle whitespaces in HTML.",
+      "type": "string",
+      "oneOf": [
+        {
+          "const": "css",
+          "description": "Respect the default value of CSS display property."
+        },
+        {
+          "const": "strict",
+          "description": "Whitespaces are considered sensitive."
+        },
+        {
+          "const": "ignore",
+          "description": "Whitespaces are considered insensitive."
+        }
+      ],
+      "default": "css"
+    },
+    "singleAttributePerLine": {
+      "description": "Enforce single attribute per line in HTML, Vue and JSX.",
+      "type": "boolean",
+      "default": false
+    },
+    "vueIndentScriptAndStyle": {
+      "description": "Indent script and style tags in Vue files.",
+      "type": "boolean",
+      "default": false
+    },
+    "arrowParens": {
+      "description": "Include parentheses around a sole arrow function parameter.",
+      "type": "string",
+      "oneOf": [
+        {
+          "const": "always",
+          "description": "Always include parens. Example: `(x) => x`"
+        },
+        {
+          "const": "avoid",
+          "description": "Omit parens when possible. Example: `x => x`"
+        }
+      ],
+      "default": "always"
+    },
+    "semi": {
+      "description": "Print semicolons.",
+      "type": "boolean",
+      "default": true
+    },
+    "experimentalTernaries": {
+      "description": "Use curious ternaries, with the question mark after the condition.",
+      "type": "boolean",
+      "default": false
+    },
+    "jsxSingleQuote": {
+      "description": "Use single quotes in JSX.",
+      "type": "boolean",
+      "default": false
+    },
+    "quoteProps": {
+      "description": "Change when properties in objects are quoted.",
+      "type": "string",
+      "oneOf": [
+        {
+          "const": "as-needed",
+          "description": "Only add quotes around object properties where required."
+        },
+        {
+          "const": "consistent",
+          "description": "If at least one property in an object requires quotes, quote all properties."
+        },
+        {
+          "const": "preserve",
+          "description": "Respect the input use of quotes in object properties."
+        }
+      ],
+      "default": "as-needed"
+    },
+    "trailingComma": {
+      "description": "Print trailing commas wherever possible when multi-line.",
+      "type": "string",
+      "oneOf": [
+        {
+          "const": "all",
+          "description": "Trailing commas wherever possible (including function arguments)."
+        },
+        {
+          "const": "es5",
+          "description": "Trailing commas where valid in ES5 (objects, arrays, etc.)"
+        },
+        {
+          "const": "none",
+          "description": "No trailing commas."
+        }
+      ],
+      "default": "all"
+    },
+    "proseWrap": {
+      "description": "How to wrap prose.",
+      "type": "string",
+      "oneOf": [
+        {
+          "const": "always",
+          "description": "Wrap prose if it exceeds the print width."
+        },
+        {
+          "const": "never",
+          "description": "Do not wrap prose."
+        },
+        {
+          "const": "preserve",
+          "description": "Wrap prose as-is."
+        }
+      ],
+      "default": "preserve"
+    },
+    "endOfLine": {
+      "description": "Which end of line characters to apply.",
+      "type": "string",
+      "oneOf": [
+        {
+          "const": "lf",
+          "description": "Line Feed only (\\n), common on Linux and macOS as well as inside git repos"
+        },
+        {
+          "const": "crlf",
+          "description": "Carriage Return + Line Feed characters (\\r\\n), common on Windows"
+        },
+        {
+          "const": "cr",
+          "description": "Carriage Return character only (\\r), used very rarely"
+        },
+        {
+          "const": "auto",
+          "description": "Maintain existing\n(mixed values within one file are normalised by looking at what's used after the first line)"
+        }
+      ],
+      "default": "lf"
+    },
+    "printWidth": {
+      "description": "The line length where Prettier will try wrap.",
+      "type": "number",
+      "default": 80
+    },
+    "tabWidth": {
+      "description": "Number of spaces per indentation level.",
+      "type": "number",
+      "default": 2
+    },
+    "useTabs": {
+      "description": "Indent with tabs instead of spaces.",
+      "type": "boolean",
+      "default": false
+    },
+    "embeddedLanguageFormatting": {
+      "description": "Control how Prettier formats quoted code embedded in the file.",
+      "type": "string",
+      "oneOf": [
+        {
+          "const": "auto",
+          "description": "Format embedded code if Prettier can automatically identify it."
+        },
+        {
+          "const": "off",
+          "description": "Never automatically format embedded code."
+        }
+      ],
+      "default": "auto"
+    }
+  },
+  "patternProperties": {
+    "^[A-Za-z0-9]+.[A-Za-z]+$": {}
+  },
+  "additionalProperties": false
+}

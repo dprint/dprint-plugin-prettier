@@ -1,0 +1,55 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>dprint-plugin-prettier</AssemblyName>
+    <!-- the version of the plugin, which dprint is told -->
+    <Version>0.72.0</Version>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <IlcLlvmVersion>10.0.0-rc.1.26357.1</IlcLlvmVersion>
+    <!-- compiles to a Wasm module with NativeAOT-LLVM, as dprint-plugin-roslyn does -->
+    <NativeLib>Shared</NativeLib>
+    <!-- the stack that is kept in the memory of the module, which deep code runs out of when it is small -->
+    <EmccStackSize>134217728</EmccStackSize>
+    <PublishTrimmed>true</PublishTrimmed>
+    <SelfContained>true</SelfContained>
+    <UseAppHost>false</UseAppHost>
+    <MSBuildEnableWorkloadResolver>false</MSBuildEnableWorkloadResolver>
+    <!-- a core Wasm module instead of a component, because dprint calls the module's exports directly -->
+    <LinkerFlavor>lld</LinkerFlavor>
+    <SuppressTrimAnalysisWarnings>true</SuppressTrimAnalysisWarnings>
+    <!-- the C# that nts makes of src/main.ts -->
+    <NtsOutDir Condition="'$(NtsOutDir)' == ''">$(MSBuildThisFileDirectory)../target/nts/dist</NtsOutDir>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- what the collector works with, in hexadecimal: 4 MB for new objects and 64 MB a segment. Without
+         these it collects far too often; larger ones are no faster when dprint runs an instance on every
+         thread and take twice the memory (20 GB against 9 GB over DefinitelyTyped on 32 threads) -->
+    <IlcArg Include="--runtimeopt:GCgen0size=400000" />
+    <IlcArg Include="--runtimeopt:GCSegmentSize=4000000" />
+    <IlcArg Include="--runtimeopt:GCgen0MaxBudget=400000" />
+    <!-- objects of up to 16 MB are new objects rather than large ones. remark's parser gives what is left of a
+         markdown file to the next part each time it reads one, which is a copy here, and with the default of
+         85 KB each copy was a large object and collecting them was a full collection every few of them -->
+    <IlcArg Include="--runtimeopt:GCLOHThreshold=1000000" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="$(NtsOutDir)/*.cs" />
+    <Compile Include="WasmExports.cs" />
+    <EmbeddedResource Include="../LICENSE" LogicalName="LICENSE" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.DotNet.ILCompiler.LLVM" Version="$(IlcLlvmVersion)" />
+    <PackageReference Include="runtime.$(NETCoreSdkPortableRuntimeIdentifier).Microsoft.DotNet.ILCompiler.LLVM" Version="$(IlcLlvmVersion)" />
+  </ItemGroup>
+  <!-- the compiler targets WASI preview 2 by default, but dprint provides preview 1 -->
+  <Target Name="UseWasiPreview1" BeforeTargets="SetupProperties">
+    <PropertyGroup>
+      <IlcLlvmTarget>wasm32-wasip1</IlcLlvmTarget>
+    </PropertyGroup>
+  </Target>
+</Project>

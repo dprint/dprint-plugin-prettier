@@ -1,0 +1,106 @@
+// @nts-check
+/** @import AstPath from "../../common/ast-path.js" */
+import {
+  CommentCheckFlags,
+  hasComment,
+  isArrayOrTupleExpression,
+  isObjectProperty,
+} from "../utils/index.js";
+
+const angularComponentObjectExpressionPredicates = [
+  /** @returns {boolean} */ (node, /** @type {string} */ name) => node.type === "ObjectExpression" && name === "properties",
+  /** @returns {boolean} */ (node, /** @type {string} */ name) =>
+    node.type === "CallExpression" &&
+    node.callee.type === "Identifier" &&
+    node.callee.name === "Component" &&
+    name === "arguments",
+  /** @returns {boolean} */ (node, /** @type {string} */ name) => node.type === "Decorator" && name === "expression",
+];
+
+/**
+ * Angular Components can have:
+ * - Inline HTML template
+ * - Inline CSS styles
+ *
+ * ...which are both within template literals somewhere
+ * inside of the Component decorator factory.
+ *
+ * E.g.
+ * @Component({
+ *  template: `<div>...</div>`,
+ *  styles: [`h1 { color: blue; }`]
+ * })
+ * @returns {boolean}
+ */
+function isAngularComponentStyles(/** @type {AstPath} */ path) {
+  const isTemplateLiteral = /** @returns {boolean} */ (node) => node.type === "TemplateLiteral";
+  const isObjectPropertyNamedStyles = /** @returns {boolean} */ (node, /** @type {string} */ key) =>
+    isObjectProperty(node) &&
+    !node.computed &&
+    node.key.type === "Identifier" &&
+    node.key.name === "styles" &&
+    key === "value";
+  return (
+    path.match(
+      isTemplateLiteral,
+      /** @returns {boolean} */ (node, name) => isArrayOrTupleExpression(node) && name === "elements",
+      isObjectPropertyNamedStyles,
+      ...angularComponentObjectExpressionPredicates,
+    ) ||
+    path.match(
+      isTemplateLiteral,
+      isObjectPropertyNamedStyles,
+      ...angularComponentObjectExpressionPredicates,
+    )
+  );
+}
+/** @returns {boolean} */ function isAngularComponentTemplate(/** @type {AstPath} */ path) {
+  return path.match(
+    /** @returns {boolean} */ (node) => node.type === "TemplateLiteral",
+    /** @returns {boolean} */ (node, name) =>
+      isObjectProperty(node) &&
+      !node.computed &&
+      node.key.type === "Identifier" &&
+      node.key.name === "template" &&
+      name === "value",
+    ...angularComponentObjectExpressionPredicates,
+  );
+}
+
+/** @returns {boolean} */ function hasLeadingBlockCommentWithName(node, /** @type {string} */ languageName) {
+  // This checks for a leading comment that is exactly `/* GraphQL */`
+  // In order to be in line with other implementations of this comment tag
+  // we will not trim the comment value and we will expect exactly one space on
+  // either side of the GraphQL string
+  // Also see ./clean.js
+  return hasComment(
+    node,
+    CommentCheckFlags.Block | CommentCheckFlags.Leading,
+    /** @returns {boolean} */ ({ value }) => value === ` ${languageName} `,
+  );
+}
+/** @returns {boolean} */ function hasLanguageComment({ node, parent }, /** @type {string} */ languageName) {
+  return (
+    hasLeadingBlockCommentWithName(node, languageName) ||
+    (isAsConstExpression(parent) &&
+      hasLeadingBlockCommentWithName(parent, languageName)) ||
+    (parent.type === "ExpressionStatement" &&
+      hasLeadingBlockCommentWithName(parent, languageName))
+  );
+}
+
+/** @returns {boolean} */ function isAsConstExpression(node) {
+  return (
+    node.type === "AsConstExpression" ||
+    (node.type === "TSAsExpression" &&
+      node.typeAnnotation.type === "TSTypeReference" &&
+      node.typeAnnotation.typeName.type === "Identifier" &&
+      node.typeAnnotation.typeName.name === "const")
+  );
+}
+
+export {
+  hasLanguageComment,
+  isAngularComponentStyles,
+  isAngularComponentTemplate,
+};

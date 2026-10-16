@@ -1,0 +1,92 @@
+// Formats the files that tests/repos_test.ts sends with prettier from npm and with target/plugin.wasm, and
+// answers whether they give the same text or fail the same way.
+/// <reference no-default-lib="true" />
+/// <reference lib="deno.worker" />
+import { createFromWasmModule, type Formatter } from "@dprint/formatter";
+import * as prettier from "prettier";
+
+export interface FileRequest {
+  filePath: string;
+}
+
+export interface FileResult {
+  filePath: string;
+  same: boolean;
+  /** What prettier gives, or what went wrong prefixed with "error: ". */
+  expected: string;
+  /** What the plugin gives, or what went wrong prefixed with "error: ". */
+  actual: string;
+  prettierMs: number;
+  pluginMs: number;
+}
+
+let wasmModule: WebAssembly.Module;
+let formatter: Formatter;
+
+self.onmessage = async (event: MessageEvent<{ wasmModule: WebAssembly.Module } | FileRequest>) => {
+  if ("wasmModule" in event.data) {
+    wasmModule = event.data.wasmModule;
+    formatter = createFormatter();
+    return;
+  }
+  self.postMessage(await formatFile(event.data.filePath));
+};
+
+async function formatFile(filePath: string): Promise<FileResult> {
+  // without a BOM, as dprint gives a file to a plugin, and @dprint/formatter would drop it from the result
+  const fileText = Deno.readTextFileSync(filePath).replace(/^\uFEFF/, "");
+  const prettierStart = performance.now();
+  const expected = await formatWithPrettier(filePath, fileText);
+  const pluginStart = performance.now();
+  const actual = formatWithPlugin(filePath, fileText);
+  const pluginEnd = performance.now();
+  return {
+    filePath,
+    same: isSame(expected, actual),
+    expected,
+    actual,
+    prettierMs: pluginStart - prettierStart,
+    pluginMs: pluginEnd - pluginStart,
+  };
+}
+
+async function formatWithPrettier(filePath: string, fileText: string) {
+  try {
+    return await prettier.format(fileText, { filepath: filePath });
+  } catch (error) {
+    return "error: " + String(error);
+  }
+}
+
+function formatWithPlugin(filePath: string, fileText: string) {
+  try {
+    return formatter.formatText({ filePath, fileText });
+  } catch (error) {
+    if (error instanceof WebAssembly.RuntimeError) {
+      // the module trapped, so its state can't be trusted for the next file
+      formatter = createFormatter();
+      return "error: crashed: " + String(error);
+    }
+    return "error: " + (error as Error).message;
+  }
+}
+
+// both failing with the same kind of error at the same place counts as the same, since the code frame that
+// prettier adds after the first line is not what is being compared
+function isSame(expected: string, actual: string) {
+  if (expected.startsWith("error: ") && actual.startsWith("error: ")) {
+    return firstLine(expected) === firstLine(actual);
+  }
+  return expected === actual;
+}
+
+function firstLine(text: string) {
+  const index = text.indexOf("\n");
+  return index < 0 ? text : text.slice(0, index);
+}
+
+function createFormatter() {
+  const formatter = createFromWasmModule(wasmModule);
+  formatter.setConfig({}, {});
+  return formatter;
+}

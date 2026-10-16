@@ -1,0 +1,153 @@
+{
+  "paths": {
+    "emoji-regex": "./shims/emoji-regex.js",
+    "get-east-asian-width": "./shims/get-east-asian-width.js",
+    "to-fast-properties": "./shims/to-fast-properties.js",
+    "node:assert": "./shims/assert.js",
+    "chalk": "./shims/chalk.js",
+    "node:fs": "./shims/fs.js",
+    "n-readlines": "./shims/n-readlines.js",
+    "vnopts": "./vendor/vnopts/lib/index.js",
+    "leven": "./vendor/leven/index.js",
+    "outdent": "./shims/outdent.js",
+    "diff": "./vendor/diff-src/array.js",
+    "@babel/parser": "./vendor/babel-parser/index.js",
+    "jest-docblock": "./vendor/jest-docblock/index.js",
+    "@prettier/is-es5-identifier-name": "./vendor/is-es5-identifier-name/index.js",
+    "escape-string-regexp": "./vendor/escape-string-regexp/index.js",
+    "graphql/*": "./vendor/graphql/*",
+    "@glimmer/syntax": "./vendor/glimmer-syntax/index.js",
+    "@glimmer/util": "./vendor/glimmer-util/index.js",
+    "@glimmer/wire-format": "./vendor/glimmer-wire-format/index.js",
+    "@glimmer/env": "./shims/glimmer-env.js",
+    "@handlebars/parser": "./vendor/handlebars-parser/index.js",
+    "simple-html-tokenizer": "./vendor/simple-html-tokenizer/index.js",
+    "lines-and-columns": "./vendor/lines-and-columns/index.js",
+    "yaml": "./vendor/yaml/default.js",
+    "yaml/util": "./vendor/yaml/util.js",
+    "yaml-unist-parser/lib/*": "./vendor/yaml-unist-parser/*",
+    "postcss": "./vendor/postcss/lib/postcss.js",
+    "postcss/lib/*": "./vendor/postcss/lib/*.js",
+    "postcss-less": "./vendor/postcss-less/lib/index.js",
+    "postcss-scss/lib/*": "./vendor/postcss-scss/lib/*.js",
+    "postcss-media-query-parser": "./vendor/postcss-media-query-parser/dist/index.js",
+    "postcss-selector-parser/dist/*": "./vendor/postcss-selector-parser/dist/*",
+    "postcss-values-parser/lib/*": "./vendor/postcss-values-parser/lib/*",
+    "flatten": "./vendor/flatten/index.js",
+    "indexes-of": "./vendor/indexes-of/index.js",
+    "uniq": "./vendor/uniq/uniq.js",
+    "nanoid/non-secure": "./vendor/nanoid/non-secure.cjs",
+    "acorn": "../prettier/node_modules/acorn/dist/acorn.mjs",
+    "acorn-jsx": "../prettier/node_modules/acorn-jsx/index.js",
+    "espree": "../prettier/node_modules/espree/espree.js",
+    "meriyah": "../prettier/node_modules/meriyah/dist/meriyah.mjs",
+    "remark-parse": "./vendor/remark-parse/index.js",
+    "remark-footnotes": "./vendor/remark-footnotes/index.js",
+    "remark-math": "./vendor/remark-math/index.js",
+    "ccount": "./vendor/ccount/index.js",
+    "collapse-white-space": "./vendor/collapse-white-space/index.js",
+    "is-alphabetical": "./vendor/is-alphabetical/index.js",
+    "is-alphanumerical": "./vendor/is-alphanumerical/index.js",
+    "is-decimal": "./vendor/is-decimal/index.js",
+    "is-hexadecimal": "./vendor/is-hexadecimal/index.js",
+    "is-whitespace-character": "./vendor/is-whitespace-character/index.js",
+    "is-word-character": "./vendor/is-word-character/index.js",
+    "markdown-escapes": "./vendor/markdown-escapes/index.js",
+    "parse-entities": "./vendor/parse-entities/index.js",
+    "repeat-string": "./vendor/repeat-string/index.js",
+    "state-toggle": "./vendor/state-toggle/index.js",
+    "trim": "./vendor/trim/index.js",
+    "trim-trailing-lines": "./vendor/trim-trailing-lines/index.js",
+    "unherit": "./vendor/unherit/index.js",
+    "unist-util-remove-position": "./vendor/unist-util-remove-position/index.js",
+    "vfile-location": "./vendor/vfile-location/index.js",
+    "xtend": "./vendor/xtend/immutable.js",
+    "character-entities": "../prettier/node_modules/character-entities/index.json",
+    "character-entities-legacy": "../prettier/node_modules/character-entities-legacy/index.json",
+    "character-reference-invalid": "../prettier/node_modules/character-reference-invalid/index.json",
+    "inherits": "../prettier/node_modules/inherits/inherits.js",
+    "unist-util-visit": "../prettier/node_modules/unist-util-visit/index.js"
+  },
+  "replace": {
+    "../prettier/src/language-js/traverse/visitor-keys.evaluate.js": "./generated/js-visitor-keys.js",
+    "../prettier/src/language-graphql/languages.evaluate.js": "./generated/graphql-languages.js",
+    "../prettier/src/language-handlebars/languages.evaluate.js": "./generated/handlebars-languages.js",
+    "../prettier/src/language-handlebars/html-void-elements.evaluate.js": "./generated/handlebars-html-void-elements.js",
+    "../prettier/src/language-handlebars/visitor-keys.evaluate.js": "./generated/handlebars-visitor-keys.js",
+    "../prettier/src/language-yaml/languages.evaluate.js": "./generated/yaml-languages.js",
+    "../prettier/src/language-css/languages.evaluate.js": "./generated/css-languages.js",
+    "../prettier/src/language-css/print/css-units.evaluate.js": "./generated/css-units.js",
+    "../prettier/src/language-markdown/languages.evaluate.js": "./generated/markdown-languages.js",
+    "../prettier/src/language-markdown/constants.evaluate.js": "./generated/markdown-constants.js",
+    "../prettier/src/language-html/constants.evaluate.js": "./generated/html-constants.js",
+    "../prettier/src/language-html/languages.evaluate.js": "./generated/html-languages.js",
+    "../prettier/src/language-html/print/angular-control-flow-block-settings.evaluate.js": "./generated/html-angular-control-flow-block-settings.js",
+    "../prettier/src/language-html/utils/html-elements-attributes.evaluate.js": "./generated/html-html-elements-attributes.js",
+    "../prettier/src/language-html/utils/html-tag-names.evaluate.js": "./generated/html-html-tag-names.js",
+    "../prettier/node_modules/angular-html-parser/lib/compiler/src/ml_parser/lexer.js": "./vendor/angular-html-parser/lexer.js"
+  },
+  "env": {
+    "NODE_ENV": "production"
+  },
+  "lazy": [
+    "./prettier-plugins/flow.mjs",
+    "./prettier-plugins/typescript.mjs",
+    "../prettier/node_modules/meriyah/dist/meriyah.mjs",
+    "../prettier/node_modules/@angular/compiler/fesm2022/compiler.mjs"
+  ],
+  "mixins": {
+    "./vendor/babel-parser/index.js": [
+      [
+        "Parser",
+        "jsx"
+      ],
+      [
+        "Parser",
+        "jsx",
+        "flow"
+      ],
+      [
+        "Parser",
+        "jsx",
+        "typescript"
+      ],
+      [
+        "Parser",
+        "typescript"
+      ],
+      [
+        "Parser",
+        "jsx",
+        "v8intrinsic"
+      ],
+      [
+        "Parser",
+        "jsx",
+        "flow",
+        "v8intrinsic"
+      ],
+      [
+        "Parser",
+        "jsx",
+        "typescript",
+        "v8intrinsic"
+      ],
+      [
+        "Parser",
+        "typescript",
+        "v8intrinsic"
+      ],
+      [
+        "Parser",
+        "estree",
+        "jsx"
+      ],
+      [
+        "Parser",
+        "estree",
+        "jsx",
+        "v8intrinsic"
+      ]
+    ]
+  }
+}

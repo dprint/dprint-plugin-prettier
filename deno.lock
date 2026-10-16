@@ -1,28 +1,114 @@
 {
   "version": "5",
   "specifiers": {
-    "jsr:@david/gagen@0.5": "0.5.0",
-    "jsr:@std/yaml@1": "1.0.11",
-    "jsr:@std/yaml@^1.0.11": "1.0.11"
+    "jsr:@david/console-static-text@0.3": "0.3.5",
+    "jsr:@david/dax@0.45": "0.45.0",
+    "jsr:@david/gagen@0.5": "0.5.1",
+    "jsr:@david/path@0.2": "0.2.0",
+    "jsr:@david/which@~0.4.1": "0.4.2",
+    "jsr:@dprint/formatter@0.4.1": "0.4.1",
+    "jsr:@std/assert@1": "1.0.19",
+    "jsr:@std/bytes@^1.0.6": "1.0.6",
+    "jsr:@std/fmt@1": "1.0.10",
+    "jsr:@std/fs@1": "1.0.24",
+    "jsr:@std/internal@^1.0.12": "1.0.14",
+    "jsr:@std/internal@^1.0.14": "1.0.14",
+    "jsr:@std/io@0.225": "0.225.3",
+    "jsr:@std/path@1": "1.1.6",
+    "jsr:@std/path@^1.1.5": "1.1.6",
+    "jsr:@std/yaml@^1.0.11": "1.3.0",
+    "npm:@dprint/formatter@0.6": "0.6.0",
+    "npm:prettier@3.4.2": "3.4.2"
   },
   "jsr": {
-    "@david/gagen@0.5.0": {
-      "integrity": "7c61c97d9bc05a1d62e341464f6674378786a92909d47b25967661fb3c8a92b1",
+    "@david/console-static-text@0.3.5": {
+      "integrity": "7a6ab3610e6f0fa5743d56f7a05347a96afa9fae19de2d84ff964f09de441101"
+    },
+    "@david/dax@0.45.0": {
+      "integrity": "ac7565dc5c3e5be953a18b505e5dd0d8a30ed53656b65fd34a53bd8d2d5d6b1e",
       "dependencies": [
-        "jsr:@std/yaml@^1.0.11"
+        "jsr:@david/console-static-text",
+        "jsr:@david/path",
+        "jsr:@david/which",
+        "jsr:@std/fmt",
+        "jsr:@std/fs",
+        "jsr:@std/io",
+        "jsr:@std/path@1"
       ]
     },
-    "@std/yaml@1.0.11": {
-      "integrity": "bd139ce77f2d06cbed3713c8b26d301d2a2e12ecc7986130a268107e212143ee"
+    "@david/gagen@0.5.1": {
+      "integrity": "e0f069243e57eac9fb319b40c0061635e50e498f0126aa0d2509cb5209745033",
+      "dependencies": [
+        "jsr:@std/yaml"
+      ]
+    },
+    "@david/path@0.2.0": {
+      "integrity": "f2d7aa7f02ce5a55e27c09f9f1381794acb09d328f8d3c8a2e3ab3ffc294dccd",
+      "dependencies": [
+        "jsr:@std/fs",
+        "jsr:@std/path@1"
+      ]
+    },
+    "@david/which@0.4.2": {
+      "integrity": "440ee262bc0673b57a39ad4d0dc5673e515ddd41c049a55b2588a0881e5d4a8c"
+    },
+    "@dprint/formatter@0.4.1": {
+      "integrity": "96449ab83aa9f72df98caa5030d3f4a921c5c29d9b0e0d0da83d79e2024a9637"
+    },
+    "@std/assert@1.0.19": {
+      "integrity": "eaada96ee120cb980bc47e040f82814d786fe8162ecc53c91d8df60b8755991e",
+      "dependencies": [
+        "jsr:@std/internal@^1.0.12"
+      ]
+    },
+    "@std/bytes@1.0.6": {
+      "integrity": "f6ac6adbd8ccd99314045f5703e23af0a68d7f7e58364b47d2c7f408aeb5820a"
+    },
+    "@std/fmt@1.0.10": {
+      "integrity": "90dfba288802ac6de82fb31d0917eb9e4450b9925b954d5e51fc29ac07419db5"
+    },
+    "@std/fs@1.0.24": {
+      "integrity": "f3061b45b81673a2bece689da041df32d174be064c89eb6397fb5718d3fb7877",
+      "dependencies": [
+        "jsr:@std/internal@^1.0.14",
+        "jsr:@std/path@^1.1.5"
+      ]
+    },
+    "@std/internal@1.0.14": {
+      "integrity": "291516b3d4c35024d6ffbc0a9df5bf4c64116e05b50012cf846710152d2ffdf7"
+    },
+    "@std/io@0.225.3": {
+      "integrity": "27b07b591384d12d7b568f39e61dff966b8230559122df1e9fd11cc068f7ddd1",
+      "dependencies": [
+        "jsr:@std/bytes"
+      ]
+    },
+    "@std/path@1.1.6": {
+      "integrity": "c68485c2a4dfbb5ae3cc74fae4e8c4e5d874cf8a8ed12927917235c758b46cbe",
+      "dependencies": [
+        "jsr:@std/internal@^1.0.14"
+      ]
+    },
+    "@std/yaml@1.3.0": {
+      "integrity": "b250103854378b8b36cbff0fe95aec017d3d9ce86b489c67605180c602fb4922"
+    }
+  },
+  "npm": {
+    "@dprint/formatter@0.6.0": {
+      "integrity": "sha512-otnYh2jmGWbekYkAd4xiF416lpdZwNCbhkDrLQcAanvvutp0PhTNSJrwJ4DKBEu6xtP36NUX70t9YQw3oC/ONg=="
+    },
+    "prettier@3.4.2": {
+      "integrity": "sha512-e9MewbtFo+Fevyuxn/4rrcDAaq0IYxPGLvObpQjiZBMAzB9IGmzlnG9RZy3FFas+eBMu2vA0CszMeduow5dIuQ==",
+      "bin": true
     }
   },
   "workspace": {
     "dependencies": [
       "jsr:@david/dax@0.45",
       "jsr:@david/gagen@0.5",
-      "jsr:@dprint/automation@~0.11.2",
-      "jsr:@std/semver@1",
-      "jsr:@std/yaml@1"
+      "jsr:@std/assert@1",
+      "npm:@dprint/formatter@0.6",
+      "npm:prettier@3.4.2"
     ]
   }
 }

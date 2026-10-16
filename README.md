@@ -2,7 +2,11 @@
 
 [![npm version](https://img.shields.io/npm/v/@dprint/prettier.svg)](https://www.npmjs.com/package/@dprint/prettier) [![CI](https://github.com/dprint/dprint-plugin-prettier/workflows/CI/badge.svg)](https://github.com/dprint/dprint-plugin-prettier/actions?query=workflow%3ACI)
 
-Wrapper around [prettier](https://prettier.io/) in order to use it as a dprint plugin.
+[Prettier](https://prettier.io/) as a dprint Wasm plugin.
+
+Prettier's JavaScript source is compiled ahead of time with [nts](https://github.com/dsherret/nts) to C#, which [NativeAOT-LLVM](https://github.com/dotnet/runtimelab/tree/feature/NativeAOT-LLVM) compiles to a Wasm module. The output is the same as Prettier's on Node.js, without a JavaScript engine, and dprint runs it in a sandbox like any other Wasm plugin.
+
+The plugin has Prettier 3.4.2.
 
 ## Install
 
@@ -21,8 +25,6 @@ See Prettier's configuration [here](https://prettier.io/docs/en/options.html). S
     "trailingComma": "all",
     "singleQuote": true,
     "proseWrap": "always",
-    // enable prettier-plugin-jsdoc
-    "plugin.jsDoc": true,
   },
 }
 ```
@@ -44,21 +46,26 @@ Add the file extension to the start of the configuration option. For example:
 }
 ```
 
-## Included Prettier Plugins
+## Prettier plugins
 
-- [prettier-plugin-svelte](https://github.com/sveltejs/prettier-plugin-svelte)
-  - Enabled by default.
-- [prettier-plugin-jsdoc](https://github.com/hosseinmd/prettier-plugin-jsdoc)
-  - Enable with `"plugin.jsDoc": true` configuration
+The plugin has the languages that Prettier has built in. Prettier plugins, such as prettier-plugin-svelte and prettier-plugin-jsdoc, are not included and will be added as separate dprint plugins.
 
-Temporarily removed, but will be added back soon:
+## Development
 
-- [prettier-plugin-astro](https://github.com/withastro/prettier-plugin-astro)
+The source is in these folders:
 
-See [issue #55](https://github.com/dprint/dprint-plugin-prettier/issues/55) for the new plugin system.
+- `prettier` - Prettier 3.4.2's source with type annotations in JSDoc comments that make the compiled code fast. They are comments only, so the code is Prettier's as it is. `package.json` lists the packages that the source imports.
+- `src` - the entry point that dprint calls (`main.ts`) and the plugins of Prettier that it uses (`plugins.ts`), with the libraries that are compiled along with Prettier (`vendor`, `shims`, `generated`) and Prettier's TypeScript and Flow parsers (`prettier-plugins`), which are also typed.
+- `wasm` - the C# project that compiles what nts makes of `src/main.ts` to the Wasm module, with the functions that dprint calls.
 
-## Why Does This Exist?
+To build, check out [nts](https://github.com/dsherret/nts) beside this repository (`../nts`), and install Deno, Node.js, the .NET 10 SDK, the [WASI SDK](https://github.com/WebAssembly/wasi-sdk) and [Binaryen](https://github.com/WebAssembly/binaryen). Then:
 
-The main reason this exists is to be able to use Prettier with dprint's CLI. That way, you can format with all the plugins that dprint supports, still use Prettier, and only have to run `dprint fmt`.
+```sh
+deno task setup
+WASI_SDK_PATH=<wasi-sdk folder> BINARYEN=<binaryen folder>/bin deno task build
+deno task test
+```
 
-Additionally it's much faster. This plugin will format files in parallel and you can take advantage of the speed of dprint's incremental formatting if enabled.
+This creates `target/plugin.wasm`.
+
+To check that the plugin formats like Prettier from npm, `deno task test:repos` clones codebases into `target/repos` and formats their files with both. It takes a while, so it is not part of `deno task test`. Set `REPOS` to a comma separated list of the names in `tests/repos_test.ts` to only test those, and see `target/repos/diffs` for the files that differ.

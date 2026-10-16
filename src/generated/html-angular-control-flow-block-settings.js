@@ -1,0 +1,1 @@
+export default new Map([["if", new Set(["else if", "else"])], ["else if", new Set(["else if", "else"])], ["for", new Set(["empty"])], ["defer", new Set(["placeholder", "error", "loading"])], ["placeholder", new Set(["placeholder", "error", "loading"])], ["error", new Set(["placeholder", "error", "loading"])], ["loading", new Set(["placeholder", "error", "loading"])]]);
