@@ -210,19 +210,17 @@ jobs:
       - name: Create release notes
         run: "deno run -A ./scripts/generate_release_notes.ts ${{ steps.get_prettier_version.outputs.PRETTIER_VERSION }} > ${{ github.workspace }}-CHANGELOG.txt"
       - name: Release
-        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2
         env:
-          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-        with:
-          files: |-
-            dprint-plugin-prettier-x86_64-apple-darwin.zip
-            dprint-plugin-prettier-aarch64-apple-darwin.zip
-            dprint-plugin-prettier-x86_64-pc-windows-msvc.zip
-            dprint-plugin-prettier-x86_64-unknown-linux-gnu.zip
-            dprint-plugin-prettier-aarch64-unknown-linux-gnu.zip
+          GH_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+        run: |-
+          gh release create "$GITHUB_REF_NAME" --verify-tag --title "$GITHUB_REF_NAME" \
+            --notes-file ${{ github.workspace }}-CHANGELOG.txt \
+            dprint-plugin-prettier-x86_64-apple-darwin.zip \
+            dprint-plugin-prettier-aarch64-apple-darwin.zip \
+            dprint-plugin-prettier-x86_64-pc-windows-msvc.zip \
+            dprint-plugin-prettier-x86_64-unknown-linux-gnu.zip \
+            dprint-plugin-prettier-aarch64-unknown-linux-gnu.zip \
             plugin.json
-          body_path: "${{ github.workspace }}-CHANGELOG.txt"
-          draft: false
       - name: Upgrade npm
         run: npm install --global npm@latest
       - name: Publish npm packages
