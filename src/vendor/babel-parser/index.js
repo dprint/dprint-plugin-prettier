@@ -19,7 +19,7 @@ class SourceLocation {
     this.end = end;
   }
 }
-/** @returns {Position} */ function createPositionWithColumnOffset(position, /** @type {number} */ columnOffset) {
+/** @returns {Position} */ function createPositionWithColumnOffset(position, /** @type {int} */ columnOffset) {
   const {
     line,
     column,
@@ -401,9 +401,9 @@ function createDefaultOptions() {
   return {
     sourceType: "script",
     sourceFilename: undefined,
-    startIndex: 0,
-    startColumn: 0,
-    startLine: 1,
+    startIndex: /** @type {int} */ (0),
+    startColumn: /** @type {int} */ (0),
+    startLine: /** @type {int} */ (1),
     allowAwaitOutsideFunction: false,
     allowReturnOutsideFunction: false,
     allowNewTargetOutsideFunction: false,
@@ -842,7 +842,7 @@ class ExportedTokenType {
   /** @type {boolean | undefined} */ isAssign;
   /** @type {boolean | undefined} */ prefix;
   /** @type {boolean | undefined} */ postfix;
-  /** @type {number | undefined | null} */ binop;
+  /** @type {int | undefined | null} */ binop;
   constructor(/** @type {string} */ label, conf = {}) {
     this.label = label;
     this.keyword = conf.keyword;
@@ -857,13 +857,13 @@ class ExportedTokenType {
   }
 }
 const keywords$1 = new Map();
-/** @returns {number} */ function createKeyword(/** @type {string} */ name, options = {}) {
+/** @returns {int} */ function createKeyword(/** @type {string} */ name, options = {}) {
   options.keyword = name;
   const token = createToken(name, options);
   keywords$1.set(name, token);
   return token;
 }
-/** @returns {number} */ function createBinop(/** @type {string} */ name, /** @type {number} */ binop) {
+/** @returns {int} */ function createBinop(/** @type {string} */ name, /** @type {int} */ binop) {
   return createToken(name, {
     beforeExpr,
     binop
@@ -876,7 +876,7 @@ const tokenBinops = [];
 const tokenBeforeExprs = [];
 const tokenStartsExprs = [];
 const tokenPrefixes = [];
-/** @returns {number} */ function createToken(/** @type {string} */ name, options = {}) {
+/** @returns {int} */ function createToken(/** @type {string} */ name, options = {}) {
   ++tokenTypeCounter;
   tokenLabels.push(name);
   tokenBinops.push(options.binop ?? -1);
@@ -886,7 +886,7 @@ const tokenPrefixes = [];
   tokenTypes.push(new ExportedTokenType(name, options));
   return tokenTypeCounter;
 }
-/** @returns {number} */ function createKeywordLike(/** @type {string} */ name, options = {}) {
+/** @returns {int} */ function createKeywordLike(/** @type {string} */ name, options = {}) {
   ++tokenTypeCounter;
   keywords$1.set(name, tokenTypeCounter);
   tokenLabels.push(name);
@@ -1276,64 +1276,64 @@ const tt = {
   }),
   jsxTagEnd: createToken("jsxTagEnd")
 };
-/** @returns {boolean} */ function tokenIsIdentifier(/** @type {number} */ token) {
+/** @returns {boolean} */ function tokenIsIdentifier(/** @type {int} */ token) {
   return token >= 89 && token <= 129;
 }
-/** @returns {boolean} */ function tokenKeywordOrIdentifierIsKeyword(/** @type {number} */ token) {
+/** @returns {boolean} */ function tokenKeywordOrIdentifierIsKeyword(/** @type {int} */ token) {
   return token <= 88;
 }
-/** @returns {boolean} */ function tokenIsKeywordOrIdentifier(/** @type {number} */ token) {
+/** @returns {boolean} */ function tokenIsKeywordOrIdentifier(/** @type {int} */ token) {
   return token >= 54 && token <= 129;
 }
-/** @returns {boolean} */ function tokenIsLiteralPropertyName(/** @type {number} */ token) {
+/** @returns {boolean} */ function tokenIsLiteralPropertyName(/** @type {int} */ token) {
   return token >= 54 && token <= 132;
 }
-/** @returns {boolean} */ function tokenComesBeforeExpression(/** @type {number} */ token) {
+/** @returns {boolean} */ function tokenComesBeforeExpression(/** @type {int} */ token) {
   return tokenBeforeExprs[token];
 }
-/** @returns {boolean} */ function tokenCanStartExpression(/** @type {number} */ token) {
+/** @returns {boolean} */ function tokenCanStartExpression(/** @type {int} */ token) {
   return tokenStartsExprs[token];
 }
-/** @returns {boolean} */ function tokenIsAssignment(/** @type {number} */ token) {
+/** @returns {boolean} */ function tokenIsAssignment(/** @type {int} */ token) {
   return token >= 25 && token <= 29;
 }
-/** @returns {boolean} */ function tokenIsFlowInterfaceOrTypeOrOpaque(/** @type {number} */ token) {
+/** @returns {boolean} */ function tokenIsFlowInterfaceOrTypeOrOpaque(/** @type {int} */ token) {
   return token >= 125 && token <= 127;
 }
-/** @returns {boolean} */ function tokenIsLoop(/** @type {number} */ token) {
+/** @returns {boolean} */ function tokenIsLoop(/** @type {int} */ token) {
   return token >= 86 && token <= 88;
 }
-/** @returns {boolean} */ function tokenIsKeyword(/** @type {number} */ token) {
+/** @returns {boolean} */ function tokenIsKeyword(/** @type {int} */ token) {
   return token >= 54 && token <= 88;
 }
-/** @returns {boolean} */ function tokenIsOperator(/** @type {number} */ token) {
+/** @returns {boolean} */ function tokenIsOperator(/** @type {int} */ token) {
   return token >= 35 && token <= 55;
 }
-/** @returns {boolean} */ function tokenIsPostfix(/** @type {number} */ token) {
+/** @returns {boolean} */ function tokenIsPostfix(/** @type {int} */ token) {
   return token === 30;
 }
-/** @returns {boolean} */ function tokenIsPrefix(/** @type {number} */ token) {
+/** @returns {boolean} */ function tokenIsPrefix(/** @type {int} */ token) {
   return tokenPrefixes[token];
 }
-/** @returns {boolean} */ function tokenIsTSTypeOperator(/** @type {number} */ token) {
+/** @returns {boolean} */ function tokenIsTSTypeOperator(/** @type {int} */ token) {
   return token >= 117 && token <= 119;
 }
-/** @returns {boolean} */ function tokenIsTSDeclarationStart(/** @type {number} */ token) {
+/** @returns {boolean} */ function tokenIsTSDeclarationStart(/** @type {int} */ token) {
   return token >= 120 && token <= 126;
 }
-/** @returns {string} */ function tokenLabelName(/** @type {number} */ token) {
+/** @returns {string} */ function tokenLabelName(/** @type {int} */ token) {
   return tokenLabels[token];
 }
-/** @returns {number} */ function tokenOperatorPrecedence(/** @type {number} */ token) {
+/** @returns {int} */ function tokenOperatorPrecedence(/** @type {int} */ token) {
   return tokenBinops[token];
 }
-/** @returns {boolean} */ function tokenIsRightAssociative(/** @type {number} */ token) {
+/** @returns {boolean} */ function tokenIsRightAssociative(/** @type {int} */ token) {
   return token === 53;
 }
-/** @returns {boolean} */ function tokenIsTemplate(/** @type {number} */ token) {
+/** @returns {boolean} */ function tokenIsTemplate(/** @type {int} */ token) {
   return token >= 20 && token <= 21;
 }
-/** @returns {ExportedTokenType} */ function getExportedToken(/** @type {number} */ token) {
+/** @returns {ExportedTokenType} */ function getExportedToken(/** @type {int} */ token) {
   return tokenTypes[token];
 }
 class TokContext {
@@ -1366,7 +1366,7 @@ function isInSupplementarySet(code, set) {
   }
   return false;
 }
-/** @returns {boolean} */ function isIdentifierStart(/** @type {number} */ code) {
+/** @returns {boolean} */ function isIdentifierStart(/** @type {int} */ code) {
   if (code < 65) return code === 36;
   if (code <= 90) return true;
   if (code < 97) return code === 95;
@@ -1376,7 +1376,7 @@ function isInSupplementarySet(code, set) {
   }
   return isInSupplementarySet(code, supplementaryIdentifierStartCodes);
 }
-/** @returns {boolean} */ function isIdentifierChar(/** @type {number} */ code) {
+/** @returns {boolean} */ function isIdentifierChar(/** @type {int} */ code) {
   if (code < 48) return code === 36;
   if (code < 58) return true;
   if (code < 65) return false;
@@ -1411,7 +1411,7 @@ function isStrictBindReservedWord(word, inModule) {
 /** @returns {boolean} */ function isKeyword(/** @type {string | undefined} */ word) {
   return keywords.has(word);
 }
-/** @returns {boolean} */ function isIteratorStart(/** @type {number} */ current, /** @type {number} */ next, /** @type {number} */ next2) {
+/** @returns {boolean} */ function isIteratorStart(/** @type {int} */ current, /** @type {int} */ next, /** @type {int} */ next2) {
   return current === 64 && next === 64 && isIdentifierStart(next2);
 }
 const reservedWordLikeSet = new Set(["break", "case", "catch", "continue", "debugger", "default", "do", "else", "finally", "for", "function", "if", "return", "switch", "throw", "try", "var", "const", "while", "with", "new", "this", "super", "class", "extends", "export", "import", "null", "true", "false", "in", "instanceof", "typeof", "void", "delete", "implements", "interface", "let", "package", "private", "protected", "public", "static", "yield", "eval", "arguments", "enum", "await"]);
@@ -1419,10 +1419,10 @@ const reservedWordLikeSet = new Set(["break", "case", "catch", "continue", "debu
   return reservedWordLikeSet.has(word);
 }
 class Scope {
-  /** @type {number} */ flags = 0;
+  /** @type {int} */ flags = 0;
   names = new Map();
   /** @type {string} */ firstLexicalName = "";
-  constructor(/** @type {number} */ flags) {
+  constructor(/** @type {int} */ flags) {
     this.flags = flags;
   }
 }
@@ -1527,7 +1527,7 @@ class ScopeHandler {
       this.undefinedExports.delete(name);
     }
   }
-  checkRedeclarationInScope(scope, /** @type {string} */ name, /** @type {number} */ bindingType, loc) {
+  checkRedeclarationInScope(scope, /** @type {string} */ name, /** @type {int} */ bindingType, loc) {
     if (this.isRedeclaredInScope(scope, name, bindingType)) {
       this.parser.raise(Errors.VarRedeclaration, loc, {
         identifierName: name
@@ -1557,7 +1557,7 @@ class ScopeHandler {
   currentScope() {
     return this.scopeStack[this.scopeStack.length - 1];
   }
-  /** @returns {number} */ currentVarScopeFlags() {
+  /** @returns {int} */ currentVarScopeFlags() {
     for (let i = this.scopeStack.length - 1;; i--) {
       const {
         flags
@@ -1567,7 +1567,7 @@ class ScopeHandler {
       }
     }
   }
-  /** @returns {number} */ currentThisScopeFlags() {
+  /** @returns {int} */ currentThisScopeFlags() {
     for (let i = this.scopeStack.length - 1;; i--) {
       const {
         flags
@@ -3618,11 +3618,11 @@ const flow = superClass => class FlowParserMixin extends superClass {
     }
     return super.skipBlockComment(this.state.hasFlowComment ? "*-/" : "*/");
   }
-  skipFlowComment() {
+  /** @returns {int | false} */ skipFlowComment() {
     const {
       pos
     } = this.state;
-    let shiftToFirstNonWhiteSpace = 2;
+    /** @type {int} */ let shiftToFirstNonWhiteSpace = 2;
     while ([32, 9].includes(this.input.charCodeAt(pos + shiftToFirstNonWhiteSpace))) {
       shiftToFirstNonWhiteSpace++;
     }
@@ -4258,7 +4258,7 @@ const entities = {
 };
 const lineBreak = /\r\n|[\r\n\u2028\u2029]/;
 const lineBreakG = new RegExp(lineBreak.source, "g");
-/** @returns {boolean} */ function isNewLine(/** @type {number} */ code) {
+/** @returns {boolean} */ function isNewLine(/** @type {int} */ code) {
   switch (code) {
     case 10:
     case 13:
@@ -4269,7 +4269,7 @@ const lineBreakG = new RegExp(lineBreak.source, "g");
       return false;
   }
 }
-/** @returns {boolean} */ function hasNewLine(/** @type {string} */ input, /** @type {number} */ start, /** @type {number} */ end) {
+/** @returns {boolean} */ function hasNewLine(/** @type {string} */ input, /** @type {int} */ start, /** @type {int} */ end) {
   for (let i = start; i < end; i++) {
     if (isNewLine(input.charCodeAt(i))) {
       return true;
@@ -4279,7 +4279,7 @@ const lineBreakG = new RegExp(lineBreak.source, "g");
 }
 const skipWhiteSpace = /(?:\s|\/\/.*|\/\*[^]*?\*\/)*/g;
 const skipWhiteSpaceInLine = /(?:[^\S\n\r\u2028\u2029]|\/\/.*|\/\*.*?\*\/)*/g;
-/** @returns {boolean} */ function isWhitespace(/** @type {number} */ code) {
+/** @returns {boolean} */ function isWhitespace(/** @type {int} */ code) {
   switch (code) {
     case 0x0009:
     case 0x000b:
@@ -4845,11 +4845,11 @@ class TypeScriptScopeHandler extends ScopeHandler {
 class BaseParser {
   /** @type {boolean} */ sawUnambiguousESM = false;
   /** @type {boolean} */ ambiguousScriptDifferentAst = false;
-  /** @returns {number} */ sourceToOffsetPos(/** @type {number} */ sourcePos) {
-    return sourcePos + this.startIndex;
+  /** @returns {int} */ sourceToOffsetPos(/** @type {int} */ sourcePos) {
+    return sourcePos + /** @type {Parser} */ (this).startIndex;
   }
-  /** @returns {number} */ offsetToSourcePos(/** @type {number} */ offsetPos) {
-    return offsetPos - this.startIndex;
+  /** @returns {int} */ offsetToSourcePos(/** @type {int} */ offsetPos) {
+    return offsetPos - /** @type {Parser} */ (this).startIndex;
   }
   /** @returns {boolean} */ hasPlugin(pluginConfig) {
     if (typeof pluginConfig === "string") {
@@ -5050,16 +5050,16 @@ class CommentsParser extends BaseParser {
   }
 }
 class State {
-  /** @type {number} */ flags = 2048;
+  /** @type {int} */ flags = 2048;
   /** @returns {boolean} */ get strict() {
     return (this.flags & 1) > 0;
   }
   set strict(/** @type {boolean} */ v) {
     if (v) this.flags |= 1;else this.flags &= -2;
   }
-  /** @type {number | undefined} */ startIndex;
-  /** @type {number | undefined} */ curLine;
-  /** @type {number | undefined} */ lineStart;
+  /** @type {int | undefined} */ startIndex;
+  /** @type {int | undefined} */ curLine;
+  /** @type {int | undefined} */ lineStart;
   /** @type {Position | undefined} */ startLoc;
   /** @type {Position | undefined} */ endLoc;
   init({
@@ -5139,13 +5139,13 @@ class State {
     if (v) this.flags |= 1024;else this.flags &= -1025;
   }
   labels = [];
-  /** @type {number} */ commentsLen = 0;
+  /** @type {int} */ commentsLen = 0;
   commentStack = [];
-  /** @type {number} */ pos = 0;
-  /** @type {number} */ type = 135;
+  /** @type {int} */ pos = 0;
+  /** @type {int} */ type = 135;
   value = null;
-  /** @type {number} */ start = 0;
-  /** @type {number} */ end = 0;
+  /** @type {int} */ start = 0;
+  /** @type {int} */ end = 0;
   /** @type {Position | null} */ lastTokEndLoc = null;
   /** @type {Position | null} */ lastTokStartLoc = null;
   context = [types.brace];
@@ -5169,7 +5169,7 @@ class State {
     if (v) this.flags |= 8192;else this.flags &= -8193;
   }
   strictErrors = new Map();
-  /** @type {number} */ tokensLength = 0;
+  /** @type {int} */ tokensLength = 0;
   /** @returns {Position} */ curPosition() {
     return new Position(this.curLine, this.pos - this.lineStart, this.pos + this.startIndex);
   }
@@ -5201,7 +5201,7 @@ class State {
     return state;
   }
 }
-var _isDigit = /** @returns {boolean} */ function isDigit(/** @type {number} */ code) {
+var _isDigit = /** @returns {boolean} */ function isDigit(/** @type {int} */ code) {
   return code >= 48 && code <= 57;
 };
 const forbiddenNumericSeparatorSiblings = {
@@ -5217,13 +5217,13 @@ const isAllowedNumericSeparatorSibling = {
 /**
 @typedef {Readonly<{ pos: number, str: string | null, firstInvalidLoc: any, lineStart: number, curLine: number }>} StringContents
 */
-/** @returns {StringContents} */ function readStringContents(/** @type {string} */ type, /** @type {string} */ input, /** @type {number} */ pos, /** @type {number} */ lineStart, /** @type {number} */ curLine, errors) {
+/** @returns {StringContents} */ function readStringContents(/** @type {string} */ type, /** @type {string} */ input, /** @type {int} */ pos, /** @type {int} */ lineStart, /** @type {int} */ curLine, errors) {
   const initialPos = pos;
   const initialLineStart = lineStart;
   const initialCurLine = curLine;
   let out = "";
   let firstInvalidLoc = null;
-  /** @type {number} */ let chunkStart = pos;
+  /** @type {int} */ let chunkStart = pos;
   const {
     length
   } = input;
@@ -5259,7 +5259,7 @@ const isAllowedNumericSeparatorSibling = {
     } else if (ch === 8232 || ch === 8233) {
       ++pos;
       ++curLine;
-      /** @type {number | undefined} */ lineStart = pos;
+      /** @type {int | undefined} */ lineStart = pos;
     } else if (ch === 10 || ch === 13) {
       if (type === "template") {
         out += input.slice(chunkStart, pos) + "\n";
@@ -5284,7 +5284,7 @@ const isAllowedNumericSeparatorSibling = {
     curLine
   };
 }
-/** @returns {boolean} */ function isStringEnd(/** @type {string} */ type, /** @type {number} */ ch, /** @type {string} */ input, /** @type {number} */ pos) {
+/** @returns {boolean} */ function isStringEnd(/** @type {string} */ type, /** @type {int} */ ch, /** @type {string} */ input, /** @type {int} */ pos) {
   if (type === "template") {
     return ch === 96 || ch === 36 && input.charCodeAt(pos + 1) === 123;
   }
@@ -5336,7 +5336,7 @@ function readEscapedChar(/** @type {string} */ input, pos, lineStart, curLine, i
         ++pos;
       }
     case 10:
-      /** @type {number | undefined} */ lineStart = pos;
+      /** @type {int | undefined} */ lineStart = pos;
       ++curLine;
     case 8232:
     case 8233:
@@ -5383,7 +5383,7 @@ function readHexChar(/** @type {string} */ input, pos, lineStart, curLine, len, 
     if (throwOnInvalid) {
       errors.invalidEscapeSequence(initialPos, lineStart, curLine);
     } else {
-      /** @type {number} */ pos = initialPos - 1;
+      /** @type {int} */ pos = initialPos - 1;
     }
   }
   return {
@@ -5391,7 +5391,7 @@ function readHexChar(/** @type {string} */ input, pos, lineStart, curLine, len, 
     pos
   };
 }
-function readInt(/** @type {string} */ input, pos, lineStart, curLine, radix, /** @type {number | undefined} */ len, forceLen, allowNumSeparator, errors, bailOnError) {
+function readInt(/** @type {string} */ input, pos, lineStart, curLine, radix, /** @type {int | undefined} */ len, forceLen, allowNumSeparator, errors, bailOnError) {
   const start = pos;
   const forbiddenSiblings = radix === 16 ? forbiddenNumericSeparatorSiblings.hex : forbiddenNumericSeparatorSiblings.decBinOct;
   const isAllowedSibling = radix === 16 ? isAllowedNumericSeparatorSibling.hex : radix === 10 ? isAllowedNumericSeparatorSibling.dec : radix === 8 ? isAllowedNumericSeparatorSibling.oct : isAllowedNumericSeparatorSibling.bin;
@@ -5488,7 +5488,7 @@ function readCodePoint(/** @type {string | undefined} */ input, pos, lineStart, 
     pos
   };
 }
-/** @returns {Position} */ function buildPosition(/** @type {number} */ pos, /** @type {number} */ lineStart, /** @type {number} */ curLine) {
+/** @returns {Position} */ function buildPosition(/** @type {int} */ pos, /** @type {int} */ lineStart, /** @type {int} */ curLine) {
   return new Position(curLine, pos - lineStart, pos);
 }
 const VALID_REGEX_FLAGS = new Set([103, 109, 115, 105, 121, 117, 100, 118]);
@@ -5497,8 +5497,8 @@ class Token {
     const startIndex = state.startIndex || 0;
     this.type = state.type;
     this.value = state.value;
-    /** @type {number} */ this.start = startIndex + state.start;
-    /** @type {number} */ this.end = startIndex + state.end;
+    /** @type {int} */ this.start = startIndex + state.start;
+    /** @type {int} */ this.end = startIndex + state.end;
     /** @type {SourceLocation} */ this.loc = new SourceLocation(state.startLoc, state.endLoc);
   }
 }
@@ -5511,7 +5511,7 @@ class Tokenizer extends CommentsParser {
     /** @type {State} */ this.state = new State();
     this.state.init(options);
     /** @type {string} */ this.input = input;
-    /** @type {number} */ this.length = input.length;
+    /** @type {int} */ this.length = input.length;
     this.comments = [];
     this.isLookahead = false;
     if (!locDataCache || locDataCache.length < (this.length + 1) * 2) {
@@ -5524,7 +5524,7 @@ class Tokenizer extends CommentsParser {
     this.locData[dataIndex * 2] = loc.line;
     this.locData[dataIndex * 2 + 1] = loc.column;
   }
-  getLoc(/** @type {number} */ locIndex) {
+  getLoc(/** @type {int} */ locIndex) {
     const dataIndex = this.offsetToSourcePos(locIndex);
     const loc = new Position(this.locData[dataIndex * 2], this.locData[dataIndex * 2 + 1], locIndex);
     return loc;
@@ -5543,7 +5543,7 @@ class Tokenizer extends CommentsParser {
     this.state.lastTokStartLoc = this.state.startLoc;
     this.nextToken();
   }
-  /** @returns {boolean} */ eat(/** @type {number} */ type) {
+  /** @returns {boolean} */ eat(/** @type {int} */ type) {
     if (this.match(type)) {
       this.next();
       return true;
@@ -5551,7 +5551,7 @@ class Tokenizer extends CommentsParser {
       return false;
     }
   }
-  /** @returns {boolean} */ match(/** @type {number} */ type) {
+  /** @returns {boolean} */ match(/** @type {int} */ type) {
     return this.state.type === type;
   }
   createLookaheadState(/** @type {State} */ state) {
@@ -5580,30 +5580,30 @@ class Tokenizer extends CommentsParser {
     this.state = old;
     return curr;
   }
-  /** @returns {number} */ nextTokenStart() {
+  /** @returns {int} */ nextTokenStart() {
     return this.nextTokenStartSince(this.state.pos);
   }
-  /** @returns {number} */ nextTokenStartSince(/** @type {number} */ pos) {
+  /** @returns {int} */ nextTokenStartSince(/** @type {int} */ pos) {
     skipWhiteSpace.lastIndex = pos;
     return skipWhiteSpace.test(this.input) ? skipWhiteSpace.lastIndex : pos;
   }
-  /** @returns {number} */ lookaheadCharCode() {
+  /** @returns {int} */ lookaheadCharCode() {
     return this.lookaheadCharCodeSince(this.state.pos);
   }
   lookaheadCharCodeSince(pos) {
     return this.input.charCodeAt(this.nextTokenStartSince(pos));
   }
-  /** @returns {number} */ nextTokenInLineStart() {
+  /** @returns {int} */ nextTokenInLineStart() {
     return this.nextTokenInLineStartSince(this.state.pos);
   }
-  /** @returns {number} */ nextTokenInLineStartSince(/** @type {number} */ pos) {
+  /** @returns {int} */ nextTokenInLineStartSince(/** @type {int} */ pos) {
     skipWhiteSpaceInLine.lastIndex = pos;
     return skipWhiteSpaceInLine.test(this.input) ? skipWhiteSpaceInLine.lastIndex : pos;
   }
-  /** @returns {number} */ lookaheadInLineCharCode() {
+  /** @returns {int} */ lookaheadInLineCharCode() {
     return this.input.charCodeAt(this.nextTokenInLineStart());
   }
-  /** @returns {number} */ codePointAtPos(/** @type {number} */ pos) {
+  /** @returns {int} */ codePointAtPos(/** @type {int} */ pos) {
     let cp = this.input.charCodeAt(pos);
     if ((cp & 0xfc00) === 0xd800 && ++pos < this.input.length) {
       const trail = this.input.charCodeAt(pos);
@@ -5658,7 +5658,7 @@ class Tokenizer extends CommentsParser {
     if (this.optionFlags & 512) this.pushToken(comment);
     return comment;
   }
-  skipLineComment(/** @type {number} */ startSkip) {
+  skipLineComment(/** @type {int} */ startSkip) {
     const start = this.state.pos;
     let startLoc;
     if (!this.isLookahead) startLoc = this.state.curPosition();
@@ -5780,7 +5780,7 @@ class Tokenizer extends CommentsParser {
       this.updateContext(prevType);
     }
   }
-  replaceToken(/** @type {number} */ type) {
+  replaceToken(/** @type {int} */ type) {
     this.state.type = type;
     this.updateContext();
   }
@@ -5903,7 +5903,7 @@ class Tokenizer extends CommentsParser {
       this.finishOp(22, 1);
     }
   }
-  readToken_plus_min(/** @type {number} */ code) {
+  readToken_plus_min(/** @type {int} */ code) {
     const next = this.input.charCodeAt(this.state.pos + 1);
     if (next === code) {
       this.finishOp(30, 2);
@@ -5954,7 +5954,7 @@ class Tokenizer extends CommentsParser {
     }
     this.finishOp(44, 1);
   }
-  readToken_eq_excl(/** @type {number} */ code) {
+  readToken_eq_excl(/** @type {int} */ code) {
     const next = this.input.charCodeAt(this.state.pos + 1);
     if (next === 61) {
       this.finishOp(42, this.input.charCodeAt(this.state.pos + 2) === 61 ? 3 : 2);
@@ -6116,7 +6116,7 @@ class Tokenizer extends CommentsParser {
       unexpected: String.fromCodePoint(code)
     });
   }
-  finishOp(/** @type {number} */ type, /** @type {number} */ size) {
+  finishOp(/** @type {int} */ type, /** @type {int} */ size) {
     const str = this.input.slice(this.state.pos, this.state.pos + size);
     this.state.pos += size;
     this.finishToken(type, str);
@@ -6183,7 +6183,7 @@ class Tokenizer extends CommentsParser {
       flags: mods
     });
   }
-  /** @returns {number | null} */ readInt(/** @type {number} */ radix, len, forceLen = false, allowNumSeparator = true) {
+  /** @returns {number | null} */ readInt(/** @type {int} */ radix, len, forceLen = false, allowNumSeparator = true) {
     const {
       n,
       pos
@@ -6191,7 +6191,7 @@ class Tokenizer extends CommentsParser {
     this.state.pos = pos;
     return n;
   }
-  readRadixNumber(/** @type {number} */ radix) {
+  readRadixNumber(/** @type {int} */ radix) {
     const start = this.state.pos;
     const startLoc = this.state.curPosition();
     let isBigInt = false;
@@ -6282,7 +6282,7 @@ class Tokenizer extends CommentsParser {
     this.state.pos = pos;
     return code;
   }
-  readString(/** @type {number} */ quote) {
+  readString(/** @type {int} */ quote) {
     const {
       str,
       pos,
@@ -6331,7 +6331,7 @@ class Tokenizer extends CommentsParser {
       this.state.strictErrors.set(index, [toParseError, at]);
     }
   }
-  /** @returns {string} */ readWord1(/** @type {number | undefined} */ firstCode) {
+  /** @returns {string} */ readWord1(/** @type {int | undefined} */ firstCode) {
     this.state.containsEsc = false;
     let word = "";
     const start = this.state.pos;
@@ -6368,7 +6368,7 @@ class Tokenizer extends CommentsParser {
     }
     return word + this.input.slice(chunkStart, this.state.pos);
   }
-  readWord(/** @type {number | undefined} */ firstCode) {
+  readWord(/** @type {int | undefined} */ firstCode) {
     const word = this.readWord1(firstCode);
     const type = keywords$1.get(word);
     if (type !== undefined) {
@@ -6499,7 +6499,7 @@ class ClassScopeHandler {
       }
     }
   }
-  declarePrivateName(/** @type {string} */ name, /** @type {number} */ elementType, loc) {
+  declarePrivateName(/** @type {string} */ name, /** @type {int} */ elementType, loc) {
     const {
       privateNames,
       loneAccessors,
@@ -6543,7 +6543,7 @@ class ClassScopeHandler {
 }
 class ExpressionScope {
   constructor(type = 0) {
-    /** @type {number} */ this.type = type;
+    /** @type {int} */ this.type = type;
   }
   /** @returns {boolean} */ canBeArrowParameterDeclaration() {
     return this.type === 2 || this.type === 1;
@@ -6554,7 +6554,7 @@ class ExpressionScope {
 }
 class ArrowHeadParsingScope extends ExpressionScope {
   declarationErrors = new Map();
-  constructor(/** @type {number} */ type) {
+  constructor(/** @type {int} */ type) {
     super(type);
   }
   recordDeclarationError(ParsingErrorClass, index) {
@@ -6659,7 +6659,7 @@ class ProductionParameterHandler {
   exit() {
     this.stacks.pop();
   }
-  /** @returns {number} */ currentFlags() {
+  /** @returns {int} */ currentFlags() {
     return this.stacks[this.stacks.length - 1];
   }
   /** @returns {boolean} */ get hasAwait() {
@@ -6678,7 +6678,7 @@ class ProductionParameterHandler {
     return (this.currentFlags() & 16) === 0;
   }
 }
-/** @returns {number} */ function functionFlags(/** @type {boolean} */ isAsync, /** @type {boolean} */ isGenerator) {
+/** @returns {int} */ function functionFlags(/** @type {boolean} */ isAsync, /** @type {boolean} */ isGenerator) {
   return (isAsync ? 2 : 0) | (isGenerator ? 1 : 0);
 }
 class UtilParser extends Tokenizer {
@@ -6700,10 +6700,10 @@ class UtilParser extends Tokenizer {
       });
     }
   }
-  /** @returns {boolean} */ isContextual(/** @type {number} */ token) {
+  /** @returns {boolean} */ isContextual(/** @type {int} */ token) {
     return this.state.type === token && !this.state.containsEsc;
   }
-  /** @returns {boolean} */ isUnparsedContextual(/** @type {number} */ nameStart, /** @type {string} */ name) {
+  /** @returns {boolean} */ isUnparsedContextual(/** @type {int} */ nameStart, /** @type {string} */ name) {
     if (this.input.startsWith(name, nameStart)) {
       const nextCh = this.input.charCodeAt(nameStart + name.length);
       return !(isIdentifierChar(nextCh) || (nextCh & 0xfc00) === 0xd800);
@@ -6714,14 +6714,14 @@ class UtilParser extends Tokenizer {
     const next = this.nextTokenStart();
     return this.isUnparsedContextual(next, name);
   }
-  /** @returns {boolean} */ eatContextual(/** @type {number} */ token) {
+  /** @returns {boolean} */ eatContextual(/** @type {int} */ token) {
     if (this.isContextual(token)) {
       this.next();
       return true;
     }
     return false;
   }
-  expectContextual(/** @type {number} */ token, toParseError) {
+  expectContextual(/** @type {int} */ token, toParseError) {
     if (!this.eatContextual(token)) {
       if (toParseError != null) {
         throw this.raise(toParseError, this.state.startLoc);
@@ -6745,7 +6745,7 @@ class UtilParser extends Tokenizer {
     if (allowAsi ? this.isLineTerminator() : this.eat(9)) return;
     this.raise(Errors.MissingSemicolon, this.state.lastTokEndLoc);
   }
-  expect(/** @type {number} */ type, loc) {
+  expect(/** @type {int} */ type, loc) {
     if (!this.eat(type)) {
       this.unexpected(loc, type);
     }
@@ -6930,10 +6930,12 @@ class ExpressionErrors {
  * @property {any} [quasis]
  */
 class Node {
-  constructor(/** @type {number} */ optionFlags, /** @type {string | undefined} */ filename, /** @type {number} */ pos, /** @type {Position | undefined} */ loc) {
-    /** @type {number} */ this.start = pos;
-    /** @type {number} */ this.end = 0;
-    if (loc !== undefined) this.loc = new SourceLocation(loc);
+  constructor(/** @type {int} */ optionFlags, /** @type {string | undefined} */ filename, /** @type {int} */ pos, /** @type {Position | undefined} */ loc) {
+    /** @type {int} */ this.start = pos;
+    /** @type {int} */ this.end = 0;
+    if (loc !== undefined) {
+      /** @type {SourceLocation | undefined} */ this.loc = new SourceLocation(loc);
+    }
     if (optionFlags & 128) this.range = [pos, 0];
     if (loc !== undefined && filename) {
       this.loc.filename = filename;
@@ -7268,7 +7270,7 @@ class LValParser extends NodeUtils {
     }
     return this.parseIdentifier();
   }
-  parseBindingList(/** @type {number} */ close, /** @type {number} */ closeCharCode, /** @type {number} */ flags) {
+  parseBindingList(/** @type {int} */ close, /** @type {int} */ closeCharCode, /** @type {int} */ flags) {
     const allowEmpty = flags & 1;
     const elts = [];
     let first = true;
@@ -7459,7 +7461,7 @@ class LValParser extends NodeUtils {
       this.checkLVal(val, nextAncestor, binding, checkClashes, strictModeChanged, isParenthesizedExpression, disallowCallExpression);
     }
   }
-  checkIdentifier(/** @type {Node} */ at, /** @type {number} */ bindingType, strictModeChanged = false) {
+  checkIdentifier(/** @type {Node} */ at, /** @type {int} */ bindingType, strictModeChanged = false) {
     if (this.state.strict && (strictModeChanged ? isStrictBindReservedWord(at.name, this.inModule) : isStrictBindOnlyReservedWord(at.name))) {
       if (bindingType === 64) {
         this.raise(Errors.StrictEvalArguments, at, {
@@ -7478,7 +7480,7 @@ class LValParser extends NodeUtils {
       this.declareNameFromIdentifier(at, bindingType);
     }
   }
-  declareNameFromIdentifier(/** @type {Node} */ identifier, /** @type {number} */ binding) {
+  declareNameFromIdentifier(/** @type {Node} */ identifier, /** @type {int} */ binding) {
     this.scope.declareName(identifier.name, binding, identifier.start);
   }
   checkToRestConversion(node, allowPattern) {
@@ -7716,7 +7718,7 @@ class ExpressionParser extends LValParser {
     }
     return left;
   }
-  /** @returns {Node} */ parseExprOpRightExpr(/** @type {number} */ op, /** @type {number} */ prec) {
+  /** @returns {Node} */ parseExprOpRightExpr(/** @type {int} */ op, /** @type {int} */ prec) {
     switch (op) {
       case 35:
         switch (this.getPluginOption("pipelineOperator", "proposal")) {
@@ -7731,7 +7733,7 @@ class ExpressionParser extends LValParser {
         return this.parseExprOpBaseRightExpr(op, prec);
     }
   }
-  /** @returns {Node} */ parseExprOpBaseRightExpr(/** @type {number} */ op, /** @type {number} */ prec) {
+  /** @returns {Node} */ parseExprOpBaseRightExpr(/** @type {int} */ op, /** @type {int} */ prec) {
     const startLoc = this.state.startLoc;
     return this.parseExprOp(this.parseMaybeUnaryOrPrivate(), startLoc, tokenIsRightAssociative(op) ? prec - 1 : prec);
   }
@@ -8201,7 +8203,7 @@ class ExpressionParser extends LValParser {
     this.next();
     return this.finishTopicReference(node, startLoc, pipeProposal, tokenType);
   }
-  /** @returns {Node} */ finishTopicReference(/** @type {Node} */ node, startLoc, /** @type {string} */ pipeProposal, /** @type {number} */ tokenType) {
+  /** @returns {Node} */ finishTopicReference(/** @type {Node} */ node, startLoc, /** @type {string} */ pipeProposal, /** @type {int} */ tokenType) {
     if (this.testTopicReferenceConfiguration(pipeProposal, startLoc, tokenType)) {
       if (!this.topicReferenceIsAllowedInCurrentContext()) {
         this.raise(Errors.PipeTopicUnbound, startLoc);
@@ -8214,7 +8216,7 @@ class ExpressionParser extends LValParser {
       });
     }
   }
-  /** @returns {boolean} */ testTopicReferenceConfiguration(/** @type {string} */ pipeProposal, startLoc, /** @type {number} */ tokenType) {
+  /** @returns {boolean} */ testTopicReferenceConfiguration(/** @type {string} */ pipeProposal, startLoc, /** @type {int} */ tokenType) {
     switch (pipeProposal) {
       case "hack":
         {
@@ -8827,7 +8829,7 @@ class ExpressionParser extends LValParser {
       this.checkLVal(param, formalParameters, 5, checkClashes, strictModeChanged);
     }
   }
-  parseExprList(/** @type {number} */ close, /** @type {boolean | undefined} */ allowEmpty, /** @type {ExpressionErrors | undefined | null} */ refExpressionErrors, /** @type {Node | undefined} */ nodeForExtra) {
+  parseExprList(/** @type {int} */ close, /** @type {boolean | undefined} */ allowEmpty, /** @type {ExpressionErrors | undefined | null} */ refExpressionErrors, /** @type {Node | undefined} */ nodeForExtra) {
     const elts = [];
     let first = true;
     while (!this.eat(close)) {
@@ -9078,7 +9080,7 @@ class ExpressionParser extends LValParser {
   /** @returns {boolean} */ topicReferenceWasUsedInCurrentContext() {
     return this.state.seenTopicReference;
   }
-  /** @returns {Node} */ parseFSharpPipelineBody(/** @type {number} */ prec) {
+  /** @returns {Node} */ parseFSharpPipelineBody(/** @type {int} */ prec) {
     const startLoc = this.state.startLoc;
     this.prodParam.enter(this.prodParam.currentFlags() & -17);
     let ret;
@@ -9271,7 +9273,7 @@ class StatementParser extends ExpressionParser {
       return false;
     }
   }
-  /** @returns {boolean} */ chStartsBindingPattern(/** @type {number} */ ch) {
+  /** @returns {boolean} */ chStartsBindingPattern(/** @type {int} */ ch) {
     return ch === 91 || ch === 123;
   }
   /** @returns {boolean} */ hasFollowingBindingAtom() {
@@ -9790,7 +9792,7 @@ class StatementParser extends ExpressionParser {
     this.next();
     return this.finishNode(node, "EmptyStatement");
   }
-  /** @returns {Node} */ parseLabeledStatement(/** @type {Node} */ node, /** @type {string} */ maybeName, /** @type {Node} */ expr, /** @type {number} */ flags) {
+  /** @returns {Node} */ parseLabeledStatement(/** @type {Node} */ node, /** @type {string} */ maybeName, /** @type {Node} */ expr, /** @type {int} */ flags) {
     for (const label of this.state.labels) {
       if (label.name === maybeName) {
         this.raise(Errors.LabelRedeclaration, expr, {
@@ -9846,7 +9848,7 @@ class StatementParser extends ExpressionParser {
     const directives = node.directives = [];
     this.parseBlockOrModuleBlockBody(body, allowDirectives ? directives : undefined, topLevel, end, afterBlockParse);
   }
-  parseBlockOrModuleBlockBody(body, directives, /** @type {boolean} */ topLevel, /** @type {number} */ end, afterBlockParse) {
+  parseBlockOrModuleBlockBody(body, directives, /** @type {boolean} */ topLevel, /** @type {int} */ end, afterBlockParse) {
     const oldStrict = this.state.strict;
     let hasStrictModeDirective = false;
     let parsedNonDirective = false;
@@ -14099,7 +14101,7 @@ class Parser extends StatementParser {
     this.initializeScopes();
     this.plugins = pluginsMap;
     this.filename = normalizedOptions.sourceFilename;
-    this.startIndex = normalizedOptions.startIndex;
+    /** @type {int} */ this.startIndex = normalizedOptions.startIndex;
     let optionFlags = 0;
     if (normalizedOptions.allowAwaitOutsideFunction) {
       optionFlags |= 1;
