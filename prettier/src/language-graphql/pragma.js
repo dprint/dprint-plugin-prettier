@@ -1,10 +1,12 @@
 // @nts-check
-/** @returns {boolean} */ function hasPragma(/** @type {string} */ text) {
-  return /^\s*#[^\S\n]*@(?:format|prettier)\s*(?:\n|$)/u.test(text);
-}
+import {
+  FORMAT_PRAGMA_TO_INSERT,
+  GRAPHQL_HAS_IGNORE_PRAGMA_REGEXP,
+  GRAPHQL_HAS_PRAGMA_REGEXP,
+} from "../utilities/pragma/pragma.evaluate.js";
 
-/** @returns {string} */ function insertPragma(/** @type {string} */ text) {
-  return "# @format\n\n" + text;
-}
+const hasPragma = (text) => GRAPHQL_HAS_PRAGMA_REGEXP.test(text);
+const hasIgnorePragma = (text) => GRAPHQL_HAS_IGNORE_PRAGMA_REGEXP.test(text);
+const insertPragma = (text) => `# @${FORMAT_PRAGMA_TO_INSERT}\n\n${text}`;
 
-export { hasPragma, insertPragma };
+export { hasIgnorePragma, hasPragma, insertPragma };

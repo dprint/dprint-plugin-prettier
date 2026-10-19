@@ -18,7 +18,7 @@
     "jsr:@std/path@^1.1.5": "1.1.6",
     "jsr:@std/yaml@^1.0.11": "1.3.0",
     "npm:@dprint/formatter@0.6": "0.6.0",
-    "npm:prettier@3.4.2": "3.4.2"
+    "npm:prettier@3.9.10": "3.9.10"
   },
   "jsr": {
     "@david/console-static-text@0.3.5": {
@@ -97,8 +97,8 @@
     "@dprint/formatter@0.6.0": {
       "integrity": "sha512-otnYh2jmGWbekYkAd4xiF416lpdZwNCbhkDrLQcAanvvutp0PhTNSJrwJ4DKBEu6xtP36NUX70t9YQw3oC/ONg=="
     },
-    "prettier@3.4.2": {
-      "integrity": "sha512-e9MewbtFo+Fevyuxn/4rrcDAaq0IYxPGLvObpQjiZBMAzB9IGmzlnG9RZy3FFas+eBMu2vA0CszMeduow5dIuQ==",
+    "prettier@3.9.10": {
+      "integrity": "sha512-skGHTH1Yb9QvaTC4hWnRTzEYtCpApF0UMBPz+t/0ZPzP8ihefo/btKd+QA7pUE0fEwA1SbS/NmhyEcstdXOIdA==",
       "bin": true
     }
   },
@@ -108,7 +108,7 @@
       "jsr:@david/gagen@0.5",
       "jsr:@std/assert@1",
       "npm:@dprint/formatter@0.6",
-      "npm:prettier@3.4.2"
+      "npm:prettier@3.9.10"
     ]
   }
 }

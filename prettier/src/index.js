@@ -1,10 +1,17 @@
-// "fast-glob" and `createTwoFilesPatch` are bundled here since the API uses `micromatch` and `diff` too
+/*
+The following are bundled here since they are used in API too
+- fast-glob
+- diff.createTwoFilesPatch
+- leven.closestMatch
+- picocolors
+*/
 import { createTwoFilesPatch } from "diff";
 import fastGlob from "fast-glob";
+import { closestMatch as closetLevenshteinMatch } from "leven";
+import picocolors from "picocolors";
 import * as vnopts from "vnopts";
 import * as errors from "./common/errors.js";
-import getFileInfoWithoutPlugins from "./common/get-file-info.js";
-import mockable from "./common/mockable.js";
+import { mockable } from "./common/mockable.js";
 import {
   clearCache as clearConfigCache,
   resolveConfig,
@@ -23,8 +30,11 @@ import {
   getSupportInfo as getSupportInfoWithoutPlugins,
   normalizeOptionSettings,
 } from "./main/support.js";
-import { createIsIgnoredFunction } from "./utils/ignore.js";
-import omit from "./utils/object-omit.js";
+import createMockable from "./utilities/create-mockable.js";
+import { getOrInsertComputed } from "./utilities/get-or-insert.js";
+import { createIsIgnoredFunction } from "./utilities/ignore.js";
+import inferParserWithoutPlugins from "./utilities/infer-parser.js";
+import omit from "./utilities/object-omit.js";
 
 /**
  * @param {*} fn
@@ -74,13 +84,14 @@ async function clearCache() {
   clearPluginCache();
 }
 
-/** @type {typeof getFileInfoWithoutPlugins} */
-const getFileInfo = withPlugins(getFileInfoWithoutPlugins);
-
 /** @type {typeof getSupportInfoWithoutPlugins} */
 const getSupportInfo = withPlugins(getSupportInfoWithoutPlugins, 0);
 
-// Internal shared with cli
+const inferParser = withPlugins((file, options) =>
+  inferParserWithoutPlugins(options, { physicalFile: file }),
+);
+
+// Internal shared with CLI
 const sharedWithCli = {
   errors,
   optionCategories,
@@ -89,16 +100,21 @@ const sharedWithCli = {
   normalizeOptions,
   getSupportInfoWithoutPlugins,
   normalizeOptionSettings,
+  inferParser: (file, options) =>
+    Promise.resolve(options?.parser ?? inferParser(file, options)),
   vnopts: {
     ChoiceSchema: vnopts.ChoiceSchema,
     apiDescriptor: vnopts.apiDescriptor,
   },
   fastGlob,
   createTwoFilesPatch,
-  utils: {
+  picocolors,
+  closetLevenshteinMatch,
+  utilities: {
     omit,
+    createMockable,
+    getOrInsertComputed,
   },
-  mockable,
 };
 
 const debugApis = {
@@ -107,6 +123,7 @@ const debugApis = {
   formatDoc: withPlugins(core.formatDoc),
   printToDoc: withPlugins(core.printToDoc),
   printDocToString: withPlugins(core.printDocToString),
+  // Exposed for tests
   mockable,
 };
 
@@ -117,11 +134,11 @@ export {
   clearCache as clearConfigCache,
   format,
   formatWithCursor,
-  getFileInfo,
   getSupportInfo,
   resolveConfig,
   resolveConfigFile,
 };
+export { default as getFileInfo } from "./common/get-file-info.js";
 export * as doc from "./document/public.js";
-export { default as version } from "./main/version.evaluate.cjs";
-export * as util from "./utils/public.js";
+export { default as version } from "./main/version.evaluate.js";
+export * as util from "./utilities/public.js";

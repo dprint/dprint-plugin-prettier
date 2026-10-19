@@ -1,16 +1,22 @@
 // @nts-check
-import { formatAttributeValue } from "./utils.js";
+import { getUnescapedAttributeValue } from "../utilities/index.js";
+import isVueSfcWithTypescriptScript from "../utilities/is-vue-sfc-with-typescript-script.js";
+import { formatAttributeValue } from "./utilities.js";
 
 /**
- * @import {Doc} from "../../document/builders.js"
+ * @import {Doc} from "../../document/index.js"
  */
 
 /**
  * @returns {Promise<Doc>}
  */
-function printVueBindings(/** @type {string} */ text, textToDoc, { parseWithTs }) {
+function printVueBindings(textToDoc, print, path, options) {
+  const text = getUnescapedAttributeValue(path.node);
+  const parser = isVueSfcWithTypescriptScript(path, options)
+    ? "babel-ts"
+    : "babel";
   return formatAttributeValue(`function _(${text}) {}`, textToDoc, {
-    parser: parseWithTs ? "babel-ts" : "babel",
+    parser,
     __isVueBindings: true,
   });
 }

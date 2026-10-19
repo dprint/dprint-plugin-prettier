@@ -1,675 +1,588 @@
-import { inspect } from '../jsutils/inspect.mjs';
-import { GraphQLError } from '../error/GraphQLError.mjs';
-import { OperationTypeNode } from '../language/ast.mjs';
-import { isEqualType, isTypeSubTypeOf } from '../utilities/typeComparators.mjs';
-import {
-  isEnumType,
-  isInputObjectType,
-  isInputType,
-  isInterfaceType,
-  isNamedType,
-  isNonNullType,
-  isObjectType,
-  isOutputType,
-  isRequiredArgument,
-  isRequiredInputField,
-  isUnionType,
-} from './definition.mjs';
-import { GraphQLDeprecatedDirective, isDirective } from './directives.mjs';
-import { isIntrospectionType } from './introspection.mjs';
-import { assertSchema } from './schema.mjs';
-/**
- * Implements the "Type Validation" sub-sections of the specification's
- * "Type System" section.
- *
- * Validation runs synchronously, returning an array of encountered errors, or
- * an empty array if no errors were encountered and the Schema is valid.
- */
-
+import { AccumulatorMap } from "../jsutils/AccumulatorMap.mjs";
+import { capitalize } from "../jsutils/capitalize.mjs";
+import { andList } from "../jsutils/formatList.mjs";
+import { inspect } from "../jsutils/inspect.mjs";
+import { invariant } from "../jsutils/invariant.mjs";
+import { isIterableObject } from "../jsutils/isIterableObject.mjs";
+import { isObjectLike } from "../jsutils/isObjectLike.mjs";
+import { keyMap } from "../jsutils/keyMap.mjs";
+import { mapValue } from "../jsutils/mapValue.mjs";
+import { printPathArray } from "../jsutils/printPathArray.mjs";
+import { GraphQLError } from "../error/GraphQLError.mjs";
+import { OperationTypeNode } from "../language/ast.mjs";
+import { Kind } from "../language/kinds.mjs";
+import { isEqualType, isTypeSubTypeOf } from "../utilities/typeComparators.mjs";
+import { validateInputLiteral, validateInputValue, } from "../utilities/validateInputValue.mjs";
+import { assertLeafType, getNamedType, isEnumType, isInputObjectType, isInputType, isInterfaceType, isListType, isNamedType, isNonNullType, isObjectType, isOutputType, isRequiredArgument, isRequiredInputField, isUnionType, } from "./definition.mjs";
+import { GraphQLDeprecatedDirective, isDirective } from "./directives.mjs";
+import { isIntrospectionType } from "./introspection.mjs";
+import { assertSchema } from "./schema.mjs";
 export function validateSchema(schema) {
-  // First check to ensure the provided value is in fact a GraphQLSchema.
-  assertSchema(schema); // If this Schema has already been validated, return the previous results.
-
-  if (schema.__validationErrors) {
-    return schema.__validationErrors;
-  } // Validate the schema, producing a list of errors.
-
-  const context = new SchemaValidationContext(schema);
-  validateRootTypes(context);
-  validateDirectives(context);
-  validateTypes(context); // Persist the results of validation before returning to ensure validation
-  // does not run multiple times for this schema.
-
-  const errors = context.getErrors();
-  schema.__validationErrors = errors;
-  return errors;
+    assertSchema(schema);
+    if (schema.__validationErrors) {
+        return schema.__validationErrors;
+    }
+    const context = new SchemaValidationContext(schema);
+    validateRootTypes(context);
+    validateDirectives(context);
+    validateTypes(context);
+    const errors = context.getErrors();
+    schema.__validationErrors = errors;
+    return errors;
 }
-/**
- * Utility function which asserts a schema is valid by throwing an error if
- * it is invalid.
- */
-
 export function assertValidSchema(schema) {
-  const errors = validateSchema(schema);
-
-  if (errors.length !== 0) {
-    throw new Error(errors.map((error) => error.message).join('\n\n'));
-  }
+    const errors = validateSchema(schema);
+    if (errors.length !== 0) {
+        throw new Error(errors.map((error) => error.message).join('\n\n'));
+    }
 }
-
 class SchemaValidationContext {
-  constructor(schema) {
-    this._errors = [];
-    this.schema = schema;
-  }
-
-  reportError(message, nodes) {
-    const _nodes = Array.isArray(nodes) ? nodes.filter(Boolean) : nodes;
-
-    this._errors.push(
-      new GraphQLError(message, {
-        nodes: _nodes,
-      }),
-    );
-  }
-
-  getErrors() {
-    return this._errors;
-  }
+    constructor(schema) {
+        this._errors = [];
+        this.schema = schema;
+    }
+    reportError(message, nodes) {
+        const _nodes = Array.isArray(nodes)
+            ? nodes.filter(Boolean)
+            : nodes;
+        this._errors.push(new GraphQLError(message, { nodes: _nodes }));
+    }
+    getErrors() {
+        return this._errors;
+    }
 }
-
 function validateRootTypes(context) {
-  const schema = context.schema;
-  const queryType = schema.getQueryType();
-
-  if (!queryType) {
-    context.reportError('Query root type must be provided.', schema.astNode);
-  } else if (!isObjectType(queryType)) {
-    var _getOperationTypeNode;
-
-    context.reportError(
-      `Query root type must be Object type, it cannot be ${inspect(
-        queryType,
-      )}.`,
-      (_getOperationTypeNode = getOperationTypeNode(
-        schema,
-        OperationTypeNode.QUERY,
-      )) !== null && _getOperationTypeNode !== void 0
-        ? _getOperationTypeNode
-        : queryType.astNode,
-    );
-  }
-
-  const mutationType = schema.getMutationType();
-
-  if (mutationType && !isObjectType(mutationType)) {
-    var _getOperationTypeNode2;
-
-    context.reportError(
-      'Mutation root type must be Object type if provided, it cannot be ' +
-        `${inspect(mutationType)}.`,
-      (_getOperationTypeNode2 = getOperationTypeNode(
-        schema,
-        OperationTypeNode.MUTATION,
-      )) !== null && _getOperationTypeNode2 !== void 0
-        ? _getOperationTypeNode2
-        : mutationType.astNode,
-    );
-  }
-
-  const subscriptionType = schema.getSubscriptionType();
-
-  if (subscriptionType && !isObjectType(subscriptionType)) {
-    var _getOperationTypeNode3;
-
-    context.reportError(
-      'Subscription root type must be Object type if provided, it cannot be ' +
-        `${inspect(subscriptionType)}.`,
-      (_getOperationTypeNode3 = getOperationTypeNode(
-        schema,
-        OperationTypeNode.SUBSCRIPTION,
-      )) !== null && _getOperationTypeNode3 !== void 0
-        ? _getOperationTypeNode3
-        : subscriptionType.astNode,
-    );
-  }
-}
-
-function getOperationTypeNode(schema, operation) {
-  var _flatMap$find;
-
-  return (_flatMap$find = [schema.astNode, ...schema.extensionASTNodes]
-    .flatMap(
-      // FIXME: https://github.com/graphql/graphql-js/issues/2203
-      (schemaNode) => {
-        var _schemaNode$operation;
-
-        return (
-          /* c8 ignore next */
-          (_schemaNode$operation =
-            schemaNode === null || schemaNode === void 0
-              ? void 0
-              : schemaNode.operationTypes) !== null &&
-            _schemaNode$operation !== void 0
-            ? _schemaNode$operation
-            : []
-        );
-      },
-    )
-    .find((operationNode) => operationNode.operation === operation)) === null ||
-    _flatMap$find === void 0
-    ? void 0
-    : _flatMap$find.type;
-}
-
-function validateDirectives(context) {
-  for (const directive of context.schema.getDirectives()) {
-    // Ensure all directives are in fact GraphQL directives.
-    if (!isDirective(directive)) {
-      context.reportError(
-        `Expected directive but got: ${inspect(directive)}.`,
-        directive === null || directive === void 0 ? void 0 : directive.astNode,
-      );
-      continue;
-    } // Ensure they are named correctly.
-
-    validateName(context, directive); // TODO: Ensure proper locations.
-    // Ensure the arguments are valid.
-
-    for (const arg of directive.args) {
-      // Ensure they are named correctly.
-      validateName(context, arg); // Ensure the type is an input type.
-
-      if (!isInputType(arg.type)) {
-        context.reportError(
-          `The type of @${directive.name}(${arg.name}:) must be Input Type ` +
-            `but got: ${inspect(arg.type)}.`,
-          arg.astNode,
-        );
-      }
-
-      if (isRequiredArgument(arg) && arg.deprecationReason != null) {
-        var _arg$astNode;
-
-        context.reportError(
-          `Required argument @${directive.name}(${arg.name}:) cannot be deprecated.`,
-          [
-            getDeprecatedDirectiveNode(arg.astNode),
-            (_arg$astNode = arg.astNode) === null || _arg$astNode === void 0
-              ? void 0
-              : _arg$astNode.type,
-          ],
-        );
-      }
+    const schema = context.schema;
+    if (schema.getQueryType() == null) {
+        context.reportError('Query root type must be provided.', schema.astNode);
     }
-  }
-}
-
-function validateName(context, node) {
-  // Ensure names are valid, however introspection types opt out.
-  if (node.name.startsWith('__')) {
-    context.reportError(
-      `Name "${node.name}" must not begin with "__", which is reserved by GraphQL introspection.`,
-      node.astNode,
-    );
-  }
-}
-
-function validateTypes(context) {
-  const validateInputObjectCircularRefs =
-    createInputObjectCircularRefsValidator(context);
-  const typeMap = context.schema.getTypeMap();
-
-  for (const type of Object.values(typeMap)) {
-    // Ensure all provided types are in fact GraphQL type.
-    if (!isNamedType(type)) {
-      context.reportError(
-        `Expected GraphQL named type but got: ${inspect(type)}.`,
-        type.astNode,
-      );
-      continue;
-    } // Ensure it is named correctly (excluding introspection types).
-
-    if (!isIntrospectionType(type)) {
-      validateName(context, type);
-    }
-
-    if (isObjectType(type)) {
-      // Ensure fields are valid
-      validateFields(context, type); // Ensure objects implement the interfaces they claim to.
-
-      validateInterfaces(context, type);
-    } else if (isInterfaceType(type)) {
-      // Ensure fields are valid.
-      validateFields(context, type); // Ensure interfaces implement the interfaces they claim to.
-
-      validateInterfaces(context, type);
-    } else if (isUnionType(type)) {
-      // Ensure Unions include valid member types.
-      validateUnionMembers(context, type);
-    } else if (isEnumType(type)) {
-      // Ensure Enums have valid values.
-      validateEnumValues(context, type);
-    } else if (isInputObjectType(type)) {
-      // Ensure Input Object fields are valid.
-      validateInputFields(context, type); // Ensure Input Objects do not contain non-nullable circular references
-
-      validateInputObjectCircularRefs(type);
-    }
-  }
-}
-
-function validateFields(context, type) {
-  const fields = Object.values(type.getFields()); // Objects and Interfaces both must define one or more fields.
-
-  if (fields.length === 0) {
-    context.reportError(`Type ${type.name} must define one or more fields.`, [
-      type.astNode,
-      ...type.extensionASTNodes,
-    ]);
-  }
-
-  for (const field of fields) {
-    // Ensure they are named correctly.
-    validateName(context, field); // Ensure the type is an output type
-
-    if (!isOutputType(field.type)) {
-      var _field$astNode;
-
-      context.reportError(
-        `The type of ${type.name}.${field.name} must be Output Type ` +
-          `but got: ${inspect(field.type)}.`,
-        (_field$astNode = field.astNode) === null || _field$astNode === void 0
-          ? void 0
-          : _field$astNode.type,
-      );
-    } // Ensure the arguments are valid
-
-    for (const arg of field.args) {
-      const argName = arg.name; // Ensure they are named correctly.
-
-      validateName(context, arg); // Ensure the type is an input type
-
-      if (!isInputType(arg.type)) {
-        var _arg$astNode2;
-
-        context.reportError(
-          `The type of ${type.name}.${field.name}(${argName}:) must be Input ` +
-            `Type but got: ${inspect(arg.type)}.`,
-          (_arg$astNode2 = arg.astNode) === null || _arg$astNode2 === void 0
-            ? void 0
-            : _arg$astNode2.type,
-        );
-      }
-
-      if (isRequiredArgument(arg) && arg.deprecationReason != null) {
-        var _arg$astNode3;
-
-        context.reportError(
-          `Required argument ${type.name}.${field.name}(${argName}:) cannot be deprecated.`,
-          [
-            getDeprecatedDirectiveNode(arg.astNode),
-            (_arg$astNode3 = arg.astNode) === null || _arg$astNode3 === void 0
-              ? void 0
-              : _arg$astNode3.type,
-          ],
-        );
-      }
-    }
-  }
-}
-
-function validateInterfaces(context, type) {
-  const ifaceTypeNames = Object.create(null);
-
-  for (const iface of type.getInterfaces()) {
-    if (!isInterfaceType(iface)) {
-      context.reportError(
-        `Type ${inspect(type)} must only implement Interface types, ` +
-          `it cannot implement ${inspect(iface)}.`,
-        getAllImplementsInterfaceNodes(type, iface),
-      );
-      continue;
-    }
-
-    if (type === iface) {
-      context.reportError(
-        `Type ${type.name} cannot implement itself because it would create a circular reference.`,
-        getAllImplementsInterfaceNodes(type, iface),
-      );
-      continue;
-    }
-
-    if (ifaceTypeNames[iface.name]) {
-      context.reportError(
-        `Type ${type.name} can only implement ${iface.name} once.`,
-        getAllImplementsInterfaceNodes(type, iface),
-      );
-      continue;
-    }
-
-    ifaceTypeNames[iface.name] = true;
-    validateTypeImplementsAncestors(context, type, iface);
-    validateTypeImplementsInterface(context, type, iface);
-  }
-}
-
-function validateTypeImplementsInterface(context, type, iface) {
-  const typeFieldMap = type.getFields(); // Assert each interface field is implemented.
-
-  for (const ifaceField of Object.values(iface.getFields())) {
-    const fieldName = ifaceField.name;
-    const typeField = typeFieldMap[fieldName]; // Assert interface field exists on type.
-
-    if (!typeField) {
-      context.reportError(
-        `Interface field ${iface.name}.${fieldName} expected but ${type.name} does not provide it.`,
-        [ifaceField.astNode, type.astNode, ...type.extensionASTNodes],
-      );
-      continue;
-    } // Assert interface field type is satisfied by type field type, by being
-    // a valid subtype. (covariant)
-
-    if (!isTypeSubTypeOf(context.schema, typeField.type, ifaceField.type)) {
-      var _ifaceField$astNode, _typeField$astNode;
-
-      context.reportError(
-        `Interface field ${iface.name}.${fieldName} expects type ` +
-          `${inspect(ifaceField.type)} but ${type.name}.${fieldName} ` +
-          `is type ${inspect(typeField.type)}.`,
-        [
-          (_ifaceField$astNode = ifaceField.astNode) === null ||
-          _ifaceField$astNode === void 0
-            ? void 0
-            : _ifaceField$astNode.type,
-          (_typeField$astNode = typeField.astNode) === null ||
-          _typeField$astNode === void 0
-            ? void 0
-            : _typeField$astNode.type,
-        ],
-      );
-    } // Assert each interface field arg is implemented.
-
-    for (const ifaceArg of ifaceField.args) {
-      const argName = ifaceArg.name;
-      const typeArg = typeField.args.find((arg) => arg.name === argName); // Assert interface field arg exists on object field.
-
-      if (!typeArg) {
-        context.reportError(
-          `Interface field argument ${iface.name}.${fieldName}(${argName}:) expected but ${type.name}.${fieldName} does not provide it.`,
-          [ifaceArg.astNode, typeField.astNode],
-        );
-        continue;
-      } // Assert interface field arg type matches object field arg type.
-      // (invariant)
-      // TODO: change to contravariant?
-
-      if (!isEqualType(ifaceArg.type, typeArg.type)) {
-        var _ifaceArg$astNode, _typeArg$astNode;
-
-        context.reportError(
-          `Interface field argument ${iface.name}.${fieldName}(${argName}:) ` +
-            `expects type ${inspect(ifaceArg.type)} but ` +
-            `${type.name}.${fieldName}(${argName}:) is type ` +
-            `${inspect(typeArg.type)}.`,
-          [
-            (_ifaceArg$astNode = ifaceArg.astNode) === null ||
-            _ifaceArg$astNode === void 0
-              ? void 0
-              : _ifaceArg$astNode.type,
-            (_typeArg$astNode = typeArg.astNode) === null ||
-            _typeArg$astNode === void 0
-              ? void 0
-              : _typeArg$astNode.type,
-          ],
-        );
-      } // TODO: validate default values?
-    } // Assert additional arguments must not be required.
-
-    for (const typeArg of typeField.args) {
-      const argName = typeArg.name;
-      const ifaceArg = ifaceField.args.find((arg) => arg.name === argName);
-
-      if (!ifaceArg && isRequiredArgument(typeArg)) {
-        context.reportError(
-          `Object field ${type.name}.${fieldName} includes required argument ${argName} that is missing from the Interface field ${iface.name}.${fieldName}.`,
-          [typeArg.astNode, ifaceField.astNode],
-        );
-      }
-    }
-  }
-}
-
-function validateTypeImplementsAncestors(context, type, iface) {
-  const ifaceInterfaces = type.getInterfaces();
-
-  for (const transitive of iface.getInterfaces()) {
-    if (!ifaceInterfaces.includes(transitive)) {
-      context.reportError(
-        transitive === type
-          ? `Type ${type.name} cannot implement ${iface.name} because it would create a circular reference.`
-          : `Type ${type.name} must implement ${transitive.name} because it is implemented by ${iface.name}.`,
-        [
-          ...getAllImplementsInterfaceNodes(iface, transitive),
-          ...getAllImplementsInterfaceNodes(type, iface),
-        ],
-      );
-    }
-  }
-}
-
-function validateUnionMembers(context, union) {
-  const memberTypes = union.getTypes();
-
-  if (memberTypes.length === 0) {
-    context.reportError(
-      `Union type ${union.name} must define one or more member types.`,
-      [union.astNode, ...union.extensionASTNodes],
-    );
-  }
-
-  const includedTypeNames = Object.create(null);
-
-  for (const memberType of memberTypes) {
-    if (includedTypeNames[memberType.name]) {
-      context.reportError(
-        `Union type ${union.name} can only include type ${memberType.name} once.`,
-        getUnionMemberTypeNodes(union, memberType.name),
-      );
-      continue;
-    }
-
-    includedTypeNames[memberType.name] = true;
-
-    if (!isObjectType(memberType)) {
-      context.reportError(
-        `Union type ${union.name} can only include Object types, ` +
-          `it cannot include ${inspect(memberType)}.`,
-        getUnionMemberTypeNodes(union, String(memberType)),
-      );
-    }
-  }
-}
-
-function validateEnumValues(context, enumType) {
-  const enumValues = enumType.getValues();
-
-  if (enumValues.length === 0) {
-    context.reportError(
-      `Enum type ${enumType.name} must define one or more values.`,
-      [enumType.astNode, ...enumType.extensionASTNodes],
-    );
-  }
-
-  for (const enumValue of enumValues) {
-    // Ensure valid name.
-    validateName(context, enumValue);
-  }
-}
-
-function validateInputFields(context, inputObj) {
-  const fields = Object.values(inputObj.getFields());
-
-  if (fields.length === 0) {
-    context.reportError(
-      `Input Object type ${inputObj.name} must define one or more fields.`,
-      [inputObj.astNode, ...inputObj.extensionASTNodes],
-    );
-  } // Ensure the arguments are valid
-
-  for (const field of fields) {
-    // Ensure they are named correctly.
-    validateName(context, field); // Ensure the type is an input type
-
-    if (!isInputType(field.type)) {
-      var _field$astNode2;
-
-      context.reportError(
-        `The type of ${inputObj.name}.${field.name} must be Input Type ` +
-          `but got: ${inspect(field.type)}.`,
-        (_field$astNode2 = field.astNode) === null || _field$astNode2 === void 0
-          ? void 0
-          : _field$astNode2.type,
-      );
-    }
-
-    if (isRequiredInputField(field) && field.deprecationReason != null) {
-      var _field$astNode3;
-
-      context.reportError(
-        `Required input field ${inputObj.name}.${field.name} cannot be deprecated.`,
-        [
-          getDeprecatedDirectiveNode(field.astNode),
-          (_field$astNode3 = field.astNode) === null ||
-          _field$astNode3 === void 0
-            ? void 0
-            : _field$astNode3.type,
-        ],
-      );
-    }
-
-    if (inputObj.isOneOf) {
-      validateOneOfInputObjectField(inputObj, field, context);
-    }
-  }
-}
-
-function validateOneOfInputObjectField(type, field, context) {
-  if (isNonNullType(field.type)) {
-    var _field$astNode4;
-
-    context.reportError(
-      `OneOf input field ${type.name}.${field.name} must be nullable.`,
-      (_field$astNode4 = field.astNode) === null || _field$astNode4 === void 0
-        ? void 0
-        : _field$astNode4.type,
-    );
-  }
-
-  if (field.defaultValue !== undefined) {
-    context.reportError(
-      `OneOf input field ${type.name}.${field.name} cannot have a default value.`,
-      field.astNode,
-    );
-  }
-}
-
-function createInputObjectCircularRefsValidator(context) {
-  // Modified copy of algorithm from 'src/validation/rules/NoFragmentCycles.js'.
-  // Tracks already visited types to maintain O(N) and to ensure that cycles
-  // are not redundantly reported.
-  const visitedTypes = Object.create(null); // Array of types nodes used to produce meaningful errors
-
-  const fieldPath = []; // Position in the type path
-
-  const fieldPathIndexByTypeName = Object.create(null);
-  return detectCycleRecursive; // This does a straight-forward DFS to find cycles.
-  // It does not terminate when a cycle was found but continues to explore
-  // the graph to find all possible cycles.
-
-  function detectCycleRecursive(inputObj) {
-    if (visitedTypes[inputObj.name]) {
-      return;
-    }
-
-    visitedTypes[inputObj.name] = true;
-    fieldPathIndexByTypeName[inputObj.name] = fieldPath.length;
-    const fields = Object.values(inputObj.getFields());
-
-    for (const field of fields) {
-      if (isNonNullType(field.type) && isInputObjectType(field.type.ofType)) {
-        const fieldType = field.type.ofType;
-        const cycleIndex = fieldPathIndexByTypeName[fieldType.name];
-        fieldPath.push(field);
-
-        if (cycleIndex === undefined) {
-          detectCycleRecursive(fieldType);
-        } else {
-          const cyclePath = fieldPath.slice(cycleIndex);
-          const pathStr = cyclePath.map((fieldObj) => fieldObj.name).join('.');
-          context.reportError(
-            `Cannot reference Input Object "${fieldType.name}" within itself through a series of non-null fields: "${pathStr}".`,
-            cyclePath.map((fieldObj) => fieldObj.astNode),
-          );
+    const rootTypesMap = new AccumulatorMap();
+    for (const operationType of Object.values(OperationTypeNode)) {
+        const rootType = schema.getRootType(operationType);
+        if (rootType != null) {
+            if (!isObjectType(rootType)) {
+                const operationTypeStr = capitalize(operationType);
+                const rootTypeStr = inspect(rootType);
+                context.reportError(operationType === OperationTypeNode.QUERY
+                    ? `${operationTypeStr} root type must be Object type, it cannot be ${rootTypeStr}.`
+                    : `${operationTypeStr} root type must be Object type if provided, it cannot be ${rootTypeStr}.`, getOperationTypeNode(schema, operationType) ??
+                    rootType.astNode);
+            }
+            else {
+                rootTypesMap.add(rootType, operationType);
+            }
         }
-
-        fieldPath.pop();
-      }
     }
-
-    fieldPathIndexByTypeName[inputObj.name] = undefined;
-  }
+    for (const [rootType, operationTypes] of rootTypesMap) {
+        if (operationTypes.length > 1) {
+            const operationList = andList(operationTypes);
+            context.reportError(`All root types must be different, "${rootType}" type is used as ${operationList} root types.`, operationTypes.map((operationType) => getOperationTypeNode(schema, operationType)));
+        }
+    }
 }
-
+function getOperationTypeNode(schema, operation) {
+    return [schema.astNode, ...schema.extensionASTNodes]
+        .flatMap((schemaNode) => schemaNode?.operationTypes ?? [])
+        .find((operationNode) => operationNode.operation === operation)?.type;
+}
+function validateDirectives(context) {
+    for (const directive of context.schema.getDirectives()) {
+        if (!isDirective(directive)) {
+            context.reportError(`Expected directive but got: ${inspect(directive)}.`, directive?.astNode);
+            continue;
+        }
+        validateName(context, directive);
+        if (directive.locations.length === 0) {
+            context.reportError(`Directive ${directive} must include 1 or more locations.`, directive.astNode);
+        }
+        for (const arg of directive.args) {
+            validateName(context, arg);
+            if (!isInputType(arg.type)) {
+                context.reportError(`The type of ${arg} must be Input Type ` +
+                    `but got: ${inspect(arg.type)}.`, arg.astNode);
+            }
+            if (isRequiredArgument(arg) && arg.deprecationReason != null) {
+                context.reportError(`Required argument ${arg} cannot be deprecated.`, [
+                    getDeprecatedDirectiveNode(arg.astNode),
+                    arg.astNode?.type,
+                ]);
+            }
+            validateDefaultValue(context, arg);
+        }
+    }
+}
+function validateDefaultValue(context, inputValue) {
+    const defaultInput = inputValue.default;
+    if (!defaultInput) {
+        return;
+    }
+    const errors = [];
+    validateDefaultInput(defaultInput, inputValue.type, (error, path) => {
+        errors.push([error, path]);
+    });
+    if (errors.length === 0) {
+        return;
+    }
+    if (!defaultInput.literal) {
+        try {
+            const uncoercedValue = uncoerceDefaultValue(defaultInput.value, inputValue.type);
+            const uncoercedErrors = [];
+            validateInputValue(uncoercedValue, inputValue.type, (error, path) => {
+                uncoercedErrors.push([error, path]);
+            });
+            if (uncoercedErrors.length === 0) {
+                context.reportError(`${inputValue} has invalid default value: ${inspect(defaultInput.value)}. Did you mean: ${inspect(uncoercedValue)}?`, inputValue.astNode?.defaultValue);
+                return;
+            }
+        }
+        catch (_error) {
+        }
+    }
+    for (const [error, path] of errors) {
+        context.reportError(`${inputValue} has invalid default value${printPathArray(path)}: ${error.message}`, error.nodes ?? inputValue.astNode?.defaultValue);
+    }
+}
+export function validateDefaultInput(defaultInput, inputType, onError, hideSuggestions) {
+    if (defaultInput.literal) {
+        validateInputLiteral(defaultInput.literal, inputType, onError, undefined, undefined, hideSuggestions);
+        return;
+    }
+    validateInputValue(defaultInput.value, inputType, onError, hideSuggestions);
+}
+function uncoerceDefaultValue(value, type) {
+    if (isNonNullType(type)) {
+        return uncoerceDefaultValue(value, type.ofType);
+    }
+    if (value === null) {
+        return null;
+    }
+    if (isListType(type)) {
+        if (isIterableObject(value)) {
+            return Array.from(value, (itemValue) => uncoerceDefaultValue(itemValue, type.ofType));
+        }
+        return [uncoerceDefaultValue(value, type.ofType)];
+    }
+    if (isInputObjectType(type)) {
+        if (!(isObjectLike(value)))
+            invariant(false);
+        const fieldDefs = type.getFields();
+        return mapValue(value, (fieldValue, fieldName) => {
+            if (!(fieldName in fieldDefs))
+                invariant(false);
+            return uncoerceDefaultValue(fieldValue, fieldDefs[fieldName].type);
+        });
+    }
+    assertLeafType(type);
+    return type.coerceOutputValue(value);
+}
+function validateName(context, node) {
+    if (node.name.startsWith('__')) {
+        context.reportError(`Name "${node.name}" must not begin with "__", which is reserved by GraphQL introspection.`, node.astNode);
+    }
+}
+function validateTypes(context) {
+    const validateInputObjectDefaultValueCircularRefs = createInputObjectDefaultValueCircularRefsValidator(context);
+    const typeMap = context.schema.getTypeMap();
+    const finiteValueStates = new Map();
+    for (const type of Object.values(typeMap)) {
+        if (!isNamedType(type)) {
+            context.reportError(`Expected GraphQL named type but got: ${inspect(type)}.`, type.astNode);
+            continue;
+        }
+        if (!isIntrospectionType(type)) {
+            validateName(context, type);
+        }
+        if (isObjectType(type)) {
+            validateFields(context, type);
+            validateInterfaces(context, type);
+        }
+        else if (isInterfaceType(type)) {
+            validateFields(context, type);
+            validateInterfaces(context, type);
+        }
+        else if (isUnionType(type)) {
+            validateUnionMembers(context, type);
+        }
+        else if (isEnumType(type)) {
+            validateEnumValues(context, type);
+        }
+        else if (isInputObjectType(type)) {
+            validateInputFields(context, type);
+            initializeInputObjectFiniteValueState(type);
+            validateInputObjectDefaultValueCircularRefs(type);
+        }
+    }
+    detectInputObjectNonFiniteValues(context, finiteValueStates);
+    function initializeInputObjectFiniteValueState(inputObj) {
+        finiteValueStates.set(inputObj, {
+            inputObj,
+            targets: [],
+            dependents: [],
+            unresolvedTargetCount: 0,
+            hasFiniteValue: false,
+        });
+    }
+}
+function validateFields(context, type) {
+    const fields = Object.values(type.getFields());
+    if (fields.length === 0) {
+        context.reportError(`Type ${type} must define one or more fields.`, [
+            type.astNode,
+            ...type.extensionASTNodes,
+        ]);
+    }
+    for (const field of fields) {
+        validateName(context, field);
+        if (!isOutputType(field.type)) {
+            context.reportError(`The type of ${field} must be Output Type ` +
+                `but got: ${inspect(field.type)}.`, field.astNode?.type);
+        }
+        for (const arg of field.args) {
+            validateName(context, arg);
+            if (!isInputType(arg.type)) {
+                context.reportError(`The type of ${arg} must be Input Type but got: ${inspect(arg.type)}.`, arg.astNode?.type);
+            }
+            if (isRequiredArgument(arg) && arg.deprecationReason != null) {
+                context.reportError(`Required argument ${arg} cannot be deprecated.`, [
+                    getDeprecatedDirectiveNode(arg.astNode),
+                    arg.astNode?.type,
+                ]);
+            }
+            validateDefaultValue(context, arg);
+        }
+    }
+}
+function validateInterfaces(context, type) {
+    const ifaceTypeNames = new Set();
+    for (const iface of type.getInterfaces()) {
+        if (!isInterfaceType(iface)) {
+            context.reportError(`Type ${type} must only implement Interface types, ` +
+                `it cannot implement ${inspect(iface)}.`, getAllImplementsInterfaceNodes(type, iface));
+            continue;
+        }
+        if (type === iface) {
+            context.reportError(`Type ${type} cannot implement itself because it would create a circular reference.`, getAllImplementsInterfaceNodes(type, iface));
+            continue;
+        }
+        if (ifaceTypeNames.has(iface.name)) {
+            context.reportError(`Type ${type} can only implement ${iface} once.`, getAllImplementsInterfaceNodes(type, iface));
+            continue;
+        }
+        ifaceTypeNames.add(iface.name);
+        validateTypeImplementsAncestors(context, type, iface);
+        validateTypeImplementsInterface(context, type, iface);
+    }
+}
+function validateTypeImplementsInterface(context, type, iface) {
+    const typeFieldMap = type.getFields();
+    for (const ifaceField of Object.values(iface.getFields())) {
+        const typeField = typeFieldMap[ifaceField.name];
+        if (typeField == null) {
+            context.reportError(`Interface field ${ifaceField} expected but ${type} does not provide it.`, [ifaceField.astNode, type.astNode, ...type.extensionASTNodes]);
+            continue;
+        }
+        if (!isTypeSubTypeOf(context.schema, typeField.type, ifaceField.type)) {
+            context.reportError(`Interface field ${ifaceField} expects type ${ifaceField.type} ` +
+                `but ${typeField} is type ${typeField.type}.`, [ifaceField.astNode?.type, typeField.astNode?.type]);
+        }
+        for (const ifaceArg of ifaceField.args) {
+            const typeArg = typeField.args.find((arg) => arg.name === ifaceArg.name);
+            if (!typeArg) {
+                context.reportError(`Interface field argument ${ifaceArg} expected but ${typeField} does not provide it.`, [ifaceArg.astNode, typeField.astNode]);
+                continue;
+            }
+            if (!isEqualType(ifaceArg.type, typeArg.type)) {
+                context.reportError(`Interface field argument ${ifaceArg} expects type ${ifaceArg.type} ` +
+                    `but ${typeArg} is type ${typeArg.type}.`, [ifaceArg.astNode?.type, typeArg.astNode?.type]);
+            }
+        }
+        for (const typeArg of typeField.args) {
+            if (isRequiredArgument(typeArg)) {
+                const ifaceArg = ifaceField.args.find((arg) => arg.name === typeArg.name);
+                if (!ifaceArg) {
+                    context.reportError(`Argument "${typeArg}" must not be required type "${typeArg.type}" ` +
+                        `if not provided by the Interface field "${ifaceField}".`, [typeArg.astNode, ifaceField.astNode]);
+                }
+            }
+        }
+        if (typeField.deprecationReason != null &&
+            ifaceField.deprecationReason == null) {
+            context.reportError(`Interface field ${iface.name}.${ifaceField.name} is not deprecated, so ` +
+                `implementation field ${type.name}.${typeField.name} must not be deprecated.`, [
+                getDeprecatedDirectiveNode(typeField.astNode),
+                typeField.astNode?.type,
+            ]);
+        }
+    }
+}
+function validateTypeImplementsAncestors(context, type, iface) {
+    const ifaceInterfaces = type.getInterfaces();
+    for (const transitive of iface.getInterfaces()) {
+        if (!ifaceInterfaces.includes(transitive)) {
+            context.reportError(transitive === type
+                ? `Type ${type} cannot implement ${iface} because it would create a circular reference.`
+                : `Type ${type} must implement ${transitive} because it is implemented by ${iface}.`, [
+                ...getAllImplementsInterfaceNodes(iface, transitive),
+                ...getAllImplementsInterfaceNodes(type, iface),
+            ]);
+        }
+    }
+}
+function validateUnionMembers(context, union) {
+    const memberTypes = union.getTypes();
+    if (memberTypes.length === 0) {
+        context.reportError(`Union type ${union} must define one or more member types.`, [union.astNode, ...union.extensionASTNodes]);
+    }
+    const includedTypeNames = new Set();
+    for (const memberType of memberTypes) {
+        if (includedTypeNames.has(memberType.name)) {
+            context.reportError(`Union type ${union} can only include type ${memberType} once.`, getUnionMemberTypeNodes(union, memberType.name));
+            continue;
+        }
+        includedTypeNames.add(memberType.name);
+        if (!isObjectType(memberType)) {
+            context.reportError(`Union type ${union} can only include Object types, ` +
+                `it cannot include ${inspect(memberType)}.`, getUnionMemberTypeNodes(union, String(memberType)));
+        }
+    }
+}
+function validateEnumValues(context, enumType) {
+    const enumValues = enumType.getValues();
+    if (enumValues.length === 0) {
+        context.reportError(`Enum type ${enumType} must define one or more values.`, [enumType.astNode, ...enumType.extensionASTNodes]);
+    }
+    for (const enumValue of enumValues) {
+        validateName(context, enumValue);
+    }
+}
+function validateInputFields(context, inputObj) {
+    const fields = Object.values(inputObj.getFields());
+    if (fields.length === 0) {
+        context.reportError(`Input Object type ${inputObj} must define one or more fields.`, [inputObj.astNode, ...inputObj.extensionASTNodes]);
+    }
+    for (const field of fields) {
+        validateName(context, field);
+        if (!isInputType(field.type)) {
+            context.reportError(`The type of ${field} must be Input Type ` +
+                `but got: ${inspect(field.type)}.`, field.astNode?.type);
+        }
+        if (isRequiredInputField(field) && field.deprecationReason != null) {
+            context.reportError(`Required input field ${field} cannot be deprecated.`, [getDeprecatedDirectiveNode(field.astNode), field.astNode?.type]);
+        }
+        validateDefaultValue(context, field);
+        if (inputObj.isOneOf) {
+            validateOneOfInputObjectField(inputObj, field, context);
+        }
+    }
+}
+function validateOneOfInputObjectField(type, field, context) {
+    if (isNonNullType(field.type)) {
+        context.reportError(`OneOf input field ${type}.${field.name} must be nullable.`, field.astNode?.type);
+    }
+    if (field.default !== undefined || field.defaultValue !== undefined) {
+        context.reportError(`OneOf input field ${type}.${field.name} cannot have a default value.`, field.astNode);
+    }
+}
+function detectInputObjectNonFiniteValues(context, finiteValueStates) {
+    const inputObjectsWithFiniteValues = [];
+    for (const state of finiteValueStates.values()) {
+        const inputObj = state.inputObj;
+        const fields = Object.values(inputObj.getFields());
+        for (const field of fields) {
+            const target = getFiniteValueTarget(inputObj, field.type);
+            if (target === undefined) {
+                continue;
+            }
+            state.targets.push({ field, target });
+            const targetState = finiteValueStates.get(target);
+            if (targetState !== undefined) {
+                targetState.dependents.push(state);
+            }
+        }
+        if (inputObj.isOneOf) {
+            if (fields.length === 0 || state.targets.length < fields.length) {
+                markInputObjectHasFiniteValue(state);
+            }
+        }
+        else {
+            state.unresolvedTargetCount = state.targets.length;
+            if (state.targets.length === 0) {
+                markInputObjectHasFiniteValue(state);
+            }
+        }
+    }
+    let nextFiniteValueState;
+    while ((nextFiniteValueState = inputObjectsWithFiniteValues.pop()) !== undefined) {
+        for (const dependentState of nextFiniteValueState.dependents) {
+            if (dependentState.hasFiniteValue) {
+                continue;
+            }
+            if (dependentState.inputObj.isOneOf) {
+                markInputObjectHasFiniteValue(dependentState);
+                continue;
+            }
+            --dependentState.unresolvedTargetCount;
+            if (dependentState.unresolvedTargetCount === 0) {
+                markInputObjectHasFiniteValue(dependentState);
+            }
+        }
+    }
+    const visitedTypes = new Set();
+    const fieldPath = [];
+    const fieldPathIndexByType = new Map();
+    for (const state of finiteValueStates.values()) {
+        if (!state.hasFiniteValue) {
+            reportCycleRecursive(state);
+        }
+    }
+    function markInputObjectHasFiniteValue(finiteValueState) {
+        if (!finiteValueState.hasFiniteValue) {
+            finiteValueState.hasFiniteValue = true;
+            inputObjectsWithFiniteValues.push(finiteValueState);
+        }
+    }
+    function reportCycleRecursive(state) {
+        const inputObj = state.inputObj;
+        if (visitedTypes.has(inputObj)) {
+            return;
+        }
+        visitedTypes.add(inputObj);
+        fieldPathIndexByType.set(inputObj, fieldPath.length);
+        for (const { field, target } of state.targets) {
+            const targetState = finiteValueStates.get(target);
+            if (targetState?.hasFiniteValue !== false) {
+                continue;
+            }
+            const cycleIndex = fieldPathIndexByType.get(target);
+            fieldPath.push({
+                fieldStr: `${inputObj}.${field.name}`,
+                astNode: field.astNode,
+            });
+            if (cycleIndex === undefined) {
+                reportCycleRecursive(targetState);
+            }
+            else {
+                const cyclePath = fieldPath.slice(cycleIndex);
+                const pathStr = cyclePath.map((p) => p.fieldStr).join(', ');
+                context.reportError(`Input Object ${target} cannot be provided a finite value because it references itself through fields: ${pathStr}.`, cyclePath.map((p) => p.astNode));
+            }
+            fieldPath.pop();
+        }
+        fieldPathIndexByType.delete(inputObj);
+    }
+}
+function getFiniteValueTarget(inputObj, fieldType) {
+    if (inputObj.isOneOf) {
+        if (isInputObjectType(fieldType)) {
+            return fieldType;
+        }
+        return;
+    }
+    if (isNonNullType(fieldType) && isInputObjectType(fieldType.ofType)) {
+        return fieldType.ofType;
+    }
+}
+function createInputObjectDefaultValueCircularRefsValidator(context) {
+    const visitedFields = Object.create(null);
+    const fieldPath = [];
+    const fieldPathIndex = Object.create(null);
+    return function validateInputObjectDefaultValueCircularRefs(inputObj) {
+        return detectValueDefaultValueCycle(inputObj, Object.create(null));
+    };
+    function detectValueDefaultValueCycle(inputObj, defaultValue) {
+        if (isIterableObject(defaultValue)) {
+            for (const itemValue of defaultValue) {
+                detectValueDefaultValueCycle(inputObj, itemValue);
+            }
+            return;
+        }
+        else if (!isObjectLike(defaultValue)) {
+            return;
+        }
+        for (const field of Object.values(inputObj.getFields())) {
+            const namedFieldType = getNamedType(field.type);
+            if (!isInputObjectType(namedFieldType)) {
+                continue;
+            }
+            if (Object.hasOwn(defaultValue, field.name)) {
+                detectValueDefaultValueCycle(namedFieldType, defaultValue[field.name]);
+            }
+            else {
+                detectFieldDefaultValueCycle(field, namedFieldType, `${inputObj}.${field.name}`);
+            }
+        }
+    }
+    function detectLiteralDefaultValueCycle(inputObj, defaultValue) {
+        if (defaultValue.kind === Kind.LIST) {
+            for (const itemLiteral of defaultValue.values) {
+                detectLiteralDefaultValueCycle(inputObj, itemLiteral);
+            }
+            return;
+        }
+        else if (defaultValue.kind !== Kind.OBJECT) {
+            return;
+        }
+        const fieldNodes = keyMap(defaultValue.fields, (field) => field.name.value);
+        for (const field of Object.values(inputObj.getFields())) {
+            const namedFieldType = getNamedType(field.type);
+            if (!isInputObjectType(namedFieldType)) {
+                continue;
+            }
+            if (Object.hasOwn(fieldNodes, field.name)) {
+                detectLiteralDefaultValueCycle(namedFieldType, fieldNodes[field.name].value);
+            }
+            else {
+                detectFieldDefaultValueCycle(field, namedFieldType, `${inputObj}.${field.name}`);
+            }
+        }
+    }
+    function detectFieldDefaultValueCycle(field, fieldType, fieldStr) {
+        const defaultInput = field.default;
+        if (defaultInput === undefined) {
+            return;
+        }
+        const cycleIndex = fieldPathIndex[fieldStr];
+        if (cycleIndex !== undefined) {
+            context.reportError(`Invalid circular reference. The default value of Input Object field ${fieldStr} references itself${cycleIndex < fieldPath.length
+                ? ` via the default values of: ${fieldPath
+                    .slice(cycleIndex)
+                    .map(([stringForMessage]) => stringForMessage)
+                    .join(', ')}`
+                : ''}.`, fieldPath.slice(cycleIndex - 1).map(([, node]) => node));
+            return;
+        }
+        if (visitedFields[fieldStr] === undefined) {
+            visitedFields[fieldStr] = true;
+            fieldPathIndex[fieldStr] = fieldPath.push([
+                fieldStr,
+                field.astNode?.defaultValue,
+            ]);
+            if (defaultInput.literal) {
+                detectLiteralDefaultValueCycle(fieldType, defaultInput.literal);
+            }
+            else {
+                detectValueDefaultValueCycle(fieldType, defaultInput.value);
+            }
+            fieldPath.pop();
+            fieldPathIndex[fieldStr] = undefined;
+        }
+    }
+}
 function getAllImplementsInterfaceNodes(type, iface) {
-  const { astNode, extensionASTNodes } = type;
-  const nodes =
-    astNode != null ? [astNode, ...extensionASTNodes] : extensionASTNodes; // FIXME: https://github.com/graphql/graphql-js/issues/2203
-
-  return nodes
-    .flatMap((typeNode) => {
-      var _typeNode$interfaces;
-
-      return (
-        /* c8 ignore next */
-        (_typeNode$interfaces = typeNode.interfaces) !== null &&
-          _typeNode$interfaces !== void 0
-          ? _typeNode$interfaces
-          : []
-      );
-    })
-    .filter((ifaceNode) => ifaceNode.name.value === iface.name);
+    const { astNode, extensionASTNodes } = type;
+    const nodes = astNode != null ? [astNode, ...extensionASTNodes] : extensionASTNodes;
+    return nodes
+        .flatMap((typeNode) => typeNode.interfaces ?? [])
+        .filter((ifaceNode) => ifaceNode.name.value === iface.name);
 }
-
 function getUnionMemberTypeNodes(union, typeName) {
-  const { astNode, extensionASTNodes } = union;
-  const nodes =
-    astNode != null ? [astNode, ...extensionASTNodes] : extensionASTNodes; // FIXME: https://github.com/graphql/graphql-js/issues/2203
-
-  return nodes
-    .flatMap((unionNode) => {
-      var _unionNode$types;
-
-      return (
-        /* c8 ignore next */
-        (_unionNode$types = unionNode.types) !== null &&
-          _unionNode$types !== void 0
-          ? _unionNode$types
-          : []
-      );
-    })
-    .filter((typeNode) => typeNode.name.value === typeName);
+    const { astNode, extensionASTNodes } = union;
+    const nodes = astNode != null ? [astNode, ...extensionASTNodes] : extensionASTNodes;
+    return nodes
+        .flatMap((unionNode) => unionNode.types ?? [])
+        .filter((typeNode) => typeNode.name.value === typeName);
 }
-
 function getDeprecatedDirectiveNode(definitionNode) {
-  var _definitionNode$direc;
-
-  return definitionNode === null || definitionNode === void 0
-    ? void 0
-    : (_definitionNode$direc = definitionNode.directives) === null ||
-      _definitionNode$direc === void 0
-    ? void 0
-    : _definitionNode$direc.find(
-        (node) => node.name.value === GraphQLDeprecatedDirective.name,
-      );
+    return definitionNode?.directives?.find((node) => node.name.value === GraphQLDeprecatedDirective.name);
 }
+//# sourceMappingURL=validate.js.map

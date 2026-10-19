@@ -1,5 +1,5 @@
-import linguistLanguages from "linguist-languages";
-import createLanguage from "../utils/create-language.js";
+import * as linguistLanguages from "linguist-languages";
+import createLanguage from "../utilities/create-language.js";
 
 const languages = [
   createLanguage(linguistLanguages.CSS, (data) => ({
@@ -7,8 +7,8 @@ const languages = [
     vscodeLanguageIds: ["css"],
     extensions: [
       ...data.extensions,
-      // `WeiXin Style Sheets`(Weixin Mini Programs)
-      // https://developers.weixin.qq.com/miniprogram/en/dev/framework/view/wxs/
+      // WeiXin Style Sheets (Weixin Mini Programs)
+      // https://developers.weixin.qq.com/miniprogram/en/dev/framework/view/wxss.html
       ".wxss",
     ],
   })),

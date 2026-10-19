@@ -1,12 +1,13 @@
 // @nts-check
 import PostcssValuesParser from "postcss-values-parser/lib/parser.js";
-import getFunctionArgumentsText from "../utils/get-function-arguments-text.js";
-import getValueRoot from "../utils/get-value-root.js";
-import hasSCSSInterpolation from "../utils/has-scss-interpolation.js";
-import hasStringOrFunction from "../utils/has-string-or-function.js";
-import isSCSSVariable from "../utils/is-scss-variable.js";
+import isObject from "../../utilities/is-object.js";
+import getFunctionArgumentsText from "../utilities/get-function-arguments-text.js";
+import getValueRoot from "../utilities/get-value-root.js";
+import hasSCSSInterpolation from "../utilities/has-scss-interpolation.js";
+import hasStringOrFunction from "../utilities/has-string-or-function.js";
+import isSCSSVariable from "../utilities/is-scss-variable.js";
 import parseSelector from "./parse-selector.js";
-import { addTypePrefix } from "./utils.js";
+import { addTypePrefix } from "./utilities.js";
 
 const isClosingParenthesis = /** @returns {boolean} */ (node) =>
   node.type === "paren" && node.value === ")";
@@ -44,14 +45,15 @@ function parseValueNode(valueNode, options) {
     }
 
     if (node.type === "func" && node.value === "selector") {
-      node.group.groups = [
-        parseSelector(
-          getValueRoot(valueNode).text.slice(
-            node.group.open.sourceIndex + 1,
-            node.group.close.sourceIndex,
-          ),
-        ),
-      ];
+      const selector = getValueRoot(valueNode).text.slice(
+        node.group.open.sourceIndex + 1,
+        node.group.close.sourceIndex,
+      );
+      const parsedSelector = parseSelector(selector);
+      parsedSelector.sourceIndex = node.group.open.sourceIndex + 1;
+      parsedSelector.raws ??= {};
+      parsedSelector.raws.selector = selector;
+      node.group.groups = [parsedSelector];
     }
 
     if (node.type === "func" && node.value === "url") {
@@ -157,12 +159,14 @@ function flattenGroups(node) {
 }
 
 function parseNestedValue(node, options) {
-  if (node && typeof node === "object") {
+  if (isObject(node)) {
     for (const key in node) {
       if (key !== "parent") {
         parseNestedValue(node[key], options);
         if (key === "nodes") {
-          node.group = flattenGroups(parseValueNode(node, options));
+          if (!(node.type === "atword" && node.nodes.length === 0)) {
+            node.group = flattenGroups(parseValueNode(node, options));
+          }
           delete node[key];
         }
       }
@@ -172,12 +176,12 @@ function parseNestedValue(node, options) {
 }
 
 function parseValue(/** @type {string} */ value, options) {
-  // Inline javascript in Less
+  // Inline JavaScript in Less
   if (options.parser === "less" && value.startsWith("~`")) {
     return { type: "value-unknown", value };
   }
 
-  let result = null;
+  let result;
 
   try {
     result = new PostcssValuesParser(value, { loose: true }).parse();
@@ -192,7 +196,7 @@ function parseValue(/** @type {string} */ value, options) {
 
   const parsedResult = parseNestedValue(result, options);
 
-  return addTypePrefix(parsedResult, "value-", /^selector-/u);
+  return addTypePrefix(parsedResult, "value-", /^selector-/);
 }
 
 export default parseValue;

@@ -7,35 +7,34 @@ import {
   indentIfBreak,
   join,
   line,
+  removeLines,
   softline,
-} from "../../document/builders.js";
-import { removeLines, willBreak } from "../../document/utils.js";
+  willBreak,
+} from "../../document/index.js";
 import {
   printCommentsSeparately,
   printDanglingComments,
 } from "../../main/comments/print.js";
-import getNextNonSpaceNonCommentCharacterIndex from "../../utils/get-next-non-space-non-comment-character-index.js";
-import { locEnd } from "../loc.js";
+import { getOrInsertComputed } from "../../utilities/get-or-insert.js";
+import { CommentCheckFlags, hasComment } from "../utilities/comments.js";
+import { getFunctionParameters } from "../utilities/function-parameters.js";
+import { hasLeadingOwnLineComment } from "../utilities/has-leading-own-line-comment.js";
+import { isTemplateOnItsOwnLine } from "../utilities/is-template-on-its-own-line.js";
 import {
-  CommentCheckFlags,
-  getFunctionParameters,
-  hasComment,
-  hasLeadingOwnLineComment,
-  isArrayOrTupleExpression,
+  isArrayExpression,
   isBinaryish,
   isCallLikeExpression,
   isJsxElement,
-  isObjectOrRecordExpression,
-  isTemplateOnItsOwnLine,
-  shouldPrintComma,
-  startsWithNoLookaheadToken,
-} from "../utils/index.js";
+  isObjectExpression,
+} from "../utilities/node-types.js";
+import { startsWithNoLookaheadToken } from "../utilities/starts-with-no-lookahead-token.js";
 import { printReturnType, shouldPrintParamsWithoutParens } from "./function.js";
 import { printFunctionParameters } from "./function-parameters.js";
+import { printTrailingComma } from "./miscellaneous.js";
 
 /**
  * @import AstPath from "../../common/ast-path.js"
- * @import {Doc} from "../../document/builders.js"
+ * @import {Doc} from "../../document/index.js"
  */
 
 // In order to avoid confusion between
@@ -43,23 +42,25 @@ import { printFunctionParameters } from "./function-parameters.js";
 // a <= a ? a : a
 const shouldAddParensIfNotBreakCache = new WeakMap();
 /** @returns {boolean} */ function shouldAddParensIfNotBreak(node) {
-  if (!shouldAddParensIfNotBreakCache.has(node)) {
-    shouldAddParensIfNotBreakCache.set(
-      node,
+  return getOrInsertComputed(
+    shouldAddParensIfNotBreakCache,
+    node,
+    /** @returns {boolean} */ (node) =>
       node.type === "ConditionalExpression" &&
-        !startsWithNoLookaheadToken(
-          node,
-          /** @returns {boolean} */ (node) => node.type === "ObjectExpression",
-        ),
-    );
-  }
-  return shouldAddParensIfNotBreakCache.get(node);
+      !startsWithNoLookaheadToken(
+        node,
+        /** @returns {boolean} */ (node) => node.type === "ObjectExpression",
+      ),
+  );
 }
 
 // We handle sequence expressions as the body of arrows specially,
 // so that the required parentheses end up on their own lines.
 const shouldAlwaysAddParens = /** @returns {boolean} */ (node) => node.type === "SequenceExpression";
 
+/*
+- `ArrowFunctionExpression`
+*/
 function printArrowFunction(/** @type {AstPath} */ path, options, print, args = {}) {
   /** @type {Doc[]} */
   const signatureDocs = [];
@@ -178,9 +179,9 @@ function printArrowFunction(/** @type {AstPath} */ path, options, print, args = 
   if (shouldPrintParamsWithoutParens(path, options)) {
     parts.push(print(["params", 0]));
   } else {
-    const expandArg = args.expandLastArg || args.expandFirstArg;
+    const shouldExpandParameters = args.expandLastArg || args.expandFirstArg;
     let returnTypeDoc = printReturnType(path, print);
-    if (expandArg) {
+    if (shouldExpandParameters) {
       if (willBreak(returnTypeDoc)) {
         throw new ArgExpansionBailout();
       }
@@ -190,10 +191,10 @@ function printArrowFunction(/** @type {AstPath} */ path, options, print, args = 
       group([
         printFunctionParameters(
           path,
-          print,
           options,
-          expandArg,
-          /* printTypeParams */ true,
+          print,
+          shouldExpandParameters,
+          /* shouldPrintTypeParameters */ true,
         ),
         returnTypeDoc,
       ]),
@@ -201,16 +202,7 @@ function printArrowFunction(/** @type {AstPath} */ path, options, print, args = 
   }
 
   const dangling = printDanglingComments(path, options, {
-    /** @returns {boolean} */ filter(comment) {
-      const nextCharacter = getNextNonSpaceNonCommentCharacterIndex(
-        options.originalText,
-        locEnd(comment),
-      );
-      return (
-        nextCharacter !== false &&
-        options.originalText.slice(nextCharacter, nextCharacter + 2) === "=>"
-      );
-    },
+    marker: "commentBeforeArrow",
   });
   if (dangling) {
     parts.push(" ", dangling);
@@ -227,8 +219,8 @@ function printArrowFunction(/** @type {AstPath} */ path, options, print, args = 
  */
 function mayBreakAfterShortPrefix(functionBody, bodyDoc, options) {
   return (
-    isArrayOrTupleExpression(functionBody) ||
-    isObjectOrRecordExpression(functionBody) ||
+    isArrayExpression(functionBody) ||
+    isObjectExpression(functionBody) ||
     functionBody.type === "ArrowFunctionExpression" ||
     functionBody.type === "DoExpression" ||
     functionBody.type === "BlockStatement" ||
@@ -301,8 +293,9 @@ function printArrowFunctionBody(
 ) {
   const { node, parent } = path;
 
-  const trailingComma =
-    args.expandLastArg && shouldPrintComma(options, "all") ? ifBreak(",") : "";
+  const trailingComma = args.expandLastArg
+    ? printTrailingComma(options, "all")
+    : "";
 
   // if the arrow function is expanded as last argument, we are adding a
   // level of indentation and need to add a softline to align the closing )
@@ -326,10 +319,6 @@ function printArrowFunctionBody(
       ]),
       bodyComments,
     ];
-  }
-
-  if (shouldAlwaysAddParens(functionBody)) {
-    bodyDoc = group(["(", indent([softline, bodyDoc]), softline, ")"]);
   }
 
   return shouldPutBodyOnSameLine

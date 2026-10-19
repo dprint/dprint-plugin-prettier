@@ -10,12 +10,31 @@ let CssSyntaxError = require('./css-syntax-error')
 let PreviousMap = require('./previous-map')
 let terminalHighlight = require('./terminal-highlight')
 
-let fromOffsetCache = Symbol('fromOffsetCache')
+let lineToIndexCache = Symbol('lineToIndexCache')
 
 /** @type {boolean} */ let sourceMapAvailable = Boolean(SourceMapConsumer && SourceMapGenerator)
 /** @type {boolean} */ let pathAvailable = Boolean(resolve && isAbsolute)
 
+function getLineToIndex(input) {
+  if (input[lineToIndexCache]) return input[lineToIndexCache]
+  let lines = input.css.split('\n')
+  /** @type {number[]} */ let lineToIndex = new Array(lines.length)
+  /** @type {number} */ let prevIndex = 0
+
+  for (let i = 0, l = lines.length; i < l; i++) {
+    lineToIndex[i] = prevIndex
+    prevIndex += lines[i].length + 1
+  }
+
+  input[lineToIndexCache] = lineToIndex
+  return lineToIndex
+}
+
 class Input {
+  get from() {
+    return this.file || this.id
+  }
+
   constructor(/** @type {string} */ css, opts = {}) {
     if (
       css === null ||
@@ -33,6 +52,9 @@ class Input {
     } else {
       this.hasBOM = false
     }
+
+    this.document = this.css
+    if (opts.document) this.document = opts.document.toString()
 
     if (opts.from) {
       if (
@@ -62,31 +84,38 @@ class Input {
   }
 
   error(/** @type {string} */ message, line, column, opts = {}) {
-    let endColumn, endLine, result
+    let endColumn, endLine, endOffset, offset, result
 
     if (line && typeof line === 'object') {
       let start = line
       let end = column
       if (typeof start.offset === 'number') {
-        let pos = this.fromOffset(start.offset)
+        offset = start.offset
+        let pos = this.fromOffset(offset)
         line = pos.line
         column = pos.col
       } else {
         line = start.line
         column = start.column
+        offset = this.fromLineAndColumn(line, column)
       }
       if (typeof end.offset === 'number') {
-        let pos = this.fromOffset(end.offset)
+        endOffset = end.offset
+        let pos = this.fromOffset(endOffset)
         endLine = pos.line
         endColumn = pos.col
       } else {
         endLine = end.line
         endColumn = end.column
+        endOffset = this.fromLineAndColumn(end.line, end.column)
       }
     } else if (!column) {
-      let pos = this.fromOffset(line)
+      offset = line
+      let pos = this.fromOffset(offset)
       line = pos.line
       column = pos.col
+    } else {
+      offset = this.fromLineAndColumn(line, column)
     }
 
     let origin = this.origin(line, column, endLine, endColumn)
@@ -114,7 +143,15 @@ class Input {
       )
     }
 
-    result.input = { column, endColumn, endLine, line, source: this.css }
+    result.input = {
+      column,
+      endColumn,
+      endLine,
+      endOffset,
+      line,
+      offset,
+      source: this.css
+    }
     if (this.file) {
       if (pathToFileURL) {
         result.input.url = pathToFileURL(this.file).toString()
@@ -125,23 +162,15 @@ class Input {
     return result
   }
 
+  fromLineAndColumn(line, column) {
+    /** @type {number[]} */ let lineToIndex = getLineToIndex(this)
+    let index = lineToIndex[line - 1]
+    return index + column - 1
+  }
+
   fromOffset(/** @type {number} */ offset) {
-    let lastLine, lineToIndex
-    if (!this[fromOffsetCache]) {
-      let lines = this.css.split('\n')
-      lineToIndex = new Array(lines.length)
-      /** @type {number} */ let prevIndex = 0
-
-      for (let i = 0, l = lines.length; i < l; i++) {
-        lineToIndex[i] = prevIndex
-        prevIndex += lines[i].length + 1
-      }
-
-      this[fromOffsetCache] = lineToIndex
-    } else {
-      lineToIndex = this[fromOffsetCache]
-    }
-    lastLine = lineToIndex[lineToIndex.length - 1]
+    /** @type {number[]} */ let lineToIndex = getLineToIndex(this)
+    let lastLine = lineToIndex[lineToIndex.length - 1]
 
     /** @type {number} */ let min = 0
     if (offset >= lastLine) {
@@ -178,12 +207,15 @@ class Input {
     if (!this.map) return false
     let consumer = this.map.consumer()
 
-    let from = consumer.originalPositionFor({ column, line })
+    let from = consumer.originalPositionFor({ column: column - 1, line })
     if (!from.source) return false
 
     let to
     if (typeof endLine === 'number') {
-      to = consumer.originalPositionFor({ column: endColumn, line: endLine })
+      to = consumer.originalPositionFor({
+        column: endColumn - 1,
+        line: endLine
+      })
     }
 
     let fromUrl
@@ -198,8 +230,8 @@ class Input {
     }
 
     let result = {
-      column: from.column,
-      endColumn: to && to.column,
+      column: from.column + 1,
+      endColumn: to && to.column + 1,
       endLine: to && to.line,
       line: from.line,
       url: fromUrl.toString()
@@ -234,10 +266,6 @@ class Input {
       }
     }
     return json
-  }
-
-  get from() {
-    return this.file || this.id
   }
 }
 

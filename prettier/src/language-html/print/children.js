@@ -6,11 +6,11 @@ import {
   hardline,
   ifBreak,
   line,
+  replaceEndOfLine,
   softline,
-} from "../../document/builders.js";
-import { replaceEndOfLine } from "../../document/utils.js";
-import htmlWhitespaceUtils from "../../utils/html-whitespace-utils.js";
-import isNonEmptyArray from "../../utils/is-non-empty-array.js";
+} from "../../document/index.js";
+import htmlWhitespace from "../../utilities/html-whitespace.js";
+import isNonEmptyArray from "../../utilities/is-non-empty-array.js";
 import { locEnd, locStart } from "../loc.js";
 import {
   forceBreakChildren,
@@ -18,7 +18,7 @@ import {
   hasPrettierIgnore,
   isTextLikeNode,
   preferHardlineAsLeadingSpaces,
-} from "../utils/index.js";
+} from "../utilities/index.js";
 import {
   needsToBorrowNextOpeningTagStartMarker,
   needsToBorrowParentClosingTagStartMarker,
@@ -34,7 +34,7 @@ import {
 
   // Element can be unclosed
   if (
-    node.type === "element" &&
+    node.kind === "element" &&
     !node.endSourceSpan &&
     isNonEmptyArray(node.children)
   ) {
@@ -44,8 +44,8 @@ import {
   return endLocation;
 }
 
-function printChild(childPath, options, /** @type {() => any} */ print) {
-  const child = childPath.node;
+function printChild(path, options, print) {
+  const child = path.node;
 
   if (hasPrettierIgnore(child)) {
     /** @type {number} */ const endLocation = getEndLocation(child);
@@ -53,7 +53,7 @@ function printChild(childPath, options, /** @type {() => any} */ print) {
     return [
       printOpeningTagPrefix(child, options),
       replaceEndOfLine(
-        htmlWhitespaceUtils.trimEnd(
+        htmlWhitespace.trimEnd(
           options.originalText.slice(
             locStart(child) +
               (child.prev && needsToBorrowNextOpeningTagStartMarker(child.prev)
@@ -74,65 +74,95 @@ function printChild(childPath, options, /** @type {() => any} */ print) {
 }
 
 function printBetweenLine(/** @type {import("../ast.js").Node} */ prevNode, /** @type {import("../ast.js").Node} */ nextNode) {
-  return isTextLikeNode(prevNode) && isTextLikeNode(nextNode)
-    ? prevNode.isTrailingSpaceSensitive
-      ? prevNode.hasTrailingSpaces
-        ? preferHardlineAsLeadingSpaces(nextNode)
-          ? hardline
-          : line
-        : ""
-      : preferHardlineAsLeadingSpaces(nextNode)
-        ? hardline
-        : softline
-    : (needsToBorrowNextOpeningTagStartMarker(prevNode) &&
-          (hasPrettierIgnore(nextNode) ||
-            /**
-             *     123<a
-             *          ~
-             *       ><b>
-             */
-            nextNode.firstChild ||
-            /**
-             *     123<!--
-             *            ~
-             *     -->
-             */
-            nextNode.isSelfClosing ||
-            /**
-             *     123<span
-             *             ~
-             *       attr
-             */
-            (nextNode.type === "element" && nextNode.attrs.length > 0))) ||
+  if (isTextLikeNode(prevNode) && isTextLikeNode(nextNode)) {
+    if (prevNode.isTrailingSpaceSensitive) {
+      if (prevNode.hasTrailingSpaces) {
+        if (preferHardlineAsLeadingSpaces(nextNode)) {
+          return hardline;
+        }
+
+        return line;
+      }
+
+      return "";
+    }
+
+    if (preferHardlineAsLeadingSpaces(nextNode)) {
+      return hardline;
+    }
+
+    return softline;
+  }
+
+  if (
+    (needsToBorrowNextOpeningTagStartMarker(prevNode) &&
+      (hasPrettierIgnore(nextNode) ||
         /**
-         *     <img
-         *       src="long"
-         *                 ~
-         *     />123
+         *     123<a
+         *          ~
+         *       ><b>
          */
-        (prevNode.type === "element" &&
-          prevNode.isSelfClosing &&
-          needsToBorrowPrevClosingTagEndMarker(nextNode))
-      ? ""
-      : !nextNode.isLeadingSpaceSensitive ||
-          preferHardlineAsLeadingSpaces(nextNode) ||
-          /**
-           *       Want to write us a letter? Use our<a
-           *         ><b><a>mailing address</a></b></a
-           *                                          ~
-           *       >.
-           */
-          (needsToBorrowPrevClosingTagEndMarker(nextNode) &&
-            prevNode.lastChild &&
-            needsToBorrowParentClosingTagStartMarker(prevNode.lastChild) &&
-            prevNode.lastChild.lastChild &&
-            needsToBorrowParentClosingTagStartMarker(
-              prevNode.lastChild.lastChild,
-            ))
-        ? hardline
-        : nextNode.hasLeadingSpaces
-          ? line
-          : softline;
+        nextNode.firstChild ||
+        /**
+         *     123<!--
+         *            ~
+         *     -->
+         */
+        nextNode.isSelfClosing ||
+        /**
+         *     123<span
+         *             ~
+         *       attr
+         */
+        (nextNode.kind === "element" && nextNode.attrs.length > 0))) ||
+    /**
+     *     <img
+     *       src="long"
+     *                 ~
+     *     />123
+     */
+    (prevNode.kind === "element" &&
+      prevNode.isSelfClosing &&
+      needsToBorrowPrevClosingTagEndMarker(nextNode))
+  ) {
+    return "";
+  }
+
+  /**
+   *     <div>{{ x }}<!-- comment --></div>
+   *                 ~
+   */
+  if (
+    nextNode.kind === "comment" &&
+    nextNode.isLeadingSpaceSensitive &&
+    !nextNode.hasLeadingSpaces
+  ) {
+    return softline;
+  }
+
+  if (
+    !nextNode.isLeadingSpaceSensitive ||
+    preferHardlineAsLeadingSpaces(nextNode) ||
+    /**
+     *       Want to write us a letter? Use our<a
+     *         ><b><a>mailing address</a></b></a
+     *                                          ~
+     *       >.
+     */
+    (needsToBorrowPrevClosingTagEndMarker(nextNode) &&
+      prevNode.lastChild &&
+      needsToBorrowParentClosingTagStartMarker(prevNode.lastChild) &&
+      prevNode.lastChild.lastChild &&
+      needsToBorrowParentClosingTagStartMarker(prevNode.lastChild.lastChild))
+  ) {
+    return hardline;
+  }
+
+  if (nextNode.hasLeadingSpaces) {
+    return line;
+  }
+
+  return softline;
 }
 
 /** @returns {any[]} */ function printChildren(/** @type {AstPath} */ path, options, print) {
@@ -142,8 +172,8 @@ function printBetweenLine(/** @type {import("../ast.js").Node} */ prevNode, /** 
     return [
       breakParent,
 
-      ...path.map(/** @returns {any[]} */ (childPath) => {
-        /** @type {import("../ast.js").Node} */ const childNode = childPath.node;
+      ...path.map(() => {
+        const childNode = path.node;
         const prevBetweenLine = !childNode.prev
           ? ""
           : printBetweenLine(childNode.prev, childNode);
@@ -154,27 +184,25 @@ function printBetweenLine(/** @type {import("../ast.js").Node} */ prevNode, /** 
                 prevBetweenLine,
                 forceNextEmptyLine(childNode.prev) ? hardline : "",
               ],
-          printChild(childPath, options, print),
+          printChild(path, options, print),
         ];
       }, "children"),
     ];
   }
 
   const groupIds = node.children.map(() => Symbol(""));
-  return path.map((childPath, childIndex) => {
-    /** @type {import("../ast.js").Node} */ const childNode = childPath.node;
-
+  return path.map(({ node: childNode, index: childIndex }) => {
     if (isTextLikeNode(childNode)) {
       if (childNode.prev && isTextLikeNode(childNode.prev)) {
         const prevBetweenLine = printBetweenLine(childNode.prev, childNode);
         if (prevBetweenLine) {
           if (forceNextEmptyLine(childNode.prev)) {
-            return [hardline, hardline, printChild(childPath, options, print)];
+            return [hardline, hardline, printChild(path, options, print)];
           }
-          return [prevBetweenLine, printChild(childPath, options, print)];
+          return [prevBetweenLine, printChild(path, options, print)];
         }
       }
-      return printChild(childPath, options, print);
+      return printChild(path, options, print);
     }
 
     const prevParts = [];
@@ -224,7 +252,7 @@ function printBetweenLine(/** @type {import("../ast.js").Node} */ prevNode, /** 
       ...prevParts,
       group([
         ...leadingParts,
-        group([printChild(childPath, options, print), ...trailingParts], {
+        group([printChild(path, options, print), ...trailingParts], {
           id: groupIds[childIndex],
         }),
       ]),

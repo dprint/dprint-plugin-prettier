@@ -1,5 +1,5 @@
-import linguistLanguages from "linguist-languages";
-import createLanguage from "../utils/create-language.js";
+import * as linguistLanguages from "linguist-languages";
+import createLanguage from "../utilities/create-language.js";
 
 const languages = [
   createLanguage(linguistLanguages.JavaScript, (data) => ({
@@ -20,10 +20,21 @@ const languages = [
       "zx",
     ],
     extensions: [
-      ...data.extensions.filter((extension) => extension !== ".jsx"),
+      ...data.extensions.filter(
+        (extension) => extension !== ".jsx" && extension !== ".frag",
+      ),
+      // https://github.com/github-linguist/linguist/issues/7232#issuecomment-2646876469
+      ".start.frag",
+      ".end.frag",
       // WeiXin Script (Weixin Mini Programs)
       // https://developers.weixin.qq.com/miniprogram/en/dev/framework/view/wxs/
       ".wxs",
+    ],
+    filenames: [
+      ...data.filenames,
+      // https://github.com/github-linguist/linguist/issues/7232#issuecomment-2646876469
+      "start.frag",
+      "end.frag",
     ],
   })),
   createLanguage(linguistLanguages.JavaScript, () => ({
@@ -55,7 +66,6 @@ const languages = [
     aceMode: "javascript",
     codemirrorMode: "jsx",
     codemirrorMimeType: "text/jsx",
-    color: undefined,
   })),
   createLanguage(linguistLanguages.TypeScript, () => ({
     parsers: ["typescript", "babel-ts"],

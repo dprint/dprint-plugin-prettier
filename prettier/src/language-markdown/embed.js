@@ -1,38 +1,58 @@
 // @nts-check
+import { hardline, markAsRoot, replaceEndOfLine } from "../document/index.js";
+import getMaxContinuousCount from "../utilities/get-max-continuous-count.js";
+import inferParser from "../utilities/infer-parser.js";
+import { getFencedCodeBlockValue } from "./utilities.js";
+
 /** @import AstPath from "../common/ast-path.js" */
-import { hardline, markAsRoot } from "../document/builders.js";
-import { replaceEndOfLine } from "../document/utils.js";
-import printFrontMatter from "../utils/front-matter/print.js";
-import getMaxContinuousCount from "../utils/get-max-continuous-count.js";
-import inferParser from "../utils/infer-parser.js";
-import { getFencedCodeBlockValue } from "./utils.js";
 
 function embed(/** @type {AstPath} */ path, options) {
   const { node } = path;
 
-  if (node.type === "code" && node.lang !== null) {
-    /** @type {string | undefined} */ const parser = inferParser(options, { language: node.lang });
-    if (parser) {
+  switch (node.type) {
+    case "code": {
+      const { lang: language } = node;
+      if (!language) {
+        return;
+      }
+
+      let parser;
+      // https://shiki.style/references/engine-js-compat#supported-languages
+      if (language === "angular-ts") {
+        parser = inferParser(options, { language: "typescript" });
+      } else if (language === "angular-html") {
+        parser = "angular";
+      } else {
+        parser = inferParser(options, { language });
+      }
+
+      if (!parser) {
+        return;
+      }
+
       return async (textToDoc) => {
-        /** @type {string} */ const styleUnit = options.__inJsTemplate ? "~" : "`";
-        /** @type {string} */ const style = styleUnit.repeat(
-          Math.max(3, getMaxContinuousCount(node.value, styleUnit) + 1),
-        );
-        const newOptions = { parser };
+        const textToDocOptions = { parser };
 
         // Override the filepath option.
         // This is because whether the trailing comma of type parameters
         // should be printed depends on whether it is `*.ts` or `*.tsx`.
         // https://github.com/prettier/prettier/issues/15282
-        if (node.lang === "ts" || node.lang === "typescript") {
-          newOptions.filepath = "dummy.ts";
-        } else if (node.lang === "tsx") {
-          newOptions.filepath = "dummy.tsx";
+        if (language === "ts" || language === "typescript") {
+          textToDocOptions.filepath = "dummy.ts";
+        } else if (language === "tsx") {
+          textToDocOptions.filepath = "dummy.tsx";
         }
 
         const doc = await textToDoc(
-          getFencedCodeBlockValue(node, options.originalText),
-          newOptions,
+          options.parser === "mdx"
+            ? getFencedCodeBlockValue(node, options.originalText)
+            : node.value,
+          textToDocOptions,
+        );
+
+        /** @type {string} */ const styleUnit = options.__inJsTemplate ? "~" : "`";
+        /** @type {string} */ const style = styleUnit.repeat(
+          Math.max(3, getMaxContinuousCount(node.value, styleUnit) + 1),
         );
 
         return markAsRoot([
@@ -46,16 +66,16 @@ function embed(/** @type {AstPath} */ path, options) {
         ]);
       };
     }
-  }
-
-  switch (node.type) {
-    case "front-matter":
-      return (textToDoc) => printFrontMatter(node, textToDoc);
 
     // MDX
     case "import":
     case "export":
-      return (textToDoc) => textToDoc(node.value, { parser: "babel" });
+      return (textToDoc) =>
+        textToDoc(node.value, {
+          // TODO: Rename this option since it's not used in HTML
+          __onHtmlBindingRoot: (ast) => validateImportExport(ast, node.type),
+          parser: "babel",
+        });
     case "jsx":
       return (textToDoc) =>
         textToDoc(`<$>${node.value}</$>`, {
@@ -65,6 +85,26 @@ function embed(/** @type {AstPath} */ path, options) {
   }
 
   return null;
+}
+
+function validateImportExport(ast, type) {
+  const {
+    program: { body },
+  } = ast;
+
+  // https://github.com/mdx-js/mdx/blob/3430138958c9c0344ecad9d59e0d6b5d72bedae3/packages/remark-mdx/extract-imports-and-exports.js#L16
+  if (
+    body.some(
+      (node) =>
+        !(
+          node.type === "ImportDeclaration" ||
+          node.type === "ExportDefaultDeclaration" ||
+          node.type === "ExportNamedDeclaration"
+        ),
+    )
+  ) {
+    throw new Error(`Unexpected '${type}' in MDX.`);
+  }
 }
 
 export default embed;

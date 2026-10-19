@@ -1,10 +1,5 @@
 // @nts-check
-/** @returns {number} */ function locStart(node) {
-  return node.position.start.offset;
-}
-
-/** @returns {number} */ function locEnd(node) {
-  return node.position.end.offset;
-}
+const locStart = (node) => node.position.start.offset;
+const locEnd = (node) => node.position.end.offset;
 
 export { locEnd, locStart };

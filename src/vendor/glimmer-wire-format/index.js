@@ -67,8 +67,6 @@ const opcodes = {
     a: 3
 };
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function is(/** @type {number} */ variant) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return function(value) {
@@ -103,4 +101,3 @@ function isHelper(expr) {
 const isGet = is(opcodes.GetSymbol);
 
 export { opcodes as SexpOpcodes, resolution as VariableResolutionContext, WellKnownAttrNames, WellKnownTagNames, getStringFromValue, is, isArgument, isAttribute, isFlushElement, isGet, isHelper, isStringLiteral };
-//# sourceMappingURL=index.js.map

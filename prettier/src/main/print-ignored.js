@@ -1,9 +1,10 @@
 // @nts-check
-/** @import AstPath from "../common/ast-path.js" */
-/** @returns {string} */ function printIgnored(/** @type {AstPath} */ path, options) {
+import { commentsPropertyInOptions } from "../constants.js";
+
+function printIgnored(path, options, printPath, args) {
   const {
     originalText,
-    [Symbol.for("comments")]: comments,
+    [commentsPropertyInOptions]: comments,
     locStart,
     locEnd,
     [Symbol.for("printedComments")]: printedComments,
@@ -19,7 +20,11 @@
     }
   }
 
-  return originalText.slice(start, end);
+  const { printPrettierIgnored } = options.printer;
+
+  return printPrettierIgnored
+    ? printPrettierIgnored(path, options, printPath, args)
+    : originalText.slice(start, end);
 }
 
 export default printIgnored;

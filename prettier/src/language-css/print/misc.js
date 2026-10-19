@@ -1,7 +1,6 @@
 // @nts-check
-import printNumber from "../../utils/print-number.js";
-import printString from "../../utils/print-string.js";
-import { maybeToLowerCase } from "../utils/index.js";
+import printNumber from "../../utilities/print-number.js";
+import printString from "../../utilities/print-string.js";
 import CSS_UNITS from "./css-units.evaluate.js";
 
 /** @returns {string} */ function printUnit(/** @type {string} */ unit) {
@@ -9,10 +8,10 @@ import CSS_UNITS from "./css-units.evaluate.js";
   return CSS_UNITS.has(lowercased) ? CSS_UNITS.get(lowercased) : unit;
 }
 
-/** @type {RegExp} */ const STRING_REGEX = /(["'])(?:(?!\1)[^\\]|\\.)*\1/gsu;
-/** @type {RegExp} */ const NUMBER_REGEX = /(?:\d*\.\d+|\d+\.?)(?:e[+-]?\d+)?/giu;
-/** @type {RegExp} */ const STANDARD_UNIT_REGEX = /[a-z]+/giu;
-/** @type {RegExp} */ const WORD_PART_REGEX = /[$@]?[_a-z\u0080-\uFFFF][\w\u0080-\uFFFF-]*/giu;
+const STRING_REGEX = /(["'])(?:(?!\1)[^\\]|\\.)*\1/gs;
+const NUMBER_REGEX = /(?:\d*\.\d+|\d+\.?)(?:e[+-]?\d+)?/gi;
+const STANDARD_UNIT_REGEX = /[a-z]+/gi;
+const WORD_PART_REGEX = /[$@]?[_a-z\u0080-\uFFFF][\w\u0080-\uFFFF-]*/gi;
 /** @type {RegExp} */ const ADJUST_NUMBERS_REGEX = new RegExp(
   STRING_REGEX.source +
     "|" +
@@ -20,7 +19,7 @@ import CSS_UNITS from "./css-units.evaluate.js";
     `(${WORD_PART_REGEX.source})?` +
     `(${NUMBER_REGEX.source})` +
     `(${STANDARD_UNIT_REGEX.source})?`,
-  "giu",
+  "gi",
 );
 
 /** @returns {string} */ function adjustStrings(/** @type {string} */ value, options) {
@@ -29,18 +28,44 @@ import CSS_UNITS from "./css-units.evaluate.js";
 
 /** @returns {string} */ function quoteAttributeValue(/** @type {string} */ value, options) {
   /** @type {string} */ const quote = options.singleQuote ? "'" : '"';
-  return value.includes('"') || value.includes("'")
-    ? value
-    : quote + value + quote;
+
+  // The selector parser currently only understand `i` flag,
+  // but not `s`, `S`, and `I`
+  // To support future flags, we simply check if it's an alphabet letter
+  // https://github.com/prettier/prettier/pull/17865#discussion_r2332698101
+  let flag = "";
+  const match = value.match(/^(?<value>.+?)\s+(?<flag>[a-z])$/i);
+  if (match) {
+    ({ value, flag } = match.groups);
+  }
+
+  return (
+    (value.includes('"') || value.includes("'")
+      ? value
+      : quote + value + quote) + (flag ? ` ${flag}` : "")
+  );
 }
 
 /** @returns {string} */ function adjustNumbers(/** @type {string} */ value) {
   return value.replaceAll(
     ADJUST_NUMBERS_REGEX,
-    /** @returns {string} */ (match, quote, wordPart, number, unit) =>
-      !wordPart && number
-        ? printCssNumber(number) + maybeToLowerCase(unit || "")
-        : match,
+    /** @returns {string} */ (match, quote, wordPart, number, unit) => {
+      if (!wordPart && number) {
+        unit ??= "";
+        unit = unit.toLowerCase();
+
+        if (
+          !unit ||
+          // `2n + 1`
+          unit === "n" ||
+          CSS_UNITS.has(unit)
+        ) {
+          return printCssNumber(number) + (unit ? printUnit(unit) : "");
+        }
+      }
+
+      return match;
+    },
   );
 }
 
@@ -48,7 +73,7 @@ import CSS_UNITS from "./css-units.evaluate.js";
   return (
     printNumber(rawNumber)
       // Remove trailing `.0`.
-      .replace(/\.0(?=$|e)/u, "")
+      .replace(/\.0(?=$|e)/, "")
   );
 }
 

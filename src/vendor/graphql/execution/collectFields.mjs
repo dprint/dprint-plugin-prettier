@@ -1,213 +1,176 @@
-import { Kind } from '../language/kinds.mjs';
-import { isAbstractType } from '../type/definition.mjs';
-import {
-  GraphQLIncludeDirective,
-  GraphQLSkipDirective,
-} from '../type/directives.mjs';
-import { typeFromAST } from '../utilities/typeFromAST.mjs';
-import { getDirectiveValues } from './values.mjs';
-/**
- * Given a selectionSet, collects all of the fields and returns them.
- *
- * CollectFields requires the "runtime type" of an object. For a field that
- * returns an Interface or Union type, the "runtime type" will be the actual
- * object type returned by that field.
- *
- * @internal
- */
-
-export function collectFields(
-  schema,
-  fragments,
-  variableValues,
-  runtimeType,
-  selectionSet,
-) {
-  const fields = new Map();
-  collectFieldsImpl(
-    schema,
-    fragments,
-    variableValues,
-    runtimeType,
-    selectionSet,
-    fields,
-    new Set(),
-  );
-  return fields;
-}
-/**
- * Given an array of field nodes, collects all of the subfields of the passed
- * in fields, and returns them at the end.
- *
- * CollectSubFields requires the "return type" of an object. For a field that
- * returns an Interface or Union type, the "return type" will be the actual
- * object type returned by that field.
- *
- * @internal
- */
-
-export function collectSubfields(
-  schema,
-  fragments,
-  variableValues,
-  returnType,
-  fieldNodes,
-) {
-  const subFieldNodes = new Map();
-  const visitedFragmentNames = new Set();
-
-  for (const node of fieldNodes) {
-    if (node.selectionSet) {
-      collectFieldsImpl(
+import { AccumulatorMap } from "../jsutils/AccumulatorMap.mjs";
+import { Kind } from "../language/kinds.mjs";
+import { isAbstractType } from "../type/definition.mjs";
+import { GraphQLDeferDirective, GraphQLIncludeDirective, GraphQLSkipDirective, } from "../type/directives.mjs";
+import { typeFromAST } from "../utilities/typeFromAST.mjs";
+import { getArgumentValues, getDirectiveValues, getFragmentVariableValues, } from "./values.mjs";
+export function collectFields(schema, fragments, variableValues, runtimeType, selectionSet, hideSuggestions, forbidSkipAndInclude = false) {
+    const groupedFieldSet = new AccumulatorMap();
+    const newDeferUsages = [];
+    const context = {
         schema,
         fragments,
         variableValues,
-        returnType,
-        node.selectionSet,
-        subFieldNodes,
-        visitedFragmentNames,
-      );
+        runtimeType,
+        visitedFragmentNames: new Map(),
+        hideSuggestions,
+        forbiddenDirectiveInstances: [],
+        forbidSkipAndInclude,
+    };
+    collectFieldsImpl(context, selectionSet, groupedFieldSet, newDeferUsages);
+    return {
+        groupedFieldSet,
+        newDeferUsages,
+        forbiddenDirectiveInstances: context.forbiddenDirectiveInstances,
+    };
+}
+export function collectSubfields(schema, fragments, variableValues, returnType, fieldDetailsList, hideSuggestions) {
+    const context = {
+        schema,
+        fragments,
+        variableValues,
+        runtimeType: returnType,
+        visitedFragmentNames: new Map(),
+        hideSuggestions,
+        forbiddenDirectiveInstances: [],
+        forbidSkipAndInclude: false,
+    };
+    const subGroupedFieldSet = new AccumulatorMap();
+    const newDeferUsages = [];
+    for (const fieldDetail of fieldDetailsList) {
+        const selectionSet = fieldDetail.node.selectionSet;
+        if (selectionSet) {
+            const { deferUsage, fragmentVariableValues } = fieldDetail;
+            collectFieldsImpl(context, selectionSet, subGroupedFieldSet, newDeferUsages, deferUsage, fragmentVariableValues);
+        }
     }
-  }
-
-  return subFieldNodes;
+    return {
+        groupedFieldSet: subGroupedFieldSet,
+        newDeferUsages,
+    };
 }
-
-function collectFieldsImpl(
-  schema,
-  fragments,
-  variableValues,
-  runtimeType,
-  selectionSet,
-  fields,
-  visitedFragmentNames,
-) {
-  for (const selection of selectionSet.selections) {
-    switch (selection.kind) {
-      case Kind.FIELD: {
-        if (!shouldIncludeNode(variableValues, selection)) {
-          continue;
+function collectFieldsImpl(context, selectionSet, groupedFieldSet, newDeferUsages, deferUsage, fragmentVariableValues) {
+    const { schema, fragments, variableValues, runtimeType, visitedFragmentNames, hideSuggestions, } = context;
+    for (const selection of selectionSet.selections) {
+        switch (selection.kind) {
+            case Kind.FIELD: {
+                if (!shouldIncludeNode(context, selection, variableValues, fragmentVariableValues)) {
+                    continue;
+                }
+                groupedFieldSet.add(getFieldEntryKey(selection), {
+                    node: selection,
+                    deferUsage,
+                    fragmentVariableValues,
+                });
+                break;
+            }
+            case Kind.INLINE_FRAGMENT: {
+                if (!shouldIncludeNode(context, selection, variableValues, fragmentVariableValues) ||
+                    !doesFragmentConditionMatch(schema, selection, runtimeType)) {
+                    continue;
+                }
+                const newDeferUsage = getDeferUsage(variableValues, fragmentVariableValues, selection, deferUsage);
+                if (!newDeferUsage) {
+                    collectFieldsImpl(context, selection.selectionSet, groupedFieldSet, newDeferUsages, deferUsage, fragmentVariableValues);
+                }
+                else {
+                    newDeferUsages.push(newDeferUsage);
+                    collectFieldsImpl(context, selection.selectionSet, groupedFieldSet, newDeferUsages, newDeferUsage, fragmentVariableValues);
+                }
+                break;
+            }
+            case Kind.FRAGMENT_SPREAD: {
+                const fragName = selection.name.value;
+                if (!shouldIncludeNode(context, selection, variableValues, fragmentVariableValues)) {
+                    continue;
+                }
+                const fragment = fragments[fragName];
+                if (fragment == null ||
+                    !doesFragmentConditionMatch(schema, fragment.definition, runtimeType)) {
+                    continue;
+                }
+                const newDeferUsage = getDeferUsage(variableValues, fragmentVariableValues, selection, deferUsage);
+                const visitedAsDeferred = visitedFragmentNames.get(fragName);
+                let maybeNewDeferUsage;
+                if (!newDeferUsage) {
+                    if (visitedAsDeferred === false) {
+                        continue;
+                    }
+                    visitedFragmentNames.set(fragName, false);
+                    maybeNewDeferUsage = deferUsage;
+                }
+                else {
+                    if (visitedAsDeferred !== undefined) {
+                        continue;
+                    }
+                    visitedFragmentNames.set(fragName, true);
+                    newDeferUsages.push(newDeferUsage);
+                    maybeNewDeferUsage = newDeferUsage;
+                }
+                const fragmentVariableSignatures = fragment.variableSignatures;
+                let newFragmentVariableValues;
+                if (fragmentVariableSignatures) {
+                    newFragmentVariableValues = getFragmentVariableValues(selection, fragmentVariableSignatures, variableValues, fragmentVariableValues, hideSuggestions);
+                }
+                collectFieldsImpl(context, fragment.definition.selectionSet, groupedFieldSet, newDeferUsages, maybeNewDeferUsage, newFragmentVariableValues);
+                break;
+            }
         }
-
-        const name = getFieldEntryKey(selection);
-        const fieldList = fields.get(name);
-
-        if (fieldList !== undefined) {
-          fieldList.push(selection);
-        } else {
-          fields.set(name, [selection]);
-        }
-
-        break;
-      }
-
-      case Kind.INLINE_FRAGMENT: {
-        if (
-          !shouldIncludeNode(variableValues, selection) ||
-          !doesFragmentConditionMatch(schema, selection, runtimeType)
-        ) {
-          continue;
-        }
-
-        collectFieldsImpl(
-          schema,
-          fragments,
-          variableValues,
-          runtimeType,
-          selection.selectionSet,
-          fields,
-          visitedFragmentNames,
-        );
-        break;
-      }
-
-      case Kind.FRAGMENT_SPREAD: {
-        const fragName = selection.name.value;
-
-        if (
-          visitedFragmentNames.has(fragName) ||
-          !shouldIncludeNode(variableValues, selection)
-        ) {
-          continue;
-        }
-
-        visitedFragmentNames.add(fragName);
-        const fragment = fragments[fragName];
-
-        if (
-          !fragment ||
-          !doesFragmentConditionMatch(schema, fragment, runtimeType)
-        ) {
-          continue;
-        }
-
-        collectFieldsImpl(
-          schema,
-          fragments,
-          variableValues,
-          runtimeType,
-          fragment.selectionSet,
-          fields,
-          visitedFragmentNames,
-        );
-        break;
-      }
     }
-  }
 }
-/**
- * Determines if a field should be included based on the `@include` and `@skip`
- * directives, where `@skip` has higher precedence than `@include`.
- */
-
-function shouldIncludeNode(variableValues, node) {
-  const skip = getDirectiveValues(GraphQLSkipDirective, node, variableValues);
-
-  if ((skip === null || skip === void 0 ? void 0 : skip.if) === true) {
-    return false;
-  }
-
-  const include = getDirectiveValues(
-    GraphQLIncludeDirective,
-    node,
-    variableValues,
-  );
-
-  if (
-    (include === null || include === void 0 ? void 0 : include.if) === false
-  ) {
-    return false;
-  }
-
-  return true;
+function getDeferUsage(variableValues, fragmentVariableValues, node, parentDeferUsage) {
+    const defer = getDirectiveValues(GraphQLDeferDirective, node, variableValues, fragmentVariableValues);
+    if (!defer) {
+        return;
+    }
+    if (defer.if === false) {
+        return;
+    }
+    return {
+        label: typeof defer.label === 'string' ? defer.label : undefined,
+        parentDeferUsage,
+    };
 }
-/**
- * Determines if a fragment is applicable to the given type.
- */
-
+function shouldIncludeNode(context, node, variableValues, fragmentVariableValues) {
+    const skipDirectiveNode = node.directives?.find((directive) => directive.name.value === GraphQLSkipDirective.name);
+    if (skipDirectiveNode && context.forbidSkipAndInclude) {
+        context.forbiddenDirectiveInstances.push(skipDirectiveNode);
+        return false;
+    }
+    const skip = skipDirectiveNode
+        ? getArgumentValues(GraphQLSkipDirective, skipDirectiveNode, variableValues, fragmentVariableValues, context.hideSuggestions)
+        : undefined;
+    if (skip?.if === true) {
+        return false;
+    }
+    const includeDirectiveNode = node.directives?.find((directive) => directive.name.value === GraphQLIncludeDirective.name);
+    if (includeDirectiveNode && context.forbidSkipAndInclude) {
+        context.forbiddenDirectiveInstances.push(includeDirectiveNode);
+        return false;
+    }
+    const include = includeDirectiveNode
+        ? getArgumentValues(GraphQLIncludeDirective, includeDirectiveNode, variableValues, fragmentVariableValues, context.hideSuggestions)
+        : undefined;
+    if (include?.if === false) {
+        return false;
+    }
+    return true;
+}
 function doesFragmentConditionMatch(schema, fragment, type) {
-  const typeConditionNode = fragment.typeCondition;
-
-  if (!typeConditionNode) {
-    return true;
-  }
-
-  const conditionalType = typeFromAST(schema, typeConditionNode);
-
-  if (conditionalType === type) {
-    return true;
-  }
-
-  if (isAbstractType(conditionalType)) {
-    return schema.isSubType(conditionalType, type);
-  }
-
-  return false;
+    const typeConditionNode = fragment.typeCondition;
+    if (!typeConditionNode) {
+        return true;
+    }
+    const conditionalType = typeFromAST(schema, typeConditionNode);
+    if (conditionalType === type) {
+        return true;
+    }
+    if (isAbstractType(conditionalType)) {
+        return schema.isSubType(conditionalType, type);
+    }
+    return false;
 }
-/**
- * Implements the logic to compute the key of a given field's entry
- */
-
 function getFieldEntryKey(node) {
-  return node.alias ? node.alias.value : node.name.value;
+    return node.alias ? node.alias.value : node.name.value;
 }
+//# sourceMappingURL=collectFields.js.map

@@ -14,14 +14,7 @@ const cjkCharset = new Charset(
       "Modifier_Symbol",
       "Nonspacing_Mark",
     ],
-    // .union below makes the next Block condition "OR"
-    // If it is merged into this object definition, it will be "AND" instead
-  }).union(
-    // Firefox treats some symbols (U+30A0, U+30FB) in the Katakana block as CJK
-    unicodeRegex({
-      Block: ["Katakana"],
-    }),
-  ),
+  }),
 );
 const variationSelectorsCharset = unicodeRegex({
   Block: ["Variation_Selectors", "Variation_Selectors_Supplement"],
@@ -81,9 +74,13 @@ const unicodePunctuationClasses = [
 
 const PUNCTUATION_REGEXP = new RegExp(
   `(?:${[
-    new Charset(...asciiPunctuationCharacters).toRegExp("u").source,
+    new Charset(
+      ...asciiPunctuationCharacters,
+      "\u{3000}", // ASCII space around it is excessive. https://bugzilla.mozilla.org/show_bug.cgi?id=1950321
+      "\u{ff5e}", // Used as a substitute for U+301C in Windows. https://bugzilla.mozilla.org/show_bug.cgi?id=1941096
+    ).toRegExp("u").source,
     ...unicodePunctuationClasses.map(
-      (charset) => `\\p{General_Category=${charset}}`,
+      (charset) => String.raw`\p{General_Category=${charset}}`,
     ),
   ].join("|")})`,
   "u",

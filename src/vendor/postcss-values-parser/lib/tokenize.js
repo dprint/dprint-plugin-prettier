@@ -53,7 +53,7 @@ module.exports = /** @returns {any[]} */ function tokenize (/** @type {string | 
     code, next, quote, lines, last, content, escape, nextLine, nextOffset,
     escaped, escapePos, nextChar;
 
-  function unclosed (what) {
+  function unclosed (/** @type {string} */ what) {
     let message = util.format('Unclosed %s at line: %d, column: %d, token: %d', what, line, pos - offset, pos);
     throw new TokenizeError(message);
   }

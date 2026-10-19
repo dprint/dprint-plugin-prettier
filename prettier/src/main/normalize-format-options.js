@@ -1,7 +1,7 @@
 // @nts-check
 import { UndefinedParserError } from "../common/errors.js";
 import { getSupportInfo } from "../main/support.js";
-import inferParser from "../utils/infer-parser.js";
+import inferParser from "../utilities/infer-parser.js";
 import normalizeOptions from "./normalize-options.js";
 import {
   getParserPluginByParserName,
@@ -16,6 +16,7 @@ const formatOptionsHiddenDefaults = {
   originalText: undefined,
   locStart: null,
   locEnd: null,
+  getVisitorKeys: null,
 };
 
 // Copy options and fill in default values.
@@ -27,15 +28,16 @@ async function normalizeFormatOptions(options, opts = {}) {
       throw new UndefinedParserError(
         "No parser and no file path given, couldn't infer a parser.",
       );
-    } else {
-      rawOptions.parser = inferParser(rawOptions, {
-        physicalFile: rawOptions.filepath,
-      });
-      if (!rawOptions.parser) {
-        throw new UndefinedParserError(
-          `No parser could be inferred for file "${rawOptions.filepath}".`,
-        );
-      }
+    }
+
+    rawOptions.parser = inferParser(rawOptions, {
+      physicalFile: rawOptions.filepath,
+    });
+
+    if (!rawOptions.parser) {
+      throw new UndefinedParserError(
+        `No parser could be inferred for file "${rawOptions.filepath}".`,
+      );
     }
   }
 
@@ -69,6 +71,7 @@ async function normalizeFormatOptions(options, opts = {}) {
   const printer = await initPrinter(printerPlugin, parser.astFormat);
 
   rawOptions.printer = printer;
+  rawOptions.getVisitorKeys = printer.getVisitorKeys;
 
   const pluginDefaults = printerPlugin.defaultOptions
     ? Object.fromEntries(
@@ -81,9 +84,7 @@ async function normalizeFormatOptions(options, opts = {}) {
   const mixedDefaults = { ...defaults, ...pluginDefaults };
 
   for (const [k, value] of Object.entries(mixedDefaults)) {
-    if (rawOptions[k] === null || rawOptions[k] === undefined) {
-      rawOptions[k] = value;
-    }
+    rawOptions[k] ??= value;
   }
 
   if (rawOptions.parser === "json") {

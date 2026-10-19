@@ -1,55 +1,68 @@
-import flowParser from "flow-parser";
+import { parse as flowParse } from "flow-parser";
 import createError from "../../common/parser-create-error.js";
 import postprocess from "./postprocess/index.js";
-import createParser from "./utils/create-parser.js";
-import replaceHashbang from "./utils/replace-hashbang.js";
+import createParser from "./utilities/create-parser.js";
 
-// https://github.com/facebook/flow/tree/main/packages/flow-parser#options
+// https://github.com/facebook/flow/blob/7c64d4b077bc6fc45c12cee3cfa7368fdb2186ce/packages/flow-parser/oxidized-src/ParserOptions.js#L15
 // Keep this sync with `/scripts/sync-flow-test.js`
 const parseOptions = {
-  // `all_comments` (boolean, default `true`) - include a list of all comments from the whole program
-  // all_comments: true,
-  // `comments` (boolean, default `true`) - attach comments to AST nodes (`leadingComments` and `trailingComments`)
-  comments: false,
-  // `components` (boolean, default `false`) - enable parsing of Flow component syntax
-  components: true,
-  // `enums` (boolean, default `false`) - enable parsing of Flow enums
-  enums: true,
-  // `esproposal_decorators` (boolean, default `false`) - enable parsing of decorators
-  esproposal_decorators: true,
-  // `esproposal_export_star_as` (boolean, default `false`) - enable parsing of `export * as` syntax
-  esproposal_export_star_as: true,
-  // `types` (boolean, default `true`) - enable parsing of Flow types
-  // types: true,
-  // `use_strict` (boolean, default `false`) - treat the file as strict, without needing a "use strict" directive
-  // use_strict: false,
-  // `tokens` (boolean, default `false`) - include a list of all parsed tokens in a top-level `tokens` property
-  tokens: true,
+  flow: "all",
+  babel: false,
+  tokens: false,
+  allowReturnOutsideFunction: true,
+  // `enableEnums` (boolean, default `true`) - enable parsing of enums https://flow.org/en/docs/enums/
+  enableEnums: true,
+  // `enableExperimentalFlowMatchSyntax` (boolean, default `true`) - enable parsing of match expressions and match statements https://flow.org/en/docs/match/
+  enableExperimentalFlowMatchSyntax: true,
+  // `enableExperimentalComponentSyntax` (boolean, default `true`) - enable parsing of Flow component syntax
+  enableExperimentalComponentSyntax: true,
+  // TODO: Support it
+  // `assertOperator` (boolean, default `false`) - enable parsing of the assert operator
+  // assertOperator: true,
+  // `enableExperimentalDecorators` (boolean, default `true`) - enable parsing of decorators
+  enableExperimentalDecorators: true,
+  // `enableExperimentalFlowRecordSyntax` (boolean, default `true`) - enable parsing of records
+  enableExperimentalFlowRecordSyntax: true,
 };
 
 function createParseError(error) {
-  const {
-    message,
-    loc: { start, end },
-  } = error;
+  let { message, loc } = error;
+
+  /* c8 ignore next 3 */
+  if (!loc) {
+    return error;
+  }
+
+  const { line, column } = loc;
+  /** @type {string} */ const suffix = ` (${line}:${column})`;
+  if (message.endsWith(suffix)) {
+    message = message.slice(0, -suffix.length);
+  }
 
   return createError(message, {
     loc: {
-      start: { line: start.line, column: start.column + 1 },
-      end: { line: end.line, column: end.column + 1 },
+      start: { line, column: column + 1 },
     },
     cause: error,
   });
 }
 
-function parse(text) {
-  const ast = flowParser.parse(replaceHashbang(text), parseOptions);
-  const [error] = ast.errors;
-  if (error) {
+function parse(text, options) {
+  const filepath = options?.filepath;
+  const sourceFilename =
+    typeof filepath === "string" ? filepath : "prettier.js.flow";
+
+  let ast;
+  try {
+    ast = flowParse(text, {
+      sourceFilename,
+      ...parseOptions,
+    });
+  } catch (error) {
     throw createParseError(error);
   }
 
-  return postprocess(ast, { text });
+  return postprocess(ast, { text, astType: "flow" });
 }
 
-export const flow = createParser(parse);
+export const flow = /* @__PURE__ */ createParser(parse);

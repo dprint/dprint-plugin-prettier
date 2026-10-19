@@ -9,21 +9,27 @@ import {
   indent,
   join,
   line,
+  replaceEndOfLine,
   softline,
-} from "../document/builders.js";
-import { replaceEndOfLine } from "../document/utils.js";
-import getPreferredQuote from "../utils/get-preferred-quote.js";
-import htmlWhitespaceUtils from "../utils/html-whitespace-utils.js";
-import isNonEmptyArray from "../utils/is-non-empty-array.js";
-import UnexpectedNodeError from "../utils/unexpected-node-error.js";
-import clean from "./clean.js";
+} from "../document/index.js";
+import { getPreferredQuote } from "../utilities/get-preferred-quote.js";
+import htmlWhitespace from "../utilities/html-whitespace.js";
+import isNonEmptyArray from "../utilities/is-non-empty-array.js";
+import UnexpectedNodeError from "../utilities/unexpected-node-error.js";
+import embed from "./embed.js";
 import getVisitorKeys from "./get-visitor-keys.js";
 import { locEnd, locStart } from "./loc.js";
-import { hasPrettierIgnore, isVoidElement, isWhitespaceNode } from "./utils.js";
+import { massageAstNode } from "./massage-ast/index.js";
+import {
+  hasPrettierIgnore,
+  isVoidElement,
+  isWhitespaceNode,
+} from "./utilities.js";
 
 /**
- * @import {Doc} from "../document/builders.js"
- */
+@import {Doc} from "../document/index.js"
+@import {AST} from "@glimmer/syntax"
+*/
 
 /** @type {number} */ const NEWLINES_TO_PRESERVE_MAX = 2;
 
@@ -40,57 +46,55 @@ function print(/** @type {AstPath} */ path, options, print) {
       return group(path.map(print, "body"));
 
     case "ElementNode": {
-      const startingTag = group(printStartingTag(path, print));
+      const isWhitespaceSensitive =
+        options.htmlWhitespaceSensitivity !== "ignore";
 
-      const escapeNextElementNode =
-        options.htmlWhitespaceSensitivity === "ignore" &&
-        path.next?.type === "ElementNode"
+      const startingTag = [
+        !isWhitespaceSensitive && path.previous?.type === "ElementNode"
           ? softline
-          : "";
+          : "",
+        group([printStartingTag(path, print)]),
+      ];
 
       if (isVoidElement(node)) {
-        return [startingTag, escapeNextElementNode];
+        return [startingTag];
       }
 
       const endingTag = ["</", node.tag, ">"];
+      const isStyle = node.tag === "style";
 
-      if (node.children.length === 0) {
-        return [startingTag, indent(endingTag), escapeNextElementNode];
+      if (
+        node.children.length === 0 ||
+        ((!isWhitespaceSensitive || isStyle) &&
+          node.children.every(/** @returns {boolean} */ (node) => isWhitespaceNode(node)))
+      ) {
+        return [startingTag, endingTag];
       }
 
-      if (options.htmlWhitespaceSensitivity === "ignore") {
-        return [
-          startingTag,
-          indent(printChildren(path, options, print)),
-          hardline,
-          indent(endingTag),
-          escapeNextElementNode,
-        ];
+      const parts = path.map(print, "children");
+
+      if (isStyle || !isWhitespaceSensitive) {
+        return [startingTag, indent([softline, ...parts]), softline, endingTag];
       }
 
-      return [
-        startingTag,
-        indent(group(printChildren(path, options, print))),
-        indent(endingTag),
-        escapeNextElementNode,
-      ];
+      return [startingTag, indent(group(parts)), endingTag];
     }
 
     case "BlockStatement":
-      if (isElseIfLike(path)) {
+      if (isElseIfBlock(path)) {
         return [
-          printElseIfLikeBlock(path, print),
-          printProgram(path, print, options),
-          printInverse(path, print, options),
+          printElseIfBlock(path, print),
+          printProgram(path, options, print),
+          printInverse(path, options, print),
         ];
       }
 
       return [
         printOpenBlock(path, print),
         group([
-          printProgram(path, print, options),
-          printInverse(path, print, options),
-          printCloseBlock(path, print, options),
+          printProgram(path, options, print),
+          printInverse(path, options, print),
+          printCloseBlock(path, options, print),
         ]),
       ];
 
@@ -158,17 +162,38 @@ function print(/** @type {AstPath} */ path, options, print) {
       return [node.key, "=", print("value")];
 
     case "TextNode": {
+      // Don't format content:
+      // 1. in `<pre>`,
+      // 2. in `<style>`
+
+      let text = node.chars;
+
+      const { parent } = path;
+      if (parent.type === "ElementNode") {
+        if (parent.tag === "pre") {
+          return replaceEndOfLine(text);
+        }
+
+        if (parent.tag === "style") {
+          text = text.replaceAll(/^\n+/g, "");
+          text = htmlWhitespace.trimEnd(text);
+          text = htmlWhitespace.dedentString(text);
+
+          return replaceEndOfLine(text, hardline);
+        }
+      }
+
       /* if `{{my-component}}` (or any text containing "{{")
        * makes it to the TextNode, it means it was escaped,
        * so let's print it escaped, ie.; `\{{my-component}}` */
-      let text = node.chars.replaceAll("{{", String.raw`\{{`);
+      text = text.replaceAll("{{", String.raw`\{{`);
 
       /** @type {string | undefined} */ const attrName = getCurrentAttributeName(path);
 
       if (attrName) {
         // TODO: format style and srcset attributes
         if (attrName === "class") {
-          const formattedClasses = text.trim().split(/\s+/u).join(" ");
+          const formattedClasses = text.trim().replaceAll(/\s+/g, " ");
 
           /** @type {boolean} */ let leadingSpace = false;
           /** @type {boolean} */ let trailingSpace = false;
@@ -176,13 +201,13 @@ function print(/** @type {AstPath} */ path, options, print) {
           if (path.parent.type === "ConcatStatement") {
             if (
               path.previous?.type === "MustacheStatement" &&
-              /^\s/u.test(text)
+              /^\s/.test(text)
             ) {
               leadingSpace = true;
             }
             if (
               path.next?.type === "MustacheStatement" &&
-              /\s$/u.test(text) &&
+              /\s$/.test(text) &&
               formattedClasses !== ""
             ) {
               trailingSpace = true;
@@ -199,7 +224,7 @@ function print(/** @type {AstPath} */ path, options, print) {
         return replaceEndOfLine(text);
       }
 
-      /** @type {boolean} */ const isWhitespaceOnly = htmlWhitespaceUtils.isWhitespaceOnly(text);
+      const isWhitespaceOnly = htmlWhitespace.isWhitespaceOnly(text);
       const { isFirst, isLast } = path;
 
       if (options.htmlWhitespaceSensitivity !== "ignore") {
@@ -215,6 +240,7 @@ function print(/** @type {AstPath} */ path, options, print) {
             return "";
           }
 
+          /** @type {Doc[]} */
           let breaks = [line];
 
           /** @type {number} */ const newlines = countNewLines(text);
@@ -229,8 +255,7 @@ function print(/** @type {AstPath} */ path, options, print) {
           return breaks;
         }
 
-        /** @type {string} */ const leadingWhitespace =
-          htmlWhitespaceUtils.getLeadingWhitespace(text);
+        const leadingWhitespace = htmlWhitespace.getLeadingWhitespace(text);
 
         let leadBreaks = [];
         if (leadingWhitespace) {
@@ -244,8 +269,7 @@ function print(/** @type {AstPath} */ path, options, print) {
           text = text.slice(leadingWhitespace.length);
         }
 
-        /** @type {string} */ const tailingWhitespace =
-          htmlWhitespaceUtils.getTrailingWhitespace(text);
+        const tailingWhitespace = htmlWhitespace.getTrailingWhitespace(text);
         let trailBreaks = [];
         if (tailingWhitespace) {
           if (!shouldTrimTrailingNewlines) {
@@ -267,11 +291,6 @@ function print(/** @type {AstPath} */ path, options, print) {
         return [...leadBreaks, fill(getTextValueParts(text)), ...trailBreaks];
       }
 
-      const lineBreaksCount = countNewLines(text);
-
-      let leadingLineBreaksCount = countLeadingNewLines(text);
-      let trailingLineBreaksCount = countTrailingNewLines(text);
-
       if (
         (isFirst || isLast) &&
         isWhitespaceOnly &&
@@ -281,6 +300,10 @@ function print(/** @type {AstPath} */ path, options, print) {
       ) {
         return "";
       }
+
+      const lineBreaksCount = countNewLines(text);
+      let leadingLineBreaksCount = countLeadingNewLines(text);
+      let trailingLineBreaksCount = countTrailingNewLines(text);
 
       if (isWhitespaceOnly && lineBreaksCount) {
         leadingLineBreaksCount = Math.min(
@@ -331,12 +354,12 @@ function print(/** @type {AstPath} */ path, options, print) {
         trailingSpace = "";
       }
 
-      if (htmlWhitespaceUtils.hasLeadingWhitespace(text)) {
-        text = leadingSpace + htmlWhitespaceUtils.trimStart(text);
+      if (htmlWhitespace.hasLeadingWhitespace(text)) {
+        text = leadingSpace + htmlWhitespace.trimStart(text);
       }
 
-      if (htmlWhitespaceUtils.hasTrailingWhitespace(text)) {
-        text = htmlWhitespaceUtils.trimEnd(text) + trailingSpace;
+      if (htmlWhitespace.hasTrailingWhitespace(text)) {
+        text = htmlWhitespace.trimEnd(text) + trailingSpace;
       }
 
       return [
@@ -388,6 +411,7 @@ function print(/** @type {AstPath} */ path, options, print) {
     case "NullLiteral":
       return "null";
 
+    case "FrontMatter": // Handled in core
     case "AtHead": // Handled in `printPathExpression`
     case "VarHead": // Handled in `printPathExpression`
     case "ThisHead": // Handled in `printPathExpression`
@@ -414,7 +438,7 @@ function print(/** @type {AstPath} */ path, options, print) {
   for (const attributeType of types) {
     path.each(({ node }) => {
       /** @type {number} */ const index = attributes.indexOf(node);
-      attributes.splice(index, 1, [line, print()]);
+      attributes[index] = [line, print()];
     }, attributeType);
   }
 
@@ -423,24 +447,6 @@ function print(/** @type {AstPath} */ path, options, print) {
   }
 
   return ["<", node.tag, indent(attributes), printStartingTagEndMarker(node)];
-}
-
-function printChildren(/** @type {AstPath} */ path, options, /** @type {() => any} */ print) {
-  const { node } = path;
-  const isEmpty = node.children.every(/** @returns {boolean} */ (node) => isWhitespaceNode(node));
-  if (options.htmlWhitespaceSensitivity === "ignore" && isEmpty) {
-    return "";
-  }
-
-  return path.map(({ isFirst }) => {
-    const printedChild = print();
-
-    if (isFirst && options.htmlWhitespaceSensitivity === "ignore") {
-      return [softline, printedChild];
-    }
-
-    return printedChild;
-  }, "children");
 }
 
 function printStartingTagEndMarker(node) {
@@ -535,21 +541,55 @@ function printOpenBlock(/** @type {AstPath} */ path, print) {
   ];
 }
 
-const isPathWithSameHead = /** @returns {boolean} */ (pathA, pathB) =>
-  pathA.head.type === "VarHead" &&
-  pathB.head.type === "VarHead" &&
+/**
+@param {AST.BlockStatement} param0
+@param {AST.BlockStatement} param1
+@returns {boolean}
+*/
+const hasSamePathHeadName = ({ path: pathA }, { path: pathB }) =>
+  [pathA, pathB].every(
+    /** @returns {boolean} */ (node) => node.type === "PathExpression" && node.head.type === "VarHead",
+  ) &&
+  // @ts-expect-error -- safe
   pathA.head.name === pathB.head.name;
 
-/** @returns {boolean} */ function isElseIfLike(path) {
-  const { grandparent, node } = path;
+/** @returns {boolean} */ function isElseIfBlock(path) {
+  if (
+    !path.match(
+      /** @returns {boolean} */ (node) => node.type === "BlockStatement",
+      /** @returns {boolean} */ (node, key) =>
+        key === "body" && node.type === "Block" && node.body.length === 1,
+      /** @returns {boolean} */ (node, key) => key === "inverse" && node.type === "BlockStatement",
+    )
+  ) {
+    return false;
+  }
+
+  const { node } = path;
+
   return (
-    grandparent?.inverse?.body.length === 1 &&
-    grandparent.inverse.body[0] === node &&
-    isPathWithSameHead(grandparent.inverse.body[0].path, grandparent.path)
+    /*
+    ```
+    {{#if a}} a {{else if b}} b {{/if}}
+    <!--               ^^ -->
+    {{#unknown a}} a {{else if b}} b {{/unknown}}
+    <!--                    ^^ -->
+    ```
+    */
+    (node.path.type === "PathExpression" &&
+      node.path.head.type === "VarHead" &&
+      node.path.head.name === "if") ||
+    /*
+    ```
+      {{#unknown a}} a {{else unknown b}} b {{/unknown}}
+    <!-- ^^^^^^^              ^^^^^^^ -->
+    ```
+    */
+    hasSamePathHeadName(node, path.grandparent)
   );
 }
 
-function printElseIfLikeBlock(/** @type {AstPath} */ path, print) {
+function printElseIfBlock(path, print) {
   const { node, grandparent } = path;
   return group([
     printInverseBlockOpeningMustache(grandparent),
@@ -566,7 +606,7 @@ function printElseIfLikeBlock(/** @type {AstPath} */ path, print) {
   ]);
 }
 
-/** @returns {any[]} */ function printCloseBlock(/** @type {AstPath} */ path, /** @type {(a0?: any) => any} */ print, options) {
+function printCloseBlock(path, options, print) {
   const { node } = path;
 
   if (options.htmlWhitespaceSensitivity === "ignore") {
@@ -596,20 +636,7 @@ function printElseIfLikeBlock(/** @type {AstPath} */ path, print) {
   );
 }
 
-/** @returns {boolean | null} */ function blockStatementHasElseIfLike(node) {
-  return (
-    blockStatementHasElse(node) &&
-    node.inverse.body.length === 1 &&
-    node.inverse.body[0].type === "BlockStatement" &&
-    isPathWithSameHead(node.inverse.body[0].path, node.path)
-  );
-}
-
-function blockStatementHasElse(node) {
-  return node.type === "BlockStatement" && node.inverse;
-}
-
-function printProgram(/** @type {AstPath} */ path, /** @type {(a0?: any) => any} */ print, options) {
+function printProgram(path, options, print) {
   const { node } = path;
 
   if (blockStatementHasOnlyWhitespaceInProgram(node)) {
@@ -625,8 +652,12 @@ function printProgram(/** @type {AstPath} */ path, /** @type {(a0?: any) => any}
   return indent(program);
 }
 
-function printInverse(/** @type {AstPath} */ path, /** @type {(a0?: any) => any} */ print, options) {
+function printInverse(path, options, print) {
   const { node } = path;
+
+  if (!node.inverse) {
+    return "";
+  }
 
   const inverse = print("inverse");
   const printed =
@@ -634,21 +665,17 @@ function printInverse(/** @type {AstPath} */ path, /** @type {(a0?: any) => any}
       ? [hardline, inverse]
       : inverse;
 
-  if (blockStatementHasElseIfLike(node)) {
+  if (path.call(isElseIfBlock, "inverse", "body", 0)) {
     return printed;
   }
 
-  if (blockStatementHasElse(node)) {
-    return [printElseBlock(node, options), indent(printed)];
-  }
-
-  return "";
+  return [printElseBlock(node, options), indent(printed)];
 }
 
 /* TextNode print helpers */
 
 /** @returns {any[]} */ function getTextValueParts(/** @type {string} */ value) {
-  return join(line, htmlWhitespaceUtils.split(value));
+  return join(line, htmlWhitespace.split(value));
 }
 
 /** @returns {string | undefined} */ function getCurrentAttributeName(/** @type {AstPath} */ path) {
@@ -669,26 +696,27 @@ function printInverse(/** @type {AstPath} */ path, /** @type {(a0?: any) => any}
 /** @returns {number} */ function countLeadingNewLines(/** @type {string} */ string) {
   /* c8 ignore next */
   string = typeof string === "string" ? string : "";
-  const newLines = (string.match(/^([^\S\n\r]*[\n\r])+/gu) || [])[0] || "";
+  const newLines = (string.match(/^([^\S\n\r]*[\n\r])+/g) || [])[0] || "";
   return countNewLines(newLines);
 }
 
 /** @returns {number} */ function countTrailingNewLines(/** @type {string} */ string) {
   /* c8 ignore next */
   string = typeof string === "string" ? string : "";
-  const newLines = (string.match(/([\n\r][^\S\n\r]*)+$/gu) || [])[0] || "";
+  const newLines = (string.match(/([\n\r][^\S\n\r]*)+$/g) || [])[0] || "";
   return countNewLines(newLines);
 }
 
 /** @returns {any[]} */ function generateHardlines(number = 0) {
-  return Array.from({
-    length: Math.min(number, NEWLINES_TO_PRESERVE_MAX),
-  }).fill(hardline);
+  return Array.from(
+    { length: Math.min(number, NEWLINES_TO_PRESERVE_MAX) },
+    () => hardline,
+  );
 }
 
 /* StringLiteral print helpers */
 
-/** @import {Quote} from "../utils/get-preferred-quote.js" */
+/** @import {Quote} from "../utilities/get-preferred-quote.js" */
 
 /**
  * Prints a string literal with the correct surrounding quotes based on
@@ -792,8 +820,8 @@ const isPathExpressionPartNeedBrackets = /** @returns {boolean} */ (/** @type {s
 
   return (
     (index !== 0 && PATH_EXPRESSION_FORBIDDEN_IN_FIRST_PART.has(part)) ||
-    /\s/u.test(part) ||
-    /^\d/u.test(part) ||
+    /\s/.test(part) ||
+    /^\d/.test(part) ||
     Array.prototype.some.call(part, /** @returns {boolean} */ (character) =>
       PATH_EXPRESSION_FORBIDDEN_CHARACTERS.has(character),
     )
@@ -815,10 +843,18 @@ const isPathExpressionPartNeedBrackets = /** @returns {boolean} */ (/** @type {s
 }
 
 const printer = {
+  features: {
+    experimental_frontMatterSupport: {
+      massageAstNode: true,
+      embed: true,
+      print: true,
+    },
+  },
   print,
-  massageAstNode: clean,
+  massageAstNode,
   hasPrettierIgnore,
   getVisitorKeys,
+  embed,
 };
 
 export default printer;

@@ -1,54 +1,34 @@
-'use strict';
-
-Object.defineProperty(exports, '__esModule', {
-  value: true,
-});
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 exports.UniqueInputFieldNamesRule = UniqueInputFieldNamesRule;
-
-var _invariant = require('../../jsutils/invariant.js');
-
-var _GraphQLError = require('../../error/GraphQLError.js');
-
-/**
- * Unique input field names
- *
- * A GraphQL input object value is only valid if all supplied fields are
- * uniquely named.
- *
- * See https://spec.graphql.org/draft/#sec-Input-Object-Field-Uniqueness
- */
+const invariant_ts_1 = require("../../jsutils/invariant.js");
+const GraphQLError_ts_1 = require("../../error/GraphQLError.js");
 function UniqueInputFieldNamesRule(context) {
-  const knownNameStack = [];
-  let knownNames = Object.create(null);
-  return {
-    ObjectValue: {
-      enter() {
-        knownNameStack.push(knownNames);
-        knownNames = Object.create(null);
-      },
-
-      leave() {
-        const prevKnownNames = knownNameStack.pop();
-        prevKnownNames || (0, _invariant.invariant)(false);
-        knownNames = prevKnownNames;
-      },
-    },
-
-    ObjectField(node) {
-      const fieldName = node.name.value;
-
-      if (knownNames[fieldName]) {
-        context.reportError(
-          new _GraphQLError.GraphQLError(
-            `There can be only one input field named "${fieldName}".`,
-            {
-              nodes: [knownNames[fieldName], node.name],
+    const knownNameStack = [];
+    let knownNames = new Map();
+    return {
+        ObjectValue: {
+            enter() {
+                knownNameStack.push(knownNames);
+                knownNames = new Map();
             },
-          ),
-        );
-      } else {
-        knownNames[fieldName] = node.name;
-      }
-    },
-  };
+            leave() {
+                const prevKnownNames = knownNameStack.pop();
+                if (!(prevKnownNames != null))
+                    (0, invariant_ts_1.invariant)(false);
+                knownNames = prevKnownNames;
+            },
+        },
+        ObjectField(node) {
+            const fieldName = node.name.value;
+            const knownName = knownNames.get(fieldName);
+            if (knownName != null) {
+                context.reportError(new GraphQLError_ts_1.GraphQLError(`There can be only one input field named "${fieldName}".`, { nodes: [knownName, node.name] }));
+            }
+            else {
+                knownNames.set(fieldName, node.name);
+            }
+        },
+    };
 }
+//# sourceMappingURL=UniqueInputFieldNamesRule.js.map

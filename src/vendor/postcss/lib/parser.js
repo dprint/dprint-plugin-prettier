@@ -21,14 +21,20 @@ const SAFE_COMMENT_NEIGHBOR = {
   }
 }
 
+function tokensToString(tokens, from, to) {
+  /** @type {string} */ let result = ''
+  for (let i = from; i < to; i++) result += tokens[i][1]
+  return result
+}
+
 class Parser {
   constructor(input) {
     this.input = input
 
     this.root = new Root()
     this.current = this.root
-    /** @type {string} */ this.spaces = ''
-    /** @type {boolean} */ this.semicolon = false
+    this.spaces = ''
+    this.semicolon = false
 
     this.createTokenizer()
     this.root.source = { input, start: { column: 1, line: 1, offset: 0 } }
@@ -133,9 +139,10 @@ class Parser {
         if (founded === 2) break
       }
     }
-    // If the token is a word, e.g. `!important`, `red` or any other valid property's value.
-    // Then we need to return the colon after that word token. [3] is the "end" colon of that word.
-    // And because we need it after that one we do +1 to get the next one.
+    // If the token is a word, e.g. `!important`, `red` or any other valid
+    // property's value. Then we need to return the colon after that word
+    // token. [3] is the "end" colon of that word. And because we need it
+    // after that one we do +1 to get the next one.
     throw this.input.error(
       'Missed semicolon',
       token[0] === 'word' ? token[3] + 1 : token[2]
@@ -177,7 +184,7 @@ class Parser {
     node.source.end.offset++
 
     let text = token[1].slice(2, -2)
-    if (/^\s*$/.test(text)) {
+    if (!text.trim()) {
       node.text = ''
       node.raws.left = text
       node.raws.right = ''
@@ -208,50 +215,50 @@ class Parser {
     )
     node.source.end.offset++
 
-    while (tokens[0][0] !== 'word') {
-      if (tokens.length === 1) this.unknownWord(tokens)
-      node.raws.before += tokens.shift()[1]
+    let start = 0
+    while (tokens[start][0] !== 'word') {
+      if (start === tokens.length - 1) this.unknownWord([tokens[start]])
+      start++
     }
-    node.source.start = this.getPosition(tokens[0][2])
+    node.raws.before += tokensToString(tokens, 0, start)
+    node.source.start = this.getPosition(tokens[start][2])
 
-    node.prop = ''
-    while (tokens.length) {
-      let type = tokens[0][0]
+    let propStart = start
+    while (start < tokens.length) {
+      let type = tokens[start][0]
       if (type === ':' || type === 'space' || type === 'comment') {
         break
       }
-      node.prop += tokens.shift()[1]
+      start++
     }
+    node.prop = tokensToString(tokens, propStart, start)
 
-    node.raws.between = ''
-
+    let betweenStart = start
     let token
-    while (tokens.length) {
-      token = tokens.shift()
-
-      if (token[0] === ':') {
-        node.raws.between += token[1]
-        break
-      } else {
-        if (token[0] === 'word' && /\w/.test(token[1])) {
-          this.unknownWord([token])
-        }
-        node.raws.between += token[1]
+    while (start < tokens.length) {
+      token = tokens[start]
+      start++
+      if (token[0] === ':') break
+      if (token[0] === 'word' && /\w/.test(token[1])) {
+        this.unknownWord([token])
       }
     }
+    node.raws.between = tokensToString(tokens, betweenStart, start)
 
     if (node.prop[0] === '_' || node.prop[0] === '*') {
       node.raws.before += node.prop[0]
       node.prop = node.prop.slice(1)
     }
 
-    let firstSpaces = []
-    let next
-    while (tokens.length) {
-      next = tokens[0][0]
+    let firstSpacesStart = start
+    while (start < tokens.length) {
+      let next = tokens[start][0]
       if (next !== 'space' && next !== 'comment') break
-      firstSpaces.push(tokens.shift())
+      start++
     }
+    let firstSpaces = tokens.slice(firstSpacesStart, start)
+
+    tokens = tokens.slice(start)
 
     this.precheckMissedSemicolon(tokens)
 
@@ -348,6 +355,8 @@ class Parser {
       if (prev && prev.type === 'rule' && !prev.raws.ownSemicolon) {
         prev.raws.ownSemicolon = this.spaces
         this.spaces = ''
+        prev.source.end = this.getPosition(token[2])
+        prev.source.end.offset += prev.raws.ownSemicolon.length
       }
     }
   }
@@ -592,7 +601,7 @@ class Parser {
 
   unknownWord(tokens) {
     throw this.input.error(
-      'Unknown word',
+      'Unknown word ' + tokens[0][1],
       { offset: tokens[0][2] },
       { offset: tokens[0][2] + tokens[0][1].length }
     )

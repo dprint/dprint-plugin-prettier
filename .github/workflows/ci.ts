@@ -2,10 +2,12 @@
 import { conditions, step, workflow } from "@david/gagen";
 
 // the version of prettier whose typed source is in ./prettier
-const prettierVersion = "3.4.2";
+const prettierVersion = "3.9.10";
 const wasiSdkVersion = "29";
 const wasiSdkDir = `wasi-sdk-${wasiSdkVersion}.0-x86_64-linux`;
 const binaryenVersion = "version_133";
+// for wasm2c, which makes C of Flow's parser
+const wabtVersion = "1.0.42";
 
 const isTag = conditions.isTag();
 
@@ -52,12 +54,14 @@ workflow({
         with: { "node-version": "24.x", "registry-url": "https://registry.npmjs.org" },
       },
       {
-        name: "Install WASI SDK and Binaryen",
+        name: "Install WASI SDK, Binaryen and WABT",
         run: [
           `curl -sSfL https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-${wasiSdkVersion}/${wasiSdkDir}.tar.gz | tar xz -C "$RUNNER_TEMP"`,
           `echo "WASI_SDK_PATH=$RUNNER_TEMP/${wasiSdkDir}" >> "$GITHUB_ENV"`,
           `curl -sSfL https://github.com/WebAssembly/binaryen/releases/download/${binaryenVersion}/binaryen-${binaryenVersion}-x86_64-linux.tar.gz | tar xz -C "$RUNNER_TEMP"`,
           `echo "BINARYEN=$RUNNER_TEMP/binaryen-${binaryenVersion}/bin" >> "$GITHUB_ENV"`,
+          `curl -sSfL https://github.com/WebAssembly/wabt/releases/download/${wabtVersion}/wabt-${wabtVersion}-linux-x64.tar.gz | tar xz -C "$RUNNER_TEMP"`,
+          `echo "WABT=$RUNNER_TEMP/wabt-${wabtVersion}" >> "$GITHUB_ENV"`,
         ],
       },
       {

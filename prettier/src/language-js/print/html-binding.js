@@ -1,12 +1,7 @@
 // @nts-check
+import { group, indent, join, line, softline } from "../../document/index.js";
+
 /** @import AstPath from "../../common/ast-path.js" */
-import {
-  group,
-  indent,
-  join,
-  line,
-  softline,
-} from "../../document/builders.js";
 
 /** @returns {any[] | undefined} */ function printHtmlBinding(/** @type {AstPath} */ path, options, print) {
   if (options.__isVueBindings || options.__isVueForBindingLeft) {

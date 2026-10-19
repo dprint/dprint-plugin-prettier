@@ -1,6 +1,10 @@
 import path from "node:path";
+import {
+  directoryIgnorerWithNodeModules,
+  directoryIgnorerWithoutNodeModules,
+} from "./directory-ignorer.js";
 import { fastGlob } from "./prettier-internal.js";
-import { lstatSafe, normalizeToPosix } from "./utils.js";
+import { lstatSafe, normalizeToPosix } from "./utilities.js";
 
 /** @import {Context} from './context.js' */
 
@@ -43,26 +47,24 @@ async function* expandPatterns(context) {
  * @param {Context} context
  */
 async function* expandPatternsInternal(context) {
-  // Ignores files in version control systems directories and `node_modules`
-  const silentlyIgnoredDirs = [".git", ".sl", ".svn", ".hg", ".jj"];
-  if (context.argv.withNodeModules !== true) {
-    silentlyIgnoredDirs.push("node_modules");
-  }
+  const directoryIgnorer =
+    context.argv.withNodeModules === true
+      ? directoryIgnorerWithoutNodeModules
+      : directoryIgnorerWithNodeModules;
   const globOptions = {
     dot: true,
-    ignore: silentlyIgnoredDirs.map((dir) => "**/" + dir),
+    ignore: [...directoryIgnorer.ignorePatterns],
     followSymbolicLinks: false,
   };
-
   const cwd = process.cwd();
 
   /** @type {Array<{ type: 'file' | 'dir' | 'glob'; glob: string; input: string; }>} */
   const entries = [];
 
   for (const pattern of context.filePatterns) {
-    const absolutePath = path.resolve(cwd, pattern);
+    const absolutePath = path.resolve(pattern);
 
-    if (containsIgnoredPathSegment(absolutePath, cwd, silentlyIgnoredDirs)) {
+    if (directoryIgnorer.shouldIgnore(absolutePath)) {
       continue;
     }
 
@@ -148,18 +150,6 @@ const errorMessages = {
 };
 
 /**
- * @param {string} absolutePath
- * @param {string} cwd
- * @param {string[]} ignoredDirectories
- */
-function containsIgnoredPathSegment(absolutePath, cwd, ignoredDirectories) {
-  return path
-    .relative(cwd, absolutePath)
-    .split(path.sep)
-    .some((dir) => ignoredDirectories.includes(dir));
-}
-
-/**
  * @param {string[]} paths
  */
 function sortPaths(paths) {
@@ -168,8 +158,8 @@ function sortPaths(paths) {
 
 /**
  * This function should be replaced with `fastGlob.escapePath` when these issues are fixed:
- * - https://github.com/mrmlnc/fast-glob/issues/261
  * - https://github.com/mrmlnc/fast-glob/issues/262
+ * - https://github.com/mrmlnc/fast-glob/issues/494
  * @param {string} path
  */
 function escapePathForGlob(path) {
@@ -177,8 +167,8 @@ function escapePathForGlob(path) {
     .escapePath(
       path.replaceAll("\\", "\0"), // Workaround for fast-glob#262 (part 1)
     )
-    .replaceAll(String.raw`\!`, "@(!)") // Workaround for fast-glob#261
-    .replaceAll("\0", String.raw`@(\\)`); // Workaround for fast-glob#262 (part 2)
+    .replaceAll("\0", String.raw`@(\\)`) // Workaround for fast-glob#262 (part 2)
+    .replaceAll('"', String.raw`@(\")`); // Workaround for fast-glob#494
 }
 
 /**

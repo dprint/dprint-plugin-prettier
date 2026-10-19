@@ -1,6 +1,7 @@
 // @nts-check
-import { ParseSourceSpan } from "angular-html-parser/lib/compiler/src/parse_util.js";
-import htmlWhitespaceUtils from "../utils/html-whitespace-utils.js";
+import { ParseSourceSpan } from "angular-html-parser";
+import htmlWhitespace from "../utilities/html-whitespace.js";
+import isNonEmptyArray from "../utilities/is-non-empty-array.js";
 import {
   canHaveInterpolation,
   getLeadingAndTrailingHtmlWhitespace,
@@ -10,7 +11,7 @@ import {
   isLeadingSpaceSensitiveNode,
   isTrailingSpaceSensitiveNode,
   isWhitespaceSensitiveNode,
-} from "./utils/index.js";
+} from "./utilities/index.js";
 
 const PREPROCESS_PIPELINE = [
   removeIgnorableFirstLf,
@@ -29,16 +30,17 @@ const PREPROCESS_PIPELINE = [
   for (const fn of PREPROCESS_PIPELINE) {
     fn(ast, options);
   }
+
   return ast;
 }
 
-function removeIgnorableFirstLf(/** @type {import("./ast.js").Node} */ ast /*, options */) {
+function removeIgnorableFirstLf(/** @type {import("./parse/ast.js").Node} */ ast /* , options */) {
   ast.walk((/** @type {import("./ast.js").Node} */ node) => {
     if (
-      node.type === "element" &&
+      node.kind === "element" &&
       node.tagDefinition.ignoreFirstLf &&
       node.children.length > 0 &&
-      node.children[0].type === "text" &&
+      node.children[0].kind === "text" &&
       node.children[0].value[0] === "\n"
     ) {
       const text = node.children[0];
@@ -52,16 +54,16 @@ function removeIgnorableFirstLf(/** @type {import("./ast.js").Node} */ ast /*, o
 }
 
 function mergeIfConditionalStartEndCommentIntoElementOpeningTag(
-  /** @type {import("./ast.js").Node} */ ast /*, options */,
+  /** @type {import("./parse/ast.js").Node} */ ast /* , options */,
 ) {
   /**
    *     <!--[if ...]><!--><target><!--<![endif]-->
    */
   const isTarget = /** @returns {boolean} */ (/** @type {import("./ast.js").Node} */ node) =>
-    node.type === "element" &&
-    node.prev?.type === "ieConditionalStartComment" &&
+    node.kind === "element" &&
+    node.prev?.kind === "ieConditionalStartComment" &&
     node.prev.sourceSpan.end.offset === node.startSourceSpan.start.offset &&
-    node.firstChild?.type === "ieConditionalEndComment" &&
+    node.firstChild?.kind === "ieConditionalEndComment" &&
     node.firstChild.sourceSpan.start.offset === node.startSourceSpan.end.offset;
   ast.walk((/** @type {import("./ast.js").Node} */ node) => {
     if (node.children) {
@@ -78,11 +80,11 @@ function mergeIfConditionalStartEndCommentIntoElementOpeningTag(
         node.removeChild(ieConditionalStartComment);
         i--; // because a node was removed
 
-        /** @type {import("../../node_modules/angular-html-parser/lib/compiler/src/parse_util.js").ParseSourceSpan} */ const startSourceSpan = new ParseSourceSpan(
+        /** @type {import("../../../src/vendor/angular-html-parser/dist/compiler/src/parse_util.mjs").ParseSourceSpan} */ const startSourceSpan = new ParseSourceSpan(
           ieConditionalStartComment.sourceSpan.start,
           ieConditionalEndComment.sourceSpan.end,
         );
-        /** @type {import("../../node_modules/angular-html-parser/lib/compiler/src/parse_util.js").ParseSourceSpan} */ const sourceSpan = new ParseSourceSpan(
+        /** @type {import("../../../src/vendor/angular-html-parser/dist/compiler/src/parse_util.mjs").ParseSourceSpan} */ const sourceSpan = new ParseSourceSpan(
           startSourceSpan.start,
           child.sourceSpan.end,
         );
@@ -102,17 +104,17 @@ function mergeNodeIntoText(/** @type {import("./ast.js").Node} */ ast, /** @type
       for (let i = 0; i < node.children.length; i++) {
         const child = node.children[i];
 
-        if (child.type !== "text" && !shouldMerge(child)) {
+        if (child.kind !== "text" && !shouldMerge(child)) {
           continue;
         }
 
-        if (child.type !== "text") {
-          child.type = "text";
+        if (child.kind !== "text") {
+          child.kind = "text";
           child.value = getValue(child);
         }
 
         const prevChild = child.prev;
-        if (!prevChild || prevChild.type !== "text") {
+        if (!prevChild || prevChild.kind !== "text") {
           continue;
         }
 
@@ -129,29 +131,30 @@ function mergeNodeIntoText(/** @type {import("./ast.js").Node} */ ast, /** @type
   });
 }
 
-function mergeCdataIntoText(/** @type {import("./ast.js").Node} */ ast /*, options */) {
+function mergeCdataIntoText(/** @type {import("./parse/ast.js").Node} */ ast /* , options */) {
   return mergeNodeIntoText(
     ast,
-    /** @returns {boolean} */ (node) => node.type === "cdata",
+    /** @returns {boolean} */ (node) => node.kind === "cdata",
     /** @returns {string} */ (node) => `<![CDATA[${node.value}]]>`,
   );
 }
 
-function mergeSimpleElementIntoText(/** @type {import("./ast.js").Node} */ ast /*, options */) {
+function mergeSimpleElementIntoText(/** @type {import("./parse/ast.js").Node} */ ast /* , options */) {
   const isSimpleElement = /** @returns {boolean} */ (/** @type {import("./ast.js").Node} */ node) =>
-    node.type === "element" &&
+    node.kind === "element" &&
     node.attrs.length === 0 &&
+    !isNonEmptyArray(node.startTagComments) &&
     node.children.length === 1 &&
-    node.firstChild.type === "text" &&
-    !htmlWhitespaceUtils.hasWhitespaceCharacter(node.children[0].value) &&
+    node.firstChild.kind === "text" &&
+    !htmlWhitespace.hasWhitespaceCharacter(node.children[0].value) &&
     !node.firstChild.hasLeadingSpaces &&
     !node.firstChild.hasTrailingSpaces &&
     node.isLeadingSpaceSensitive &&
     !node.hasLeadingSpaces &&
     node.isTrailingSpaceSensitive &&
     !node.hasTrailingSpaces &&
-    node.prev?.type === "text" &&
-    node.next?.type === "text";
+    node.prev?.kind === "text" &&
+    node.next?.kind === "text";
   ast.walk((/** @type {import("./ast.js").Node} */ node) => {
     if (node.children) {
       for (let i = 0; i < node.children.length; i++) {
@@ -187,19 +190,19 @@ function extractInterpolation(/** @type {import("./ast.js").Node} */ ast, option
     return;
   }
 
-  /** @type {RegExp} */ const interpolationRegex = /\{\{(.+?)\}\}/su;
+  const interpolationRegex = /\{\{(.+?)\}\}/s;
   ast.walk((/** @type {import("./ast.js").Node} */ node) => {
-    if (!canHaveInterpolation(node)) {
+    if (!canHaveInterpolation(node, options)) {
       return;
     }
 
     for (const child of node.children) {
-      if (child.type !== "text") {
+      if (child.kind !== "text") {
         continue;
       }
 
       let startSourceSpan = child.sourceSpan.start;
-      let endSourceSpan = null;
+      let endSourceSpan;
       const components = child.value.split(interpolationRegex);
       for (
         let i = 0;
@@ -212,7 +215,7 @@ function extractInterpolation(/** @type {import("./ast.js").Node} */ ast, option
           endSourceSpan = startSourceSpan.moveBy(value.length);
           if (value.length > 0) {
             node.insertChildBefore(child, {
-              type: "text",
+              kind: "text",
               value,
               sourceSpan: new ParseSourceSpan(startSourceSpan, endSourceSpan),
             });
@@ -222,14 +225,14 @@ function extractInterpolation(/** @type {import("./ast.js").Node} */ ast, option
 
         endSourceSpan = startSourceSpan.moveBy(value.length + 4); // `{{` + `}}`
         node.insertChildBefore(child, {
-          type: "interpolation",
+          kind: "interpolation",
           sourceSpan: new ParseSourceSpan(startSourceSpan, endSourceSpan),
           children:
             value.length === 0
               ? []
               : [
                   {
-                    type: "text",
+                    kind: "text",
                     value,
                     sourceSpan: new ParseSourceSpan(
                       startSourceSpan.moveBy(2),
@@ -252,30 +255,32 @@ function extractInterpolation(/** @type {import("./ast.js").Node} */ ast, option
  * - add `isWhitespaceSensitive`, `isIndentationSensitive` field for text nodes
  * - remove insensitive whitespaces
  */
-function extractWhitespaces(/** @type {import("./ast.js").Node} */ ast /*, options*/) {
+function extractWhitespaces(/** @type {import("./parse/ast.js").Node} */ ast, options) {
   ast.walk((/** @type {import("./ast.js").Node} */ node) => {
-    if (!node.children) {
+    const children = node.$children;
+
+    if (!children) {
       return;
     }
 
     if (
-      node.children.length === 0 ||
-      (node.children.length === 1 &&
-        node.children[0].type === "text" &&
-        htmlWhitespaceUtils.trim(node.children[0].value).length === 0)
+      children.length === 0 ||
+      (children.length === 1 &&
+        children[0].kind === "text" &&
+        htmlWhitespace.trim(children[0].value).length === 0)
     ) {
-      node.hasDanglingSpaces = node.children.length > 0;
-      node.children = [];
+      node.hasDanglingSpaces = children.length > 0;
+      node.$children = [];
       return;
     }
 
-    /** @type {boolean} */ const isWhitespaceSensitive = isWhitespaceSensitiveNode(node);
+    const isWhitespaceSensitive = isWhitespaceSensitiveNode(node, options);
     /** @type {boolean} */ const isIndentationSensitive = isIndentationSensitiveNode(node);
 
     if (!isWhitespaceSensitive) {
-      for (let i = 0; i < node.children.length; i++) {
-        const child = node.children[i];
-        if (child.type !== "text") {
+      for (let i = 0; i < children.length; i++) {
+        const child = children[i];
+        if (child.kind !== "text") {
           continue;
         }
 
@@ -325,11 +330,11 @@ function extractWhitespaces(/** @type {import("./ast.js").Node} */ ast /*, optio
   });
 }
 
-function addIsSelfClosing(/** @type {import("./ast.js").Node} */ ast /*, options */) {
+function addIsSelfClosing(/** @type {import("./parse/ast.js").Node} */ ast /* , options */) {
   ast.walk((/** @type {import("./ast.js").Node} */ node) => {
     node.isSelfClosing =
       !node.children ||
-      (node.type === "element" &&
+      (node.kind === "element" &&
         (node.tagDefinition.isVoid ||
           // self-closing
           (node.endSourceSpan &&
@@ -340,13 +345,13 @@ function addIsSelfClosing(/** @type {import("./ast.js").Node} */ ast /*, options
 
 function addHasHtmComponentClosingTag(/** @type {import("./ast.js").Node} */ ast, options) {
   ast.walk((/** @type {import("./ast.js").Node} */ node) => {
-    if (node.type !== "element") {
+    if (node.kind !== "element") {
       return;
     }
 
     node.hasHtmComponentClosingTag =
       node.endSourceSpan &&
-      /^<\s*\/\s*\/\s*>$/u.test(
+      /^<\s*\/\s*\/\s*>$/.test(
         options.originalText.slice(
           node.endSourceSpan.start.offset,
           node.endSourceSpan.end.offset,
@@ -373,7 +378,10 @@ function addIsSpaceSensitive(/** @type {import("./ast.js").Node} */ ast, options
       return;
     }
     if (children.length === 0) {
-      node.isDanglingSpaceSensitive = isDanglingSpaceSensitiveNode(node);
+      node.isDanglingSpaceSensitive = isDanglingSpaceSensitiveNode(
+        node,
+        options,
+      );
       return;
     }
     for (const child of children) {

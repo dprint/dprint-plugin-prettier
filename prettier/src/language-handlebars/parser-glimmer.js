@@ -1,8 +1,18 @@
 // @nts-check
 import { preprocess as parseGlimmer } from "@glimmer/syntax";
-import { LinesAndColumns } from "lines-and-columns";
 import createError from "../common/parser-create-error.js";
+import parseFrontMatter from "../main/front-matter/parse.js";
 import { locEnd, locStart } from "./loc.js";
+
+/**
+@import {AST, PreprocessOptions} from "@glimmer/syntax";
+@typedef {AST.SourcePosition & {offset: number}} SourcePosition
+@typedef {{start: SourcePosition, end: SourcePosition}} SourceLocation
+@typedef {Omit<AST.BaseNode, "type" | "loc"> & {
+  type: "FrontMatter",
+  loc: SourceLocation,
+}} GlimmerFrontMatter
+*/
 
 /* from the following template: `non-escaped mustache \\{{helper}}`
  * glimmer parser will produce an AST missing a backslash
@@ -17,7 +27,7 @@ function addBackslash(node) {
         childrenOrBody[i + 1].type === "MustacheStatement"
       ) {
         childrenOrBody[i].chars = childrenOrBody[i].chars.replace(
-          /\\$/u,
+          /\\$/,
           "\\\\",
         );
       }
@@ -25,37 +35,46 @@ function addBackslash(node) {
   }
 }
 
+const isIndex = /** @returns {boolean} */ (/** @type {number} */ value) => Number.isSafeInteger(value) && value >= 0;
+// Add `offset` to `loc.{start,end}`
+const setOffset = (node) => {
+  const { start, end } = node.loc;
+
+  start.offset = node.loc.getStart().offset;
+  end.offset = node.loc.getEnd().offset;
+
+  /* c8 ignore next 6 */
+  if (
+    process.env.NODE_ENV !== "production" &&
+    (!isIndex(start.offset) || !isIndex(end.offset))
+  ) {
+    throw new TypeError("Can't not locate node.");
+  }
+};
+
 // Combine plugins to reduce traverse https://github.com/glimmerjs/glimmer-vm/blob/cdfb8f93d7ff0b504c8e9eab293f656a9b942025/packages/%40glimmer/syntax/lib/parser/tokenizer-event-handlers.ts#L442-L451
-function createPlugin(/** @type {string} */ text) {
-  const lines = new LinesAndColumns(text);
-  const calculateOffset = /** @returns {number | null} */ ({ line, column }) =>
-    lines.indexForLocation({ line: line - 1, column });
-
-  // Add `loc.{start,end}.offset`
-  const addOffset = (node) => {
-    const { start, end } = node.loc;
-    start.offset = calculateOffset(start);
-    end.offset = calculateOffset(end);
-  };
-
-  return (/* options*/) => ({
-    name: "prettierParsePlugin",
-    visitor: {
-      All(node) {
-        addOffset(node);
-        addBackslash(node);
-      },
+const glimmerPrettierParsePlugin = (/* options*/) => ({
+  name: "glimmerPrettierParsePlugin",
+  visitor: {
+    All(node) {
+      setOffset(node);
+      addBackslash(node);
     },
-  });
-}
+  },
+});
 
-function parse(/** @type {string | undefined} */ text /*, options */) {
+/** @type {PreprocessOptions} */
+const glimmerParseOptions = {
+  mode: "codemod",
+  plugins: { ast: [glimmerPrettierParsePlugin] },
+};
+
+function parse(/** @type {string | undefined} */ text) {
+  const { frontMatter, content: textToParse } = parseFrontMatter(text);
+
   let ast;
   try {
-    ast = parseGlimmer(text, {
-      mode: "codemod",
-      plugins: { ast: [createPlugin(text)] },
-    });
+    ast = parseGlimmer(textToParse, glimmerParseOptions);
   } catch (error) {
     const location = getErrorLocation(error);
 
@@ -67,6 +86,26 @@ function parse(/** @type {string | undefined} */ text /*, options */) {
 
     /* c8 ignore next */
     throw error;
+  }
+
+  if (frontMatter) {
+    /** @type {GlimmerFrontMatter} */
+    const glimmerFrontMatter = {
+      ...frontMatter,
+      type: "FrontMatter",
+      loc: {
+        start: {
+          ...frontMatter.start,
+          offset: frontMatter.start.index,
+        },
+        end: {
+          ...frontMatter.end,
+          offset: frontMatter.end.index,
+        },
+      },
+    };
+    // @ts-expect-error -- not a real "Node"
+    ast.body.unshift(glimmerFrontMatter);
   }
 
   return ast;
@@ -88,8 +127,8 @@ function parse(/** @type {string | undefined} */ text /*, options */) {
   */
   if (
     lines.length >= 4 &&
-    /^Parse error on line \d+:$/u.test(lines[0]) &&
-    /^-*\^$/u.test(lines.at(-2))
+    /^Parse error on line \d+:$/.test(lines[0]) &&
+    /^-*\^$/.test(lines.at(-2))
   ) {
     return lines.at(-1);
   }
@@ -109,8 +148,8 @@ function parse(/** @type {string | undefined} */ text /*, options */) {
   */
   if (
     lines.length >= 4 &&
-    /:\s?$/u.test(lines[0]) &&
-    /^\(error occurred in '.*?' @ line \d+ : column \d+\)$/u.test(
+    /:\s?$/.test(lines[0]) &&
+    /^\(error occurred in '.*?' @ line \d+ : column \d+\)$/.test(
       lines.at(-1),
     ) &&
     lines[1] === "" &&
@@ -128,10 +167,13 @@ function getErrorLocation(error) {
   const { location, hash } = error;
   if (location) {
     const { start, end } = location;
-    if (typeof end.line !== "number") {
-      return { start };
-    }
-    return location;
+    return {
+      start: { line: start.line, column: start.column + 1 },
+      end:
+        typeof end.line === "number"
+          ? { line: end.line, column: end.column + 1 }
+          : undefined,
+    };
   }
 
   if (hash) {

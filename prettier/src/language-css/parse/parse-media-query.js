@@ -1,6 +1,6 @@
 // @nts-check
 import postcssMediaQueryParser from "postcss-media-query-parser";
-import { addMissingType, addTypePrefix } from "./utils.js";
+import { addMissingType, addTypePrefix } from "./utilities.js";
 
 const parse = postcssMediaQueryParser.default;
 

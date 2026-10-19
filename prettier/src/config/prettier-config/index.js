@@ -1,7 +1,12 @@
 import path from "node:path";
 import mockable from "../../common/mockable.js";
+import { getOrInsertComputed } from "../../utilities/get-or-insert.js";
 import getConfigSearcher from "./config-searcher.js";
 import loadConfig from "./load-config.js";
+
+/**
+@import {FileSearcher} from 'search-closest'
+*/
 
 const loadCache = new Map();
 const searchCache = new Map();
@@ -27,24 +32,22 @@ function loadPrettierConfig(configFile, { shouldCache }) {
 }
 
 /**
- * @param {string} stopDirectory
- */
+@param {string} stopDirectory
+@returns {FileSearcher["search"]}
+*/
 function getSearchFunction(stopDirectory) {
   stopDirectory = stopDirectory ? path.resolve(stopDirectory) : undefined;
 
-  if (!searchCache.has(stopDirectory)) {
+  return getOrInsertComputed(searchCache, stopDirectory, (stopDirectory) => {
     const searcher = getConfigSearcher(stopDirectory);
-    const searchFunction = searcher.search.bind(searcher);
-    searchCache.set(stopDirectory, searchFunction);
-  }
-
-  return searchCache.get(stopDirectory);
+    return searcher.search.bind(searcher);
+  });
 }
 
 /**
  * @param {string} startDirectory
  * @param {{shouldCache?: boolean}} options
- * @returns {Promise<string>}
+ * @returns {Promise<string | void>}
  */
 function searchPrettierConfig(startDirectory, options = {}) {
   startDirectory = startDirectory
@@ -55,7 +58,7 @@ function searchPrettierConfig(startDirectory, options = {}) {
 
   const search = getSearchFunction(stopDirectory);
 
-  return search(startDirectory, { shouldCache: options.shouldCache });
+  return search(startDirectory, { cache: options.shouldCache });
 }
 
 export { clearPrettierConfigCache, loadPrettierConfig, searchPrettierConfig };

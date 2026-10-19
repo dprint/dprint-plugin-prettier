@@ -8,19 +8,21 @@ import {
   indent,
   indentIfBreak,
   line,
+  replaceEndOfLine,
   softline,
-} from "../../document/builders.js";
-import { replaceEndOfLine } from "../../document/utils.js";
+} from "../../document/index.js";
 import getNodeContent from "../get-node-content.js";
 import {
   forceBreakContent,
+  isPreLikeNode,
   isScriptLikeTag,
   isVueCustomBlock,
   shouldPreserveContent,
-} from "../utils/index.js";
+} from "../utilities/index.js";
 import { printChildren } from "./children.js";
 import {
   needsToBorrowLastChildClosingTagEndMarker,
+  needsToBorrowParentClosingTagStartMarker,
   needsToBorrowPrevClosingTagEndMarker,
   printClosingTag,
   printClosingTagSuffix,
@@ -62,8 +64,8 @@ function printElement(/** @type {AstPath} */ path, options, print) {
    */
   const shouldHugContent =
     node.children.length === 1 &&
-    (node.firstChild.type === "interpolation" ||
-      node.firstChild.type === "angularIcuExpression") &&
+    (node.firstChild.kind === "interpolation" ||
+      node.firstChild.kind === "angularIcuExpression") &&
     node.firstChild.isLeadingSpaceSensitive &&
     !node.firstChild.hasLeadingSpaces &&
     node.lastChild.isTrailingSpaceSensitive &&
@@ -78,13 +80,19 @@ function printElement(/** @type {AstPath} */ path, options, print) {
       printClosingTag(node, options),
     ]);
 
+  if (node.children.length === 0) {
+    return printTag(
+      node.hasDanglingSpaces && node.isDanglingSpaceSensitive ? line : "",
+    );
+  }
+
   const printChildrenDoc = (/** @type {any[]} */ childrenDoc) => {
     if (shouldHugContent) {
       return indentIfBreak(childrenDoc, { groupId: attrGroupId });
     }
     if (
-      (isScriptLikeTag(node) || isVueCustomBlock(node, options)) &&
-      node.parent.type === "root" &&
+      (isScriptLikeTag(node, options) || isVueCustomBlock(node, options)) &&
+      node.parent.kind === "root" &&
       options.parser === "vue" &&
       !options.vueIndentScriptAndStyle
     ) {
@@ -104,7 +112,7 @@ function printElement(/** @type {AstPath} */ path, options, print) {
       return line;
     }
     if (
-      node.firstChild.type === "text" &&
+      node.firstChild.kind === "text" &&
       node.isWhitespaceSensitive &&
       node.isIndentationSensitive
     ) {
@@ -126,6 +134,12 @@ function printElement(/** @type {AstPath} */ path, options, print) {
       }
       return "";
     }
+    if (
+      isPreLikeNode(node) &&
+      needsToBorrowParentClosingTagStartMarker(node.lastChild)
+    ) {
+      return "";
+    }
     if (shouldHugContent) {
       return ifBreak(softline, "", { groupId: attrGroupId });
     }
@@ -136,25 +150,18 @@ function printElement(/** @type {AstPath} */ path, options, print) {
       return line;
     }
     if (
-      (node.lastChild.type === "comment" ||
-        (node.lastChild.type === "text" &&
+      (node.lastChild.kind === "comment" ||
+        (node.lastChild.kind === "text" &&
           node.isWhitespaceSensitive &&
           node.isIndentationSensitive)) &&
       new RegExp(
-        `\\n[\\t ]{${options.tabWidth * (path.ancestors.length - 1)}}$`,
-        "u",
+        String.raw`\n[\t ]{${options.tabWidth * (path.ancestors.length - 1)}}$`,
       ).test(node.lastChild.value)
     ) {
       return "";
     }
     return softline;
   };
-
-  if (node.children.length === 0) {
-    return printTag(
-      node.hasDanglingSpaces && node.isDanglingSpaceSensitive ? line : "",
-    );
-  }
 
   return printTag([
     forceBreakContent(node) ? breakParent : "",

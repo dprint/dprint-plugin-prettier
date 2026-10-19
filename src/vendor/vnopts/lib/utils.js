@@ -1,5 +1,5 @@
 // @nts-check
-export function recordFromArray(/** @type {any[]} */ array, /** @type {string} */ mainKey) {
+export function recordFromArray(array, mainKey) {
     const record = Object.create(null);
     for (const value of array) {
         const key = value[mainKey];
@@ -61,7 +61,7 @@ export function comparePrimitive(a, b) {
     const typeofB = typeof b;
     const orders = [
         'undefined',
-        'object',
+        'object', // null
         'boolean',
         'number',
         'string',

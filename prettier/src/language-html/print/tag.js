@@ -1,19 +1,19 @@
 // @nts-check
 /** @import AstPath from "../../common/ast-path.js" */
 /**
- * @import {Doc} from "../../document/builders.js"
+ * @import {Doc} from "../../document/index.js"
  */
 
-import assert from "node:assert";
+import * as assert from "#universal/assert";
 import {
   hardline,
   indent,
   join,
   line,
+  replaceEndOfLine,
   softline,
-} from "../../document/builders.js";
-import { replaceEndOfLine } from "../../document/utils.js";
-import isNonEmptyArray from "../../utils/is-non-empty-array.js";
+} from "../../document/index.js";
+import isNonEmptyArray from "../../utilities/is-non-empty-array.js";
 import { locEnd, locStart } from "../loc.js";
 import {
   getLastDescendant,
@@ -22,7 +22,7 @@ import {
   isTextLikeNode,
   isVueSfcBlock,
   shouldPreserveContent,
-} from "../utils/index.js";
+} from "../utilities/index.js";
 
 /** @returns {any[]} */ function printClosingTag(/** @type {import("../ast.js").Node} */ node, options) {
   return [
@@ -69,12 +69,15 @@ function printClosingTagEnd(/** @type {import("../ast.js").Node} */ node, option
 }
 
 /** @returns {string} */ function printClosingTagStartMarker(/** @type {import("../ast.js").Node} */ node, options) {
-  assert(!node.isSelfClosing);
+  /* c8 ignore next 3 */
+  if (process.env.NODE_ENV !== "production") {
+    assert.ok(!node.isSelfClosing);
+  }
   /* c8 ignore next 3 */
   if (shouldNotPrintClosingTag(node, options)) {
     return "";
   }
-  switch (node.type) {
+  switch (node.kind) {
     case "ieConditionalComment":
       return "<!";
     case "element":
@@ -91,7 +94,7 @@ function printClosingTagEnd(/** @type {import("../ast.js").Node} */ node, option
   if (shouldNotPrintClosingTag(node, options)) {
     return "";
   }
-  switch (node.type) {
+  switch (node.kind) {
     case "ieConditionalComment":
     case "ieConditionalEndComment":
       return "[endif]-->";
@@ -131,8 +134,8 @@ function printClosingTagEnd(/** @type {import("../ast.js").Node} */ node, option
    */
   return (
     node.prev &&
-    node.prev.type !== "docType" &&
-    node.type !== "angularControlFlowBlock" &&
+    node.prev.kind !== "docType" &&
+    node.kind !== "angularControlFlowBlock" &&
     !isTextLikeNode(node.prev) &&
     node.isLeadingSpaceSensitive &&
     !node.hasLeadingSpaces
@@ -191,7 +194,7 @@ function printClosingTagEnd(/** @type {import("../ast.js").Node} */ node, option
 }
 
 function getPrettierIgnoreAttributeCommentData(/** @type {string} */ value) {
-  const match = value.trim().match(/^prettier-ignore-attribute(?:\s+(.+))?$/su);
+  const match = value.trim().match(/^prettier-ignore-attribute(?:\s+(.+))?$/s);
 
   if (!match) {
     return false;
@@ -201,7 +204,7 @@ function getPrettierIgnoreAttributeCommentData(/** @type {string} */ value) {
     return true;
   }
 
-  return match[1].split(/\s+/u);
+  return match[1].split(/\s+/);
 }
 
 /** @returns {boolean | undefined} */ function needsToBorrowParentOpeningTagEndMarker(/** @type {import("../ast.js").Node} */ node) {
@@ -220,7 +223,9 @@ function getPrettierIgnoreAttributeCommentData(/** @type {string} */ value) {
 function printAttributes(/** @type {AstPath} */ path, options, /** @type {() => any} */ print) {
   const { node } = path;
 
-  if (!isNonEmptyArray(node.attrs)) {
+  const { attrs: attributes = [], startTagComments = [] } = node;
+
+  if (attributes.length === 0 && startTagComments.length === 0) {
     return node.isSelfClosing
       ? /**
          *     <br />
@@ -231,44 +236,63 @@ function printAttributes(/** @type {AstPath} */ path, options, /** @type {() => 
   }
 
   const ignoreAttributeData =
-    node.prev?.type === "comment" &&
+    node.prev?.kind === "comment" &&
     getPrettierIgnoreAttributeCommentData(node.prev.value);
 
   const hasPrettierIgnoreAttribute =
     typeof ignoreAttributeData === "boolean"
       ? /** @returns {boolean} */ () => ignoreAttributeData
       : Array.isArray(ignoreAttributeData)
-        ? /** @returns {boolean} */ (/** @type {import("../ast.js").Node} */ attribute) => ignoreAttributeData.includes(attribute.rawName)
+        ? /** @returns {boolean} */ (attribute) => ignoreAttributeData.includes(attribute.rawName)
         : () => false;
 
-  const printedAttributes = path.map(
-    ({ node: attribute }) =>
-      hasPrettierIgnoreAttribute(attribute)
-        ? replaceEndOfLine(
-            options.originalText.slice(locStart(attribute), locEnd(attribute)),
-          )
-        : print(),
-    "attrs",
+  const properties = ["attrs", "startTagComments"].filter(/** @returns {boolean} */ (property) =>
+    isNonEmptyArray(node[property]),
+  );
+  const printedAttributes = properties.flatMap((property) =>
+    path.map(
+      ({ node }) => ({
+        loc: locStart(node),
+        printed:
+          node.kind === "attribute" && hasPrettierIgnoreAttribute(node)
+            ? replaceEndOfLine(
+                options.originalText.slice(locStart(node), locEnd(node)),
+              )
+            : print(),
+      }),
+      property,
+    ),
   );
 
-  /** @type {boolean} */ const forceNotToBreakAttrContent =
-    node.type === "element" &&
-    node.fullName === "script" &&
-    node.attrs.length === 1 &&
-    node.attrs[0].fullName === "src" &&
-    node.children.length === 0;
+  if (properties.length > 1) {
+    printedAttributes.sort((a, b) => a.loc - b.loc);
+  }
 
+  /** @type {boolean} */ const forceNotToBreakAttrContent =
+    node.kind === "element" &&
+    node.fullName === "script" &&
+    attributes.length === 1 &&
+    attributes[0].fullName === "src" &&
+    node.children.length === 0 &&
+    startTagComments.length === 0;
+  const shouldForceBreak = startTagComments.some(
+    (comment) => comment.type === "single",
+  );
   const shouldPrintAttributePerLine =
-    options.singleAttributePerLine &&
-    node.attrs.length > 1 &&
-    !isVueSfcBlock(node, options);
+    shouldForceBreak ||
+    (options.singleAttributePerLine &&
+      attributes.length > 1 &&
+      !isVueSfcBlock(node, options));
   const attributeLine = shouldPrintAttributePerLine ? hardline : line;
 
   /** @type {Doc[]} */
   const parts = [
     indent([
-      forceNotToBreakAttrContent ? " " : line,
-      join(attributeLine, printedAttributes),
+      forceNotToBreakAttrContent ? " " : shouldForceBreak ? hardline : line,
+      join(
+        attributeLine,
+        printedAttributes.map(({ printed }) => printed),
+      ),
     ]),
   ];
 
@@ -343,7 +367,7 @@ function printOpeningTagStart(/** @type {import("../ast.js").Node} */ node, opti
 
 /** @type {string} */ const HTML5_DOCTYPE_START_MARKER = "<!doctype";
 /** @returns {string} */ function printOpeningTagStartMarker(/** @type {import("../ast.js").Node} */ node, options) {
-  switch (node.type) {
+  switch (node.kind) {
     case "ieConditionalComment":
     case "ieConditionalStartComment":
       return `<!--[if ${node.condition}`;
@@ -354,15 +378,17 @@ function printOpeningTagStart(/** @type {import("../ast.js").Node} */ node, opti
     case "docType": {
       // Only lowercase HTML5 doctype in `.html` and `.htm` files
       if (node.value === "html") {
-        const filepath = options.filepath ?? "";
-        if (/\.html?$/u.test(filepath)) {
+        const { filepath } = options;
+        if (filepath && /\.html?$/.test(filepath)) {
           return HTML5_DOCTYPE_START_MARKER;
         }
       }
 
-      const original = options.originalText.slice(locStart(node), locEnd(node));
-
-      return original.slice(0, HTML5_DOCTYPE_START_MARKER.length);
+      const start = locStart(node);
+      return options.originalText.slice(
+        start,
+        start + HTML5_DOCTYPE_START_MARKER.length,
+      );
     }
 
     case "angularIcuExpression":
@@ -378,8 +404,11 @@ function printOpeningTagStart(/** @type {import("../ast.js").Node} */ node, opti
 }
 
 /** @returns {string} */ function printOpeningTagEndMarker(/** @type {import("../ast.js").Node} */ node) {
-  assert(!node.isSelfClosing);
-  switch (node.type) {
+  /* c8 ignore next 3 */
+  if (process.env.NODE_ENV !== "production") {
+    assert.ok(!node.isSelfClosing);
+  }
+  switch (node.kind) {
     case "ieConditionalComment":
       return "]>";
     case "element":

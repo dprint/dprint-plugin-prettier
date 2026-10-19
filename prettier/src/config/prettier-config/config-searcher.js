@@ -1,53 +1,67 @@
-import isFile from "../../utils/is-file.js";
-import Searcher from "../searcher.js";
+import { FileSearcher } from "search-closest";
 import {
   loadConfigFromPackageJson,
   loadConfigFromPackageYaml,
 } from "./loaders.js";
 
-const CONFIG_FILE_NAMES = [
-  "package.json",
-  "package.yaml",
+/**
+@import {SearcherOptions} from 'search-closest'
+
+@typedef {string | {name: string, filter: SearcherOptions['filter']}} SearchTarget
+*/
+
+// Please keep this order sync with docs, docs/configuration.md
+
+/** @type {SearchTarget[]} */
+const CONFIG_FILES = [
+  {
+    name: "package.json",
+    async filter({ path: file }) {
+      try {
+        return Boolean(await loadConfigFromPackageJson(file));
+      } catch {
+        return false;
+      }
+    },
+  },
+  {
+    name: "package.yaml",
+    async filter({ path: file }) {
+      try {
+        return Boolean(await loadConfigFromPackageYaml(file));
+      } catch {
+        return false;
+      }
+    },
+  },
+
   ".prettierrc",
+
   ".prettierrc.json",
-  ".prettierrc.yaml",
   ".prettierrc.yml",
+  ".prettierrc.yaml",
   ".prettierrc.json5",
+
   ".prettierrc.js",
-  ".prettierrc.mjs",
-  ".prettierrc.cjs",
   "prettier.config.js",
+  ".prettierrc.ts",
+  "prettier.config.ts",
+
+  ".prettierrc.mjs",
   "prettier.config.mjs",
+  ".prettierrc.mts",
+  "prettier.config.mts",
+
+  ".prettierrc.cjs",
   "prettier.config.cjs",
+  ".prettierrc.cts",
+  "prettier.config.cts",
+
   ".prettierrc.toml",
 ];
 
-async function filter({ name, path: file }) {
-  if (!(await isFile(file))) {
-    return false;
-  }
-
-  if (name === "package.json") {
-    try {
-      return Boolean(await loadConfigFromPackageJson(file));
-    } catch {
-      return false;
-    }
-  }
-
-  if (name === "package.yaml") {
-    try {
-      return Boolean(await loadConfigFromPackageYaml(file));
-    } catch {
-      return false;
-    }
-  }
-
-  return true;
-}
-
 function getSearcher(stopDirectory) {
-  return new Searcher({ names: CONFIG_FILE_NAMES, filter, stopDirectory });
+  return new FileSearcher(CONFIG_FILES, { stopDirectory });
 }
 
 export default getSearcher;

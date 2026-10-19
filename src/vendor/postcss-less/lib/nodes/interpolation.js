@@ -1,7 +1,8 @@
+// @nts-check
 /* eslint no-param-reassign: off */
 
 module.exports = {
-  interpolation(token) {
+  /** @returns {boolean} */ interpolation(/** @type {any[] | undefined} */ token) {
     const tokens = [token, this.tokenizer.nextToken()];
     const validTypes = ['word', '}'];
 
@@ -17,7 +18,7 @@ module.exports = {
       token = this.tokenizer.nextToken();
     }
 
-    const words = tokens.map((tokn) => tokn[1]);
+    const words = tokens.map(/** @returns {string} */ (tokn) => tokn[1]);
     const [first] = tokens;
     const last = tokens.pop();
     const newToken = ['word', words.join(''), first[2], last[2]];

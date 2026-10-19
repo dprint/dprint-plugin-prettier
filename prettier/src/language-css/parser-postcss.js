@@ -3,7 +3,9 @@ import postcssParse from "postcss/lib/parse";
 import postcssLess from "postcss-less";
 import postcssScssParse from "postcss-scss/lib/scss-parse";
 import createError from "../common/parser-create-error.js";
-import parseFrontMatter from "../utils/front-matter/parse.js";
+import { parseFrontMatter } from "../main/front-matter/index.js";
+import isObject from "../utilities/is-object.js";
+import replaceNonLineBreaksWithSpace from "../utilities/replace-non-line-breaks-with-space.js";
 import {
   calculateLoc,
   locEnd,
@@ -13,16 +15,16 @@ import {
 import parseMediaQuery from "./parse/parse-media-query.js";
 import parseSelector from "./parse/parse-selector.js";
 import parseValue from "./parse/parse-value.js";
-import { addTypePrefix } from "./parse/utils.js";
-import { hasPragma } from "./pragma.js";
-import isModuleRuleName from "./utils/is-module-rule-name.js";
-import isSCSSNestedPropertyNode from "./utils/is-scss-nested-property-node.js";
+import { addTypePrefix } from "./parse/utilities.js";
+import { hasIgnorePragma, hasPragma } from "./pragma.js";
+import isModuleRuleName from "./utilities/is-module-rule-name.js";
+import isScssNestedPropertyNode from "./utilities/is-scss-nested-property-node.js";
 
-/** @type {RegExp} */ const DEFAULT_SCSS_DIRECTIVE = /(\s*)(!default).*$/u;
-/** @type {RegExp} */ const GLOBAL_SCSS_DIRECTIVE = /(\s*)(!global).*$/u;
+const DEFAULT_SCSS_DIRECTIVE = /(\s*)(!default).*$/;
+const GLOBAL_SCSS_DIRECTIVE = /(\s*)(!global).*$/;
 
 function parseNestedCSS(node, options) {
-  if (node && typeof node === "object") {
+  if (isObject(node)) {
     delete node.parent;
 
     for (const key in node) {
@@ -56,7 +58,8 @@ function parseNestedCSS(node, options) {
             node.source.start.offset + node.prop.length,
             node.source.end.offset,
           );
-        /** @type {string} */ const fakeContent = textBefore.replaceAll(/[^\n]/gu, " ") + nodeText;
+        const fakeContent =
+          replaceNonLineBreaksWithSpace(textBefore) + nodeText;
         let parse;
         if (options.parser === "scss") {
           parse = parseScss;
@@ -125,7 +128,7 @@ function parseNestedCSS(node, options) {
       }
 
       if (node.raws.between && node.raws.between.trim().length > 0) {
-        params = params + node.raws.between;
+        params += node.raws.between;
       }
 
       params = params.trim();
@@ -151,8 +154,8 @@ function parseNestedCSS(node, options) {
       }
 
       // Check on SCSS nested property
-      if (isSCSSNestedPropertyNode(node, options)) {
-        node.isSCSSNesterProperty = true;
+      if (isScssNestedPropertyNode(node, options)) {
+        node.isScssNestedProperty = true;
       }
 
       node.selector = parseSelector(selector);
@@ -193,6 +196,20 @@ function parseNestedCSS(node, options) {
       node.value = parseValue(value, options);
     }
 
+    // Clean spaces in between `+` and `:`
+    // https://lesscss.org/features/#merge-feature
+    if (
+      options.parser === "less" &&
+      node.type === "css-decl" &&
+      typeof node.prop === "string" &&
+      /^\s*\+\s*:/.test(node.raws.between)
+    ) {
+      // Add "+" to prop
+      node.prop += "+";
+      // Only ":" should be left in between
+      node.raws.between = node.raws.between.replace("+", "");
+    }
+
     if (
       options.parser === "less" &&
       node.type === "css-decl" &&
@@ -228,9 +245,9 @@ function parseNestedCSS(node, options) {
         }
       }
 
-      // only css support custom-selector
+      // only CSS support custom-selector
       if (options.parser === "css" && node.name === "custom-selector") {
-        const customSelector = node.params.match(/:--\S+\s+/u)[0].trim();
+        const customSelector = node.params.match(/:--\S+\s+/)[0].trim();
         node.customSelector = customSelector;
         node.selector = parseSelector(
           node.params.slice(customSelector.length).trim(),
@@ -244,11 +261,18 @@ function parseNestedCSS(node, options) {
         // `@color: blue;` is recognized fine, but the cases below aren't:
 
         // `@color:blue;`
-        if (node.name.includes(":") && !node.params) {
+        if (node.name.includes(":")) {
           node.variable = true;
           const parts = node.name.split(":");
           node.name = parts[0];
-          node.value = parseValue(parts.slice(1).join(":"), options);
+          let value = parts.slice(1).join(":");
+
+          // `@fooBackground:rgba(255, 255, 255, 1);`
+          if (node.params) {
+            value += node.params;
+          }
+
+          node.value = parseValue(value, options);
         }
 
         // `@color :blue;`
@@ -279,7 +303,6 @@ function parseNestedCSS(node, options) {
 
     if (node.type === "css-atrule" && params.length > 0) {
       const { name } = node;
-      const lowercasedName = node.name.toLowerCase();
 
       if (name === "warn" || name === "error") {
         node.params = {
@@ -298,7 +321,7 @@ function parseNestedCSS(node, options) {
       }
 
       if (name === "at-root") {
-        if (/^\(\s*(?:without|with)\s*:.+\)$/su.test(params)) {
+        if (/^\(\s*(?:without|with)\s*:.+\)$/s.test(params)) {
           node.params = parseValue(params, options);
         } else {
           node.selector = parseSelector(params);
@@ -308,6 +331,7 @@ function parseNestedCSS(node, options) {
         return node;
       }
 
+      const lowercasedName = name.toLowerCase();
       if (isModuleRuleName(lowercasedName)) {
         node.import = true;
         delete node.filename;
@@ -335,10 +359,11 @@ function parseNestedCSS(node, options) {
       ) {
         // Remove unnecessary spaces in SCSS variable arguments
         // Move spaces after the `...`, so we can keep the range correct
-        params = params.replace(/(\$\S+?)(\s+)?\.{3}/u, "$1...$2");
+        params = params.replace(/(\$\S+?)(\s+)?\.{3}/, "$1...$2");
         // Remove unnecessary spaces before SCSS control, mixin and function directives
         // Move spaces after the `(`, so we can keep the range correct
-        params = params.replace(/^(?!if)(\S+)(\s+)\(/u, "$1($2");
+        // Only match the first function call at the beginning, not nested ones
+        params = params.replace(/^(?!if)([^"'\s(]+)(\s+)\(/, "$1($2");
 
         node.value = parseValue(params, options);
         delete node.params;
@@ -370,14 +395,12 @@ function parseNestedCSS(node, options) {
 }
 
 function parseWithParser(/** @type {(a0?: any, a1?: any) => any} */ parse, /** @type {string} */ text, options) {
-  const parsed = parseFrontMatter(text);
-  const { frontMatter } = parsed;
-  text = parsed.content;
+  const { frontMatter, content: textToParse } = parseFrontMatter(text);
 
   let result;
 
   try {
-    result = parse(text, {
+    result = parse(textToParse, {
       // Prevent file access https://github.com/postcss/postcss/blob/4f4e2932fc97e2c117e1a4b15f0272ed551ed59d/lib/previous-map.js#L18
       map: false,
     });
@@ -400,11 +423,14 @@ function parseWithParser(/** @type {(a0?: any, a1?: any) => any} */ parse, /** @
   calculateLoc(result, text);
 
   if (frontMatter) {
-    frontMatter.source = {
-      startOffset: 0,
-      endOffset: frontMatter.raw.length,
+    result.frontMatter = {
+      ...frontMatter,
+      type: "front-matter",
+      source: {
+        startOffset: frontMatter.start.index,
+        endOffset: frontMatter.end.index,
+      },
     };
-    result.frontMatter = frontMatter;
   }
 
   return result;
@@ -431,6 +457,7 @@ function parseScss(/** @type {string} */ text, options = {}) {
 const postCssParser = {
   astFormat: "postcss",
   hasPragma,
+  hasIgnorePragma,
   locStart,
   locEnd,
 };

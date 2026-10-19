@@ -8,7 +8,17 @@
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <InvariantGlobalization>true</InvariantGlobalization>
+    <!-- otherwise the module includes DWARF debug info, which is over half its size. Stack traces in error messages don't use it. -->
+    <DebugType>none</DebugType>
     <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
+    <!-- ILC inlines more for speed, which makes formatting 7-10% faster for a module 3 MB larger -->
+    <OptimizationPreference>Speed</OptimizationPreference>
+    <!-- Speed also gives ILC the runtime's profile data, which NativeAOT-LLVM 10.0.0-rc.1.26357.1 fails every
+         method with (https://github.com/dotnet/runtimelab/pull/3319) -->
+    <IlcPgoOptimize>false</IlcPgoOptimize>
+    <!-- Wasm's own exceptions rather than ones made of returned flags, which makes formatting 5-6% faster and the
+         module 16% smaller, and which dprint loads from 0.64.0 -->
+    <WasmEnableExceptionHandling>true</WasmEnableExceptionHandling>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
     <IlcLlvmVersion>10.0.0-rc.1.26357.1</IlcLlvmVersion>
     <!-- compiles to a Wasm module with NativeAOT-LLVM, as dprint-plugin-roslyn does -->
@@ -40,7 +50,13 @@
   <ItemGroup>
     <Compile Include="$(NtsOutDir)/*.cs" />
     <Compile Include="WasmExports.cs" />
+    <Compile Include="FlowParser.cs" />
     <EmbeddedResource Include="../LICENSE" LogicalName="LICENSE" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- Flow's parser, which scripts/build.ts compiles from the Wasm module of the flow-parser package -->
+    <NativeLibrary Include="$(FlowParserLib)" />
+    <DirectPInvoke Include="flowparser" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.DotNet.ILCompiler.LLVM" Version="$(IlcLlvmVersion)" />

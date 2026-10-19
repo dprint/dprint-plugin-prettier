@@ -1,16 +1,14 @@
 // @nts-check
-/** @import AstPath from "../../common/ast-path.js" */
-import { hardline, indent } from "../../document/builders.js";
+import { hardline, indent } from "../../document/index.js";
 import { printDanglingComments } from "../../main/comments/print.js";
-import isNonEmptyArray from "../../utils/is-non-empty-array.js";
-import {
-  CommentCheckFlags,
-  hasComment,
-  isNextLineEmpty,
-} from "../utils/index.js";
-import { printStatementSequence } from "./statement.js";
+import isNonEmptyArray from "../../utilities/is-non-empty-array.js";
+import { CommentCheckFlags, hasComment } from "../utilities/comments.js";
+import { isNextLineEmpty } from "../utilities/is-next-line-empty.js";
+import { printStatementSequence } from "./statement-sequence.js";
 
-/** @import {Doc} from "../../document/builders.js" */
+/** @import AstPath from "../../common/ast-path.js" */
+
+/** @import {Doc} from "../../document/index.js" */
 
 /*
 - `Program`
@@ -37,26 +35,26 @@ function printBlock(/** @type {AstPath} */ path, options, print) {
     parts.push(indent([hardline, bodyDoc]), hardline);
   } else {
     const parentParent = path.grandparent;
-    if (
-      !(
-        parent.type === "ArrowFunctionExpression" ||
-        parent.type === "FunctionExpression" ||
-        parent.type === "FunctionDeclaration" ||
-        parent.type === "ComponentDeclaration" ||
-        parent.type === "HookDeclaration" ||
-        parent.type === "ObjectMethod" ||
-        parent.type === "ClassMethod" ||
-        parent.type === "ClassPrivateMethod" ||
-        parent.type === "ForStatement" ||
-        parent.type === "WhileStatement" ||
-        parent.type === "DoWhileStatement" ||
-        parent.type === "DoExpression" ||
-        parent.type === "ModuleExpression" ||
-        (parent.type === "CatchClause" && !parentParent.finalizer) ||
-        parent.type === "TSModuleDeclaration" ||
-        node.type === "StaticBlock"
-      )
-    ) {
+    if (!(
+      parent.type === "ArrowFunctionExpression" ||
+      parent.type === "FunctionExpression" ||
+      parent.type === "FunctionDeclaration" ||
+      parent.type === "ComponentDeclaration" ||
+      parent.type === "HookDeclaration" ||
+      parent.type === "ObjectMethod" ||
+      parent.type === "ClassMethod" ||
+      parent.type === "ClassPrivateMethod" ||
+      parent.type === "ForStatement" ||
+      parent.type === "WhileStatement" ||
+      parent.type === "DoWhileStatement" ||
+      parent.type === "DoExpression" ||
+      parent.type === "ModuleExpression" ||
+      (parent.type === "CatchClause" && !parentParent.finalizer) ||
+      parent.type === "TSModuleDeclaration" ||
+      parent.type === "DeclareModule" ||
+      parent.type === "MatchStatementCase" ||
+      node.type === "StaticBlock"
+    )) {
       parts.push(hardline);
     }
   }

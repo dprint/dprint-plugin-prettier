@@ -6,9 +6,9 @@ import {
   hardlineWithoutBreakParent,
   ifBreak,
   join,
-} from "../../document/builders.js";
-import { printDocToString } from "../../document/printer.js";
-import getStringWidth from "../../utils/get-string-width.js";
+} from "../../document/index.js";
+import { printDocToString } from "../../document/printer/printer.js";
+import getStringWidth from "../../utilities/get-string-width.js";
 
 function printTable(/** @type {AstPath} */ path, options, /** @type {() => any} */ print) {
   const { node } = path;
@@ -52,13 +52,20 @@ function printTable(/** @type {AstPath} */ path, options, /** @type {() => any} 
   }
 
   function printAlign(/** @type {boolean} */ isCompact) {
-    return columnMaxWidths.map(/** @returns {string} */ (width, index) => {
-      /** @type {string | undefined | null} */ const align = node.align[index];
-      /** @type {string} */ const first = align === "center" || align === "left" ? ":" : "-";
-      /** @type {string} */ const last = align === "center" || align === "right" ? ":" : "-";
-      /** @type {string} */ const middle = isCompact ? "-" : "-".repeat(width - 2);
-      return `${first}${middle}${last}`;
-    });
+    return columnMaxWidths
+      .map(/** @returns {string | null} */ (width, index) => {
+        if (options.parser !== "mdx" && index >= contents[0].length) {
+          // The header row must match the delimiter row in the number of cells. If not, a table will not be recognized
+          // https://github.github.com/gfm/#example-203
+          return null;
+        }
+        /** @type {string | undefined | null} */ const align = node.align[index];
+        /** @type {string} */ const first = align === "center" || align === "left" ? ":" : "-";
+        /** @type {string} */ const last = align === "center" || align === "right" ? ":" : "-";
+        /** @type {string} */ const middle = isCompact ? "-" : "-".repeat(width - 2);
+        return `${first}${middle}${last}`;
+      })
+      .filter(/** @returns {boolean} */ (x) => x !== null);
   }
 
   function printRow(columns, /** @type {boolean} */ isCompact) {

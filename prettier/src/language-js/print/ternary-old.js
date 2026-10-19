@@ -1,27 +1,23 @@
 // @nts-check
 import {
   align,
-  breakParent,
   dedent,
   group,
   ifBreak,
   indent,
   line,
   softline,
-} from "../../document/builders.js";
-import hasNewlineInRange from "../../utils/has-newline-in-range.js";
-import { locEnd, locStart } from "../loc.js";
+} from "../../document/index.js";
 import {
-  hasComment,
   isBinaryCastExpression,
   isCallExpression,
+  isChainElementWrapper,
   isJsxElement,
   isMemberExpression,
-} from "../utils/index.js";
-import isBlockComment from "../utils/is-block-comment.js";
+} from "../utilities/node-types.js";
 
 /**
- * @import {Doc} from "../../document/builders.js"
+ * @import {Doc} from "../../document/index.js"
  * @import AstPath from "../../common/ast-path.js"
  *
  * @typedef {any} Options - Prettier options (TBD ...)
@@ -153,10 +149,9 @@ const ancestorNameMap = new Map([
     const node = path.getParentNode(ancestorCount);
 
     if (
-      (node.type === "ChainExpression" && node.expression === child) ||
+      (isChainElementWrapper(node) && node.expression === child) ||
       (isCallExpression(node) && node.callee === child) ||
-      (isMemberExpression(node) && node.object === child) ||
-      (node.type === "TSNonNullExpression" && node.expression === child)
+      (isMemberExpression(node) && node.object === child)
     ) {
       child = node;
       continue;
@@ -325,31 +320,8 @@ function printTernaryOld(path, options, print) {
     );
   }
 
-  // We want a whole chain of ConditionalExpressions to all
-  // break if any of them break. That means we should only group around the
-  // outer-most ConditionalExpression.
-  /** @type {boolean} */ const shouldBreak = [
-    consequentNodePropertyName,
-    alternateNodePropertyName,
-    ...testNodePropertyNames,
-  ].some(/** @returns {boolean} */ (property) =>
-    hasComment(
-      node[property],
-      /** @returns {boolean} */ (comment) =>
-        isBlockComment(comment) &&
-        hasNewlineInRange(
-          options.originalText,
-          locStart(comment),
-          locEnd(comment),
-        ),
-    ),
-  );
   const maybeGroup = (/** @type {any[]} */ doc) =>
-    parent === firstNonConditionalParent
-      ? group(doc, { shouldBreak })
-      : shouldBreak
-        ? [doc, breakParent]
-        : doc;
+    parent === firstNonConditionalParent ? group(doc) : doc;
 
   // Break the closing paren to keep the chain right after it:
   // (a

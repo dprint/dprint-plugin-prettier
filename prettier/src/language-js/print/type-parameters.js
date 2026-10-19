@@ -2,37 +2,36 @@
 import {
   group,
   hardline,
-  ifBreak,
   indent,
   indentIfBreak,
   join,
   line,
   lineSuffixBoundary,
   softline,
-} from "../../document/builders.js";
+} from "../../document/index.js";
 import { printDanglingComments } from "../../main/comments/print.js";
-import createGroupIdMapper from "../../utils/create-group-id-mapper.js";
+import hasNewline from "../../utilities/has-newline.js";
+import { locEnd } from "../location/index.js";
+import { isLineComment } from "../utilities/comment-types.js";
 import {
   CommentCheckFlags,
-  getFunctionParameters,
+  getComments,
   hasComment,
-  isObjectType,
-  isTestCall,
-  shouldPrintComma,
-} from "../utils/index.js";
+} from "../utilities/comments.js";
+import { getFunctionParameters } from "../utilities/function-parameters.js";
+import { isObjectType } from "../utilities/node-types.js";
+import { isTestCall } from "../utilities/test-libraries.js";
 import { isArrowFunctionVariableDeclarator } from "./assignment.js";
-import { printTypeScriptMappedTypeModifier } from "./mapped-type.js";
+import { printTrailingComma } from "./miscellaneous.js";
 import {
   printTypeAnnotationProperty,
   shouldHugType,
 } from "./type-annotation.js";
 
 /**
- * @import {Doc} from "../../document/builders.js"
+ * @import {Doc} from "../../document/index.js"
  * @import AstPath from "../../common/ast-path.js"
  */
-
-const getTypeParametersGroupId = createGroupIdMapper("typeParameters");
 
 // Keep comma if the file extension not `.ts` and
 // has one type parameter that isn't extend with any types.
@@ -44,22 +43,31 @@ const getTypeParametersGroupId = createGroupIdMapper("typeParameters");
     node.type.startsWith("TS") &&
     !node[paramsKey][0].constraint &&
     path.parent.type === "ArrowFunctionExpression" &&
-    !(options.filepath && /\.ts$/u.test(options.filepath))
+    !(options.filepath && /\.ts$/.test(options.filepath))
   );
 }
 
 /**
- * @param {AstPath} path
- */
+@param {AstPath} path
+
+- `GenericTypeAnnotation` (Flow)
+- `TypeParameterDeclaration` (Flow)
+- `TypeParameterInstantiation` (Flow)
+- `TSTypeParameterDeclaration` (TypeScript)
+- `TSTypeParameterInstantiation` (TypeScript)
+- `TSImportType` (TypeScript)
+- `TSTypeReference` (TypeScript)
+*/
 function printTypeParameters(path, options, print, /** @type {string} */ paramsKey) {
   const { node } = path;
+  const parameters = node[paramsKey];
 
-  if (!node[paramsKey]) {
+  if (!parameters) {
     return "";
   }
 
   // for TypeParameterDeclaration typeParameters is a single node
-  if (!Array.isArray(node[paramsKey])) {
+  if (!Array.isArray(parameters)) {
     return print(paramsKey);
   }
 
@@ -75,12 +83,25 @@ function printTypeParameters(path, options, print, /** @type {string} */ paramsK
   );
 
   /** @type {boolean} */ const shouldInline =
-    node[paramsKey].length === 0 ||
+    parameters.length === 0 ||
     (!isArrowFunctionVariable &&
       (isParameterInTestCall ||
-        (node[paramsKey].length === 1 &&
-          (node[paramsKey][0].type === "NullableTypeAnnotation" ||
-            shouldHugType(node[paramsKey][0])))));
+        (parameters.length === 1 &&
+          (parameters[0].type === "NullableTypeAnnotation" ||
+            shouldHugType(parameters[0])))) &&
+      !parameters.some(/** @returns {boolean} */ (node) => {
+        const comments = getComments(
+          node,
+          (comment) => comment.leading || comment.trailing,
+        );
+        return (
+          comments.length > 0 &&
+          (comments.some((comment) => isLineComment(comment)) ||
+            // This condition base on existing one in class-body.js
+            // It is not really correct, but we don't have a way to check how comments are printed
+            hasNewline(options.originalText, locEnd(comments.at(-1))))
+        );
+      }));
 
   if (shouldInline) {
     return [
@@ -96,20 +117,15 @@ function printTypeParameters(path, options, print, /** @type {string} */ paramsK
       ? ""
       : shouldForceTrailingComma(path, options, paramsKey)
         ? ","
-        : shouldPrintComma(options)
-          ? ifBreak(",")
-          : "";
+        : printTrailingComma(options);
 
-  return group(
-    [
-      "<",
-      indent([softline, join([",", line], path.map(print, paramsKey))]),
-      trailingComma,
-      softline,
-      ">",
-    ],
-    { id: getTypeParametersGroupId(node) },
-  );
+  return group([
+    "<",
+    indent([softline, join([",", line], path.map(print, paramsKey))]),
+    trailingComma,
+    softline,
+    ">",
+  ]);
 }
 
 function printDanglingCommentsForInline(/** @type {AstPath} */ path, options) {
@@ -127,36 +143,16 @@ function printDanglingCommentsForInline(/** @type {AstPath} */ path, options) {
   return [printed, hardline];
 }
 
+// `TSTypeParameter` and `TypeParameter`
 function printTypeParameter(/** @type {AstPath} */ path, options, print) {
-  const { node, parent } = path;
+  const { node } = path;
 
   /**
    * @type {Doc[]}
    */
-  const parts = [node.type === "TSTypeParameter" && node.const ? "const " : ""];
+  const parts = [node.const ? "const " : ""];
 
   const name = node.type === "TSTypeParameter" ? print("name") : node.name;
-
-  if (parent.type === "TSMappedType") {
-    if (parent.readonly) {
-      parts.push(
-        printTypeScriptMappedTypeModifier(parent.readonly, "readonly"),
-        " ",
-      );
-    }
-    parts.push("[", name);
-    if (node.constraint) {
-      parts.push(" in ", print("constraint"));
-    }
-    if (parent.nameType) {
-      parts.push(
-        " as ",
-        path.callParent(() => print("nameType")),
-      );
-    }
-    parts.push("]");
-    return parts;
-  }
 
   if (node.variance) {
     parts.push(print("variance"));
@@ -191,10 +187,16 @@ function printTypeParameter(/** @type {AstPath} */ path, options, print) {
   }
 
   if (node.default) {
-    parts.push(" = ", print("default"));
+    const groupId = Symbol("default");
+    parts.push(
+      " =",
+      group(indent(line), { id: groupId }),
+      lineSuffixBoundary,
+      indentIfBreak(print("default"), { groupId }),
+    );
   }
 
   return group(parts);
 }
 
-export { getTypeParametersGroupId, printTypeParameter, printTypeParameters };
+export { printTypeParameter, printTypeParameters };

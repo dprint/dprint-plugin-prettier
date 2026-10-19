@@ -1,5 +1,5 @@
 // @nts-check
-import chalk from 'chalk';
+import picocolors from 'picocolors';
 import { VALUE_NOT_EXIST } from '../../constants.js';
 /** @type {string} */ const INDENTATION = ' '.repeat(2);
 export const commonInvalidHandler = (key, value, utils) => {
@@ -17,20 +17,20 @@ export const commonInvalidHandler = (key, value, utils) => {
 };
 function getDescription(key, value, expected, descriptor) {
     return [
-        `Invalid ${chalk.red(descriptor.key(key))} value.`,
-        `Expected ${chalk.blue(expected)},`,
+        `Invalid ${picocolors.red(descriptor.key(key))} value.`,
+        `Expected ${picocolors.blue(expected)},`,
         `but received ${value === VALUE_NOT_EXIST
-            ? chalk.gray('nothing')
-            : chalk.red(descriptor.value(value))}.`,
+            ? picocolors.gray('nothing')
+            : picocolors.red(descriptor.value(value))}.`,
     ].join(' ');
 }
 function getListDescription({ text, list }, printWidth) {
     const descriptions = [];
     if (text) {
-        descriptions.push(`- ${chalk.blue(text)}`);
+        descriptions.push(`- ${picocolors.blue(text)}`);
     }
     if (list) {
-        descriptions.push([`- ${chalk.blue(list.title)}:`]
+        descriptions.push([`- ${picocolors.blue(list.title)}:`]
             .concat(list.values.map(valueDescription => getListDescription(valueDescription, printWidth - INDENTATION.length).replace(/^|\n/g, `$&${INDENTATION}`)))
             .join('\n'));
     }

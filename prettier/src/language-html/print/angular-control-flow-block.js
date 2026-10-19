@@ -7,9 +7,9 @@ import {
   join,
   line,
   softline,
-} from "../../document/builders.js";
-import { hasPrettierIgnore } from "../utils/index.js";
-import ANGULAR_CONTROL_FLOW_BLOCK_SETTINGS from "./angular-control-flow-block-settings.evaluate.js";
+} from "../../document/index.js";
+import { hasPrettierIgnore } from "../utilities/index.js";
+import { ANGULAR_CONTROL_FLOW_BLOCK_SETTINGS } from "./angular-control-flow-block-settings.evaluate.js";
 import { printChildren } from "./children.js";
 
 function printAngularControlFlowBlock(/** @type {AstPath} */ path, options, print) {
@@ -22,22 +22,37 @@ function printAngularControlFlowBlock(/** @type {AstPath} */ path, options, prin
 
   docs.push("@", node.name);
 
+  const isDefaultNever = isSwitchExhaustiveCheck(node);
+
   if (node.parameters) {
-    docs.push(" (", group(print("parameters")), ")");
+    // No space in `@default never(state)`
+    // https://github.com/prettier/prettier/issues/19570#issuecomment-4916194365
+    if (!isDefaultNever) {
+      docs.push(" ");
+    }
+
+    docs.push("(", group(print("parameters")), ")");
   }
 
-  docs.push(" {");
+  if (isDefaultNever) {
+    docs.push(";");
+    return docs;
+  }
 
-  /** @type {boolean} */ const shouldPrintCloseBracket = shouldCloseBlock(node);
-  if (node.children.length > 0) {
-    node.firstChild.hasLeadingSpaces = true;
-    node.lastChild.hasTrailingSpaces = true;
-    docs.push(indent([hardline, printChildren(path, options, print)]));
-    if (shouldPrintCloseBracket) {
-      docs.push(hardline, "}");
+  if (!isSwitchFallthroughCase(node)) {
+    docs.push(" {");
+
+    /** @type {boolean} */ const shouldPrintCloseBracket = shouldCloseBlock(node);
+    if (node.children.length > 0) {
+      node.firstChild.hasLeadingSpaces = true;
+      node.lastChild.hasTrailingSpaces = true;
+      docs.push(indent([hardline, printChildren(path, options, print)]));
+      if (shouldPrintCloseBracket) {
+        docs.push(hardline, "}");
+      }
+    } else if (shouldPrintCloseBracket) {
+      docs.push("}");
     }
-  } else if (shouldPrintCloseBracket) {
-    docs.push("}");
   }
 
   return group(docs, { shouldBreak: true });
@@ -45,15 +60,32 @@ function printAngularControlFlowBlock(/** @type {AstPath} */ path, options, prin
 
 /** @returns {boolean} */ function shouldCloseBlock(/** @type {import("../ast.js").Node} */ node) {
   return !(
-    node.next?.type === "angularControlFlowBlock" &&
+    node.next?.kind === "angularControlFlowBlock" &&
     ANGULAR_CONTROL_FLOW_BLOCK_SETTINGS.get(node.name)?.has(node.next.name)
+  );
+}
+
+const isSwitchCaseBlock = /** @returns {boolean} */ (/** @type {import("../parse/ast.js").Node} */ node) =>
+  node?.kind === "angularControlFlowBlock" &&
+  (node.name === "case" || node.name === "default");
+
+const isSwitchExhaustiveCheck = /** @returns {boolean} */ (/** @type {import("../parse/ast.js").Node} */ node) =>
+  node?.kind === "angularControlFlowBlock" && node.name === "default never";
+
+// https://github.com/angular/angular/commit/0ad3adc7c6d4094f1e3432a3f2e3bdc9862cb4fa#diff-77a6f285c6ea13d6644ef635e7495e71134d1141af2650cb9ae5631ff1f38bf2R263
+// https://github.com/prettier/prettier/issues/18563#issuecomment-3728354491
+/** @returns {boolean} */ function isSwitchFallthroughCase(/** @type {import("../parse/ast.js").Node} */ node) {
+  return (
+    isSwitchCaseBlock(node) &&
+    node.endSourceSpan &&
+    node.endSourceSpan.start.offset === node.endSourceSpan.end.offset
   );
 }
 
 /** @returns {boolean} */ function isPreviousBlockUnClosed(path) {
   const { previous } = path;
   return (
-    previous?.type === "angularControlFlowBlock" &&
+    previous?.kind === "angularControlFlowBlock" &&
     !hasPrettierIgnore(previous) &&
     !shouldCloseBlock(previous)
   );

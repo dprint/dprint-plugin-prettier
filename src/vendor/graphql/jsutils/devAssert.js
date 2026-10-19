@@ -1,14 +1,9 @@
-'use strict';
-
-Object.defineProperty(exports, '__esModule', {
-  value: true,
-});
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
 exports.devAssert = devAssert;
-
 function devAssert(condition, message) {
-  const booleanCondition = Boolean(condition);
-
-  if (!booleanCondition) {
-    throw new Error(message);
-  }
+    if (!condition) {
+        throw new Error(message);
+    }
 }
+//# sourceMappingURL=devAssert.js.map

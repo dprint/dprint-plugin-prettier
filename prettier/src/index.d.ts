@@ -22,8 +22,7 @@ export namespace doc {
 // It comes from this issue: microsoft/TypeScript#29729:
 //   https://github.com/microsoft/TypeScript/issues/29729#issuecomment-700527227
 export type LiteralUnion<T extends U, U = string> =
-  | T
-  | (Pick<U, never> & { _?: never | undefined });
+  T | (Pick<U, never> & { _?: never | undefined });
 
 export type AST = any;
 export type Doc = doc.builders.Doc;
@@ -296,6 +295,7 @@ export type BuiltInParserName =
   | "markdown"
   | "mdx"
   | "meriyah"
+  | "mjml"
   | "scss"
   | "typescript"
   | "vue"
@@ -303,7 +303,7 @@ export type BuiltInParserName =
 export type BuiltInParsers = Record<BuiltInParserName, BuiltInParser>;
 
 /**
- * For use in `.prettierrc.js`, `.prettierrc.cjs`, `prettierrc.mjs`, `prettier.config.js`, `prettier.config.cjs`, `prettier.config.mjs`
+ * For use in `.prettierrc.js`, `.prettierrc.ts`, `.prettierrc.cjs`, `.prettierrc.cts`, `prettierrc.mjs`, `prettierrc.mts`, `prettier.config.js`, `prettier.config.ts`, `prettier.config.cjs`, `prettier.config.cts`, `prettier.config.mjs`, `prettier.config.mts`
  */
 export interface Config extends Options {
   overrides?: Array<{
@@ -341,6 +341,11 @@ export interface RequiredOptions extends doc.printer.Options {
    * @default true
    */
   bracketSpacing: boolean;
+  /**
+   * How to wrap object literals.
+   * @default "preserve"
+   */
+  objectWrap: "preserve" | "collapse";
   /**
    * Put the `>` of a multi-line HTML (HTML, JSX, Vue, Angular) element at the end of the last line instead of being
    * alone on the next line (does not apply to self closing elements).
@@ -380,6 +385,11 @@ export interface RequiredOptions extends doc.printer.Options {
    */
   insertPragma: boolean;
   /**
+   * Prettier can allow individual files to opt out of formatting if they contain a special comment, called a pragma, at the top of the file.
+   * @default false
+   */
+  checkIgnorePragma: boolean;
+  /**
    * By default, Prettier will wrap markdown text as-is since some services use a linebreak-sensitive renderer.
    * In some cases you may want to rely on editor/viewer soft wrapping instead, so this option allows you to opt out.
    * @default "preserve"
@@ -393,7 +403,7 @@ export interface RequiredOptions extends doc.printer.Options {
   /**
    * Provide ability to support new languages to prettier.
    */
-  plugins: Array<string | Plugin>;
+  plugins: Array<string | URL | Plugin>;
   /**
    * How to handle whitespaces in HTML.
    * @default "css"
@@ -424,6 +434,11 @@ export interface RequiredOptions extends doc.printer.Options {
    * @default false
    */
   singleAttributePerLine: boolean;
+  /**
+   * Where to print operators when binary expressions wrap lines.
+   * @default "end"
+   */
+  experimentalOperatorPosition: "start" | "end";
   /**
    * Use curious ternaries, with the question mark after the condition, instead
    * of on the same line as the consequent.
@@ -460,10 +475,11 @@ export interface Parser<T = any> {
   parse: (text: string, options: ParserOptions<T>) => T | Promise<T>;
   astFormat: string;
   hasPragma?: ((text: string) => boolean) | undefined;
+  hasIgnorePragma?: ((text: string) => boolean) | undefined;
   locStart: (node: T) => number;
   locEnd: (node: T) => number;
   preprocess?:
-    | ((text: string, options: ParserOptions<T>) => string)
+    | ((text: string, options: ParserOptions<T>) => string | Promise<string>)
     | undefined;
 }
 
@@ -471,7 +487,19 @@ export interface Printer<T = any> {
   print(
     path: AstPath<T>,
     options: ParserOptions<T>,
-    print: (path: AstPath<T>) => Doc,
+    print: (
+      selector?: string | number | Array<string | number> | AstPath<T>,
+      args?: unknown,
+    ) => Doc,
+    args?: unknown,
+  ): Doc;
+  printPrettierIgnored?(
+    path: AstPath<T>,
+    options: ParserOptions<T>,
+    print: (
+      selector?: string | number | Array<string | number> | AstPath<T>,
+      args?: unknown,
+    ) => Doc,
     args?: unknown,
   ): Doc;
   embed?:
@@ -483,6 +511,7 @@ export interface Printer<T = any> {
             textToDoc: (text: string, options: Options) => Promise<Doc>,
             print: (
               selector?: string | number | Array<string | number> | AstPath,
+              args?: unknown,
             ) => Doc,
             path: AstPath,
             options: Options,
@@ -491,8 +520,7 @@ export interface Printer<T = any> {
         | null)
     | undefined;
   preprocess?:
-    | ((ast: T, options: ParserOptions<T>) => T | Promise<T>)
-    | undefined;
+    ((ast: T, options: ParserOptions<T>) => T | Promise<T>) | undefined;
   insertPragma?: (text: string) => string;
   /**
    * @returns `null` if you want to remove this node
@@ -500,15 +528,13 @@ export interface Printer<T = any> {
    * @returns anything if you want to replace the node with it
    */
   massageAstNode?:
-    | ((original: any, cloned: any, parent: any) => any)
-    | undefined;
+    ((original: any, cloned: any, parent: any) => any) | undefined;
   hasPrettierIgnore?: ((path: AstPath<T>) => boolean) | undefined;
-  canAttachComment?: ((node: T) => boolean) | undefined;
+  canAttachComment?: ((node: T, ancestors: T[]) => boolean) | undefined;
   isBlockComment?: ((node: T) => boolean) | undefined;
   willPrintOwnComments?: ((path: AstPath<T>) => boolean) | undefined;
   printComment?:
-    | ((commentPath: AstPath<T>, options: ParserOptions<T>) => Doc)
-    | undefined;
+    ((commentPath: AstPath<T>, options: ParserOptions<T>) => Doc) | undefined;
   /**
    * By default, Prettier searches all object properties (except for a few predefined ones) of each node recursively.
    * This function can be provided to override that behavior.
@@ -517,8 +543,7 @@ export interface Printer<T = any> {
    * @returns `[]` if the node has no children or `undefined` to fall back on the default behavior.
    */
   getCommentChildNodes?:
-    | ((node: T, options: ParserOptions<T>) => T[] | undefined)
-    | undefined;
+    ((node: T, options: ParserOptions<T>) => T[] | undefined) | undefined;
   handleComments?:
     | {
         ownLine?:
@@ -551,8 +576,7 @@ export interface Printer<T = any> {
       }
     | undefined;
   getVisitorKeys?:
-    | ((node: T, nonTraversableKeys: Set<string>) => string[])
-    | undefined;
+    ((node: T, nonTraversableKeys: Set<string>) => string[]) | undefined;
 }
 
 export interface CursorOptions extends Options {
@@ -568,7 +592,7 @@ export interface CursorResult {
 }
 
 /**
- * `format` is used to format text using Prettier. [Options](https://prettier.io/docs/en/options.html) may be provided to override the defaults.
+ * `format` is used to format text using Prettier. [Options](https://prettier.io/docs/options) may be provided to override the defaults.
  */
 export function format(source: string, options?: Options): Promise<string>;
 
@@ -597,7 +621,7 @@ export interface ResolveConfigOptions {
   /**
    * Pass directly the path of the config file if you don't wish to search for it.
    */
-  config?: string | undefined;
+  config?: string | URL | undefined;
   /**
    * If set to `true` and an `.editorconfig` file is in your project,
    * Prettier will parse it and convert its properties to the corresponding prettier configuration.
@@ -617,7 +641,7 @@ export interface ResolveConfigOptions {
  *
  * A promise is returned which will resolve to:
  *
- *  - An options object, providing a [config file](https://prettier.io/docs/en/configuration.html) was found.
+ *  - An options object, providing a [config file](https://prettier.io/docs/configuration) was found.
  *  - `null`, if no file was found.
  *
  * The promise will be rejected if there was an error parsing the configuration file.
@@ -650,7 +674,6 @@ export function clearConfigCache(): Promise<void>;
 
 export interface SupportLanguage {
   name: string;
-  since?: string | undefined;
   parsers: BuiltInParserName[] | string[];
   group?: string | undefined;
   tmScope?: string | undefined;
@@ -663,6 +686,7 @@ export interface SupportLanguage {
   linguistLanguageId?: number | undefined;
   vscodeLanguageIds?: string[] | undefined;
   interpreters?: string[] | undefined;
+  isSupported?: ((options: { filepath: string }) => boolean) | undefined;
 }
 
 export interface SupportOptionRange {
@@ -672,20 +696,10 @@ export interface SupportOptionRange {
 }
 
 export type SupportOptionType =
-  | "int"
-  | "string"
-  | "boolean"
-  | "choice"
-  | "path";
+  "int" | "string" | "boolean" | "choice" | "path";
 
 export type CoreCategoryType =
-  | "Config"
-  | "Editor"
-  | "Format"
-  | "Other"
-  | "Output"
-  | "Global"
-  | "Special";
+  "Config" | "Editor" | "Format" | "Other" | "Output" | "Global" | "Special";
 
 export interface BaseSupportOption<Type extends SupportOptionType> {
   readonly name?: string | undefined;
@@ -743,18 +757,17 @@ export interface BooleanSupportOption extends BaseSupportOption<"boolean"> {
   oppositeDescription?: string | undefined;
 }
 
-export interface BooleanArraySupportOption
-  extends BaseSupportOption<"boolean"> {
+export interface BooleanArraySupportOption extends BaseSupportOption<"boolean"> {
   default?: Array<{ value: boolean[] }> | undefined;
   array: true;
 }
 
-export interface ChoiceSupportOption<Value = any>
-  extends BaseSupportOption<"choice"> {
+export interface ChoiceSupportOption<
+  Value = any,
+> extends BaseSupportOption<"choice"> {
   default?: Value | Array<{ value: Value }> | undefined;
   description: string;
   choices: Array<{
-    since?: string | undefined;
     value: Value;
     description: string;
   }>;
@@ -791,7 +804,7 @@ export interface SupportInfo {
 export interface FileInfoOptions {
   ignorePath?: string | URL | (string | URL)[] | undefined;
   withNodeModules?: boolean | undefined;
-  plugins?: Array<string | Plugin> | undefined;
+  plugins?: Array<string | URL | Plugin> | undefined;
   resolveConfig?: boolean | undefined;
 }
 
@@ -806,7 +819,7 @@ export function getFileInfo(
 ): Promise<FileInfoResult>;
 
 export interface SupportInfoOptions {
-  plugins?: Array<string | Plugin> | undefined;
+  plugins?: Array<string | URL | Plugin> | undefined;
   showDeprecated?: boolean | undefined;
 }
 
@@ -822,7 +835,7 @@ export function getSupportInfo(
  */
 export const version: string;
 
-// https://github.com/prettier/prettier/blob/next/src/utils/public.js
+// https://github.com/prettier/prettier/blob/main/src/utilities/public.js
 export namespace util {
   interface SkipOptions {
     backwards?: boolean | undefined;

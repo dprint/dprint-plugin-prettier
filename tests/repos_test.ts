@@ -16,7 +16,7 @@ interface Repo {
 
 const repos: Repo[] = [
   // prettier's own tests have samples of every language and edge case that prettier handles
-  { name: "prettier", url: "https://github.com/prettier/prettier", ref: "3.4.2" },
+  { name: "prettier", url: "https://github.com/prettier/prettier", ref: "3.9.10" },
   { name: "vue", url: "https://github.com/vuejs/core", ref: "v3.5.13" },
   { name: "react", url: "https://github.com/facebook/react", ref: "v19.0.0" },
   { name: "bootstrap", url: "https://github.com/twbs/bootstrap", ref: "v5.3.3" },

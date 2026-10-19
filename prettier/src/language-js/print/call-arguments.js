@@ -6,45 +6,57 @@ import {
   conditionalGroup,
   group,
   hardline,
-  ifBreak,
   indent,
   line,
   softline,
-} from "../../document/builders.js";
-import { willBreak } from "../../document/utils.js";
-import { printDanglingComments } from "../../main/comments/print.js";
+  willBreak,
+} from "../../document/index.js";
 import {
-  CommentCheckFlags,
   getCallArguments,
   getCallArgumentSelector,
-  getFunctionParameters,
-  hasComment,
-  isArrayOrTupleExpression,
+  iterateCallArgumentsPath,
+} from "../utilities/call-arguments.js";
+import { CommentCheckFlags, hasComment } from "../utilities/comments.js";
+import { getFunctionParameters } from "../utilities/function-parameters.js";
+import { isFunctionCompositionArguments } from "../utilities/is-function-composition-arguments.js";
+import { isLongCurriedCallExpression } from "../utilities/is-long-curried-call-expression.js";
+import { isNextLineEmpty } from "../utilities/is-next-line-empty.js";
+import { isObjectProperty } from "../utilities/is-object-property.js";
+import { isSimpleCallArgument } from "../utilities/is-simple-call-argument.js";
+import { isSimpleType } from "../utilities/is-simple-type.js";
+import {
+  isArrayExpression,
   isBinaryCastExpression,
   isBinaryish,
   isCallExpression,
   isCallLikeExpression,
-  isFunctionCompositionArgs,
   isJsxElement,
-  isLongCurriedCallExpression,
-  isNextLineEmpty,
-  isObjectOrRecordExpression,
-  isObjectProperty,
+  isObjectExpression,
   isRegExpLiteral,
-  isSimpleCallArgument,
-  isSimpleType,
   isStringLiteral,
-  iterateCallArgumentsPath,
-  shouldPrintComma,
-} from "../utils/index.js";
+} from "../utilities/node-types.js";
+import { stripChainElementWrappers } from "../utilities/strip-chain-element-wrappers.js";
 import { isConciselyPrintedArray } from "./array.js";
+import {
+  printDanglingCommentsInList,
+  printTrailingComma,
+} from "./miscellaneous.js";
 
+/*
+- `NewExpression`
+- `ImportExpression`
+- `OptionalCallExpression`
+- `CallExpression`
+- `TSImportType` (TypeScript)
+- `TSExternalModuleReference` (TypeScript)
+*/
 function printCallArguments(/** @type {AstPath} */ path, options, /** @type {(a0?: any, a1?: any) => any} */ print) {
   const { node } = path;
 
   const args = getCallArguments(node);
+
   if (args.length === 0) {
-    return ["(", printDanglingComments(path, options), ")"];
+    return group(["(", printDanglingCommentsInList(path, options), ")"]);
   }
 
   /** @type {number} */ const lastArgIndex = args.length - 1;
@@ -80,25 +92,26 @@ function printCallArguments(/** @type {AstPath} */ path, options, /** @type {(a0
     printedArguments.push(argDoc);
   });
 
-  /** @type {string} */ const maybeTrailingComma =
+  const trailingComma =
     // Angular does not allow trailing comma
-    !options.parser.startsWith("__ng_") &&
+    path.root.type !== "NGRoot" &&
     // Dynamic imports cannot have trailing commas
     node.type !== "ImportExpression" &&
-    shouldPrintComma(options, "all")
-      ? ","
+    node.type !== "TSImportType" &&
+    node.type !== "TSExternalModuleReference"
+      ? printTrailingComma(options, "all")
       : "";
 
   function allArgsBrokenOut() {
     return group(
-      ["(", indent([line, ...printedArguments]), maybeTrailingComma, line, ")"],
+      ["(", indent([line, ...printedArguments]), trailingComma, line, ")"],
       { shouldBreak: true },
     );
   }
 
   if (
     anyArgEmptyLine ||
-    (path.parent.type !== "Decorator" && isFunctionCompositionArgs(args))
+    (path.parent.type !== "Decorator" && isFunctionCompositionArguments(args))
   ) {
     return allArgsBrokenOut();
   }
@@ -176,7 +189,7 @@ function printCallArguments(/** @type {AstPath} */ path, options, /** @type {(a0
   const contents = [
     "(",
     indent([softline, ...printedArguments]),
-    ifBreak(maybeTrailingComma),
+    trailingComma,
     softline,
     ")",
   ];
@@ -192,48 +205,63 @@ function printCallArguments(/** @type {AstPath} */ path, options, /** @type {(a0
 }
 
 /** @returns {boolean} */ function couldExpandArg(arg, arrowChainRecursion = false) {
-  return (
-    (isObjectOrRecordExpression(arg) &&
-      (arg.properties.length > 0 || hasComment(arg))) ||
-    (isArrayOrTupleExpression(arg) &&
-      (arg.elements.length > 0 || hasComment(arg))) ||
-    (arg.type === "TSTypeAssertion" && couldExpandArg(arg.expression)) ||
-    (isBinaryCastExpression(arg) && couldExpandArg(arg.expression)) ||
+  if (
+    isObjectExpression(arg) &&
+    (arg.properties.length > 0 || hasComment(arg))
+  ) {
+    return true;
+  }
+
+  if (isArrayExpression(arg) && (arg.elements.length > 0 || hasComment(arg))) {
+    return true;
+  }
+
+  if (
+    (isBinaryCastExpression(arg) || arg.type === "TSTypeAssertion") &&
+    couldExpandArg(arg.expression)
+  ) {
+    return true;
+  }
+
+  if (
     arg.type === "FunctionExpression" ||
-    (arg.type === "ArrowFunctionExpression" &&
-      // we want to avoid breaking inside composite return types but not simple keywords
-      // https://github.com/prettier/prettier/issues/4070
-      // export class Thing implements OtherThing {
-      //   do: (type: Type) => Provider<Prop> = memoize(
-      //     (type: ObjectType): Provider<Opts> => {}
-      //   );
-      // }
-      // https://github.com/prettier/prettier/issues/6099
-      // app.get("/", (req, res): void => {
-      //   res.send("Hello World!");
-      // });
-      (!arg.returnType ||
-        !arg.returnType.typeAnnotation ||
-        arg.returnType.typeAnnotation.type !== "TSTypeReference" ||
-        // https://github.com/prettier/prettier/issues/7542
-        isNonEmptyBlockStatement(arg.body)) &&
-      (arg.body.type === "BlockStatement" ||
-        (arg.body.type === "ArrowFunctionExpression" &&
-          couldExpandArg(arg.body, true)) ||
-        isObjectOrRecordExpression(arg.body) ||
-        isArrayOrTupleExpression(arg.body) ||
-        (!arrowChainRecursion &&
-          (isCallExpression(arg.body) ||
-            arg.body.type === "ConditionalExpression")) ||
-        isJsxElement(arg.body))) ||
     arg.type === "DoExpression" ||
     arg.type === "ModuleExpression"
-  );
+  ) {
+    return true;
+  }
+
+  if (arg.type === "ArrowFunctionExpression") {
+    const { body } = arg;
+
+    if (
+      body.type === "BlockStatement" ||
+      isJsxElement(body) ||
+      isObjectExpression(body) ||
+      isArrayExpression(body)
+    ) {
+      return true;
+    }
+
+    if (body.type === "ArrowFunctionExpression" && couldExpandArg(body, true)) {
+      return true;
+    }
+
+    if (!arrowChainRecursion) {
+      if (body.type === "ConditionalExpression") {
+        return true;
+      }
+
+      if (isCallExpression(stripChainElementWrappers(body))) {
+        return true;
+      }
+    }
+  }
+
+  return false;
 }
 
 /** @returns {boolean} */ function shouldExpandLastArg(/** @type {any[]} */ args, /** @type {any[]} */ argDocs, options) {
-  const lastArg = args.at(-1);
-
   if (args.length === 1) {
     const lastArgDoc = argDocs.at(-1);
     if (lastArgDoc.label?.embed && lastArgDoc.label?.hug !== false) {
@@ -241,6 +269,7 @@ function printCallArguments(/** @type {AstPath} */ path, options, /** @type {(a0
     }
   }
 
+  const lastArg = args.at(-1);
   const penultimateArg = args.at(-2);
   return (
     !hasComment(lastArg, CommentCheckFlags.Leading) &&
@@ -252,7 +281,7 @@ function printCallArguments(/** @type {AstPath} */ path, options, /** @type {(a0
     // useMemo(() => func(), [foo, bar, baz])
     (args.length !== 2 ||
       penultimateArg.type !== "ArrowFunctionExpression" ||
-      !isArrayOrTupleExpression(lastArg)) &&
+      !isArrayExpression(lastArg)) &&
     !(args.length > 1 && isConciselyPrintedArray(lastArg, options))
   );
 }
@@ -306,12 +335,15 @@ function printCallArguments(/** @type {AstPath} */ path, options, /** @type {(a0
         typeAnnotation = typeAnnotation.elementType;
       }
     }
+
     if (
       typeAnnotation.type === "GenericTypeAnnotation" ||
       typeAnnotation.type === "TSTypeReference"
     ) {
       const typeArguments =
-        typeAnnotation.typeArguments ?? typeAnnotation.typeParameters;
+        typeAnnotation.type === "GenericTypeAnnotation"
+          ? typeAnnotation.typeParameters
+          : typeAnnotation.typeArguments;
       if (typeArguments?.params.length === 1) {
         typeAnnotation = typeArguments.params[0];
       }
@@ -369,28 +401,28 @@ function isReactHookCallWithDepsArray(/** @type {any[]} */ args) {
     getFunctionParameters(maybeArrowFunction).length === 0 &&
     maybeArrowFunction.body.type === "BlockStatement" &&
     maybeDepsArray.type === "ArrayExpression" &&
-    !args.some(/** @returns {boolean} */ (arg) => hasComment(arg))
+    args.every(/** @returns {boolean} */ (arg) => !hasComment(arg))
   );
 }
 
-/** @returns {boolean} */ function isNonEmptyBlockStatement(node) {
-  return (
-    node.type === "BlockStatement" &&
-    (node.body.some(/** @returns {boolean} */ (node) => node.type !== "EmptyStatement") ||
-      hasComment(node, CommentCheckFlags.Dangling))
-  );
-}
-
-// { type: "module" }
+// `{ type: "module" }` and `{"type": "module"}`
 /** @returns {boolean} */ function isTypeModuleObjectExpression(node) {
+  if (!(node.type === "ObjectExpression" && node.properties.length === 1)) {
+    return false;
+  }
+
+  const [property] = node.properties;
+
+  if (!isObjectProperty(property)) {
+    return false;
+  }
+
   return (
-    node.type === "ObjectExpression" &&
-    node.properties.length === 1 &&
-    isObjectProperty(node.properties[0]) &&
-    node.properties[0].key.type === "Identifier" &&
-    node.properties[0].key.name === "type" &&
-    isStringLiteral(node.properties[0].value) &&
-    node.properties[0].value.value === "module"
+    !property.computed &&
+    ((property.key.type === "Identifier" && property.key.name === "type") ||
+      (isStringLiteral(property.key) && property.key.value === "type")) &&
+    isStringLiteral(property.value) &&
+    property.value.value === "module"
   );
 }
 

@@ -1,176 +1,98 @@
-'use strict';
-
-Object.defineProperty(exports, '__esModule', {
-  value: true,
-});
-exports.specifiedSDLRules =
-  exports.specifiedRules =
-  exports.recommendedRules =
-    void 0;
-
-var _ExecutableDefinitionsRule = require('./rules/ExecutableDefinitionsRule.js');
-
-var _FieldsOnCorrectTypeRule = require('./rules/FieldsOnCorrectTypeRule.js');
-
-var _FragmentsOnCompositeTypesRule = require('./rules/FragmentsOnCompositeTypesRule.js');
-
-var _KnownArgumentNamesRule = require('./rules/KnownArgumentNamesRule.js');
-
-var _KnownDirectivesRule = require('./rules/KnownDirectivesRule.js');
-
-var _KnownFragmentNamesRule = require('./rules/KnownFragmentNamesRule.js');
-
-var _KnownTypeNamesRule = require('./rules/KnownTypeNamesRule.js');
-
-var _LoneAnonymousOperationRule = require('./rules/LoneAnonymousOperationRule.js');
-
-var _LoneSchemaDefinitionRule = require('./rules/LoneSchemaDefinitionRule.js');
-
-var _MaxIntrospectionDepthRule = require('./rules/MaxIntrospectionDepthRule.js');
-
-var _NoFragmentCyclesRule = require('./rules/NoFragmentCyclesRule.js');
-
-var _NoUndefinedVariablesRule = require('./rules/NoUndefinedVariablesRule.js');
-
-var _NoUnusedFragmentsRule = require('./rules/NoUnusedFragmentsRule.js');
-
-var _NoUnusedVariablesRule = require('./rules/NoUnusedVariablesRule.js');
-
-var _OverlappingFieldsCanBeMergedRule = require('./rules/OverlappingFieldsCanBeMergedRule.js');
-
-var _PossibleFragmentSpreadsRule = require('./rules/PossibleFragmentSpreadsRule.js');
-
-var _PossibleTypeExtensionsRule = require('./rules/PossibleTypeExtensionsRule.js');
-
-var _ProvidedRequiredArgumentsRule = require('./rules/ProvidedRequiredArgumentsRule.js');
-
-var _ScalarLeafsRule = require('./rules/ScalarLeafsRule.js');
-
-var _SingleFieldSubscriptionsRule = require('./rules/SingleFieldSubscriptionsRule.js');
-
-var _UniqueArgumentDefinitionNamesRule = require('./rules/UniqueArgumentDefinitionNamesRule.js');
-
-var _UniqueArgumentNamesRule = require('./rules/UniqueArgumentNamesRule.js');
-
-var _UniqueDirectiveNamesRule = require('./rules/UniqueDirectiveNamesRule.js');
-
-var _UniqueDirectivesPerLocationRule = require('./rules/UniqueDirectivesPerLocationRule.js');
-
-var _UniqueEnumValueNamesRule = require('./rules/UniqueEnumValueNamesRule.js');
-
-var _UniqueFieldDefinitionNamesRule = require('./rules/UniqueFieldDefinitionNamesRule.js');
-
-var _UniqueFragmentNamesRule = require('./rules/UniqueFragmentNamesRule.js');
-
-var _UniqueInputFieldNamesRule = require('./rules/UniqueInputFieldNamesRule.js');
-
-var _UniqueOperationNamesRule = require('./rules/UniqueOperationNamesRule.js');
-
-var _UniqueOperationTypesRule = require('./rules/UniqueOperationTypesRule.js');
-
-var _UniqueTypeNamesRule = require('./rules/UniqueTypeNamesRule.js');
-
-var _UniqueVariableNamesRule = require('./rules/UniqueVariableNamesRule.js');
-
-var _ValuesOfCorrectTypeRule = require('./rules/ValuesOfCorrectTypeRule.js');
-
-var _VariablesAreInputTypesRule = require('./rules/VariablesAreInputTypesRule.js');
-
-var _VariablesInAllowedPositionRule = require('./rules/VariablesInAllowedPositionRule.js');
-
-// Spec Section: "Executable Definitions"
-// Spec Section: "Field Selections on Objects, Interfaces, and Unions Types"
-// Spec Section: "Fragments on Composite Types"
-// Spec Section: "Argument Names"
-// Spec Section: "Directives Are Defined"
-// Spec Section: "Fragment spread target defined"
-// Spec Section: "Fragment Spread Type Existence"
-// Spec Section: "Lone Anonymous Operation"
-// SDL-specific validation rules
-// TODO: Spec Section
-// Spec Section: "Fragments must not form cycles"
-// Spec Section: "All Variable Used Defined"
-// Spec Section: "Fragments must be used"
-// Spec Section: "All Variables Used"
-// Spec Section: "Field Selection Merging"
-// Spec Section: "Fragment spread is possible"
-// Spec Section: "Argument Optionality"
-// Spec Section: "Leaf Field Selections"
-// Spec Section: "Subscriptions with Single Root Field"
-// Spec Section: "Argument Uniqueness"
-// Spec Section: "Directives Are Unique Per Location"
-// Spec Section: "Fragment Name Uniqueness"
-// Spec Section: "Input Object Field Uniqueness"
-// Spec Section: "Operation Name Uniqueness"
-// Spec Section: "Variable Uniqueness"
-// Spec Section: "Value Type Correctness"
-// Spec Section: "Variables are Input Types"
-// Spec Section: "All Variable Usages Are Allowed"
-
-/**
- * Technically these aren't part of the spec but they are strongly encouraged
- * validation rules.
- */
-const recommendedRules = Object.freeze([
-  _MaxIntrospectionDepthRule.MaxIntrospectionDepthRule,
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.specifiedSDLRules = exports.specifiedRules = exports.recommendedRules = void 0;
+const DeferStreamDirectiveLabelRule_ts_1 = require("./rules/DeferStreamDirectiveLabelRule.js");
+const DeferStreamDirectiveOnRootFieldRule_ts_1 = require("./rules/DeferStreamDirectiveOnRootFieldRule.js");
+const DeferStreamDirectiveOnValidOperationsRule_ts_1 = require("./rules/DeferStreamDirectiveOnValidOperationsRule.js");
+const ExecutableDefinitionsRule_ts_1 = require("./rules/ExecutableDefinitionsRule.js");
+const FieldsOnCorrectTypeRule_ts_1 = require("./rules/FieldsOnCorrectTypeRule.js");
+const FragmentsOnCompositeTypesRule_ts_1 = require("./rules/FragmentsOnCompositeTypesRule.js");
+const KnownArgumentNamesRule_ts_1 = require("./rules/KnownArgumentNamesRule.js");
+const KnownDirectivesRule_ts_1 = require("./rules/KnownDirectivesRule.js");
+const KnownFragmentNamesRule_ts_1 = require("./rules/KnownFragmentNamesRule.js");
+const KnownOperationTypesRule_ts_1 = require("./rules/KnownOperationTypesRule.js");
+const KnownTypeNamesRule_ts_1 = require("./rules/KnownTypeNamesRule.js");
+const LoneAnonymousOperationRule_ts_1 = require("./rules/LoneAnonymousOperationRule.js");
+const LoneSchemaDefinitionRule_ts_1 = require("./rules/LoneSchemaDefinitionRule.js");
+const MaxIntrospectionDepthRule_ts_1 = require("./rules/MaxIntrospectionDepthRule.js");
+const NoFragmentCyclesRule_ts_1 = require("./rules/NoFragmentCyclesRule.js");
+const NoUndefinedVariablesRule_ts_1 = require("./rules/NoUndefinedVariablesRule.js");
+const NoUnusedFragmentsRule_ts_1 = require("./rules/NoUnusedFragmentsRule.js");
+const NoUnusedVariablesRule_ts_1 = require("./rules/NoUnusedVariablesRule.js");
+const OverlappingFieldsCanBeMergedRule_ts_1 = require("./rules/OverlappingFieldsCanBeMergedRule.js");
+const PossibleFragmentSpreadsRule_ts_1 = require("./rules/PossibleFragmentSpreadsRule.js");
+const PossibleTypeExtensionsRule_ts_1 = require("./rules/PossibleTypeExtensionsRule.js");
+const ProvidedRequiredArgumentsRule_ts_1 = require("./rules/ProvidedRequiredArgumentsRule.js");
+const ScalarLeafsRule_ts_1 = require("./rules/ScalarLeafsRule.js");
+const SingleFieldSubscriptionsRule_ts_1 = require("./rules/SingleFieldSubscriptionsRule.js");
+const StreamDirectiveOnListFieldRule_ts_1 = require("./rules/StreamDirectiveOnListFieldRule.js");
+const UniqueArgumentDefinitionNamesRule_ts_1 = require("./rules/UniqueArgumentDefinitionNamesRule.js");
+const UniqueArgumentNamesRule_ts_1 = require("./rules/UniqueArgumentNamesRule.js");
+const UniqueDirectiveNamesRule_ts_1 = require("./rules/UniqueDirectiveNamesRule.js");
+const UniqueDirectivesPerLocationRule_ts_1 = require("./rules/UniqueDirectivesPerLocationRule.js");
+const UniqueEnumValueNamesRule_ts_1 = require("./rules/UniqueEnumValueNamesRule.js");
+const UniqueFieldDefinitionNamesRule_ts_1 = require("./rules/UniqueFieldDefinitionNamesRule.js");
+const UniqueFragmentNamesRule_ts_1 = require("./rules/UniqueFragmentNamesRule.js");
+const UniqueInputFieldNamesRule_ts_1 = require("./rules/UniqueInputFieldNamesRule.js");
+const UniqueOperationNamesRule_ts_1 = require("./rules/UniqueOperationNamesRule.js");
+const UniqueOperationTypesRule_ts_1 = require("./rules/UniqueOperationTypesRule.js");
+const UniqueTypeNamesRule_ts_1 = require("./rules/UniqueTypeNamesRule.js");
+const UniqueVariableNamesRule_ts_1 = require("./rules/UniqueVariableNamesRule.js");
+const ValuesOfCorrectTypeRule_ts_1 = require("./rules/ValuesOfCorrectTypeRule.js");
+const VariablesAreInputTypesRule_ts_1 = require("./rules/VariablesAreInputTypesRule.js");
+const VariablesInAllowedPositionRule_ts_1 = require("./rules/VariablesInAllowedPositionRule.js");
+exports.recommendedRules = Object.freeze([
+    MaxIntrospectionDepthRule_ts_1.MaxIntrospectionDepthRule,
 ]);
-/**
- * This set includes all validation rules defined by the GraphQL spec.
- *
- * The order of the rules in this list has been adjusted to lead to the
- * most clear output when encountering multiple validation errors.
- */
-
-exports.recommendedRules = recommendedRules;
-const specifiedRules = Object.freeze([
-  _ExecutableDefinitionsRule.ExecutableDefinitionsRule,
-  _UniqueOperationNamesRule.UniqueOperationNamesRule,
-  _LoneAnonymousOperationRule.LoneAnonymousOperationRule,
-  _SingleFieldSubscriptionsRule.SingleFieldSubscriptionsRule,
-  _KnownTypeNamesRule.KnownTypeNamesRule,
-  _FragmentsOnCompositeTypesRule.FragmentsOnCompositeTypesRule,
-  _VariablesAreInputTypesRule.VariablesAreInputTypesRule,
-  _ScalarLeafsRule.ScalarLeafsRule,
-  _FieldsOnCorrectTypeRule.FieldsOnCorrectTypeRule,
-  _UniqueFragmentNamesRule.UniqueFragmentNamesRule,
-  _KnownFragmentNamesRule.KnownFragmentNamesRule,
-  _NoUnusedFragmentsRule.NoUnusedFragmentsRule,
-  _PossibleFragmentSpreadsRule.PossibleFragmentSpreadsRule,
-  _NoFragmentCyclesRule.NoFragmentCyclesRule,
-  _UniqueVariableNamesRule.UniqueVariableNamesRule,
-  _NoUndefinedVariablesRule.NoUndefinedVariablesRule,
-  _NoUnusedVariablesRule.NoUnusedVariablesRule,
-  _KnownDirectivesRule.KnownDirectivesRule,
-  _UniqueDirectivesPerLocationRule.UniqueDirectivesPerLocationRule,
-  _KnownArgumentNamesRule.KnownArgumentNamesRule,
-  _UniqueArgumentNamesRule.UniqueArgumentNamesRule,
-  _ValuesOfCorrectTypeRule.ValuesOfCorrectTypeRule,
-  _ProvidedRequiredArgumentsRule.ProvidedRequiredArgumentsRule,
-  _VariablesInAllowedPositionRule.VariablesInAllowedPositionRule,
-  _OverlappingFieldsCanBeMergedRule.OverlappingFieldsCanBeMergedRule,
-  _UniqueInputFieldNamesRule.UniqueInputFieldNamesRule,
-  ...recommendedRules,
+exports.specifiedRules = Object.freeze([
+    ExecutableDefinitionsRule_ts_1.ExecutableDefinitionsRule,
+    KnownOperationTypesRule_ts_1.KnownOperationTypesRule,
+    UniqueOperationNamesRule_ts_1.UniqueOperationNamesRule,
+    LoneAnonymousOperationRule_ts_1.LoneAnonymousOperationRule,
+    SingleFieldSubscriptionsRule_ts_1.SingleFieldSubscriptionsRule,
+    KnownTypeNamesRule_ts_1.KnownTypeNamesRule,
+    FragmentsOnCompositeTypesRule_ts_1.FragmentsOnCompositeTypesRule,
+    VariablesAreInputTypesRule_ts_1.VariablesAreInputTypesRule,
+    ScalarLeafsRule_ts_1.ScalarLeafsRule,
+    FieldsOnCorrectTypeRule_ts_1.FieldsOnCorrectTypeRule,
+    UniqueFragmentNamesRule_ts_1.UniqueFragmentNamesRule,
+    KnownFragmentNamesRule_ts_1.KnownFragmentNamesRule,
+    NoUnusedFragmentsRule_ts_1.NoUnusedFragmentsRule,
+    PossibleFragmentSpreadsRule_ts_1.PossibleFragmentSpreadsRule,
+    NoFragmentCyclesRule_ts_1.NoFragmentCyclesRule,
+    UniqueVariableNamesRule_ts_1.UniqueVariableNamesRule,
+    NoUndefinedVariablesRule_ts_1.NoUndefinedVariablesRule,
+    NoUnusedVariablesRule_ts_1.NoUnusedVariablesRule,
+    KnownDirectivesRule_ts_1.KnownDirectivesRule,
+    UniqueDirectivesPerLocationRule_ts_1.UniqueDirectivesPerLocationRule,
+    DeferStreamDirectiveOnRootFieldRule_ts_1.DeferStreamDirectiveOnRootFieldRule,
+    DeferStreamDirectiveOnValidOperationsRule_ts_1.DeferStreamDirectiveOnValidOperationsRule,
+    DeferStreamDirectiveLabelRule_ts_1.DeferStreamDirectiveLabelRule,
+    StreamDirectiveOnListFieldRule_ts_1.StreamDirectiveOnListFieldRule,
+    KnownArgumentNamesRule_ts_1.KnownArgumentNamesRule,
+    UniqueArgumentNamesRule_ts_1.UniqueArgumentNamesRule,
+    ValuesOfCorrectTypeRule_ts_1.ValuesOfCorrectTypeRule,
+    ProvidedRequiredArgumentsRule_ts_1.ProvidedRequiredArgumentsRule,
+    VariablesInAllowedPositionRule_ts_1.VariablesInAllowedPositionRule,
+    OverlappingFieldsCanBeMergedRule_ts_1.OverlappingFieldsCanBeMergedRule,
+    UniqueInputFieldNamesRule_ts_1.UniqueInputFieldNamesRule,
+    ...exports.recommendedRules,
 ]);
-/**
- * @internal
- */
-
-exports.specifiedRules = specifiedRules;
-const specifiedSDLRules = Object.freeze([
-  _LoneSchemaDefinitionRule.LoneSchemaDefinitionRule,
-  _UniqueOperationTypesRule.UniqueOperationTypesRule,
-  _UniqueTypeNamesRule.UniqueTypeNamesRule,
-  _UniqueEnumValueNamesRule.UniqueEnumValueNamesRule,
-  _UniqueFieldDefinitionNamesRule.UniqueFieldDefinitionNamesRule,
-  _UniqueArgumentDefinitionNamesRule.UniqueArgumentDefinitionNamesRule,
-  _UniqueDirectiveNamesRule.UniqueDirectiveNamesRule,
-  _KnownTypeNamesRule.KnownTypeNamesRule,
-  _KnownDirectivesRule.KnownDirectivesRule,
-  _UniqueDirectivesPerLocationRule.UniqueDirectivesPerLocationRule,
-  _PossibleTypeExtensionsRule.PossibleTypeExtensionsRule,
-  _KnownArgumentNamesRule.KnownArgumentNamesOnDirectivesRule,
-  _UniqueArgumentNamesRule.UniqueArgumentNamesRule,
-  _UniqueInputFieldNamesRule.UniqueInputFieldNamesRule,
-  _ProvidedRequiredArgumentsRule.ProvidedRequiredArgumentsOnDirectivesRule,
+exports.specifiedSDLRules = Object.freeze([
+    LoneSchemaDefinitionRule_ts_1.LoneSchemaDefinitionRule,
+    UniqueOperationTypesRule_ts_1.UniqueOperationTypesRule,
+    UniqueTypeNamesRule_ts_1.UniqueTypeNamesRule,
+    UniqueEnumValueNamesRule_ts_1.UniqueEnumValueNamesRule,
+    UniqueFieldDefinitionNamesRule_ts_1.UniqueFieldDefinitionNamesRule,
+    UniqueArgumentDefinitionNamesRule_ts_1.UniqueArgumentDefinitionNamesRule,
+    UniqueDirectiveNamesRule_ts_1.UniqueDirectiveNamesRule,
+    KnownTypeNamesRule_ts_1.KnownTypeNamesRule,
+    KnownDirectivesRule_ts_1.KnownDirectivesRule,
+    UniqueDirectivesPerLocationRule_ts_1.UniqueDirectivesPerLocationRule,
+    PossibleTypeExtensionsRule_ts_1.PossibleTypeExtensionsRule,
+    KnownArgumentNamesRule_ts_1.KnownArgumentNamesOnDirectivesRule,
+    UniqueArgumentNamesRule_ts_1.UniqueArgumentNamesRule,
+    UniqueInputFieldNamesRule_ts_1.UniqueInputFieldNamesRule,
+    ProvidedRequiredArgumentsRule_ts_1.ProvidedRequiredArgumentsOnDirectivesRule,
 ]);
-exports.specifiedSDLRules = specifiedSDLRules;
+//# sourceMappingURL=specifiedRules.js.map

@@ -1,0 +1,248 @@
+// @nts-check
+import { align } from "../../document/index.js";
+import {
+  getNthListSiblingIndex,
+  hasGitDiffFriendlyOrderedList,
+} from "../utilities.js";
+import { printChildren } from "./children.js";
+
+/**
+ * @import AstPath from "../../common/ast-path.js"
+ * @import {Doc} from "../../document/index.js"
+ */
+
+// 999,999,999 is the maximum number that can be parsed as a list item number as intended in CommonMark
+// https://spec.commonmark.org/0.31.2/#ordered-list-marker
+const MAXIMUM_ORDERED_LIST_MARKER = 999_999_999;
+
+/**
+ * @param {AstPath} path
+ * @param {*} options
+ * @param {() => Doc} print
+ * @return {Doc}
+ */
+function printList(path, options, print) {
+  const { node } = path;
+  /** @type {number | undefined} */ const nthSiblingIndex = getNthListSiblingIndex(node, path.parent);
+
+  /** @type {boolean} */ const isGitDiffFriendlyOrderedList = hasGitDiffFriendlyOrderedList(
+    node,
+    options,
+  );
+
+  const minIndent = requiredIndent(path);
+
+  return printChildren(path, options, print, {
+    processor() {
+      /** @type {string} */ const prefix = getPrefix();
+      const { node: childNode } = path;
+
+      if (
+        childNode.children.length === 2 &&
+        childNode.children[1].type === "html" &&
+        childNode.children[0].position.start.column !==
+          childNode.children[1].position.start.column
+      ) {
+        return [prefix, printListItem(path, options, print, prefix)];
+      }
+
+      return [
+        prefix,
+        align(
+          " ".repeat(prefix.length),
+          printListItem(path, options, print, prefix),
+        ),
+      ];
+
+      /** @returns {string} */ function getPrefix() {
+        /** @type {string} */ const rawPrefix = node.ordered
+          ? (path.isFirst
+              ? node.start
+              : isGitDiffFriendlyOrderedList
+                ? 1
+                : Math.min(
+                    node.start + path.index,
+                    MAXIMUM_ORDERED_LIST_MARKER,
+                  )) + (nthSiblingIndex % 2 === 0 ? ". " : ") ")
+          : nthSiblingIndex % 2 === 0
+            ? "- "
+            : "* ";
+
+        let prefix =
+          node.isAligned && node.ordered
+            ? alignListPrefix(rawPrefix, options)
+            : rawPrefix;
+
+        if (prefix.length >= minIndent) {
+          return prefix;
+        }
+
+        prefix = prefix.trimEnd();
+        const trailingSpaces = Math.min(minIndent - prefix.length, 4); // 5+ will cause indented code block
+        if (trailingSpaces > 0) {
+          prefix += " ".repeat(trailingSpaces);
+        }
+        const leadingSpaces = Math.min(minIndent - prefix.length, 3); // 4+ will cause indented code block
+        if (leadingSpaces > 0) {
+          prefix = " ".repeat(leadingSpaces) + prefix;
+        }
+
+        return prefix;
+      }
+    },
+  });
+}
+
+/** @returns {any[]} */ function printListItem(/** @type {AstPath} */ path, options, print, /** @type {string} */ listPrefix) {
+  const { node } = path;
+  /** @type {string} */ const prefix = node.checked === null ? "" : node.checked ? "[x] " : "[ ] ";
+  return [
+    prefix,
+    printChildren(path, options, print, {
+      processor({ node, isFirst }) {
+        if ((isFirst && node.type !== "list") || node.type === "html") {
+          return align(" ".repeat(prefix.length), print());
+        }
+
+        if (node.type === "code" && node.isIndented) {
+          return print();
+        }
+
+        /** @type {string} */ const alignment = " ".repeat(
+          clamp(options.tabWidth - listPrefix.length, 0, 3), // 4+ will cause indented code block
+        );
+        return [alignment, align(alignment, print())];
+      },
+    }),
+  ];
+}
+
+/**
+ * If the list is followed by a indented code block, its content have to be
+ * indented deeper than the code block.
+ * @param {AstPath} path
+ * @return {number}
+ */
+function requiredIndent(path) {
+  const { node, next } = path;
+  if (node.checked === null) {
+    return 0;
+  }
+  if (!(next?.type === "code" && next.isIndented)) {
+    return 0;
+  }
+
+  const leadingSpaces = /^[ \t]*/.exec(next.value)?.[0] ?? "";
+  return (
+    4 + // base indent of the code block
+    [...leadingSpaces].reduce(
+      /** @returns {number} */ (count, char) => count + (char === "\t" ? 4 : 1),
+      0,
+    ) +
+    1 // at least one space more than the code block
+  );
+}
+
+/**
+ * @param {AstPath} path
+ * @param {*} options
+ * @param {() => Doc} print
+ * @return {Doc}
+ */
+function printListLegacy(path, options, print) {
+  const { node } = path;
+  /** @type {number | undefined} */ const nthSiblingIndex = getNthListSiblingIndex(node, path.parent);
+
+  /** @type {boolean} */ const isGitDiffFriendlyOrderedList = hasGitDiffFriendlyOrderedList(
+    node,
+    options,
+  );
+
+  return printChildren(path, options, print, {
+    processor() {
+      /** @type {string} */ const prefix = getPrefix();
+      const { node: childNode } = path;
+
+      if (
+        childNode.children.length === 2 &&
+        childNode.children[1].type === "html" &&
+        childNode.children[0].position.start.column !==
+          childNode.children[1].position.start.column
+      ) {
+        return [prefix, printListItemLegacy(path, options, print, prefix)];
+      }
+
+      return [
+        prefix,
+        align(
+          " ".repeat(prefix.length),
+          printListItemLegacy(path, options, print, prefix),
+        ),
+      ];
+
+      /** @returns {string} */ function getPrefix() {
+        /** @type {string} */ const rawPrefix = node.ordered
+          ? (path.isFirst
+              ? node.start
+              : isGitDiffFriendlyOrderedList
+                ? 1
+                : node.start + path.index) +
+            (nthSiblingIndex % 2 === 0 ? ". " : ") ")
+          : nthSiblingIndex % 2 === 0
+            ? "- "
+            : "* ";
+
+        return (node.isAligned ||
+          /* workaround for https://github.com/remarkjs/remark/issues/315 */ node.hasIndentedCodeblock) &&
+          node.ordered
+          ? alignListPrefix(rawPrefix, options)
+          : rawPrefix;
+      }
+    },
+  });
+}
+
+function printListItemLegacy(path, options, print, listPrefix) {
+  const { node } = path;
+  /** @type {string} */ const prefix = node.checked === null ? "" : node.checked ? "[x] " : "[ ] ";
+  return [
+    prefix,
+    printChildren(path, options, print, {
+      processor({ node, isFirst }) {
+        if (isFirst && node.type !== "list") {
+          return align(" ".repeat(prefix.length), print());
+        }
+
+        if (node.type === "code" && node.isIndented) {
+          return print();
+        }
+
+        /** @type {string} */ const alignment = " ".repeat(
+          clamp(options.tabWidth - listPrefix.length, 0, 3), // 4+ will cause indented code block
+        );
+        return [alignment, align(alignment, print())];
+      },
+    }),
+  ];
+}
+
+/** @returns {string} */ function alignListPrefix(/** @type {string} */ prefix, options) {
+  /** @type {number} */ const additionalSpaces = getAdditionalSpaces();
+  return (
+    prefix +
+    " ".repeat(
+      additionalSpaces >= 4 ? 0 : additionalSpaces, // 4+ will cause indented code block
+    )
+  );
+
+  /** @returns {number} */ function getAdditionalSpaces() {
+    /** @type {number} */ const restSpaces = prefix.length % options.tabWidth;
+    return restSpaces === 0 ? 0 : options.tabWidth - restSpaces;
+  }
+}
+
+/** @returns {number} */ function clamp(/** @type {number} */ value, /** @type {number} */ min, /** @type {number} */ max) {
+  return Math.max(min, Math.min(value, max));
+}
+
+export { printList, printListLegacy };

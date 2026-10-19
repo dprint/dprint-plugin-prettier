@@ -1,233 +1,65 @@
-'use strict';
-
-Object.defineProperty(exports, '__esModule', {
-  value: true,
-});
-Object.defineProperty(exports, 'BreakingChangeType', {
-  enumerable: true,
-  get: function () {
-    return _findBreakingChanges.BreakingChangeType;
-  },
-});
-Object.defineProperty(exports, 'DangerousChangeType', {
-  enumerable: true,
-  get: function () {
-    return _findBreakingChanges.DangerousChangeType;
-  },
-});
-Object.defineProperty(exports, 'TypeInfo', {
-  enumerable: true,
-  get: function () {
-    return _TypeInfo.TypeInfo;
-  },
-});
-Object.defineProperty(exports, 'assertValidName', {
-  enumerable: true,
-  get: function () {
-    return _assertValidName.assertValidName;
-  },
-});
-Object.defineProperty(exports, 'astFromValue', {
-  enumerable: true,
-  get: function () {
-    return _astFromValue.astFromValue;
-  },
-});
-Object.defineProperty(exports, 'buildASTSchema', {
-  enumerable: true,
-  get: function () {
-    return _buildASTSchema.buildASTSchema;
-  },
-});
-Object.defineProperty(exports, 'buildClientSchema', {
-  enumerable: true,
-  get: function () {
-    return _buildClientSchema.buildClientSchema;
-  },
-});
-Object.defineProperty(exports, 'buildSchema', {
-  enumerable: true,
-  get: function () {
-    return _buildASTSchema.buildSchema;
-  },
-});
-Object.defineProperty(exports, 'coerceInputValue', {
-  enumerable: true,
-  get: function () {
-    return _coerceInputValue.coerceInputValue;
-  },
-});
-Object.defineProperty(exports, 'concatAST', {
-  enumerable: true,
-  get: function () {
-    return _concatAST.concatAST;
-  },
-});
-Object.defineProperty(exports, 'doTypesOverlap', {
-  enumerable: true,
-  get: function () {
-    return _typeComparators.doTypesOverlap;
-  },
-});
-Object.defineProperty(exports, 'extendSchema', {
-  enumerable: true,
-  get: function () {
-    return _extendSchema.extendSchema;
-  },
-});
-Object.defineProperty(exports, 'findBreakingChanges', {
-  enumerable: true,
-  get: function () {
-    return _findBreakingChanges.findBreakingChanges;
-  },
-});
-Object.defineProperty(exports, 'findDangerousChanges', {
-  enumerable: true,
-  get: function () {
-    return _findBreakingChanges.findDangerousChanges;
-  },
-});
-Object.defineProperty(exports, 'getIntrospectionQuery', {
-  enumerable: true,
-  get: function () {
-    return _getIntrospectionQuery.getIntrospectionQuery;
-  },
-});
-Object.defineProperty(exports, 'getOperationAST', {
-  enumerable: true,
-  get: function () {
-    return _getOperationAST.getOperationAST;
-  },
-});
-Object.defineProperty(exports, 'getOperationRootType', {
-  enumerable: true,
-  get: function () {
-    return _getOperationRootType.getOperationRootType;
-  },
-});
-Object.defineProperty(exports, 'introspectionFromSchema', {
-  enumerable: true,
-  get: function () {
-    return _introspectionFromSchema.introspectionFromSchema;
-  },
-});
-Object.defineProperty(exports, 'isEqualType', {
-  enumerable: true,
-  get: function () {
-    return _typeComparators.isEqualType;
-  },
-});
-Object.defineProperty(exports, 'isTypeSubTypeOf', {
-  enumerable: true,
-  get: function () {
-    return _typeComparators.isTypeSubTypeOf;
-  },
-});
-Object.defineProperty(exports, 'isValidNameError', {
-  enumerable: true,
-  get: function () {
-    return _assertValidName.isValidNameError;
-  },
-});
-Object.defineProperty(exports, 'lexicographicSortSchema', {
-  enumerable: true,
-  get: function () {
-    return _lexicographicSortSchema.lexicographicSortSchema;
-  },
-});
-Object.defineProperty(exports, 'printIntrospectionSchema', {
-  enumerable: true,
-  get: function () {
-    return _printSchema.printIntrospectionSchema;
-  },
-});
-Object.defineProperty(exports, 'printSchema', {
-  enumerable: true,
-  get: function () {
-    return _printSchema.printSchema;
-  },
-});
-Object.defineProperty(exports, 'printType', {
-  enumerable: true,
-  get: function () {
-    return _printSchema.printType;
-  },
-});
-Object.defineProperty(exports, 'separateOperations', {
-  enumerable: true,
-  get: function () {
-    return _separateOperations.separateOperations;
-  },
-});
-Object.defineProperty(exports, 'stripIgnoredCharacters', {
-  enumerable: true,
-  get: function () {
-    return _stripIgnoredCharacters.stripIgnoredCharacters;
-  },
-});
-Object.defineProperty(exports, 'typeFromAST', {
-  enumerable: true,
-  get: function () {
-    return _typeFromAST.typeFromAST;
-  },
-});
-Object.defineProperty(exports, 'valueFromAST', {
-  enumerable: true,
-  get: function () {
-    return _valueFromAST.valueFromAST;
-  },
-});
-Object.defineProperty(exports, 'valueFromASTUntyped', {
-  enumerable: true,
-  get: function () {
-    return _valueFromASTUntyped.valueFromASTUntyped;
-  },
-});
-Object.defineProperty(exports, 'visitWithTypeInfo', {
-  enumerable: true,
-  get: function () {
-    return _TypeInfo.visitWithTypeInfo;
-  },
-});
-
-var _getIntrospectionQuery = require('./getIntrospectionQuery.js');
-
-var _getOperationAST = require('./getOperationAST.js');
-
-var _getOperationRootType = require('./getOperationRootType.js');
-
-var _introspectionFromSchema = require('./introspectionFromSchema.js');
-
-var _buildClientSchema = require('./buildClientSchema.js');
-
-var _buildASTSchema = require('./buildASTSchema.js');
-
-var _extendSchema = require('./extendSchema.js');
-
-var _lexicographicSortSchema = require('./lexicographicSortSchema.js');
-
-var _printSchema = require('./printSchema.js');
-
-var _typeFromAST = require('./typeFromAST.js');
-
-var _valueFromAST = require('./valueFromAST.js');
-
-var _valueFromASTUntyped = require('./valueFromASTUntyped.js');
-
-var _astFromValue = require('./astFromValue.js');
-
-var _TypeInfo = require('./TypeInfo.js');
-
-var _coerceInputValue = require('./coerceInputValue.js');
-
-var _concatAST = require('./concatAST.js');
-
-var _separateOperations = require('./separateOperations.js');
-
-var _stripIgnoredCharacters = require('./stripIgnoredCharacters.js');
-
-var _typeComparators = require('./typeComparators.js');
-
-var _assertValidName = require('./assertValidName.js');
-
-var _findBreakingChanges = require('./findBreakingChanges.js');
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.resolveASTSchemaCoordinate = exports.resolveSchemaCoordinate = exports.findSchemaChanges = exports.findDangerousChanges = exports.findBreakingChanges = exports.SafeChangeType = exports.DangerousChangeType = exports.BreakingChangeType = exports.doTypesOverlap = exports.isTypeSubTypeOf = exports.isEqualType = exports.stripIgnoredCharacters = exports.separateOperations = exports.concatAST = exports.validateInputLiteral = exports.validateInputValue = exports.coerceInputLiteral = exports.coerceInputValue = exports.valueToLiteral = exports.replaceVariables = exports.visitWithTypeInfo = exports.TypeInfo = exports.astFromValue = exports.valueFromASTUntyped = exports.valueFromAST = exports.typeFromAST = exports.printIntrospectionSchema = exports.printDirective = exports.printType = exports.printSchema = exports.lexicographicSortSchema = exports.extendSchema = exports.buildSchema = exports.buildASTSchema = exports.buildClientSchema = exports.introspectionFromSchema = exports.getOperationAST = exports.getIntrospectionQuery = void 0;
+var getIntrospectionQuery_ts_1 = require("./getIntrospectionQuery.js");
+Object.defineProperty(exports, "getIntrospectionQuery", { enumerable: true, get: function () { return getIntrospectionQuery_ts_1.getIntrospectionQuery; } });
+var getOperationAST_ts_1 = require("./getOperationAST.js");
+Object.defineProperty(exports, "getOperationAST", { enumerable: true, get: function () { return getOperationAST_ts_1.getOperationAST; } });
+var introspectionFromSchema_ts_1 = require("./introspectionFromSchema.js");
+Object.defineProperty(exports, "introspectionFromSchema", { enumerable: true, get: function () { return introspectionFromSchema_ts_1.introspectionFromSchema; } });
+var buildClientSchema_ts_1 = require("./buildClientSchema.js");
+Object.defineProperty(exports, "buildClientSchema", { enumerable: true, get: function () { return buildClientSchema_ts_1.buildClientSchema; } });
+var buildASTSchema_ts_1 = require("./buildASTSchema.js");
+Object.defineProperty(exports, "buildASTSchema", { enumerable: true, get: function () { return buildASTSchema_ts_1.buildASTSchema; } });
+Object.defineProperty(exports, "buildSchema", { enumerable: true, get: function () { return buildASTSchema_ts_1.buildSchema; } });
+var extendSchema_ts_1 = require("./extendSchema.js");
+Object.defineProperty(exports, "extendSchema", { enumerable: true, get: function () { return extendSchema_ts_1.extendSchema; } });
+var lexicographicSortSchema_ts_1 = require("./lexicographicSortSchema.js");
+Object.defineProperty(exports, "lexicographicSortSchema", { enumerable: true, get: function () { return lexicographicSortSchema_ts_1.lexicographicSortSchema; } });
+var printSchema_ts_1 = require("./printSchema.js");
+Object.defineProperty(exports, "printSchema", { enumerable: true, get: function () { return printSchema_ts_1.printSchema; } });
+Object.defineProperty(exports, "printType", { enumerable: true, get: function () { return printSchema_ts_1.printType; } });
+Object.defineProperty(exports, "printDirective", { enumerable: true, get: function () { return printSchema_ts_1.printDirective; } });
+Object.defineProperty(exports, "printIntrospectionSchema", { enumerable: true, get: function () { return printSchema_ts_1.printIntrospectionSchema; } });
+var typeFromAST_ts_1 = require("./typeFromAST.js");
+Object.defineProperty(exports, "typeFromAST", { enumerable: true, get: function () { return typeFromAST_ts_1.typeFromAST; } });
+var valueFromAST_ts_1 = require("./valueFromAST.js");
+Object.defineProperty(exports, "valueFromAST", { enumerable: true, get: function () { return valueFromAST_ts_1.valueFromAST; } });
+var valueFromASTUntyped_ts_1 = require("./valueFromASTUntyped.js");
+Object.defineProperty(exports, "valueFromASTUntyped", { enumerable: true, get: function () { return valueFromASTUntyped_ts_1.valueFromASTUntyped; } });
+var astFromValue_ts_1 = require("./astFromValue.js");
+Object.defineProperty(exports, "astFromValue", { enumerable: true, get: function () { return astFromValue_ts_1.astFromValue; } });
+var TypeInfo_ts_1 = require("./TypeInfo.js");
+Object.defineProperty(exports, "TypeInfo", { enumerable: true, get: function () { return TypeInfo_ts_1.TypeInfo; } });
+Object.defineProperty(exports, "visitWithTypeInfo", { enumerable: true, get: function () { return TypeInfo_ts_1.visitWithTypeInfo; } });
+var replaceVariables_ts_1 = require("./replaceVariables.js");
+Object.defineProperty(exports, "replaceVariables", { enumerable: true, get: function () { return replaceVariables_ts_1.replaceVariables; } });
+var valueToLiteral_ts_1 = require("./valueToLiteral.js");
+Object.defineProperty(exports, "valueToLiteral", { enumerable: true, get: function () { return valueToLiteral_ts_1.valueToLiteral; } });
+var coerceInputValue_ts_1 = require("./coerceInputValue.js");
+Object.defineProperty(exports, "coerceInputValue", { enumerable: true, get: function () { return coerceInputValue_ts_1.coerceInputValue; } });
+Object.defineProperty(exports, "coerceInputLiteral", { enumerable: true, get: function () { return coerceInputValue_ts_1.coerceInputLiteral; } });
+var validateInputValue_ts_1 = require("./validateInputValue.js");
+Object.defineProperty(exports, "validateInputValue", { enumerable: true, get: function () { return validateInputValue_ts_1.validateInputValue; } });
+Object.defineProperty(exports, "validateInputLiteral", { enumerable: true, get: function () { return validateInputValue_ts_1.validateInputLiteral; } });
+var concatAST_ts_1 = require("./concatAST.js");
+Object.defineProperty(exports, "concatAST", { enumerable: true, get: function () { return concatAST_ts_1.concatAST; } });
+var separateOperations_ts_1 = require("./separateOperations.js");
+Object.defineProperty(exports, "separateOperations", { enumerable: true, get: function () { return separateOperations_ts_1.separateOperations; } });
+var stripIgnoredCharacters_ts_1 = require("./stripIgnoredCharacters.js");
+Object.defineProperty(exports, "stripIgnoredCharacters", { enumerable: true, get: function () { return stripIgnoredCharacters_ts_1.stripIgnoredCharacters; } });
+var typeComparators_ts_1 = require("./typeComparators.js");
+Object.defineProperty(exports, "isEqualType", { enumerable: true, get: function () { return typeComparators_ts_1.isEqualType; } });
+Object.defineProperty(exports, "isTypeSubTypeOf", { enumerable: true, get: function () { return typeComparators_ts_1.isTypeSubTypeOf; } });
+Object.defineProperty(exports, "doTypesOverlap", { enumerable: true, get: function () { return typeComparators_ts_1.doTypesOverlap; } });
+var findSchemaChanges_ts_1 = require("./findSchemaChanges.js");
+Object.defineProperty(exports, "BreakingChangeType", { enumerable: true, get: function () { return findSchemaChanges_ts_1.BreakingChangeType; } });
+Object.defineProperty(exports, "DangerousChangeType", { enumerable: true, get: function () { return findSchemaChanges_ts_1.DangerousChangeType; } });
+Object.defineProperty(exports, "SafeChangeType", { enumerable: true, get: function () { return findSchemaChanges_ts_1.SafeChangeType; } });
+Object.defineProperty(exports, "findBreakingChanges", { enumerable: true, get: function () { return findSchemaChanges_ts_1.findBreakingChanges; } });
+Object.defineProperty(exports, "findDangerousChanges", { enumerable: true, get: function () { return findSchemaChanges_ts_1.findDangerousChanges; } });
+Object.defineProperty(exports, "findSchemaChanges", { enumerable: true, get: function () { return findSchemaChanges_ts_1.findSchemaChanges; } });
+var resolveSchemaCoordinate_ts_1 = require("./resolveSchemaCoordinate.js");
+Object.defineProperty(exports, "resolveSchemaCoordinate", { enumerable: true, get: function () { return resolveSchemaCoordinate_ts_1.resolveSchemaCoordinate; } });
+Object.defineProperty(exports, "resolveASTSchemaCoordinate", { enumerable: true, get: function () { return resolveSchemaCoordinate_ts_1.resolveASTSchemaCoordinate; } });
+//# sourceMappingURL=index.js.map

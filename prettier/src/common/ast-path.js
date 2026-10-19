@@ -130,7 +130,7 @@ class AstPath {
     let value = stack.at(-1);
 
     for (const name of names) {
-      value = value[name];
+      value = value?.[name];
       stack.push(name, value);
     }
     try {
@@ -159,7 +159,7 @@ class AstPath {
   // accessing this.getValue()[name1][name2]... should be array. The
   // callback will be called with a reference to this path object for each
   // element of the array.
-  each(callback, ...names) {
+  each(/** @type {(path: AstPath, index: number, value: any) => void} */ callback, ...names) {
     const { stack } = this;
     const { length } = stack;
     let value = stack.at(-1);

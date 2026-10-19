@@ -5,19 +5,19 @@ import {
   indent,
   literalline,
   softline,
-} from "../../document/builders.js";
+} from "../../document/index.js";
 import { escapeTemplateCharacters } from "../print/template-literal.js";
 
-async function printEmbedMarkdown(/** @type {(a0?: any, a1?: any) => any} */ textToDoc, print, /** @type {AstPath} */ path /*, options*/) {
+async function printEmbedMarkdown(textToDoc, print, /** @type {AstPath} */ path /* , options*/) {
   const { node } = path;
   let text = node.quasis[0].value.raw.replaceAll(
-    /((?:\\\\)*)\\`/gu,
+    /((?:\\\\)*)\\`/g,
     /** @returns {string} */ (/** @type {string} */ _, /** @type {string} */ backslashes) => "\\".repeat(backslashes.length / 2) + "`",
   );
   const indentation = getIndentation(text);
   /** @type {boolean} */ const hasIndent = indentation !== "";
   if (hasIndent) {
-    text = text.replaceAll(new RegExp(`^${indentation}`, "gmu"), "");
+    text = text.replaceAll(new RegExp(`^${indentation}`, "gm"), "");
   }
   const doc = escapeTemplateCharacters(
     await textToDoc(text, { parser: "markdown", __inJsTemplate: true }),
@@ -32,14 +32,8 @@ async function printEmbedMarkdown(/** @type {(a0?: any, a1?: any) => any} */ tex
 }
 
 /** @returns {string} */ function getIndentation(/** @type {string} */ str) {
-  const firstMatchedIndent = str.match(/^([^\S\n]*)\S/mu);
+  const firstMatchedIndent = str.match(/^([^\S\n]*)\S/m);
   return firstMatchedIndent === null ? "" : firstMatchedIndent[1];
-}
-
-function printMarkdown(path /*, options*/) {
-  if (isMarkdown(path)) {
-    return printEmbedMarkdown;
-  }
 }
 
 /**
@@ -47,7 +41,7 @@ function printMarkdown(path /*, options*/) {
  * markdown`...`
  * @returns {boolean}
  */
-function isMarkdown({ node, parent }) {
+function isEmbedMarkdown({ node, parent }) {
   return (
     parent?.type === "TaggedTemplateExpression" &&
     node.quasis.length === 1 &&
@@ -56,4 +50,4 @@ function isMarkdown({ node, parent }) {
   );
 }
 
-export default printMarkdown;
+export { isEmbedMarkdown, printEmbedMarkdown };

@@ -1,13 +1,91 @@
 // @nts-check
+// the parts of get-east-asian-width 1.7.0 that prettier uses, with types
+
+// node_modules/get-east-asian-width/lookup-data.js
+/** @type {number} */ const fullwidthMinimalCodePoint = 12288;
+/** @type {number} */ const fullwidthMaximumCodePoint = 65510;
+/** @type {number[]} */ const fullwidthRanges = [12288, 12288, 65281, 65376, 65504, 65510];
+/** @type {number} */ const wideMinimalCodePoint = 4352;
+/** @type {number} */ const wideMaximumCodePoint = 262141;
+/** @type {number[]} */ const wideRanges = [4352, 4447, 8986, 8987, 9001, 9002, 9193, 9196, 9200, 9200, 9203, 9203, 9725, 9726, 9748, 9749, 9776, 9783, 9800, 9811, 9855, 9855, 9866, 9871, 9875, 9875, 9889, 9889, 9898, 9899, 9917, 9918, 9924, 9925, 9934, 9934, 9940, 9940, 9962, 9962, 9970, 9971, 9973, 9973, 9978, 9978, 9981, 9981, 9989, 9989, 9994, 9995, 10024, 10024, 10060, 10060, 10062, 10062, 10067, 10069, 10071, 10071, 10133, 10135, 10160, 10160, 10175, 10175, 11035, 11036, 11088, 11088, 11093, 11093, 11904, 11929, 11931, 12019, 12032, 12245, 12272, 12287, 12289, 12350, 12353, 12438, 12441, 12543, 12549, 12591, 12593, 12686, 12688, 12773, 12783, 12830, 12832, 12871, 12880, 42124, 42128, 42182, 43360, 43388, 44032, 55203, 63744, 64255, 65040, 65049, 65072, 65106, 65108, 65126, 65128, 65131, 94176, 94180, 94192, 94198, 94208, 101594, 101631, 101664, 101760, 101874, 101888, 102801, 102816, 102866, 110576, 110579, 110581, 110587, 110589, 110590, 110592, 110888, 110898, 110898, 110928, 110930, 110933, 110933, 110948, 110952, 110960, 111355, 119552, 119638, 119648, 119670, 126980, 126980, 127183, 127183, 127374, 127374, 127377, 127386, 127406, 127406, 127488, 127490, 127504, 127547, 127552, 127560, 127568, 127569, 127584, 127589, 127744, 127776, 127789, 127797, 127799, 127868, 127870, 127891, 127904, 127946, 127951, 127955, 127968, 127984, 127988, 127988, 127992, 128062, 128064, 128064, 128066, 128252, 128255, 128317, 128331, 128334, 128336, 128359, 128378, 128378, 128405, 128406, 128420, 128420, 128507, 128591, 128640, 128709, 128716, 128716, 128720, 128722, 128725, 128729, 128732, 128735, 128747, 128748, 128756, 128764, 128986, 128986, 128992, 129003, 129008, 129008, 129292, 129338, 129340, 129349, 129351, 129535, 129648, 129660, 129664, 129734, 129736, 129736, 129740, 129757, 129759, 129771, 129775, 129786, 131072, 196605, 196608, 262141];
+
+// node_modules/get-east-asian-width/utilities.js
+const isInRange = /** @returns {boolean} */ (/** @type {number[]} */ ranges, /** @type {number} */ codePoint) => {
+	let low = 0;
+	let high = Math.floor(ranges.length / 2) - 1;
+	while (low <= high) {
+		const mid = Math.floor((low + high) / 2);
+		const i = mid * 2;
+		if (codePoint < ranges[i]) {
+			high = mid - 1;
+		} else if (codePoint > ranges[i + 1]) {
+			low = mid + 1;
+		} else {
+			return true;
+		}
+	}
+
+	return false;
+};
+
 // node_modules/get-east-asian-width/lookup.js
-/** @returns {boolean} */ function isFullWidth(/** @type {number} */ x) {
-  return x === 12288 || x >= 65281 && x <= 65376 || x >= 65504 && x <= 65510;
-}
-/** @returns {boolean} */ function isWide(/** @type {number} */ x) {
-  return x >= 4352 && x <= 4447 || x === 8986 || x === 8987 || x === 9001 || x === 9002 || x >= 9193 && x <= 9196 || x === 9200 || x === 9203 || x === 9725 || x === 9726 || x === 9748 || x === 9749 || x >= 9776 && x <= 9783 || x >= 9800 && x <= 9811 || x === 9855 || x >= 9866 && x <= 9871 || x === 9875 || x === 9889 || x === 9898 || x === 9899 || x === 9917 || x === 9918 || x === 9924 || x === 9925 || x === 9934 || x === 9940 || x === 9962 || x === 9970 || x === 9971 || x === 9973 || x === 9978 || x === 9981 || x === 9989 || x === 9994 || x === 9995 || x === 10024 || x === 10060 || x === 10062 || x >= 10067 && x <= 10069 || x === 10071 || x >= 10133 && x <= 10135 || x === 10160 || x === 10175 || x === 11035 || x === 11036 || x === 11088 || x === 11093 || x >= 11904 && x <= 11929 || x >= 11931 && x <= 12019 || x >= 12032 && x <= 12245 || x >= 12272 && x <= 12287 || x >= 12289 && x <= 12350 || x >= 12353 && x <= 12438 || x >= 12441 && x <= 12543 || x >= 12549 && x <= 12591 || x >= 12593 && x <= 12686 || x >= 12688 && x <= 12773 || x >= 12783 && x <= 12830 || x >= 12832 && x <= 12871 || x >= 12880 && x <= 42124 || x >= 42128 && x <= 42182 || x >= 43360 && x <= 43388 || x >= 44032 && x <= 55203 || x >= 63744 && x <= 64255 || x >= 65040 && x <= 65049 || x >= 65072 && x <= 65106 || x >= 65108 && x <= 65126 || x >= 65128 && x <= 65131 || x >= 94176 && x <= 94180 || x === 94192 || x === 94193 || x >= 94208 && x <= 100343 || x >= 100352 && x <= 101589 || x >= 101631 && x <= 101640 || x >= 110576 && x <= 110579 || x >= 110581 && x <= 110587 || x === 110589 || x === 110590 || x >= 110592 && x <= 110882 || x === 110898 || x >= 110928 && x <= 110930 || x === 110933 || x >= 110948 && x <= 110951 || x >= 110960 && x <= 111355 || x >= 119552 && x <= 119638 || x >= 119648 && x <= 119670 || x === 126980 || x === 127183 || x === 127374 || x >= 127377 && x <= 127386 || x >= 127488 && x <= 127490 || x >= 127504 && x <= 127547 || x >= 127552 && x <= 127560 || x === 127568 || x === 127569 || x >= 127584 && x <= 127589 || x >= 127744 && x <= 127776 || x >= 127789 && x <= 127797 || x >= 127799 && x <= 127868 || x >= 127870 && x <= 127891 || x >= 127904 && x <= 127946 || x >= 127951 && x <= 127955 || x >= 127968 && x <= 127984 || x === 127988 || x >= 127992 && x <= 128062 || x === 128064 || x >= 128066 && x <= 128252 || x >= 128255 && x <= 128317 || x >= 128331 && x <= 128334 || x >= 128336 && x <= 128359 || x === 128378 || x === 128405 || x === 128406 || x === 128420 || x >= 128507 && x <= 128591 || x >= 128640 && x <= 128709 || x === 128716 || x >= 128720 && x <= 128722 || x >= 128725 && x <= 128727 || x >= 128732 && x <= 128735 || x === 128747 || x === 128748 || x >= 128756 && x <= 128764 || x >= 128992 && x <= 129003 || x === 129008 || x >= 129292 && x <= 129338 || x >= 129340 && x <= 129349 || x >= 129351 && x <= 129535 || x >= 129648 && x <= 129660 || x >= 129664 && x <= 129673 || x >= 129679 && x <= 129734 || x >= 129742 && x <= 129756 || x >= 129759 && x <= 129769 || x >= 129776 && x <= 129784 || x >= 131072 && x <= 196605 || x >= 196608 && x <= 262141;
+/** @type {number} */ const commonCjkCodePoint = 0x4E_00;
+const [wideFastPathStart, wideFastPathEnd] = /* #__PURE__ */ findWideFastPathRange(wideRanges);
+
+// Use a hot-path range so common `isWide` calls can skip binary search.
+// The range containing U+4E00 covers common CJK ideographs;
+// fallback to the largest range for resilience to Unicode table changes.
+/** @returns {number[]} */ function findWideFastPathRange(/** @type {number[]} */ ranges) {
+	let fastPathStart = ranges[0];
+	let fastPathEnd = ranges[1];
+
+	for (let index = 0; index < ranges.length; index += 2) {
+		const start = ranges[index];
+		const end = ranges[index + 1];
+
+		if (
+			commonCjkCodePoint >= start
+			&& commonCjkCodePoint <= end
+		) {
+			return [start, end];
+		}
+
+		if ((end - start) > (fastPathEnd - fastPathStart)) {
+			fastPathStart = start;
+			fastPathEnd = end;
+		}
+	}
+
+	return [fastPathStart, fastPathEnd];
 }
 
-// node_modules/get-east-asian-width/index.js
-var _isNarrowWidth = /** @returns {boolean} */ (/** @type {number} */ codePoint) => !(isFullWidth(codePoint) || isWide(codePoint));
+const isFullwidth = /** @returns {boolean} */ (/** @type {number} */ codePoint) => {
+	if (
+		codePoint < fullwidthMinimalCodePoint
+		|| codePoint > fullwidthMaximumCodePoint
+	) {
+		return false;
+	}
 
-export { _isNarrowWidth };
+	return isInRange(fullwidthRanges, codePoint);
+};
+
+const isWide = /** @returns {boolean} */ (/** @type {number} */ codePoint) => {
+	if (
+		codePoint >= wideFastPathStart
+		&& codePoint <= wideFastPathEnd
+	) {
+		return true;
+	}
+
+	if (
+		codePoint < wideMinimalCodePoint
+		|| codePoint > wideMaximumCodePoint
+	) {
+		return false;
+	}
+
+	return isInRange(wideRanges, codePoint);
+};
+
+export { isFullwidth as _isFullWidth, isWide as _isWide };

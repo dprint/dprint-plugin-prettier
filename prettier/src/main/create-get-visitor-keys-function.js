@@ -1,4 +1,9 @@
 // @nts-check
+import {
+  FRONT_MATTER_VISITOR_KEYS,
+  isFrontMatter,
+} from "./front-matter/index.js";
+
 const nonTraversableKeys = new Set([
   "tokens",
   "comments",
@@ -11,10 +16,23 @@ const nonTraversableKeys = new Set([
 const defaultGetVisitorKeys = (node) =>
   Object.keys(node).filter((key) => !nonTraversableKeys.has(key));
 
-function createGetVisitorKeysFunction(/** @type {(a0?: any, a1?: any) => any} */ printerGetVisitorKeys) {
-  return printerGetVisitorKeys
+function createGetVisitorKeysFunction(
+  printerGetVisitorKeys,
+  /** @type {boolean} */ supportFrontMatter,
+) {
+  const getVisitorKeys = printerGetVisitorKeys
     ? /** @returns {any[]} */ (node) => printerGetVisitorKeys(node, nonTraversableKeys)
     : defaultGetVisitorKeys;
+  if (!supportFrontMatter) {
+    return getVisitorKeys;
+  }
+
+  return new Proxy(getVisitorKeys, {
+    apply: (target, thisArgument, argumentsList) =>
+      isFrontMatter(argumentsList[0])
+        ? FRONT_MATTER_VISITOR_KEYS
+        : Reflect.apply(target, thisArgument, argumentsList),
+  });
 }
 
 export default createGetVisitorKeysFunction;

@@ -1,10 +1,13 @@
 // @nts-check
-/** @returns {boolean} */ function hasPragma(/** @type {string} */ text) {
-  return /^\s*<!--\s*@(?:format|prettier)\s*-->/u.test(text);
-}
+import {
+  FORMAT_PRAGMA_TO_INSERT,
+  HTML_HAS_IGNORE_PRAGMA_REGEXP,
+  HTML_HAS_PRAGMA_REGEXP,
+} from "../utilities/pragma/pragma.evaluate.js";
 
-/** @returns {string} */ function insertPragma(/** @type {string} */ text) {
-  return "<!-- @format -->\n\n" + text;
-}
+const hasPragma = (text) => HTML_HAS_PRAGMA_REGEXP.test(text);
+const hasIgnorePragma = (text) => HTML_HAS_IGNORE_PRAGMA_REGEXP.test(text);
+const insertPragma = (text) =>
+  `<!-- @${FORMAT_PRAGMA_TO_INSERT} -->\n\n${text}`;
 
-export { hasPragma, insertPragma };
+export { hasIgnorePragma, hasPragma, insertPragma };

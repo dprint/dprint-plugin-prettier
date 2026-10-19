@@ -1,7 +1,12 @@
 // @nts-check
 import { extract, parseWithComments, print, strip } from "jest-docblock";
 import { normalizeEndOfLine } from "../common/end-of-line.js";
-import getShebang from "./utils/get-shebang.js";
+import {
+  FORMAT_IGNORE_PRAGMAS,
+  FORMAT_PRAGMA_TO_INSERT,
+  FORMAT_PRAGMAS,
+} from "../utilities/pragma/pragma.evaluate.js";
+import getShebang from "./utilities/get-shebang.js";
 
 function parseDocBlock(/** @type {string} */ text) {
   const shebang = getShebang(text);
@@ -17,7 +22,12 @@ function parseDocBlock(/** @type {string} */ text) {
 
 /** @returns {boolean} */ function hasPragma(/** @type {string} */ text) {
   const { pragmas } = parseDocBlock(text);
-  return Object.hasOwn(pragmas, "prettier") || Object.hasOwn(pragmas, "format");
+  return FORMAT_PRAGMAS.some((pragma) => Object.hasOwn(pragmas, pragma));
+}
+
+function hasIgnorePragma(text) {
+  const { pragmas } = parseDocBlock(text);
+  return FORMAT_IGNORE_PRAGMAS.some((pragma) => Object.hasOwn(pragmas, pragma));
 }
 
 /** @returns {string} */ function insertPragma(/** @type {string} */ originalText) {
@@ -26,7 +36,7 @@ function parseDocBlock(/** @type {string} */ text) {
 
   let docBlock = print({
     pragmas: {
-      format: "",
+      [FORMAT_PRAGMA_TO_INSERT]: "",
       ...pragmas,
     },
     comments: comments.trimStart(),
@@ -47,4 +57,4 @@ function parseDocBlock(/** @type {string} */ text) {
   );
 }
 
-export { hasPragma, insertPragma };
+export { hasIgnorePragma, hasPragma, insertPragma };

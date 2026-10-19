@@ -1,22 +1,26 @@
 // @nts-check
 import { diffArrays } from "diff";
 import {
-  convertEndOfLineToChars,
-  countEndOfLineChars,
+  convertEndOfLineOptionToCharacter,
+  countEndOfLineCharacters,
   guessEndOfLine,
   normalizeEndOfLine,
 } from "../common/end-of-line.js";
-import { addAlignmentToDoc, hardline } from "../document/builders.js";
-import { printDocToDebug } from "../document/debug.js";
-import { printDocToString as printDocToStringWithoutNormalizeOptions } from "../document/printer.js";
-import getAlignmentSize from "../utils/get-alignment-size.js";
+import { commentsPropertyInOptions } from "../constants.js";
+import {
+  addAlignmentToDoc,
+  hardline,
+  printDocToDebug,
+  printDocToString as printDocToStringWithoutNormalizeOptions,
+} from "../document/index.js";
+import getAlignmentSize from "../utilities/get-alignment-size.js";
 import { prepareToPrint, printAstToDoc } from "./ast-to-doc.js";
 import getCursorLocation from "./get-cursor-node.js";
 import massageAst from "./massage-ast.js";
 import normalizeFormatOptions from "./normalize-format-options.js";
 import parseText from "./parse.js";
 import { resolveParser } from "./parser-and-printer.js";
-import { calculateRange } from "./range-util.js";
+import { calculateRange } from "./range.js";
 
 /** @type {string} */ const BOM = "\uFEFF";
 
@@ -63,10 +67,11 @@ async function coreFormat(/** @type {string} */ originalText, opts, addAlignment
       }
     }
 
-    result.formatted = trimmed + convertEndOfLineToChars(opts.endOfLine);
+    result.formatted =
+      trimmed + convertEndOfLineOptionToCharacter(opts.endOfLine);
   }
 
-  const comments = opts[Symbol.for("comments")];
+  const comments = opts[commentsPropertyInOptions];
 
   if (opts.cursorOffset >= 0) {
     // Roughly, our logic for preserving the user's cursor position is as
@@ -145,7 +150,6 @@ async function coreFormat(/** @type {string} */ originalText, opts, addAlignment
     // diff old and new cursor node texts, with a special cursor
     // symbol inserted to find out where it moves to
 
-    // eslint-disable-next-line unicorn/prefer-spread
     const oldCursorNodeCharArray = oldCursorRegionText.split("");
     oldCursorNodeCharArray.splice(
       cursorOffsetRelativeToOldCursorRegionStart,
@@ -153,7 +157,6 @@ async function coreFormat(/** @type {string} */ originalText, opts, addAlignment
       CURSOR,
     );
 
-    // eslint-disable-next-line unicorn/prefer-spread
     const newCursorNodeCharArray = newCursorRegionText.split("");
     const cursorNodeDiff = diffArrays(
       oldCursorNodeCharArray,
@@ -179,7 +182,7 @@ async function coreFormat(/** @type {string} */ originalText, opts, addAlignment
 
 async function formatRange(/** @type {string} */ originalText, opts) {
   const { ast, text } = await parseText(originalText, opts);
-  const { rangeStart, rangeEnd } = calculateRange(text, opts, ast);
+  const [rangeStart, rangeEnd] = calculateRange(text, opts, ast) ?? [0, 0];
   const rangeString = text.slice(rangeStart, rangeEnd);
 
   // Try to extend the range backwards to the beginning of the line.
@@ -189,7 +192,7 @@ async function formatRange(/** @type {string} */ originalText, opts) {
     rangeStart,
     text.lastIndexOf("\n", rangeStart) + 1,
   );
-  const indentString = text.slice(rangeStart2, rangeStart).match(/^\s*/u)[0];
+  const indentString = text.slice(rangeStart2, rangeStart).match(/^\s*/)[0];
 
   const alignmentSize = getAlignmentSize(indentString, opts.tabWidth);
 
@@ -227,9 +230,9 @@ async function formatRange(/** @type {string} */ originalText, opts) {
   let formatted =
     text.slice(0, rangeStart) + rangeTrimmed + text.slice(rangeEnd);
   if (opts.endOfLine !== "lf") {
-    const eol = convertEndOfLineToChars(opts.endOfLine);
+    const eol = convertEndOfLineOptionToCharacter(opts.endOfLine);
     if (cursorOffset >= 0 && eol === "\r\n") {
-      cursorOffset += countEndOfLineChars(
+      cursorOffset += countEndOfLineCharacters(
         formatted.slice(0, cursorOffset),
         "\n",
       );
@@ -284,8 +287,8 @@ function normalizeInputAndOptions(/** @type {string} */ text, options) {
 
   // get rid of CR/CRLF parsing
   if (text.includes("\r")) {
-    const countCrlfBefore = (index) =>
-      countEndOfLineChars(text.slice(0, Math.max(index, 0)), "\r\n");
+    const countCrlfBefore = /** @returns {number} */ (/** @type {number} */ index) =>
+      countEndOfLineCharacters(text.slice(0, Math.max(index, 0)), "\r\n");
 
     cursorOffset -= countCrlfBefore(cursorOffset);
     rangeStart -= countCrlfBefore(rangeStart);
@@ -312,6 +315,11 @@ async function hasPragma(/** @type {string} */ text, options) {
   return !selectedParser.hasPragma || selectedParser.hasPragma(text);
 }
 
+async function hasIgnorePragma(text, options) {
+  const selectedParser = await resolveParser(options);
+  return selectedParser.hasIgnorePragma?.(text);
+}
+
 async function formatWithCursor(/** @type {string} */ originalText, originalOptions) {
   let { hasBOM, text, options } = normalizeInputAndOptions(
     originalText,
@@ -320,7 +328,8 @@ async function formatWithCursor(/** @type {string} */ originalText, originalOpti
 
   if (
     (options.rangeStart >= options.rangeEnd && text !== "") ||
-    (options.requirePragma && !(await hasPragma(text, options)))
+    (options.requirePragma && !(await hasPragma(text, options))) ||
+    (options.checkIgnorePragma && (await hasIgnorePragma(text, options)))
   ) {
     return {
       formatted: originalText,
@@ -393,6 +402,14 @@ async function formatDoc(doc, options) {
 async function printToDoc(originalText, options) {
   options = await normalizeFormatOptions(options);
   const { ast } = await parseText(originalText, options);
+
+  if (options.cursorOffset >= 0) {
+    options = {
+      ...options,
+      ...getCursorLocation(ast, options),
+    };
+  }
+
   return printAstToDoc(ast, options);
 }
 

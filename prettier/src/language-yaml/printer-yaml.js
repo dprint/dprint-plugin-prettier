@@ -1,6 +1,5 @@
 // @nts-check
-/** @import AstPath from "../common/ast-path.js" */
-/** @import {Doc} from "../document/builders.js" */
+/** @import {Doc} from "../document/index.js" */
 
 import {
   breakParent,
@@ -10,14 +9,15 @@ import {
   join,
   line,
   lineSuffix,
-} from "../document/builders.js";
-import { replaceEndOfLine } from "../document/utils.js";
-import isPreviousLineEmpty from "../utils/is-previous-line-empty.js";
-import UnexpectedNodeError from "../utils/unexpected-node-error.js";
+  replaceEndOfLine,
+} from "../document/index.js";
+import isPreviousLineEmpty from "../utilities/is-previous-line-empty.js";
+import UnexpectedNodeError from "../utilities/unexpected-node-error.js";
 import embed from "./embed.js";
 import getVisitorKeys from "./get-visitor-keys.js";
 import { locStart } from "./loc.js";
-import { insertPragma, isPragma } from "./pragma.js";
+import { massageAstNode } from "./massage-ast/index.js";
+import { insertPragma } from "./pragma.js";
 import printBlock from "./print/block.js";
 import {
   printFlowMapping,
@@ -41,7 +41,9 @@ import {
   isInlineNode,
   isLastDescendantNode,
   isNode,
-} from "./utils.js";
+} from "./utilities.js";
+
+/** @import AstPath from "../common/ast-path.js" */
 
 /** @returns {any[]} */ function genericPrint(/** @type {AstPath} */ path, options, print) {
   const { node } = path;
@@ -150,34 +152,38 @@ function printNode(/** @type {AstPath} */ path, options, print) {
   const { node } = path;
   switch (node.type) {
     case "root": {
+      const lastDescendantNode = getLastDescendantNode(node);
+      const shouldPrintHardline = !(
+        isNode(lastDescendantNode, ["blockLiteral", "blockFolded"]) &&
+        lastDescendantNode.chomping === "keep"
+      );
       const parts = [];
-      path.each(({ node: document, next: nextDocument, isFirst }) => {
+      path.each(({ node: document, isFirst }) => {
         if (!isFirst) {
           parts.push(hardline);
         }
         parts.push(print());
-        if (shouldPrintDocumentEndMarker(document, nextDocument)) {
-          parts.push(hardline, "...");
+        if (shouldPrintDocumentEndMarker(path)) {
+          if (shouldPrintHardline) {
+            parts.push(hardline);
+          }
+
+          parts.push("...");
           if (hasTrailingComment(document)) {
             parts.push(" ", print("trailingComment"));
           }
-        } else if (nextDocument && !hasTrailingComment(nextDocument.head)) {
-          parts.push(hardline, "---");
         }
       }, "children");
 
-      const lastDescendantNode = getLastDescendantNode(node);
-      if (
-        !isNode(lastDescendantNode, ["blockLiteral", "blockFolded"]) ||
-        lastDescendantNode.chomping !== "keep"
-      ) {
+      if (shouldPrintHardline) {
         parts.push(hardline);
       }
+
       return parts;
     }
     case "document": {
       const parts = [];
-      if (shouldPrintDocumentHeadEndMarker(path, options) === "head") {
+      if (shouldPrintDocumentHeadEndMarker(path)) {
         if (node.head.children.length > 0 || node.head.endComments.length > 0) {
           parts.push(print("head"));
         }
@@ -213,7 +219,13 @@ function printNode(/** @type {AstPath} */ path, options, print) {
             separator = [hardline, hardline];
           }
         } else {
-          separator = hardline;
+          // Check if we need to preserve empty line before end comments
+          const lastChild = children.at(-1);
+          const shouldPreserveEmptyLine =
+            isNode(lastChild, ["mapping"]) &&
+            isPreviousLineEmpty(options.originalText, locStart(endComments[0]));
+
+          separator = shouldPreserveEmptyLine ? [hardline, hardline] : hardline;
         }
       }
 
@@ -257,7 +269,7 @@ function printNode(/** @type {AstPath} */ path, options, print) {
 
       if (
         (node.type === "quoteSingle" && raw.includes("\\")) ||
-        (node.type === "quoteDouble" && /\\[^"]/u.test(raw))
+        (node.type === "quoteDouble" && /\\[^"]/.test(raw))
       ) {
         // only quoteDouble can use escape chars
         // and quoteSingle do not need to escape backslashes
@@ -307,7 +319,7 @@ function printNode(/** @type {AstPath} */ path, options, print) {
     }
     case "blockFolded":
     case "blockLiteral":
-      return printBlock(path, print, options);
+      return printBlock(path, options, print);
 
     case "mapping":
     case "sequence":
@@ -319,12 +331,12 @@ function printNode(/** @type {AstPath} */ path, options, print) {
       return !node.content ? "" : print("content");
     case "mappingItem":
     case "flowMappingItem":
-      return printMappingItem(path, print, options);
+      return printMappingItem(path, options, print);
 
     case "flowMapping":
-      return printFlowMapping(path, print, options);
+      return printFlowMapping(path, options, print);
     case "flowSequence":
-      return printFlowSequence(path, print, options);
+      return printFlowSequence(path, options, print);
     case "flowSequenceItem":
       return print("content");
     default:
@@ -337,39 +349,50 @@ function printNode(/** @type {AstPath} */ path, options, print) {
   return document.body.children.length > 0 || hasEndComments(document.body);
 }
 
-function shouldPrintDocumentEndMarker(document, nextDocument) {
+/** @returns {boolean} */ function shouldPrintDocumentEndMarker(path) {
+  const document = path.node;
+
+  if (document.documentEndMarker) {
+    return true;
+  }
+
+  /**
+   *... # trailingComment
+   */
+  if (hasTrailingComment(document)) {
+    return true;
+  }
+
+  if (path.isLast) {
+    return false;
+  }
+
+  const nextDocument = path.next;
+
   return (
     /**
-     *... # trailingComment
+     * ...
+     * %DIRECTIVE
+     * ---
      */
-    hasTrailingComment(document) ||
-    (nextDocument &&
-      /**
-       * ...
-       * %DIRECTIVE
-       * ---
-       */
-      (nextDocument.head.children.length > 0 ||
-        /**
-         * ...
-         * # endComment
-         * ---
-         */
-        hasEndComments(nextDocument.head)))
+    nextDocument.head.children.length > 0 ||
+    /**
+     * ...
+     * # endComment
+     * ---
+     */
+    hasEndComments(nextDocument.head)
   );
 }
 
-function shouldPrintDocumentHeadEndMarker(/** @type {AstPath} */ path, options) {
+/** @returns {boolean | null} */ function shouldPrintDocumentHeadEndMarker(path) {
   const document = path.node;
-  if (
+  return (
     /**
      * ---
      * preserve the first document head end marker
      */
-    (path.isFirst &&
-      /---(?:\s|$)/u.test(
-        options.originalText.slice(locStart(document), locStart(document) + 4),
-      )) ||
+    document.directivesEndMarker ||
     /**
      * %DIRECTIVE
      * ---
@@ -384,16 +407,7 @@ function shouldPrintDocumentHeadEndMarker(/** @type {AstPath} */ path, options) 
      * --- # trailing comment
      */
     hasTrailingComment(document.head)
-  ) {
-    return "head";
-  }
-
-  const nextDocument = path.next;
-  if (shouldPrintDocumentEndMarker(document, nextDocument)) {
-    return false;
-  }
-
-  return nextDocument ? "root" : false;
+  );
 }
 
 /** @returns {any[]} */ function printFlowScalarContent(/** @type {string} */ nodeType, /** @type {string} */ content, options) {
@@ -404,29 +418,11 @@ function shouldPrintDocumentHeadEndMarker(/** @type {AstPath} */ path, options) 
   );
 }
 
-function clean(original, cloned /*, parent */) {
-  if (isNode(original)) {
-    switch (original.type) {
-      case "comment":
-        // insert pragma
-        if (isPragma(original.value)) {
-          return null;
-        }
-        break;
-      case "quoteDouble":
-      case "quoteSingle":
-        cloned.type = "quote";
-        break;
-    }
-  }
-}
-clean.ignoredProperties = new Set(["position"]);
-
 const printer = {
   preprocess,
   embed,
   print: genericPrint,
-  massageAstNode: clean,
+  massageAstNode,
   insertPragma,
   getVisitorKeys,
 };

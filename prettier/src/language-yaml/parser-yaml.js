@@ -1,24 +1,22 @@
 // @nts-check
-import { parse as parseYaml } from "yaml-unist-parser/lib/parse.js";
+import { parse as parseYaml, YAMLSyntaxError } from "yaml-unist-parser";
 import createError from "../common/parser-create-error.js";
 import { locEnd, locStart } from "./loc.js";
-import { hasPragma } from "./pragma.js";
+import { hasIgnorePragma, hasPragma } from "./pragma.js";
+
+/**
+@import {ParseOptions} from "yaml-unist-parser";
+*/
+
+/** @type {any} */
+const parseOptions = { uniqueKeys: false };
 
 function parse(/** @type {string | undefined} */ text) {
+  let root;
   try {
-    const root = parseYaml(text);
-
-    /**
-     * suppress `comment not printed` error
-     *
-     * comments are handled in printer-yaml.js without using `printComment`
-     * so that it'll always throw errors even if we printed it correctly
-     */
-    delete root.comments;
-
-    return root;
-  } catch (/** @type {any} */ error) {
-    if (error?.position) {
+    root = parseYaml(text, parseOptions);
+  } catch (error) {
+    if (error instanceof YAMLSyntaxError) {
       throw createError(error.message, {
         loc: error.position,
         cause: error,
@@ -28,12 +26,23 @@ function parse(/** @type {string | undefined} */ text) {
     /* c8 ignore next */
     throw error;
   }
+
+  /**
+   * suppress `comment not printed` error
+   *
+   * comments are handled in printer-yaml.js without using `printComment`
+   * so that it'll always throw errors even if we printed it correctly
+   */
+  delete root.comments;
+
+  return root;
 }
 
 export const yaml = {
   astFormat: "yaml",
   parse,
   hasPragma,
+  hasIgnorePragma,
   locStart,
   locEnd,
 };

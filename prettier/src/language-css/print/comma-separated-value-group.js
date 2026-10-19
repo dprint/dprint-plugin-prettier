@@ -1,5 +1,5 @@
 // @nts-check
-/** @import AstPath from "../../common/ast-path.js" */
+import * as assert from "#universal/assert";
 import {
   breakParent,
   dedent,
@@ -10,7 +10,7 @@ import {
   line,
   lineSuffix,
   softline,
-} from "../../document/builders.js";
+} from "../../document/index.js";
 import { locEnd, locStart } from "../loc.js";
 import {
   getPropOfDeclNode,
@@ -39,12 +39,19 @@ import {
   isSCSSControlDirectiveNode,
   isSubtractionNode,
   isWordNode,
-} from "../utils/index.js";
+} from "../utilities/index.js";
 
 /**
- * @import {Doc} from "../../document/builders.js"
+ * @import AstPath from "../../common/ast-path.js"
+ * @import {Doc} from "../../document/index.js"
  */
 
+/**
+ * @param {AstPath} path
+ * @param {*} options
+ * @param {(...args: *[]) => Doc} print
+ * @returns {Doc}
+ */
 function printCommaSeparatedValueGroup(/** @type {AstPath} */ path, options, print) {
   const { node } = path;
   const parentNode = path.parent;
@@ -85,7 +92,6 @@ function printCommaSeparatedValueGroup(/** @type {AstPath} */ path, options, pri
     const iPrevNode = node.groups[i - 1];
     const iNode = node.groups[i];
     const iNextNode = node.groups[i + 1];
-    const iNextNextNode = node.groups[i + 2];
 
     // If the node is comment and last node print it in a line suffix
     if (isInlineValueCommentNode(iNode) && !iNextNode) {
@@ -106,19 +112,6 @@ function printCommaSeparatedValueGroup(/** @type {AstPath} */ path, options, pri
       continue;
     }
 
-    // Align key after comment in SCSS map
-    if (
-      isColonNode(iNextNode) &&
-      iNode.type === "value-word" &&
-      parts.length > 2 &&
-      node.groups
-        .slice(0, i)
-        .every(/** @returns {boolean} */ (group) => group.type === "value-comment") &&
-      !isInlineValueCommentNode(iPrevNode)
-    ) {
-      parts[parts.length - 2] = dedent(parts.at(-2));
-    }
-
     // Ignore SCSS @forward wildcard suffix
     if (
       insideAtRuleNode(path, "forward") &&
@@ -133,16 +126,47 @@ function printCommaSeparatedValueGroup(/** @type {AstPath} */ path, options, pri
       continue;
     }
 
+    // Ignore Tailwind `@utility` directive ( https://tailwindcss.com/docs/adding-custom-styles#functional-utilities )
+    if (
+      insideAtRuleNode(path, "utility") &&
+      iNode.type === "value-word" &&
+      iNextNode &&
+      iNextNode.type === "value-operator" &&
+      iNextNode.value === "*"
+    ) {
+      continue;
+    }
+
     // Ignore after latest node (i.e. before semicolon)
     if (!iNextNode) {
       continue;
     }
 
-    // styled.div` background: var(--${one}); `
+    // Don't print a space before the `;` branch delimiter in the SCSS `if()`
+    // function (i.e. `if(condition: value; else: value)`)
+    if (
+      options.parser === "scss" &&
+      iNextNode.type === "value-word" &&
+      iNextNode.value === ";" &&
+      path.match(
+        undefined,
+        (node, key) => key === "groups" && node.type === "value-paren_group",
+        (node, key) =>
+          key === "group" && node.type === "value-func" && node.value === "if",
+      )
+    ) {
+      continue;
+    }
+
+    // We should keep spaces between words in a embedded JS expression
+    // examples:
+    //   styled.div` font-size: var(--font-size-h${({ level }) => level}); `;
+    //   styled.div` grid-area: area-${({ area }) => area}; `;
+    //   styled.div` border: 1px ${solid} red; `;
     if (
       iNode.type === "value-word" &&
-      iNode.value.endsWith("-") &&
-      isAtWordPlaceholderNode(iNextNode)
+      isAtWordPlaceholderNode(iNextNode) &&
+      locEnd(iNode) === locStart(iNextNode)
     ) {
       continue;
     }
@@ -178,9 +202,9 @@ function printCommaSeparatedValueGroup(/** @type {AstPath} */ path, options, pri
       iNode.type === "value-atword" &&
       (iNode.value === "" ||
         /*
-            @var[ @notVarNested ][notVar]
-            ^^^^^
-            */
+        @var[ @notVarNested ][notVar]
+        ^^^^^
+        */
         iNode.value.endsWith("["))
     ) {
       continue;
@@ -197,6 +221,33 @@ function printCommaSeparatedValueGroup(/** @type {AstPath} */ path, options, pri
     // Ignore `~` in Less (i.e. `content: ~"^//* some horrible but needed css hack";`)
     if (iNode.value === "~") {
       continue;
+    }
+
+    // Less property/variable lookup
+    // https://lesscss.org/features/#detached-rulesets-feature-property-variable-accessors
+    if (options.parser === "less") {
+      // `foo [@bar]`
+      //      ^
+      if (iNextNode?.type === "value-word" && iNextNode.value === "[") {
+        continue;
+      }
+
+      // Ignore spaces after `[` (i.e. `foo[ @bar]` or `foo[ bar]`)
+      if (
+        iNode.type === "value-word" &&
+        iNode.value.endsWith("[") &&
+        (iNextNode?.type === "value-atword" || iNextNode?.type === "value-word")
+      ) {
+        assert.ok(
+          node.groups.some(
+            /** @returns {boolean} */ (node, index) =>
+              index > i &&
+              (node.value?.startsWith("]") || node.value?.endsWith("]")),
+          ),
+        );
+
+        continue;
+      }
     }
 
     // Ignore escape `\`
@@ -241,7 +292,7 @@ function printCommaSeparatedValueGroup(/** @type {AstPath} */ path, options, pri
       continue;
     }
 
-    // Ignore css variables and interpolation in SCSS (i.e. `--#{$var}`)
+    // Ignore CSS variables and interpolation in SCSS (i.e. `--#{$var}`)
     if (iNode.value === "--" && isHashNode(iNextNode)) {
       continue;
     }
@@ -256,6 +307,17 @@ function printCommaSeparatedValueGroup(/** @type {AstPath} */ path, options, pri
     if (
       ((isMathOperator && isHashNode(iNextNode)) ||
         (isNextMathOperator && isRightCurlyBraceNode(iNode))) &&
+      hasEmptyRawBefore(iNextNode)
+    ) {
+      continue;
+    }
+
+    // Prevent the addition of a space inside type() declarations that include an + operator
+    // due to the fact that it is not valid syntax
+    // (i.e. `type(<number> +)`, `type(<color> +)`)
+    if (
+      isAdditionNode(iNextNode) &&
+      insideValueFunctionNode(path, "type") &&
       hasEmptyRawBefore(iNextNode)
     ) {
       continue;
@@ -282,27 +344,6 @@ function printCommaSeparatedValueGroup(/** @type {AstPath} */ path, options, pri
       continue;
     }
 
-    // Print spaces after `+` and `-` in color adjuster functions as is (e.g. `color(red l(+ 20%))`)
-    // Adjusters with signed numbers (e.g. `color(red l(+20%))`) output as-is.
-    const isColorAdjusterNode =
-      (isAdditionNode(iNode) || isSubtractionNode(iNode)) &&
-      i === 0 &&
-      (iNextNode.type === "value-number" || iNextNode.isHex) &&
-      parentParentNode &&
-      isColorAdjusterFuncNode(parentParentNode) &&
-      !hasEmptyRawBefore(iNextNode);
-
-    const requireSpaceBeforeOperator =
-      iNextNextNode?.type === "value-func" ||
-      (iNextNextNode && isWordNode(iNextNextNode)) ||
-      iNode.type === "value-func" ||
-      isWordNode(iNode);
-    const requireSpaceAfterOperator =
-      iNextNode.type === "value-func" ||
-      isWordNode(iNextNode) ||
-      iPrevNode?.type === "value-func" ||
-      (iPrevNode && isWordNode(iPrevNode));
-
     // Space before unary minus followed by a function call.
     if (
       options.parser === "scss" &&
@@ -314,6 +355,28 @@ function printCommaSeparatedValueGroup(/** @type {AstPath} */ path, options, pri
       parts.push([parts.pop(), " "]);
       continue;
     }
+
+    const iNextNextNode = node.groups[i + 2];
+
+    // Print spaces after `+` and `-` in color adjuster functions as is (e.g. `color(red l(+ 20%))`)
+    // Adjusters with signed numbers (e.g. `color(red l(+20%))`) output as-is.
+    const isColorAdjusterNode =
+      (isAdditionNode(iNode) || isSubtractionNode(iNode)) &&
+      i === 0 &&
+      (iNextNode.type === "value-number" || iNextNode.isHex) &&
+      parentParentNode &&
+      isColorAdjusterFuncNode(parentParentNode) &&
+      !hasEmptyRawBefore(iNextNode);
+    const requireSpaceBeforeOperator =
+      iNextNextNode?.type === "value-func" ||
+      (iNextNextNode && isWordNode(iNextNextNode)) ||
+      iNode.type === "value-func" ||
+      isWordNode(iNode);
+    const requireSpaceAfterOperator =
+      iNextNode.type === "value-func" ||
+      isWordNode(iNextNode) ||
+      iPrevNode?.type === "value-func" ||
+      (iPrevNode && isWordNode(iPrevNode));
 
     // Formatting `/`, `+`, `-` sign
     if (
@@ -396,8 +459,30 @@ function printCommaSeparatedValueGroup(/** @type {AstPath} */ path, options, pri
       continue;
     }
 
+    // Formatting `font` property
+    if (
+      declAncestorProp &&
+      (declAncestorProp === "font" || declAncestorProp.startsWith("--"))
+    ) {
+      if (
+        isDivisionNode(iNextNode) &&
+        hasEmptyRawBefore(iNextNode) &&
+        isPossibleFontSize(iNode)
+      ) {
+        continue;
+      }
+
+      if (
+        isDivisionNode(iNode) &&
+        hasEmptyRawBefore(iNode) &&
+        isPossibleFontSize(iPrevNode)
+      ) {
+        continue;
+      }
+    }
+
     // Add `space` before next math operation
-    // Note: `grip` property have `/` delimiter and it is not math operation, so
+    // Note: `grid` property have `/` delimiter and it is not math operation, so
     // `grid` property handles above
     if (isNextMathOperator) {
       parts.push([parts.pop(), " "]);
@@ -445,6 +530,17 @@ function printCommaSeparatedValueGroup(/** @type {AstPath} */ path, options, pri
       continue;
     }
 
+    // align value after block comment
+    if (
+      !atRuleAncestorNode &&
+      iNode.type === "value-comment" &&
+      !iNode.inline &&
+      node.groups.slice(0, i).every(/** @returns {boolean} */ (group) => group.type === "value-comment")
+    ) {
+      parts.push(dedent(line), "");
+      continue;
+    }
+
     // Be default all values go through `line`
     parts.push(line, "");
   }
@@ -461,7 +557,7 @@ function printCommaSeparatedValueGroup(/** @type {AstPath} */ path, options, pri
     return group(indent(parts));
   }
 
-  // Indent is not needed for import url when url is very long
+  // Indent is not needed for import URL when URL is very long
   // and node has two groups
   // when type is value-comma_group
   // example @import url("verylongurl") projection,tv
@@ -470,6 +566,26 @@ function printCommaSeparatedValueGroup(/** @type {AstPath} */ path, options, pri
   }
 
   return group(indent(fill(parts)));
+}
+
+function isPossibleFontSize(node) {
+  if (node?.type === "value-number") {
+    return true;
+  }
+
+  if (node?.type !== "value-func") {
+    return false;
+  }
+
+  const value = node.value.toLowerCase();
+  return (
+    value === "var" ||
+    value === "calc" ||
+    value === "min" ||
+    value === "max" ||
+    value === "clamp" ||
+    value.startsWith("--")
+  );
 }
 
 export default printCommaSeparatedValueGroup;

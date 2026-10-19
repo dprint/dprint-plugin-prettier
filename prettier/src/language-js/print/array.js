@@ -8,45 +8,32 @@ import {
   indent,
   line,
   softline,
-} from "../../document/builders.js";
+} from "../../document/index.js";
 import { printDanglingComments } from "../../main/comments/print.js";
-import hasNewline from "../../utils/has-newline.js";
-import isNextLineEmptyAfterIndex from "../../utils/is-next-line-empty.js";
-import skipInlineComment from "../../utils/skip-inline-comment.js";
-import skipTrailingComment from "../../utils/skip-trailing-comment.js";
-import { locEnd, locStart } from "../loc.js";
+import hasNewline from "../../utilities/has-newline.js";
+import isNextLineEmptyAfterIndex from "../../utilities/is-next-line-empty.js";
+import skipInlineComment from "../../utilities/skip-inline-comment.js";
+import skipTrailingComment from "../../utilities/skip-trailing-comment.js";
+import { locEnd, locStart } from "../location/index.js";
+import { CommentCheckFlags, hasComment } from "../utilities/comments.js";
+import { isSignedNumericLiteral } from "../utilities/is-signed-numeric-literal.js";
 import {
-  CommentCheckFlags,
-  hasComment,
-  isArrayOrTupleExpression,
+  isArrayExpression,
   isNumericLiteral,
-  isObjectOrRecordExpression,
-  isSignedNumericLiteral,
-  shouldPrintComma,
-} from "../utils/index.js";
-import { printOptionalToken } from "./misc.js";
+  isObjectExpression,
+  isTupleType,
+} from "../utilities/node-types.js";
+import { shouldPrintTrailingComma } from "../utilities/should-print-trailing-comma.js";
+import {
+  printDanglingCommentsInList,
+  printOptionalToken,
+} from "./miscellaneous.js";
 import { printTypeAnnotationProperty } from "./type-annotation.js";
 
-/** @import {Doc} from "../../document/builders.js" */
-
-function printEmptyArrayElements(/** @type {AstPath} */ path, options, /** @type {string} */ openBracket, /** @type {string} */ closeBracket) {
-  const { node } = path;
-  /** @type {string} */ const inexact = node.inexact ? "..." : "";
-  if (!hasComment(node, CommentCheckFlags.Dangling)) {
-    return [openBracket, inexact, closeBracket];
-  }
-  return group([
-    openBracket,
-    inexact,
-    printDanglingComments(path, options, { indent: true }),
-    softline,
-    closeBracket,
-  ]);
-}
+/** @import {Doc} from "../../document/index.js" */
 
 /*
 - `ArrayExpression`
-- `TupleExpression`
 - `ArrayPattern`
 - `TSTupleType`(TypeScript)
 - `TupleTypeAnnotation`(Flow)
@@ -56,20 +43,10 @@ function printEmptyArrayElements(/** @type {AstPath} */ path, options, /** @type
   /** @type{Doc[]} */
   const parts = [];
 
-  /** @type {string} */ const openBracket = node.type === "TupleExpression" ? "#[" : "[";
-  /** @type {string} */ const closeBracket = "]";
-  /** @type {string} */ const elementsProperty =
-    // TODO: Remove `types` when babel changes AST of `TupleTypeAnnotation`
-    node.type === "TupleTypeAnnotation" && node.types
-      ? "types"
-      : node.type === "TSTupleType" || node.type === "TupleTypeAnnotation"
-        ? "elementTypes"
-        : "elements";
+  const elementsProperty = isTupleType(node) ? "elementTypes" : "elements";
   const elements = node[elementsProperty];
-  if (elements.length === 0) {
-    parts.push(
-      printEmptyArrayElements(path, options, openBracket, closeBracket),
-    );
+  if (elements.length === 0 && !node.inexact) {
+    parts.push(group(["[", printDanglingCommentsInList(path, options), "]"]));
   } else {
     const lastElem = elements.at(-1);
     /** @type {boolean} */ const canHaveTrailingComma =
@@ -90,28 +67,26 @@ function printEmptyArrayElements(/** @type {AstPath} */ path, options, /** @type
     const groupId = Symbol("array");
 
     const shouldBreak =
-      !options.__inJestEach &&
-      elements.length > 1 &&
-      elements.every(/** @returns {boolean} */ (element, /** @type {number} */ i, /** @type {any[]} */ elements) => {
-        const elementType = element?.type;
-        if (
-          !isArrayOrTupleExpression(element) &&
-          !isObjectOrRecordExpression(element)
-        ) {
-          return false;
-        }
+      (!options.__inJestEach &&
+        elements.length > 1 &&
+        elements.every(/** @returns {boolean} */ (element, /** @type {number} */ i, /** @type {any[]} */ elements) => {
+          if (!isArrayExpression(element) && !isObjectExpression(element)) {
+            return false;
+          }
 
-        const nextElement = elements[i + 1];
-        if (nextElement && elementType !== nextElement.type) {
-          return false;
-        }
+          const elementType = element?.type;
+          const nextElement = elements[i + 1];
+          if (nextElement && elementType !== nextElement.type) {
+            return false;
+          }
 
-        /** @type {string} */ const itemsKey = isArrayOrTupleExpression(element)
-          ? "elements"
-          : "properties";
+          const itemsKey = isArrayExpression(element)
+            ? "elements"
+            : "properties";
 
-        return element[itemsKey] && element[itemsKey].length > 1;
-      });
+          return element[itemsKey] && element[itemsKey].length > 1;
+        })) ||
+      hasComment(node, CommentCheckFlags.Dangling | CommentCheckFlags.Line);
 
     /** @type {boolean} */ const shouldUseConciseFormatting = isConciselyPrintedArray(node, options);
 
@@ -119,7 +94,7 @@ function printEmptyArrayElements(/** @type {AstPath} */ path, options, /** @type
       ? ""
       : needsForcedTrailingComma
         ? ","
-        : !shouldPrintComma(options)
+        : !shouldPrintTrailingComma(options)
           ? ""
           : shouldUseConciseFormatting
             ? ifBreak(",", "", { groupId })
@@ -128,7 +103,7 @@ function printEmptyArrayElements(/** @type {AstPath} */ path, options, /** @type
     parts.push(
       group(
         [
-          openBracket,
+          "[",
           indent([
             softline,
             shouldUseConciseFormatting
@@ -137,16 +112,16 @@ function printEmptyArrayElements(/** @type {AstPath} */ path, options, /** @type
                   printArrayElements(
                     path,
                     options,
+                    print,
                     elementsProperty,
                     node.inexact,
-                    print,
                   ),
                   trailingComma,
                 ],
             printDanglingComments(path, options),
           ]),
           softline,
-          closeBracket,
+          "]",
         ],
         { shouldBreak, id: groupId },
       ),
@@ -163,8 +138,8 @@ function printEmptyArrayElements(/** @type {AstPath} */ path, options, /** @type
 
 /** @returns {boolean} */ function isConciselyPrintedArray(node, options) {
   return (
-    isArrayOrTupleExpression(node) &&
-    node.elements.length > 1 &&
+    isArrayExpression(node) &&
+    node.elements.length > 0 &&
     node.elements.every(
       /** @returns {boolean | null} */ (element) =>
         element &&
@@ -183,18 +158,26 @@ function printEmptyArrayElements(/** @type {AstPath} */ path, options, /** @type
 }
 
 /** @returns {boolean} */ function isLineAfterElementEmpty({ node }, { originalText: text }) {
-  const skipComment = (/** @type {number} */ idx) =>
-    skipInlineComment(text, skipTrailingComment(text, idx));
+  let currentIdx = locEnd(node);
+  if (currentIdx === locStart(node)) {
+    return false;
+  }
 
-  const skipToComma = /** @returns {number} */ (/** @type {number} */ currentIdx) =>
-    text[currentIdx] === ","
-      ? currentIdx
-      : skipToComma(skipComment(currentIdx + 1));
+  const { length } = text;
+  while (currentIdx < length) {
+    if (text[currentIdx] === ",") {
+      break;
+    }
 
-  return isNextLineEmptyAfterIndex(text, skipToComma(locEnd(node)));
+    currentIdx = /** @type {number} */ (
+      skipInlineComment(text, skipTrailingComment(text, currentIdx + 1))
+    );
+  }
+
+  return isNextLineEmptyAfterIndex(text, currentIdx);
 }
 
-/** @returns {any[]} */ function printArrayElements(/** @type {AstPath} */ path, options, /** @type {string} */ elementsProperty, /** @type {boolean | undefined} */ inexact, /** @type {() => any} */ print) {
+function printArrayElements(/** @type {AstPath} */ path, options, print, /** @type {string} */ elementsProperty, inexact) {
   const parts = [];
 
   path.each(({ node, isLast }) => {

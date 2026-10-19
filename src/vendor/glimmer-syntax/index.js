@@ -1,15 +1,17 @@
+// @nts-check
 import { assertNever, assign, dict } from "@glimmer/util";
 
 import { parseWithoutProcessing, parse } from "@handlebars/parser";
 
-import { EventedTokenizer, EntityParser, HTML5NamedCharRefs } from "simple-html-tokenizer";
+import { EntityParser, EventedTokenizer, HTML5NamedCharRefs } from "simple-html-tokenizer";
 
 import { DEBUG } from "@glimmer/env";
 
 import { SexpOpcodes } from "@glimmer/wire-format";
 
-const ATTR_VALUE_REGEX_TEST = /["&\xA0]/u, ATTR_VALUE_REGEX_REPLACE = new RegExp(ATTR_VALUE_REGEX_TEST.source, "gu"), TEXT_REGEX_TEST = /[&<>\xA0]/u, TEXT_REGEX_REPLACE = new RegExp(TEXT_REGEX_TEST.source, "gu");
+const ATTR_VALUE_REGEX_TEST = /["\x26\xa0]/u, ATTR_VALUE_REGEX_REPLACE = new RegExp(ATTR_VALUE_REGEX_TEST.source, "gu"), TEXT_REGEX_TEST = /[&<>\xa0]/u, TEXT_REGEX_REPLACE = new RegExp(TEXT_REGEX_TEST.source, "gu");
 
+// \x26 is ampersand, \xa0 is non-breaking space
 function attrValueReplacer(char) {
     switch (char.charCodeAt(0)) {
       case 160:
@@ -45,6 +47,10 @@ function textReplacer(char) {
     }
 }
 
+function escapeAttrValue(attrValue) {
+    return ATTR_VALUE_REGEX_TEST.test(attrValue) ? attrValue.replace(ATTR_VALUE_REGEX_REPLACE, attrValueReplacer) : attrValue;
+}
+
 function sortByLoc(a, b) {
     // If either is invisible, don't try to order them
     return a.loc.isInvisible || b.loc.isInvisible ? 0 : a.loc.startPosition.line < b.loc.startPosition.line || a.loc.startPosition.line === b.loc.startPosition.line && a.loc.startPosition.column < b.loc.startPosition.column ? -1 : a.loc.startPosition.line === b.loc.startPosition.line && a.loc.startPosition.column === b.loc.startPosition.column ? 0 : 1;
@@ -52,7 +58,7 @@ function sortByLoc(a, b) {
 
 const voidMap = new Set([ "area", "base", "br", "col", "command", "embed", "hr", "img", "input", "keygen", "link", "meta", "param", "source", "track", "wbr" ]);
 
-function getVoidTags() {
+/** @returns {any[]} */ function getVoidTags() {
     return [ ...voidMap ];
 }
 
@@ -70,16 +76,15 @@ const NON_WHITESPACE = /^\S/u;
 }
 
 class Printer {
-    buffer="";
-    options;
     constructor(options) {
-        this.options = options;
+        this.buffer = "", this.options = options;
     }
     /*
     This is used by _all_ methods on this Printer class that add to `this.buffer`,
     it allows consumers of the printer to use alternate string representations for
     a given node.
-     The primary use case for this are things like source -> source codemod utilities.
+
+    The primary use case for this are things like source -> source codemod utilities.
     For example, ember-template-recast attempts to always preserve the original string
     formatting in each AST node if no modifications are made to it.
   */    handledByOverride(node, ensureLeadingWhitespace = !1) {
@@ -197,7 +202,8 @@ class Printer {
     Block(block) {
         /*
       When processing a template like:
-       ```hbs
+
+      ```hbs
       {{#if whatever}}
         whatever
       {{else if somethingElse}}
@@ -206,8 +212,10 @@ class Printer {
         fallback
       {{/if}}
       ```
-       The AST still _effectively_ looks like:
-       ```hbs
+
+      The AST still _effectively_ looks like:
+
+      ```hbs
       {{#if whatever}}
         whatever
       {{else}}{{#if somethingElse}}
@@ -216,12 +224,14 @@ class Printer {
         fallback
       {{/if}}{{/if}}
       ```
-       The only way we can tell if that is the case is by checking for
+
+      The only way we can tell if that is the case is by checking for
       `block.chained`, but unfortunately when the actual statements are
       processed the `block.body[0]` node (which will always be a
       `BlockStatement`) has no clue that its ancestor `Block` node was
       chained.
-       This "forwards" the `chained` setting so that we can check
+
+      This "forwards" the `chained` setting so that we can check
       it later when processing the `BlockStatement`.
     */
         block.chained && (block.body[0].chained = !0), this.handledByOverride(block) || this.TopLevelStatements(block.body);
@@ -257,16 +267,18 @@ class Printer {
     AttrNode(attr) {
         if (this.handledByOverride(attr)) return;
         let {name: name, value: value} = attr;
-        this.buffer += name, ("TextNode" !== value.type || value.chars.length > 0) && (this.buffer += "=", 
+        this.buffer += name, !name.startsWith("@") && "TextNode" == value.type && 0 === value.chars.length || (this.buffer += "=", 
         this.AttrNodeValue(value));
     }
     AttrNodeValue(value) {
-        "TextNode" === value.type ? (this.buffer += '"', this.TextNode(value, !0), this.buffer += '"') : this.Node(value);
+        if ("TextNode" === value.type) {
+            let quote = '"';
+            "raw" === this.options.entityEncoding && value.chars.includes('"') && !value.chars.includes("'") && (quote = "'"), 
+            this.buffer += quote, this.TextNode(value, quote), this.buffer += quote;
+        } else this.Node(value);
     }
-    TextNode(text, isAttr) {
-        var attrValue;
-        this.handledByOverride(text) || ("raw" === this.options.entityEncoding ? this.buffer += text.chars : this.buffer += isAttr ? (attrValue = text.chars, 
-        ATTR_VALUE_REGEX_TEST.test(attrValue) ? attrValue.replace(ATTR_VALUE_REGEX_REPLACE, attrValueReplacer) : attrValue) : function(text) {
+    TextNode(text, isInAttr) {
+        this.handledByOverride(text) || ("raw" === this.options.entityEncoding ? isInAttr && text.chars.includes(isInAttr) ? this.buffer += escapeAttrValue(text.chars) : this.buffer += text.chars : this.buffer += isInAttr ? escapeAttrValue(text.chars) : function(text) {
             return TEXT_REGEX_TEST.test(text) ? text.replace(TEXT_REGEX_REPLACE, textReplacer) : text;
         }(text.chars));
     }
@@ -290,7 +302,7 @@ class Printer {
     }
     ConcatStatement(concat) {
         this.handledByOverride(concat) || (this.buffer += '"', concat.parts.forEach((part => {
-            "TextNode" === part.type ? this.TextNode(part, !0) : this.Node(part);
+            "TextNode" === part.type ? this.TextNode(part, '"') : this.Node(part);
         })), this.buffer += '"');
     }
     MustacheCommentStatement(comment) {
@@ -329,10 +341,10 @@ class Printer {
         this.handledByOverride(str) || (this.buffer += JSON.stringify(str.value));
     }
     BooleanLiteral(bool) {
-        this.handledByOverride(bool) || (this.buffer += bool.value);
+        this.handledByOverride(bool) || (this.buffer += String(bool.value));
     }
     NumberLiteral(number) {
-        this.handledByOverride(number) || (this.buffer += number.value);
+        this.handledByOverride(number) || (this.buffer += String(number.value));
     }
     UndefinedLiteral(node) {
         this.handledByOverride(node) || (this.buffer += "undefined");
@@ -353,6 +365,7 @@ class Printer {
 function build(ast, options = {
     entityEncoding: "transformed"
 }) {
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- JS users
     return ast ? new Printer(options).print(ast) : "";
 }
 
@@ -387,19 +400,15 @@ function isKeyword(word, type) {
 };
 
 // import Logger from './logger';
-function isPresentArray(list) {
-    return list.length > 0;
+/** @returns {boolean} */ function isPresentArray(/** @type {any[]} */ list) {
+    return !!list && list.length > 0;
 }
 
-function asPresentArray(list, message = "unexpected empty list") {
-    return list;
-}
-
-function getLast(list) {
+function getLast(/** @type {any[]} */ list) {
     return 0 === list.length ? void 0 : list[list.length - 1];
 }
 
-function getFirst(list) {
+function getFirst(/** @type {any[]} */ list) {
     return 0 === list.length ? void 0 : list[0];
 }
 
@@ -421,11 +430,10 @@ const UNKNOWN_POSITION = Object.freeze({
 });
 
 class WhenList {
-    _whens;
-    constructor(whens) {
-        this._whens = whens;
+    constructor(/** @type {any[]} */ whens) {
+        /** @type {any[]} */ this._whens = whens;
     }
-    first(kind) {
+    first(/** @type {string} */ kind) {
         for (const when of this._whens) {
             const value = when.match(kind);
             if (isPresentArray(value)) return value[0];
@@ -435,16 +443,15 @@ class WhenList {
 }
 
 class When {
-    _map=new Map;
-    get(pattern, or) {
+    /** @returns {When} */ get(/** @type {string} */ pattern, or) {
         let value = this._map.get(pattern);
         return value || (value = or(), this._map.set(pattern, value), value);
     }
-    add(pattern, out) {
+    add(/** @type {string} */ pattern, out) {
         this._map.set(pattern, out);
     }
-    match(kind) {
-        const pattern = function(kind) {
+    /** @returns {any[]} */ match(/** @type {string} */ kind) {
+        const pattern = /** @returns {string} */ function(/** @type {string} */ kind) {
             switch (kind) {
               case "Broken":
               case "InternalsSynthetic":
@@ -457,6 +464,9 @@ class When {
         }(kind), out = [], exact = this._map.get(pattern), fallback = this._map.get("MATCH_ANY");
         return exact && out.push(exact), fallback && out.push(fallback), out;
     }
+    constructor() {
+        this._map = new Map;
+    }
 }
 
 function match(callback) {
@@ -464,24 +474,22 @@ function match(callback) {
 }
 
 class Matcher {
-    _whens=new When;
     /**
    * You didn't exhaustively match all possibilities.
    */
     validate() {
-        return (left, right) => this.matchFor(left.kind, right.kind)(left, right);
+        return /** @returns {SourceSpan} */ (left, right) => this.matchFor(left.kind, right.kind)(left, right);
     }
-    matchFor(left, right) {
+    matchFor(/** @type {string} */ left, /** @type {string} */ right) {
         const nesteds = this._whens.match(left);
         return isPresentArray(nesteds), new WhenList(nesteds).first(right);
     }
-    // This big block is the bulk of the heavy lifting in this file. It facilitates exhaustiveness
-    // checking so that matchers can ensure they've actually covered all the cases (and TypeScript
-    // will treat it as an exhaustive match).
-    when(left, right, 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    /** @returns {Matcher} */ when(/** @type {string} */ left, /** @type {string} */ right, // eslint-disable-next-line @typescript-eslint/no-explicit-any
     callback) {
-        return this._whens.get(left, (() => new When)).add(right, callback), this;
+        return this._whens.get(left, (/** @returns {When} */ () => new When)).add(right, callback), this;
+    }
+    constructor() {
+        /** @type {When} */ this._whens = new When;
     }
 }
 
@@ -499,8 +507,6 @@ class SourceSlice {
             chars: slice[0]
         });
     }
-    chars;
-    loc;
     constructor(options) {
         this.loc = options.loc, this.chars = options.chars;
     }
@@ -512,9 +518,6 @@ class SourceSlice {
     }
 }
 
-/**
- * All spans have these details in common.
- */
 /**
  * A `SourceSpan` object represents a span of characters inside of a template source.
  *
@@ -555,14 +558,14 @@ class SourceSlice {
     static load(source, serialized) {
         return "number" == typeof serialized ? SourceSpan.forCharPositions(source, serialized, serialized) : "string" == typeof serialized ? SourceSpan.synthetic(serialized) : Array.isArray(serialized) ? SourceSpan.forCharPositions(source, serialized[0], serialized[1]) : "NonExistent" === serialized ? SourceSpan.NON_EXISTENT : "Broken" === serialized ? SourceSpan.broken(BROKEN_LOCATION) : void assertNever(serialized);
     }
-    static forHbsLoc(source, loc) {
+    /** @returns {SourceSpan} */ static forHbsLoc(/** @type {Source} */ source, loc) {
         const start = new HbsPosition(source, loc.start), end = new HbsPosition(source, loc.end);
         return new HbsSpan(source, {
             start: start,
             end: end
         }, loc).wrap();
     }
-    static forCharPositions(source, startPos, endPos) {
+    /** @returns {SourceSpan} */ static forCharPositions(/** @type {Source} */ source, /** @type {number} */ startPos, /** @type {number} */ endPos) {
         const start = new CharPosition(source, startPos), end = new CharPosition(source, endPos);
         return new CharPositionSpan(source, {
             start: start,
@@ -572,14 +575,10 @@ class SourceSlice {
     static synthetic(chars) {
         return new InvisibleSpan("InternalsSynthetic", NON_EXISTENT_LOCATION, chars).wrap();
     }
-    static broken(pos = BROKEN_LOCATION) {
+    /** @returns {SourceSpan} */ static broken(pos = BROKEN_LOCATION) {
         return new InvisibleSpan("Broken", pos).wrap();
     }
-    isInvisible;
     constructor(data) {
-        /**
- * These kinds  describe spans that don't have a concrete location in the original source.
- */
         var kind;
         /**
  * This file implements the DSL used by span and offset in places where they need to exhaustively
@@ -590,17 +589,17 @@ class SourceSlice {
  * removed.
  */        this.data = data, this.isInvisible = "CharPosition" !== (kind = data.kind) && "HbsPosition" !== kind;
     }
-    getStart() {
+    /** @returns {SourceOffset} */ getStart() {
         return this.data.getStart().wrap();
     }
-    getEnd() {
+    /** @returns {SourceOffset} */ getEnd() {
         return this.data.getEnd().wrap();
     }
     get loc() {
         const span = this.data.toHbsSpan();
         return null === span ? BROKEN_LOCATION : span.toHbsLoc();
     }
-    get module() {
+    /** @returns {string} */ get module() {
         return this.data.getModule();
     }
     /**
@@ -625,22 +624,18 @@ class SourceSlice {
     }
     /**
    * Create a new span with the current span's beginning and a new ending.
-   */    withEnd(other) {
+   * @returns {SourceSpan}
+   */    withEnd(/** @type {SourceOffset} */ other) {
         return span(this.data.getStart(), other.data);
     }
-    asString() {
+    /** @returns {string} */ asString() {
         return this.data.asString();
     }
     /**
-   * Convert this `SourceSpan` into a `SourceSlice`. In debug mode, this method optionally checks
-   * that the byte offsets represented by this `SourceSpan` actually correspond to the expected
-   * string.
+   * Convert this `SourceSpan` into a `SourceSlice`.
    */    toSlice(expected) {
         const chars = this.data.asString();
-        return DEBUG && void 0 !== expected && chars !== expected && 
-        // eslint-disable-next-line no-console
-        console.warn(`unexpectedly found ${JSON.stringify(chars)} when slicing source, but expected ${JSON.stringify(expected)}`), 
-        new SourceSlice({
+        return JSON.stringify(chars), JSON.stringify(expected), new SourceSlice({
             loc: this,
             chars: expected || chars
         });
@@ -684,7 +679,7 @@ class SourceSlice {
    */    get source() {
         return this.module;
     }
-    collapse(where) {
+    /** @returns {SourceSpan} */ collapse(/** @type {string} */ where) {
         switch (where) {
           case "start":
             return this.getStart().collapsed();
@@ -693,7 +688,7 @@ class SourceSlice {
             return this.getEnd().collapsed();
         }
     }
-    extend(other) {
+    /** @returns {SourceSpan} */ extend(/** @type {SourceSpan} */ other) {
         return span(this.data.getStart(), other.data.getEnd());
     }
     serialize() {
@@ -702,7 +697,7 @@ class SourceSlice {
     slice({skipStart: skipStart = 0, skipEnd: skipEnd = 0}) {
         return span(this.getStart().move(skipStart).data, this.getEnd().move(-skipEnd).data);
     }
-    sliceStartChars({skipStart: skipStart = 0, chars: chars}) {
+    /** @returns {SourceSpan} */ sliceStartChars({skipStart: skipStart = 0, chars: chars}) {
         return span(this.getStart().move(skipStart).data, this.getStart().move(skipStart + chars).data);
     }
     sliceEndChars({skipEnd: skipEnd = 0, chars: chars}) {
@@ -711,28 +706,28 @@ class SourceSlice {
 }
 
 class CharPositionSpan {
-    kind="CharPosition";
-    #locPosSpan=null;
-    constructor(source, charPositions) {
-        this.source = source, this.charPositions = charPositions;
+    #locPosSpan;
+    constructor(/** @type {Source} */ source, charPositions) {
+        this.source = source, this.charPositions = charPositions, this.kind = "CharPosition", 
+        this.#locPosSpan = null;
     }
-    wrap() {
+    /** @returns {SourceSpan} */ wrap() {
         return new SourceSpan(this);
     }
-    asString() {
+    /** @returns {string} */ asString() {
         return this.source.slice(this.charPositions.start.charPos, this.charPositions.end.charPos);
     }
     getModule() {
         return this.source.module;
     }
-    getStart() {
+    /** @returns {CharPosition} */ getStart() {
         return this.charPositions.start;
     }
-    getEnd() {
+    /** @returns {CharPosition} */ getEnd() {
         return this.charPositions.end;
     }
     locDidUpdate() {}
-    toHbsSpan() {
+    /** @returns {HbsSpan | null} */ toHbsSpan() {
         let locPosSpan = this.#locPosSpan;
         if (null === locPosSpan) {
             const start = this.charPositions.start.toHbsPos(), end = this.charPositions.end.toHbsPos();
@@ -753,18 +748,18 @@ class CharPositionSpan {
 }
 
 class HbsSpan {
-    kind="HbsPosition";
-    #charPosSpan=null;
+    #charPosSpan;
     // the source location from Handlebars + AST Plugins -- could be wrong
     #providedHbsLoc;
-    constructor(source, hbsPositions, providedHbsLoc = null) {
-        this.source = source, this.hbsPositions = hbsPositions, this.#providedHbsLoc = providedHbsLoc;
+    constructor(/** @type {Source} */ source, hbsPositions, providedHbsLoc = null) {
+        this.source = source, this.hbsPositions = hbsPositions, this.kind = "HbsPosition", 
+        this.#charPosSpan = null, this.#providedHbsLoc = providedHbsLoc;
     }
     serialize() {
         const charPos = this.toCharPosSpan();
         return null === charPos ? "Broken" : charPos.wrap().serialize();
     }
-    wrap() {
+    /** @returns {SourceSpan} */ wrap() {
         return new SourceSpan(this);
     }
     updateProvided(pos, edge) {
@@ -779,17 +774,17 @@ class HbsSpan {
         void 0 !== start && (this.updateProvided(start, "start"), this.hbsPositions.start = new HbsPosition(this.source, start, null)), 
         void 0 !== end && (this.updateProvided(end, "end"), this.hbsPositions.end = new HbsPosition(this.source, end, null));
     }
-    asString() {
+    /** @returns {string} */ asString() {
         const span = this.toCharPosSpan();
         return null === span ? "" : span.asString();
     }
-    getModule() {
+    /** @returns {string} */ getModule() {
         return this.source.module;
     }
-    getStart() {
+    /** @returns {HbsPosition} */ getStart() {
         return this.hbsPositions.start;
     }
-    getEnd() {
+    /** @returns {HbsPosition} */ getEnd() {
         return this.hbsPositions.end;
     }
     toHbsLoc() {
@@ -798,10 +793,10 @@ class HbsSpan {
             end: this.hbsPositions.end.hbsPos
         };
     }
-    toHbsSpan() {
+    /** @returns {HbsSpan} */ toHbsSpan() {
         return this;
     }
-    toCharPosSpan() {
+    /** @returns {CharPositionSpan | null} */ toCharPosSpan() {
         let charPosSpan = this.#charPosSpan;
         if (null === charPosSpan) {
             const start = this.hbsPositions.start.toCharPos(), end = this.hbsPositions.end.toCharPos();
@@ -816,10 +811,8 @@ class HbsSpan {
 }
 
 class InvisibleSpan {
-    constructor(kind, 
-    // whatever was provided, possibly broken
-    loc, 
-    // if the span represents a synthetic string
+    constructor(/** @type {string} */ kind, // whatever was provided, possibly broken
+    loc, // if the span represents a synthetic string
     string = null) {
         this.kind = kind, this.loc = loc, this.string = string;
     }
@@ -833,7 +826,7 @@ class InvisibleSpan {
             return this.string || "";
         }
     }
-    wrap() {
+    /** @returns {SourceSpan} */ wrap() {
         return new SourceSpan(this);
     }
     asString() {
@@ -863,13 +856,13 @@ class InvisibleSpan {
     }
 }
 
-const span = match((m => m.when("HbsPosition", "HbsPosition", ((left, right) => new HbsSpan(left.source, {
+const span = match((/** @returns {Matcher} */ (/** @type {Matcher} */ m) => m.when("HbsPosition", "HbsPosition", (/** @returns {SourceSpan} */ (/** @type {HbsPosition} */ left, /** @type {HbsPosition} */ right) => new HbsSpan(left.source, {
     start: left,
     end: right
-}).wrap())).when("CharPosition", "CharPosition", ((left, right) => new CharPositionSpan(left.source, {
+}).wrap())).when("CharPosition", "CharPosition", (/** @returns {SourceSpan} */ (/** @type {CharPosition} */ left, /** @type {CharPosition} */ right) => new CharPositionSpan(left.source, {
     start: left,
     end: right
-}).wrap())).when("CharPosition", "HbsPosition", ((left, right) => {
+}).wrap())).when("CharPosition", "HbsPosition", (/** @returns {SourceSpan} */ (/** @type {CharPosition} */ left, /** @type {HbsPosition} */ right) => {
     const rightCharPos = right.toCharPos();
     return null === rightCharPos ? new InvisibleSpan("Broken", BROKEN_LOCATION).wrap() : span(left, rightCharPos);
 })).when("HbsPosition", "CharPosition", ((left, right) => {
@@ -877,10 +870,6 @@ const span = match((m => m.when("HbsPosition", "HbsPosition", ((left, right) => 
     return null === leftCharPos ? new InvisibleSpan("Broken", BROKEN_LOCATION).wrap() : span(leftCharPos, right);
 })).when("IS_INVISIBLE", "MATCH_ANY", (left => new InvisibleSpan(left.kind, BROKEN_LOCATION).wrap())).when("MATCH_ANY", "IS_INVISIBLE", ((_, right) => new InvisibleSpan(right.kind, BROKEN_LOCATION).wrap())))), BROKEN = "BROKEN";
 
-/**
- * All positions have these details in common. Most notably, all three kinds of positions can
- * must be able to attempt to convert themselves into {@see CharPosition}.
- */
 /**
  * Used to indicate that an attempt to convert a `SourcePosition` to a character offset failed. It
  * is separate from `null` so that `null` can be used to indicate that the computation wasn't yet
@@ -901,8 +890,9 @@ class SourceOffset {
    * Create a `SourceOffset` from a Handlebars `SourcePosition`. It's stored as-is, and converted
    * into a character offset on demand, which avoids unnecessarily computing the offset of every
    * `SourceLocation`, but also means that broken `SourcePosition`s are not always detected.
+   * @returns {SourceOffset}
    */
-    static forHbsPos(source, pos) {
+    static forHbsPos(/** @type {Source} */ source, pos) {
         return new HbsPosition(source, pos, null).wrap();
     }
     /**
@@ -917,6 +907,7 @@ class SourceOffset {
     }
     /**
    * Get the character offset for this `SourceOffset`, if possible.
+   * @returns {number | null}
    */    get offset() {
         const charPos = this.data.toCharPos();
         return null === charPos ? null : charPos.offset;
@@ -935,7 +926,8 @@ class SourceOffset {
     /**
    * Create a span that starts from this source offset and ends with another source offset. Avoid
    * computing character offsets if both `SourceOffset`s are still lazy.
-   */    until(other) {
+   * @returns {SourceSpan}
+   */    until(/** @type {SourceOffset} */ other) {
         return span(this.data, other.data);
     }
     /**
@@ -946,7 +938,8 @@ class SourceOffset {
    *
    * If the resulting character offset is less than 0 or greater than the size of the source, `move`
    * returns a broken offset.
-   */    move(by) {
+   * @returns {SourceOffset}
+   */    move(/** @type {number} */ by) {
         const charPos = this.data.toCharPos();
         if (null === charPos) return SourceOffset.broken();
         {
@@ -957,6 +950,7 @@ class SourceOffset {
     /**
    * Create a new `SourceSpan` that represents a collapsed range at this source offset. Avoid
    * computing the character offset if it has not already been computed.
+   * @returns {SourceSpan}
    */    collapsed() {
         return span(this.data, this.data);
     }
@@ -969,16 +963,14 @@ class SourceOffset {
 }
 
 class CharPosition {
-    kind="CharPosition";
-    /** Computed from char offset */
-    _locPos=null;
-    constructor(source, charPos) {
-        this.source = source, this.charPos = charPos;
+    constructor(/** @type {Source} */ source, /** @type {number} */ charPos) {
+        this.source = source, this.charPos = charPos, this.kind = "CharPosition", this._locPos = null;
     }
     /**
    * This is already a `CharPosition`.
    *
    * {@see HbsPosition} for the alternative.
+   * @returns {CharPosition}
    */    toCharPos() {
         return this;
     }
@@ -989,11 +981,12 @@ class CharPosition {
         const hbs = this.toHbsPos();
         return null === hbs ? UNKNOWN_POSITION : hbs.toJSON();
     }
-    wrap() {
+    /** @returns {SourceOffset} */ wrap() {
         return new SourceOffset(this);
     }
     /**
    * A `CharPosition` always has an offset it can produce without any additional computation.
+   * @returns {number}
    */    get offset() {
         return this.charPos;
     }
@@ -1002,6 +995,7 @@ class CharPosition {
    * a `CharPosition` has computed its `HbsPosition`, it will not need to do compute it again, and
    * the same `CharPosition` is retained when used as one of the ends of a `SourceSpan`, so
    * computing the `HbsPosition` should be a one-time operation.
+   * @returns {HbsPosition | null}
    */    toHbsPos() {
         let locPos = this._locPos;
         if (null === locPos) {
@@ -1013,16 +1007,15 @@ class CharPosition {
 }
 
 class HbsPosition {
-    kind="HbsPosition";
-    _charPos;
-    constructor(source, hbsPos, charPos = null) {
-        this.source = source, this.hbsPos = hbsPos, this._charPos = null === charPos ? null : new CharPosition(source, charPos);
+    constructor(/** @type {Source} */ source, hbsPos, charPos = null) {
+        this.source = source, this.hbsPos = hbsPos, this.kind = "HbsPosition", this._charPos = null === charPos ? null : new CharPosition(source, charPos);
     }
     /**
    * Lazily compute the character offset from the {@see SourcePosition}. Once an `HbsPosition` has
    * computed its `CharPosition`, it will not need to do compute it again, and the same
    * `HbsPosition` is retained when used as one of the ends of a `SourceSpan`, so computing the
    * `CharPosition` should be a one-time operation.
+   * @returns {CharPosition | null}
    */    toCharPos() {
         let charPos = this._charPos;
         if (null === charPos) {
@@ -1037,7 +1030,7 @@ class HbsPosition {
    */    toJSON() {
         return this.hbsPos;
     }
-    wrap() {
+    /** @returns {SourceOffset} */ wrap() {
         return new SourceOffset(this);
     }
     /**
@@ -1050,8 +1043,7 @@ class HbsPosition {
 }
 
 class InvisiblePosition {
-    constructor(kind, 
-    // whatever was provided, possibly broken
+    constructor(kind, // whatever was provided, possibly broken
     pos) {
         this.kind = kind, this.pos = pos;
     }
@@ -1081,30 +1073,31 @@ class InvisiblePosition {
  * Compare two {@see AnyPosition} and determine whether they are equal.
  *
  * @see {SourceOffset#eql}
- */ const eql = match((m => m.when("HbsPosition", "HbsPosition", (({hbsPos: left}, {hbsPos: right}) => left.column === right.column && left.line === right.line)).when("CharPosition", "CharPosition", (({charPos: left}, {charPos: right}) => left === right)).when("CharPosition", "HbsPosition", (({offset: left}, right) => left === right.toCharPos()?.offset)).when("HbsPosition", "CharPosition", ((left, {offset: right}) => left.toCharPos()?.offset === right)).when("MATCH_ANY", "MATCH_ANY", (() => !1))));
+ */ const eql = match((/** @returns {Matcher} */ (/** @type {Matcher} */ m) => m.when("HbsPosition", "HbsPosition", (({hbsPos: left}, {hbsPos: right}) => left.column === right.column && left.line === right.line)).when("CharPosition", "CharPosition", (({charPos: left}, {charPos: right}) => left === right)).when("CharPosition", "HbsPosition", (({offset: left}, right) => left === right.toCharPos()?.offset)).when("HbsPosition", "CharPosition", ((left, {offset: right}) => left.toCharPos()?.offset === right)).when("MATCH_ANY", "MATCH_ANY", (() => !1))));
 
 class Source {
     static from(source, options = {}) {
         return new Source(source, options.meta?.moduleName);
     }
-    constructor(source, module = "an unknown module") {
+    constructor(/** @type {string} */ source, module = "an unknown module") {
         this.source = source, this.module = module;
     }
     /**
    * Validate that the character offset represents a position in the source string.
+   * @returns {boolean}
    */    validate(offset) {
         return offset >= 0 && offset <= this.source.length;
     }
-    slice(start, end) {
+    /** @returns {string} */ slice(start, end) {
         return this.source.slice(start, end);
     }
-    offsetFor(line, column) {
+    /** @returns {SourceOffset} */ offsetFor(/** @type {number} */ line, /** @type {number} */ column) {
         return SourceOffset.forHbsPos(this, {
             line: line,
             column: column
         });
     }
-    spanFor({start: start, end: end}) {
+    /** @returns {SourceSpan} */ spanFor({start: start, end: end}) {
         return SourceSpan.forHbsLoc(this, {
             start: {
                 line: start.line,
@@ -1116,11 +1109,10 @@ class Source {
             }
         });
     }
-    hbsPosFor(offset) {
+    hbsPosFor(/** @type {number} */ offset) {
         let seenLines = 0, seenChars = 0;
         if (offset > this.source.length) return null;
-        // eslint-disable-next-line no-constant-condition
-                for (;;) {
+        for (;;) {
             let nextLine = this.source.indexOf("\n", seenChars);
             if (offset <= nextLine || -1 === nextLine) return {
                 line: seenLines + 1,
@@ -1129,7 +1121,7 @@ class Source {
             seenLines += 1, seenChars = nextLine + 1;
         }
     }
-    charPosFor(position) {
+    /** @returns {number} */ charPosFor(position) {
         let {line: line, column: column} = position, sourceLength = this.source.length, seenLines = 0, seenChars = 0;
         for (;seenChars < sourceLength; ) {
             let nextLine = this.source.indexOf("\n", seenChars);
@@ -1152,7 +1144,6 @@ class SpanList {
     static range(span, fallback = SourceSpan.NON_EXISTENT) {
         return new SpanList(span.map(loc)).getRangeOffset(fallback);
     }
-    _span;
     constructor(span = []) {
         this._span = span;
     }
@@ -1184,7 +1175,7 @@ function maybeLoc(location, fallback) {
     return hasSpan(location) ? loc(location) : fallback;
 }
 
-var api$2 =  Object.freeze({
+var api$1 =  Object.freeze({
     __proto__: null,
     NON_EXISTENT_LOCATION: NON_EXISTENT_LOCATION,
     SYNTHETIC_LOCATION: SYNTHETIC_LOCATION,
@@ -1199,7 +1190,7 @@ var api$2 =  Object.freeze({
     maybeLoc: maybeLoc
 });
 
-function generateSyntaxError(message, location) {
+function generateSyntaxError(/** @type {string} */ message, /** @type {SourceSpan} */ location) {
     let {module: module, loc: loc} = location, {line: line, column: column} = loc.start, code = location.asString(), quotedCode = code ? `\n\n|\n|  ${code.split("\n").join("\n|  ")}\n|\n\n` : "", error = new Error(`${message}: ${quotedCode}(error occurred in '${module}' @ line ${line} : column ${column})`);
     return error.name = "SyntaxError", error.location = location, error.code = code, 
     error;
@@ -1234,8 +1225,10 @@ const visitorKeys = {
         this.key = key, this.message = message, this.node = node, this.parent = parent, 
         error.stack && (this.stack = error.stack);
     }
-    return TraversalError.prototype = Object.create(Error.prototype), TraversalError.prototype.constructor = TraversalError, 
-    TraversalError;
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    return TraversalError.prototype = Object.create(Error.prototype), 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    TraversalError.prototype.constructor = TraversalError, TraversalError;
 }();
 
 function cannotRemoveNode(node, parent, key) {
@@ -1251,9 +1244,6 @@ function cannotReplaceOrRemoveInKeyHandlerYet(node, key) {
 }
 
 class WalkerPath {
-    node;
-    parent;
-    parentKey;
     constructor(node, parent = null, parentKey = null) {
         this.node = node, this.parent = parent, this.parentKey = parentKey;
     }
@@ -1268,7 +1258,6 @@ class WalkerPath {
 }
 
 class PathParentsIterator {
-    path;
     constructor(path) {
         this.path = path;
     }
@@ -1291,11 +1280,11 @@ function getExitFunction(handler) {
     return "function" == typeof handler ? void 0 : handler.exit;
 }
 
-function visitNode(visitor, path) {
-    let enter, exit, result, {node: node, parent: parent, parentKey: parentKey} = path, handler = function(visitor, nodeType) {
-        // eslint-disable-next-line deprecation/deprecation
+function visitNode(visitor, /** @type {WalkerPath | undefined} */ path) {
+    let enter, exit, result, {node: node, parent: parent, parentKey: parentKey} = path, handler = function(visitor, /** @type {string} */ nodeType) {
+        // eslint-disable-next-line @typescript-eslint/no-deprecated
         if (visitor.Program && ("Template" === nodeType && !visitor.Template || "Block" === nodeType && !visitor.Block)) 
-        // eslint-disable-next-line deprecation/deprecation
+        // eslint-disable-next-line @typescript-eslint/no-deprecated
         return visitor.Program;
         let handler = visitor[nodeType];
         return void 0 !== handler ? handler : visitor.All;
@@ -1320,13 +1309,13 @@ function set(node, key, value) {
     node[key] = value;
 }
 
-function visitKey(visitor, handler, path, key) {
-    let keyEnter, keyExit, {node: node} = path, value = function(node, key) {
+function visitKey(visitor, handler, /** @type {WalkerPath} */ path, /** @type {string} */ key) {
+    let keyEnter, keyExit, {node: node} = path, value = function(node, /** @type {string} */ key) {
         return node[key];
     }(node, key);
     if (value) {
         if (void 0 !== handler) {
-            let keyHandler = function(handler, key) {
+            let keyHandler = function(handler, /** @type {string} */ key) {
                 let keyVisitor = "function" != typeof handler ? handler.keys : void 0;
                 if (void 0 === keyVisitor) return;
                 let keyHandler = keyVisitor[key];
@@ -1340,10 +1329,11 @@ function visitKey(visitor, handler, path, key) {
             void 0 !== result && 
             // TODO: dynamically check the results by having a table of
             // expected node types in value space, not just type space
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
             function(node, key, value, result) {
                 if (null === result) throw cannotRemoveNode(value, node, key);
                 if (Array.isArray(result)) {
+                    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
                     if (1 !== result.length) throw 0 === result.length ? cannotRemoveNode(value, node, key) : cannotReplaceNode(value, node, key);
                     set(node, key, result[0]);
                 } else set(node, key, result);
@@ -1353,7 +1343,7 @@ function visitKey(visitor, handler, path, key) {
     }
 }
 
-function visitArray(visitor, array, parent, parentKey) {
+function visitArray(visitor, /** @type {any[]} */ array, /** @type {WalkerPath} */ parent, /** @type {string} */ parentKey) {
     for (let i = 0; i < array.length; i++) {
         let node = array[i], result = visitNode(visitor, new WalkerPath(node, parent, parentKey));
         void 0 !== result && (i += spliceArray(array, i, result) - 1);
@@ -1370,9 +1360,8 @@ function traverse(node, visitor) {
 }
 
 class Walker {
-    stack=[];
     constructor(order) {
-        this.order = order;
+        this.order = order, this.stack = [];
     }
     visit(node, visitor) {
         node && (this.stack.push(node), "post" === this.order ? (this.children(node, visitor), 
@@ -1401,7 +1390,7 @@ function walkBody(walker, body, callback) {
 }
 
 function appendChild(parent, node) {
-    (function(node) {
+    (/** @returns {any[]} */ function(node) {
         switch (node.type) {
           case "Block":
           case "Template":
@@ -1413,7 +1402,7 @@ function appendChild(parent, node) {
     })(parent).push(node);
 }
 
-function isHBSLiteral(path) {
+/** @returns {boolean} */ function isHBSLiteral(path) {
     return "StringLiteral" === path.type || "BooleanLiteral" === path.type || "NumberLiteral" === path.type || "NullLiteral" === path.type || "UndefinedLiteral" === path.type;
 }
 
@@ -1423,8 +1412,6 @@ function SOURCE() {
     return _SOURCE || (_SOURCE = new Source("", "(synthetic)")), _SOURCE;
 }
 
-// const SOURCE = new Source('', '(tests)');
-// Statements
 function buildVar(name, loc) {
     return b.var({
         name: name,
@@ -1452,7 +1439,7 @@ function buildPath(path, loc) {
         }
     }
     let {head: head, tail: tail} = function(original, loc) {
-        let [head, ...tail] = asPresentArray(original.split(".")), headNode = b.head({
+        let [head, ...tail] = original.split("."), headNode = b.head({
             original: head,
             loc: buildLoc(loc || null)
         });
@@ -1575,9 +1562,7 @@ var publicBuilder = {
             loc: buildLoc(loc || null)
         });
     },
-    element: 
-    // Nodes
-    function(tag, options = {}) {
+    element: function(tag, options = {}) {
         let path, selfClosing, {attrs: attrs, blockParams: blockParams, modifiers: modifiers, comments: comments, children: children, openTag: openTag, closeTag: _closeTag, loc: loc} = options;
         // this is used for backwards compat, prior to `selfClosing` being part of the ElementNode AST
                 "string" == typeof tag ? tag.endsWith("/") ? (path = buildPath(tag.slice(0, -1)), 
@@ -1585,7 +1570,7 @@ var publicBuilder = {
         path = tag) : "path" in tag ? (tag.path.type, tag.path.type, path = tag.path, selfClosing = tag.selfClosing) : (path = buildPath(tag.name), 
         selfClosing = tag.selfClosing);
         let params = blockParams?.map((param => "string" == typeof param ? buildVar(param) : param)), closeTag = null;
-        return _closeTag ? closeTag = buildLoc(_closeTag || null) : void 0 === _closeTag && (closeTag = selfClosing || isVoidTag(path.original) ? null : buildLoc(null)), 
+        return _closeTag ? closeTag = buildLoc(_closeTag) : void 0 === _closeTag && (closeTag = selfClosing || isVoidTag(path.original) ? null : buildLoc(null)), 
         b.element({
             path: path,
             selfClosing: selfClosing || !1,
@@ -1691,7 +1676,7 @@ var publicBuilder = {
     null: () => buildLiteral("NullLiteral", null)
 };
 
-function literal(type) {
+function literal(/** @type {string} */ type) {
     return function(value, loc) {
         return buildLiteral(type, value, loc);
     };
@@ -1714,18 +1699,18 @@ class {
             column: column
         };
     }
-    blockItself({body: body, params: params, chained: chained = !1, loc: loc}) {
+    blockItself({body: body, params: params1, chained: chained = !1, loc: loc}) {
         return {
             type: "Block",
             body: body,
-            params: params,
-            get blockParams() {
-                return this.params.map((p => p.name));
+            params: params1,
+            /** @returns {any[]} */ get blockParams() {
+                return this.params.map((/** @returns {string} */ p => p.name));
             },
             set blockParams(params) {
-                this.params = params.map((name => b.var({
-                    name: name,
-                    loc: SourceSpan.synthetic(name)
+                this.params = params.map((name1 => b.var({
+                    name: name1,
+                    loc: SourceSpan.synthetic(name1)
                 })));
             },
             chained: chained,
@@ -1740,7 +1725,7 @@ class {
             loc: loc
         };
     }
-    mustache({path: path, params: params, hash: hash, trusting: trusting, loc: loc, strip: strip = DEFAULT_STRIP}) {
+    mustache({path: path, params: params1, hash: hash, trusting: trusting, loc: loc, strip: strip = DEFAULT_STRIP}) {
         return function({path: path, params: params, hash: hash, trusting: trusting, strip: strip, loc: loc}) {
             const node = {
                 type: "MustacheStatement",
@@ -1756,24 +1741,24 @@ class {
                 get() {
                     return !this.trusting;
                 },
-                set(value) {
-                    this.trusting = !value;
+                set(value1) {
+                    this.trusting = !value1;
                 }
             }), node;
         }({
             path: path,
-            params: params,
+            params: params1,
             hash: hash,
             trusting: trusting,
             strip: strip,
             loc: loc
         });
     }
-    block({path: path, params: params, hash: hash, defaultBlock: defaultBlock, elseBlock: elseBlock = null, loc: loc, openStrip: openStrip = DEFAULT_STRIP, inverseStrip: inverseStrip = DEFAULT_STRIP, closeStrip: closeStrip = DEFAULT_STRIP}) {
+    block({path: path, params: params1, hash: hash, defaultBlock: defaultBlock, elseBlock: elseBlock = null, loc: loc, openStrip: openStrip = DEFAULT_STRIP, inverseStrip: inverseStrip = DEFAULT_STRIP, closeStrip: closeStrip = DEFAULT_STRIP}) {
         return {
             type: "BlockStatement",
             path: path,
-            params: params,
+            params: params1,
             hash: hash,
             program: defaultBlock,
             inverse: elseBlock,
@@ -1783,17 +1768,17 @@ class {
             closeStrip: closeStrip
         };
     }
-    comment({value: value, loc: loc}) {
+    comment({value: value1, loc: loc}) {
         return {
             type: "CommentStatement",
-            value: value,
+            value: value1,
             loc: loc
         };
     }
-    mustacheComment({value: value, loc: loc}) {
+    mustacheComment({value: value1, loc: loc}) {
         return {
             type: "MustacheCommentStatement",
-            value: value,
+            value: value1,
             loc: loc
         };
     }
@@ -1804,35 +1789,35 @@ class {
             loc: loc
         };
     }
-    element({path: path, selfClosing: selfClosing, attributes: attributes, modifiers: modifiers, params: params, comments: comments, children: children, openTag: openTag, closeTag: closeTag, loc: loc}) {
-        let _selfClosing = selfClosing;
+    element({path: path, selfClosing: selfClosing1, attributes: attributes, modifiers: modifiers, params: params1, comments: comments, children: children, openTag: openTag, closeTag: closeTag, loc: loc}) {
+        let _selfClosing = selfClosing1;
         return {
             type: "ElementNode",
             path: path,
             attributes: attributes,
             modifiers: modifiers,
-            params: params,
+            params: params1,
             comments: comments,
             children: children,
             openTag: openTag,
             closeTag: closeTag,
             loc: loc,
-            get tag() {
+            /** @returns {string} */ get tag() {
                 return this.path.original;
             },
             set tag(name) {
                 this.path.original = name;
             },
-            get blockParams() {
-                return this.params.map((p => p.name));
+            /** @returns {any[]} */ get blockParams() {
+                return this.params.map((/** @returns {string} */ p => p.name));
             },
             set blockParams(params) {
-                this.params = params.map((name => b.var({
-                    name: name,
-                    loc: SourceSpan.synthetic(name)
+                this.params = params.map((name1 => b.var({
+                    name: name1,
+                    loc: SourceSpan.synthetic(name1)
                 })));
             },
-            get selfClosing() {
+            /** @returns {boolean} */ get selfClosing() {
                 return _selfClosing;
             },
             set selfClosing(selfClosing) {
@@ -1840,20 +1825,20 @@ class {
             }
         };
     }
-    elementModifier({path: path, params: params, hash: hash, loc: loc}) {
+    elementModifier({path: path, params: params1, hash: hash, loc: loc}) {
         return {
             type: "ElementModifierStatement",
             path: path,
-            params: params,
+            params: params1,
             hash: hash,
             loc: loc
         };
     }
-    attr({name: name, value: value, loc: loc}) {
+    attr({name: name1, value: value1, loc: loc}) {
         return {
             type: "AttrNode",
-            name: name,
-            value: value,
+            name: name1,
+            value: value1,
             loc: loc
         };
     }
@@ -1864,11 +1849,11 @@ class {
             loc: loc
         };
     }
-    sexpr({path: path, params: params, hash: hash, loc: loc}) {
+    sexpr({path: path, params: params1, hash: hash, loc: loc}) {
         return {
             type: "SubExpression",
             path: path,
-            params: params,
+            params: params1,
             hash: hash,
             loc: loc
         };
@@ -1879,11 +1864,11 @@ class {
                 type: "PathExpression",
                 head: head,
                 tail: tail,
-                get original() {
+                /** @returns {string} */ get original() {
                     return [ this.head.original, ...this.tail ].join(".");
                 },
                 set original(value) {
-                    let [head, ...tail] = asPresentArray(value.split("."));
+                    let [head, ...tail] = value.split(".");
                     this.head = publicBuilder.head(head, this.head.loc), this.tail = tail;
                 },
                 loc: loc
@@ -1891,7 +1876,7 @@ class {
             return Object.defineProperty(node, "parts", {
                 enumerable: !1,
                 get() {
-                    let parts = asPresentArray(this.original.split("."));
+                    let parts = this.original.split(".");
                     return "this" === parts[0] ? 
                     // parts does not include `this`
                     parts.shift() : parts[0].startsWith("@") && (
@@ -1936,23 +1921,23 @@ class {
     this({loc: loc}) {
         return {
             type: "ThisHead",
-            get original() {
+            /** @returns {string} */ get original() {
                 return "this";
             },
             loc: loc
         };
     }
-    atName({name: name, loc: loc}) {
+    atName({name: name1, loc: loc}) {
         let _name = "";
         const node = {
             type: "AtHead",
-            get name() {
+            /** @returns {string} */ get name() {
                 return _name;
             },
-            set name(value) {
+            set name(/** @type {string} */ value) {
                 value[0], value.indexOf("."), _name = value;
             },
-            get original() {
+            /** @returns {string} */ get original() {
                 return this.name;
             },
             set original(value) {
@@ -1961,19 +1946,19 @@ class {
             loc: loc
         };
         // trigger the assertions
-                return node.name = name, node;
+                return node.name = name1, node;
     }
-    var({name: name, loc: loc}) {
+    var({name: name1, loc: loc}) {
         let _name = "";
         const node = {
             type: "VarHead",
-            get name() {
+            /** @returns {string} */ get name() {
                 return _name;
             },
-            set name(value) {
+            set name(/** @type {string} */ value) {
                 value[0], value.indexOf("."), _name = value;
             },
-            get original() {
+            /** @returns {string} */ get original() {
                 return this.name;
             },
             set original(value) {
@@ -1982,7 +1967,7 @@ class {
             loc: loc
         };
         // trigger the assertions
-                return node.name = name, node;
+                return node.name = name1, node;
     }
     hash({pairs: pairs, loc: loc}) {
         return {
@@ -1991,19 +1976,19 @@ class {
             loc: loc
         };
     }
-    pair({key: key, value: value, loc: loc}) {
+    pair({key: key, value: value1, loc: loc}) {
         return {
             type: "HashPair",
             key: key,
-            value: value,
+            value: value1,
             loc: loc
         };
     }
-    literal({type: type, value: value, loc: loc}) {
-        return function({type: type, value: value, loc: loc}) {
+    literal({type: type, value: value1, loc: loc}) {
+        return function({type: type, value: value1, loc: loc}) {
             const node = {
                 type: type,
-                value: value,
+                value: value1,
                 loc: loc
             };
             return Object.defineProperty(node, "original", {
@@ -2011,29 +1996,24 @@ class {
                 get() {
                     return this.value;
                 },
-                set(value) {
-                    this.value = value;
+                set(value1) {
+                    this.value = value1;
                 }
             }), node;
         }({
             type: type,
-            value: value,
+            value: value1,
             loc: loc
         });
     }
 };
 
 class Parser {
-    elementStack=[];
-    lines;
-    source;
-    currentAttribute=null;
-    currentNode=null;
-    tokenizer;
-    constructor(source, entityParser = new EntityParser(HTML5NamedCharRefs), mode = "precompile") {
-        this.source = source, this.lines = source.source.split(/\r\n?|\n/u), this.tokenizer = new EventedTokenizer(this, entityParser, mode);
+    constructor(/** @type {Source} */ source, entityParser = new EntityParser(HTML5NamedCharRefs), mode = "precompile") {
+        this.elementStack = [], this.currentAttribute = null, this.currentNode = null, this.source = source, 
+        this.lines = source.source.split(/\r\n?|\n/u), this.tokenizer = new EventedTokenizer(this, entityParser, mode);
     }
-    offset() {
+    /** @returns {SourceOffset} */ offset() {
         let {line: line, column: column} = this.tokenizer;
         return this.source.offsetFor(line, column);
     }
@@ -2073,7 +2053,7 @@ class Parser {
         return this[node.type](node);
     }
     currentElement() {
-        return getLast(asPresentArray(this.elementStack));
+        return getLast(this.elementStack);
     }
     sourceForNode(node, endNode) {
         let line, lastLine, lastColumn, firstLine = node.loc.start.line - 1, currentLine = firstLine - 1, firstColumn = node.loc.start.column, string = [];
@@ -2084,16 +2064,9 @@ class Parser {
     }
 }
 
-/* eslint-disable @typescript-eslint/no-unsafe-enum-comparison */ class HandlebarsNodeVisitors extends Parser {
-    // Because we interleave the HTML and HBS parsing, sometimes the HTML
-    // tokenizer can run out of tokens when we switch into {{...}} or reached
-    // EOF. There are positions where neither of these are expected, and it would
-    // like to generate an error, but there is no span to attach the error to.
-    // This allows the HTML tokenization to stash an error message and the next
-    // mustache visitor will attach the message to the appropriate span and throw
-    // the error.
-    pendingError=null;
-    parse(program, blockParams) {
+class HandlebarsNodeVisitors extends Parser {
+    parse(program, /** @type {any[] | undefined} */ blockParams) {
+        program.loc;
         let node = b.template({
             body: [],
             blockParams: blockParams,
@@ -2104,7 +2077,8 @@ class Parser {
         // into `Template { body: [] }` which is obviously incorrect
         return this.pendingError?.eof(template.loc.getEnd()), template;
     }
-    Program(program, blockParams) {
+    Program(program, /** @type {any[]} */ blockParams) {
+        program.loc;
         let node = b.blockItself({
             body: [],
             params: blockParams,
@@ -2130,30 +2104,27 @@ class Parser {
         return node;
     }
     BlockStatement(block) {
-        if ("comment" === this.tokenizer.state) return void this.appendToCommentData(this.sourceForNode(block));
+        if ("comment" === this.tokenizer.state) return block.loc, void this.appendToCommentData(this.sourceForNode(block));
         if ("data" !== this.tokenizer.state && "beforeData" !== this.tokenizer.state) throw generateSyntaxError("A block may only be used inside an HTML element or another block.", this.source.spanFor(block.loc));
         const {path: path, params: params, hash: hash} = acceptCallNodes(this, block), loc = this.source.spanFor(block.loc);
         // Backfill block params loc for the default block
-        let blockParams = [];
+        let repairedBlock, blockParams = [];
         if (block.program.blockParams?.length) {
             // Start from right after the hash
             let span = hash.loc.collapse("end");
             // Extend till the beginning of the block
-                        span = block.program.loc ? span.withEnd(this.source.spanFor(block.program.loc).getStart()) : block.program.body[0] ? span.withEnd(this.source.spanFor(block.program.body[0].loc).getStart()) : span.withEnd(loc.getEnd());
+                        span = block.program.loc ? span.withEnd(this.source.spanFor(block.program.loc).getStart()) : block.program.body[0] ? span.withEnd(this.source.spanFor(block.program.body[0].loc).getStart()) : span.withEnd(loc.getEnd()), 
+            repairedBlock = repairBlock(this.source, block, span);
             // Now we have a span for something like this:
-            
             //   {{#foo bar baz=bat as |wow wat|}}
             //                     ~~~~~~~~~~~~~~~
-            
             // Or, if we are unlucky:
-            
             // {{#foo bar baz=bat as |wow wat|}}{{/foo}}
             //                   ~~~~~~~~~~~~~~~~~~~~~~~
-            
             // Either way, within this span, there should be exactly two pipes
             // fencing our block params, neatly whitespace separated and with
             // legal identifiers only
-                        const content = span.asString();
+            const content = span.asString();
             let skipStart = content.indexOf("|") + 1;
             const limit = content.indexOf("|", skipStart);
             for (const name of block.program.blockParams) {
@@ -2167,10 +2138,8 @@ class Parser {
                     loc: loc
                 }));
             }
-        }
-        // These are bugs in Handlebars upstream
-                block.program.loc || (block.program.loc = NON_EXISTENT_LOCATION), block.inverse && !block.inverse.loc && (block.inverse.loc = NON_EXISTENT_LOCATION);
-        const program = this.Program(block.program, blockParams), inverse = block.inverse ? this.Program(block.inverse, []) : null, node = b.block({
+        } else repairedBlock = repairBlock(this.source, block, loc);
+        const program = this.Program(repairedBlock.program, blockParams), inverse = repairedBlock.inverse ? this.Program(repairedBlock.inverse, []) : null, node = b.block({
             path: path,
             params: params,
             hash: hash,
@@ -2264,7 +2233,7 @@ class Parser {
     ContentStatement(content) {
         !function(tokenizer, content) {
             let line = content.loc.start.line, column = content.loc.start.column;
-            const offsets = function(original, value) {
+            const offsets = function(/** @type {string} */ original, /** @type {string} */ value) {
                 if ("" === value) 
                 // if it is empty, just return the count of newlines
                 // in original
@@ -2439,9 +2408,19 @@ class Parser {
             loc: this.source.spanFor(nul.loc)
         });
     }
+    constructor(...args) {
+        super(...args), // Because we interleave the HTML and HBS parsing, sometimes the HTML
+        // tokenizer can run out of tokens when we switch into {{...}} or reached
+        // EOF. There are positions where neither of these are expected, and it would
+        // like to generate an error, but there is no span to attach the error to.
+        // This allows the HTML tokenization to stash an error message and the next
+        // mustache visitor will attach the message to the appropriate span and throw
+        // the error.
+        this.pendingError = null;
+    }
 }
 
-function acceptCallNodes(compiler, node) {
+function acceptCallNodes(/** @type {HandlebarsNodeVisitors} */ compiler, node) {
     let path;
     switch (node.path.type) {
       case "PathExpression":
@@ -2463,7 +2442,7 @@ function acceptCallNodes(compiler, node) {
             generateSyntaxError(`${node.path.type} "${"StringLiteral" === node.path.type ? node.path.original : value}" cannot be called as a sub-expression, replace (${value}) with ${value}`, compiler.source.spanFor(node.path.loc));
         }
     }
-    const params = node.params ? node.params.map((e => compiler.acceptNode(e))) : [], end = isPresentArray(params) ? getLast(params).loc : path.loc;
+    const params = node.params.map((e => compiler.acceptNode(e))), end = isPresentArray(params) ? getLast(params).loc : path.loc;
     // if there is no hash, position it as a collapsed node immediately after the last param (or the
     // path, if there are also no params)
         return {
@@ -2493,14 +2472,29 @@ function addElementModifier(element, mustache) {
     element.modifiers.push(modifier);
 }
 
+function repairBlock(/** @type {Source} */ source, block, /** @type {SourceSpan} */ fallbackStart) {
+    // Extend till the beginning of the block
+    if (!block.program.loc) {
+        const start = block.program.body.at(0), end = block.program.body.at(-1);
+        if (start && end) block.program.loc = {
+            ...start.loc,
+            end: end.loc.end
+        }; else {
+            const loc = source.spanFor(block.loc);
+            block.program.loc = fallbackStart.withEnd(loc.getEnd());
+        }
+    }
+    let endProgram = source.spanFor(block.program.loc).getEnd();
+    return block.inverse && !block.inverse.loc && (block.inverse.loc = endProgram.collapsed()), 
+    block;
+}
+
 // vendored from simple-html-tokenizer because it's unexported
-function isSpace(char) {
+/** @returns {boolean} */ function isSpace(/** @type {string} */ char) {
     return /[\t\n\f ]/u.test(char);
 }
 
 class TokenizerEventHandlers extends HandlebarsNodeVisitors {
-    tagOpenLine=0;
-    tagOpenColumn=0;
     reset() {
         this.currentNode = null;
     }
@@ -2512,7 +2506,7 @@ class TokenizerEventHandlers extends HandlebarsNodeVisitors {
             start: this.source.offsetFor(this.tagOpenLine, this.tagOpenColumn)
         };
     }
-    appendToCommentData(char) {
+    appendToCommentData(/** @type {string} */ char) {
         this.currentComment.value += char;
     }
     finishComment() {
@@ -2526,7 +2520,7 @@ class TokenizerEventHandlers extends HandlebarsNodeVisitors {
             start: this.offset()
         };
     }
-    appendToData(char) {
+    appendToData(/** @type {string} */ char) {
         this.currentData.chars += char;
     }
     finishData() {
@@ -2565,10 +2559,10 @@ class TokenizerEventHandlers extends HandlebarsNodeVisitors {
                 end: this.offset().toJSON()
             }));
             (voidMap.has(tag.name) || tag.selfClosing) && this.finishEndTag(!0);
-        } else "EndTag" === tag.type && this.finishEndTag(!1);
+        } else tag.type, tag.type, this.finishEndTag(!1);
     }
     finishStartTag() {
-        let {name: name, nameStart: nameStart, nameEnd: nameEnd} = this.currentStartTag, nameLoc = nameStart.until(nameEnd), [head, ...tail] = asPresentArray(name.split(".")), path = b.path({
+        let {name: name, nameStart: nameStart, nameEnd: nameEnd} = this.currentStartTag, nameLoc = nameStart.until(nameEnd), [head, ...tail] = name.split("."), path = b.path({
             head: b.head({
                 original: head,
                 loc: nameLoc.sliceStartChars({
@@ -2591,7 +2585,7 @@ class TokenizerEventHandlers extends HandlebarsNodeVisitors {
         });
         this.elementStack.push(element);
     }
-    finishEndTag(isVoid) {
+    finishEndTag(/** @type {boolean} */ isVoid) {
         let {start: closeTagStart} = this.currentTag, tag = this.finish(this.currentTag), element = this.elementStack.pop();
         this.validateEndTag(tag, element, isVoid);
         let parent = this.currentElement();
@@ -2607,7 +2601,7 @@ class TokenizerEventHandlers extends HandlebarsNodeVisitors {
         tag.selfClosing = !0;
     }
     // Tags - name
-    appendToTagName(char) {
+    appendToTagName(/** @type {string} */ char) {
         let tag = this.currentTag;
         if (tag.name += char, "StartTag" === tag.type) {
             let offset = this.offset();
@@ -2629,17 +2623,17 @@ class TokenizerEventHandlers extends HandlebarsNodeVisitors {
             valueSpan: offset.collapsed()
         };
     }
-    appendToAttributeName(char) {
+    appendToAttributeName(/** @type {string} */ char) {
         this.currentAttr.name += char, 
         // The block params parsing code can actually handle peek=non-space just
         // fine, but this check was added as an optimization, as there is a little
         // bit of setup overhead for the parsing logic just to immediately bail
         "as" === this.currentAttr.name && this.parsePossibleBlockParams();
     }
-    beginAttributeValue(isQuoted) {
+    beginAttributeValue(/** @type {boolean} */ isQuoted) {
         this.currentAttr.isQuoted = isQuoted, this.startTextPart(), this.currentAttr.valueSpan = this.offset().collapsed();
     }
-    appendToAttributeValue(char) {
+    appendToAttributeValue(/** @type {string} */ char) {
         let parts = this.currentAttr.parts, lastPart = parts[parts.length - 1], current = this.currentAttr.currentPart;
         if (current) current.chars += char, 
         // update end location for each added char
@@ -2682,7 +2676,7 @@ class TokenizerEventHandlers extends HandlebarsNodeVisitors {
             state: "PossibleAs"
         };
         const handlers = {
-            PossibleAs: next => {
+            PossibleAs: (/** @type {string} */ next) => {
                 if (state.state, isSpace(next)) 
                 // " as ..."
                 state = {
@@ -2699,7 +2693,7 @@ class TokenizerEventHandlers extends HandlebarsNodeVisitors {
                     };
                 }
             },
-            BeforeStartPipe: next => {
+            BeforeStartPipe: (/** @type {string} */ next) => {
                 state.state, isSpace(next) ? this.tokenizer.consume() : "|" === next ? (state = {
                     state: "BeforeBlockParamName"
                 }, this.tokenizer.transitionTo("beforeAttributeName"), this.tokenizer.consume()) : 
@@ -2709,7 +2703,7 @@ class TokenizerEventHandlers extends HandlebarsNodeVisitors {
                     state: "Done"
                 };
             },
-            BeforeBlockParamName: next => {
+            BeforeBlockParamName: (/** @type {string} */ next) => {
                 if (state.state, isSpace(next)) this.tokenizer.consume(); else if ("" === next) 
                 // The HTML tokenizer ran out of characters, so we are either
                 // encountering mustache or <EOF>
@@ -2739,7 +2733,7 @@ class TokenizerEventHandlers extends HandlebarsNodeVisitors {
                     }, this.tokenizer.consume();
                 }
             },
-            BlockParamName: next => {
+            BlockParamName: (/** @type {string} */ next) => {
                 if (state.state, "" === next) 
                 // The HTML tokenizer ran out of characters, so we are either
                 // encountering mustache or <EOF>, HBS side will attach the error
@@ -2770,7 +2764,7 @@ class TokenizerEventHandlers extends HandlebarsNodeVisitors {
                     state.name += next, this.tokenizer.consume();
                 }
             },
-            AfterEndPipe: next => {
+            AfterEndPipe: (/** @type {string} */ next) => {
                 state.state, isSpace(next) ? this.tokenizer.consume() : "" === next ? (
                 // The HTML tokenizer ran out of characters, so we are either
                 // encountering mustache or <EOF>, HBS side will attach the error
@@ -2812,24 +2806,23 @@ class TokenizerEventHandlers extends HandlebarsNodeVisitors {
     reportSyntaxError(message) {
         throw generateSyntaxError(message, this.offset().collapsed());
     }
-    assembleConcatenatedValue(parts) {
-        for (const part of parts) if ("MustacheStatement" !== part.type && "TextNode" !== part.type) throw generateSyntaxError(`Unsupported node in quoted attribute value: ${part.type}`, part.loc);
+    assembleConcatenatedValue(/** @type {any[]} */ parts) {
         let first = getFirst(parts), last = getLast(parts);
         return b.concat({
             parts: parts,
             loc: this.source.spanFor(first.loc).extend(this.source.spanFor(last.loc))
         });
     }
-    validateEndTag(tag, element, selfClosing) {
+    validateEndTag(tag, element, /** @type {boolean} */ selfClosing) {
         if (voidMap.has(tag.name) && !selfClosing) 
         // EngTag is also called by StartTag for void and self-closing tags (i.e.
         // <input> or <br />, so we need to check for that here. Otherwise, we would
         // throw an error for those cases.
         throw generateSyntaxError(`<${tag.name}> elements do not need end tags. You should remove it`, tag.loc);
-        if (void 0 === element.tag) throw generateSyntaxError(`Closing tag </${tag.name}> without an open tag`, tag.loc);
+        if ("ElementNode" !== element.type) throw generateSyntaxError(`Closing tag </${tag.name}> without an open tag`, tag.loc);
         if (element.tag !== tag.name) throw generateSyntaxError(`Closing tag </${tag.name}> did not match last open tag <${element.tag}> (on line ${element.loc.startPosition.line})`, tag.loc);
     }
-    assembleAttributeValue(parts, isQuoted, isDynamic, span) {
+    assembleAttributeValue(/** @type {any[]} */ parts, /** @type {boolean} */ isQuoted, /** @type {boolean} */ isDynamic, /** @type {SourceSpan} */ span) {
         if (isDynamic) {
             if (isQuoted) return this.assembleConcatenatedValue(parts);
             {
@@ -2843,12 +2836,12 @@ class TokenizerEventHandlers extends HandlebarsNodeVisitors {
             loc: span
         });
     }
+    constructor(...args) {
+        super(...args), this.tagOpenLine = 0, this.tagOpenColumn = 0;
+    }
 }
 
-/**
-  ASTPlugins can make changes to the Glimmer template AST before
-  compilation begins.
-*/ const syntax = {
+const syntax = {
     parse: preprocess,
     builders: publicBuilder,
     print: build,
@@ -2864,7 +2857,7 @@ class CodemodEntityParser extends EntityParser {
     parse() {}
 }
 
-function preprocess(input, options = {}) {
+function preprocess(/** @type {string | undefined} */ input, options = {}) {
     let source, ast, entityParser, mode = options.mode || "precompile";
     "string" == typeof input ? (source = new Source(input, options.meta?.moduleName), 
     ast = "codemod" === mode ? parseWithoutProcessing(input, options.parseOptions) : parse(input, options.parseOptions)) : input instanceof Source ? (source = input, 
@@ -2877,7 +2870,7 @@ function preprocess(input, options = {}) {
         end: offsets.endPosition
     };
     let template = new TokenizerEventHandlers(source, entityParser, mode).parse(ast, options.locals ?? []);
-    if (options?.plugins?.ast) for (const transform of options.plugins.ast) traverse(template, transform(assign({}, options, {
+    if (options.plugins?.ast) for (const transform of options.plugins.ast) traverse(template, transform(assign({}, options, {
         syntax: syntax
     }, {
         plugins: void 0
@@ -2892,7 +2885,7 @@ function preprocess(input, options = {}) {
  * Adds tokens to the tokensSet based on their node.type
  */
 function addTokens(tokensSet, node, scopedTokens, options) {
-    const maybeTokens = function(node, scopedTokens, options) {
+    const maybePathName = function(node, scopedTokens, options) {
         if ("PathExpression" === node.type) {
             if ("AtHead" === node.head.type || "ThisHead" === node.head.type) return;
             const possbleToken = node.head.name;
@@ -2901,7 +2894,7 @@ function addTokens(tokensSet, node, scopedTokens, options) {
             const {tag: tag} = node, char = tag.charAt(0);
             if (":" === char || "@" === char) return;
             if (!options.includeHtmlElements && -1 === tag.indexOf(".") && tag.toLowerCase() === tag) return;
-            // eslint-disable-next-line deprecation/deprecation
+            // eslint-disable-next-line @typescript-eslint/no-deprecated -- @fixme
                         if ("this." === tag.substr(0, 5)) return;
             // the tag may be from a yielded object
             // example:
@@ -2916,12 +2909,10 @@ function addTokens(tokensSet, node, scopedTokens, options) {
             return tag;
         }
     }(node, scopedTokens, options);
-    (Array.isArray(maybeTokens) ? maybeTokens : [ maybeTokens ]).forEach((maybeToken => {
-        if (void 0 !== maybeToken && "@" !== maybeToken[0]) {
-            const maybeTokenFirstSegment = maybeToken.split(".")[0];
-            scopedTokens.includes(maybeTokenFirstSegment) || tokensSet.add(maybeToken.split(".")[0]);
-        }
-    }));
+    if (void 0 !== maybePathName && "@" !== maybePathName[0]) {
+        const maybeFirstPathSegment = maybePathName.split(".")[0];
+        maybeFirstPathSegment && !scopedTokens.includes(maybeFirstPathSegment) && tokensSet.add(maybeFirstPathSegment);
+    }
 }
 
 /**
@@ -2963,43 +2954,15 @@ function addTokens(tokensSet, node, scopedTokens, options) {
         }
     });
     let tokens = [];
-    return tokensSet.forEach((s => tokens.push(s))), options?.includeKeywords || (tokens = tokens.filter((token => !isKeyword(token)))), 
+    return tokensSet.forEach((s => tokens.push(s))), options.includeKeywords || (tokens = tokens.filter((token => !isKeyword(token)))), 
     tokens;
 }
 
-/**
- * This is a convenience function for creating ASTv2 nodes, with an optional name and the node's
- * options.
- *
- * ```ts
- * export class HtmlText extends node('HtmlText').fields<{ chars: string }>() {}
- * ```
- *
- * This creates a new ASTv2 node with the name `'HtmlText'` and one field `chars: string` (in
- * addition to a `loc: SourceOffsets` field, which all nodes have).
- *
- * ```ts
- * export class Args extends node().fields<{
- *  positional: PositionalArguments;
- *  named: NamedArguments
- * }>() {}
- * ```
- *
- * This creates a new un-named ASTv2 node with two fields (`positional: Positional` and `named:
- * Named`, in addition to the generic `loc: SourceOffsets` field).
- *
- * Once you create a node using `node`, it is instantiated with all of its fields (including `loc`):
- *
- * ```ts
- * new HtmlText({ loc: offsets, chars: someString });
- * ```
- */ function node(name) {
+function node(/** @type {string | undefined} */ name) {
     if (void 0 !== name) {
         const type = name;
         return {
             fields: () => class {
-                // SAFETY: initialized via `assign` in the constructor.
-                type;
                 constructor(fields) {
                     this.type = type, assign(this, fields);
                 }
@@ -3008,7 +2971,6 @@ function addTokens(tokensSet, node, scopedTokens, options) {
     }
     return {
         fields: () => class {
-            // SAFETY: initialized via `assign` in the constructor.
             constructor(fields) {
                 assign(this, fields);
             }
@@ -3109,31 +3071,12 @@ function addTokens(tokensSet, node, scopedTokens, options) {
  * x=<expr>
  * ```
  */ class NamedArgument {
-    loc;
-    name;
-    value;
     constructor(options) {
         this.loc = options.name.loc.extend(options.value.loc), this.name = options.name, 
         this.value = options.value;
     }
 }
 
-/**
- * Attr nodes look like HTML attributes, but are classified as:
- *
- * 1. `HtmlAttr`, which means a regular HTML attribute in Glimmer
- * 2. `SplatAttr`, which means `...attributes`
- * 3. `ComponentArg`, which means an attribute whose name begins with `@`, and it is therefore a
- *    component argument.
- */
-/**
- * `HtmlAttr` and `SplatAttr` are grouped together because the order of the `SplatAttr` node,
- * relative to other attributes, matters.
- */
-/**
- * "Attr Block" nodes are allowed inside an open element tag in templates. They interact with the
- * element (or component).
- */
 /**
  * `HtmlAttr` nodes are valid HTML attributes, with or without a value.
  *
@@ -3163,12 +3106,7 @@ class SplatAttr extends(node("SplatAttr").fields()){}
  * An `ElementModifier` is just a normal call node in modifier position.
  */ class ElementModifier extends(node("ElementModifier").fields()){}
 
-/**
- * Content Nodes are allowed in content positions in templates. They correspond to behavior in the
- * [Data][data] tokenization state in HTML.
- *
- * [data]: https://html.spec.whatwg.org/multipage/parsing.html#data-state
- */ class GlimmerComment extends(node("GlimmerComment").fields()){}
+class GlimmerComment extends(node("GlimmerComment").fields()){}
 
 class HtmlText extends(node("HtmlText").fields()){}
 
@@ -3212,11 +3150,6 @@ class InvokeBlock extends(node("InvokeBlock").fields()){}
     }
 }
 
-/**
- * A Handlebars literal.
- *
- * {@link https://handlebarsjs.com/guide/expressions.html#literal-segments}
- */
 /**
  * Corresponds to a Handlebars literal.
  *
@@ -3285,9 +3218,6 @@ class PathExpression extends(node("Path").fields()){}
 /**
  * Corresponds to a collection of named blocks.
  */ class NamedBlocks extends(node().fields()){
-    /**
-   * Get the `NamedBlock` for a given name.
-   */
     get(name) {
         return this.blocks.filter((block => block.name.chars === name))[0] || null;
     }
@@ -3410,7 +3340,7 @@ class LooseModeResolution {
     }
 }
 
-var api$1 =  Object.freeze({
+var api =  Object.freeze({
     __proto__: null,
     AppendContent: AppendContent,
     ArgReference: ArgReference,
@@ -3452,30 +3382,7 @@ var api$1 =  Object.freeze({
     isStrictResolution: function(value) {
         return value === STRICT_RESOLUTION;
     },
-    loadResolution: 
-    /**
- * A `Namespaced` must be resolved in one or more namespaces.
- *
- * ```hbs
- * <X />
- * ```
- *
- * ^ `X` is resolved in the `component` namespace
- *
- * ```hbs
- * (x)
- * ```
- *
- * ^ `x` is resolved in the `helper` namespace
- *
- * ```hbs
- * <a {{x}} />
- * ```
- *
- * ^ `x` is resolved in the `modifier` namespace
- */
-    // Serialization
-    function(resolution) {
+    loadResolution: function(resolution) {
         return "Strict" === resolution ? STRICT_RESOLUTION : "ComponentOrHelper" === resolution ? LooseModeResolution.append() : LooseModeResolution.namespaced(resolution);
     },
     node: node
@@ -3493,14 +3400,10 @@ class SymbolTable {
 
 class ProgramSymbolTable extends SymbolTable {
     constructor(templateLocals, keywords, options) {
-        super(), this.templateLocals = templateLocals, this.keywords = keywords, this.options = options;
+        super(), this.templateLocals = templateLocals, this.keywords = keywords, this.options = options, 
+        this.symbols = [], this.upvars = [], this.size = 1, this.named = dict(), this.blocks = dict(), 
+        this.usedTemplateLocals = [];
     }
-    symbols=[];
-    upvars=[];
-    size=1;
-    named=dict();
-    blocks=dict();
-    usedTemplateLocals=[];
     root() {
         return this;
     }
@@ -3605,10 +3508,6 @@ class BlockSymbolTable extends SymbolTable {
         return this.parent.allocate(identifier);
     }
 }
-
-var api =  Object.freeze({
-    __proto__: null
-});
 
 class Builder {
     // TEMPLATE //
@@ -3802,7 +3701,6 @@ class Builder {
 }
 
 class BuildElement {
-    builder;
     constructor(base) {
         this.base = base, this.builder = new Builder;
     }
@@ -3943,7 +3841,6 @@ function normalize(source, options = {
  *
  * `BlockContext` is stateless.
  */ class BlockContext {
-    builder;
     constructor(source, options, table) {
         this.source = source, this.options = options, this.table = table, this.builder = new Builder;
     }
@@ -3999,12 +3896,7 @@ function normalize(source, options = {
     constructor(block) {
         this.block = block;
     }
-    /**
-   * The `normalize` method takes an arbitrary expression and its original syntax context and
-   * normalizes it to an ASTv2 expression.
-   *
-   * @see {SyntaxContext}
-   */    normalize(expr, resolution) {
+    normalize(expr, resolution) {
         switch (expr.type) {
           case "NullLiteral":
           case "BooleanLiteral":
@@ -4079,6 +3971,10 @@ function normalize(source, options = {
         let {block: block} = this, {builder: builder, table: table} = block, offsets = block.loc(head.loc);
         switch (head.type) {
           case "ThisHead":
+            if (block.hasBinding("this")) {
+                let [symbol, isRoot] = table.get("this");
+                return block.builder.localVar("this", symbol, isRoot, offsets);
+            }
             return builder.self(offsets);
 
           case "AtHead":
@@ -4146,16 +4042,34 @@ function normalize(source, options = {
         }
     }
     MustacheCommentStatement(node) {
-        let textLoc, loc = this.block.loc(node.loc);
-        return textLoc = "{{!--" === loc.asString().slice(0, 5) ? loc.slice({
-            skipStart: 5,
-            skipEnd: 4
-        }) : loc.slice({
-            skipStart: 3,
-            skipEnd: 2
-        }), new GlimmerComment({
+        let loc = this.block.loc(node.loc);
+        // If someone cares for these cases to have the right loc, feel free to attempt:
+        // {{!}} {{~!}} {{!~}} {{~!~}}
+        // {{!-}} {{~!-}} {{!-~}} {{~!-~}}
+        // {{!--}} {{~!--}} {{!--~}} {{~!--~}}
+        // {{!---}} {{~!---}} {{!---~}} {{~!---~}}
+        // {{!----}} {{~!----}} {{!----~}} {{~!----~}}
+                if ("" === node.value) return new GlimmerComment({
             loc: loc,
-            text: textLoc.toSlice(node.value)
+            text: SourceSlice.synthetic("")
+        });
+        let source = loc.asString(), span = loc;
+        if (node.value.startsWith("-")) span = span.sliceStartChars({
+            skipStart: source.startsWith("{{~") ? 6 : 5,
+            chars: node.value.length
+        }); else if (node.value.endsWith("-")) {
+            const skipEnd = source.endsWith("~}}") ? 5 : 4, skipStart = source.length - node.value.length - skipEnd;
+            span = span.slice({
+                skipStart: skipStart,
+                skipEnd: skipEnd
+            });
+        } else span = span.sliceStartChars({
+            skipStart: source.lastIndexOf(node.value),
+            chars: node.value.length
+        });
+        return new GlimmerComment({
+            loc: loc,
+            text: span.toSlice(node.value)
         });
     }
     /**
@@ -4222,7 +4136,7 @@ class ElementNormalizer {
    * - the part before the first `.` is a reference to an in-scope variable binding
    * - it begins with an uppercase character
    */    ElementNode(element) {
-        let {tag: tag, selfClosing: selfClosing, comments: comments} = element, loc = this.ctx.loc(element.loc), [tagHead, ...rest] = asPresentArray(tag.split(".")), path = this.classifyTag(tagHead, rest, element.loc), attrs = element.attributes.filter((a => "@" !== a.name[0])).map((a => this.attr(a))), args = element.attributes.filter((a => "@" === a.name[0])).map((a => this.arg(a))), modifiers = element.modifiers.map((m => this.modifier(m))), child = this.ctx.child(element.blockParams), normalizer = new StatementNormalizer(child), childNodes = element.children.map((s => normalizer.normalize(s))), el = this.ctx.builder.element({
+        let {tag: tag, selfClosing: selfClosing, comments: comments} = element, loc = this.ctx.loc(element.loc), [tagHead, ...rest] = tag.split("."), path = this.classifyTag(tagHead, rest, element.loc), attrs = element.attributes.filter((a => "@" !== a.name[0])).map((a => this.attr(a))), args = element.attributes.filter((a => "@" === a.name[0])).map((a => this.arg(a))), modifiers = element.modifiers.map((m => this.modifier(m))), child = this.ctx.child(element.blockParams), normalizer = new StatementNormalizer(child), childNodes = element.children.map((s => normalizer.normalize(s))), el = this.ctx.builder.element({
             selfClosing: selfClosing,
             attrs: attrs,
             componentArgs: args,
@@ -4387,9 +4301,6 @@ class ElementNormalizer {
 }
 
 class Children {
-    namedBlocks;
-    hasSemanticContent;
-    nonBlockChildren;
     constructor(loc, children, block) {
         this.loc = loc, this.children = children, this.block = block, this.namedBlocks = children.filter((c => c instanceof NamedBlock)), 
         this.hasSemanticContent = Boolean(children.filter((c => {
@@ -4495,5 +4406,4 @@ function printHead(node) {
     }).print(node);
 }
 
-export { api as AST, api as ASTv1, api$1 as ASTv2, BlockSymbolTable, KEYWORDS_TYPES, Walker as Path, ProgramSymbolTable, SourceSlice, SpanList, SymbolTable, Walker, WalkerPath, publicBuilder as builders, cannotRemoveNode, cannotReplaceNode, generateSyntaxError, getTemplateLocals, getVoidTags, hasSpan, isKeyword, isVoidTag, loc, maybeLoc, node, normalize, preprocess, build as print, sortByLoc, api$2 as src, traverse, visitorKeys };
-//# sourceMappingURL=index.js.map
+export { api as ASTv2, BlockSymbolTable, KEYWORDS_TYPES, Walker as Path, ProgramSymbolTable, SourceSlice, SpanList, SymbolTable, Walker, WalkerPath, publicBuilder as builders, cannotRemoveNode, cannotReplaceNode, generateSyntaxError, getTemplateLocals, getVoidTags, hasSpan, isKeyword, isVoidTag, loc, maybeLoc, node, normalize, preprocess, build as print, sortByLoc, api$1 as src, traverse, visitorKeys };

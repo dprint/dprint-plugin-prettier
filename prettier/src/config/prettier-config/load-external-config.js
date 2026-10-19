@@ -1,5 +1,5 @@
-import importFromFile from "../../utils/import-from-file.js";
-import requireFromFile from "../../utils/require-from-file.js";
+import importFromFile from "../../utilities/import-from-file.js";
+import requireFromFile from "../../utilities/require-from-file.js";
 
 const requireErrorCodesShouldBeIgnored = new Set([
   "MODULE_NOT_FOUND",
@@ -17,11 +17,8 @@ async function loadExternalConfig(externalConfig, configFile) {
   */
   try {
     const required = requireFromFile(externalConfig, configFile);
-    // Since Node.js v23 onwards, it is possible to load ESM using require.
+    // Since Node.js v22.12 onwards, it is possible to load ESM via `require()`.
     // If that feature is enabled, it is necessary to return the default.
-    // https://github.com/prettier/prettier/issues/16812
-    // FIXME: We want to add tests but https://github.com/jestjs/jest/issues/15363 blocks
-    // @ts-expect-error
     if (process.features.require_module && required.__esModule) {
       return required.default;
     }

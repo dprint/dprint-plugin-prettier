@@ -4,6 +4,10 @@
 let Node = require('./node')
 
 class Declaration extends Node {
+  get variable() {
+    return this.prop.startsWith('--') || this.prop[0] === '$'
+  }
+
   constructor(defaults) {
     if (
       defaults &&
@@ -14,10 +18,6 @@ class Declaration extends Node {
     }
     super(defaults)
     /** @type {string} */ this.type = 'decl'
-  }
-
-  get variable() {
-    return this.prop.startsWith('--') || this.prop[0] === '$'
   }
 }
 

@@ -1,6 +1,5 @@
 // @nts-check
-/** @import AstPath from "../../common/ast-path.js" */
-/** @import {Doc} from "../../document/builders.js" */
+/** @import {Doc} from "../../document/index.js" */
 
 import {
   conditionalGroup,
@@ -8,7 +7,7 @@ import {
   hardline,
   ifBreak,
   line,
-} from "../../document/builders.js";
+} from "../../document/index.js";
 import {
   hasEndComments,
   hasLeadingComments,
@@ -17,10 +16,10 @@ import {
   isEmptyNode,
   isInlineNode,
   isNode,
-} from "../utils.js";
+} from "../utilities.js";
 import { alignWithSpaces } from "./misc.js";
 
-function printMappingItem(/** @type {AstPath} */ path, /** @type {(a0?: any) => any} */ print, options) {
+function printMappingItem(path, options, print) {
   const { node, parent } = path;
   const { key, value } = node;
 
@@ -78,7 +77,8 @@ function printMappingItem(/** @type {AstPath} */ path, /** @type {(a0?: any) => 
     !hasLeadingComments(value.content) &&
     !hasMiddleComments(value.content) &&
     !hasEndComments(value) &&
-    isAbsolutelyPrintedAsSingleLineNode(value.content, options)
+    isAbsolutelyPrintedAsSingleLineNode(value.content, options) &&
+    isAbsolutelyPrintedAsSingleLineNode(key.content, options)
   ) {
     return [printedKey, spaceBeforeColon, ": ", printedValue];
   }
@@ -100,6 +100,13 @@ function printMappingItem(/** @type {AstPath} */ path, /** @type {(a0?: any) => 
   // as part of the mapping value
   const implicitMappingValueParts = [spaceBeforeColon, ":"];
   if (
+    hasEndComments(value) &&
+    value.content &&
+    isNode(value.content, ["flowMapping", "flowSequence"]) &&
+    value.content.children.length === 0
+  ) {
+    implicitMappingValueParts.push(" ");
+  } else if (
     hasLeadingComments(value.content) ||
     (hasEndComments(value) &&
       value.content &&
@@ -130,6 +137,7 @@ function printMappingItem(/** @type {AstPath} */ path, /** @type {(a0?: any) => 
     isAbsolutelyPrintedAsSingleLineNode(key.content, options) &&
     !hasLeadingComments(key.content) &&
     !hasMiddleComments(key.content) &&
+    !hasTrailingComment(key.content) &&
     !hasEndComments(key)
   ) {
     return conditionalGroup([[printedKey, implicitMappingValue]]);
@@ -167,7 +175,7 @@ function printMappingItem(/** @type {AstPath} */ path, /** @type {(a0?: any) => 
 
   if (
     // backslash-newline
-    /\\$/mu.test(
+    /\\$/m.test(
       options.originalText.slice(
         node.position.start.offset,
         node.position.end.offset,
@@ -181,7 +189,7 @@ function printMappingItem(/** @type {AstPath} */ path, /** @type {(a0?: any) => 
     case "never":
       return !node.value.includes("\n");
     case "always":
-      return !/[\n ]/u.test(node.value);
+      return !/[\n ]/.test(node.value);
     default:
       /* c8 ignore next */
       return false;

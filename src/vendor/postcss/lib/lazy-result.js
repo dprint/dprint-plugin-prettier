@@ -106,6 +106,38 @@ function cleanMarks(node) {
 let postcss = {}
 
 class LazyResult {
+  get content() {
+    return this.stringify().content
+  }
+
+  get css() {
+    return this.stringify().css
+  }
+
+  get map() {
+    return this.stringify().map
+  }
+
+  get messages() {
+    return this.sync().messages
+  }
+
+  get opts() {
+    return this.result.opts
+  }
+
+  get processor() {
+    return this.result.processor
+  }
+
+  get root() {
+    return this.sync().root
+  }
+
+  get [Symbol.toStringTag]() {
+    return 'LazyResult'
+  }
+
   constructor(processor, css, opts) {
     this.stringified = false
     this.processed = false
@@ -347,6 +379,19 @@ class LazyResult {
     if (opts.stringifier) str = opts.stringifier
     if (str.stringify) str = str.stringify
 
+    let rootSource = this.result.root.source
+    if (
+      opts.map === undefined &&
+      !(rootSource && rootSource.input && rootSource.input.map)
+    ) {
+      let result = ''
+      str(this.result.root, i => {
+        result += i
+      })
+      this.result.css = result
+      return this.result
+    }
+
     let map = new MapGenerator(str, this.result.root, this.result.opts)
     let data = map.generate()
     this.result.css = data[0]
@@ -505,38 +550,6 @@ class LazyResult {
 
   warnings() {
     return this.sync().warnings()
-  }
-
-  get content() {
-    return this.stringify().content
-  }
-
-  get css() {
-    return this.stringify().css
-  }
-
-  get map() {
-    return this.stringify().map
-  }
-
-  get messages() {
-    return this.sync().messages
-  }
-
-  get opts() {
-    return this.result.opts
-  }
-
-  get processor() {
-    return this.result.processor
-  }
-
-  get root() {
-    return this.sync().root
-  }
-
-  get [Symbol.toStringTag]() {
-    return 'LazyResult'
   }
 }
 

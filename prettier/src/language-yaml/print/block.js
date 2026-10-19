@@ -1,6 +1,5 @@
 // @nts-check
-/** @import AstPath from "../../common/ast-path.js" */
-/** @import {Doc} from "../../document/builders.js" */
+/** @import {Doc} from "../../document/index.js" */
 
 import {
   dedent,
@@ -11,15 +10,17 @@ import {
   line,
   literalline,
   markAsRoot,
-} from "../../document/builders.js";
+} from "../../document/index.js";
 import {
   getBlockValueLineContents,
   hasIndicatorComment,
   isLastDescendantNode,
-} from "../utils.js";
+} from "../utilities.js";
 import { alignWithSpaces } from "./misc.js";
 
-/** @returns {any[]} */ function printBlock(/** @type {AstPath} */ path, /** @type {(a0?: any) => any} */ print, options) {
+/** @import AstPath from "../../common/ast-path.js" */
+
+function printBlock(/** @type {AstPath} */ path, options, print) {
   const { node } = path;
   /** @type {number} */ const parentIndent = path.ancestors.filter(
     /** @returns {boolean} */ (node) => node.type === "sequence" || node.type === "mapping",

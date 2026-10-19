@@ -1,6 +1,7 @@
+// @nts-check
 const EMPTY_ARRAY = Object.freeze([]);
 
-function emptyArray() {
+/** @returns {any[]} */ function emptyArray() {
     return EMPTY_ARRAY;
 }
 
@@ -15,7 +16,9 @@ function isEmptyArray(input) {
 }
 
 function* reverse(input) {
-    for (let i = input.length - 1; i >= 0; i--) yield input[i];
+    for (let i = input.length - 1; i >= 0; i--) 
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- @fixme
+    yield input[i];
 }
 
 function* enumerate(input) {
@@ -38,7 +41,7 @@ function* zipArrays(left, right) {
 }
 
 function isPresentArray(list) {
-    return list.length > 0;
+    return !!list && list.length > 0;
 }
 
 function getLast(list) {
@@ -58,10 +61,8 @@ function isIndexable(u) {
 }
 
 class StackImpl {
-    stack;
-    current=null;
     constructor(values = []) {
-        this.stack = values;
+        this.current = null, this.stack = values;
     }
     get size() {
         return this.stack.length;
@@ -150,7 +151,7 @@ function isSerializationFirstNode(node) {
     return "%+b:0%" === node.nodeValue;
 }
 
-let assign = Object.assign;
+const assign = Object.assign;
 
 function values(obj) {
     return Object.values(obj);
@@ -172,6 +173,7 @@ function strip(strings, ...args) {
     for (var list; isPresentArray(lines) && /^\s*$/u.test(getLast(lines)); ) lines.pop();
     let min = 1 / 0;
     for (let line of lines) {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- @fixme
         let leading = /^\s*/u.exec(line)[0].length;
         min = Math.min(min, leading);
     }
@@ -200,4 +202,3 @@ function strip(strings, ...args) {
 }
 
 export { EMPTY_ARRAY, EMPTY_NUMBER_ARRAY, EMPTY_STRING_ARRAY, LOCAL_LOGGER, LOGGER, SERIALIZATION_FIRST_NODE_STRING, StackImpl as Stack, assertNever, assign, beginTestSteps, clearElement, dict, emptyArray, endTestSteps, entries, enumerate, intern, isDict, isEmptyArray, isIndexable, isSerializationFirstNode, keys, logStep, reverse, strip, values, verifySteps, zipArrays, zipTuples };
-//# sourceMappingURL=index.js.map

@@ -1,33 +1,24 @@
-/**
- * The set of allowed directive location values.
- */
-var DirectiveLocation;
-
-(function (DirectiveLocation) {
-  DirectiveLocation['QUERY'] = 'QUERY';
-  DirectiveLocation['MUTATION'] = 'MUTATION';
-  DirectiveLocation['SUBSCRIPTION'] = 'SUBSCRIPTION';
-  DirectiveLocation['FIELD'] = 'FIELD';
-  DirectiveLocation['FRAGMENT_DEFINITION'] = 'FRAGMENT_DEFINITION';
-  DirectiveLocation['FRAGMENT_SPREAD'] = 'FRAGMENT_SPREAD';
-  DirectiveLocation['INLINE_FRAGMENT'] = 'INLINE_FRAGMENT';
-  DirectiveLocation['VARIABLE_DEFINITION'] = 'VARIABLE_DEFINITION';
-  DirectiveLocation['SCHEMA'] = 'SCHEMA';
-  DirectiveLocation['SCALAR'] = 'SCALAR';
-  DirectiveLocation['OBJECT'] = 'OBJECT';
-  DirectiveLocation['FIELD_DEFINITION'] = 'FIELD_DEFINITION';
-  DirectiveLocation['ARGUMENT_DEFINITION'] = 'ARGUMENT_DEFINITION';
-  DirectiveLocation['INTERFACE'] = 'INTERFACE';
-  DirectiveLocation['UNION'] = 'UNION';
-  DirectiveLocation['ENUM'] = 'ENUM';
-  DirectiveLocation['ENUM_VALUE'] = 'ENUM_VALUE';
-  DirectiveLocation['INPUT_OBJECT'] = 'INPUT_OBJECT';
-  DirectiveLocation['INPUT_FIELD_DEFINITION'] = 'INPUT_FIELD_DEFINITION';
-})(DirectiveLocation || (DirectiveLocation = {}));
-
-export { DirectiveLocation };
-/**
- * The enum type representing the directive location values.
- *
- * @deprecated Please use `DirectiveLocation`. Will be remove in v17.
- */
+export const DirectiveLocation = {
+    QUERY: 'QUERY',
+    MUTATION: 'MUTATION',
+    SUBSCRIPTION: 'SUBSCRIPTION',
+    FIELD: 'FIELD',
+    FRAGMENT_DEFINITION: 'FRAGMENT_DEFINITION',
+    FRAGMENT_SPREAD: 'FRAGMENT_SPREAD',
+    INLINE_FRAGMENT: 'INLINE_FRAGMENT',
+    VARIABLE_DEFINITION: 'VARIABLE_DEFINITION',
+    FRAGMENT_VARIABLE_DEFINITION: 'FRAGMENT_VARIABLE_DEFINITION',
+    SCHEMA: 'SCHEMA',
+    SCALAR: 'SCALAR',
+    OBJECT: 'OBJECT',
+    FIELD_DEFINITION: 'FIELD_DEFINITION',
+    ARGUMENT_DEFINITION: 'ARGUMENT_DEFINITION',
+    INTERFACE: 'INTERFACE',
+    UNION: 'UNION',
+    ENUM: 'ENUM',
+    ENUM_VALUE: 'ENUM_VALUE',
+    INPUT_OBJECT: 'INPUT_OBJECT',
+    INPUT_FIELD_DEFINITION: 'INPUT_FIELD_DEFINITION',
+    DIRECTIVE_DEFINITION: 'DIRECTIVE_DEFINITION',
+};
+//# sourceMappingURL=directiveLocation.js.map

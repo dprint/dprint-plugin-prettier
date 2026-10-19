@@ -26,6 +26,16 @@ function markTreeDirty(node) {
 }
 
 class Container extends Node {
+  get first() {
+    if (!this.proxyOf.nodes) return undefined
+    return this.proxyOf.nodes[0]
+  }
+
+  get last() {
+    if (!this.proxyOf.nodes) return undefined
+    return this.proxyOf.nodes[this.proxyOf.nodes.length - 1]
+  }
+
   append(...children) {
     for (let child of children) {
       let nodes = this.normalize(child, this.last)
@@ -391,16 +401,6 @@ class Container extends Node {
         return callback(child, i)
       }
     })
-  }
-
-  get first() {
-    if (!this.proxyOf.nodes) return undefined
-    return this.proxyOf.nodes[0]
-  }
-
-  get last() {
-    if (!this.proxyOf.nodes) return undefined
-    return this.proxyOf.nodes[this.proxyOf.nodes.length - 1]
   }
 }
 

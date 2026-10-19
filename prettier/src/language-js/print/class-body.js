@@ -1,0 +1,344 @@
+// @nts-check
+import {
+  group,
+  hardline,
+  ifBreak,
+  indent,
+  line,
+  softline,
+} from "../../document/index.js";
+import { printDanglingComments } from "../../main/comments/print.js";
+import hasNewline from "../../utilities/has-newline.js";
+import hasNewlineInRange from "../../utilities/has-newline-in-range.js";
+import { locEnd, locStart } from "../location/index.js";
+import { iterateClassMembersPath } from "../utilities/class-members.js";
+import {
+  CommentCheckFlags,
+  getComments,
+  hasComment,
+} from "../utilities/comments.js";
+import { createTypeCheckFunction } from "../utilities/create-type-check-function.js";
+import { isNextLineEmpty } from "../utilities/is-next-line-empty.js";
+import { shouldHugTheOnlyParameter } from "./function-parameters.js";
+import { printSemicolon, printTrailingComma } from "./miscellaneous.js";
+
+/** @import AstPath from "../../common/ast-path.js" */
+/** @import {Doc} from "../../document/index.js" */
+
+/*
+- `ClassBody`
+- `TSInterfaceBody` (TypeScript)
+- `TSTypeLiteral` (TypeScript)
+- `ObjectTypeAnnotation` (Flow)
+- `RecordDeclarationBody` (Flow)
+*/
+/** @returns {Doc} */ function printClassBody(/** @type {AstPath} */ path, options, /** @type {() => any} */ print) {
+  const { node } = path;
+  const parts = [];
+  const isFlowTypeAnnotation = node.type === "ObjectTypeAnnotation";
+  const isFlowRecordDeclaration = node.type === "RecordDeclarationBody";
+  const isObjectType = !isClassBody(path);
+  const separator = isObjectType ? line : hardline;
+  /** @type {boolean} */ const hasDanglingComments = hasComment(node, CommentCheckFlags.Dangling);
+
+  const [openingBrace, closingBrace] =
+    isFlowTypeAnnotation && node.exact ? ["{|", "|}"] : "{}";
+  let isEmpty = true;
+  let firstMember;
+
+  iterateClassMembersPath(path, ({ node, next, isLast }) => {
+    firstMember ??= node;
+    isEmpty &&= false;
+    parts.push(print());
+
+    if (!isFlowRecordDeclaration && isObjectType && isFlowTypeAnnotation) {
+      const { parent } = path;
+
+      if (parent.inexact || !isLast) {
+        parts.push(",");
+      } else {
+        parts.push(printTrailingComma(options));
+      }
+    }
+
+    if (isFlowRecordDeclaration && node.type !== "MethodDefinition") {
+      parts.push(",");
+    }
+
+    if (
+      !isFlowRecordDeclaration &&
+      !isObjectType &&
+      (shouldPrintSemicolonAfterClassProperty({ node, next }, options) ||
+        shouldPrintSemicolonAfterInterfaceProperty({ node, next }, options))
+    ) {
+      parts.push(";");
+    }
+
+    if (!isLast) {
+      parts.push(separator);
+
+      if (isNextLineEmpty(node, options)) {
+        parts.push(hardline);
+      }
+    }
+  });
+
+  if (hasDanglingComments) {
+    parts.push(printDanglingComments(path, options));
+  }
+
+  // TODO: this part can unify with the similar part in `printObject`
+  if (node.type === "ObjectTypeAnnotation" && node.inexact) {
+    isEmpty &&= false;
+    let printed;
+    if (hasComment(node, CommentCheckFlags.Dangling)) {
+      /** @type {boolean} */ const hasLineComments = hasComment(node, CommentCheckFlags.Line);
+      printed = [
+        hasLineComments ||
+        hasNewline(options.originalText, locEnd(getComments(node).at(-1)))
+          ? hardline
+          : line,
+        "...",
+      ];
+    } else {
+      printed = [firstMember ? line : "", "..."];
+    }
+    parts.push(printed);
+  }
+
+  if (isObjectType) {
+    const shouldBreak =
+      hasComment(node, CommentCheckFlags.Dangling | CommentCheckFlags.Line) ||
+      (options.objectWrap === "preserve" &&
+        firstMember &&
+        hasNewlineInRange(
+          options.originalText,
+          locStart(node),
+          locStart(firstMember),
+        ));
+
+    let content;
+    if (parts.length === 0) {
+      content = openingBrace + closingBrace;
+    } else {
+      const spacing =
+        !options.bracketSpacing || (isEmpty && !shouldBreak) ? softline : line;
+      content = [
+        openingBrace,
+        indent([spacing, ...parts]),
+        spacing,
+        closingBrace,
+      ];
+    }
+
+    // If we inline the object as first argument of the parent, we don't want
+    // to create another group so that the object breaks before the return
+    // type
+    if (
+      path.match(
+        undefined,
+        /** @returns {boolean} */ (node, name) => name === "typeAnnotation",
+        /** @returns {boolean} */ (node, name) => name === "typeAnnotation",
+        shouldHugTheOnlyParameter,
+      ) ||
+      path.match(
+        undefined,
+        /** @returns {boolean} */ (node, name) =>
+          node.type === "FunctionTypeParam" && name === "typeAnnotation",
+        shouldHugTheOnlyParameter,
+      )
+    ) {
+      return content;
+    }
+
+    return group(content, { shouldBreak });
+  }
+
+  return [
+    openingBrace,
+    parts.length > 0 ? [indent([hardline, parts]), hardline] : "",
+    closingBrace,
+  ];
+}
+
+/** @returns {boolean} */ function isClassBody(path) {
+  const { node } = path;
+
+  if (node.type === "ObjectTypeAnnotation") {
+    const { key, parent } = path;
+    return (
+      key === "body" &&
+      (parent.type === "InterfaceDeclaration" ||
+        parent.type === "DeclareInterface" ||
+        parent.type === "DeclareClass")
+    );
+  }
+
+  return (
+    node.type === "ClassBody" ||
+    node.type === "TSInterfaceBody" ||
+    node.type === "RecordDeclarationBody"
+  );
+}
+
+function printClassMemberSemicolon(path, options) {
+  const { parent } = path;
+
+  if (path.callParent(isClassBody)) {
+    return parent.type === "ObjectTypeAnnotation"
+      ? ";"
+      : printSemicolon(options);
+  }
+
+  if (parent.type === "TSTypeLiteral") {
+    if (path.isLast) {
+      return options.semi ? ifBreak(";") : "";
+    }
+
+    if (
+      options.semi ||
+      shouldPrintSemicolonAfterInterfaceProperty(
+        { node: path.node, next: path.next },
+        options,
+      )
+    ) {
+      return ";";
+    }
+
+    return ifBreak("", ";");
+  }
+
+  return "";
+}
+
+const isClassProperty = createTypeCheckFunction([
+  "ClassProperty",
+  "PropertyDefinition",
+  "ClassPrivateProperty",
+  "ClassAccessorProperty",
+  "AccessorProperty",
+  "TSAbstractPropertyDefinition",
+  "TSAbstractAccessorProperty",
+]);
+
+const isKeywordProperty = (node) => {
+  if (node.computed || node.typeAnnotation) {
+    return false;
+  }
+
+  const { type, name } = node.key;
+  return (
+    type === "Identifier" &&
+    (name === "static" || name === "get" || name === "set")
+  );
+};
+
+/**
+ * @returns {boolean}
+ */
+function shouldPrintSemicolonAfterClassProperty(
+  { node, next: nextNode },
+  options,
+) {
+  if (options.semi || !isClassProperty(node)) {
+    return false;
+  }
+
+  if (!node.value && isKeywordProperty(node)) {
+    return true;
+  }
+
+  if (!nextNode) {
+    return false;
+  }
+
+  if (
+    nextNode.static ||
+    nextNode.accessibility || // TypeScript
+    nextNode.readonly // TypeScript
+  ) {
+    return false;
+  }
+
+  if (!nextNode.computed) {
+    const name = nextNode.key?.name;
+    if (name === "in" || name === "instanceof") {
+      return true;
+    }
+  }
+
+  // Flow variance sigil +/- requires semi if there's no
+  // "declare" or "static" keyword before it.
+  if (
+    isClassProperty(nextNode) &&
+    !nextNode.static &&
+    // @ts-expect-error -- Safe
+    nextNode.variance &&
+    // @ts-expect-error -- Safe
+    !nextNode.declare
+  ) {
+    return true;
+  }
+
+  switch (nextNode.type) {
+    case "ClassProperty":
+    case "PropertyDefinition":
+    case "TSAbstractPropertyDefinition":
+      return nextNode.computed;
+    case "MethodDefinition":
+    case "TSAbstractMethodDefinition":
+    case "ClassMethod":
+    case "ClassPrivateMethod": {
+      // Babel
+      const isAsync = nextNode.value ? nextNode.value.async : nextNode.async;
+      if (isAsync || nextNode.kind === "get" || nextNode.kind === "set") {
+        return false;
+      }
+
+      const isGenerator = nextNode.value
+        ? nextNode.value.generator
+        : nextNode.generator;
+      if (nextNode.computed || isGenerator) {
+        return true;
+      }
+
+      return false;
+    }
+
+    case "TSIndexSignature":
+      return true;
+  }
+
+  return false;
+}
+
+const isInterfaceProperty = createTypeCheckFunction(["TSPropertySignature"]);
+/** @returns {boolean} */ function shouldPrintSemicolonAfterInterfaceProperty(
+  { node, next: nextNode },
+  options,
+) {
+  if (options.semi || !isInterfaceProperty(node)) {
+    return false;
+  }
+
+  if (isKeywordProperty(node)) {
+    return true;
+  }
+
+  if (!nextNode) {
+    return false;
+  }
+
+  switch (nextNode.type) {
+    case "TSCallSignatureDeclaration":
+      if (node.type === "TSPropertySignature" && node.typeAnnotation) {
+        return false;
+      }
+
+      return true;
+  }
+
+  return false;
+}
+
+export { printClassBody, printClassMemberSemicolon };

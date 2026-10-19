@@ -32,7 +32,7 @@ module.exports = class Parser {
     const defaults = { loose: false };
 
     // cache needs to be an array for values with more than 1 level of function nesting
-    this.cache = [];
+    /** @type {any[]} */ this.cache = [];
     /** @type {string} */ this.input = input;
     this.options = Object.assign({}, defaults, options);
     /** @type {number} */ this.position = 0;
@@ -45,7 +45,7 @@ module.exports = class Parser {
     this.root.append(value);
 
     this.current = value;
-    this.tokens = tokenize(input, this.options);
+    /** @type {any[]} */ this.tokens = tokenize(input, this.options);
   }
 
   parse () {

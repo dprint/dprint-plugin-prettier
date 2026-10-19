@@ -1,19 +1,19 @@
 // @nts-check
 import {
+  hasIgnorePragma as jsHasIgnorePragma,
   hasPragma as jsHasPragma,
   insertPragma as jsInsertPragma,
 } from "../language-js/pragma.js";
-import parseFrontMatter from "../utils/front-matter/parse.js";
+import { parseFrontMatter } from "../main/front-matter/index.js";
 
-/** @returns {boolean} */ function hasPragma(/** @type {string} */ text) {
-  return jsHasPragma(parseFrontMatter(text).content);
-}
-
-/** @returns {string} */ function insertPragma(/** @type {string} */ text) {
+const hasPragma = (text) => jsHasPragma(parseFrontMatter(text).content);
+const hasIgnorePragma = (text) =>
+  jsHasIgnorePragma(parseFrontMatter(text).content);
+const insertPragma = /** @returns {string} */ (/** @type {string} */ text) => {
   const { frontMatter, content } = parseFrontMatter(text);
   return (
     (frontMatter ? frontMatter.raw + "\n\n" : "") + jsInsertPragma(content)
   );
-}
+};
 
-export { hasPragma, insertPragma };
+export { hasIgnorePragma, hasPragma, insertPragma };

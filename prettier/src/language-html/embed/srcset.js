@@ -1,27 +1,34 @@
 // @nts-check
 /** @import AstPath from "../../common/ast-path.js" */
 import parseSrcset from "@prettier/parse-srcset";
-import { ifBreak, join, line } from "../../document/builders.js";
-import { getUnescapedAttributeValue } from "../utils/index.js";
-import { printExpand } from "./utils.js";
+import { ifBreak, join, line } from "../../document/index.js";
+import { getUnescapedAttributeValue } from "../utilities/index.js";
+import { printExpand } from "./utilities.js";
 
-/** @import {Doc} from "../../document/builders.js" */
+/**
+@import {Doc} from "../../document/index.js"
+@import {AttributeValuePredicate, AttributeValuePrint} from "./attribute.js"
+*/
 
-function printSrcset(/** @type {AstPath} */ path /*, options*/) {
-  if (
-    path.node.fullName === "srcset" &&
-    (path.parent.fullName === "img" || path.parent.fullName === "source")
-  ) {
-    return () => printSrcsetValue(getUnescapedAttributeValue(path.node));
-  }
-}
+/** @type {AttributeValuePredicate} */
+const isSrcset = /** @returns {boolean} */ (path /* , options*/) =>
+  path.node.fullName === "srcset" &&
+  (path.parent.fullName === "img" || path.parent.fullName === "source");
 
 const SRCSET_UNITS = { width: "w", height: "h", density: "x" };
 const SRCSET_TYPES = Object.keys(SRCSET_UNITS);
-function printSrcsetValue(value) {
+
+/** @type {AttributeValuePrint} */
+function printSrcset(
+  textToDoc,
+  print,
+  path,
+  /* , options*/
+) {
+  /** @type {string} */ const value = getUnescapedAttributeValue(path.node);
   const srcset = parseSrcset(value);
-  const types = SRCSET_TYPES.filter((type) =>
-    srcset.some((candidate) => Object.hasOwn(candidate, type)),
+  const types = SRCSET_TYPES.filter(/** @returns {boolean} */ (type) =>
+    srcset.some(/** @returns {boolean} */ (candidate) => Object.hasOwn(candidate, type)),
   );
 
   if (types.length > 1) {
@@ -31,13 +38,13 @@ function printSrcsetValue(value) {
   const [key] = types;
   const unit = SRCSET_UNITS[key];
 
-  const urls = srcset.map((src) => src.source.value);
-  const maxUrlLength = Math.max(...urls.map((url) => url.length));
+  const urls = srcset.map(/** @returns {string} */ (src) => src.source.value);
+  const maxUrlLength = Math.max(...urls.map(/** @returns {number} */ (url) => url.length));
 
-  const descriptors = srcset.map((src) =>
+  const descriptors = srcset.map(/** @returns {string} */ (src) =>
     src[key] ? String(src[key].value) : "",
   );
-  const descriptorLeftLengths = descriptors.map((descriptor) => {
+  const descriptorLeftLengths = descriptors.map(/** @returns {number} */ (descriptor) => {
     const index = descriptor.indexOf(".");
     return index === -1 ? descriptor.length : index;
   });
@@ -66,4 +73,4 @@ function printSrcsetValue(value) {
   );
 }
 
-export default printSrcset;
+export { isSrcset, printSrcset };

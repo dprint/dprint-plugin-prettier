@@ -6,11 +6,11 @@ import {
   join,
   line,
   softline,
-} from "../../document/builders.js";
-import { hasEndComments, isEmptyNode } from "../utils.js";
+} from "../../document/index.js";
+import { hasEndComments, isEmptyNode } from "../utilities.js";
 import { alignWithSpaces, printNextEmptyLine } from "./misc.js";
 
-/** @returns {any[]} */ function printFlowMapping(/** @type {AstPath} */ path, print, options) {
+function printFlowMapping(path, options, print) {
   const { node } = path;
   /** @type {boolean} */ const isMapping = node.type === "flowMapping";
   /** @type {string} */ const openMarker = isMapping ? "{" : "[";
@@ -31,7 +31,7 @@ import { alignWithSpaces, printNextEmptyLine } from "./misc.js";
     openMarker,
     alignWithSpaces(options.tabWidth, [
       bracketSpacing,
-      printChildren(path, print, options),
+      printChildren(path, options, print),
       options.trailingComma === "none" ? "" : ifBreak(","),
       hasEndComments(node)
         ? [hardline, join(hardline, path.map(print, "endComments"))]
@@ -42,7 +42,7 @@ import { alignWithSpaces, printNextEmptyLine } from "./misc.js";
   ];
 }
 
-/** @returns {any[]} */ function printChildren(/** @type {AstPath} */ path, /** @type {() => any} */ print, options) {
+function printChildren(path, options, print) {
   return path.map(
     /** @returns {any[]} */ ({ isLast, node, next }) => [
       print(),

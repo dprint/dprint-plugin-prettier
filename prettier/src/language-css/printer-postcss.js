@@ -9,16 +9,20 @@ import {
   indent,
   join,
   line,
+  lineSuffix,
+  lineSuffixBoundary,
+  literallineWithoutBreakParent,
+  removeLines,
+  replaceEndOfLine,
   softline,
-} from "../document/builders.js";
-import { removeLines } from "../document/utils.js";
-import isNonEmptyArray from "../utils/is-non-empty-array.js";
-import printString from "../utils/print-string.js";
-import UnexpectedNodeError from "../utils/unexpected-node-error.js";
-import clean from "./clean.js";
+} from "../document/index.js";
+import isNonEmptyArray from "../utilities/is-non-empty-array.js";
+import printString from "../utilities/print-string.js";
+import UnexpectedNodeError from "../utilities/unexpected-node-error.js";
 import embed from "./embed.js";
 import getVisitorKeys from "./get-visitor-keys.js";
 import { locEnd, locStart } from "./loc.js";
+import { massageAstNode } from "./massage-ast/index.js";
 import { insertPragma } from "./pragma.js";
 import printCommaSeparatedValueGroup from "./print/comma-separated-value-group.js";
 import {
@@ -37,8 +41,9 @@ import {
   hasComposesNode,
   hasParensAroundNode,
   insideAtRuleNode,
-  insideICSSRuleNode,
+  insideIcssRuleNode,
   insideValueFunctionNode,
+  isAtWordPlaceholderNode,
   isDetachedRulesetCallNode,
   isDetachedRulesetDeclarationNode,
   isKeyframeAtRuleKeywords,
@@ -49,14 +54,12 @@ import {
   isWideKeywords,
   lastLineHasInlineComment,
   maybeToLowerCase,
-} from "./utils/index.js";
+} from "./utilities/index.js";
 
 function genericPrint(/** @type {AstPath} */ path, options, print) {
   const { node } = path;
 
   switch (node.type) {
-    case "front-matter":
-      return [node.raw, hardline];
     case "css-root": {
       const nodes = printSequence(path, options, print);
       let after = node.raws.after.trim();
@@ -65,7 +68,13 @@ function genericPrint(/** @type {AstPath} */ path, options, print) {
       }
 
       return [
-        node.frontMatter ? [print("frontMatter"), hardline] : "",
+        node.frontMatter
+          ? [
+              print("frontMatter"),
+              hardline,
+              node.nodes.length > 0 ? hardline : "",
+            ]
+          : "",
         nodes,
         after ? ` ${after}` : "",
         node.nodes.length > 0 ? hardline : "",
@@ -107,8 +116,9 @@ function genericPrint(/** @type {AstPath} */ path, options, print) {
       const { between: rawBetween } = node.raws;
       const trimmedBetween = rawBetween.trim();
       /** @type {boolean} */ const isColon = trimmedBetween === ":";
+      const hasSpaceAfterColon = rawBetween.endsWith(" ") && isColon;
       /** @type {boolean} */ const isValueAllSpace =
-        typeof node.value === "string" && /^ *$/u.test(node.value);
+        typeof node.value === "string" && /^ *$/.test(node.value);
       let value = typeof node.value === "string" ? node.value : print("value");
 
       value = hasComposesNode(node) ? removeLines(value) : value;
@@ -116,47 +126,60 @@ function genericPrint(/** @type {AstPath} */ path, options, print) {
       if (
         !isColon &&
         lastLineHasInlineComment(trimmedBetween) &&
-        !(
-          node.value?.group?.group &&
-          path.call(/** @returns {boolean} */ () => shouldBreakList(path), "value", "group", "group")
-        )
+        !path.call(/** @returns {boolean} */ () => shouldBreakList(path), "value", "group", "group")
       ) {
         value = indent([hardline, dedent(value)]);
       }
 
       return [
-        node.raws.before.replaceAll(/[\s;]/gu, ""),
+        node.raws.before.replaceAll(/[\s;]/g, ""),
         // Less variable
         (parentNode.type === "css-atrule" && parentNode.variable) ||
-        insideICSSRuleNode(path)
+        insideIcssRuleNode(path)
           ? node.prop
           : maybeToLowerCase(node.prop),
         trimmedBetween.startsWith("//") ? " " : "",
         trimmedBetween,
-        node.extend || isValueAllSpace ? "" : " ",
+        node.extend ||
+        isValueAllSpace ||
+        (!hasSpaceAfterColon &&
+          node.isNested &&
+          (isAtWordPlaceholderNode(node.value.group.group) ||
+            isAtWordPlaceholderNode(node.value.group.group.groups?.[0])))
+          ? ""
+          : " ",
         options.parser === "less" && node.extend && node.selector
-          ? ["extend(", print("selector"), ")"]
+          ? node.selector.nodes.length > 1
+            ? group([
+                "extend(",
+                indent([softline, print("selector")]),
+                softline,
+                ")",
+              ])
+            : ["extend(", print("selector"), ")"]
           : "",
         value,
         node.raws.important
-          ? node.raws.important.replace(/\s*!\s*important/iu, " !important")
+          ? node.raws.important.replace(/\s*!\s*important/i, " !important")
           : node.important
             ? " !important"
             : "",
         node.raws.scssDefault
-          ? node.raws.scssDefault.replace(/\s*!default/iu, " !default")
+          ? node.raws.scssDefault.replace(/\s*!default/i, " !default")
           : node.scssDefault
             ? " !default"
             : "",
         node.raws.scssGlobal
-          ? node.raws.scssGlobal.replace(/\s*!global/iu, " !global")
+          ? node.raws.scssGlobal.replace(/\s*!global/i, " !global")
           : node.scssGlobal
             ? " !global"
             : "",
         node.nodes
           ? [
               " {",
-              indent([softline, printSequence(path, options, print)]),
+              node.nodes.length > 0
+                ? indent([softline, printSequence(path, options, print)])
+                : "",
               softline,
               "}",
             ]
@@ -198,15 +221,14 @@ function genericPrint(/** @type {AstPath} */ path, options, print) {
             "@",
             node.name,
             ": ",
-            node.value ? print("value") : "",
+            node.value ? [print("value"), lineSuffixBoundary] : "",
             node.raws.between.trim() ? node.raws.between.trim() + " " : "",
             node.nodes
               ? [
                   "{",
-                  indent([
-                    node.nodes.length > 0 ? softline : "",
-                    printSequence(path, options, print),
-                  ]),
+                  node.nodes.length > 0
+                    ? indent([softline, printSequence(path, options, print)])
+                    : "",
                   softline,
                   "}",
                 ]
@@ -239,9 +261,9 @@ function genericPrint(/** @type {AstPath} */ path, options, print) {
                     ? ""
                     : node.name.endsWith(":")
                       ? " "
-                      : /^\s*\n\s*\n/u.test(node.raws.afterName)
+                      : /^\s*\n\s*\n/.test(node.raws.afterName)
                         ? [hardline, hardline]
-                        : /^\s*\n/u.test(node.raws.afterName)
+                        : /^\s*\n/.test(node.raws.afterName)
                           ? hardline
                           : " "
                   : " ",
@@ -276,10 +298,9 @@ function genericPrint(/** @type {AstPath} */ path, options, print) {
                   ? line
                   : " ",
               "{",
-              indent([
-                node.nodes.length > 0 ? softline : "",
-                printSequence(path, options, print),
-              ]),
+              node.nodes.length > 0
+                ? indent([softline, printSequence(path, options, print)])
+                : "",
               softline,
               "}",
             ]
@@ -315,7 +336,7 @@ function genericPrint(/** @type {AstPath} */ path, options, print) {
 
     case "media-feature":
       return maybeToLowerCase(
-        adjustStrings(node.value.replaceAll(/ +/gu, " "), options),
+        adjustStrings(node.value.replaceAll(/ +/g, " "), options),
       );
 
     case "media-colon":
@@ -329,9 +350,7 @@ function genericPrint(/** @type {AstPath} */ path, options, print) {
 
     case "media-url":
       return adjustStrings(
-        node.value
-          .replaceAll(/^url\(\s+/giu, "url(")
-          .replaceAll(/\s+\)$/gu, ")"),
+        node.value.replaceAll(/^url\(\s+/gi, "url(").replaceAll(/\s+\)$/g, ")"),
         options,
       );
 
@@ -360,7 +379,7 @@ function genericPrint(/** @type {AstPath} */ path, options, print) {
       ]);
 
     case "selector-selector": {
-      /** @type {boolean} */ const shouldIndent = node.nodes.length > 1;
+      const shouldIndent = node.nodes.length > 2;
       return group(
         (shouldIndent ? indent : /** @returns {any[]} */ (/** @type {any[]} */ x) => x)(path.map(print, "nodes")),
       );
@@ -401,9 +420,12 @@ function genericPrint(/** @type {AstPath} */ path, options, print) {
         node.attribute.trim(),
         node.operator ?? "",
         node.value
-          ? quoteAttributeValue(
-              adjustStrings(node.value.trim(), options),
-              options,
+          ? replaceEndOfLine(
+              quoteAttributeValue(
+                adjustStrings(node.value.trim(), options),
+                options,
+              ),
+              literallineWithoutBreakParent,
             )
           : "",
         node.insensitive ? " i" : "",
@@ -427,7 +449,7 @@ function genericPrint(/** @type {AstPath} */ path, options, print) {
         return [leading, node.value, path.isLast ? "" : " "];
       }
 
-      const leading = node.value.trim().startsWith("(") ? line : "";
+      const leading = node.value.trimStart().startsWith("(") ? line : "";
       const value =
         adjustNumbers(adjustStrings(node.value.trim(), options)) || line;
 
@@ -463,7 +485,7 @@ function genericPrint(/** @type {AstPath} */ path, options, print) {
       );
 
       // Nested SCSS property
-      if (ruleAncestorNode?.isSCSSNesterProperty) {
+      if (ruleAncestorNode?.isScssNestedProperty) {
         return adjustNumbers(
           adjustStrings(maybeToLowerCase(node.value), options),
         );
@@ -500,9 +522,10 @@ function genericPrint(/** @type {AstPath} */ path, options, print) {
     case "value-root":
       return print("group");
 
-    case "value-comment":
-      return options.originalText.slice(locStart(node), locEnd(node));
-
+    case "value-comment": {
+      const text = options.originalText.slice(locStart(node), locEnd(node));
+      return node.inline ? lineSuffix(text.trimEnd()) : text;
+    }
     case "value-comma_group":
       return printCommaSeparatedValueGroup(path, options, print);
 
@@ -562,6 +585,7 @@ function genericPrint(/** @type {AstPath} */ path, options, print) {
     case "value-unknown":
       return node.value;
 
+    case "front-matter": // Handled in core
     case "value-comma": // Handled in `value-comma_group`
     default:
       /* c8 ignore next */
@@ -570,10 +594,17 @@ function genericPrint(/** @type {AstPath} */ path, options, print) {
 }
 
 const printer = {
+  features: {
+    experimental_frontMatterSupport: {
+      massageAstNode: true,
+      embed: true,
+      print: true,
+    },
+  },
   print: genericPrint,
   embed,
   insertPragma,
-  massageAstNode: clean,
+  massageAstNode,
   getVisitorKeys,
 };
 

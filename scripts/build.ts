@@ -28,12 +28,16 @@ if (!rootDir.join("prettier/node_modules").existsSync()) {
 
 $.logStep("Compiling", "src/main.ts with nts");
 ntsOutDir.mkdirSync({ recursive: true });
-await $`deno run -A ${ntsDir.join("main.ts")} ${rootDir.join("src/main.ts")} --no-aot`
+// the C# is only compiled by the Wasm project, which also has what it calls of the plugin (wasm/FlowParser.cs)
+await $`deno run -A ${ntsDir.join("main.ts")} ${rootDir.join("src/main.ts")} --no-aot --no-build`
   .cwd(ntsOutDir)
   .stderr(ntsOutDir.join("nts.log"));
 
+$.logStep("Compiling", "Flow's parser");
+const flowLibPath = await buildFlowParser();
+
 $.logStep("Compiling", "the Wasm module with NativeAOT-LLVM");
-await $`dotnet publish Plugin.csproj -c Release -r wasi-wasm -p:NtsOutDir=${ntsOutDir.join("dist")}`
+await $`dotnet publish Plugin.csproj -c Release -r wasi-wasm -p:NtsOutDir=${ntsOutDir.join("dist")} -p:FlowParserLib=${flowLibPath}`
   .cwd(wasmDir)
   .stdout(targetDir.join("publish.log"));
 
@@ -44,6 +48,46 @@ await $`node ${wasmDir.join("patch-shadow-stack.mjs")} ${publishedPath} ${patche
 const binaryen = Deno.env.get("BINARYEN");
 const wasmOptName = Deno.build.os === "windows" ? "wasm-opt.exe" : "wasm-opt";
 const wasmOpt = binaryen == null ? wasmOptName : $.path(binaryen).join(wasmOptName).toString();
-await $`${wasmOpt} -O2 --enable-bulk-memory --enable-nontrapping-float-to-int --enable-sign-ext --enable-mutable-globals --enable-multivalue --enable-reference-types ${patchedPath} -o ${outPath}`;
+// -O3 inlines more than -O2, which is 1-2% faster. The compiler emits the legacy form of Wasm's exceptions, which
+// wasmtime only runs in the standard form that binaryen translates it to
+await $`${wasmOpt} -O3 --enable-bulk-memory --enable-nontrapping-float-to-int --enable-sign-ext --enable-mutable-globals --enable-multivalue --enable-reference-types --enable-exception-handling --translate-to-exnref ${patchedPath} -o ${outPath}`;
 
 $.logStep("Built", outPath.toString());
+
+/**
+ * Compiles Flow's parser, the Wasm module of the flow-parser package, into a library for WASI: wasm2c makes C of
+ * the module, which the WASI SDK compiles along with what runs it (wasm/flow). Gives the path of the library.
+ */
+async function buildFlowParser() {
+  const flowDir = targetDir.join("flow");
+  flowDir.mkdirSync({ recursive: true });
+  const wasmPath = flowDir.join("flow_parser.wasm");
+  await $`node ${wasmDir.join("flow/extract-wasm.mjs")} ${rootDir.join("prettier/node_modules/flow-parser/dist/FlowParserWASM.js")} ${wasmPath}`;
+  const wabt = Deno.env.get("WABT");
+  if (wabt == null) {
+    throw new Error("Expected the WABT environment variable to give the folder of WABT, for wasm2c.");
+  }
+  const exe = Deno.build.os === "windows" ? ".exe" : "";
+  await $`${$.path(wabt).join(`bin/wasm2c${exe}`)} ${wasmPath} -n flow -o ${flowDir.join("flow_parser.c")}`;
+  const wasiSdk = $.path(Deno.env.get("WASI_SDK_PATH")!);
+  const flags = [
+    "--target=wasm32-wasip1",
+    `--sysroot=${wasiSdk.join("share/wasi-sysroot")}`,
+    "-O2",
+    `-I${wasmDir.join("flow/include")}`,
+    `-I${flowDir}`,
+    `-I${$.path(wabt).join("include")}`,
+    // the memory is allocated with malloc and checked on each access, since WASI has no guard pages
+    "-DWASM_RT_USE_MMAP=0",
+    "-DWASM_RT_MEMCHECK_BOUNDS_CHECK=1",
+    // running out of stack is a trap of the engine, as it is for the rest of the plugin
+    "-DWASM_RT_NONCONFORMING_UNCHECKED_STACK_EXHAUSTION=1",
+  ];
+  const clang = wasiSdk.join(`bin/clang${exe}`);
+  await $`${clang} ${flags} -c ${flowDir.join("flow_parser.c")} -o ${flowDir.join("flow_parser.o")}`;
+  await $`${clang} ${flags} -c ${wasmDir.join("flow/flow_parser_glue.c")} -o ${flowDir.join("flow_parser_glue.o")}`;
+  const libPath = flowDir.join("libflowparser.a");
+  if (libPath.existsSync()) libPath.removeSync();
+  await $`${wasiSdk.join(`bin/llvm-ar${exe}`)} rcs ${libPath} ${flowDir.join("flow_parser.o")} ${flowDir.join("flow_parser_glue.o")}`;
+  return libPath;
+}

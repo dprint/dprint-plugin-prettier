@@ -1,8 +1,12 @@
 // @nts-check
-import { parse as parseGraphql } from "graphql/language/parser.mjs";
+import { GraphQLError, parse as parseGraphql } from "graphql";
 import createError from "../common/parser-create-error.js";
 import { locEnd, locStart } from "./loc.js";
-import { hasPragma } from "./pragma.js";
+import { hasIgnorePragma, hasPragma } from "./pragma.js";
+
+/**
+@import {ParseOptions} from "graphql"
+*/
 
 /** @returns {any[]} */ function parseComments(ast) {
   const comments = [];
@@ -16,24 +20,25 @@ import { hasPragma } from "./pragma.js";
   return comments;
 }
 
+/** @type {any} */
 const parseOptions = {
-  allowLegacyFragmentVariables: true,
+  experimentalFragmentArguments: true,
 };
 
 function createParseError(/** @type {import("../../../src/vendor/graphql/error/GraphQLError.mjs").GraphQLError} */ error) {
-  if (error?.name === "GraphQLError") {
-    const {
-      message,
-      locations: [start],
-    } = error;
-    return createError(message, { loc: { start }, cause: error });
+  /* c8 ignore next 3 */
+  if (!(error instanceof GraphQLError)) {
+    return error;
   }
 
-  /* c8 ignore next */
-  return error;
+  const {
+    message,
+    locations: [start],
+  } = error;
+  return createError(message, { loc: { start }, cause: error });
 }
 
-function parse(/** @type {string | undefined} */ text /*, options */) {
+function parse(/** @type {string | undefined} */ text /* , options */) {
   let ast;
   try {
     ast = parseGraphql(text, parseOptions);
@@ -41,6 +46,7 @@ function parse(/** @type {string | undefined} */ text /*, options */) {
     throw createParseError(error);
   }
 
+  // @ts-expect-error -- expected
   ast.comments = parseComments(ast);
   return ast;
 }
@@ -49,6 +55,7 @@ export const graphql = {
   parse,
   astFormat: "graphql",
   hasPragma,
+  hasIgnorePragma,
   locStart,
   locEnd,
 };

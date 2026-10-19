@@ -17,6 +17,7 @@ function fromBase64(str) {
 class PreviousMap {
   constructor(/** @type {string} */ css, opts) {
     if (opts.map === false) return
+    if (opts.unsafeMap) this.unsafeMap = true
     this.loadAnnotation(css)
     /** @type {boolean} */ this.inline = this.startWith(this.annotation, 'data:')
 
@@ -31,7 +32,7 @@ class PreviousMap {
 
   consumer() {
     if (!this.consumerCache) {
-      this.consumerCache = new SourceMapConsumer(this.text)
+      this.consumerCache = new SourceMapConsumer(this.json || this.text)
     }
     return this.consumerCache
   }
@@ -52,7 +53,8 @@ class PreviousMap {
       return fromBase64(text.substr(baseUriMatch[0].length))
     }
 
-    let encoding = text.match(/data:application\/json;([^,]+),/)[1]
+    let encoding = text.slice('data:application/json;'.length)
+    encoding = encoding.slice(0, encoding.indexOf(','))
     throw new Error('Unsupported source map encoding ' + encoding)
   }
 
@@ -83,7 +85,13 @@ class PreviousMap {
     }
   }
 
-  loadFile(path) {
+  loadFile(path, cssFile, trusted) {
+    /* c8 ignore next 5 */
+    if (!trusted && !this.unsafeMap) {
+      if (!/\.map$/i.test(path)) {
+        return undefined
+      }
+    }
     this.root = dirname(path)
     if (existsSync(path)) {
       this.mapFile = path
@@ -100,7 +108,7 @@ class PreviousMap {
       } else if (typeof prev === 'function') {
         let prevPath = prev(file)
         if (prevPath) {
-          let map = this.loadFile(prevPath)
+          let map = this.loadFile(prevPath, file, true)
           if (!map) {
             throw new Error(
               'Unable to load previous source map: ' + prevPath.toString()
@@ -124,7 +132,16 @@ class PreviousMap {
     } else if (this.annotation) {
       let map = this.annotation
       if (file) map = join(dirname(file), map)
-      return this.loadFile(map)
+      let unknown = this.loadFile(map, file, false)
+      if (unknown) {
+        try {
+          /* c8 ignore next 4 */
+          this.json = JSON.parse(unknown.replace(/^\)]}'[^\n]*\n/, ''))
+        } catch {
+          return undefined
+        }
+      }
+      return unknown
     }
   }
 

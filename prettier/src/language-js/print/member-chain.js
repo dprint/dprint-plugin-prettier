@@ -8,36 +8,32 @@ import {
   indent,
   join,
   label,
-} from "../../document/builders.js";
-import { willBreak } from "../../document/utils.js";
+  willBreak,
+} from "../../document/index.js";
 import { printComments } from "../../main/comments/print.js";
-import getNextNonSpaceNonCommentCharacterIndex from "../../utils/get-next-non-space-non-comment-character-index.js";
-import isNextLineEmptyAfterIndex from "../../utils/is-next-line-empty.js";
-import { locEnd } from "../loc.js";
-import pathNeedsParens from "../needs-parens.js";
+import getNextNonSpaceNonCommentCharacterIndex from "../../utilities/get-next-non-space-non-comment-character-index.js";
+import isNextLineEmptyAfterIndex from "../../utilities/is-next-line-empty.js";
+import { locEnd } from "../location/index.js";
+import needsParentheses from "../parentheses/needs-parentheses.js";
+import { CommentCheckFlags, hasComment } from "../utilities/comments.js";
+import { isLongCurriedCallExpression } from "../utilities/is-long-curried-call-expression.js";
+import { isMemberish } from "../utilities/is-memberish.js";
+import { isNextLineEmpty } from "../utilities/is-next-line-empty.js";
+import { isSimpleCallArgument } from "../utilities/is-simple-call-argument.js";
 import {
-  CommentCheckFlags,
-  hasComment,
   isCallExpression,
   isFunctionOrArrowExpression,
-  isLongCurriedCallExpression,
   isMemberExpression,
-  isMemberish,
-  isNextLineEmpty,
   isNumericLiteral,
-  isSimpleCallArgument,
-} from "../utils/index.js";
+} from "../utilities/node-types.js";
+import { printBindExpressionCallee } from "./bind-expression.js";
 import printCallArguments from "./call-arguments.js";
 import { printMemberLookup } from "./member.js";
-import {
-  printBindExpressionCallee,
-  printFunctionTypeParameters,
-  printOptionalToken,
-} from "./misc.js";
+import { printOptionalToken } from "./miscellaneous.js";
 
 /**
- * @import {Doc} from "../../document/builders.js"
- * @typedef {{ node: any, printed: Doc, needsParens?: boolean, shouldInline?: boolean, hasTrailingEmptyLine?: boolean }} PrintedNode
+ * @import {Doc} from "../../document/index.js"
+ * @typedef {{ node: any, printed: Doc, shouldInline?: boolean, hasTrailingEmptyLine?: boolean }} PrintedNode
  */
 
 // We detect calls on member expressions specially to format a
@@ -51,18 +47,15 @@ import {
 // The way it is structured in the AST is via a nested sequence of
 // MemberExpression and CallExpression. We need to traverse the AST
 // and make groups out of it to print it in the desired way.
+/*
+- `BindExpression`
+- `MemberExpression`
+- `OptionalMemberExpression`
+*/
 function printMemberChain(/** @type {AstPath} */ path, options, print) {
-  /* c8 ignore next 6 */
-  if (path.node.type === "ChainExpression") {
-    return path.call(
-      () => printMemberChain(path, options, print),
-      "expression",
-    );
-  }
-
-  const { parent } = path;
   /** @type {boolean} */ const isExpressionStatement =
-    !parent || parent.type === "ExpressionStatement";
+    (path.parent.type === "ChainExpression" ? path.grandparent : path.parent)
+      .type === "ExpressionStatement";
 
   // The first phase is to linearize the AST by traversing it down.
   //
@@ -99,13 +92,10 @@ function printMemberChain(/** @type {AstPath} */ path, options, print) {
   function rec() {
     const { node } = path;
 
-    if (node.type === "ChainExpression") {
-      return path.call(rec, "expression");
-    }
-
     if (
       isCallExpression(node) &&
-      (isMemberish(node.callee) || isCallExpression(node.callee))
+      (isMemberish(node.callee) || isCallExpression(node.callee)) &&
+      !needsParentheses(path, options)
     ) {
       /** @type {boolean} */ const hasTrailingEmptyLine = shouldInsertEmptyLineAfter(node);
       printedNodes.unshift({
@@ -116,7 +106,7 @@ function printMemberChain(/** @type {AstPath} */ path, options, print) {
             path,
             [
               printOptionalToken(path),
-              printFunctionTypeParameters(path, options, print),
+              print("typeArguments"),
               printCallArguments(path, options, print),
             ],
             options,
@@ -125,10 +115,9 @@ function printMemberChain(/** @type {AstPath} */ path, options, print) {
         ],
       });
       path.call(rec, "callee");
-    } else if (isMemberish(node)) {
+    } else if (isMemberish(node) && !needsParentheses(path, options)) {
       printedNodes.unshift({
         node,
-        needsParens: pathNeedsParens(path, options),
         printed: printComments(
           path,
           isMemberExpression(node)
@@ -138,7 +127,15 @@ function printMemberChain(/** @type {AstPath} */ path, options, print) {
         ),
       });
       path.call(rec, "object");
-    } else if (node.type === "TSNonNullExpression") {
+    } else if (
+      node.type === "ChainExpression" &&
+      !needsParentheses(path, options)
+    ) {
+      path.call(rec, "expression");
+    } else if (
+      node.type === "TSNonNullExpression" &&
+      !needsParentheses(path, options)
+    ) {
       printedNodes.unshift({
         node,
         printed: printComments(path, "!", options),
@@ -159,7 +156,7 @@ function printMemberChain(/** @type {AstPath} */ path, options, print) {
     node,
     printed: [
       printOptionalToken(path),
-      printFunctionTypeParameters(path, options, print),
+      print("typeArguments"),
       printCallArguments(path, options, print),
     ],
   });
@@ -199,6 +196,7 @@ function printMemberChain(/** @type {AstPath} */ path, options, print) {
   for (; i < printedNodes.length; ++i) {
     if (
       printedNodes[i].node.type === "TSNonNullExpression" ||
+      printedNodes[i].node.type === "ChainExpression" ||
       isCallExpression(printedNodes[i].node) ||
       (isMemberExpression(printedNodes[i].node) &&
         printedNodes[i].node.computed &&
@@ -277,7 +275,7 @@ function printMemberChain(/** @type {AstPath} */ path, options, print) {
   // letter or just a sequence of _$. The rationale is that they are
   // likely to be factories.
   /** @returns {boolean} */ function isFactory(/** @type {string} */ name) {
-    return /^[A-Z]|^[$_]+$/u.test(name);
+    return /^[A-Z]|^[$_]+$/.test(name);
   }
 
   // In case the Identifier is shorter than tab width, we can keep the
@@ -319,13 +317,7 @@ function printMemberChain(/** @type {AstPath} */ path, options, print) {
     shouldNotWrap(groups);
 
   /** @returns {any[]} */ function printGroup(/** @type {any[]} */ printedGroup) {
-    const printed = printedGroup.map((tuple) => tuple.printed);
-    // Checks if the last node (i.e. the parent node) needs parens and print
-    // accordingly
-    if (printedGroup.length > 0 && printedGroup.at(-1).needsParens) {
-      return ["(", ...printed, ")"];
-    }
-    return printed;
+    return printedGroup.map((tuple) => tuple.printed);
   }
 
   function printIndentedGroup(/** @type {any[]} */ groups) {
@@ -357,7 +349,7 @@ function printMemberChain(/** @type {AstPath} */ path, options, print) {
   if (
     groups.length <= cutoff &&
     !nodeHasComment &&
-    !groups.some(/** @returns {boolean | undefined} */ (g) => g.at(-1).hasTrailingEmptyLine)
+    groups.every(/** @returns {boolean} */ (g) => !g.at(-1).hasTrailingEmptyLine)
   ) {
     if (isLongCurriedCallExpression(path)) {
       return oneLine;
@@ -406,8 +398,8 @@ function printMemberChain(/** @type {AstPath} */ path, options, print) {
   if (
     nodeHasComment ||
     (callExpressions.length > 2 &&
-      callExpressions.some(
-        /** @returns {boolean} */ (expr) => !expr.arguments.every(/** @returns {boolean} */ (arg) => isSimpleCallArgument(arg)),
+      callExpressions.some(/** @returns {boolean} */ (expr) =>
+        expr.arguments.some(/** @returns {boolean} */ (arg) => !isSimpleCallArgument(arg)),
       )) ||
     printedGroups.slice(0, -1).some(willBreak) ||
     lastGroupWillBreakAndOtherCallsHaveFunctionArguments()

@@ -1,31 +1,38 @@
 {
   "name": "vnopts",
   "type": "module",
-  "version": "2.0.0",
+  "version": "2.0.5",
   "description": "validate and normalize options",
   "exports": "./lib/index.js",
-  "repository": "https://github.com/ikatyang/vnopts",
-  "homepage": "https://github.com/ikatyang/vnopts#readme",
+  "repository": "https://github.com/ikatyang-collab/vnopts",
+  "homepage": "https://github.com/ikatyang-collab/vnopts#readme",
   "author": {
     "name": "Ika",
     "email": "ikatyang@gmail.com",
     "url": "https://github.com/ikatyang"
   },
   "license": "MIT",
+  "scripts": {
+    "prepack": "pnpm run build",
+    "lint": "prettier --check .",
+    "fix": "prettier --write .",
+    "test": "vitest",
+    "build": "tsc -p ./tsconfig.build.json",
+    "release": "standard-version"
+  },
   "dependencies": {
-    "chalk": "^5.3.0",
-    "leven": "^4.0.0",
-    "tslib": "^2.6.0"
+    "leven": "^4.1.0",
+    "picocolors": "^1.1.1"
   },
   "devDependencies": {
-    "@types/node": "18.16.19",
-    "@vitest/coverage-v8": "0.33.0",
-    "jest-snapshot-serializer-ansi": "2.1.0",
-    "prettier": "3.0.0",
+    "@types/node": "25.9.2",
+    "@vitest/coverage-v8": "4.1.8",
+    "jest-snapshot-serializer-ansi": "2.2.1",
+    "prettier": "3.8.3",
     "standard-version": "9.5.0",
-    "typescript": "5.1.6",
-    "vite": "4.4.4",
-    "vitest": "0.33.0"
+    "typescript": "6.0.3",
+    "vite": "8.0.16",
+    "vitest": "4.1.8"
   },
   "engines": {
     "node": ">=16"
@@ -34,11 +41,10 @@
     "/lib/**/*",
     "/CHANGELOG.md"
   ],
-  "packageManager": "pnpm@8.6.6",
-  "scripts": {
-    "lint": "prettier --check .",
-    "test": "vitest",
-    "build": "tsc -p ./tsconfig.build.json",
-    "release": "standard-version"
+  "packageManager": "pnpm@11.5.2",
+  "sideEffects": false,
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org",
+    "access": "public"
   }
 }

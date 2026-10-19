@@ -1,6 +1,7 @@
 // @nts-check
+import { formatAttributeValue, shouldHugJsExpression } from "./utilities.js";
+
 /** @import AstPath from "../../common/ast-path.js" */
-import { formatAttributeValue, shouldHugJsExpression } from "./utils.js";
 
 function printAngularControlFlowBlockParameters(
   textToDoc,
@@ -14,7 +15,7 @@ function printAngularControlFlowBlockParameters(
     node.sourceSpan.start.offset,
     node.sourceSpan.end.offset,
   );
-  /** @type {boolean} */ const isEmpty = /^\s*$/u.test(content);
+  const isEmpty = /^\s*$/.test(content);
 
   if (isEmpty) {
     return "";

@@ -1,40 +1,23 @@
 // @nts-check
-import assert from "node:assert";
-import {
-  group,
-  hardline,
-  ifBreak,
-  indent,
-  softline,
-} from "../../document/builders.js";
-import { printDanglingComments } from "../../main/comments/print.js";
-import hasNewlineInRange from "../../utils/has-newline-in-range.js";
-import { locEnd, locStart } from "../loc.js";
-import {
-  CommentCheckFlags,
-  getCallArguments,
-  getFunctionParameters,
-  getLeftSide,
-  hasComment,
-  hasLeadingOwnLineComment,
-  hasNakedLeftSide,
-  isBinaryish,
-  isCallExpression,
-  isJsxElement,
-  isMethod,
-} from "../utils/index.js";
+import * as assert from "#universal/assert";
+import { group } from "../../document/index.js";
+import { getCallArguments } from "../utilities/call-arguments.js";
+import { CommentCheckFlags, hasComment } from "../utilities/comments.js";
+import { getFunctionParameters } from "../utilities/function-parameters.js";
+import { isMethod } from "../utilities/is-method.js";
+import { isCallExpression } from "../utilities/node-types.js";
 import {
   printFunctionParameters,
   shouldBreakFunctionParameters,
   shouldGroupFunctionParameters,
 } from "./function-parameters.js";
-import { printDeclareToken, printFunctionTypeParameters } from "./misc.js";
-import { printPropertyKey } from "./property.js";
+import { printKey } from "./key.js";
+import { printDeclareToken, printSemicolon } from "./miscellaneous.js";
 import { printTypeAnnotationProperty } from "./type-annotation.js";
 
 /**
  * @import AstPath from "../../common/ast-path.js"
- * @import {Doc} from "../../document/builders.js"
+ * @import {Doc} from "../../document/index.js"
  */
 
 const isMethodValue = /** @returns {boolean} */ ({ node, key, parent }) =>
@@ -49,23 +32,20 @@ const isMethodValue = /** @returns {boolean} */ ({ node, key, parent }) =>
     (parent.type === "Property" && isMethod(parent)));
 
 /*
-- "FunctionDeclaration"
-- "FunctionExpression"
+- `FunctionDeclaration`
+- `FunctionExpression`
+- `HookDeclaration` (Flow)
 - `TSDeclareFunction`(TypeScript)
 */
-/** @returns {any[]} */ function printFunction(/** @type {AstPath} */ path, print, options, args) {
+function printFunction(path, options, print, args) {
   if (isMethodValue(path)) {
     return printMethodValue(path, options, print);
   }
 
   const { node } = path;
 
-  /** @type {boolean} */ let expandArg = false;
-  if (
-    (node.type === "FunctionDeclaration" ||
-      node.type === "FunctionExpression") &&
-    args?.expandLastArg
-  ) {
+  let shouldExpandParameters = false;
+  if (node.type === "FunctionExpression" && args?.expandLastArg) {
     const { parent } = path;
     if (
       isCallExpression(parent) &&
@@ -74,22 +54,15 @@ const isMethodValue = /** @returns {boolean} */ ({ node, key, parent }) =>
           /** @returns {boolean} */ (param) => param.type === "Identifier" && !param.typeAnnotation,
         ))
     ) {
-      expandArg = true;
+      shouldExpandParameters = true;
     }
   }
 
-  const parts = [
-    printDeclareToken(path),
-    node.async ? "async " : "",
-    `function${node.generator ? "*" : ""} `,
-    node.id ? print("id") : "",
-  ];
-
   const parametersDoc = printFunctionParameters(
     path,
-    print,
     options,
-    expandArg,
+    print,
+    shouldExpandParameters,
   );
   const returnTypeDoc = printReturnType(path, print);
   /** @type {boolean} */ const shouldGroupParameters = shouldGroupFunctionParameters(
@@ -97,24 +70,31 @@ const isMethodValue = /** @returns {boolean} */ ({ node, key, parent }) =>
     returnTypeDoc,
   );
 
-  parts.push(
-    printFunctionTypeParameters(path, options, print),
+  const isFlowHookDeclaration = node.type === "HookDeclaration";
+  const keyword = isFlowHookDeclaration ? "hook" : "function";
+
+  return [
+    printDeclareToken(path),
+    node.async ? "async " : "",
+    keyword,
+    node.generator ? "*" : "",
+    " ",
+    node.id ? print("id") : "",
+    print("typeParameters"),
     group([
       shouldGroupParameters ? group(parametersDoc) : parametersDoc,
       returnTypeDoc,
     ]),
     node.body ? " " : "",
     print("body"),
-  );
-
-  if (options.semi && (node.declare || !node.body)) {
-    parts.push(";");
-  }
-
-  return parts;
+    node.declare || !node.body ? printSemicolon(options) : "",
+  ];
 }
 
 /*
+- `FunctionDeclaration`
+- `FunctionExpression`
+- `TSDeclareFunction`(TypeScript)
 - `ObjectMethod`
 - `Property`
 - `ObjectProperty`
@@ -146,17 +126,28 @@ const isMethodValue = /** @returns {boolean} */ ({ node, key, parent }) =>
   }
 
   parts.push(
-    printPropertyKey(path, options, print),
-    node.optional || node.key.optional ? "?" : "",
+    printKey(path, options, print),
+    node.optional ? "?" : "",
     node === value ? printMethodValue(path, options, print) : print("value"),
   );
 
   return parts;
 }
 
+/*
+- `ObjectMethod`
+- `Property`
+- `ObjectProperty`
+- `ClassMethod`
+- `ClassPrivateMethod`
+- `MethodDefinition
+- `TSAbstractMethodDefinition` (TypeScript)
+- `TSDeclareMethod` (TypeScript)
+- `TSEmptyBodyFunctionExpression` (TypeScript)
+*/
 /** @returns {any[]} */ function printMethodValue(/** @type {AstPath} */ path, options, print) {
   const { node } = path;
-  const parametersDoc = printFunctionParameters(path, print, options);
+  const parametersDoc = printFunctionParameters(path, options, print);
   const returnTypeDoc = printReturnType(path, print);
   /** @type {boolean} */ const shouldBreakParameters = shouldBreakFunctionParameters(node);
   /** @type {boolean} */ const shouldGroupParameters = shouldGroupFunctionParameters(
@@ -164,7 +155,7 @@ const isMethodValue = /** @returns {boolean} */ ({ node, key, parent }) =>
     returnTypeDoc,
   );
   const parts = [
-    printFunctionTypeParameters(path, options, print),
+    print("typeParameters"),
     group([
       shouldBreakParameters
         ? group(parametersDoc, { shouldBreak: true })
@@ -178,7 +169,7 @@ const isMethodValue = /** @returns {boolean} */ ({ node, key, parent }) =>
   if (node.body) {
     parts.push(" ", print("body"));
   } else {
-    parts.push(options.semi ? ";" : "");
+    parts.push(printSemicolon(options));
   }
 
   return parts;
@@ -228,104 +219,10 @@ function printReturnType(/** @type {AstPath} */ path, print) {
   return parts;
 }
 
-// `ReturnStatement` and `ThrowStatement`
-/** @returns {any[]} */ function printReturnOrThrowArgument(/** @type {AstPath} */ path, options, /** @type {(a0?: any) => any} */ print) {
-  const { node } = path;
-  /** @type {string} */ const semi = options.semi ? ";" : "";
-  const parts = [];
-
-  if (node.argument) {
-    let argumentDoc = print("argument");
-
-    if (returnArgumentHasLeadingComment(options, node.argument)) {
-      argumentDoc = ["(", indent([hardline, argumentDoc]), hardline, ")"];
-    } else if (
-      isBinaryish(node.argument) ||
-      node.argument.type === "SequenceExpression" ||
-      (options.experimentalTernaries &&
-        node.argument.type === "ConditionalExpression" &&
-        (node.argument.consequent.type === "ConditionalExpression" ||
-          node.argument.alternate.type === "ConditionalExpression"))
-    ) {
-      argumentDoc = group([
-        ifBreak("("),
-        indent([softline, argumentDoc]),
-        softline,
-        ifBreak(")"),
-      ]);
-    }
-
-    parts.push(" ", argumentDoc);
-  }
-
-  /** @type {boolean} */ const hasDanglingComments = hasComment(node, CommentCheckFlags.Dangling);
-  /** @type {boolean} */ const shouldPrintSemiBeforeComments =
-    semi &&
-    hasDanglingComments &&
-    hasComment(node, CommentCheckFlags.Last | CommentCheckFlags.Line);
-
-  if (shouldPrintSemiBeforeComments) {
-    parts.push(semi);
-  }
-
-  if (hasDanglingComments) {
-    parts.push(" ", printDanglingComments(path, options));
-  }
-
-  if (!shouldPrintSemiBeforeComments) {
-    parts.push(semi);
-  }
-
-  return parts;
-}
-
-/** @returns {any[]} */ function printReturnStatement(/** @type {AstPath} */ path, options, print) {
-  return ["return", printReturnOrThrowArgument(path, options, print)];
-}
-
-/** @returns {any[]} */ function printThrowStatement(/** @type {AstPath} */ path, options, print) {
-  return ["throw", printReturnOrThrowArgument(path, options, print)];
-}
-
-// This recurses the return argument, looking for the first token
-// (the leftmost leaf node) and, if it (or its parents) has any
-// leadingComments, returns true (so it can be wrapped in parens).
-/** @returns {boolean} */ function returnArgumentHasLeadingComment(options, argument) {
-  if (
-    hasLeadingOwnLineComment(options.originalText, argument) ||
-    (hasComment(argument, CommentCheckFlags.Leading, /** @returns {boolean} */ (comment) =>
-      hasNewlineInRange(
-        options.originalText,
-        locStart(comment),
-        locEnd(comment),
-      ),
-    ) &&
-      !isJsxElement(argument))
-  ) {
-    return true;
-  }
-
-  if (hasNakedLeftSide(argument)) {
-    let leftMost = argument;
-    let newLeftMost;
-    while ((newLeftMost = getLeftSide(leftMost))) {
-      leftMost = newLeftMost;
-
-      if (hasLeadingOwnLineComment(options.originalText, leftMost)) {
-        return true;
-      }
-    }
-  }
-
-  return false;
-}
-
 export {
   printFunction,
   printMethod,
   printMethodValue,
-  printReturnStatement,
   printReturnType,
-  printThrowStatement,
   shouldPrintParamsWithoutParens,
 };

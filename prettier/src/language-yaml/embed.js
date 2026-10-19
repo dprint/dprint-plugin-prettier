@@ -1,6 +1,7 @@
 // @nts-check
+import { hardline } from "../document/index.js";
+
 /** @import AstPath from "../common/ast-path.js" */
-import { hardline } from "../document/builders.js";
 
 function embed(/** @type {AstPath} */ path, options) {
   const { node } = path;
@@ -9,7 +10,7 @@ function embed(/** @type {AstPath} */ path, options) {
   if (
     node.type === "root" &&
     options.filepath &&
-    /(?:[/\\]|^)\.(?:prettier|stylelint|lintstaged)rc$/u.test(options.filepath)
+    /(?:[/\\]|^)\.(?:prettier|stylelint|lintstaged)rc$/.test(options.filepath)
   ) {
     return async (textToDoc) => {
       const doc = await textToDoc(options.originalText, { parser: "json" });

@@ -40,7 +40,7 @@ module.exports = class LessParser extends Parser {
     }
   }
 
-  each(tokens) {
+  each(/** @type {any[]} */ tokens) {
     // prepend a space so the `name` will be parsed correctly
     tokens[0][1] = ` ${tokens[0][1]}`;
 
@@ -64,7 +64,7 @@ module.exports = class LessParser extends Parser {
     this.lastNode = node;
   }
 
-  inlineComment(token) {
+  inlineComment(/** @type {any[]} */ token) {
     const node = new Comment();
     const text = token[1].slice(2);
 
@@ -83,7 +83,7 @@ module.exports = class LessParser extends Parser {
     }
   }
 
-  mixin(tokens) {
+  mixin(/** @type {any[]} */ tokens) {
     const [first] = tokens;
     const identifier = first[1].slice(0, 1);
     const bracketsIndex = tokens.findIndex(/** @returns {boolean} */ (t) => t[0] === 'brackets');
@@ -92,7 +92,7 @@ module.exports = class LessParser extends Parser {
 
     // fix for #86. if rulesets are mixin params, they need to be converted to a brackets token
     if ((bracketsIndex < 0 || bracketsIndex > 3) && firstParenIndex > 0) {
-      const lastParenIndex = tokens.reduce((last, t, i) => (t[0] === ')' ? i : last));
+      const lastParenIndex = tokens.reduce((last, t, /** @type {number} */ i) => (t[0] === ')' ? i : last));
 
       const contents = tokens.slice(firstParenIndex, lastParenIndex + firstParenIndex);
       const brackets = contents.map(/** @returns {string} */ (t) => t[1]).join('');

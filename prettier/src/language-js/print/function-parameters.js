@@ -3,59 +3,89 @@ import { ArgExpansionBailout } from "../../common/errors.js";
 import {
   group,
   hardline,
-  ifBreak,
   indent,
   line,
+  removeLines,
   softline,
-} from "../../document/builders.js";
-import { removeLines, willBreak } from "../../document/utils.js";
-import { printDanglingComments } from "../../main/comments/print.js";
-import getNextNonSpaceNonCommentCharacter from "../../utils/get-next-non-space-non-comment-character.js";
-import isNonEmptyArray from "../../utils/is-non-empty-array.js";
-import { locEnd } from "../loc.js";
+  willBreak,
+} from "../../document/index.js";
+import isNonEmptyArray from "../../utilities/is-non-empty-array.js";
+import { hasComment } from "../utilities/comments.js";
 import {
   getFunctionParameters,
-  hasComment,
   hasRestParameter,
-  isArrayOrTupleExpression,
-  isFlowObjectTypePropertyAFunction,
-  isNextLineEmpty,
-  isObjectOrRecordExpression,
-  isObjectType,
-  isSimpleType,
-  isTestCall,
-  isTypeAnnotationAFunction,
   iterateFunctionParametersPath,
-  shouldPrintComma,
-} from "../utils/index.js";
-import { printFunctionTypeParameters } from "./misc.js";
+} from "../utilities/function-parameters.js";
+import { isFlowObjectTypePropertyAFunction } from "../utilities/is-flow-object-type-property-a-function.js";
+import { isNextLineEmpty } from "../utilities/is-next-line-empty.js";
+import { isSimpleType } from "../utilities/is-simple-type.js";
+import { isTypeAnnotationAFunction } from "../utilities/is-type-annotation-a-function.js";
+import {
+  isArrayExpression,
+  isObjectExpression,
+  isObjectType,
+} from "../utilities/node-types.js";
+import { isTestCall } from "../utilities/test-libraries.js";
+import {
+  printDanglingCommentsInList,
+  printTrailingComma,
+} from "./miscellaneous.js";
 
 /** @import AstPath from "../../common/ast-path.js" */
 
+// `ArrowFunctionExpression` has other dangling comments
+const functionParameterDanglingCommentFilter = (comment) =>
+  comment.mark !== "commentBeforeArrow";
+
+/*
+- `ArrowFunctionExpression`
+- `FunctionDeclaration`
+- `FunctionExpression`
+- `ObjectMethod`
+- `Property`
+- `ObjectProperty`
+- `ClassMethod`
+- `ClassPrivateMethod`
+- `MethodDefinition
+- `TSFunctionType` (TypeScript)
+- `TSCallSignatureDeclaration` (TypeScript)
+- `TSConstructorType` (TypeScript)
+- `TSConstructSignatureDeclaration` (TypeScript)
+- `TSDeclareFunction`(TypeScript)
+- `TSAbstractMethodDefinition` (TypeScript)
+- `TSDeclareMethod` (TypeScript)
+- `TSEmptyBodyFunctionExpression` (TypeScript)
+- `TSMethodSignature` (TypeScript)
+- `FunctionTypeAnnotation` (Flow)
+- `HookDeclaration` (Flow)
+- `HookTypeAnnotation` (Flow)
+- `ComponentDeclaration` (Flow)
+- `DeclareComponent` (Flow)
+- `ComponentTypeAnnotation` (Flow)
+*/
 function printFunctionParameters(
   /** @type {AstPath} */ path,
-  print,
   options,
-  /** @type {boolean | undefined} */ expandArg,
-  /** @type {boolean | undefined} */ printTypeParams,
+  print,
+  /** @type {boolean | undefined} */ shouldExpandParameters,
+  /** @type {boolean | undefined} */ shouldPrintTypeParameters,
 ) {
   const functionNode = path.node;
   const parameters = getFunctionParameters(functionNode);
-  const typeParams = printTypeParams
-    ? printFunctionTypeParameters(path, options, print)
-    : "";
+  const typeParametersDoc =
+    shouldPrintTypeParameters && functionNode.typeParameters
+      ? print("typeParameters")
+      : "";
 
   if (parameters.length === 0) {
     return [
-      typeParams,
+      typeParametersDoc,
       "(",
-      printDanglingComments(path, options, {
-        filter: /** @returns {boolean} */ (comment) =>
-          getNextNonSpaceNonCommentCharacter(
-            options.originalText,
-            locEnd(comment),
-          ) === ")",
-      }),
+      printDanglingCommentsInList(
+        /** @type {AstPath} */ path,
+        options,
+        functionParameterDanglingCommentFilter,
+      ),
       ")",
     ];
   }
@@ -93,12 +123,17 @@ function printFunctionParameters(
   //     }                     b,
   //   )                     ) => {
   //                         })
-  if (expandArg && !isDecoratedFunction(path)) {
-    if (willBreak(typeParams) || willBreak(printed)) {
+  if (shouldExpandParameters && !isDecoratedFunction(path)) {
+    if (willBreak(typeParametersDoc) || willBreak(printed)) {
       // Removing lines in this case leads to broken or ugly output
       throw new ArgExpansionBailout();
     }
-    return group([removeLines(typeParams), "(", removeLines(printed), ")"]);
+    return group([
+      removeLines(typeParametersDoc),
+      "(",
+      removeLines(printed),
+      ")",
+    ]);
   }
 
   // Single object destructuring should hug
@@ -112,12 +147,12 @@ function printFunctionParameters(
     /** @returns {boolean} */ (node) => !isNonEmptyArray(node.decorators),
   );
   if (shouldHugParameters && hasNotParameterDecorator) {
-    return [typeParams, "(", ...printed, ")"];
+    return [typeParametersDoc, "(", ...printed, ")"];
   }
 
   // don't break in specs, eg; `it("should maintain parens around done even when long", (done) => {})`
   if (isParametersInTestCall) {
-    return [typeParams, "(", ...printed, ")"];
+    return [typeParametersDoc, "(", ...printed, ")"];
   }
 
   const isFlowShorthandWithOneArg =
@@ -148,14 +183,14 @@ function printFunctionParameters(
   }
 
   return [
-    typeParams,
+    typeParametersDoc,
     "(",
     indent([softline, ...printed]),
-    ifBreak(
-      !hasRestParameter(functionNode) && shouldPrintComma(options, "all")
-        ? ","
-        : "",
-    ),
+    !hasRestParameter(functionNode) &&
+    // Angular does not allow trailing comma
+    path.root.type !== "NGRoot"
+      ? printTrailingComma(options, "all")
+      : "",
     softline,
     ")",
   ];
@@ -186,9 +221,9 @@ function printFunctionParameters(
         (parameter.left.type === "ObjectPattern" ||
           parameter.left.type === "ArrayPattern") &&
         (parameter.right.type === "Identifier" ||
-          (isObjectOrRecordExpression(parameter.right) &&
+          (isObjectExpression(parameter.right) &&
             parameter.right.properties.length === 0) ||
-          (isArrayOrTupleExpression(parameter.right) &&
+          (isArrayExpression(parameter.right) &&
             parameter.right.elements.length === 0))))
   );
 }
@@ -294,9 +329,16 @@ function isDecoratedFunction(path) {
   );
 }
 
+/** @returns {boolean} */ function shouldHugTheOnlyParameter(node, /** @type {string} */ name) {
+  return (
+    (name === "params" || name === "this" || name === "rest") &&
+    shouldHugTheOnlyFunctionParameter(node)
+  );
+}
+
 export {
   printFunctionParameters,
   shouldBreakFunctionParameters,
   shouldGroupFunctionParameters,
-  shouldHugTheOnlyFunctionParameter,
+  shouldHugTheOnlyParameter,
 };

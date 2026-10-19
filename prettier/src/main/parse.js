@@ -5,7 +5,7 @@ import { resolveParser } from "./parser-and-printer.js";
 async function parse(/** @type {string | undefined} */ originalText, options) {
   const parser = await resolveParser(options);
   const text = parser.preprocess
-    ? parser.preprocess(originalText, options)
+    ? await parser.preprocess(originalText, options)
     : originalText;
   options.originalText = text;
 
@@ -29,13 +29,22 @@ function handleParseError(error, /** @type {string} */ text) {
   const { loc } = error;
 
   if (loc) {
-    const codeFrame = codeFrameColumns(text, loc, { highlightCode: true });
+    // We use 1-based column, but `@babel/code-frame` uses 0-based column
+    // https://github.com/babel/babel/pull/17849
+    let { start, end } = loc;
+
+    start &&= { line: start.line, column: start.column - 1 };
+    end &&= { line: end.line, column: end.column - 1 };
+
+    const codeFrame = codeFrameColumns(
+      text,
+      { start, end },
+      { highlightCode: true },
+    );
     error.message += "\n" + codeFrame;
     error.codeFrame = codeFrame;
-    throw error;
   }
 
-  /* c8 ignore next */
   throw error;
 }
 
