@@ -5214,7 +5214,10 @@ const isAllowedNumericSeparatorSibling = {
   dec: ch => ch >= 48 && ch <= 57,
   hex: ch => ch >= 48 && ch <= 57 || ch >= 65 && ch <= 70 || ch >= 97 && ch <= 102
 };
-function readStringContents(/** @type {string} */ type, /** @type {string} */ input, /** @type {number} */ pos, /** @type {number} */ lineStart, /** @type {number} */ curLine, errors) {
+/**
+@typedef {Readonly<{ pos: number, str: string | null, firstInvalidLoc: any, lineStart: number, curLine: number }>} StringContents
+*/
+/** @returns {StringContents} */ function readStringContents(/** @type {string} */ type, /** @type {string} */ input, /** @type {number} */ pos, /** @type {number} */ lineStart, /** @type {number} */ curLine, errors) {
   const initialPos = pos;
   const initialLineStart = lineStart;
   const initialCurLine = curLine;
