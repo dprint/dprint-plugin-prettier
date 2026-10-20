@@ -36,12 +36,13 @@
     <NtsOutDir Condition="'$(NtsOutDir)' == ''">$(MSBuildThisFileDirectory)../target/nts/dist</NtsOutDir>
   </PropertyGroup>
   <ItemGroup>
-    <!-- what the collector works with, in hexadecimal: 4 MB for new objects and 64 MB a segment. Without
-         these it collects far too often; larger ones are no faster when dprint runs an instance on every
-         thread and take twice the memory (20 GB against 9 GB over DefinitelyTyped on 32 threads) -->
-    <IlcArg Include="--runtimeopt:GCgen0size=400000" />
-    <IlcArg Include="--runtimeopt:GCSegmentSize=4000000" />
-    <IlcArg Include="--runtimeopt:GCgen0MaxBudget=400000" />
+    <!-- what the collector works with, in hexadecimal: 32 MB for new objects and 256 MB a segment, which makes
+         formatting 3% faster than 4 and 64 MB. Without these it collects far too often. New objects need a segment
+         that has room for them several times over, or each collection is of everything. Only as much of a segment
+         is written to as the collector uses (wasm/gc), so a large one takes no more memory -->
+    <IlcArg Include="--runtimeopt:GCgen0size=2000000" />
+    <IlcArg Include="--runtimeopt:GCSegmentSize=10000000" />
+    <IlcArg Include="--runtimeopt:GCgen0MaxBudget=2000000" />
     <!-- objects of up to 16 MB are new objects rather than large ones. remark's parser gives what is left of a
          markdown file to the next part each time it reads one, which is a copy here, and with the default of
          85 KB each copy was a large object and collecting them was a full collection every few of them -->
@@ -57,6 +58,8 @@
     <!-- Flow's parser, which scripts/build.ts compiles from the Wasm module of the flow-parser package -->
     <NativeLibrary Include="$(FlowParserLib)" />
     <DirectPInvoke Include="flowparser" />
+    <!-- the collector's memory functions (wasm/gc), which scripts/build.ts compiles, in place of the runtime's -->
+    <NativeLibrary Include="$(GcEnvObject)" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.DotNet.ILCompiler.LLVM" Version="$(IlcLlvmVersion)" />

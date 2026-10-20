@@ -36,8 +36,11 @@ await $`deno run -A ${ntsDir.join("main.ts")} ${rootDir.join("src/main.ts")} --n
 $.logStep("Compiling", "Flow's parser");
 const flowLibPath = await buildFlowParser();
 
+$.logStep("Compiling", "the collector's memory functions");
+const gcEnvPath = await buildGcEnv();
+
 $.logStep("Compiling", "the Wasm module with NativeAOT-LLVM");
-await $`dotnet publish Plugin.csproj -c Release -r wasi-wasm -p:NtsOutDir=${ntsOutDir.join("dist")} -p:FlowParserLib=${flowLibPath}`
+await $`dotnet publish Plugin.csproj -c Release -r wasi-wasm -p:NtsOutDir=${ntsOutDir.join("dist")} -p:FlowParserLib=${flowLibPath} -p:GcEnvObject=${gcEnvPath}`
   .cwd(wasmDir)
   .stdout(targetDir.join("publish.log"));
 
@@ -90,4 +93,15 @@ async function buildFlowParser() {
   if (libPath.existsSync()) libPath.removeSync();
   await $`${wasiSdk.join(`bin/llvm-ar${exe}`)} rcs ${libPath} ${flowDir.join("flow_parser.o")} ${flowDir.join("flow_parser_glue.o")}`;
   return libPath;
+}
+
+/** Compiles the memory functions of the collector (wasm/gc) for WASI. Gives the path of the object. */
+async function buildGcEnv() {
+  const gcDir = targetDir.join("gc");
+  gcDir.mkdirSync({ recursive: true });
+  const wasiSdk = $.path(Deno.env.get("WASI_SDK_PATH")!);
+  const exe = Deno.build.os === "windows" ? ".exe" : "";
+  const objectPath = gcDir.join("gcenv.wasm.o");
+  await $`${wasiSdk.join(`bin/clang++${exe}`)} --target=wasm32-wasip1 --sysroot=${wasiSdk.join("share/wasi-sysroot")} -O2 -mbulk-memory -fno-exceptions -fno-rtti -c ${wasmDir.join("gc/gcenv.wasm.cpp")} -o ${objectPath}`;
+  return objectPath;
 }
