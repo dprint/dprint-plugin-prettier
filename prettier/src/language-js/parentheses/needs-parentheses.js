@@ -31,7 +31,7 @@ import { parentNeedsParentheses } from "./parent-needs-parentheses.js";
 
 /**
  * @param {AstPath} path
- * @returns {any}
+ * @returns {boolean}
  */
 function needsParentheses(path, options) {
   if (path.isRoot) {
