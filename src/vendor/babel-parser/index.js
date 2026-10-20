@@ -5502,7 +5502,7 @@ class Token {
     /** @type {SourceLocation} */ this.loc = new SourceLocation(state.startLoc, state.endLoc);
   }
 }
-let locDataCache;
+/** @type {Uint32Array | undefined} */ let locDataCache;
 class Tokenizer extends CommentsParser {
   /** @type {boolean | undefined} */ isLookahead;
   tokens = [];
@@ -5517,7 +5517,7 @@ class Tokenizer extends CommentsParser {
     if (!locDataCache || locDataCache.length < (this.length + 1) * 2) {
       locDataCache = new Uint32Array((this.length + 1) * 2);
     }
-    this.locData = locDataCache;
+    /** @type {Uint32Array} */ this.locData = locDataCache;
   }
   setLoc(/** @type {Position} */ loc) {
     const dataIndex = this.offsetToSourcePos(loc.index);
@@ -14251,13 +14251,13 @@ function getParserClass(pluginsMap) {
   }
   return cls;
 }
-function getLine(locData, pos) {
+function getLine(/** @type {Uint32Array} */ locData, /** @type {number} */ pos) {
   if (pos < 0 || pos * 2 >= locData.length) {
     throw new Error(`Position ${pos} is out of bounds for location data.`);
   }
   return locData[pos * 2];
 }
-function getColumn(locData, pos) {
+function getColumn(/** @type {Uint32Array} */ locData, /** @type {number} */ pos) {
   if (pos < 0 || pos * 2 + 1 >= locData.length) {
     throw new Error(`Position ${pos} is out of bounds for location data.`);
   }
