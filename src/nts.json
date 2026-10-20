@@ -166,7 +166,14 @@
     "!../prettier/node_modules/micromark-extension-gfm-tagfilter/lib/index.js",
     "!../prettier/node_modules/micromark/lib/compile.js",
     "!../prettier/node_modules/micromark-extension-gfm-table/lib/html.js",
-    "!../prettier/node_modules/micromark-extension-gfm-footnote/lib/html.js"
+    "!../prettier/node_modules/micromark-extension-gfm-footnote/lib/html.js",
+    "../prettier/src/utilities/skip.js",
+    "../prettier/src/utilities/skip-newline.js",
+    "../prettier/src/utilities/skip-inline-comment.js",
+    "../prettier/src/utilities/skip-trailing-comment.js",
+    "../prettier/src/utilities/has-newline.js",
+    "../prettier/src/utilities/is-next-line-empty.js",
+    "../prettier/src/document/printer/indent.js"
   ],
   "mixins": {
     "./vendor/babel-parser/index.js": [
