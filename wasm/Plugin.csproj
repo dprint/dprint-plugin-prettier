@@ -34,6 +34,8 @@
     <SuppressTrimAnalysisWarnings>true</SuppressTrimAnalysisWarnings>
     <!-- the C# that nts makes of src/main.ts -->
     <NtsOutDir Condition="'$(NtsOutDir)' == ''">$(MSBuildThisFileDirectory)../target/nts/dist</NtsOutDir>
+    <!-- the linker's map of the module, which names its functions for order-functions.mjs -->
+    <LinkMapPath Condition="'$(LinkMapPath)' == ''">$(MSBuildThisFileDirectory)../target/link.map</LinkMapPath>
   </PropertyGroup>
   <ItemGroup>
     <!-- what the collector works with, in hexadecimal: 32 MB for new objects and 256 MB a segment, which makes
@@ -60,6 +62,7 @@
     <DirectPInvoke Include="flowparser" />
     <!-- the collector's memory functions (wasm/gc), which scripts/build.ts compiles, in place of the runtime's -->
     <NativeLibrary Include="$(GcEnvObject)" />
+    <LinkerArg Include="-Wl,--Map=&quot;$(LinkMapPath.Replace('\', '/'))&quot;" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.DotNet.ILCompiler.LLVM" Version="$(IlcLlvmVersion)" />
