@@ -223,5 +223,6 @@
       ]
     ]
   },
-  "regexes": "./regexes.json"
+  "regexes": "./regexes.json",
+  "sites": "./sites.json"
 }
