@@ -74,4 +74,12 @@
       <IlcLlvmTarget>wasm32-wasip1</IlcLlvmTarget>
     </PropertyGroup>
   </Target>
+  <!-- LLVM moves the parts of functions that only lead to throwing into functions of their own, which leaves less
+       code between the parts that run, making formatting about 1% faster. The targets set this property where a
+       project cannot, so it is set again here before it is used -->
+  <Target Name="SplitColdCode" BeforeTargets="CompileWasmObjects">
+    <PropertyGroup>
+      <WasmOptimizationSetting>-O2 -mllvm -hot-cold-split=true</WasmOptimizationSetting>
+    </PropertyGroup>
+  </Target>
 </Project>
