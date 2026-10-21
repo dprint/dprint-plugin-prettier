@@ -13,7 +13,7 @@ import { ANGULAR_CONTROL_FLOW_BLOCK_SETTINGS } from "./angular-control-flow-bloc
 import { printChildren } from "./children.js";
 
 function printAngularControlFlowBlock(/** @type {AstPath} */ path, options, print) {
-  const { node } = path;
+  /** @type {{ node: import("../parse/ast.js").Node }} */ const { node } = path;
   const docs = [];
 
   if (isPreviousBlockUnClosed(path)) {

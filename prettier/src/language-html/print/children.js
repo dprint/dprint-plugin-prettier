@@ -166,7 +166,7 @@ function printBetweenLine(/** @type {import("../parse/ast.js").Node} */ prevNode
 }
 
 /** @returns {any[]} */ function printChildren(/** @type {AstPath} */ path, options, print) {
-  const { node } = path;
+  /** @type {{ node: import("../parse/ast.js").Node }} */ const { node } = path;
 
   if (forceBreakChildren(node)) {
     return [

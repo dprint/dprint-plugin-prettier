@@ -221,7 +221,7 @@ function getPrettierIgnoreAttributeCommentData(/** @type {string} */ value) {
 }
 
 function printAttributes(/** @type {AstPath} */ path, options, /** @type {() => any} */ print) {
-  const { node } = path;
+  /** @type {{ node: import("../parse/ast.js").Node }} */ const { node } = path;
 
   const { attrs: attributes = [], startTagComments = [] } = node;
 
@@ -339,7 +339,7 @@ function printAttributes(/** @type {AstPath} */ path, options, /** @type {() => 
 }
 
 /** @returns {any[]} */ function printOpeningTag(/** @type {AstPath} */ path, options, print) {
-  const { node } = path;
+  /** @type {{ node: import("../parse/ast.js").Node }} */ const { node } = path;
 
   return [
     printOpeningTagStart(node, options),

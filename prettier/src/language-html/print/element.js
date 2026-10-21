@@ -31,7 +31,7 @@ import {
 } from "./tag.js";
 
 function printElement(/** @type {AstPath} */ path, options, print) {
-  const { node } = path;
+  /** @type {{ node: import("../parse/ast.js").Node }} */ const { node } = path;
 
   if (shouldPreserveContent(node, options)) {
     return [
