@@ -16,8 +16,8 @@ const isPermissionsPolicy = /** @returns {boolean} */ ({ node }, options) =>
   !node.value.includes("{{");
 
 /** @type {AttributeValuePrint} */
-function printPermissionsPolicy(textToDoc, print, path /* , options*/) {
-  const { node } = path;
+function printPermissionsPolicy(textToDoc, print, /** @type {import("../../common/ast-path.js").default} */ path /* , options*/) {
+  /** @type {{ node: import("../parse/ast.js").Node }} */ const { node } = path;
   const directives = parsePermissionsPolicy(getUnescapedAttributeValue(node));
 
   if (directives.length === 0) {

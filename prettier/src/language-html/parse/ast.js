@@ -56,7 +56,7 @@ const NON_ENUMERABLE_PROPERTIES = new Set(["parent"]);
  * @property {any} [expSourceSpan]
  * @property {any} [valueSourceSpan]
  * @property {string} [name]
- * @property {any} [value]
+ * @property {string | null} [value]
  * @property {any} [type]
  * @property {Node[]} [children]
  * @property {Node[]} [attrs]

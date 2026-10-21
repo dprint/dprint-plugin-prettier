@@ -353,7 +353,7 @@ function isPrettierIgnore(/** @type {MdastNode} */ node) {
   }
 }
 
-/** @returns {boolean} */ function hasPrettierIgnore(path) {
+/** @returns {boolean} */ function hasPrettierIgnore(/** @type {import("../common/ast-path.js").default} */ path) {
   return path.index > 0 && isPrettierIgnore(path.previous) === "next";
 }
 

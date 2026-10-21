@@ -42,7 +42,7 @@ function printChildren(/** @type {AstPath} */ path, options, print, events = {})
   return parts;
 }
 
-/** @returns {boolean} */ function shouldPrePrintHardline({ node, parent }) {
+/** @returns {boolean} */ function shouldPrePrintHardline(/** @type {AstPath} */ { node, parent }) {
   const isInlineNode =
     INLINE_NODE_TYPES.has(node.type) &&
     !(

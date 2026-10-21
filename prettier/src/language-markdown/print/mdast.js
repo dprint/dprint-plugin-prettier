@@ -44,7 +44,7 @@ import { printWord, printWordLegacy } from "./word.js";
  * @returns {boolean}
  */
 
-function prevOrNextWord(path) {
+function prevOrNextWord(/** @type {AstPath} */ path) {
   const { previous, next } = path;
   const hasPrevOrNextWord =
     (previous?.type === "sentence" &&
@@ -61,7 +61,7 @@ function prevOrNextWord(path) {
   return hasPrevOrNextWord;
 }
 
-/** @returns {boolean} */ function hasFakeWhitespaceAfterNextToken(path) {
+/** @returns {boolean} */ function hasFakeWhitespaceAfterNextToken(/** @type {AstPath} */ path) {
   const { siblings, index } = path;
   if (!siblings || typeof index !== "number") {
     return false;
@@ -86,7 +86,7 @@ function isNextTokenFakeSetextH2Line(path) {
 function printMdast(
   /** @type {AstPath} */ path,
   /** @type {MarkdownOptions} */ options,
-  print,
+  /** @type {(selector?: any, args?: any) => any} */ print,
 ) {
   /** @type {{ node: MdastNode }} */ const { node } = path;
 
@@ -382,7 +382,7 @@ function printMdast(
               align(
                 " ".repeat(4),
                 printChildren(path, options, print, {
-                  processor: ({ isFirst }) =>
+                  processor: (/** @type {AstPath} */ { isFirst }) =>
                     isFirst ? group([softline, print()]) : print(),
                 }),
               ),
@@ -432,7 +432,7 @@ function printMdast(
   }
 }
 
-/** @returns {any[]} */ function printRoot(/** @type {AstPath} */ path, options, print) {
+/** @returns {any[]} */ function printRoot(/** @type {AstPath} */ path, options, /** @type {(selector?: any, args?: any) => any} */ print) {
   /** @typedef {{ index: number, offset: number }} IgnorePosition */
   /** @type {Array<{start: IgnorePosition, end: IgnorePosition}>} */
   const ignoreRanges = [];
@@ -464,7 +464,7 @@ function printMdast(
   }
 
   return printChildren(path, options, print, {
-    processor({ index }) {
+    processor(/** @type {AstPath} */ { index }) {
       if (ignoreRanges.length > 0) {
         const ignoreRange = ignoreRanges[0];
 

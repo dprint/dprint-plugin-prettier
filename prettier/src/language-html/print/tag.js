@@ -338,7 +338,7 @@ function printAttributes(/** @type {AstPath} */ path, options, /** @type {() => 
     : printOpeningTagEndMarker(node);
 }
 
-/** @returns {any[]} */ function printOpeningTag(/** @type {AstPath} */ path, options, print) {
+/** @returns {any[]} */ function printOpeningTag(/** @type {AstPath} */ path, options, /** @type {(selector?: any, args?: any) => any} */ print) {
   /** @type {{ node: import("../parse/ast.js").Node }} */ const { node } = path;
 
   return [

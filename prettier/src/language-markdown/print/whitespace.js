@@ -1,3 +1,4 @@
+// @nts-check
 import { hardline, line, softline } from "../../document/index.js";
 import {
   isSetextHeading,
@@ -34,7 +35,7 @@ const lineBreakBetweenTheseAndCJConvertsToSpace = new Set(
  * @returns {boolean} `true` if Space tends to be inserted between CJ and
  * non-CJK, `false` otherwise.
  */
-function isInSentenceWithCJSpaces({ parent: sentenceNode }) {
+function isInSentenceWithCJSpaces(/** @type {AstPath} */ { parent: sentenceNode }) {
   if (sentenceNode.usesCJSpaces === undefined) {
     const stats = { " ": 0, "": 0 };
     const { children } = sentenceNode;

@@ -2,9 +2,9 @@
 import escapeStringRegexp from "escape-string-regexp";
 
 class WhitespaceUtilities {
-  #whitespaceCharacters;
+  /** @type {Set<string>} */ #whitespaceCharacters;
 
-  constructor(whitespaceCharacters) {
+  constructor(/** @type {string | string[]} */ whitespaceCharacters) {
     this.#whitespaceCharacters = new Set(whitespaceCharacters);
 
     if (
@@ -113,7 +113,7 @@ class WhitespaceUtilities {
     );
   }
 
-  #getMinIndentation(text) {
+  /** @returns {number} */ #getMinIndentation(/** @type {string} */ text) {
     /** @type {number} */ let minIndentation = Number.POSITIVE_INFINITY;
 
     for (const line of text.split("\n")) {
@@ -121,7 +121,7 @@ class WhitespaceUtilities {
         continue;
       }
 
-      const indentation = this.getLeadingWhitespaceCount(line);
+      /** @type {number} */ const indentation = this.getLeadingWhitespaceCount(line);
       if (indentation === 0) {
         return 0;
       }
@@ -139,7 +139,7 @@ class WhitespaceUtilities {
   }
 
   /** @returns {string} */ dedentString(/** @type {string} */ text) {
-    const minIndent = this.#getMinIndentation(text);
+    /** @type {number} */ const minIndent = this.#getMinIndentation(text);
     return minIndent === 0
       ? text
       : text

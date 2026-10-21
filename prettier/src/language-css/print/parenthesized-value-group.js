@@ -31,7 +31,7 @@ import {
 } from "../utilities/index.js";
 import { shouldPrintTrailingComma } from "./misc.js";
 
-/** @returns {boolean} */ function hasComma({ node, parent }, /** @type {CssOptions} */ options) {
+/** @returns {boolean} */ function hasComma(/** @type {AstPath} */ { node, parent }, /** @type {CssOptions} */ options) {
   return Boolean(
     node.source &&
     options.originalText
@@ -173,7 +173,7 @@ function printParenthesizedValueGroup(/** @type {AstPath} */ path, /** @type {Cs
   );
 }
 
-/** @returns {boolean} */ function shouldPrecededBySoftline(path) {
+/** @returns {boolean} */ function shouldPrecededBySoftline(/** @type {AstPath} */ path) {
   return path.match(
     /** @returns {boolean} */ (node) => node.type === "value-paren_group" && !node.open,
     /** @returns {boolean} */ (node, key) => key === "group" && node.type === "value-value",

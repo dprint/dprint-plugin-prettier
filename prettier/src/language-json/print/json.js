@@ -6,7 +6,7 @@ import { getRaw } from "../utilities.js";
 
 /** @import AstPath from "../../common/ast-path.js" */
 
-function printJson(path, options, print) {
+function printJson(/** @type {AstPath} */ path, options, /** @type {(selector?: any, args?: any) => any} */ print) {
   const { node } = path;
   switch (node.type) {
     case "JsonRoot":

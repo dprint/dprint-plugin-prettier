@@ -7,7 +7,7 @@ import { hardline } from "../../document/index.js";
 import { isSetextHeading } from "../utilities.js";
 import { printChildren } from "./children.js";
 
-function printAtxHeading(/** @type {AstPath} */ path, options, print) {
+function printAtxHeading(/** @type {AstPath} */ path, options, /** @type {(selector?: any, args?: any) => any} */ print) {
   return [
     "#".repeat(/** @type {MdastNode} */ (path.node).depth) + " ",
     printChildren(path, options, print),
@@ -17,7 +17,7 @@ function printAtxHeading(/** @type {AstPath} */ path, options, print) {
 function printSetextHeading(
   /** @type {AstPath} */ path,
   /** @type {MarkdownOptions} */ options,
-  print,
+  /** @type {(selector?: any, args?: any) => any} */ print,
 ) {
   const { originalText } = options;
   /** @type {{ node: MdastNode }} */ const { node } = path;
@@ -29,7 +29,7 @@ function printSetextHeading(
   return [printChildren(path, options, print), hardline, underline];
 }
 
-function printHeading(path, options, print) {
+function printHeading(/** @type {AstPath} */ path, /** @type {MarkdownOptions} */ options, /** @type {(selector?: any, args?: any) => any} */ print) {
   if (options.parser !== "mdx" && isSetextHeading(path.node)) {
     return printSetextHeading(path, options, print);
   }

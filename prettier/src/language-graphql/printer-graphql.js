@@ -446,7 +446,7 @@ function genericPrint(/** @type {AstPath} */ path, /** @type {GraphqlOptions} */
   return node.kind !== "Comment";
 }
 
-/** @returns {string} */ function printComment({ node: comment }) {
+/** @returns {string} */ function printComment(/** @type {AstPath} */ { node: comment }) {
   if (comment.kind === "Comment") {
     return "#" + comment.value.trimEnd();
   }

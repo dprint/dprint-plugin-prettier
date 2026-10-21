@@ -37,8 +37,8 @@ const printers = [
   print: createAttributePrinter(print),
 }));
 
-function printAttribute(path, options) {
-  const { node } = path;
+function printAttribute(/** @type {AstPath} */ path, options) {
+  /** @type {{ node: import("../parse/ast.js").Node }} */ const { node } = path;
   const { value } = node;
 
   if (!value) {
@@ -68,7 +68,7 @@ function createAttributePrinter(printValue) {
       typeof doc === "string" ? doc.replaceAll('"', "&quot;") : doc,
     );
 
-    return [path.node.rawName, '="', group(valueDoc), '"'];
+    return [/** @type {import("../parse/ast.js").Node} */ (path.node).rawName, '="', group(valueDoc), '"'];
   };
 }
 

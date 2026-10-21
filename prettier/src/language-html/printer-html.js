@@ -44,8 +44,8 @@ import {
   unescapeQuoteEntities,
 } from "./utilities/index.js";
 
-function genericPrint(/** @type {AstPath} */ path, options, print) {
-  const { node } = path;
+function genericPrint(/** @type {AstPath} */ path, options, /** @type {(selector?: any, args?: any) => any} */ print) {
+  /** @type {{ node: import("./parse/ast.js").HtmlNode }} */ const { node } = path;
 
   switch (node.kind) {
     case "root":

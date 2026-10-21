@@ -19,7 +19,7 @@ import {
 */
 
 const createAngularPrinter =
-  (/** @type {string} */ parser) => (textToDoc, print, path /* , options*/) =>
+  (/** @type {string} */ parser) => (textToDoc, print, /** @type {import("../../common/ast-path.js").default} */ path /* , options*/) =>
     formatAttributeValue(
       getUnescapedAttributeValue(path.node),
       textToDoc,
@@ -34,8 +34,8 @@ const printers = [
     - `(click)="angularStatement"`
     - `on-click="angularStatement"`
     */
-    /** @returns {boolean} */ test(path /* , options */) {
-      const name = path.node.fullName;
+    /** @returns {boolean} */ test(/** @type {import("../../common/ast-path.js").default} */ path /* , options */) {
+      /** @type {string} */ const name = /** @type {import("../parse/ast.js").Node} */ (path.node).fullName;
       return (
         (name.startsWith("(") && name.endsWith(")")) || name.startsWith("on-")
       );
@@ -49,8 +49,8 @@ const printers = [
     - `[(target)]="angularExpression"`
     - `bindon-target="angularExpression"`
     */
-    /** @returns {boolean} */ test(path /* , options */) {
-      const name = path.node.fullName;
+    /** @returns {boolean} */ test(/** @type {import("../../common/ast-path.js").default} */ path /* , options */) {
+      /** @type {string} */ const name = /** @type {import("../parse/ast.js").Node} */ (path.node).fullName;
       return (
         (name.startsWith("[") && name.endsWith("]")) ||
         /^bind(?:on)?-/.test(name) ||
@@ -64,7 +64,7 @@ const printers = [
     /*
     - `*directive="angularDirective"`
     */
-    test: /** @returns {boolean} */ (path /* , options */) => path.node.fullName.startsWith("*"),
+    test: /** @returns {boolean} */ (/** @type {import("../../common/ast-path.js").default} */ path /* , options */) => /** @type {import("../parse/ast.js").Node} */ (path.node).fullName.startsWith("*"),
     print: createAngularPrinter("__ng_directive"),
   },
   {
@@ -72,7 +72,7 @@ const printers = [
     - `i18n="longDescription"`
     - `i18n-attr="longDescription"`
     */
-    test: /** @returns {boolean} */ (path /* , options */) => /^i18n(?:-.+)?$/.test(path.node.fullName),
+    test: /** @returns {boolean} */ (/** @type {import("../../common/ast-path.js").default} */ path /* , options */) => /^i18n(?:-.+)?$/.test(/** @type {import("../parse/ast.js").Node} */ (path.node).fullName),
     print: printAngularI18n,
   },
   {
@@ -80,12 +80,12 @@ const printers = [
     print: printAngularInterpolation,
   },
 ].map(({ test, print }) => ({
-  test: /** @returns {boolean} */ (path, options) =>
+  test: /** @returns {boolean} */ (/** @type {import("../../common/ast-path.js").default} */ path, options) =>
     options.parser === "angular" && test(path /* , options */),
   print,
 }));
 
-function printAngularI18n(textToDoc, print, { node } /* , options */) {
+function printAngularI18n(textToDoc, print, /** @type {import("../../common/ast-path.js").default} */ { node } /* , options */) {
   /** @type {string} */ const value = getUnescapedAttributeValue(node);
   return printExpand(
     // @ts-expect-error -- Need investigate how `replaceEndOfLine` works

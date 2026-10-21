@@ -40,7 +40,7 @@ const colorAdjusterFunctions = new Set([
   "hwba",
 ]);
 
-/** @returns {string | undefined} */ function getPropOfDeclNode(path) {
+/** @returns {string | undefined} */ function getPropOfDeclNode(/** @type {AstPath} */ path) {
   return path
     .findAncestor(/** @returns {boolean} */ (node) => node.type === "css-decl")
     ?.prop?.toLowerCase();
@@ -81,7 +81,7 @@ const wideKeywords = new Set(["initial", "inherit", "unset", "revert"]);
 }
 
 // https://github.com/css-modules/icss
-/** @returns {boolean} */ function insideIcssRuleNode(path) {
+/** @returns {boolean} */ function insideIcssRuleNode(/** @type {AstPath} */ path) {
   return path.hasAncestor(/** @returns {boolean | undefined} */ (node) => {
     if (node.type !== "css-rule") {
       return false;

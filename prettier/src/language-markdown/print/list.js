@@ -94,13 +94,13 @@ function printList(path, options, print) {
   });
 }
 
-/** @returns {any[]} */ function printListItem(/** @type {AstPath} */ path, options, print, /** @type {string} */ listPrefix) {
+/** @returns {any[]} */ function printListItem(/** @type {AstPath} */ path, options, /** @type {(selector?: any, args?: any) => any} */ print, /** @type {string} */ listPrefix) {
   /** @type {{ node: MdastNode }} */ const { node } = path;
   /** @type {string} */ const prefix = node.checked === null ? "" : node.checked ? "[x] " : "[ ] ";
   return [
     prefix,
     printChildren(path, options, print, {
-      processor({ node, isFirst }) {
+      processor(/** @type {AstPath} */ { node, isFirst }) {
         if ((isFirst && node.type !== "list") || node.type === "html") {
           return align(" ".repeat(prefix.length), print());
         }
@@ -203,13 +203,13 @@ function printListLegacy(path, options, print) {
   });
 }
 
-function printListItemLegacy(path, options, print, listPrefix) {
+/** @returns {any[]} */ function printListItemLegacy(/** @type {AstPath} */ path, options, /** @type {(selector?: any, args?: any) => any} */ print, /** @type {string} */ listPrefix) {
   /** @type {{ node: MdastNode }} */ const { node } = path;
   /** @type {string} */ const prefix = node.checked === null ? "" : node.checked ? "[x] " : "[ ] ";
   return [
     prefix,
     printChildren(path, options, print, {
-      processor({ node, isFirst }) {
+      processor(/** @type {AstPath} */ { node, isFirst }) {
         if (isFirst && node.type !== "list") {
           return align(" ".repeat(prefix.length), print());
         }

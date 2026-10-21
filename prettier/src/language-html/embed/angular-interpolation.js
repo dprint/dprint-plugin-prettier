@@ -5,13 +5,13 @@ import { formatAttributeValue } from "./utilities.js";
 
 const interpolationRegex = /\{\{(.+?)\}\}/s;
 
-const isAngularInterpolation = /** @returns {boolean} */ ({ node: { value } } /* , options*/) =>
+const isAngularInterpolation = /** @returns {boolean} */ (/** @type {import("../../common/ast-path.js").default} */ { node: { value } } /* , options*/) =>
   interpolationRegex.test(value);
 
 async function printAngularInterpolation(
   textToDoc,
   print,
-  path,
+  /** @type {import("../../common/ast-path.js").default} */ path,
   /* , options*/
 ) {
   const text = getUnescapedAttributeValue(path.node);

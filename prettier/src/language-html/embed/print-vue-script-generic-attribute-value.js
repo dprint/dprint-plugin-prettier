@@ -12,7 +12,7 @@ import { formatAttributeValue, shouldHugJsExpression } from "./utilities.js";
 function printVueScriptGenericAttributeValue(
   textToDoc,
   print,
-  path,
+  /** @type {import("../../common/ast-path.js").default} */ path,
   /* , options*/
 ) {
   /** @type {string} */ const value = getUnescapedAttributeValue(path.node);

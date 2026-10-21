@@ -30,7 +30,7 @@ import {
   printOpeningTagPrefix,
 } from "./tag.js";
 
-function printElement(/** @type {AstPath} */ path, options, print) {
+function printElement(/** @type {AstPath} */ path, options, /** @type {(selector?: any, args?: any) => any} */ print) {
   /** @type {{ node: import("../parse/ast.js").Node }} */ const { node } = path;
 
   if (shouldPreserveContent(node, options)) {

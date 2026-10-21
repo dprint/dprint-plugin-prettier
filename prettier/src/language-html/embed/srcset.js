@@ -12,8 +12,8 @@ import { printExpand } from "./utilities.js";
 
 /** @type {AttributeValuePredicate} */
 const isSrcset = /** @returns {boolean} */ (path /* , options*/) =>
-  path.node.fullName === "srcset" &&
-  (path.parent.fullName === "img" || path.parent.fullName === "source");
+  /** @type {import("../parse/ast.js").Node} */ (path.node).fullName === "srcset" &&
+  (/** @type {import("../parse/ast.js").Node} */ (path.parent).fullName === "img" || /** @type {import("../parse/ast.js").Node} */ (path.parent).fullName === "source");
 
 const SRCSET_UNITS = { width: "w", height: "h", density: "x" };
 const SRCSET_TYPES = Object.keys(SRCSET_UNITS);
@@ -22,7 +22,7 @@ const SRCSET_TYPES = Object.keys(SRCSET_UNITS);
 function printSrcset(
   textToDoc,
   print,
-  path,
+  /** @type {AstPath} */ path,
   /* , options*/
 ) {
   /** @type {string} */ const value = getUnescapedAttributeValue(path.node);

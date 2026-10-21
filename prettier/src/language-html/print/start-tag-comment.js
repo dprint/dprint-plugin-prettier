@@ -1,8 +1,9 @@
+// @nts-check
 import { replaceEndOfLine } from "../../document/index.js";
 
 // Based on JS comment print src/language-js/print/comment.js
 
-function printStartTagComment(path) {
+function printStartTagComment(/** @type {import("../../common/ast-path.js").default} */ path) {
   const {
     node: { value, type },
   } = path;

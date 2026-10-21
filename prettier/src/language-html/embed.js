@@ -36,7 +36,7 @@ const embeddedAngularControlFlowBlocks = new Set([
 ]);
 
 function embed(/** @type {AstPath} */ path, options) {
-  const { node } = path;
+  /** @type {{ node: import("./parse/ast.js").HtmlNode }} */ const { node } = path;
 
   switch (node.kind) {
     case "element":
