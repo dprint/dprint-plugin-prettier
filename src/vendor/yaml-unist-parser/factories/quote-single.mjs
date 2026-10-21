@@ -1,5 +1,7 @@
+// @nts-check
+/** @import { Position, YamlNode, Content } from "yaml-unist-types" */
 //#region src/factories/quote-single.ts
-function createQuoteSingle(quoteValue) {
+/** @returns {YamlNode} */ function createQuoteSingle(/** @type {YamlNode} */ quoteValue) {
 	return {
 		...quoteValue,
 		type: "quoteSingle"

@@ -1,6 +1,7 @@
 // @nts-check
+/** @import { Position, YamlNode, Content } from "yaml-unist-types" */
 //#region src/factories/quote-value.ts
-function createQuoteValue(position, content, /** @type {string} */ value) {
+/** @returns {YamlNode} */ function createQuoteValue(/** @type {Position} */ position, /** @type {Content} */ content, /** @type {string} */ value) {
 	return {
 		type: "quoteValue",
 		position,

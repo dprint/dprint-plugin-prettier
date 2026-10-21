@@ -16,14 +16,14 @@ function* tokens(...tokensArgs) {
 * Type guard to check if a token is a space or newline token.
 * @returns {boolean}
 */
-function isSpace(token) {
+function isSpace(/** @type {import("yaml-cst-types").Token} */ token) {
 	return token.type === "space" || token.type === "newline";
 }
 /**
 * Type guard to check if a token is a content property token (comment, tag, or anchor).
 * @returns {boolean}
 */
-function maybeContentPropertyToken(token) {
+function maybeContentPropertyToken(/** @type {import("yaml-cst-types").Token} */ token) {
 	return token.type === "comment" || token.type === "tag" || token.type === "anchor";
 }
 //#endregion

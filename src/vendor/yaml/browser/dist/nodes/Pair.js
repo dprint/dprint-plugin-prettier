@@ -9,6 +9,10 @@ import { NODE_TYPE, PAIR, isNode } from './identity.js';
     const v = createNode(value, undefined, ctx);
     return new Pair(k, v);
 }
+/**
+ * the item of the source that composing made the pair from
+ * @property {import("yaml-cst-types").CollectionItem} [srcToken]
+ */
 class Pair {
     constructor(/** @type {import("./Scalar.js").Scalar | import("./YAMLMap.js").YAMLMap | import("./Alias.js").Alias | import("./YAMLSeq.js").YAMLSeq} */ key, value = null) {
         Object.defineProperty(this, NODE_TYPE, { value: PAIR });

@@ -24,7 +24,7 @@ class YAMLMap extends Collection {
     }
     constructor(/** @type {import("../schema/Schema.js").Schema | undefined} */ schema) {
         super(MAP, schema);
-        this.items = [];
+        /** @type {any[]} */ this.items = [];
     }
     /**
      * A generic collection parsing method that can be extended

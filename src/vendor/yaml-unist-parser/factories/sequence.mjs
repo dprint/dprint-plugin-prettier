@@ -1,6 +1,7 @@
 // @nts-check
+/** @import { Position, YamlNode, Content } from "yaml-unist-types" */
 //#region src/factories/sequence.ts
-function createSequence(position, content, /** @type {any[]} */ children) {
+/** @returns {YamlNode} */ function createSequence(/** @type {Position} */ position, /** @type {Content} */ content, /** @type {YamlNode[]} */ children) {
 	return {
 		type: "sequence",
 		position,

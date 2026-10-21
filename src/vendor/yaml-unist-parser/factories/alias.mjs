@@ -1,6 +1,7 @@
 // @nts-check
+/** @import { Position, YamlNode, Content } from "yaml-unist-types" */
 //#region src/factories/alias.ts
-function createAlias(position, content, /** @type {string} */ value) {
+/** @returns {YamlNode} */ function createAlias(/** @type {Position} */ position, /** @type {Content} */ content, /** @type {string} */ value) {
 	return {
 		type: "alias",
 		position,

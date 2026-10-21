@@ -4,10 +4,10 @@ import { composeNode, composeEmptyNode } from './compose-node.js';
 import { resolveEnd } from './resolve-end.js';
 import { resolveProps } from './resolve-props.js';
 
-/** @returns {Document} */ function composeDoc(options, /** @type {import("../doc/directives.js").Directives} */ directives, { offset, start, value, end }, onError) {
+/** @returns {Document} */ function composeDoc(options, /** @type {import("../doc/directives.js").Directives} */ directives, /** @type {import("yaml-cst-types").Token} */ { offset, start, value, end }, /** @type {import("yaml-cst-types").ComposeErrorHandler} */ onError) {
     const opts = Object.assign({ _directives: directives }, options);
     const doc = new Document(undefined, opts);
-    const ctx = {
+    /** @type {import("yaml-cst-types").ComposeContext} */ const ctx = {
         atKey: false,
         atRoot: true,
         directives: doc.directives,

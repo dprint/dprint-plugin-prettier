@@ -1,6 +1,7 @@
 // @nts-check
+/** @import { Position, YamlNode, Content } from "yaml-unist-types" */
 //#region src/factories/tag.ts
-function createTag(position, /** @type {string} */ value) {
+/** @returns {YamlNode} */ function createTag(/** @type {Position} */ position, /** @type {string} */ value) {
 	return {
 		type: "tag",
 		position,

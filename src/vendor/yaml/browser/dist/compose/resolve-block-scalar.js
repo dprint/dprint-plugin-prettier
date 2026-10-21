@@ -1,7 +1,7 @@
 // @nts-check
 import { Scalar } from '../nodes/Scalar.js';
 
-function resolveBlockScalar(/** @type {import("yaml-cst-types").ComposeContext} */ ctx, /** @type {import("yaml-cst-types").Token} */ scalar, onError) {
+function resolveBlockScalar(/** @type {import("yaml-cst-types").ComposeContext} */ ctx, /** @type {import("yaml-cst-types").Token} */ scalar, /** @type {import("yaml-cst-types").ComposeErrorHandler} */ onError) {
     const start = scalar.offset;
     const header = parseBlockScalarHeader(scalar, ctx.options.strict, onError);
     if (!header)
@@ -121,7 +121,7 @@ function resolveBlockScalar(/** @type {import("yaml-cst-types").ComposeContext} 
     const end = start + header.length + scalar.source.length;
     return { value, type, comment: header.comment, range: [start, end, end] };
 }
-function parseBlockScalarHeader({ offset, props }, strict, onError) {
+function parseBlockScalarHeader(/** @type {import("yaml-cst-types").Token} */ { offset, props }, /** @type {boolean} */ strict, /** @type {import("yaml-cst-types").ComposeErrorHandler} */ onError) {
     /* istanbul ignore if should not happen */
     if (props[0].type !== 'block-scalar-header') {
         onError(props[0], 'IMPOSSIBLE', 'Block scalar header not found');

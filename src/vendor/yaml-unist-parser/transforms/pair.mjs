@@ -6,10 +6,10 @@ import { createMappingKey } from "../factories/mapping-key.mjs";
 import { createMappingValue } from "../factories/mapping-value.mjs";
 import { isEmptyNode } from "./transform.mjs";
 //#region src/transforms/pair.ts
-function transformPair(/** @type {import("../../yaml/browser/dist/nodes/Pair.js").Pair} */ pair, srcItem, /** @type {import("./context.mjs").default} */ context, createNode) {
+/** @returns {import("yaml-unist-types").YamlNode} */ function transformPair(/** @type {import("../../yaml/browser/dist/nodes/Pair.js").Pair} */ pair, /** @type {import("yaml-cst-types").CollectionItem} */ srcItem, /** @type {import("./context.mjs").default} */ context, /** @type {(position: import("yaml-unist-types").Position, key: import("yaml-unist-types").YamlNode, value: import("yaml-unist-types").YamlNode) => import("yaml-unist-types").YamlNode} */ createNode) {
 	var _srcItem$key;
 	const keyPropTokens = [];
-	let explicitKeyIndToken = null;
+	/** @type {import("yaml-cst-types").Token | null} */ let explicitKeyIndToken = null;
 	for (const token of tokens(srcItem.start)) {
 		if (maybeContentPropertyToken(token)) {
 			keyPropTokens.push(token);
@@ -25,7 +25,7 @@ function transformPair(/** @type {import("../../yaml/browser/dist/nodes/Pair.js"
 		throw new Error(`Unexpected token type in collection item start: ${token.type}`);
 	}
 	const valuePropTokens = [];
-	let mapValueIndToken = null;
+	/** @type {import("yaml-cst-types").Token | null} */ let mapValueIndToken = null;
 	for (const token of tokens(srcItem.sep)) {
 		if (maybeContentPropertyToken(token)) {
 			valuePropTokens.push(token);
@@ -55,7 +55,7 @@ function transformPair(/** @type {import("../../yaml/browser/dist/nodes/Pair.js"
 		props: { tokens: valuePropTokens }
 	});
 }
-function transformAstPair(/** @type {import("../../yaml/browser/dist/nodes/Pair.js").Pair} */ pair, /** @type {import("./context.mjs").default} */ context, createNode, additionalKeyData, additionalValueData) {
+/** @returns {import("yaml-unist-types").YamlNode} */ function transformAstPair(/** @type {import("../../yaml/browser/dist/nodes/Pair.js").Pair} */ pair, /** @type {import("./context.mjs").default} */ context, /** @type {(position: import("yaml-unist-types").Position, key: import("yaml-unist-types").YamlNode, value: import("yaml-unist-types").YamlNode) => import("yaml-unist-types").YamlNode} */ createNode, /** @type {{ range: any[] | null, props: import("yaml-unist-types").TransformProps }} */ additionalKeyData, /** @type {{ range: any[] | null, props: import("yaml-unist-types").TransformProps }} */ additionalValueData) {
 	let keyContent = null;
 	if (!isEmptyNode(pair.key, additionalKeyData.props)) keyContent = context.transformNode(pair.key, additionalKeyData.props);
 	else extractComments(additionalKeyData.props.tokens, context);

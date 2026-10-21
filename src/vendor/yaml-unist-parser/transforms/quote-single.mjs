@@ -2,7 +2,7 @@
 import { transformAstQuoteValue } from "./quote-value.mjs";
 import { createQuoteSingle } from "../factories/quote-single.mjs";
 //#region src/transforms/quote-single.ts
-function transformQuoteSingle(/** @type {import("../../yaml/browser/dist/nodes/Scalar.js").Scalar} */ quoteSingle, /** @type {import("./context.mjs").default} */ context, props) {
+/** @returns {import("yaml-unist-types").YamlNode} */ function transformQuoteSingle(/** @type {import("../../yaml/browser/dist/nodes/Scalar.js").Scalar} */ quoteSingle, /** @type {import("./context.mjs").default} */ context, /** @type {import("yaml-unist-types").TransformProps} */ props) {
 	const srcToken = quoteSingle.srcToken;
 	// istanbul ignore if -- @preserve
 	if (!srcToken || srcToken.type !== "single-quoted-scalar") throw new Error("Expected single-quoted scalar srcToken");

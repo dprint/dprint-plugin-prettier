@@ -30,6 +30,12 @@ function collectionFromPath(schema, path, value) {
 // as it does not cover untypable empty non-string iterables (e.g. []).
 const isEmptyPath = (path) => path == null ||
     (typeof path === 'object' && !!path[Symbol.iterator]().next().done);
+/**
+ * what a collection holds and is given (yaml/dist/nodes/Collection.d.ts)
+ * @property {any[]} [items]
+ * @property {boolean} [flow]
+ * @property {string} [tag]
+ */
 class Collection extends NodeBase {
     constructor(type, /** @type {import("../schema/Schema.js").Schema | undefined} */ schema) {
         super(type);

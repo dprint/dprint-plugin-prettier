@@ -1,5 +1,7 @@
+// @nts-check
+/** @import { Position, YamlNode, Content } from "yaml-unist-types" */
 //#region src/factories/mapping-key.ts
-function createMappingKey(position, content) {
+/** @returns {YamlNode} */ function createMappingKey(/** @type {Position} */ position, /** @type {YamlNode | null} */ content) {
 	return {
 		type: "mappingKey",
 		position,

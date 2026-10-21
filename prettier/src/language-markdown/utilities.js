@@ -101,6 +101,7 @@ function splitText(/** @type {string} */ text) {
   /** @type {Array<TextNode>} */
   const nodes = [];
 
+  /** @type {Array<string>} */
   const tokens = text.split(/([\t\n ]+)/);
   for (const [index, token] of tokens.entries()) {
     // whitespace
@@ -118,6 +119,7 @@ function splitText(/** @type {string} */ text) {
       continue;
     }
 
+    /** @type {Array<string>} */
     const innerTokens = token.split(new RegExp(`(${CJK_REGEXP.source})`, "u"));
     for (const [innerIndex, innerToken] of innerTokens.entries()) {
       if (

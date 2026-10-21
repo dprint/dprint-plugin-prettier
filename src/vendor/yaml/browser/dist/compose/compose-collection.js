@@ -7,7 +7,7 @@ import { resolveBlockMap } from './resolve-block-map.js';
 import { resolveBlockSeq } from './resolve-block-seq.js';
 import { resolveFlowCollection } from './resolve-flow-collection.js';
 
-/** @returns {YAMLMap | YAMLSeq | import("../schema/yaml-1.1/omap.js").YAMLOMap | import("../schema/yaml-1.1/set.js").YAMLSet} */ function resolveCollection(CN, ctx, token, onError, /** @type {string | null} */ tagName, tag) {
+/** @returns {YAMLMap | YAMLSeq | import("../schema/yaml-1.1/omap.js").YAMLOMap | import("../schema/yaml-1.1/set.js").YAMLSet} */ function resolveCollection(/** @type {import("./compose-node.js").ComposeNodes} */ CN, /** @type {import("yaml-cst-types").ComposeContext} */ ctx, /** @type {import("yaml-cst-types").Token} */ token, /** @type {import("yaml-cst-types").ComposeErrorHandler} */ onError, /** @type {string | null} */ tagName, tag) {
     const coll = token.type === 'block-map'
         ? resolveBlockMap(CN, ctx, token, onError, tag)
         : token.type === 'block-seq'
@@ -24,7 +24,7 @@ import { resolveFlowCollection } from './resolve-flow-collection.js';
         coll.tag = tagName;
     return coll;
 }
-/** @returns {YAMLMap | YAMLSeq | import("../schema/yaml-1.1/omap.js").YAMLOMap | import("../schema/yaml-1.1/set.js").YAMLSet} */ function composeCollection(CN, /** @type {import("yaml-cst-types").ComposeContext} */ ctx, /** @type {import("yaml-cst-types").Token} */ token, props, onError) {
+/** @returns {YAMLMap | YAMLSeq | import("../schema/yaml-1.1/omap.js").YAMLOMap | import("../schema/yaml-1.1/set.js").YAMLSet} */ function composeCollection(/** @type {import("./compose-node.js").ComposeNodes} */ CN, /** @type {import("yaml-cst-types").ComposeContext} */ ctx, /** @type {import("yaml-cst-types").Token} */ token, /** @type {import("yaml-cst-types").ResolvedProps} */ props, /** @type {import("yaml-cst-types").ComposeErrorHandler} */ onError) {
     const tagToken = props.tag;
     const tagName = !tagToken
         ? null

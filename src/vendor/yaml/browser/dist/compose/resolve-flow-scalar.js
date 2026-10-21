@@ -3,7 +3,7 @@ import { Scalar } from '../nodes/Scalar.js';
 import { resolveEnd } from './resolve-end.js';
 
 /** @import { SourceToken } from "./resolve-props.js" */
-function resolveFlowScalar(/** @type {{ offset: number, type: string, source: string, end?: SourceToken[] }} */ scalar, /** @type {boolean} */ strict, onError) {
+function resolveFlowScalar(/** @type {{ offset: number, type: string, source: string, end?: SourceToken[] }} */ scalar, /** @type {boolean} */ strict, /** @type {import("yaml-cst-types").ComposeErrorHandler} */ onError) {
     const { offset, type, source, end } = scalar;
     let _type;
     let value;
@@ -40,7 +40,7 @@ function resolveFlowScalar(/** @type {{ offset: number, type: string, source: st
         range: [offset, valueEnd, re.offset]
     };
 }
-/** @returns {string} */ function plainValue(/** @type {string} */ source, onError) {
+/** @returns {string} */ function plainValue(/** @type {string} */ source, /** @type {(rel: number, code: string, msg: string) => void} */ onError) {
     /** @type {string} */ let badChar = '';
     switch (source[0]) {
         /* istanbul ignore next should not happen */
@@ -68,7 +68,7 @@ function resolveFlowScalar(/** @type {{ offset: number, type: string, source: st
         onError(0, 'BAD_SCALAR_START', `Plain value cannot start with ${badChar}`);
     return foldLines(source);
 }
-/** @returns {string} */ function singleQuotedValue(/** @type {string} */ source, onError) {
+/** @returns {string} */ function singleQuotedValue(/** @type {string} */ source, /** @type {(rel: number, code: string, msg: string) => void} */ onError) {
     if (source[source.length - 1] !== "'" || source.length === 1)
         onError(source.length, 'MISSING_CHAR', "Missing closing 'quote");
     return foldLines(source.slice(1, -1)).replace(/''/g, "'");
@@ -115,7 +115,7 @@ function resolveFlowScalar(/** @type {{ offset: number, type: string, source: st
     match = last.exec(source);
     return res + sep + (match?.[1] ?? '');
 }
-/** @returns {string} */ function doubleQuotedValue(/** @type {string} */ source, onError) {
+/** @returns {string} */ function doubleQuotedValue(/** @type {string} */ source, /** @type {(rel: number, code: string, msg: string) => void} */ onError) {
     /** @type {string} */ let res = '';
     for (let i = 1; i < source.length - 1; ++i) {
         /** @type {string} */ const ch = source[i];
@@ -210,7 +210,7 @@ const escapeCodes = {
     '\\': '\\',
     '\t': '\t'
 };
-/** @returns {string} */ function parseCharCode(/** @type {string} */ source, /** @type {number} */ offset, /** @type {number} */ length, onError) {
+/** @returns {string} */ function parseCharCode(/** @type {string} */ source, /** @type {number} */ offset, /** @type {number} */ length, /** @type {(rel: number, code: string, msg: string) => void} */ onError) {
     /** @type {string} */ const cc = source.substr(offset, length);
     /** @type {boolean} */ const ok = cc.length === length && /^[0-9a-fA-F]+$/.test(cc);
     /** @type {number} */ const code = ok ? parseInt(cc, 16) : NaN;

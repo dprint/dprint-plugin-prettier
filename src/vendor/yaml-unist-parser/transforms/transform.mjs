@@ -11,7 +11,7 @@ import { transformQuoteSingle } from "./quote-single.mjs";
 import { transformSeq } from "./seq.mjs";
 import * as YAML from "yaml";
 //#region src/transforms/transform.ts
-function transformNode(/** @type {import("../../yaml/browser/dist/nodes/YAMLMap.js").YAMLMap | import("../../yaml/browser/dist/nodes/Scalar.js").Scalar | import("../../yaml/browser/dist/nodes/YAMLSeq.js").YAMLSeq | import("../../yaml/browser/dist/nodes/Alias.js").Alias | import("../../yaml/browser/dist/schema/yaml-1.1/omap.js").YAMLOMap | import("../../yaml/browser/dist/schema/yaml-1.1/set.js").YAMLSet} */ node, /** @type {import("./context.mjs").default} */ context, props) {
+/** @returns {import("yaml-unist-types").YamlNode | null} */ function transformNode(/** @type {import("../../yaml/browser/dist/nodes/YAMLMap.js").YAMLMap | import("../../yaml/browser/dist/nodes/Scalar.js").Scalar | import("../../yaml/browser/dist/nodes/YAMLSeq.js").YAMLSeq | import("../../yaml/browser/dist/nodes/Alias.js").Alias | import("../../yaml/browser/dist/schema/yaml-1.1/omap.js").YAMLOMap | import("../../yaml/browser/dist/schema/yaml-1.1/set.js").YAMLSet} */ node, /** @type {import("./context.mjs").default} */ context, /** @type {import("yaml-unist-types").TransformProps} */ props) {
 	if (node == null) return null;
 	if (YAML.isAlias(node)) return transformAlias(node, context, props);
 	if (YAML.isMap(node)) {
@@ -36,7 +36,7 @@ function transformNode(/** @type {import("../../yaml/browser/dist/nodes/YAMLMap.
 	// istanbul ignore next -- @preserve
 	throw new Error(`Unexpected unknown node type`);
 }
-/** @returns {boolean} */ function isEmptyNode(/** @type {import("../../yaml/browser/dist/nodes/Scalar.js").Scalar | import("../../yaml/browser/dist/nodes/YAMLMap.js").YAMLMap | import("../../yaml/browser/dist/nodes/YAMLSeq.js").YAMLSeq | import("../../yaml/browser/dist/nodes/Alias.js").Alias | import("../../yaml/browser/dist/schema/yaml-1.1/omap.js").YAMLOMap | import("../../yaml/browser/dist/schema/yaml-1.1/set.js").YAMLSet | null} */ node, props) {
+/** @returns {boolean} */ function isEmptyNode(/** @type {import("../../yaml/browser/dist/nodes/Scalar.js").Scalar | import("../../yaml/browser/dist/nodes/YAMLMap.js").YAMLMap | import("../../yaml/browser/dist/nodes/YAMLSeq.js").YAMLSeq | import("../../yaml/browser/dist/nodes/Alias.js").Alias | import("../../yaml/browser/dist/schema/yaml-1.1/omap.js").YAMLOMap | import("../../yaml/browser/dist/schema/yaml-1.1/set.js").YAMLSet | null} */ node, /** @type {import("yaml-unist-types").TransformProps} */ props) {
 	return !node || node.range[0] === node.range[1] && props.tokens.every(/** @returns {boolean} */ (t) => t.type === "comment");
 }
 //#endregion

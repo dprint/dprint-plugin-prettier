@@ -1,5 +1,7 @@
+// @nts-check
+/** @import { Position, YamlNode, Content } from "yaml-unist-types" */
 //#region src/factories/flow-mapping-item.ts
-function createFlowMappingItem(position, key, value) {
+/** @returns {YamlNode} */ function createFlowMappingItem(/** @type {Position} */ position, /** @type {YamlNode} */ key, /** @type {YamlNode} */ value) {
 	return {
 		type: "flowMappingItem",
 		position,

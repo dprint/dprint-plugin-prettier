@@ -9,7 +9,7 @@ import { createFlowSequenceItem } from "../factories/flow-sequence-item.mjs";
 import { getLast } from "../utils/get-last.mjs";
 import * as YAML from "yaml";
 //#region src/transforms/flow-seq.ts
-function transformFlowSeq(/** @type {import("../../yaml/browser/dist/nodes/YAMLSeq.js").YAMLSeq | import("../../yaml/browser/dist/schema/yaml-1.1/omap.js").YAMLOMap} */ flowSeq, /** @type {import("./context.mjs").default} */ context, props) {
+/** @returns {import("yaml-unist-types").YamlNode} */ function transformFlowSeq(/** @type {import("../../yaml/browser/dist/nodes/YAMLSeq.js").YAMLSeq | import("../../yaml/browser/dist/schema/yaml-1.1/omap.js").YAMLOMap} */ flowSeq, /** @type {import("./context.mjs").default} */ context, /** @type {import("yaml-unist-types").TransformProps} */ props) {
 	const srcToken = flowSeq.srcToken;
 	// istanbul ignore if -- @preserve
 	if (!srcToken || srcToken.type !== "flow-collection") throw new Error("Expected flow-collection CST node for flow sequence");
@@ -44,7 +44,7 @@ function transformFlowSeq(/** @type {import("../../yaml/browser/dist/nodes/YAMLS
 			throw new Error(`Unexpected token type in collection item start: ${token.type}`);
 		}
 	}
-	let flowSeqEndToken = null;
+	/** @type {import("yaml-cst-types").Token | null} */ let flowSeqEndToken = null;
 	for (const token of tokens(srcToken.end)) {
 		if (token.type === "comment") {
 			context.transformComment(token);

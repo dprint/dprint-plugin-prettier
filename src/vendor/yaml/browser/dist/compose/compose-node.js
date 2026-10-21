@@ -6,11 +6,16 @@ import { composeScalar } from './compose-scalar.js';
 import { resolveEnd } from './resolve-end.js';
 import { emptyScalarPosition } from './util-empty-scalar-position.js';
 
-const CN = { composeNode, composeEmptyNode };
-/** @returns {import("../nodes/Scalar.js").Scalar | import("../nodes/YAMLMap.js").YAMLMap | import("../nodes/YAMLSeq.js").YAMLSeq | Alias | import("../schema/yaml-1.1/omap.js").YAMLOMap | import("../schema/yaml-1.1/set.js").YAMLSet} */ function composeNode(ctx, token, props, onError) {
+/** @typedef {import("yaml-cst-types").ComposeContext} ComposeContext */
+/** @typedef {import("yaml-cst-types").Token} Token */
+/** @typedef {import("yaml-cst-types").ResolvedProps} ResolvedProps */
+/** @typedef {import("yaml-cst-types").ComposeErrorHandler} ComposeErrorHandler */
+/** @typedef {{ composeNode: typeof composeNode, composeEmptyNode: typeof composeEmptyNode }} ComposeNodes */
+/** @type {ComposeNodes} */ const CN = { composeNode, composeEmptyNode };
+/** @returns {import("../nodes/Scalar.js").Scalar | import("../nodes/YAMLMap.js").YAMLMap | import("../nodes/YAMLSeq.js").YAMLSeq | Alias | import("../schema/yaml-1.1/omap.js").YAMLOMap | import("../schema/yaml-1.1/set.js").YAMLSet} */ function composeNode(/** @type {ComposeContext} */ ctx, /** @type {Token} */ token, /** @type {ResolvedProps} */ props, /** @type {ComposeErrorHandler} */ onError) {
     const atKey = ctx.atKey;
     const { spaceBefore, comment, anchor, tag } = props;
-    let node;
+    /** @type {import("../nodes/Scalar.js").Scalar | import("../nodes/YAMLMap.js").YAMLMap | import("../nodes/YAMLSeq.js").YAMLSeq | Alias | import("../schema/yaml-1.1/omap.js").YAMLOMap | import("../schema/yaml-1.1/set.js").YAMLSet | undefined} */ let node;
     let isSrcToken = true;
     switch (token.type) {
         case 'alias':
@@ -72,7 +77,7 @@ const CN = { composeNode, composeEmptyNode };
         node.srcToken = token;
     return node;
 }
-/** @returns {import("../nodes/Scalar.js").Scalar} */ function composeEmptyNode(ctx, /** @type {number} */ offset, /** @type {any[]} */ before, /** @type {null | number} */ pos, { spaceBefore, comment, anchor, tag, end }, onError) {
+/** @returns {import("../nodes/Scalar.js").Scalar} */ function composeEmptyNode(/** @type {ComposeContext} */ ctx, /** @type {number} */ offset, /** @type {Token[] | undefined} */ before, /** @type {null | number} */ pos, /** @type {ResolvedProps} */ { spaceBefore, comment, anchor, tag, end }, /** @type {ComposeErrorHandler} */ onError) {
     const token = {
         type: 'scalar',
         offset: emptyScalarPosition(offset, before, pos),
@@ -93,7 +98,7 @@ const CN = { composeNode, composeEmptyNode };
     }
     return node;
 }
-/** @returns {Alias} */ function composeAlias({ options }, { offset, source, end }, onError) {
+/** @returns {Alias} */ function composeAlias(/** @type {ComposeContext} */ { options }, /** @type {Token} */ { offset, source, end }, /** @type {ComposeErrorHandler} */ onError) {
     const alias = new Alias(source.substring(1));
     if (alias.source === '')
         onError(offset, 'BAD_ALIAS', 'Alias cannot be an empty string');

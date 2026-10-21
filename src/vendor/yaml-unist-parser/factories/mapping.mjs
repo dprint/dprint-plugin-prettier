@@ -1,6 +1,7 @@
 // @nts-check
+/** @import { Position, YamlNode, Content } from "yaml-unist-types" */
 //#region src/factories/mapping.ts
-function createMapping(position, content, /** @type {any[]} */ children) {
+/** @returns {YamlNode} */ function createMapping(/** @type {Position} */ position, /** @type {Content} */ content, /** @type {YamlNode[]} */ children) {
 	return {
 		type: "mapping",
 		position,

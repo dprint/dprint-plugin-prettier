@@ -9,6 +9,8 @@ import { codes, types } from "micromark-util-symbol";
  * @typedef {import('mdast-util-from-markdown').Handle} Handle
  * @typedef {import('micromark-util-types').State} State
  * @typedef {import('micromark-util-types').TokenizeContext} TokenizeContext
+ * @typedef {import('micromark-util-types').Tokenizer} Tokenizer
+ * @typedef {import('micromark-util-types').Effects} Effects
  */
 
 const nodeType = "liquidNode";
@@ -62,19 +64,29 @@ function liquidSyntax() {
     },
   };
 
-  /** @this {TokenizeContext} */
+  /**
+   * @this {TokenizeContext}
+   * @type {Tokenizer}
+   */
   function tokenizeFlow(effects, ok, nok) {
     return tokenize.call(this, effects, ok, nok, "flow");
   }
 
-  /** @this {TokenizeContext} */
+  /**
+   * @this {TokenizeContext}
+   * @type {Tokenizer}
+   */
   function tokenizeText(effects, ok, nok) {
     return tokenize.call(this, effects, ok, nok, "text");
   }
 
   /**
    * @this {TokenizeContext}
+   * @param {Effects} effects
+   * @param {State} ok
+   * @param {State} nok
    * @param mode {"text" | "flow"}
+   * @returns {State}
    */
   function tokenize(effects, ok, nok, mode) {
     const isFlow = mode === "flow";

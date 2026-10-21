@@ -1,6 +1,7 @@
 // @nts-check
+/** @import { Position, YamlNode, Content } from "yaml-unist-types" */
 //#region src/factories/plain.ts
-function createPlain(position, content, /** @type {string} */ value) {
+/** @returns {YamlNode} */ function createPlain(/** @type {Position} */ position, /** @type {Content} */ content, /** @type {string} */ value) {
 	return {
 		type: "plain",
 		position,

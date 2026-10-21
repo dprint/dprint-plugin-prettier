@@ -1,6 +1,7 @@
 // @nts-check
+/** @import { Position, YamlNode, Content } from "yaml-unist-types" */
 //#region src/factories/document-body.ts
-function createDocumentBody(position, content, /** @type {any[]} */ endComments) {
+/** @returns {YamlNode} */ function createDocumentBody(/** @type {Position} */ position, /** @type {YamlNode | null} */ content, /** @type {YamlNode[]} */ endComments) {
 	return {
 		type: "documentBody",
 		position,

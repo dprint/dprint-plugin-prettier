@@ -3,6 +3,13 @@ import { NodeBase } from './Node.js';
 import { toJS } from './toJS.js';
 
 const isScalarValue = (value) => !value || (typeof value !== 'function' && typeof value !== 'object');
+/**
+ * what composing gives a scalar (yaml/dist/nodes/Scalar.d.ts)
+ * @property {string} [source]
+ * @property {string} [type]
+ * @property {string} [tag]
+ * @property {number} [minFractionDigits]
+ */
 class Scalar extends NodeBase {
     constructor(value) {
         super(SCALAR);

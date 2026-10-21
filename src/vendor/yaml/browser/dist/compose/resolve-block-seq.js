@@ -3,15 +3,15 @@ import { YAMLSeq } from '../nodes/YAMLSeq.js';
 import { resolveProps } from './resolve-props.js';
 import { flowIndentCheck } from './util-flow-indent-check.js';
 
-/** @returns {YAMLSeq | import("../schema/yaml-1.1/omap.js").YAMLOMap} */ function resolveBlockSeq({ composeNode, composeEmptyNode }, /** @type {import("yaml-cst-types").ComposeContext} */ ctx, /** @type {import("yaml-cst-types").Token} */ bs, onError, tag) {
+/** @returns {YAMLSeq | import("../schema/yaml-1.1/omap.js").YAMLOMap} */ function resolveBlockSeq(/** @type {import("./compose-node.js").ComposeNodes} */ { composeNode, composeEmptyNode }, /** @type {import("yaml-cst-types").ComposeContext} */ ctx, /** @type {import("yaml-cst-types").Token} */ bs, /** @type {import("yaml-cst-types").ComposeErrorHandler} */ onError, tag) {
     const NodeClass = tag?.nodeClass ?? YAMLSeq;
-    const seq = new NodeClass(ctx.schema);
+    /** @type {YAMLSeq} */ const seq = new NodeClass(ctx.schema);
     if (ctx.atRoot)
         ctx.atRoot = false;
     if (ctx.atKey)
         ctx.atKey = false;
     let offset = bs.offset;
-    let commentEnd = null;
+    /** @type {number | null} */ let commentEnd = null;
     for (const { start, value } of bs.items) {
         const props = resolveProps(start, {
             indicator: 'seq-item-ind',

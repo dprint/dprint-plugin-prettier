@@ -25,14 +25,14 @@ var Context = class {
 			offset
 		};
 	}
-	/** @returns {Position} */ transformRange(/** @type {any[]} */ range) {
+	/** @returns {Position} */ transformRange(/** @type {number[]} */ range) {
 		const [start, end] = range.map((/** @type {number} */ position) => this.transformOffset(position));
 		return createPosition(start, end);
 	}
-	transformNode(/** @type {import("../../yaml/browser/dist/nodes/YAMLMap.js").YAMLMap | import("../../yaml/browser/dist/nodes/Scalar.js").Scalar | import("../../yaml/browser/dist/nodes/YAMLSeq.js").YAMLSeq | import("../../yaml/browser/dist/nodes/Alias.js").Alias | import("../../yaml/browser/dist/schema/yaml-1.1/omap.js").YAMLOMap | import("../../yaml/browser/dist/schema/yaml-1.1/set.js").YAMLSet} */ node, props) {
+	/** @returns {import("yaml-unist-types").YamlNode | null} */ transformNode(/** @type {import("../../yaml/browser/dist/nodes/YAMLMap.js").YAMLMap | import("../../yaml/browser/dist/nodes/Scalar.js").Scalar | import("../../yaml/browser/dist/nodes/YAMLSeq.js").YAMLSeq | import("../../yaml/browser/dist/nodes/Alias.js").Alias | import("../../yaml/browser/dist/schema/yaml-1.1/omap.js").YAMLOMap | import("../../yaml/browser/dist/schema/yaml-1.1/set.js").YAMLSet} */ node, /** @type {import("yaml-unist-types").TransformProps} */ props) {
 		return transformNode(node, this, props);
 	}
-	transformComment(node) {
+	/** @returns {YamlNode} */ transformComment(/** @type {import("yaml-cst-types").Token} */ node) {
 		const comment = transformComment(node, this);
 		this.comments.push(comment);
 		return comment;

@@ -6,7 +6,7 @@ import { getLast } from "../utils/get-last.mjs";
 import { createMapping } from "../factories/mapping.mjs";
 import { createMappingItem } from "../factories/mapping-item.mjs";
 //#region src/transforms/map.ts
-function transformMap(/** @type {import("../../yaml/browser/dist/nodes/YAMLMap.js").YAMLMap | import("../../yaml/browser/dist/schema/yaml-1.1/set.js").YAMLSet} */ map, /** @type {import("./context.mjs").default} */ context, props) {
+/** @returns {import("yaml-unist-types").YamlNode} */ function transformMap(/** @type {import("../../yaml/browser/dist/nodes/YAMLMap.js").YAMLMap | import("../../yaml/browser/dist/schema/yaml-1.1/set.js").YAMLSet} */ map, /** @type {import("./context.mjs").default} */ context, /** @type {import("yaml-unist-types").TransformProps} */ props) {
 	const srcToken = map.srcToken;
 	// istanbul ignore if -- @preserve
 	if (!srcToken || srcToken.type !== "block-map") throw new Error("Expected block mapping srcToken");

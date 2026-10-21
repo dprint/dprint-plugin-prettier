@@ -1,5 +1,5 @@
 // @nts-check
-function resolveEnd(/** @type {any[] | undefined} */ end, /** @type {number} */ offset, /** @type {boolean} */ reqSpace, onError) {
+/** @returns {import("yaml-cst-types").ResolvedEnd} */ function resolveEnd(/** @type {import("yaml-cst-types").Token[] | undefined} */ end, /** @type {number} */ offset, /** @type {boolean} */ reqSpace, /** @type {import("yaml-cst-types").ComposeErrorHandler} */ onError) {
     let comment = '';
     if (end) {
         /** @type {boolean} */ let hasSpace = false;

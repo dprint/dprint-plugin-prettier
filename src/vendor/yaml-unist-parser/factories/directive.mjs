@@ -1,6 +1,7 @@
 // @nts-check
+/** @import { Position, YamlNode, Content } from "yaml-unist-types" */
 //#region src/factories/directive.ts
-function createDirective(position, /** @type {string} */ name, /** @type {any[]} */ parameters) {
+/** @returns {YamlNode} */ function createDirective(/** @type {Position} */ position, /** @type {string} */ name, /** @type {any[]} */ parameters) {
 	return {
 		type: "directive",
 		position,

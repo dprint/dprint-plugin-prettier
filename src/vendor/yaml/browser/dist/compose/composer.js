@@ -133,7 +133,7 @@ class Composer {
         yield* this.end(forceDoc, endOffset);
     }
     /** Advance the composer by one CST token. */
-    *next(token) {
+    *next(/** @type {import("yaml-cst-types").Token} */ token) {
         switch (token.type) {
             case 'directive':
                 this.directives.add(token.source, (/** @type {number} */ offset, /** @type {string} */ message, /** @type {boolean} */ warning) => {

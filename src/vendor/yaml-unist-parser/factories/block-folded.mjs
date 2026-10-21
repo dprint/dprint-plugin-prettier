@@ -1,5 +1,7 @@
+// @nts-check
+/** @import { Position, YamlNode, Content } from "yaml-unist-types" */
 //#region src/factories/block-folded.ts
-function createBlockFolded(blockValue) {
+/** @returns {YamlNode} */ function createBlockFolded(/** @type {YamlNode} */ blockValue) {
 	return {
 		...blockValue,
 		type: "blockFolded"

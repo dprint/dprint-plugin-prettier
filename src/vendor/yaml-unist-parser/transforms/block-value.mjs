@@ -2,8 +2,8 @@
 import { tokens } from "../cst.mjs";
 import { createBlockValue } from "../factories/block-value.mjs";
 //#region src/transforms/block-value.ts
-function transformAstBlockValue(/** @type {import("../../yaml/browser/dist/nodes/Scalar.js").Scalar} */ blockValue, srcToken, /** @type {import("./context.mjs").default} */ context, props) {
-	let blockScalarHeaderToken = null;
+/** @returns {import("yaml-unist-types").YamlNode} */ function transformAstBlockValue(/** @type {import("../../yaml/browser/dist/nodes/Scalar.js").Scalar} */ blockValue, /** @type {import("yaml-cst-types").Token} */ srcToken, /** @type {import("./context.mjs").default} */ context, /** @type {import("yaml-unist-types").TransformProps} */ props) {
+	/** @type {import("yaml-cst-types").Token | null} */ let blockScalarHeaderToken = null;
 	let indicatorComment = null;
 	for (const token of tokens(srcToken.props)) if (token.type === "comment") indicatorComment = context.transformComment(token);
 	else if (token.type === "block-scalar-header") blockScalarHeaderToken = token;

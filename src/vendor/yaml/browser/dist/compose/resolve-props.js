@@ -1,6 +1,6 @@
 // @nts-check
 /** @typedef {{ type: string, offset: number, indent: number, source: string }} SourceToken */
-function resolveProps(/** @type {SourceToken[]} */ tokens, /** @type {{ flow?: string, indicator: string, next: any, offset: number, onError: (source: any, code: string, message: string, warning?: boolean) => void, parentIndent: number, startOnNewline: boolean }} */ { flow, indicator, next, offset, onError, parentIndent, startOnNewline }) {
+/** @returns {import("yaml-cst-types").ResolvedProps} */ function resolveProps(/** @type {SourceToken[]} */ tokens, /** @type {{ flow?: string, indicator: string, next: import("yaml-cst-types").Token | null | undefined, offset: number, onError: import("yaml-cst-types").ComposeErrorHandler, parentIndent: number, startOnNewline: boolean }} */ { flow, indicator, next, offset, onError, parentIndent, startOnNewline }) {
     /** @type {boolean} */ let spaceBefore = false;
     /** @type {boolean} */ let atNewline = startOnNewline;
     /** @type {boolean} */ let hasSpace = startOnNewline;

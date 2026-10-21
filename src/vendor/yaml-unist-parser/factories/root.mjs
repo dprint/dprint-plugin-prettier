@@ -1,6 +1,7 @@
 // @nts-check
+/** @import { Position, YamlNode, Content } from "yaml-unist-types" */
 //#region src/factories/root.ts
-function createRoot(position, /** @type {any[] | undefined} */ children, /** @type {any[] | undefined} */ comments) {
+/** @returns {YamlNode} */ function createRoot(/** @type {Position} */ position, /** @type {YamlNode[] | undefined} */ children, /** @type {YamlNode[] | undefined} */ comments) {
 	return {
 		type: "root",
 		position,

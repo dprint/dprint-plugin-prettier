@@ -74,11 +74,15 @@ export type ContentType = 'content' | 'document' | 'flow' | 'string' | 'text'
  * `_bufferIndex`).
  *
  * (dprint-plugin-prettier: this file is micromark-util-types' `index.d.ts` as a module that nts compiles, which
- * src/nts.json maps the package to. `Point` is the one interface left, which nts compiles to a class whose fields
- * are numbers, with its properties in the order micromark creates them in; the tokens and the tokenizer's context
- * and effects are object types, which are records as they were, with what they hold typed; `Event` is in
- * micromark-events.js; and the types of constructs, extensions, the parser, the compiler and the state functions
- * are `any`, which is what nts made of them before, as some of them are created as something else than they say.)
+ * src/nts.json maps the package to. `Point`, `Token` and `Effects` are interfaces, which nts compiles to classes
+ * whose properties are fields, `Point`'s with its properties in the order micromark creates them in: micromark
+ * creates its tokens as objects written out or given to `enter` as its fields, which nts creates as tokens, and gives
+ * them nothing that `Token` does not declare (the fields that its extensions add to the interface are written in
+ * it). The tokenizer's context is an object type, which is a record as it was, with what it holds typed, as the
+ * context that constructs that interrupt are given is a record made with `Object.create` of it; its functions are
+ * properties rather than methods, so that they are called as what they are. `Event` is in micromark-events.js; and
+ * the types of constructs, extensions, the parser, the compiler and the state functions are `any`, which is what
+ * nts made of them before, as some of them are created as something else than they say.)
  *
  * `_bufferIndex` is `-1` when `_index` points to a code chunk and it’s a
  * non-negative integer when pointing to a string chunk.
@@ -143,7 +147,7 @@ export interface Point {
  * The two `chunkFlow` tokens are linked together.
  * The chunks they span are then passed through the flow tokenizer.
  */
-export type Token = {
+export interface Token {
   /**
    * Token type.
    */
@@ -246,6 +250,14 @@ export type Token = {
    * balanced: it’s not a link opening but has a balanced closing.
    */
   _balanced?: boolean | undefined
+
+  // (dprint-plugin-prettier: the fields that micromark-extension-gfm-table, mdast-util-from-markdown and
+  // micromark-extension-gfm-autolink-literal give tokens, which their declarations add to the interface)
+  _align?: Array<'center' | 'left' | 'none' | 'right'> | undefined
+
+  _spread?: boolean | undefined
+
+  _gfmAutolinkLiteralWalkedInto?: boolean | undefined
 }
 
 /**
@@ -316,7 +328,7 @@ export type Attempt = (
 /**
  * A context object to transition the state machine.
  */
-export type Effects = {
+export interface Effects {
   /**
    * Try to tokenize a construct.
    */
@@ -580,7 +592,7 @@ export type TokenizeContext = {
    * @returns
    *   Nothing.
    */
-  defineSkip(point: Point): undefined
+  defineSkip: (point: Point) => undefined
 
   /**
    * Get the current place.
@@ -588,7 +600,7 @@ export type TokenizeContext = {
    * @returns
    *   Current point.
    */
-  now(): Point
+  now: () => Point
 
   /**
    * Get the source text that spans a token (or location).
@@ -600,10 +612,10 @@ export type TokenizeContext = {
    * @returns
    *   Serialized chunks.
    */
-  sliceSerialize(
+  sliceSerialize: (
     token: Pick<Token, 'end' | 'start'>,
     expandTabs?: boolean | undefined
-  ): string
+  ) => string
 
   /**
    * Get the chunks that span a token (or location).
@@ -613,7 +625,7 @@ export type TokenizeContext = {
    * @returns
    *   List of chunks.
    */
-  sliceStream(token: Pick<Token, 'end' | 'start'>): Array<Chunk>
+  sliceStream: (token: Pick<Token, 'end' | 'start'>) => Array<Chunk>
 
   /**
    * Write a slice of chunks.
@@ -625,7 +637,7 @@ export type TokenizeContext = {
    * @returns
    *   Events.
    */
-  write(slice: Array<Chunk>): Array<Event>
+  write: (slice: Array<Chunk>) => Array<Event>
 }
 
 /**

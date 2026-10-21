@@ -16,20 +16,20 @@ export interface Position {
 export type YamlNode = {
   type: string;
   position: Position;
-  children?: any[];
-  leadingComments?: any[];
-  middleComments?: any[];
+  children?: YamlNode[];
+  leadingComments?: YamlNode[];
+  middleComments?: YamlNode[];
   indicatorComment?: YamlNode | null;
   trailingComment?: YamlNode | null;
-  endComments?: any[];
+  endComments?: YamlNode[];
   anchor?: YamlNode | null;
   tag?: YamlNode | null;
-  _parent?: any;
-  comments?: any[];
-  content?: any;
-  head?: any;
-  body?: any;
-  key?: any;
+  _parent?: YamlNode | null;
+  comments?: YamlNode[];
+  content?: YamlNode | null;
+  head?: YamlNode;
+  body?: YamlNode;
+  key?: YamlNode;
   value?: any;
   indent: number | null;
   chomping?: string;
@@ -37,4 +37,16 @@ export type YamlNode = {
   parameters?: any[];
   documentEndMarker?: any;
   directivesEndMarker?: any;
+};
+
+// what a node's tag, anchor and the comments between them are, which a node that has them is given by spreading it
+export type Content = {
+  anchor: YamlNode | null;
+  tag: YamlNode | null;
+  middleComments: YamlNode[];
+};
+
+// what a node of yaml is transformed with: the tokens of its tag, anchor and the comments around them
+export type TransformProps = {
+  tokens: import("./yaml-cst-types.ts").Token[];
 };

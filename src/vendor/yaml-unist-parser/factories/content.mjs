@@ -1,6 +1,7 @@
 // @nts-check
+/** @import { Position, YamlNode, Content } from "yaml-unist-types" */
 //#region src/factories/content.ts
-function createContent(tag, anchor, /** @type {any[]} */ middleComments) {
+/** @returns {Content} */ function createContent(/** @type {YamlNode | null} */ tag, /** @type {YamlNode | null} */ anchor, /** @type {YamlNode[]} */ middleComments) {
 	return {
 		anchor,
 		tag,

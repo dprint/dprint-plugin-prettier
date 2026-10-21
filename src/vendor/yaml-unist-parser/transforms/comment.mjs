@@ -1,6 +1,6 @@
 // @nts-check
 //#region src/transforms/comment.ts
-function transformComment(comment, /** @type {import("./context.mjs").default | undefined} */ context) {
+/** @returns {import("yaml-unist-types").YamlNode} */ function transformComment(/** @type {import("yaml-cst-types").Token} */ comment, /** @type {import("./context.mjs").default | undefined} */ context) {
 	return {
 		type: "comment",
 		position: context.transformRange([comment.offset, comment.offset + comment.source.length]),

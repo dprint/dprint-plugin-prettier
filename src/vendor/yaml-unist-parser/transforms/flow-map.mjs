@@ -4,7 +4,7 @@ import { createFlowMapping } from "../factories/flow-mapping.mjs";
 import { createFlowMappingItem } from "../factories/flow-mapping-item.mjs";
 import { transformPair } from "./pair.mjs";
 //#region src/transforms/flow-map.ts
-function transformFlowMap(/** @type {import("../../yaml/browser/dist/nodes/YAMLMap.js").YAMLMap | import("../../yaml/browser/dist/schema/yaml-1.1/set.js").YAMLSet} */ flowMap, /** @type {import("./context.mjs").default} */ context, props) {
+/** @returns {import("yaml-unist-types").YamlNode} */ function transformFlowMap(/** @type {import("../../yaml/browser/dist/nodes/YAMLMap.js").YAMLMap | import("../../yaml/browser/dist/schema/yaml-1.1/set.js").YAMLSet} */ flowMap, /** @type {import("./context.mjs").default} */ context, /** @type {import("yaml-unist-types").TransformProps} */ props) {
 	const srcToken = flowMap.srcToken;
 	// istanbul ignore if -- @preserve
 	if (!srcToken || srcToken.type !== "flow-collection") throw new Error("Expected flow-collection CST node for flow map");
@@ -21,7 +21,7 @@ function transformFlowMap(/** @type {import("../../yaml/browser/dist/nodes/YAMLM
 			throw new Error(`Unexpected token type in collection item start: ${token.type}`);
 		}
 	}
-	let flowMapEndToken = null;
+	/** @type {import("yaml-cst-types").Token | null} */ let flowMapEndToken = null;
 	for (const token of extractComments(srcToken.end, context)) {
 		// istanbul ignore else -- @preserve
 		if (token.type === "flow-map-end") {

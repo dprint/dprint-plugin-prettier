@@ -2,6 +2,16 @@ import { applyReviver } from '../doc/applyReviver.js';
 import { NODE_TYPE, isDocument } from './identity.js';
 import { toJS } from './toJS.js';
 
+/**
+ * what composing gives every node (yaml/dist/nodes/Node.d.ts)
+ * @property {string | null} [comment]
+ * @property {string | null} [commentBefore]
+ * @property {number[]} [range]
+ * @property {boolean} [spaceBefore]
+ * @property {import("yaml-cst-types").Token} [srcToken]
+ * @property {string} [anchor]
+ * @property {string} [format]
+ */
 class NodeBase {
     constructor(type) {
         Object.defineProperty(this, NODE_TYPE, { value: type });

@@ -4,7 +4,7 @@ import { Scalar } from '../nodes/Scalar.js';
 import { resolveBlockScalar } from './resolve-block-scalar.js';
 import { resolveFlowScalar } from './resolve-flow-scalar.js';
 
-/** @returns {Scalar} */ function composeScalar(/** @type {import("yaml-cst-types").ComposeContext} */ ctx, /** @type {import("yaml-cst-types").Token} */ token, /** @type {null | import("yaml-cst-types").Token} */ tagToken, onError) {
+/** @returns {Scalar} */ function composeScalar(/** @type {import("yaml-cst-types").ComposeContext} */ ctx, /** @type {import("yaml-cst-types").Token} */ token, /** @type {null | import("yaml-cst-types").Token} */ tagToken, /** @type {import("yaml-cst-types").ComposeErrorHandler} */ onError) {
     const { value, type, comment, range } = token.type === 'block-scalar'
         ? resolveBlockScalar(ctx, token, onError)
         : resolveFlowScalar(token, ctx.options.strict, onError);
@@ -43,7 +43,7 @@ import { resolveFlowScalar } from './resolve-flow-scalar.js';
         scalar.comment = comment;
     return scalar;
 }
-function findScalarTagByName(/** @type {import("../schema/Schema.js").Schema} */ schema, /** @type {string} */ value, /** @type {string} */ tagName, tagToken, onError) {
+function findScalarTagByName(/** @type {import("../schema/Schema.js").Schema} */ schema, /** @type {string} */ value, /** @type {string} */ tagName, /** @type {import("yaml-cst-types").Token} */ tagToken, /** @type {import("yaml-cst-types").ComposeErrorHandler} */ onError) {
     if (tagName === '!')
         return schema[SCALAR]; // non-specific tag
     const matchWithTest = [];
@@ -68,7 +68,7 @@ function findScalarTagByName(/** @type {import("../schema/Schema.js").Schema} */
     onError(tagToken, 'TAG_RESOLVE_FAILED', `Unresolved tag: ${tagName}`, tagName !== 'tag:yaml.org,2002:str');
     return schema[SCALAR];
 }
-function findScalarTagByTest({ atKey, directives, schema }, /** @type {string} */ value, token, onError) {
+function findScalarTagByTest(/** @type {import("yaml-cst-types").ComposeContext} */ { atKey, directives, schema }, /** @type {string} */ value, /** @type {import("yaml-cst-types").Token} */ token, /** @type {import("yaml-cst-types").ComposeErrorHandler} */ onError) {
     const tag = schema.tags.find(/** @returns {boolean | undefined} */ tag => (tag.default === true || (atKey && tag.default === 'key')) &&
         tag.test?.test(value)) || schema[SCALAR];
     if (schema.compat) {

@@ -12,7 +12,7 @@ class YAMLSeq extends Collection {
     }
     constructor(/** @type {import("../schema/Schema.js").Schema | undefined} */ schema) {
         super(SEQ, schema);
-        this.items = [];
+        /** @type {any[]} */ this.items = [];
     }
     add(value) {
         this.items.push(value);
