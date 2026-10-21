@@ -29100,7 +29100,6 @@ var p_ = uf(w_.Latest, !0);
  * the parent that the parser gives each node, and the properties that it gives nodes of some kinds, which are
  * other nodes
  * @property {Kf} parent
- * @property {Kf[]} jsDoc
  * @sideProperty {Kf | xh | vh | Th} [name]
  * @sideProperty {Kf | xh | vh | Th} [expression]
  * @sideProperty {Kf | xh | vh | Th} [questionDotToken]
@@ -29409,11 +29408,6 @@ var Zf = class {
       super(e, t, a);
     }
   },
-  /**
-   * the name that the parser gives an identifier, and the JSDoc comments in front of it
-   * @property {string} escapedText
-   * @property {Kf[]} jsDoc
-   */
   xh = class extends Zf {
     constructor(/** @type {int} */ e, /** @type {number} */ t, /** @type {number} */ a) {
       super(e, t, a);
@@ -29422,10 +29416,6 @@ var Zf = class {
       return Pn(this);
     }
   },
-  /**
-   * the name that the parser gives a private identifier, which has no JSDoc comments of its own
-   * @property {string} escapedText
-   */
   Th = class extends Zf {
     constructor(/** @type {int} */ e, /** @type {number} */ t, /** @type {number} */ a) {
       super(e, t, a);

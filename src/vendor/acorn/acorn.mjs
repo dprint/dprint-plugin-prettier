@@ -107,6 +107,8 @@ var nonASCIIidentifier = new RegExp("[" + nonASCIIidentifierStartChars + nonASCI
 // continue jumps to that label.
 
 /** @typedef {{ keyword?: string, beforeExpr?: boolean, startsExpr?: boolean, isLoop?: boolean, isAssign?: boolean, prefix?: boolean, postfix?: boolean, binop?: number }} TokenTypeConf */
+/** @typedef {{pattern: string, flags: string, value: RegExp | null}} RegExpTokenValue */
+/** @typedef {string | number | bigint | RegExpTokenValue | null | undefined} TokenValue */
 
 var TokenType = function TokenType(/** @type {string} */ label, /** @type {TokenTypeConf | undefined} */ conf) {
   if ( conf === void 0 ) conf = {};
@@ -122,6 +124,7 @@ var TokenType = function TokenType(/** @type {string} */ label, /** @type {Token
   this.postfix = !!conf.postfix;
   /** @type {number | null} */
   this.binop = conf.binop || null;
+  /** @type {((this: Parser, prevType: TokenType) => void) | null} */
   this.updateContext = null;
 };
 
@@ -615,6 +618,7 @@ var Parser = function Parser(options, /** @type {string | undefined} */ input, /
   /** @type {TokenType} */
   this.type = types$1.eof;
   // For tokens that include more information than their type, the value
+  /** @type {TokenValue} */
   this.value = null;
   // Its start and end offset
   /** @type {number} */
@@ -2605,7 +2609,8 @@ pp$6.inGeneratorContext = /** @returns {boolean} */ /** @this {Parser} */ functi
 };
 
 pp$6.updateContext = /** @this {Parser} */ function(/** @type {TokenType} */ prevType) {
-  var update, type = this.type;
+  /** @type {((this: Parser, prevType: TokenType) => void) | null} */ var update;
+  var type = this.type;
   if (type.keyword && prevType === types$1.dot)
     { this.exprAllowed = false; }
   else if (update = type.updateContext)
@@ -5764,7 +5769,7 @@ pp.skipSpace = /** @this {Parser} */ function() {
 // the token, so that the next one's `start` will point at the
 // right position.
 
-pp.finishToken = /** @this {Parser} */ function(/** @type {TokenType} */ type, val) {
+pp.finishToken = /** @this {Parser} */ function(/** @type {TokenType} */ type, /** @type {TokenValue} */ val) {
   this.end = this.pos;
   if (this.options.locations) { this.endLoc = this.curPosition(); }
   var prevType = this.type;
