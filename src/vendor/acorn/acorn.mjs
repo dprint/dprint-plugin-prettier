@@ -110,6 +110,7 @@ var TokenType = function TokenType(/** @type {string} */ label, conf) {
   if ( conf === void 0 ) conf = {};
 
   this.label = label;
+  /** @type {string | undefined} */
   this.keyword = conf.keyword;
   this.beforeExpr = !!conf.beforeExpr;
   this.startsExpr = !!conf.startsExpr;
@@ -117,6 +118,7 @@ var TokenType = function TokenType(/** @type {string} */ label, conf) {
   this.isAssign = !!conf.isAssign;
   this.prefix = !!conf.prefix;
   this.postfix = !!conf.postfix;
+  /** @type {number | null} */
   this.binop = conf.binop || null;
   this.updateContext = null;
 };
@@ -301,7 +303,7 @@ Position.prototype.offset = function offset (n) {
   return new Position(this.line, this.column + n)
 };
 
-var SourceLocation = function SourceLocation(p, start, end) {
+var SourceLocation = function SourceLocation(p, /** @type {Position | undefined} */ start, /** @type {Position | undefined} */ end) {
   this.start = start;
   this.end = end;
   if (p.sourceFile !== null) { this.source = p.sourceFile; }
@@ -324,6 +326,32 @@ function getLineInfo(/** @type {string} */ input, /** @type {number} */ offset) 
 
 // A second argument must be given to configure the parser process.
 // These options are recognized (only `ecmaVersion` is required):
+
+// the options once getOptions has filled them in: what code gives the parser, or the default of each
+/**
+ * @typedef {{
+ *   ecmaVersion: number,
+ *   sourceType: string,
+ *   strict: boolean,
+ *   onInsertedSemicolon: any,
+ *   onTrailingComma: any,
+ *   allowReserved: boolean | string,
+ *   allowReturnOutsideFunction: boolean,
+ *   allowImportExportEverywhere: boolean,
+ *   allowAwaitOutsideFunction: boolean | null,
+ *   allowSuperOutsideMethod: boolean | null,
+ *   allowHashBang: boolean,
+ *   checkPrivateFields: boolean,
+ *   locations: boolean,
+ *   onToken: any,
+ *   onComment: any,
+ *   ranges: boolean,
+ *   program: any,
+ *   sourceFile: any,
+ *   directSourceFile: any,
+ *   preserveParens: boolean
+ * }} AcornOptions
+ */
 
 var defaultOptions = {
   // `ecmaVersion` indicates the ECMAScript version to parse. Must be
@@ -430,7 +458,7 @@ var defaultOptions = {
 
 var warnedAboutEcmaVersion = false;
 
-function getOptions(opts) {
+/** @returns {AcornOptions} */ function getOptions(opts) {
   var options = {};
 
   for (var opt in defaultOptions)
@@ -511,18 +539,23 @@ var
     BIND_SIMPLE_CATCH = 4, // Simple (identifier pattern) catch binding
     BIND_OUTSIDE = 5; // Special case for function names as bound inside the function
 
-var Parser = function Parser(options, /** @type {string | undefined} */ input, startPos) {
+var Parser = function Parser(options, /** @type {string | undefined} */ input, /** @type {number | undefined} */ startPos) {
+  /** @type {AcornOptions} */
   this.options = options = getOptions(options);
   this.sourceFile = options.sourceFile;
+  /** @type {RegExp} */
   this.keywords = wordsRegexp(keywords$1[options.ecmaVersion >= 6 ? 6 : options.sourceType === "module" ? "5module" : 5]);
   var reserved = "";
   if (options.allowReserved !== true) {
     reserved = reservedWords[options.ecmaVersion >= 6 ? 6 : options.ecmaVersion === 5 ? 5 : 3];
     if (options.sourceType === "module") { reserved += " await"; }
   }
+  /** @type {RegExp} */
   this.reservedWords = wordsRegexp(reserved);
   var reservedStrict = (reserved ? reserved + " " : "") + reservedWords.strict;
+  /** @type {RegExp} */
   this.reservedWordsStrict = wordsRegexp(reservedStrict);
+  /** @type {RegExp} */
   this.reservedWordsStrictBind = wordsRegexp(reservedStrict + " " + reservedWords.strictBind);
   this.input = String(input);
 
@@ -535,6 +568,7 @@ var Parser = function Parser(options, /** @type {string | undefined} */ input, s
 
   // The current position of the tokenizer in the input.
   if (startPos) {
+    /** @type {number} */
     this.pos = startPos;
     this.lineStart = this.input.lastIndexOf("\n", startPos - 1) + 1;
     this.curLine = this.input.slice(0, this.lineStart).split(lineBreak).length;
@@ -545,10 +579,12 @@ var Parser = function Parser(options, /** @type {string | undefined} */ input, s
 
   // Properties of the current token:
   // Its type
+  /** @type {TokenType} */
   this.type = types$1.eof;
   // For tokens that include more information than their type, the value
   this.value = null;
   // Its start and end offset
+  /** @type {number} */
   this.start = this.end = this.pos;
   // And, if locations are used, the {line, column} object
   // corresponding to those offsets
@@ -584,6 +620,7 @@ var Parser = function Parser(options, /** @type {string | undefined} */ input, s
     { this.skipLineComment(2); }
 
   // Scope tracking for duplicate variable names (see scope.js)
+  /** @type {Scope[]} */
   this.scopeStack = [];
   this.enterScope(
     this.options.sourceType === "commonjs"
@@ -593,6 +630,7 @@ var Parser = function Parser(options, /** @type {string | undefined} */ input, s
   );
 
   // For RegExp validation
+  /** @type {RegExpValidationState | null} */
   this.regexpState = null;
 
   // The stack of private names.
@@ -724,7 +762,7 @@ pp$9.strictDirective = /** @returns {boolean} */ /** @this {Parser} */ function(
 // Predicate that tests whether the next token is of the given
 // type, and if yes, consumes it as a side effect.
 
-pp$9.eat = /** @returns {boolean} */ /** @this {Parser} */ function(type) {
+pp$9.eat = /** @returns {boolean} */ /** @this {Parser} */ function(/** @type {TokenType} */ type) {
   if (this.type === type) {
     this.next();
     return true
@@ -787,7 +825,7 @@ pp$9.semicolon = /** @this {Parser} */ function() {
   if (!this.eat(types$1.semi) && !this.insertSemicolon()) { this.unexpected(); }
 };
 
-pp$9.afterTrailingComma = /** @returns {boolean | undefined} */ /** @this {Parser} */ function(tokType, /** @type {boolean | undefined} */ notNext) {
+pp$9.afterTrailingComma = /** @returns {boolean | undefined} */ /** @this {Parser} */ function(/** @type {TokenType} */ tokType, /** @type {boolean | undefined} */ notNext) {
   if (this.type === tokType) {
     if (this.options.onTrailingComma)
       { this.options.onTrailingComma(this.lastTokStart, this.lastTokStartLoc); }
@@ -800,7 +838,7 @@ pp$9.afterTrailingComma = /** @returns {boolean | undefined} */ /** @this {Parse
 // Expect a token of a given type. If found, consume it, otherwise,
 // raise an unexpected token error.
 
-pp$9.expect = /** @this {Parser} */ function(type) {
+pp$9.expect = /** @this {Parser} */ function(/** @type {TokenType} */ type) {
   this.eat(type) || this.unexpected();
 };
 
@@ -819,7 +857,7 @@ var DestructuringErrors = function DestructuringErrors() {
     -1;
 };
 
-pp$9.checkPatternErrors = /** @this {Parser} */ function(refDestructuringErrors, /** @type {boolean} */ isAssign) {
+pp$9.checkPatternErrors = /** @this {Parser} */ function(/** @type {DestructuringErrors} */ refDestructuringErrors, /** @type {boolean} */ isAssign) {
   if (!refDestructuringErrors) { return }
   if (refDestructuringErrors.trailingComma > -1)
     { this.raiseRecoverable(refDestructuringErrors.trailingComma, "Comma is not permitted after the rest element"); }
@@ -827,7 +865,7 @@ pp$9.checkPatternErrors = /** @this {Parser} */ function(refDestructuringErrors,
   if (parens > -1) { this.raiseRecoverable(parens, isAssign ? "Assigning to rvalue" : "Parenthesized pattern"); }
 };
 
-pp$9.checkExpressionErrors = /** @returns {boolean | undefined} */ /** @this {Parser} */ function(refDestructuringErrors, /** @type {boolean | undefined} */ andThrow) {
+pp$9.checkExpressionErrors = /** @returns {boolean | undefined} */ /** @this {Parser} */ function(/** @type {DestructuringErrors | null} */ refDestructuringErrors, /** @type {boolean | undefined} */ andThrow) {
   if (!refDestructuringErrors) { return false }
   var shorthandAssign = refDestructuringErrors.shorthandAssign;
   var doubleProto = refDestructuringErrors.doubleProto;
@@ -845,7 +883,7 @@ pp$9.checkYieldAwaitInDefaultParams = /** @this {Parser} */ function() {
     { this.raise(this.awaitPos, "Await expression cannot be a default value"); }
 };
 
-pp$9.isSimpleAssignTarget = /** @returns {boolean} */ /** @this {Parser} */ function(expr) {
+pp$9.isSimpleAssignTarget = /** @returns {boolean} */ /** @this {Parser} */ function(/** @type {Node} */ expr) {
   if (expr.type === "ParenthesizedExpression")
     { return this.isSimpleAssignTarget(expr.expression) }
   return expr.type === "Identifier" || expr.type === "MemberExpression"
@@ -860,7 +898,7 @@ var pp$8 = Parser.prototype;
 // `program` argument.  If present, the statements will be appended
 // to its body instead of creating a new node.
 
-pp$8.parseTopLevel = /** @this {Parser} */ function(node) {
+pp$8.parseTopLevel = /** @this {Parser} */ function(/** @type {Node} */ node) {
   var exports$1 = Object.create(null);
   if (!node.body) { node.body = []; }
   while (this.type !== types$1.eof) {
@@ -1080,7 +1118,7 @@ pp$8.parseStatement = /** @this {Parser} */ function(/** @type {string | null} *
   }
 };
 
-pp$8.parseBreakContinueStatement = /** @this {Parser} */ function(node, /** @type {string} */ keyword) {
+pp$8.parseBreakContinueStatement = /** @this {Parser} */ function(/** @type {Node} */ node, /** @type {string} */ keyword) {
   var isBreak = keyword === "break";
   this.next();
   if (this.eat(types$1.semi) || this.insertSemicolon()) { node.label = null; }
@@ -1110,7 +1148,7 @@ pp$8.parseDebuggerStatement = /** @this {Parser} */ function(node) {
   return this.finishNode(node, "DebuggerStatement")
 };
 
-pp$8.parseDoStatement = /** @this {Parser} */ function(node) {
+pp$8.parseDoStatement = /** @this {Parser} */ function(/** @type {Node} */ node) {
   this.next();
   this.labels.push(loopLabel);
   node.body = this.parseStatement("do");
@@ -1132,7 +1170,7 @@ pp$8.parseDoStatement = /** @this {Parser} */ function(node) {
 // part (semicolon immediately after the opening parenthesis), it
 // is a regular `for` loop.
 
-pp$8.parseForStatement = /** @this {Parser} */ function(node) {
+pp$8.parseForStatement = /** @this {Parser} */ function(/** @type {Node} */ node) {
   this.next();
   var awaitAt = (this.options.ecmaVersion >= 9 && this.canAwait && this.eatContextual("await")) ? this.lastTokStart : -1;
   this.labels.push(loopLabel);
@@ -1192,7 +1230,7 @@ pp$8.parseForStatement = /** @this {Parser} */ function(node) {
 };
 
 // Helper method to parse for loop after variable initialization
-pp$8.parseForAfterInit = /** @this {Parser} */ function(node, init, /** @type {number} */ awaitAt) {
+pp$8.parseForAfterInit = /** @this {Parser} */ function(/** @type {Node} */ node, /** @type {Node} */ init, /** @type {number} */ awaitAt) {
   if ((this.type === types$1._in || (this.options.ecmaVersion >= 6 && this.isContextual("of"))) && init.declarations.length === 1) {
     if (this.type === types$1._in) {
       if ((init.kind === "using" || init.kind === "await using") && !init.declarations[0].init) {
@@ -1206,12 +1244,12 @@ pp$8.parseForAfterInit = /** @this {Parser} */ function(node, init, /** @type {n
   return this.parseFor(node, init)
 };
 
-pp$8.parseFunctionStatement = /** @this {Parser} */ function(node, /** @type {boolean} */ isAsync, /** @type {boolean} */ declarationPosition) {
+pp$8.parseFunctionStatement = /** @this {Parser} */ function(/** @type {Node} */ node, /** @type {boolean} */ isAsync, /** @type {boolean} */ declarationPosition) {
   this.next();
   return this.parseFunction(node, FUNC_STATEMENT | (declarationPosition ? 0 : FUNC_HANGING_STATEMENT), false, isAsync)
 };
 
-pp$8.parseIfStatement = /** @this {Parser} */ function(node) {
+pp$8.parseIfStatement = /** @this {Parser} */ function(/** @type {Node} */ node) {
   this.next();
   node.test = this.parseParenExpression();
   // allow function declarations in branches, but only in non-strict mode
@@ -1220,7 +1258,7 @@ pp$8.parseIfStatement = /** @this {Parser} */ function(node) {
   return this.finishNode(node, "IfStatement")
 };
 
-pp$8.parseReturnStatement = /** @this {Parser} */ function(node) {
+pp$8.parseReturnStatement = /** @this {Parser} */ function(/** @type {Node} */ node) {
   if (!this.allowReturn)
     { this.raise(this.start, "'return' outside of function"); }
   this.next();
@@ -1234,7 +1272,7 @@ pp$8.parseReturnStatement = /** @this {Parser} */ function(node) {
   return this.finishNode(node, "ReturnStatement")
 };
 
-pp$8.parseSwitchStatement = /** @this {Parser} */ function(node) {
+pp$8.parseSwitchStatement = /** @this {Parser} */ function(/** @type {Node} */ node) {
   this.next();
   node.discriminant = this.parseParenExpression();
   node.cases = [];
@@ -1274,7 +1312,7 @@ pp$8.parseSwitchStatement = /** @this {Parser} */ function(node) {
   return this.finishNode(node, "SwitchStatement")
 };
 
-pp$8.parseThrowStatement = /** @this {Parser} */ function(node) {
+pp$8.parseThrowStatement = /** @this {Parser} */ function(/** @type {Node} */ node) {
   this.next();
   if (lineBreak.test(this.input.slice(this.lastTokEnd, this.start)))
     { this.raise(this.lastTokEnd, "Illegal newline after throw"); }
@@ -1297,7 +1335,7 @@ pp$8.parseCatchClauseParam = /** @this {Parser} */ function() {
   return param
 };
 
-pp$8.parseTryStatement = /** @this {Parser} */ function(node) {
+pp$8.parseTryStatement = /** @this {Parser} */ function(/** @type {Node} */ node) {
   this.next();
   node.block = this.parseBlock();
   node.handler = null;
@@ -1321,14 +1359,14 @@ pp$8.parseTryStatement = /** @this {Parser} */ function(node) {
   return this.finishNode(node, "TryStatement")
 };
 
-pp$8.parseVarStatement = /** @this {Parser} */ function(node, /** @type {string} */ kind, allowMissingInitializer) {
+pp$8.parseVarStatement = /** @this {Parser} */ function(/** @type {Node} */ node, /** @type {string} */ kind, allowMissingInitializer) {
   this.next();
   this.parseVar(node, false, kind, allowMissingInitializer);
   this.semicolon();
   return this.finishNode(node, "VariableDeclaration")
 };
 
-pp$8.parseWhileStatement = /** @this {Parser} */ function(node) {
+pp$8.parseWhileStatement = /** @this {Parser} */ function(/** @type {Node} */ node) {
   this.next();
   node.test = this.parseParenExpression();
   this.labels.push(loopLabel);
@@ -1345,12 +1383,12 @@ pp$8.parseWithStatement = /** @this {Parser} */ function(node) {
   return this.finishNode(node, "WithStatement")
 };
 
-pp$8.parseEmptyStatement = /** @this {Parser} */ function(node) {
+pp$8.parseEmptyStatement = /** @this {Parser} */ function(/** @type {Node} */ node) {
   this.next();
   return this.finishNode(node, "EmptyStatement")
 };
 
-pp$8.parseLabeledStatement = /** @this {Parser} */ function(node, /** @type {string} */ maybeName, expr, context) {
+pp$8.parseLabeledStatement = /** @this {Parser} */ function(/** @type {Node} */ node, /** @type {string} */ maybeName, /** @type {Node} */ expr, context) {
   for (var i$1 = 0, list = this.labels; i$1 < list.length; i$1 += 1)
     {
     var label = list[i$1];
@@ -1374,7 +1412,7 @@ pp$8.parseLabeledStatement = /** @this {Parser} */ function(node, /** @type {str
   return this.finishNode(node, "LabeledStatement")
 };
 
-pp$8.parseExpressionStatement = /** @this {Parser} */ function(node, expr) {
+pp$8.parseExpressionStatement = /** @this {Parser} */ function(/** @type {Node} */ node, /** @type {Node} */ expr) {
   node.expression = expr;
   this.semicolon();
   return this.finishNode(node, "ExpressionStatement")
@@ -1384,7 +1422,7 @@ pp$8.parseExpressionStatement = /** @this {Parser} */ function(node, expr) {
 // strict"` declarations when `allowStrict` is true (used for
 // function bodies).
 
-pp$8.parseBlock = /** @this {Parser} */ function(/** @type {boolean | undefined} */ createNewLexicalScope, node, /** @type {boolean | undefined} */ exitStrict) {
+pp$8.parseBlock = /** @this {Parser} */ function(/** @type {boolean | undefined} */ createNewLexicalScope, /** @type {Node | undefined} */ node, /** @type {boolean | undefined} */ exitStrict) {
   if ( createNewLexicalScope === void 0 ) createNewLexicalScope = true;
   if ( node === void 0 ) node = this.startNode();
 
@@ -1405,7 +1443,7 @@ pp$8.parseBlock = /** @this {Parser} */ function(/** @type {boolean | undefined}
 // `parseStatement` will already have parsed the init statement or
 // expression.
 
-pp$8.parseFor = /** @this {Parser} */ function(node, init) {
+pp$8.parseFor = /** @this {Parser} */ function(/** @type {Node} */ node, /** @type {Node | null} */ init) {
   node.init = init;
   this.expect(types$1.semi);
   node.test = this.type === types$1.semi ? null : this.parseExpression();
@@ -1421,7 +1459,7 @@ pp$8.parseFor = /** @this {Parser} */ function(node, init) {
 // Parse a `for`/`in` and `for`/`of` loop, which are almost
 // same from parser's perspective.
 
-pp$8.parseForIn = /** @this {Parser} */ function(node, init) {
+pp$8.parseForIn = /** @this {Parser} */ function(/** @type {Node} */ node, /** @type {Node} */ init) {
   var isForIn = this.type === types$1._in;
   this.next();
 
@@ -1452,7 +1490,7 @@ pp$8.parseForIn = /** @this {Parser} */ function(node, init) {
 
 // Parse a list of variable declarations.
 
-pp$8.parseVar = /** @this {Parser} */ function(node, /** @type {boolean} */ isFor, /** @type {string} */ kind, allowMissingInitializer) {
+pp$8.parseVar = /** @this {Parser} */ function(/** @type {Node} */ node, /** @type {boolean} */ isFor, /** @type {string} */ kind, allowMissingInitializer) {
   node.declarations = [];
   node.kind = kind;
   for (;;) {
@@ -1475,7 +1513,7 @@ pp$8.parseVar = /** @this {Parser} */ function(node, /** @type {boolean} */ isFo
   return node
 };
 
-pp$8.parseVarId = /** @this {Parser} */ function(decl, /** @type {string} */ kind) {
+pp$8.parseVarId = /** @this {Parser} */ function(/** @type {Node} */ decl, /** @type {string} */ kind) {
   decl.id = kind === "using" || kind === "await using"
     ? this.parseIdent()
     : this.parseBindingAtom();
@@ -1489,7 +1527,7 @@ var FUNC_STATEMENT = 1, FUNC_HANGING_STATEMENT = 2, FUNC_NULLABLE_ID = 4;
 // `statement & FUNC_STATEMENT`).
 
 // Remove `allowExpressionBody` for 7.0.0, as it is only called with false
-pp$8.parseFunction = /** @this {Parser} */ function(node, /** @type {number} */ statement, /** @type {boolean | undefined} */ allowExpressionBody, /** @type {boolean | undefined} */ isAsync, forInit) {
+pp$8.parseFunction = /** @this {Parser} */ function(/** @type {Node} */ node, /** @type {number} */ statement, /** @type {boolean | undefined} */ allowExpressionBody, /** @type {boolean | undefined} */ isAsync, forInit) {
   this.initFunction(node);
   if (this.options.ecmaVersion >= 9 || this.options.ecmaVersion >= 6 && !isAsync) {
     if (this.type === types$1.star && (statement & FUNC_HANGING_STATEMENT))
@@ -1527,7 +1565,7 @@ pp$8.parseFunction = /** @this {Parser} */ function(node, /** @type {number} */ 
   return this.finishNode(node, (statement & FUNC_STATEMENT) ? "FunctionDeclaration" : "FunctionExpression")
 };
 
-pp$8.parseFunctionParams = /** @this {Parser} */ function(node) {
+pp$8.parseFunctionParams = /** @this {Parser} */ function(/** @type {Node} */ node) {
   this.expect(types$1.parenL);
   node.params = this.parseBindingList(types$1.parenR, false, this.options.ecmaVersion >= 8);
   this.checkYieldAwaitInDefaultParams();
@@ -1536,7 +1574,7 @@ pp$8.parseFunctionParams = /** @this {Parser} */ function(node) {
 // Parse a class declaration or literal (depending on the
 // `isStatement` parameter).
 
-pp$8.parseClass = /** @this {Parser} */ function(node, /** @type {boolean} */ isStatement) {
+pp$8.parseClass = /** @this {Parser} */ function(/** @type {Node} */ node, /** @type {boolean} */ isStatement) {
   this.next();
 
   // ecma-262 14.6 Class Definitions
@@ -1653,7 +1691,7 @@ pp$8.isClassElementNameStart = /** @returns {boolean | undefined} */ /** @this {
   )
 };
 
-pp$8.parseClassElementName = /** @this {Parser} */ function(element) {
+pp$8.parseClassElementName = /** @this {Parser} */ function(/** @type {Node} */ element) {
   if (this.type === types$1.privateId) {
     if (this.value === "constructor") {
       this.raise(this.start, "Classes can't have an element named '#constructor'");
@@ -1665,7 +1703,7 @@ pp$8.parseClassElementName = /** @this {Parser} */ function(element) {
   }
 };
 
-pp$8.parseClassMethod = /** @this {Parser} */ function(method, /** @type {boolean} */ isGenerator, /** @type {boolean} */ isAsync, /** @type {boolean} */ allowsDirectSuper) {
+pp$8.parseClassMethod = /** @this {Parser} */ function(/** @type {Node} */ method, /** @type {boolean} */ isGenerator, /** @type {boolean} */ isAsync, /** @type {boolean} */ allowsDirectSuper) {
   // Check key and flags
   var key = method.key;
   if (method.kind === "constructor") {
@@ -1689,7 +1727,7 @@ pp$8.parseClassMethod = /** @this {Parser} */ function(method, /** @type {boolea
   return this.finishNode(method, "MethodDefinition")
 };
 
-pp$8.parseClassField = /** @this {Parser} */ function(field) {
+pp$8.parseClassField = /** @this {Parser} */ function(/** @type {Node} */ field) {
   if (checkKeyName(field, "constructor")) {
     this.raise(field.key.start, "Classes can't have a field named 'constructor'");
   } else if (field.static && checkKeyName(field, "prototype")) {
@@ -1726,7 +1764,7 @@ pp$8.parseClassStaticBlock = /** @this {Parser} */ function(node) {
   return this.finishNode(node, "StaticBlock")
 };
 
-pp$8.parseClassId = /** @this {Parser} */ function(node, /** @type {boolean} */ isStatement) {
+pp$8.parseClassId = /** @this {Parser} */ function(/** @type {Node} */ node, /** @type {boolean} */ isStatement) {
   if (this.type === types$1.name) {
     node.id = this.parseIdent();
     if (isStatement)
@@ -1738,7 +1776,7 @@ pp$8.parseClassId = /** @this {Parser} */ function(node, /** @type {boolean} */ 
   }
 };
 
-pp$8.parseClassSuper = /** @this {Parser} */ function(node) {
+pp$8.parseClassSuper = /** @this {Parser} */ function(/** @type {Node} */ node) {
   node.superClass = this.eat(types$1._extends) ? this.parseExprSubscripts(null, false) : null;
 };
 
@@ -1767,7 +1805,7 @@ pp$8.exitClassBody = /** @this {Parser} */ function() {
   }
 };
 
-/** @returns {boolean} */ function isPrivateNameConflicted(privateNameMap, element) {
+/** @returns {boolean} */ function isPrivateNameConflicted(privateNameMap, /** @type {Node} */ element) {
   var name = element.key.name;
   var curr = privateNameMap[name];
 
@@ -1793,7 +1831,7 @@ pp$8.exitClassBody = /** @this {Parser} */ function() {
   }
 }
 
-/** @returns {boolean} */ function checkKeyName(node, /** @type {string} */ name) {
+/** @returns {boolean} */ function checkKeyName(/** @type {Node} */ node, /** @type {string} */ name) {
   var computed = node.computed;
   var key = node.key;
   return !computed && (
@@ -1822,7 +1860,7 @@ pp$8.parseExportAllDeclaration = /** @this {Parser} */ function(node, exports$1)
   return this.finishNode(node, "ExportAllDeclaration")
 };
 
-pp$8.parseExport = /** @this {Parser} */ function(node, exports$1) {
+pp$8.parseExport = /** @this {Parser} */ function(/** @type {Node} */ node, exports$1) {
   this.next();
   // export * from '...'
   if (this.eat(types$1.star)) {
@@ -1875,7 +1913,7 @@ pp$8.parseExport = /** @this {Parser} */ function(node, exports$1) {
   return this.finishNode(node, "ExportNamedDeclaration")
 };
 
-pp$8.parseExportDeclaration = /** @this {Parser} */ function(node) {
+pp$8.parseExportDeclaration = /** @this {Parser} */ function(/** @type {Node} */ node) {
   return this.parseStatement(null)
 };
 
@@ -1905,7 +1943,7 @@ pp$8.checkExport = /** @this {Parser} */ function(exports$1, name, /** @type {nu
   exports$1[name] = true;
 };
 
-pp$8.checkPatternExport = /** @this {Parser} */ function(exports$1, pat) {
+pp$8.checkPatternExport = /** @this {Parser} */ function(exports$1, /** @type {Node} */ pat) {
   var type = pat.type;
   if (type === "Identifier")
     { this.checkExport(exports$1, pat, pat.start); }
@@ -1982,7 +2020,7 @@ pp$8.parseExportSpecifiers = /** @returns {any[]} */ /** @this {Parser} */ funct
 
 // Parses import declaration.
 
-pp$8.parseImport = /** @this {Parser} */ function(node) {
+pp$8.parseImport = /** @this {Parser} */ function(/** @type {Node} */ node) {
   this.next();
 
   // import '...'
@@ -2108,7 +2146,7 @@ pp$8.adaptDirectivePrologue = /** @this {Parser} */ function(/** @type {any[]} *
     statements[i].directive = statements[i].expression.raw.slice(1, -1);
   }
 };
-pp$8.isDirectiveCandidate = /** @returns {boolean} */ /** @this {Parser} */ function(statement) {
+pp$8.isDirectiveCandidate = /** @returns {boolean} */ /** @this {Parser} */ function(/** @type {Node} */ statement) {
   return (
     this.options.ecmaVersion >= 5 &&
     statement.type === "ExpressionStatement" &&
@@ -2124,7 +2162,7 @@ var pp$7 = Parser.prototype;
 // Convert existing expression atom to assignable pattern
 // if possible.
 
-pp$7.toAssignable = /** @this {Parser} */ function(node, /** @type {boolean} */ isBinding, refDestructuringErrors) {
+pp$7.toAssignable = /** @this {Parser} */ function(/** @type {Node} */ node, /** @type {boolean} */ isBinding, /** @type {DestructuringErrors | undefined} */ refDestructuringErrors) {
   if (this.options.ecmaVersion >= 6 && node) {
     switch (node.type) {
     case "Identifier":
@@ -2221,7 +2259,7 @@ pp$7.toAssignableList = /** @returns {any[]} */ /** @this {Parser} */ function(/
 
 // Parses spread element.
 
-pp$7.parseSpread = /** @this {Parser} */ function(refDestructuringErrors) {
+pp$7.parseSpread = /** @this {Parser} */ function(/** @type {DestructuringErrors | undefined} */ refDestructuringErrors) {
   var node = this.startNode();
   this.next();
   node.argument = this.parseMaybeAssign(false, refDestructuringErrors);
@@ -2259,7 +2297,7 @@ pp$7.parseBindingAtom = /** @this {Parser} */ function() {
   return this.parseIdent()
 };
 
-pp$7.parseBindingList = /** @returns {any[]} */ /** @this {Parser} */ function(close, /** @type {boolean} */ allowEmpty, /** @type {boolean} */ allowTrailingComma, allowModifiers) {
+pp$7.parseBindingList = /** @returns {any[]} */ /** @this {Parser} */ function(/** @type {TokenType} */ close, /** @type {boolean} */ allowEmpty, /** @type {boolean} */ allowTrailingComma, allowModifiers) {
   var elts = [], first = true;
   while (!this.eat(close)) {
     if (first) { first = false; }
@@ -2288,13 +2326,13 @@ pp$7.parseAssignableListItem = /** @this {Parser} */ function(allowModifiers) {
   return elem
 };
 
-pp$7.parseBindingListItem = /** @this {Parser} */ function(param) {
+pp$7.parseBindingListItem = /** @this {Parser} */ function(/** @type {Node} */ param) {
   return param
 };
 
 // Parses assignment pattern around given atom if possible.
 
-pp$7.parseMaybeDefault = /** @this {Parser} */ function(/** @type {number} */ startPos, startLoc, left) {
+pp$7.parseMaybeDefault = /** @this {Parser} */ function(/** @type {number} */ startPos, startLoc, /** @type {Node | undefined} */ left) {
   left = left || this.parseBindingAtom();
   if (this.options.ecmaVersion < 6 || !this.eat(types$1.eq)) { return left }
   var node = this.startNodeAt(startPos, startLoc);
@@ -2367,7 +2405,7 @@ pp$7.parseMaybeDefault = /** @this {Parser} */ function(/** @type {number} */ st
 // duplicate argument names. checkClashes is ignored if the provided construct
 // is an assignment (i.e., bindingType is BIND_NONE).
 
-pp$7.checkLValSimple = /** @this {Parser} */ function(expr, /** @type {number | undefined} */ bindingType, checkClashes) {
+pp$7.checkLValSimple = /** @this {Parser} */ function(/** @type {Node} */ expr, /** @type {number | undefined} */ bindingType, checkClashes) {
   if ( bindingType === void 0 ) bindingType = BIND_NONE;
 
   var isBind = bindingType !== BIND_NONE;
@@ -2405,7 +2443,7 @@ pp$7.checkLValSimple = /** @this {Parser} */ function(expr, /** @type {number | 
   }
 };
 
-pp$7.checkLValPattern = /** @this {Parser} */ function(expr, /** @type {number | undefined} */ bindingType, checkClashes) {
+pp$7.checkLValPattern = /** @this {Parser} */ function(/** @type {Node} */ expr, /** @type {number | undefined} */ bindingType, checkClashes) {
   if ( bindingType === void 0 ) bindingType = BIND_NONE;
 
   switch (expr.type) {
@@ -2430,7 +2468,7 @@ pp$7.checkLValPattern = /** @this {Parser} */ function(expr, /** @type {number |
   }
 };
 
-pp$7.checkLValInnerPattern = /** @this {Parser} */ function(expr, /** @type {number} */ bindingType, checkClashes) {
+pp$7.checkLValInnerPattern = /** @this {Parser} */ function(/** @type {Node} */ expr, /** @type {number} */ bindingType, checkClashes) {
   if ( bindingType === void 0 ) bindingType = BIND_NONE;
 
   switch (expr.type) {
@@ -2480,15 +2518,15 @@ var types = {
 
 var pp$6 = Parser.prototype;
 
-pp$6.initialContext = /** @returns {any[]} */ /** @this {Parser} */ function() {
+pp$6.initialContext = /** @returns {TokContext[]} */ /** @this {Parser} */ function() {
   return [types.b_stat]
 };
 
-pp$6.curContext = /** @this {Parser} */ function() {
+pp$6.curContext = /** @returns {TokContext} */ /** @this {Parser} */ function() {
   return this.context[this.context.length - 1]
 };
 
-pp$6.braceIsBlock = /** @returns {boolean} */ /** @this {Parser} */ function(prevType) {
+pp$6.braceIsBlock = /** @returns {boolean} */ /** @this {Parser} */ function(/** @type {TokenType} */ prevType) {
   var parent = this.curContext();
   if (parent === types.f_expr || parent === types.f_stat)
     { return true }
@@ -2518,7 +2556,7 @@ pp$6.inGeneratorContext = /** @returns {boolean} */ /** @this {Parser} */ functi
   return false
 };
 
-pp$6.updateContext = /** @this {Parser} */ function(prevType) {
+pp$6.updateContext = /** @this {Parser} */ function(/** @type {TokenType} */ prevType) {
   var update, type = this.type;
   if (type.keyword && prevType === types$1.dot)
     { this.exprAllowed = false; }
@@ -2530,7 +2568,7 @@ pp$6.updateContext = /** @this {Parser} */ function(prevType) {
 
 // Used to handle edge cases when token context could not be inferred correctly during tokenization phase
 
-pp$6.overrideContext = /** @this {Parser} */ function(tokenCtx) {
+pp$6.overrideContext = /** @this {Parser} */ function(/** @type {TokContext} */ tokenCtx) {
   if (this.curContext() !== tokenCtx) {
     this.context[this.context.length - 1] = tokenCtx;
   }
@@ -2538,7 +2576,7 @@ pp$6.overrideContext = /** @this {Parser} */ function(tokenCtx) {
 
 // Token-specific context update code
 
-types$1.parenR.updateContext = types$1.braceR.updateContext = function() {
+types$1.parenR.updateContext = types$1.braceR.updateContext = /** @this {Parser} */ function() {
   if (this.context.length === 1) {
     this.exprAllowed = true;
     return
@@ -2550,27 +2588,27 @@ types$1.parenR.updateContext = types$1.braceR.updateContext = function() {
   this.exprAllowed = !out.isExpr;
 };
 
-types$1.braceL.updateContext = function(prevType) {
+types$1.braceL.updateContext = /** @this {Parser} */ function(/** @type {TokenType} */ prevType) {
   this.context.push(this.braceIsBlock(prevType) ? types.b_stat : types.b_expr);
   this.exprAllowed = true;
 };
 
-types$1.dollarBraceL.updateContext = function() {
+types$1.dollarBraceL.updateContext = /** @this {Parser} */ function() {
   this.context.push(types.b_tmpl);
   this.exprAllowed = true;
 };
 
-types$1.parenL.updateContext = function(prevType) {
+types$1.parenL.updateContext = /** @this {Parser} */ function(/** @type {TokenType} */ prevType) {
   var statementParens = prevType === types$1._if || prevType === types$1._for || prevType === types$1._with || prevType === types$1._while;
   this.context.push(statementParens ? types.p_stat : types.p_expr);
   this.exprAllowed = true;
 };
 
-types$1.incDec.updateContext = function() {
+types$1.incDec.updateContext = /** @this {Parser} */ function() {
   // tokExprAllowed stays unchanged
 };
 
-types$1._function.updateContext = types$1._class.updateContext = function(prevType) {
+types$1._function.updateContext = types$1._class.updateContext = /** @this {Parser} */ function(/** @type {TokenType} */ prevType) {
   if (prevType.beforeExpr && prevType !== types$1._else &&
       !(prevType === types$1.semi && this.curContext() !== types.p_stat) &&
       !(prevType === types$1._return && lineBreak.test(this.input.slice(this.lastTokEnd, this.start))) &&
@@ -2581,12 +2619,12 @@ types$1._function.updateContext = types$1._class.updateContext = function(prevTy
   this.exprAllowed = false;
 };
 
-types$1.colon.updateContext = function() {
+types$1.colon.updateContext = /** @this {Parser} */ function() {
   if (this.curContext().token === "function") { this.context.pop(); }
   this.exprAllowed = true;
 };
 
-types$1.backQuote.updateContext = function() {
+types$1.backQuote.updateContext = /** @this {Parser} */ function() {
   if (this.curContext() === types.q_tmpl)
     { this.context.pop(); }
   else
@@ -2594,7 +2632,7 @@ types$1.backQuote.updateContext = function() {
   this.exprAllowed = false;
 };
 
-types$1.star.updateContext = function(prevType) {
+types$1.star.updateContext = /** @this {Parser} */ function(/** @type {TokenType} */ prevType) {
   if (prevType === types$1._function) {
     var index = this.context.length - 1;
     if (this.context[index] === types.f_expr)
@@ -2605,7 +2643,7 @@ types$1.star.updateContext = function(prevType) {
   this.exprAllowed = true;
 };
 
-types$1.name.updateContext = function(prevType) {
+types$1.name.updateContext = /** @this {Parser} */ function(/** @type {TokenType} */ prevType) {
   var allowed = false;
   if (this.options.ecmaVersion >= 6 && prevType !== types$1.dot) {
     if (this.value === "of" && !this.exprAllowed ||
@@ -2641,7 +2679,7 @@ var pp$5 = Parser.prototype;
 // either with each other or with an init property — and in
 // strict mode, init properties are also not allowed to be repeated.
 
-pp$5.checkPropClash = /** @this {Parser} */ function(prop, propHash, refDestructuringErrors) {
+pp$5.checkPropClash = /** @this {Parser} */ function(/** @type {Node} */ prop, propHash, /** @type {DestructuringErrors | null} */ refDestructuringErrors) {
   if (this.options.ecmaVersion >= 9 && prop.type === "SpreadElement")
     { return }
   if (this.options.ecmaVersion >= 6 && (prop.computed || prop.method || prop.shorthand))
@@ -2705,7 +2743,7 @@ pp$5.checkPropClash = /** @this {Parser} */ function(prop, propHash, refDestruct
 // and object pattern might appear (so it's possible to raise
 // delayed syntax error at correct position).
 
-pp$5.parseExpression = /** @this {Parser} */ function(/** @type {boolean | string | undefined} */ forInit, refDestructuringErrors) {
+pp$5.parseExpression = /** @this {Parser} */ function(/** @type {boolean | string | undefined} */ forInit, /** @type {DestructuringErrors | undefined} */ refDestructuringErrors) {
   var this$1$1 = this;
 
   return this.catchStackOverflow(function () {
@@ -2779,7 +2817,7 @@ pp$5.parseMaybeAssign = /** @this {Parser} */ function(/** @type {boolean | stri
 
 // Parse a ternary conditional (`?:`) operator.
 
-pp$5.parseMaybeConditional = /** @this {Parser} */ function(/** @type {boolean | string | undefined} */ forInit, refDestructuringErrors) {
+pp$5.parseMaybeConditional = /** @this {Parser} */ function(/** @type {boolean | string | undefined} */ forInit, /** @type {DestructuringErrors} */ refDestructuringErrors) {
   var startPos = this.start, startLoc = this.startLoc;
   var expr = this.parseExprOps(forInit, refDestructuringErrors);
   if (this.checkExpressionErrors(refDestructuringErrors)) { return expr }
@@ -2796,7 +2834,7 @@ pp$5.parseMaybeConditional = /** @this {Parser} */ function(/** @type {boolean |
 
 // Start the precedence parser.
 
-pp$5.parseExprOps = /** @this {Parser} */ function(/** @type {boolean | string | undefined} */ forInit, refDestructuringErrors) {
+pp$5.parseExprOps = /** @this {Parser} */ function(/** @type {boolean | string | undefined} */ forInit, /** @type {DestructuringErrors} */ refDestructuringErrors) {
   var startPos = this.start, startLoc = this.startLoc;
   var expr = this.parseMaybeUnary(refDestructuringErrors, false, false, forInit);
   if (this.checkExpressionErrors(refDestructuringErrors)) { return expr }
@@ -2809,7 +2847,7 @@ pp$5.parseExprOps = /** @this {Parser} */ function(/** @type {boolean | string |
 // defer further parser to one of its callers when it encounters an
 // operator that has a lower precedence than the set it is parsing.
 
-pp$5.parseExprOp = /** @this {Parser} */ function(left, /** @type {number} */ leftStartPos, leftStartLoc, /** @type {number} */ minPrec, /** @type {boolean | string | undefined} */ forInit) {
+pp$5.parseExprOp = /** @this {Parser} */ function(/** @type {Node} */ left, /** @type {number} */ leftStartPos, leftStartLoc, /** @type {number} */ minPrec, /** @type {boolean | string | undefined} */ forInit) {
   var prec = this.type.binop;
   if (prec != null && (!forInit || this.type !== types$1._in)) {
     if (prec > minPrec) {
@@ -2834,7 +2872,7 @@ pp$5.parseExprOp = /** @this {Parser} */ function(left, /** @type {number} */ le
   return left
 };
 
-pp$5.buildBinary = /** @this {Parser} */ function(/** @type {number} */ startPos, startLoc, left, right, /** @type {string} */ op, /** @type {boolean} */ logical) {
+pp$5.buildBinary = /** @this {Parser} */ function(/** @type {number} */ startPos, startLoc, /** @type {Node} */ left, /** @type {Node} */ right, /** @type {string} */ op, /** @type {boolean} */ logical) {
   if (right.type === "PrivateIdentifier") { this.raise(right.start, "Private identifier can only be left side of binary expression"); }
   var node = this.startNodeAt(startPos, startLoc);
   node.left = left;
@@ -2845,7 +2883,7 @@ pp$5.buildBinary = /** @this {Parser} */ function(/** @type {number} */ startPos
 
 // Parse unary operators, both prefix and postfix.
 
-pp$5.parseMaybeUnary = /** @this {Parser} */ function(refDestructuringErrors, /** @type {boolean} */ sawUnary, /** @type {boolean} */ incDec, /** @type {boolean | string | undefined} */ forInit) {
+pp$5.parseMaybeUnary = /** @this {Parser} */ function(/** @type {DestructuringErrors | null} */ refDestructuringErrors, /** @type {boolean} */ sawUnary, /** @type {boolean} */ incDec, /** @type {boolean | string | undefined} */ forInit) {
   var startPos = this.start, startLoc = this.startLoc, expr;
   if (this.isContextual("await") && this.canAwait) {
     expr = this.parseAwait(forInit);
@@ -2893,14 +2931,14 @@ pp$5.parseMaybeUnary = /** @this {Parser} */ function(refDestructuringErrors, /*
   }
 };
 
-/** @returns {boolean} */ function isLocalVariableAccess(node) {
+/** @returns {boolean} */ function isLocalVariableAccess(/** @type {Node} */ node) {
   return (
     node.type === "Identifier" ||
     node.type === "ParenthesizedExpression" && isLocalVariableAccess(node.expression)
   )
 }
 
-/** @returns {boolean} */ function isPrivateFieldAccess(node) {
+/** @returns {boolean} */ function isPrivateFieldAccess(/** @type {Node} */ node) {
   return (
     node.type === "MemberExpression" && node.property.type === "PrivateIdentifier" ||
     node.type === "ChainExpression" && isPrivateFieldAccess(node.expression) ||
@@ -2910,7 +2948,7 @@ pp$5.parseMaybeUnary = /** @this {Parser} */ function(refDestructuringErrors, /*
 
 // Parse call, dot, and `[]`-subscript expressions.
 
-pp$5.parseExprSubscripts = /** @this {Parser} */ function(refDestructuringErrors, /** @type {boolean | string | undefined} */ forInit) {
+pp$5.parseExprSubscripts = /** @this {Parser} */ function(/** @type {DestructuringErrors | null} */ refDestructuringErrors, /** @type {boolean | string | undefined} */ forInit) {
   var startPos = this.start, startLoc = this.startLoc;
   var expr = this.parseExprAtom(refDestructuringErrors, forInit);
   if (expr.type === "ArrowFunctionExpression" && this.input.slice(this.lastTokStart, this.lastTokEnd) !== ")")
@@ -2924,7 +2962,7 @@ pp$5.parseExprSubscripts = /** @this {Parser} */ function(refDestructuringErrors
   return result
 };
 
-pp$5.parseSubscripts = /** @this {Parser} */ function(base, /** @type {number} */ startPos, startLoc, /** @type {boolean} */ noCalls, /** @type {boolean | string | undefined} */ forInit) {
+pp$5.parseSubscripts = /** @this {Parser} */ function(/** @type {Node} */ base, /** @type {number} */ startPos, startLoc, /** @type {boolean} */ noCalls, /** @type {boolean | string | undefined} */ forInit) {
   var maybeAsyncArrow = this.options.ecmaVersion >= 8 && base.type === "Identifier" && base.name === "async" &&
       this.lastTokEnd === base.end && !this.canInsertSemicolon() && base.end - base.start === 5 &&
       this.potentialArrowAt === base.start;
@@ -2955,7 +2993,7 @@ pp$5.parseSubscriptAsyncArrow = /** @this {Parser} */ function(/** @type {number
   return this.parseArrowExpression(this.startNodeAt(startPos, startLoc), exprList, true, forInit)
 };
 
-pp$5.parseSubscript = /** @this {Parser} */ function(base, /** @type {number} */ startPos, startLoc, /** @type {boolean} */ noCalls, /** @type {boolean} */ maybeAsyncArrow, /** @type {boolean} */ optionalChained, /** @type {boolean | string | undefined} */ forInit) {
+pp$5.parseSubscript = /** @this {Parser} */ function(/** @type {Node} */ base, /** @type {number} */ startPos, startLoc, /** @type {boolean} */ noCalls, /** @type {boolean} */ maybeAsyncArrow, /** @type {boolean} */ optionalChained, /** @type {boolean | string | undefined} */ forInit) {
   var optionalSupported = this.options.ecmaVersion >= 11;
   var optional = optionalSupported && this.eat(types$1.questionDot);
   if (noCalls && optional) { this.raise(this.lastTokStart, "Optional chaining cannot appear in the callee of new expressions"); }
@@ -3194,7 +3232,7 @@ pp$5.parseDynamicImport = /** @this {Parser} */ function(node) {
   return this.finishNode(node, "ImportExpression")
 };
 
-pp$5.parseImportMeta = /** @this {Parser} */ function(node) {
+pp$5.parseImportMeta = /** @this {Parser} */ function(/** @type {Node} */ node) {
   this.next(); // skip `.`
 
   var containsEsc = this.containsEsc;
@@ -3298,7 +3336,7 @@ pp$5.parseParenAndDistinguishExpression = /** @this {Parser} */ function(/** @ty
   }
 };
 
-pp$5.parseParenItem = /** @this {Parser} */ function(item) {
+pp$5.parseParenItem = /** @this {Parser} */ function(/** @type {Node} */ item) {
   return item
 };
 
@@ -3387,7 +3425,7 @@ pp$5.parseTemplate = /** @this {Parser} */ function(ref) {
   return this.finishNode(node, "TemplateLiteral")
 };
 
-pp$5.isAsyncProp = /** @returns {boolean} */ /** @this {Parser} */ function(prop) {
+pp$5.isAsyncProp = /** @returns {boolean} */ /** @this {Parser} */ function(/** @type {Node} */ prop) {
   return !prop.computed && prop.key.type === "Identifier" && prop.key.name === "async" &&
     (this.type === types$1.name || this.type === types$1.num || this.type === types$1.string || this.type === types$1.bracketL || this.type.keyword || (this.options.ecmaVersion >= 9 && this.type === types$1.star)) &&
     !lineBreak.test(this.input.slice(this.lastTokEnd, this.start))
@@ -3454,7 +3492,7 @@ pp$5.parseProperty = /** @this {Parser} */ function(/** @type {boolean} */ isPat
   return this.finishNode(prop, "Property")
 };
 
-pp$5.parseGetterSetter = /** @this {Parser} */ function(prop) {
+pp$5.parseGetterSetter = /** @this {Parser} */ function(/** @type {Node} */ prop) {
   var kind = prop.key.name;
   this.parsePropertyName(prop);
   prop.value = this.parseMethod(false);
@@ -3472,7 +3510,7 @@ pp$5.parseGetterSetter = /** @this {Parser} */ function(prop) {
   }
 };
 
-pp$5.parsePropertyValue = /** @this {Parser} */ function(prop, /** @type {boolean} */ isPattern, /** @type {boolean | undefined} */ isGenerator, /** @type {boolean} */ isAsync, /** @type {number | undefined} */ startPos, startLoc, refDestructuringErrors, /** @type {boolean} */ containsEsc) {
+pp$5.parsePropertyValue = /** @this {Parser} */ function(/** @type {Node} */ prop, /** @type {boolean} */ isPattern, /** @type {boolean | undefined} */ isGenerator, /** @type {boolean} */ isAsync, /** @type {number | undefined} */ startPos, startLoc, refDestructuringErrors, /** @type {boolean} */ containsEsc) {
   if ((isGenerator || isAsync) && this.type === types$1.colon)
     { this.unexpected(); }
 
@@ -3509,7 +3547,7 @@ pp$5.parsePropertyValue = /** @this {Parser} */ function(prop, /** @type {boolea
   } else { this.unexpected(); }
 };
 
-pp$5.parsePropertyName = /** @this {Parser} */ function(prop) {
+pp$5.parsePropertyName = /** @this {Parser} */ function(/** @type {Node} */ prop) {
   if (this.options.ecmaVersion >= 6) {
     if (this.eat(types$1.bracketL)) {
       prop.computed = true;
@@ -3525,7 +3563,7 @@ pp$5.parsePropertyName = /** @this {Parser} */ function(prop) {
 
 // Initialize empty function node.
 
-pp$5.initFunction = /** @this {Parser} */ function(node) {
+pp$5.initFunction = /** @this {Parser} */ function(/** @type {Node} */ node) {
   node.id = null;
   if (this.options.ecmaVersion >= 6) { node.generator = node.expression = false; }
   if (this.options.ecmaVersion >= 8) { node.async = false; }
@@ -3560,7 +3598,7 @@ pp$5.parseMethod = /** @this {Parser} */ function(/** @type {boolean} */ isGener
 
 // Parse arrow function expression with given parameters.
 
-pp$5.parseArrowExpression = /** @this {Parser} */ function(node, /** @type {any[]} */ params, /** @type {boolean} */ isAsync, /** @type {boolean | string | undefined} */ forInit) {
+pp$5.parseArrowExpression = /** @this {Parser} */ function(/** @type {Node} */ node, /** @type {any[]} */ params, /** @type {boolean} */ isAsync, /** @type {boolean | string | undefined} */ forInit) {
   var oldYieldPos = this.yieldPos, oldAwaitPos = this.awaitPos, oldAwaitIdentPos = this.awaitIdentPos;
 
   this.enterScope(functionFlags(isAsync, false) | SCOPE_ARROW);
@@ -3582,7 +3620,7 @@ pp$5.parseArrowExpression = /** @this {Parser} */ function(node, /** @type {any[
 
 // Parse function body and check parameters.
 
-pp$5.parseFunctionBody = /** @this {Parser} */ function(node, /** @type {boolean | undefined} */ isArrowFunction, /** @type {boolean} */ isMethod, /** @type {boolean | string | undefined} */ forInit) {
+pp$5.parseFunctionBody = /** @this {Parser} */ function(/** @type {Node} */ node, /** @type {boolean | undefined} */ isArrowFunction, /** @type {boolean} */ isMethod, /** @type {boolean | string | undefined} */ forInit) {
   var isExpression = isArrowFunction && this.type !== types$1.braceL;
   var oldStrict = this.strict, useStrict = false;
 
@@ -3632,7 +3670,7 @@ pp$5.isSimpleParamList = /** @returns {boolean} */ /** @this {Parser} */ functio
 // Checks function params for various disallowed patterns such as using "eval"
 // or "arguments" and duplicate parameters.
 
-pp$5.checkParams = /** @this {Parser} */ function(node, /** @type {boolean} */ allowDuplicates) {
+pp$5.checkParams = /** @this {Parser} */ function(/** @type {Node} */ node, /** @type {boolean} */ allowDuplicates) {
   var nameHash = Object.create(null);
   for (var i = 0, list = node.params; i < list.length; i += 1)
     {
@@ -3648,7 +3686,7 @@ pp$5.checkParams = /** @this {Parser} */ function(node, /** @type {boolean} */ a
 // nothing in between them to be parsed as `null` (which is needed
 // for array literals).
 
-pp$5.parseExprList = /** @returns {any[]} */ /** @this {Parser} */ function(close, /** @type {boolean} */ allowTrailingComma, /** @type {boolean} */ allowEmpty, refDestructuringErrors) {
+pp$5.parseExprList = /** @returns {any[]} */ /** @this {Parser} */ function(/** @type {TokenType} */ close, /** @type {boolean} */ allowTrailingComma, /** @type {boolean} */ allowEmpty, refDestructuringErrors) {
   var elts = [], first = true;
   while (!this.eat(close)) {
     if (!first) {
@@ -3671,7 +3709,7 @@ pp$5.parseExprList = /** @returns {any[]} */ /** @this {Parser} */ function(clos
   return elts
 };
 
-pp$5.checkUnreserved = /** @this {Parser} */ function(ref) {
+pp$5.checkUnreserved = /** @this {Parser} */ function(/** @type {Node} */ ref) {
   var start = ref.start;
   var end = ref.end;
   var name = ref.name;
@@ -3803,7 +3841,7 @@ pp$4.raise = /** @this {Parser} */ function(/** @type {number} */ pos, /** @type
 
 pp$4.raiseRecoverable = pp$4.raise;
 
-pp$4.curPosition = /** @this {Parser} */ function() {
+pp$4.curPosition = /** @returns {Position | undefined} */ /** @this {Parser} */ function() {
   if (this.options.locations) {
     return new Position(this.curLine, this.pos - this.lineStart)
   }
@@ -3814,10 +3852,13 @@ var pp$3 = Parser.prototype;
 var Scope = function Scope(/** @type {number} */ flags) {
   this.flags = flags;
   // A list of var-declared names in the current lexical scope
+  /** @type {string[]} */
   this.var = [];
   // A list of lexically-declared names in the current lexical scope
+  /** @type {string[]} */
   this.lexical = [];
   // A list of lexically-declared FunctionDeclaration names in the current lexical scope
+  /** @type {string[]} */
   this.functions = [];
 };
 
@@ -3834,7 +3875,7 @@ pp$3.exitScope = /** @this {Parser} */ function() {
 // The spec says:
 // > At the top level of a function, or script, function declarations are
 // > treated like var declarations rather than like lexical declarations.
-pp$3.treatFunctionsAsVarInScope = /** @this {Parser} */ function(scope) {
+pp$3.treatFunctionsAsVarInScope = /** @this {Parser} */ function(/** @type {Scope} */ scope) {
   return (scope.flags & SCOPE_FUNCTION) || !this.inModule && (scope.flags & SCOPE_TOP)
 };
 
@@ -3873,7 +3914,7 @@ pp$3.declareName = /** @this {Parser} */ function(/** @type {string} */ name, /*
   if (redeclared) { this.raiseRecoverable(pos, ("Identifier '" + name + "' has already been declared")); }
 };
 
-pp$3.checkLocalExport = /** @this {Parser} */ function(id) {
+pp$3.checkLocalExport = /** @this {Parser} */ function(/** @type {Node} */ id) {
   // scope.functions must be empty as Module code is always strict.
   if (this.scopeStack[0].lexical.indexOf(id.name) === -1 &&
       this.scopeStack[0].var.indexOf(id.name) === -1) {
@@ -3881,11 +3922,11 @@ pp$3.checkLocalExport = /** @this {Parser} */ function(id) {
   }
 };
 
-pp$3.currentScope = /** @this {Parser} */ function() {
+pp$3.currentScope = /** @returns {Scope} */ /** @this {Parser} */ function() {
   return this.scopeStack[this.scopeStack.length - 1]
 };
 
-pp$3.currentVarScope = /** @this {Parser} */ function() {
+pp$3.currentVarScope = /** @returns {Scope} */ /** @this {Parser} */ function() {
   for (var i = this.scopeStack.length - 1;; i--) {
     var scope = this.scopeStack[i];
     if (scope.flags & (SCOPE_VAR | SCOPE_CLASS_FIELD_INIT | SCOPE_CLASS_STATIC_BLOCK)) { return scope }
@@ -3893,7 +3934,7 @@ pp$3.currentVarScope = /** @this {Parser} */ function() {
 };
 
 // Could be useful for `this`, `new.target`, `super()`, `super.property`, and `super[property]`.
-pp$3.currentThisScope = /** @this {Parser} */ function() {
+pp$3.currentThisScope = /** @returns {Scope} */ /** @this {Parser} */ function() {
   for (var i = this.scopeStack.length - 1;; i--) {
     var scope = this.scopeStack[i];
     if (scope.flags & (SCOPE_VAR | SCOPE_CLASS_FIELD_INIT | SCOPE_CLASS_STATIC_BLOCK) &&
@@ -3901,7 +3942,71 @@ pp$3.currentThisScope = /** @this {Parser} */ function() {
   }
 };
 
-var Node = function Node(parser, pos, loc) {
+// what the nodes of the tree are given beside their type and place, by the kind of node
+/**
+ * @sideProperty {boolean} [computed]
+ * @sideProperty {boolean} [shorthand]
+ * @sideProperty {boolean} [method]
+ * @sideProperty {string} [kind]
+ * @sideProperty {string} [operator]
+ * @sideProperty {any} [alternate]
+ * @sideProperty {any} [argument]
+ * @sideProperty {any} [arguments]
+ * @sideProperty {any} [async]
+ * @sideProperty {any} [attributes]
+ * @sideProperty {any} [await]
+ * @sideProperty {any} [bigint]
+ * @sideProperty {any} [block]
+ * @sideProperty {any} [body]
+ * @sideProperty {any} [callee]
+ * @sideProperty {any} [cases]
+ * @sideProperty {any} [consequent]
+ * @sideProperty {any} [declaration]
+ * @sideProperty {any} [declarations]
+ * @sideProperty {any} [delegate]
+ * @sideProperty {any} [directive]
+ * @sideProperty {any} [discriminant]
+ * @sideProperty {any} [elements]
+ * @sideProperty {any} [exported]
+ * @sideProperty {any} [expression]
+ * @sideProperty {any} [expressions]
+ * @sideProperty {any} [finalizer]
+ * @sideProperty {any} [generator]
+ * @sideProperty {any} [handler]
+ * @sideProperty {any} [id]
+ * @sideProperty {any} [imported]
+ * @sideProperty {any} [init]
+ * @sideProperty {any} [key]
+ * @sideProperty {any} [label]
+ * @sideProperty {any} [left]
+ * @sideProperty {any} [local]
+ * @sideProperty {any} [meta]
+ * @sideProperty {any} [name]
+ * @sideProperty {any} [object]
+ * @sideProperty {any} [optional]
+ * @sideProperty {any} [options]
+ * @sideProperty {any} [param]
+ * @sideProperty {any} [params]
+ * @sideProperty {any} [prefix]
+ * @sideProperty {any} [properties]
+ * @sideProperty {any} [property]
+ * @sideProperty {any} [quasi]
+ * @sideProperty {any} [quasis]
+ * @sideProperty {any} [raw]
+ * @sideProperty {any} [regex]
+ * @sideProperty {any} [right]
+ * @sideProperty {any} [source]
+ * @sideProperty {any} [sourceType]
+ * @sideProperty {any} [specifiers]
+ * @sideProperty {any} [static]
+ * @sideProperty {any} [superClass]
+ * @sideProperty {any} [tag]
+ * @sideProperty {any} [tail]
+ * @sideProperty {any} [test]
+ * @sideProperty {any} [update]
+ * @sideProperty {any} [value]
+ */
+var Node = function Node(/** @type {Parser} */ parser, /** @type {number} */ pos, /** @type {Position | undefined} */ loc) {
   this.type = "";
   this.start = pos;
   this.end = 0;
@@ -3917,17 +4022,17 @@ var Node = function Node(parser, pos, loc) {
 
 var pp$2 = Parser.prototype;
 
-pp$2.startNode = /** @this {Parser} */ function() {
+pp$2.startNode = /** @returns {Node} */ /** @this {Parser} */ function() {
   return new Node(this, this.start, this.startLoc)
 };
 
-pp$2.startNodeAt = /** @this {Parser} */ function(/** @type {number} */ pos, loc) {
+pp$2.startNodeAt = /** @returns {Node} */ /** @this {Parser} */ function(/** @type {number} */ pos, loc) {
   return new Node(this, pos, loc)
 };
 
 // Finish an AST node, adding `type` and `end` properties.
 
-function finishNodeAt(node, /** @type {string} */ type, /** @type {number} */ pos, loc) {
+/** @this {Parser} @returns {Node} */ function finishNodeAt(/** @type {Node} */ node, /** @type {string} */ type, /** @type {number} */ pos, /** @type {Position | undefined} */ loc) {
   node.type = type;
   node.end = pos;
   if (this.options.locations)
@@ -3937,17 +4042,17 @@ function finishNodeAt(node, /** @type {string} */ type, /** @type {number} */ po
   return node
 }
 
-pp$2.finishNode = /** @this {Parser} */ function(node, /** @type {string} */ type) {
+pp$2.finishNode = /** @returns {Node} */ /** @this {Parser} */ function(/** @type {Node} */ node, /** @type {string} */ type) {
   return finishNodeAt.call(this, node, type, this.lastTokEnd, this.lastTokEndLoc)
 };
 
 // Finish node at given position
 
-pp$2.finishNodeAt = /** @this {Parser} */ function(node, /** @type {string} */ type, /** @type {number} */ pos, loc) {
+pp$2.finishNodeAt = /** @returns {Node} */ /** @this {Parser} */ function(/** @type {Node} */ node, /** @type {string} */ type, /** @type {number} */ pos, /** @type {Position | undefined} */ loc) {
   return finishNodeAt.call(this, node, type, pos, loc)
 };
 
-pp$2.copyNode = /** @this {Parser} */ function(node) {
+pp$2.copyNode = /** @returns {Node} */ /** @this {Parser} */ function(/** @type {Node} */ node) {
   var newNode = new Node(this, node.start, this.startLoc);
   for (var prop in node) { newNode[prop] = node[prop]; }
   return newNode
@@ -4009,6 +4114,9 @@ var unicodeScriptValues = {
   14: ecma14ScriptValues
 };
 
+/** @typedef {{binary: RegExp, binaryOfStrings: RegExp, nonBinary: Record<string, RegExp>}} UnicodeData */
+
+/** @type {Record<number, UnicodeData>} */
 var data = {};
 function buildUnicodeData(/** @type {number} */ ecmaVersion) {
   var d = data[ecmaVersion] = {
@@ -4036,14 +4144,15 @@ var pp$1 = Parser.prototype;
 
 // Track disjunction structure to determine whether a duplicate
 // capture group name is allowed because it is in a separate branch.
-var BranchID = function BranchID(parent, base) {
+var BranchID = function BranchID(/** @type {BranchID | null} */ parent, /** @type {BranchID | null} */ base) {
   // Parent disjunction branch
   this.parent = parent;
   // Identifies this set of sibling branches
+  /** @type {BranchID} */
   this.base = base || this;
 };
 
-BranchID.prototype.separatedFrom = function separatedFrom (alt) {
+BranchID.prototype.separatedFrom = /** @returns {boolean} */ function separatedFrom (/** @type {BranchID | null} */ alt) {
   // A branch is separate from another branch if they or any of
   // their parents are siblings in a given disjunction
   for (var self = this; self; self = self.parent) {
@@ -4054,13 +4163,14 @@ BranchID.prototype.separatedFrom = function separatedFrom (alt) {
   return false
 };
 
-BranchID.prototype.sibling = function sibling () {
+BranchID.prototype.sibling = /** @returns {BranchID} */ function sibling () {
   return new BranchID(this.parent, this.base)
 };
 
-var RegExpValidationState = function RegExpValidationState(parser) {
+var RegExpValidationState = function RegExpValidationState(/** @type {Parser} */ parser) {
   this.parser = parser;
   this.validFlags = "gim" + (parser.options.ecmaVersion >= 6 ? "uy" : "") + (parser.options.ecmaVersion >= 9 ? "s" : "") + (parser.options.ecmaVersion >= 13 ? "d" : "") + (parser.options.ecmaVersion >= 15 ? "v" : "");
+  /** @type {UnicodeData} */
   this.unicodeProperties = data[parser.options.ecmaVersion >= 14 ? 14 : parser.options.ecmaVersion];
   this.source = "";
   this.flags = "";
@@ -4075,11 +4185,13 @@ var RegExpValidationState = function RegExpValidationState(parser) {
   this.numCapturingParens = 0;
   this.maxBackReference = 0;
   this.groupNames = Object.create(null);
+  /** @type {string[]} */
   this.backReferenceNames = [];
+  /** @type {BranchID | null} */
   this.branchID = null;
 };
 
-RegExpValidationState.prototype.reset = function reset (start, /** @type {string | undefined} */ pattern, /** @type {string | undefined} */ flags) {
+RegExpValidationState.prototype.reset = function reset (/** @type {number} */ start, /** @type {string | undefined} */ pattern, /** @type {string | undefined} */ flags) {
   var unicodeSets = flags.indexOf("v") !== -1;
   var unicode = flags.indexOf("u") !== -1;
   this.start = start | 0;
@@ -4096,13 +4208,13 @@ RegExpValidationState.prototype.reset = function reset (start, /** @type {string
   }
 };
 
-RegExpValidationState.prototype.raise = function raise (message) {
+RegExpValidationState.prototype.raise = function raise (/** @type {string} */ message) {
   this.parser.raiseRecoverable(this.start, ("Invalid regular expression: /" + (this.source) + "/: " + message));
 };
 
 // If u flag is given, this returns the code point at the index (it combines a surrogate pair).
 // Otherwise, this returns the code unit of the index (can be a part of a surrogate pair).
-RegExpValidationState.prototype.at = /** @returns {number} */ function at (/** @type {number} */ i, forceU) {
+RegExpValidationState.prototype.at = /** @returns {number} */ function at (/** @type {number} */ i, /** @type {boolean | undefined} */ forceU) {
     if ( forceU === void 0 ) forceU = false;
 
   var s = this.source;
@@ -4140,7 +4252,7 @@ RegExpValidationState.prototype.current = /** @returns {number} */ function curr
   return this.at(this.pos, forceU)
 };
 
-RegExpValidationState.prototype.lookahead = function lookahead (forceU) {
+RegExpValidationState.prototype.lookahead = /** @returns {number} */ function lookahead (/** @type {boolean | undefined} */ forceU) {
     if ( forceU === void 0 ) forceU = false;
 
   return this.at(this.nextIndex(this.pos, forceU), forceU)
@@ -4152,7 +4264,7 @@ RegExpValidationState.prototype.advance = function advance (/** @type {boolean |
   this.pos = this.nextIndex(this.pos, forceU);
 };
 
-RegExpValidationState.prototype.eat = /** @returns {boolean} */ function eat (/** @type {number} */ ch, forceU) {
+RegExpValidationState.prototype.eat = /** @returns {boolean} */ function eat (/** @type {number} */ ch, /** @type {boolean | undefined} */ forceU) {
     if ( forceU === void 0 ) forceU = false;
 
   if (this.current(forceU) === ch) {
@@ -4162,7 +4274,7 @@ RegExpValidationState.prototype.eat = /** @returns {boolean} */ function eat (/*
   return false
 };
 
-RegExpValidationState.prototype.eatChars = function eatChars (chs, forceU) {
+RegExpValidationState.prototype.eatChars = /** @returns {boolean} */ function eatChars (/** @type {number[]} */ chs, /** @type {boolean | undefined} */ forceU) {
     if ( forceU === void 0 ) forceU = false;
 
   var pos = this.pos;
@@ -4185,7 +4297,7 @@ RegExpValidationState.prototype.eatChars = function eatChars (chs, forceU) {
  * @param {RegExpValidationState} state The state to validate RegExp.
  * @returns {void}
  */
-pp$1.validateRegExpFlags = /** @this {Parser} */ function(state) {
+pp$1.validateRegExpFlags = /** @this {Parser} */ function(/** @type {RegExpValidationState} */ state) {
   var validFlags = state.validFlags;
   var flags = state.flags;
 
@@ -4219,7 +4331,7 @@ pp$1.validateRegExpFlags = /** @this {Parser} */ function(state) {
  * @param {RegExpValidationState} state The state to validate RegExp.
  * @returns {void}
  */
-pp$1.validateRegExpPattern = /** @this {Parser} */ function(state) {
+pp$1.validateRegExpPattern = /** @this {Parser} */ function(/** @type {RegExpValidationState} */ state) {
   this.regexp_pattern(state);
 
   // The goal symbol for the parse is |Pattern[~U, ~N]|. If the result of
@@ -4234,7 +4346,7 @@ pp$1.validateRegExpPattern = /** @this {Parser} */ function(state) {
 };
 
 // https://www.ecma-international.org/ecma-262/8.0/#prod-Pattern
-pp$1.regexp_pattern = /** @this {Parser} */ function(state) {
+pp$1.regexp_pattern = /** @this {Parser} */ function(/** @type {RegExpValidationState} */ state) {
   state.pos = 0;
   state.lastIntValue = 0;
   state.lastStringValue = "";
@@ -4269,7 +4381,7 @@ pp$1.regexp_pattern = /** @this {Parser} */ function(state) {
 };
 
 // https://www.ecma-international.org/ecma-262/8.0/#prod-Disjunction
-pp$1.regexp_disjunction = /** @this {Parser} */ function(state) {
+pp$1.regexp_disjunction = /** @this {Parser} */ function(/** @type {RegExpValidationState} */ state) {
   var trackDisjunction = this.options.ecmaVersion >= 16;
   if (trackDisjunction) { state.branchID = new BranchID(state.branchID, null); }
   this.regexp_alternative(state);
@@ -4289,12 +4401,12 @@ pp$1.regexp_disjunction = /** @this {Parser} */ function(state) {
 };
 
 // https://www.ecma-international.org/ecma-262/8.0/#prod-Alternative
-pp$1.regexp_alternative = /** @this {Parser} */ function(state) {
+pp$1.regexp_alternative = /** @this {Parser} */ function(/** @type {RegExpValidationState} */ state) {
   while (state.pos < state.source.length && this.regexp_eatTerm(state)) {}
 };
 
 // https://www.ecma-international.org/ecma-262/8.0/#prod-annexB-Term
-pp$1.regexp_eatTerm = /** @returns {boolean} */ /** @this {Parser} */ function(state) {
+pp$1.regexp_eatTerm = /** @returns {boolean} */ /** @this {Parser} */ function(/** @type {RegExpValidationState} */ state) {
   if (this.regexp_eatAssertion(state)) {
     // Handle `QuantifiableAssertion Quantifier` alternative.
     // `state.lastAssertionIsQuantifiable` is true if the last eaten Assertion
@@ -4317,7 +4429,7 @@ pp$1.regexp_eatTerm = /** @returns {boolean} */ /** @this {Parser} */ function(s
 };
 
 // https://www.ecma-international.org/ecma-262/8.0/#prod-annexB-Assertion
-pp$1.regexp_eatAssertion = /** @returns {boolean} */ /** @this {Parser} */ function(state) {
+pp$1.regexp_eatAssertion = /** @returns {boolean} */ /** @this {Parser} */ function(/** @type {RegExpValidationState} */ state) {
   var start = state.pos;
   state.lastAssertionIsQuantifiable = false;
 
@@ -4355,7 +4467,7 @@ pp$1.regexp_eatAssertion = /** @returns {boolean} */ /** @this {Parser} */ funct
 };
 
 // https://www.ecma-international.org/ecma-262/8.0/#prod-Quantifier
-pp$1.regexp_eatQuantifier = /** @returns {boolean} */ /** @this {Parser} */ function(state, /** @type {boolean | undefined} */ noError) {
+pp$1.regexp_eatQuantifier = /** @returns {boolean} */ /** @this {Parser} */ function(/** @type {RegExpValidationState} */ state, /** @type {boolean | undefined} */ noError) {
   if ( noError === void 0 ) noError = false;
 
   if (this.regexp_eatQuantifierPrefix(state, noError)) {
@@ -4366,7 +4478,7 @@ pp$1.regexp_eatQuantifier = /** @returns {boolean} */ /** @this {Parser} */ func
 };
 
 // https://www.ecma-international.org/ecma-262/8.0/#prod-QuantifierPrefix
-pp$1.regexp_eatQuantifierPrefix = /** @returns {boolean} */ /** @this {Parser} */ function(state, /** @type {boolean} */ noError) {
+pp$1.regexp_eatQuantifierPrefix = /** @returns {boolean} */ /** @this {Parser} */ function(/** @type {RegExpValidationState} */ state, /** @type {boolean} */ noError) {
   return (
     state.eat(0x2A /* * */) ||
     state.eat(0x2B /* + */) ||
@@ -4374,7 +4486,7 @@ pp$1.regexp_eatQuantifierPrefix = /** @returns {boolean} */ /** @this {Parser} *
     this.regexp_eatBracedQuantifier(state, noError)
   )
 };
-pp$1.regexp_eatBracedQuantifier = /** @returns {boolean} */ /** @this {Parser} */ function(state, /** @type {boolean} */ noError) {
+pp$1.regexp_eatBracedQuantifier = /** @returns {boolean} */ /** @this {Parser} */ function(/** @type {RegExpValidationState} */ state, /** @type {boolean} */ noError) {
   var start = state.pos;
   if (state.eat(0x7B /* { */)) {
     var min = 0, max = -1;
@@ -4400,7 +4512,7 @@ pp$1.regexp_eatBracedQuantifier = /** @returns {boolean} */ /** @this {Parser} *
 };
 
 // https://www.ecma-international.org/ecma-262/8.0/#prod-Atom
-pp$1.regexp_eatAtom = /** @returns {boolean} */ /** @this {Parser} */ function(state) {
+pp$1.regexp_eatAtom = /** @returns {boolean} */ /** @this {Parser} */ function(/** @type {RegExpValidationState} */ state) {
   return (
     this.regexp_eatPatternCharacters(state) ||
     state.eat(0x2E /* . */) ||
@@ -4410,7 +4522,7 @@ pp$1.regexp_eatAtom = /** @returns {boolean} */ /** @this {Parser} */ function(s
     this.regexp_eatCapturingGroup(state)
   )
 };
-pp$1.regexp_eatReverseSolidusAtomEscape = /** @returns {boolean} */ /** @this {Parser} */ function(state) {
+pp$1.regexp_eatReverseSolidusAtomEscape = /** @returns {boolean} */ /** @this {Parser} */ function(/** @type {RegExpValidationState} */ state) {
   var start = state.pos;
   if (state.eat(0x5C /* \ */)) {
     if (this.regexp_eatAtomEscape(state)) {
@@ -4420,7 +4532,7 @@ pp$1.regexp_eatReverseSolidusAtomEscape = /** @returns {boolean} */ /** @this {P
   }
   return false
 };
-pp$1.regexp_eatUncapturingGroup = /** @returns {boolean} */ /** @this {Parser} */ function(state) {
+pp$1.regexp_eatUncapturingGroup = /** @returns {boolean} */ /** @this {Parser} */ function(/** @type {RegExpValidationState} */ state) {
   var start = state.pos;
   if (state.eat(0x28 /* ( */)) {
     if (state.eat(0x3F /* ? */)) {
@@ -4463,7 +4575,7 @@ pp$1.regexp_eatUncapturingGroup = /** @returns {boolean} */ /** @this {Parser} *
   }
   return false
 };
-pp$1.regexp_eatCapturingGroup = /** @returns {boolean} */ /** @this {Parser} */ function(state) {
+pp$1.regexp_eatCapturingGroup = /** @returns {boolean} */ /** @this {Parser} */ function(/** @type {RegExpValidationState} */ state) {
   if (state.eat(0x28 /* ( */)) {
     if (this.options.ecmaVersion >= 9) {
       this.regexp_groupSpecifier(state);
@@ -4482,7 +4594,7 @@ pp$1.regexp_eatCapturingGroup = /** @returns {boolean} */ /** @this {Parser} */ 
 // RegularExpressionModifiers ::
 //   [empty]
 //   RegularExpressionModifiers RegularExpressionModifier
-pp$1.regexp_eatModifiers = /** @returns {string} */ /** @this {Parser} */ function(state) {
+pp$1.regexp_eatModifiers = /** @returns {string} */ /** @this {Parser} */ function(/** @type {RegExpValidationState} */ state) {
   var modifiers = "";
   var ch = 0;
   while ((ch = state.current()) !== -1 && isRegularExpressionModifier(ch)) {
@@ -4498,7 +4610,7 @@ pp$1.regexp_eatModifiers = /** @returns {string} */ /** @this {Parser} */ functi
 }
 
 // https://www.ecma-international.org/ecma-262/8.0/#prod-annexB-ExtendedAtom
-pp$1.regexp_eatExtendedAtom = /** @returns {boolean} */ /** @this {Parser} */ function(state) {
+pp$1.regexp_eatExtendedAtom = /** @returns {boolean} */ /** @this {Parser} */ function(/** @type {RegExpValidationState} */ state) {
   return (
     state.eat(0x2E /* . */) ||
     this.regexp_eatReverseSolidusAtomEscape(state) ||
@@ -4511,7 +4623,7 @@ pp$1.regexp_eatExtendedAtom = /** @returns {boolean} */ /** @this {Parser} */ fu
 };
 
 // https://www.ecma-international.org/ecma-262/8.0/#prod-annexB-InvalidBracedQuantifier
-pp$1.regexp_eatInvalidBracedQuantifier = /** @returns {boolean} */ /** @this {Parser} */ function(state) {
+pp$1.regexp_eatInvalidBracedQuantifier = /** @returns {boolean} */ /** @this {Parser} */ function(/** @type {RegExpValidationState} */ state) {
   if (this.regexp_eatBracedQuantifier(state, true)) {
     state.raise("Nothing to repeat");
   }
@@ -4519,7 +4631,7 @@ pp$1.regexp_eatInvalidBracedQuantifier = /** @returns {boolean} */ /** @this {Pa
 };
 
 // https://www.ecma-international.org/ecma-262/8.0/#prod-SyntaxCharacter
-pp$1.regexp_eatSyntaxCharacter = /** @returns {boolean} */ /** @this {Parser} */ function(state) {
+pp$1.regexp_eatSyntaxCharacter = /** @returns {boolean} */ /** @this {Parser} */ function(/** @type {RegExpValidationState} */ state) {
   var ch = state.current();
   if (isSyntaxCharacter(ch)) {
     state.lastIntValue = ch;
@@ -4541,7 +4653,7 @@ pp$1.regexp_eatSyntaxCharacter = /** @returns {boolean} */ /** @this {Parser} */
 
 // https://www.ecma-international.org/ecma-262/8.0/#prod-PatternCharacter
 // But eat eager.
-pp$1.regexp_eatPatternCharacters = /** @returns {boolean} */ /** @this {Parser} */ function(state) {
+pp$1.regexp_eatPatternCharacters = /** @returns {boolean} */ /** @this {Parser} */ function(/** @type {RegExpValidationState} */ state) {
   var start = state.pos;
   var ch = 0;
   while ((ch = state.current()) !== -1 && !isSyntaxCharacter(ch)) {
@@ -4551,7 +4663,7 @@ pp$1.regexp_eatPatternCharacters = /** @returns {boolean} */ /** @this {Parser} 
 };
 
 // https://www.ecma-international.org/ecma-262/8.0/#prod-annexB-ExtendedPatternCharacter
-pp$1.regexp_eatExtendedPatternCharacter = /** @returns {boolean} */ /** @this {Parser} */ function(state) {
+pp$1.regexp_eatExtendedPatternCharacter = /** @returns {boolean} */ /** @this {Parser} */ function(/** @type {RegExpValidationState} */ state) {
   var ch = state.current();
   if (
     ch !== -1 &&
@@ -4572,7 +4684,7 @@ pp$1.regexp_eatExtendedPatternCharacter = /** @returns {boolean} */ /** @this {P
 // GroupSpecifier ::
 //   [empty]
 //   `?` GroupName
-pp$1.regexp_groupSpecifier = /** @this {Parser} */ function(state) {
+pp$1.regexp_groupSpecifier = /** @this {Parser} */ function(/** @type {RegExpValidationState} */ state) {
   if (state.eat(0x3F /* ? */)) {
     if (!this.regexp_eatGroupName(state)) { state.raise("Invalid group"); }
     var trackDisjunction = this.options.ecmaVersion >= 16;
@@ -4600,7 +4712,7 @@ pp$1.regexp_groupSpecifier = /** @this {Parser} */ function(state) {
 // GroupName ::
 //   `<` RegExpIdentifierName `>`
 // Note: this updates `state.lastStringValue` property with the eaten name.
-pp$1.regexp_eatGroupName = /** @returns {boolean} */ /** @this {Parser} */ function(state) {
+pp$1.regexp_eatGroupName = /** @returns {boolean} */ /** @this {Parser} */ function(/** @type {RegExpValidationState} */ state) {
   state.lastStringValue = "";
   if (state.eat(0x3C /* < */)) {
     if (this.regexp_eatRegExpIdentifierName(state) && state.eat(0x3E /* > */)) {
@@ -4615,7 +4727,7 @@ pp$1.regexp_eatGroupName = /** @returns {boolean} */ /** @this {Parser} */ funct
 //   RegExpIdentifierStart
 //   RegExpIdentifierName RegExpIdentifierPart
 // Note: this updates `state.lastStringValue` property with the eaten name.
-pp$1.regexp_eatRegExpIdentifierName = /** @returns {boolean} */ /** @this {Parser} */ function(state) {
+pp$1.regexp_eatRegExpIdentifierName = /** @returns {boolean} */ /** @this {Parser} */ function(/** @type {RegExpValidationState} */ state) {
   state.lastStringValue = "";
   if (this.regexp_eatRegExpIdentifierStart(state)) {
     state.lastStringValue += codePointToString(state.lastIntValue);
@@ -4632,7 +4744,7 @@ pp$1.regexp_eatRegExpIdentifierName = /** @returns {boolean} */ /** @this {Parse
 //   `$`
 //   `_`
 //   `\` RegExpUnicodeEscapeSequence[+U]
-pp$1.regexp_eatRegExpIdentifierStart = /** @returns {boolean} */ /** @this {Parser} */ function(state) {
+pp$1.regexp_eatRegExpIdentifierStart = /** @returns {boolean} */ /** @this {Parser} */ function(/** @type {RegExpValidationState} */ state) {
   var start = state.pos;
   var forceU = this.options.ecmaVersion >= 11;
   var ch = state.current(forceU);
@@ -4660,7 +4772,7 @@ pp$1.regexp_eatRegExpIdentifierStart = /** @returns {boolean} */ /** @this {Pars
 //   `\` RegExpUnicodeEscapeSequence[+U]
 //   <ZWNJ>
 //   <ZWJ>
-pp$1.regexp_eatRegExpIdentifierPart = /** @returns {boolean} */ /** @this {Parser} */ function(state) {
+pp$1.regexp_eatRegExpIdentifierPart = /** @returns {boolean} */ /** @this {Parser} */ function(/** @type {RegExpValidationState} */ state) {
   var start = state.pos;
   var forceU = this.options.ecmaVersion >= 11;
   var ch = state.current(forceU);
@@ -4682,7 +4794,7 @@ pp$1.regexp_eatRegExpIdentifierPart = /** @returns {boolean} */ /** @this {Parse
 }
 
 // https://www.ecma-international.org/ecma-262/8.0/#prod-annexB-AtomEscape
-pp$1.regexp_eatAtomEscape = /** @returns {boolean} */ /** @this {Parser} */ function(state) {
+pp$1.regexp_eatAtomEscape = /** @returns {boolean} */ /** @this {Parser} */ function(/** @type {RegExpValidationState} */ state) {
   if (
     this.regexp_eatBackReference(state) ||
     this.regexp_eatCharacterClassEscape(state) ||
@@ -4700,7 +4812,7 @@ pp$1.regexp_eatAtomEscape = /** @returns {boolean} */ /** @this {Parser} */ func
   }
   return false
 };
-pp$1.regexp_eatBackReference = /** @returns {boolean} */ /** @this {Parser} */ function(state) {
+pp$1.regexp_eatBackReference = /** @returns {boolean} */ /** @this {Parser} */ function(/** @type {RegExpValidationState} */ state) {
   var start = state.pos;
   if (this.regexp_eatDecimalEscape(state)) {
     var n = state.lastIntValue;
@@ -4718,7 +4830,7 @@ pp$1.regexp_eatBackReference = /** @returns {boolean} */ /** @this {Parser} */ f
   }
   return false
 };
-pp$1.regexp_eatKGroupName = /** @returns {boolean} */ /** @this {Parser} */ function(state) {
+pp$1.regexp_eatKGroupName = /** @returns {boolean} */ /** @this {Parser} */ function(/** @type {RegExpValidationState} */ state) {
   if (state.eat(0x6B /* k */)) {
     if (this.regexp_eatGroupName(state)) {
       state.backReferenceNames.push(state.lastStringValue);
@@ -4730,7 +4842,7 @@ pp$1.regexp_eatKGroupName = /** @returns {boolean} */ /** @this {Parser} */ func
 };
 
 // https://www.ecma-international.org/ecma-262/8.0/#prod-annexB-CharacterEscape
-pp$1.regexp_eatCharacterEscape = /** @returns {boolean} */ /** @this {Parser} */ function(state) {
+pp$1.regexp_eatCharacterEscape = /** @returns {boolean} */ /** @this {Parser} */ function(/** @type {RegExpValidationState} */ state) {
   return (
     this.regexp_eatControlEscape(state) ||
     this.regexp_eatCControlLetter(state) ||
@@ -4741,7 +4853,7 @@ pp$1.regexp_eatCharacterEscape = /** @returns {boolean} */ /** @this {Parser} */
     this.regexp_eatIdentityEscape(state)
   )
 };
-pp$1.regexp_eatCControlLetter = /** @returns {boolean} */ /** @this {Parser} */ function(state) {
+pp$1.regexp_eatCControlLetter = /** @returns {boolean} */ /** @this {Parser} */ function(/** @type {RegExpValidationState} */ state) {
   var start = state.pos;
   if (state.eat(0x63 /* c */)) {
     if (this.regexp_eatControlLetter(state)) {
@@ -4751,7 +4863,7 @@ pp$1.regexp_eatCControlLetter = /** @returns {boolean} */ /** @this {Parser} */ 
   }
   return false
 };
-pp$1.regexp_eatZero = /** @returns {boolean} */ /** @this {Parser} */ function(state) {
+pp$1.regexp_eatZero = /** @returns {boolean} */ /** @this {Parser} */ function(/** @type {RegExpValidationState} */ state) {
   if (state.current() === 0x30 /* 0 */ && !isDecimalDigit(state.lookahead())) {
     state.lastIntValue = 0;
     state.advance();
@@ -4761,7 +4873,7 @@ pp$1.regexp_eatZero = /** @returns {boolean} */ /** @this {Parser} */ function(s
 };
 
 // https://www.ecma-international.org/ecma-262/8.0/#prod-ControlEscape
-pp$1.regexp_eatControlEscape = /** @returns {boolean} */ /** @this {Parser} */ function(state) {
+pp$1.regexp_eatControlEscape = /** @returns {boolean} */ /** @this {Parser} */ function(/** @type {RegExpValidationState} */ state) {
   var ch = state.current();
   if (ch === 0x74 /* t */) {
     state.lastIntValue = 0x09; /* \t */
@@ -4792,7 +4904,7 @@ pp$1.regexp_eatControlEscape = /** @returns {boolean} */ /** @this {Parser} */ f
 };
 
 // https://www.ecma-international.org/ecma-262/8.0/#prod-ControlLetter
-pp$1.regexp_eatControlLetter = /** @this {Parser} */ function(state) {
+pp$1.regexp_eatControlLetter = /** @this {Parser} */ function(/** @type {RegExpValidationState} */ state) {
   var ch = state.current();
   if (isControlLetter(ch)) {
     state.lastIntValue = ch % 0x20;
@@ -4809,7 +4921,7 @@ pp$1.regexp_eatControlLetter = /** @this {Parser} */ function(state) {
 }
 
 // https://www.ecma-international.org/ecma-262/8.0/#prod-RegExpUnicodeEscapeSequence
-pp$1.regexp_eatRegExpUnicodeEscapeSequence = /** @returns {boolean} */ /** @this {Parser} */ function(state, /** @type {boolean} */ forceU) {
+pp$1.regexp_eatRegExpUnicodeEscapeSequence = /** @returns {boolean} */ /** @this {Parser} */ function(/** @type {RegExpValidationState} */ state, /** @type {boolean} */ forceU) {
   if ( forceU === void 0 ) forceU = false;
 
   var start = state.pos;
@@ -4854,7 +4966,7 @@ function isValidUnicode(ch) {
 }
 
 // https://www.ecma-international.org/ecma-262/8.0/#prod-annexB-IdentityEscape
-pp$1.regexp_eatIdentityEscape = /** @returns {boolean} */ /** @this {Parser} */ function(state) {
+pp$1.regexp_eatIdentityEscape = /** @returns {boolean} */ /** @this {Parser} */ function(/** @type {RegExpValidationState} */ state) {
   if (state.switchU) {
     if (this.regexp_eatSyntaxCharacter(state)) {
       return true
@@ -4877,7 +4989,7 @@ pp$1.regexp_eatIdentityEscape = /** @returns {boolean} */ /** @this {Parser} */ 
 };
 
 // https://www.ecma-international.org/ecma-262/8.0/#prod-DecimalEscape
-pp$1.regexp_eatDecimalEscape = /** @returns {boolean} */ /** @this {Parser} */ function(state) {
+pp$1.regexp_eatDecimalEscape = /** @returns {boolean} */ /** @this {Parser} */ function(/** @type {RegExpValidationState} */ state) {
   state.lastIntValue = 0;
   var ch = state.current();
   if (ch >= 0x31 /* 1 */ && ch <= 0x39 /* 9 */) {
@@ -4897,7 +5009,7 @@ var CharSetOk = 1; // Construct parsed, cannot contain strings
 var CharSetString = 2; // Construct parsed, can contain strings
 
 // https://www.ecma-international.org/ecma-262/8.0/#prod-CharacterClassEscape
-pp$1.regexp_eatCharacterClassEscape = /** @returns {number} */ /** @this {Parser} */ function(state) {
+pp$1.regexp_eatCharacterClassEscape = /** @returns {number} */ /** @this {Parser} */ function(/** @type {RegExpValidationState} */ state) {
   var ch = state.current();
 
   if (isCharacterClassEscape(ch)) {
@@ -4943,7 +5055,7 @@ pp$1.regexp_eatCharacterClassEscape = /** @returns {number} */ /** @this {Parser
 // UnicodePropertyValueExpression ::
 //   UnicodePropertyName `=` UnicodePropertyValue
 //   LoneUnicodePropertyNameOrValue
-pp$1.regexp_eatUnicodePropertyValueExpression = /** @returns {number} */ /** @this {Parser} */ function(state) {
+pp$1.regexp_eatUnicodePropertyValueExpression = /** @returns {number} */ /** @this {Parser} */ function(/** @type {RegExpValidationState} */ state) {
   var start = state.pos;
 
   // UnicodePropertyName `=` UnicodePropertyValue
@@ -4965,14 +5077,14 @@ pp$1.regexp_eatUnicodePropertyValueExpression = /** @returns {number} */ /** @th
   return CharSetNone
 };
 
-pp$1.regexp_validateUnicodePropertyNameAndValue = /** @this {Parser} */ function(state, name, value) {
+pp$1.regexp_validateUnicodePropertyNameAndValue = /** @this {Parser} */ function(/** @type {RegExpValidationState} */ state, /** @type {string} */ name, /** @type {string} */ value) {
   if (!hasOwn(state.unicodeProperties.nonBinary, name))
     { state.raise("Invalid property name"); }
   if (!state.unicodeProperties.nonBinary[name].test(value))
     { state.raise("Invalid property value"); }
 };
 
-pp$1.regexp_validateUnicodePropertyNameOrValue = /** @returns {number | undefined} */ /** @this {Parser} */ function(state, /** @type {string} */ nameOrValue) {
+pp$1.regexp_validateUnicodePropertyNameOrValue = /** @returns {number | undefined} */ /** @this {Parser} */ function(/** @type {RegExpValidationState} */ state, /** @type {string} */ nameOrValue) {
   if (state.unicodeProperties.binary.test(nameOrValue)) { return CharSetOk }
   if (state.switchV && state.unicodeProperties.binaryOfStrings.test(nameOrValue)) { return CharSetString }
   state.raise("Invalid property name");
@@ -4980,7 +5092,7 @@ pp$1.regexp_validateUnicodePropertyNameOrValue = /** @returns {number | undefine
 
 // UnicodePropertyName ::
 //   UnicodePropertyNameCharacters
-pp$1.regexp_eatUnicodePropertyName = /** @returns {boolean} */ /** @this {Parser} */ function(state) {
+pp$1.regexp_eatUnicodePropertyName = /** @returns {boolean} */ /** @this {Parser} */ function(/** @type {RegExpValidationState} */ state) {
   var ch = 0;
   state.lastStringValue = "";
   while (isUnicodePropertyNameCharacter(ch = state.current())) {
@@ -4996,7 +5108,7 @@ pp$1.regexp_eatUnicodePropertyName = /** @returns {boolean} */ /** @this {Parser
 
 // UnicodePropertyValue ::
 //   UnicodePropertyValueCharacters
-pp$1.regexp_eatUnicodePropertyValue = /** @returns {boolean} */ /** @this {Parser} */ function(state) {
+pp$1.regexp_eatUnicodePropertyValue = /** @returns {boolean} */ /** @this {Parser} */ function(/** @type {RegExpValidationState} */ state) {
   var ch = 0;
   state.lastStringValue = "";
   while (isUnicodePropertyValueCharacter(ch = state.current())) {
@@ -5011,12 +5123,12 @@ pp$1.regexp_eatUnicodePropertyValue = /** @returns {boolean} */ /** @this {Parse
 
 // LoneUnicodePropertyNameOrValue ::
 //   UnicodePropertyValueCharacters
-pp$1.regexp_eatLoneUnicodePropertyNameOrValue = /** @returns {boolean} */ /** @this {Parser} */ function(state) {
+pp$1.regexp_eatLoneUnicodePropertyNameOrValue = /** @returns {boolean} */ /** @this {Parser} */ function(/** @type {RegExpValidationState} */ state) {
   return this.regexp_eatUnicodePropertyValue(state)
 };
 
 // https://www.ecma-international.org/ecma-262/8.0/#prod-CharacterClass
-pp$1.regexp_eatCharacterClass = /** @returns {boolean} */ /** @this {Parser} */ function(state) {
+pp$1.regexp_eatCharacterClass = /** @returns {boolean} */ /** @this {Parser} */ function(/** @type {RegExpValidationState} */ state) {
   if (state.eat(0x5B /* [ */)) {
     var negate = state.eat(0x5E /* ^ */);
     var result = this.regexp_classContents(state);
@@ -5031,7 +5143,7 @@ pp$1.regexp_eatCharacterClass = /** @returns {boolean} */ /** @this {Parser} */ 
 
 // https://tc39.es/ecma262/#prod-ClassContents
 // https://www.ecma-international.org/ecma-262/8.0/#prod-ClassRanges
-pp$1.regexp_classContents = /** @returns {number} */ /** @this {Parser} */ function(state) {
+pp$1.regexp_classContents = /** @returns {number} */ /** @this {Parser} */ function(/** @type {RegExpValidationState} */ state) {
   if (state.current() === 0x5D /* ] */) { return CharSetOk }
   if (state.switchV) { return this.regexp_classSetExpression(state) }
   this.regexp_nonEmptyClassRanges(state);
@@ -5040,7 +5152,7 @@ pp$1.regexp_classContents = /** @returns {number} */ /** @this {Parser} */ funct
 
 // https://www.ecma-international.org/ecma-262/8.0/#prod-NonemptyClassRanges
 // https://www.ecma-international.org/ecma-262/8.0/#prod-NonemptyClassRangesNoDash
-pp$1.regexp_nonEmptyClassRanges = /** @this {Parser} */ function(state) {
+pp$1.regexp_nonEmptyClassRanges = /** @this {Parser} */ function(/** @type {RegExpValidationState} */ state) {
   while (this.regexp_eatClassAtom(state)) {
     var left = state.lastIntValue;
     if (state.eat(0x2D /* - */) && this.regexp_eatClassAtom(state)) {
@@ -5057,7 +5169,7 @@ pp$1.regexp_nonEmptyClassRanges = /** @this {Parser} */ function(state) {
 
 // https://www.ecma-international.org/ecma-262/8.0/#prod-ClassAtom
 // https://www.ecma-international.org/ecma-262/8.0/#prod-ClassAtomNoDash
-pp$1.regexp_eatClassAtom = /** @returns {boolean} */ /** @this {Parser} */ function(state) {
+pp$1.regexp_eatClassAtom = /** @returns {boolean} */ /** @this {Parser} */ function(/** @type {RegExpValidationState} */ state) {
   var start = state.pos;
 
   if (state.eat(0x5C /* \ */)) {
@@ -5086,7 +5198,7 @@ pp$1.regexp_eatClassAtom = /** @returns {boolean} */ /** @this {Parser} */ funct
 };
 
 // https://www.ecma-international.org/ecma-262/8.0/#prod-annexB-ClassEscape
-pp$1.regexp_eatClassEscape = /** @this {Parser} */ function(state) {
+pp$1.regexp_eatClassEscape = /** @this {Parser} */ function(/** @type {RegExpValidationState} */ state) {
   var start = state.pos;
 
   if (state.eat(0x62 /* b */)) {
@@ -5116,7 +5228,7 @@ pp$1.regexp_eatClassEscape = /** @this {Parser} */ function(state) {
 // https://tc39.es/ecma262/#prod-ClassUnion
 // https://tc39.es/ecma262/#prod-ClassIntersection
 // https://tc39.es/ecma262/#prod-ClassSubtraction
-pp$1.regexp_classSetExpression = /** @this {Parser} */ function(state) {
+pp$1.regexp_classSetExpression = /** @this {Parser} */ function(/** @type {RegExpValidationState} */ state) {
   var result = CharSetOk, subResult;
   if (this.regexp_eatClassSetRange(state)) ; else if (subResult = this.regexp_eatClassSetOperand(state)) {
     if (subResult === CharSetString) { result = CharSetString; }
@@ -5152,7 +5264,7 @@ pp$1.regexp_classSetExpression = /** @this {Parser} */ function(state) {
 };
 
 // https://tc39.es/ecma262/#prod-ClassSetRange
-pp$1.regexp_eatClassSetRange = /** @this {Parser} */ function(state) {
+pp$1.regexp_eatClassSetRange = /** @this {Parser} */ function(/** @type {RegExpValidationState} */ state) {
   var start = state.pos;
   if (this.regexp_eatClassSetCharacter(state)) {
     var left = state.lastIntValue;
@@ -5169,13 +5281,13 @@ pp$1.regexp_eatClassSetRange = /** @this {Parser} */ function(state) {
 };
 
 // https://tc39.es/ecma262/#prod-ClassSetOperand
-pp$1.regexp_eatClassSetOperand = /** @this {Parser} */ function(state) {
+pp$1.regexp_eatClassSetOperand = /** @this {Parser} */ function(/** @type {RegExpValidationState} */ state) {
   if (this.regexp_eatClassSetCharacter(state)) { return CharSetOk }
   return this.regexp_eatClassStringDisjunction(state) || this.regexp_eatNestedClass(state)
 };
 
 // https://tc39.es/ecma262/#prod-NestedClass
-pp$1.regexp_eatNestedClass = /** @this {Parser} */ function(state) {
+pp$1.regexp_eatNestedClass = /** @this {Parser} */ function(/** @type {RegExpValidationState} */ state) {
   var start = state.pos;
   if (state.eat(0x5B /* [ */)) {
     var negate = state.eat(0x5E /* ^ */);
@@ -5199,7 +5311,7 @@ pp$1.regexp_eatNestedClass = /** @this {Parser} */ function(state) {
 };
 
 // https://tc39.es/ecma262/#prod-ClassStringDisjunction
-pp$1.regexp_eatClassStringDisjunction = /** @this {Parser} */ function(state) {
+pp$1.regexp_eatClassStringDisjunction = /** @this {Parser} */ function(/** @type {RegExpValidationState} */ state) {
   var start = state.pos;
   if (state.eatChars([0x5C, 0x71] /* \q */)) {
     if (state.eat(0x7B /* { */)) {
@@ -5217,7 +5329,7 @@ pp$1.regexp_eatClassStringDisjunction = /** @this {Parser} */ function(state) {
 };
 
 // https://tc39.es/ecma262/#prod-ClassStringDisjunctionContents
-pp$1.regexp_classStringDisjunctionContents = /** @this {Parser} */ function(state) {
+pp$1.regexp_classStringDisjunctionContents = /** @this {Parser} */ function(/** @type {RegExpValidationState} */ state) {
   var result = this.regexp_classString(state);
   while (state.eat(0x7C /* | */)) {
     if (this.regexp_classString(state) === CharSetString) { result = CharSetString; }
@@ -5227,14 +5339,14 @@ pp$1.regexp_classStringDisjunctionContents = /** @this {Parser} */ function(stat
 
 // https://tc39.es/ecma262/#prod-ClassString
 // https://tc39.es/ecma262/#prod-NonEmptyClassString
-pp$1.regexp_classString = /** @this {Parser} */ function(state) {
+pp$1.regexp_classString = /** @this {Parser} */ function(/** @type {RegExpValidationState} */ state) {
   var count = 0;
   while (this.regexp_eatClassSetCharacter(state)) { count++; }
   return count === 1 ? CharSetOk : CharSetString
 };
 
 // https://tc39.es/ecma262/#prod-ClassSetCharacter
-pp$1.regexp_eatClassSetCharacter = /** @this {Parser} */ function(state) {
+pp$1.regexp_eatClassSetCharacter = /** @this {Parser} */ function(/** @type {RegExpValidationState} */ state) {
   var start = state.pos;
   if (state.eat(0x5C /* \ */)) {
     if (
@@ -5285,7 +5397,7 @@ function isClassSetSyntaxCharacter(ch) {
 }
 
 // https://tc39.es/ecma262/#prod-ClassSetReservedPunctuator
-pp$1.regexp_eatClassSetReservedPunctuator = /** @this {Parser} */ function(state) {
+pp$1.regexp_eatClassSetReservedPunctuator = /** @this {Parser} */ function(/** @type {RegExpValidationState} */ state) {
   var ch = state.current();
   if (isClassSetReservedPunctuator(ch)) {
     state.lastIntValue = ch;
@@ -5312,7 +5424,7 @@ function isClassSetReservedPunctuator(ch) {
 }
 
 // https://www.ecma-international.org/ecma-262/8.0/#prod-annexB-ClassControlLetter
-pp$1.regexp_eatClassControlLetter = /** @this {Parser} */ function(state) {
+pp$1.regexp_eatClassControlLetter = /** @this {Parser} */ function(/** @type {RegExpValidationState} */ state) {
   var ch = state.current();
   if (isDecimalDigit(ch) || ch === 0x5F /* _ */) {
     state.lastIntValue = ch % 0x20;
@@ -5323,7 +5435,7 @@ pp$1.regexp_eatClassControlLetter = /** @this {Parser} */ function(state) {
 };
 
 // https://www.ecma-international.org/ecma-262/8.0/#prod-HexEscapeSequence
-pp$1.regexp_eatHexEscapeSequence = /** @returns {boolean} */ /** @this {Parser} */ function(state) {
+pp$1.regexp_eatHexEscapeSequence = /** @returns {boolean} */ /** @this {Parser} */ function(/** @type {RegExpValidationState} */ state) {
   var start = state.pos;
   if (state.eat(0x78 /* x */)) {
     if (this.regexp_eatFixedHexDigits(state, 2)) {
@@ -5338,7 +5450,7 @@ pp$1.regexp_eatHexEscapeSequence = /** @returns {boolean} */ /** @this {Parser} 
 };
 
 // https://www.ecma-international.org/ecma-262/8.0/#prod-DecimalDigits
-pp$1.regexp_eatDecimalDigits = /** @returns {boolean} */ /** @this {Parser} */ function(state) {
+pp$1.regexp_eatDecimalDigits = /** @returns {boolean} */ /** @this {Parser} */ function(/** @type {RegExpValidationState} */ state) {
   var start = state.pos;
   var ch = 0;
   state.lastIntValue = 0;
@@ -5353,7 +5465,7 @@ pp$1.regexp_eatDecimalDigits = /** @returns {boolean} */ /** @this {Parser} */ f
 }
 
 // https://www.ecma-international.org/ecma-262/8.0/#prod-HexDigits
-pp$1.regexp_eatHexDigits = /** @this {Parser} */ function(state) {
+pp$1.regexp_eatHexDigits = /** @this {Parser} */ function(/** @type {RegExpValidationState} */ state) {
   var start = state.pos;
   var ch = 0;
   state.lastIntValue = 0;
@@ -5382,7 +5494,7 @@ pp$1.regexp_eatHexDigits = /** @this {Parser} */ function(state) {
 
 // https://www.ecma-international.org/ecma-262/8.0/#prod-annexB-LegacyOctalEscapeSequence
 // Allows only 0-377(octal) i.e. 0-255(decimal).
-pp$1.regexp_eatLegacyOctalEscapeSequence = /** @returns {boolean} */ /** @this {Parser} */ function(state) {
+pp$1.regexp_eatLegacyOctalEscapeSequence = /** @returns {boolean} */ /** @this {Parser} */ function(/** @type {RegExpValidationState} */ state) {
   if (this.regexp_eatOctalDigit(state)) {
     var n1 = state.lastIntValue;
     if (this.regexp_eatOctalDigit(state)) {
@@ -5401,7 +5513,7 @@ pp$1.regexp_eatLegacyOctalEscapeSequence = /** @returns {boolean} */ /** @this {
 };
 
 // https://www.ecma-international.org/ecma-262/8.0/#prod-OctalDigit
-pp$1.regexp_eatOctalDigit = /** @returns {boolean} */ /** @this {Parser} */ function(state) {
+pp$1.regexp_eatOctalDigit = /** @returns {boolean} */ /** @this {Parser} */ function(/** @type {RegExpValidationState} */ state) {
   var ch = state.current();
   if (isOctalDigit(ch)) {
     state.lastIntValue = ch - 0x30; /* 0 */
@@ -5418,7 +5530,7 @@ pp$1.regexp_eatOctalDigit = /** @returns {boolean} */ /** @this {Parser} */ func
 // https://www.ecma-international.org/ecma-262/8.0/#prod-Hex4Digits
 // https://www.ecma-international.org/ecma-262/8.0/#prod-HexDigit
 // And HexDigit HexDigit in https://www.ecma-international.org/ecma-262/8.0/#prod-HexEscapeSequence
-pp$1.regexp_eatFixedHexDigits = /** @returns {boolean} */ /** @this {Parser} */ function(state, /** @type {number} */ length) {
+pp$1.regexp_eatFixedHexDigits = /** @returns {boolean} */ /** @this {Parser} */ function(/** @type {RegExpValidationState} */ state, /** @type {number} */ length) {
   var start = state.pos;
   state.lastIntValue = 0;
   for (var i = 0; i < length; ++i) {
@@ -5602,7 +5714,7 @@ pp.skipSpace = /** @this {Parser} */ function() {
 // the token, so that the next one's `start` will point at the
 // right position.
 
-pp.finishToken = /** @this {Parser} */ function(type, val) {
+pp.finishToken = /** @this {Parser} */ function(/** @type {TokenType} */ type, val) {
   this.end = this.pos;
   if (this.options.locations) { this.endLoc = this.curPosition(); }
   var prevType = this.type;
@@ -5832,7 +5944,7 @@ pp.getTokenFromCode = /** @this {Parser} */ function(/** @type {number} */ code)
   this.raise(this.pos, "Unexpected character '" + codePointToString(code) + "'");
 };
 
-pp.finishOp = /** @this {Parser} */ function(type, /** @type {number} */ size) {
+pp.finishOp = /** @this {Parser} */ function(/** @type {TokenType} */ type, /** @type {number} */ size) {
   var str = this.input.slice(this.pos, this.pos + size);
   this.pos += size;
   return this.finishToken(type, str)

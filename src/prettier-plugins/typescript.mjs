@@ -296,7 +296,7 @@ function Fy(e, t, a) {
   for (let s = 0; s < e.length; s++) t = Math.max(t, a(e[s]));
   return t;
 }
-function __(/** @type {string} */ e, t, a) {
+/** @returns {string | undefined} */ function __(/** @type {string} */ e, t, a) {
   let s = Math.max(2, Math.floor(e.length * 0.34)),
     f = Math.floor(e.length * 0.4) + 1,
     h;
@@ -311,7 +311,7 @@ function __(/** @type {string} */ e, t, a) {
   }
   return h;
 }
-function zy(/** @type {string} */ e, /** @type {string} */ t, /** @type {number} */ a) {
+/** @returns {number | undefined} */ function zy(/** @type {string} */ e, /** @type {string} */ t, /** @type {number} */ a) {
   let s = new Array(t.length + 1),
     f = new Array(t.length + 1),
     h = a + 0.01;
@@ -16075,7 +16075,7 @@ function uf(/** @type {number} */ e, /** @type {boolean} */ t, a = 0, s, f, h, b
     let ke = it(K.trimStart(), Z);
     return ke === void 0 ? U : An(U, { range: { pos: we, end: l }, type: ke });
   }
-  /** @returns {number | undefined} */ function it(/** @type {string} */ U, K) {
+  /** @returns {number | undefined} */ function it(/** @type {string} */ U, /** @type {RegExp | undefined} */ K) {
     let Z = K.exec(U);
     if (Z)
       switch (Z[1]) {
@@ -17913,10 +17913,10 @@ function Ba(e) {
   }
   return -1;
 }
-function Dp(/** @type {vh | Kf} */ e) {
+/** @returns {boolean} */ function Dp(/** @type {vh | Kf} */ e) {
   return !!((e.templateFlags || 0) & 2048);
 }
-function Z2(/** @type {Kf} */ e) {
+/** @returns {boolean} */ function Z2(/** @type {Kf} */ e) {
   return e && !!(I1(e) ? Dp(e) : Dp(e.head) || nn(e.templateSpans, /** @returns {boolean} */ (t) => Dp(t.literal)));
 }
 var C3 = new Map(
@@ -19448,7 +19448,7 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
     let T = In(d, 4 | i, _, c);
     return ((T.original = r), T);
   }
-  function On(r) {
+  function On(/** @type {string | undefined} */ r) {
     let i = t.createBasePrivateIdentifierNode(81);
     return ((i.escapedText = r), (i.transformFlags |= 16777216), i);
   }
@@ -20599,7 +20599,7 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       c
     );
   }
-  function Q_(/** @type {Kf | undefined} */ r) {
+  /** @returns {number} */ function Q_(/** @type {Kf | undefined} */ r) {
     return fh(r) ? 65536 : 0;
   }
   function ru(r, i, _, c) {
@@ -22836,7 +22836,7 @@ function N1(e) {
 /** @returns {boolean} */ function Lr(/** @type {any} */ e) {
   return e.kind === 11;
 }
-function I1(/** @type {Kf} */ e) {
+/** @returns {boolean} */ function I1(/** @type {Kf} */ e) {
   return e.kind === 15;
 }
 function Zb(e) {
@@ -22866,7 +22866,7 @@ function Zb(e) {
 /** @returns {boolean} */ function tv(/** @type {any} */ e) {
   return e.kind === 102;
 }
-function O1(/** @type {Kf} */ e) {
+/** @returns {boolean} */ function O1(/** @type {Kf} */ e) {
   return e.kind === 167;
 }
 /** @returns {boolean} */ function Nf(/** @type {xh | Kf | Th} */ e) {
@@ -22884,7 +22884,7 @@ function If(e) {
 function M1(e) {
   return e.kind === 172;
 }
-function Xa(/** @type {Kf} */ e) {
+/** @returns {boolean} */ function Xa(/** @type {Kf} */ e) {
   return e.kind === 173;
 }
 function L1(e) {
@@ -22899,7 +22899,7 @@ function Of(e) {
 /** @returns {boolean} */ function Al(/** @type {InstanceType<typeof Kf>} */ e) {
   return e.kind === 178;
 }
-function S_(/** @type {Kf} */ e) {
+/** @returns {boolean} */ function S_(/** @type {Kf} */ e) {
   return e.kind === 179;
 }
 function j1(e) {
@@ -22986,7 +22986,7 @@ function pv(e) {
 /** @returns {boolean} */ function Rf(/** @type {Kf | xh} */ e) {
   return e.kind === 211;
 }
-function gr(/** @type {Kf} */ e) {
+/** @returns {boolean} */ function gr(/** @type {Kf} */ e) {
   return e.kind === 212;
 }
 function Za(e) {
@@ -23040,7 +23040,7 @@ function mv(e) {
 /** @returns {boolean} */ function es(/** @type {InstanceType<typeof Kf>} */ e) {
   return e.kind === 244;
 }
-function Ll(/** @type {Kf} */ e) {
+/** @returns {boolean} */ function Ll(/** @type {Kf} */ e) {
   return e.kind === 245;
 }
 function Z1(e) {
@@ -23055,7 +23055,7 @@ function Z1(e) {
 function zf(e) {
   return e.kind === 263;
 }
-function $a(/** @type {Kf} */ e) {
+/** @returns {boolean} */ function $a(/** @type {Kf} */ e) {
   return e.kind === 264;
 }
 function A_(e) {
@@ -23073,31 +23073,31 @@ function jl(e) {
 /** @returns {boolean} */ function Vf(/** @type {InstanceType<typeof Kf>} */ e) {
   return e.kind === 272;
 }
-function Wf(/** @type {Kf} */ e) {
+/** @returns {boolean} */ function Wf(/** @type {Kf} */ e) {
   return e.kind === 273;
 }
-function Gf(/** @type {Kf} */ e) {
+/** @returns {boolean} */ function Gf(/** @type {Kf} */ e) {
   return e.kind === 278;
 }
-function Yf(/** @type {Kf} */ e) {
+/** @returns {boolean} */ function Yf(/** @type {Kf} */ e) {
   return e.kind === 279;
 }
 function nh(e) {
   return e.kind === 280;
 }
-function hv(/** @type {Kf} */ e) {
+/** @returns {boolean} */ function hv(/** @type {Kf} */ e) {
   return e.kind === 354;
 }
 /** @returns {boolean} */ function Hf(/** @type {Kf} */ e) {
   return e.kind === 284;
 }
-function Yp(/** @type {Kf} */ e) {
+/** @returns {boolean} */ function Yp(/** @type {Kf} */ e) {
   return e.kind === 287;
 }
 function yv(e) {
   return e.kind === 290;
 }
-function rh(/** @type {xh} */ e) {
+/** @returns {boolean} */ function rh(/** @type {xh} */ e) {
   return e.kind === 296;
 }
 function gv(e) {
@@ -23352,7 +23352,7 @@ function Uv(e, t) {
 function Xp(e, t, a, s, f) {
   return ((t = rm(t, f)), (s = rm(s, f)), (a = Rv(a, f)), `${e ? "#" : ""}${t}${a}${s}`);
 }
-function fh(/** @type {Kf} */ e) {
+/** @returns {boolean} */ function fh(/** @type {Kf} */ e) {
   if (e.transformFlags & 65536) return !0;
   if (e.transformFlags & 128)
     for (let t of Jv(e)) {
@@ -24131,7 +24131,7 @@ var na;
   var G = {
       createBaseSourceFileNode: /** @returns {InstanceType<typeof d6>} */ (/** @type {number} */ o) => l(new v(o, 0, 0)),
       createBaseIdentifierNode: /** @returns {InstanceType<typeof xh>} */ (/** @type {number} */ o) => l(new h(o, 0, 0)),
-      createBasePrivateIdentifierNode: (o) => l(new b(o, 0, 0)),
+      createBasePrivateIdentifierNode: (/** @type {number} */ o) => l(new b(o, 0, 0)),
       createBaseTokenNode: /** @returns {InstanceType<typeof vh>} */ (/** @type {number} */ o) => l(new f(o, 0, 0)),
       createBaseNode: /** @returns {InstanceType<typeof Kf>} */ (/** @type {number} */ o) => l(new s(o, 0, 0)),
     },
@@ -24643,7 +24643,7 @@ var na;
     }
     u() !== 0 && at(m, o.end, E.Unexpected_keyword_or_identifier);
   }
-  function Rt(o, p, m) {
+  function Rt(o, p, /** @type {number} */ m) {
     u() === m ? De(p) : De(o, t.getTokenValue());
   }
   function fn(/** @type {string | undefined} */ o) {
@@ -24780,7 +24780,7 @@ var na;
   /** @returns {boolean} */ function Sr() {
     return kt(u()) || u() === 11 || u() === 9 || u() === 10;
   }
-  function L_() {
+  /** @returns {boolean} */ function L_() {
     return kt(u()) || u() === 11;
   }
   /** @returns {any} */ function $l(/** @type {boolean} */ o) {
@@ -26062,7 +26062,7 @@ var na;
         : D(y.createYieldExpression(void 0, void 0), o)
     );
   }
-  function Bo(o, /** @type {xh} */ p, m, g, x) {
+  function Bo(/** @type {number} */ o, /** @type {xh} */ p, /** @type {boolean} */ m, /** @type {boolean} */ g, x) {
     q.assert(u() === 39, "parseSimpleArrowFunctionExpression should only have been called if we had a =>");
     /** @type {Kf} */ let P = y.createParameterDeclaration(void 0, void 0, p, void 0, void 0, void 0);
     D(P, p.pos);
@@ -26643,7 +26643,7 @@ var na;
   /** @returns {boolean} */ function Sn() {
     return u() === 15 || u() === 16;
   }
-  function Wr(o, /** @type {xh | Kf} */ p, m, g) {
+  function Wr(/** @type {number} */ o, /** @type {xh | Kf} */ p, m, g) {
     /** @type {Kf} */ let x = y.createTaggedTemplateExpression(p, g, u() === 15 ? (Nt(!0), $n()) : ya(!0));
     return ((m || p.flags & 64) && (x.flags |= 64), (x.questionDotToken = m), D(x, o));
   }
@@ -26917,7 +26917,7 @@ var na;
     j(99);
     /** @type {vh | undefined} */ let m = ft(135);
     j(21);
-    let g;
+    /** @type {Kf | xh | undefined} */ let g;
     u() !== 27 &&
       (u() === 115 || u() === 121 || u() === 87 || (u() === 160 && H(Pc)) || (u() === 135 && H(zs))
         ? (g = Rc(!0))
@@ -27171,7 +27171,7 @@ var na;
   function Ca(o) {
     return (B(), o && u() === 165 ? H(Wu) : (Ve() || u() === 19) && !t.hasPrecedingLineBreak());
   }
-  function Nc() {
+  /** @returns {boolean} */ function Nc() {
     return H(Ca);
   }
   /** @returns {boolean} */ function zs(o) {
@@ -27497,7 +27497,7 @@ var na;
     return ((ce.typeParameters = Q), S_(ce) && (ce.type = ee), Pe(D(ce, o), p));
   }
   /** @returns {boolean} */ function Fc() {
-    let o;
+    /** @type {number | undefined} */ let o;
     if (u() === 60) return !0;
     for (; Xr(u());) {
       if (((o = u()), e2(o))) return !0;
@@ -27620,7 +27620,7 @@ var na;
   /** @returns {Kf} */ function tp() {
     return Xs(O(), qe(), void 0, 232);
   }
-  /** @returns {Kf} */ function Hs(o, p, m) {
+  /** @returns {Kf} */ function Hs(/** @type {number} */ o, p, m) {
     return Xs(o, p, m, 264);
   }
   /** @returns {InstanceType<typeof Kf>} */ function Xs(/** @type {number} */ o, /** @type {boolean} */ p, m, /** @type {number} */ g) {
@@ -27676,7 +27676,7 @@ var na;
       _e = y.createInterfaceDeclaration(m, g, x, P, Q);
     return Pe(D(_e, o), p);
   }
-  function sp(o, p, m) {
+  function sp(/** @type {number} */ o, /** @type {boolean} */ p, m) {
     (j(156), t.hasPrecedingLineBreak() && De(E.Line_break_not_permitted_here));
     let g = vt(),
       x = mn();
@@ -27693,7 +27693,7 @@ var na;
       g = ut(Er);
     return Pe(D(y.createEnumMember(m, g), o), p);
   }
-  /** @returns {InstanceType<typeof Kf>} */ function _p(/** @type {number} */ o, p, m) {
+  /** @returns {InstanceType<typeof Kf>} */ function _p(/** @type {number} */ o, /** @type {boolean} */ p, m) {
     j(94);
     let g = vt(),
       x;
@@ -27753,7 +27753,7 @@ var na;
     let g = t.getTokenFullStart(),
       x;
     Te() && (x = vt());
-    let P;
+    /** @type {number | undefined} */ let P;
     if (
       (x?.escapedText === "type" && (u() !== 161 || (Te() && H(Lc))) && (Te() || Yr())
         ? ((P = 156), (x = Te() ? vt() : void 0))
@@ -27770,7 +27770,7 @@ var na;
     /** @type {Kf} */ let te = y.createImportDeclaration(m, Q, _e, ee);
     return Pe(D(te, o), p);
   }
-  /** @returns {InstanceType<typeof Kf> | undefined} */ function Zc(/** @type {xh | undefined} */ o, p, m, g = !1) {
+  /** @returns {InstanceType<typeof Kf> | undefined} */ function Zc(/** @type {xh | undefined} */ o, /** @type {number} */ p, /** @type {number | undefined} */ m, g = !1) {
     /** @type {Kf | undefined} */ let x;
     return ((o || u() === 42 || u() === 19) && ((x = mp(o, p, m, g)), j(161)), x);
   }
@@ -27785,7 +27785,7 @@ var na;
     let m = Vt(!0);
     return D(y.createImportAttribute(p, m), o);
   }
-  function Zs(o, p) {
+  function Zs(/** @type {number} */ o, p) {
     let m = O();
     p || j(o);
     let g = t.getTokenStart();
@@ -27810,14 +27810,14 @@ var na;
   /** @returns {boolean} */ function fp() {
     return u() === 28 || u() === 161;
   }
-  /** @returns {InstanceType<typeof Kf>} */ function dp(o, p, m, /** @type {xh} */ g, x) {
+  /** @returns {InstanceType<typeof Kf>} */ function dp(/** @type {number} */ o, /** @type {boolean} */ p, m, /** @type {xh} */ g, /** @type {boolean} */ x) {
     j(64);
     let P = Fi();
     en();
     /** @type {Kf} */ let Q = y.createImportEqualsDeclaration(m, x, g, P);
     return Pe(D(Q, o), p);
   }
-  /** @returns {InstanceType<typeof Kf>} */ function mp(/** @type {xh | undefined} */ o, p, m, g) {
+  /** @returns {InstanceType<typeof Kf>} */ function mp(/** @type {xh | undefined} */ o, /** @type {number} */ p, /** @type {number | undefined} */ m, /** @type {boolean} */ g) {
     /** @type {Kf | undefined} */ let x;
     return (
       (!o || Je(28)) &&
@@ -27916,7 +27916,7 @@ var na;
   /** @returns {InstanceType<typeof Kf>} */ function il(/** @type {number} */ o, /** @type {boolean} */ p, m) {
     let g = Xe();
     _t(!0);
-    let x;
+    /** @type {boolean | undefined} */ let x;
     Je(64) ? (x = !0) : j(90);
     let P = Vt(!0);
     (en(), _t(g));
@@ -29108,7 +29108,7 @@ var Kf = class {
   /** @returns {InstanceType<typeof d6>} */ getSourceFile() {
     return bi(this);
   }
-  getStart(/** @type {d6 | undefined} */ e, t) {
+  /** @returns {number} */ getStart(/** @type {d6 | undefined} */ e, t) {
     return (this.assertHasRealPosition(), kl(this, e, t));
   }
   /** @returns {number} */ getFullStart() {
@@ -29117,7 +29117,7 @@ var Kf = class {
   /** @returns {number} */ getEnd() {
     return (this.assertHasRealPosition(), this.end);
   }
-  getWidth(/** @type {d6} */ e) {
+  /** @returns {number} */ getWidth(/** @type {d6} */ e) {
     return (this.assertHasRealPosition(), this.getEnd() - this.getStart(e));
   }
   getFullWidth() {
@@ -29365,10 +29365,10 @@ var Zf = class {
     }
   },
   Th = class extends Zf {
-    constructor(/** @type {int} */ e, t, a) {
+    constructor(/** @type {int} */ e, /** @type {number} */ t, /** @type {number} */ a) {
       super(e, t, a);
     }
-    get text() {
+    /** @returns {string} */ get text() {
       return Pn(this);
     }
   },
@@ -29815,7 +29815,7 @@ var v6 = ts["5.0"],
 /** @returns {boolean} */ function Dh(/** @type {Kf} */ e) {
   return e.kind !== ye.SemicolonClassElement;
 }
-function Fe(e, /** @type {Kf} */ t) {
+/** @returns {boolean} */ function Fe(/** @type {number} */ e, /** @type {Kf} */ t) {
   return rr(t)?.some(/** @returns {boolean} */ (s) => s.kind === e) === !0;
 }
 /** @returns {InstanceType<typeof vh> | null} */ function Ph(/** @type {InstanceType<typeof Kf>} */ e) {
@@ -30011,7 +30011,7 @@ var id = class extends Error {
     return this.location.start.column;
   }
 };
-/** @returns {id} */ function ue(e, t, a) {
+/** @returns {id} */ function ue(e, /** @type {string} */ t, a) {
   let s, f;
   if (
     (Array.isArray(e)
@@ -30028,7 +30028,7 @@ var id = class extends Error {
   });
   return new id(t, a.fileName, { end: b, start: h });
 }
-function M6(/** @type {Kf | vh} */ e, /** @type {d6} */ t) {
+/** @returns {boolean} */ function M6(/** @type {Kf | vh} */ e, /** @type {d6} */ t) {
   return e.kind === ye.EndOfFileToken ? !!e.jsDoc : e.getWidth(t) !== 0;
 }
 /** @returns {InstanceType<typeof vh>} */ function L6(e, t) {
@@ -30079,14 +30079,14 @@ function Rh(/** @type {Kf} */ e) {
 function Uh(e) {
   return e.getSourceFile().text.slice(e.pos, e.end).trimStart() || "(Missing)";
 }
-function J6(/** @type {Kf} */ e) {
+/** @returns {boolean} */ function J6(/** @type {Kf} */ e) {
   return gr(e) && et(e.name) && ql(e.expression);
 }
 /** @returns {boolean} */ function ql(/** @type {xh | Kf} */ e) {
   return e.kind === ye.Identifier || J6(e);
 }
 var ve = Ae;
-function R6(/** @type {Kf} */ e) {
+/** @returns {boolean} */ function R6(/** @type {Kf} */ e) {
   return e == null ? !0 : e.pos === e.end && e.pos >= 0 && e.kind !== ve.EndOfFileToken;
 }
 /** @returns {boolean} */ function Bh(/** @type {InstanceType<typeof Kf>} */ e) {
@@ -30108,7 +30108,7 @@ function q6(e) {
 function F6(/** @type {Kf} */ e) {
   return ff(e.parent, xf);
 }
-function z6(/** @type {Kf} */ e) {
+/** @returns {boolean} */ function z6(/** @type {Kf} */ e) {
   switch (e.kind) {
     case ve.ClassDeclaration:
       return !0;
@@ -30252,7 +30252,7 @@ function qh(/** @type {Kf} */ e, /** @type {vh} */ t) {
     throw ue(t, `'${rt(t.kind)}' modifier cannot be used here.`);
 }
 var G6 = ts["5.9"];
-function P_(/** @type {Kf | undefined} */ e) {
+/** @returns {string | null} */ function P_(/** @type {Kf | undefined} */ e) {
   return e
     ? G6
       ? e.phaseModifier === Ae.TypeKeyword
@@ -30534,7 +30534,7 @@ function Y6(/** @type {Kf} */ e) {
   } else if (!Bl(t) && t.kind !== be.ObjectLiteralExpression && t.kind !== be.ArrayLiteralExpression)
     throw ue(t, `The left-hand side of a '${s}' statement must be a variable or a property access.`);
 }
-function Vh(/** @type {Kf} */ e, t) {
+function Vh(/** @type {Kf} */ e, /** @type {boolean} */ t) {
   if (!t && e.moduleSpecifier == null) throw ue(e, "Module specifier must be a string literal.");
   if (e.moduleSpecifier && e.moduleSpecifier.kind !== be.StringLiteral)
     throw ue(e.moduleSpecifier, "Module specifier must be a string literal.");
@@ -30698,7 +30698,7 @@ var Fl = class {
         })
       : [];
   }
-  converter(/** @type {d6 | Kf | xh | vh | Th | undefined} */ t, /** @type {Kf | undefined} */ a, s) {
+  converter(/** @type {d6 | Kf | xh | vh | Th | undefined} */ t, /** @type {Kf | undefined} */ a, /** @type {boolean | undefined} */ s) {
     if (!t) return null;
     let f = this.allowPattern;
     s != null && (this.allowPattern = s);
@@ -32346,7 +32346,7 @@ function* Hh(/** @type {d6} */ e, t = e.getSourceFile()) {
   }
   return !0;
 }
-function Yh(e, t) {
+function Yh(e, /** @type {string} */ t) {
   let a = [];
   return (
     e((s, f, h) => {
@@ -32357,7 +32357,7 @@ function Yh(e, t) {
     a
   );
 }
-function ld(/** @type {Kf} */ e) {
+/** @returns {boolean} */ function ld(/** @type {Kf} */ e) {
   return e.kind === Ae.JsxElement || e.kind === Ae.JsxFragment;
 }
 var [CT, DT] = km.split(".").map(/** @returns {number} */ (e) => Number.parseInt(e, 10));

@@ -32,12 +32,12 @@ function getJsxTokens(acorn) {
       jsxTagEnd: new TokenType('jsxTagEnd')
     };
 
-    tokTypes.jsxTagStart.updateContext = function() {
+    tokTypes.jsxTagStart.updateContext = /** @this {import("acorn").Parser} */ function() {
       this.context.push(tc_expr); // treat as beginning of JSX expression
       this.context.push(tc_oTag); // start opening tag context
       this.exprAllowed = false;
     };
-    tokTypes.jsxTagEnd.updateContext = function(prevType) {
+    tokTypes.jsxTagEnd.updateContext = /** @this {import("acorn").Parser} */ function(/** @type {import("acorn").TokenType} */ prevType) {
       let out = this.context.pop();
       if (out === tc_oTag && prevType === tt.slash || out === tc_cTag) {
         this.context.pop();
@@ -91,7 +91,7 @@ Object.defineProperty(module.exports, "tokTypes", {
   enumerable: true
 });
 
-function plugin(options, Parser) {
+function plugin(options, /** @type {typeof import("acorn").Parser} */ Parser) {
   const acorn = Parser.acorn || require("acorn");
   const acornJsx = getJsxTokens(acorn);
   const tt = acorn.tokTypes;

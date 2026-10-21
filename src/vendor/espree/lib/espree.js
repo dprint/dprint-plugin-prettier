@@ -135,7 +135,7 @@ function convertAcornCommentToEsprimaComment(
 export default () => {
 	/**
 	 * Returns the Espree parser.
-	 * @param {AcornJsxParserCtorEnhanced} Parser The Acorn parser. The `acorn` property is missing from acorn's
+	 * @param {typeof import("acorn").Parser} Parser The Acorn parser. The `acorn` property is missing from acorn's
 	 *   TypeScript but is present statically on the class.
 	 * @returns {EspreeParserCtor} The Espree Parser constructor.
 	 */
