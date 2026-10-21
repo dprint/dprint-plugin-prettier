@@ -818,7 +818,7 @@ pp$9.eatContextual = /** @returns {boolean} */ /** @this {Parser} */ function(/*
   return true
 };
 
-pp$9.catchStackOverflow = /** @this {Parser} */ function(f) {
+pp$9.catchStackOverflow = /** @this {Parser} */ function(/** @type {() => Node} */ f) {
   try {
     return f()
   } catch (e) {
@@ -3107,7 +3107,7 @@ pp$5.parseSubscript = /** @returns {Node} */ /** @this {Parser} */ function(/** 
 // `new`, or an expression wrapped in punctuation like `()`, `[]`,
 // or `{}`.
 
-pp$5.parseExprAtom = /** @returns {Node} */ /** @this {Parser} */ function(refDestructuringErrors, forInit, forNew) {
+pp$5.parseExprAtom = /** @returns {Node} */ /** @this {Parser} */ function(/** @type {DestructuringErrors | null | undefined} */ refDestructuringErrors, /** @type {boolean | string | undefined} */ forInit, /** @type {boolean | undefined} */ forNew) {
   // If a division operator appears in an expression position, the
   // tokenizer got confused, and we force it to read a regexp instead.
   if (this.type === types$1.slash) { this.readRegexp(); }

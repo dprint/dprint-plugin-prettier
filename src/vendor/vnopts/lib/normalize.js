@@ -186,7 +186,7 @@ export class Normalizer {
         }
     }
     _partitionOptionKeys(/** @type {Record<string, any>} */ options) {
-        const [knownKeys, unknownKeys] = partition(Object.keys(options).filter(/** @returns {boolean} */ key => !this._identifyMissing(key, options)), /** @returns {boolean} */ key => key in this._utils.schemas);
+        const [knownKeys, unknownKeys] = partition(Object.keys(options).filter(/** @returns {boolean} */ key => !this._identifyMissing(key, options)), /** @returns {boolean} */ (/** @type {string} */ key) => key in this._utils.schemas);
         return { knownKeys, unknownKeys };
     }
     _applyValidation(value, /** @type {string} */ key, /** @type {VnoptsSchema} */ schema) {

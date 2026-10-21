@@ -14,7 +14,7 @@ import isNonEmptyArray from "./is-non-empty-array.js";
  * @param {string | URL | undefined} [file]
  * @returns {SupportLanguage | undefined}
  */
-function getLanguageByFileName(/** @type {any[]} */ languages, /** @type {string | undefined} */ file) {
+function getLanguageByFileName(/** @type {SupportLanguage[]} */ languages, /** @type {string | undefined} */ file) {
   if (!file) {
     return;
   }
@@ -22,10 +22,10 @@ function getLanguageByFileName(/** @type {any[]} */ languages, /** @type {string
   /** @type {string} */ const basename = getFileBasename(file).toLowerCase();
 
   return (
-    languages.find(/** @returns {boolean | undefined} */ ({ filenames }) =>
+    languages.find(/** @returns {boolean | undefined} */ (/** @type {SupportLanguage} */ { filenames }) =>
       filenames?.some(/** @returns {boolean} */ (/** @type {string} */ name) => name.toLowerCase() === basename),
     ) ??
-    languages.find(/** @returns {boolean} */ ({ extensions }) =>
+    languages.find(/** @returns {boolean} */ (/** @type {SupportLanguage} */ { extensions }) =>
       extensions?.some(/** @returns {boolean} */ (/** @type {string} */ extension) => basename.endsWith(extension)),
     )
   );
