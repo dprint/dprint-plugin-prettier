@@ -7,7 +7,7 @@ import { printExpand } from "./utilities.js";
 */
 
 /** @type {AttributeValuePredicate} */
-const isStyle = /** @returns {boolean} */ (/** @type {AttributePath} */ { node }, options) =>
+const isStyle = /** @returns {boolean} */ (/** @type {AttributePath} */ { node }, /** @type {import("../print-options.js").HtmlPrintOptions} */ options) =>
   node.fullName === "style" &&
   !options.parentParser &&
   !node.value.includes("{{");

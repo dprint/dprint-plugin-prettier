@@ -24,12 +24,12 @@ const printers = /** @type {AttributeValuePrinter[]} */ ([
     print: printVueVForDirective,
   },
   {
-    test: /** @returns {boolean} */ (path, options) =>
+    test: /** @returns {boolean} */ (/** @type {AstPath} */ path, /** @type {import("../print-options.js").HtmlPrintOptions} */ options) =>
       /** @type {import("../parse/ast.js").Node} */ (path.node).fullName === "generic" && isVueScriptTag(path.parent, options),
     print: printVueScriptGenericAttributeValue,
   },
   {
-    test: /** @returns {boolean} */ (/** @type {AttributePath} */ { node }, options) =>
+    test: /** @returns {boolean} */ (/** @type {AttributePath} */ { node }, /** @type {import("../print-options.js").HtmlPrintOptions} */ options) =>
       isVueSlotAttribute(node) || isVueSfcBindingsAttribute(node, options),
     print: printVueBindings,
   },
@@ -70,14 +70,14 @@ const printers = /** @type {AttributeValuePrinter[]} */ ([
     print: printExpression,
   },
 ]).map(({ test, print }) => ({
-  test: /** @returns {boolean} */ (path, options) => options.parser === "vue" && test(path, options),
+  test: /** @returns {boolean} */ (/** @type {AstPath} */ path, /** @type {import("../print-options.js").HtmlPrintOptions} */ options) => options.parser === "vue" && test(path, options),
   print,
 }));
 
 /**
  * @returns {Promise<Doc>}
  */
-async function printVueVOnDirective(textToDoc, print, /** @type {AstPath} */ path, options) {
+async function printVueVOnDirective(textToDoc, print, /** @type {AstPath} */ path, /** @type {import("../print-options.js").HtmlPrintOptions} */ options) {
   try {
     return await printExpression(textToDoc, print, path, options);
   } catch (error) {
@@ -103,7 +103,7 @@ async function printVueVOnDirective(textToDoc, print, /** @type {AstPath} */ pat
 /**
  * @returns {Promise<Doc>}
  */
-function printVueVBindDirective(textToDoc, print, /** @type {AstPath} */ path, options) {
+function printVueVBindDirective(textToDoc, print, /** @type {AstPath} */ path, /** @type {import("../print-options.js").HtmlPrintOptions} */ options) {
   const text = getUnescapedAttributeValue(path.node);
   const parser = isVueSfcWithTypescriptScript(path, options)
     ? "__vue_ts_expression"
@@ -120,7 +120,7 @@ function printVueVBindDirective(textToDoc, print, /** @type {AstPath} */ path, o
 /**
  * @returns {Promise<Doc>}
  */
-function printExpression(textToDoc, print, /** @type {AstPath} */ path, options) {
+function printExpression(textToDoc, print, /** @type {AstPath} */ path, /** @type {import("../print-options.js").HtmlPrintOptions} */ options) {
   const text = getUnescapedAttributeValue(path.node);
   const parser = isVueSfcWithTypescriptScript(path, options)
     ? "__ts_expression"

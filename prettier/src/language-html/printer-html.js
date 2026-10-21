@@ -44,7 +44,7 @@ import {
   unescapeQuoteEntities,
 } from "./utilities/index.js";
 
-function genericPrint(/** @type {AstPath} */ path, options, /** @type {(selector?: any, args?: any) => any} */ print) {
+function genericPrint(/** @type {AstPath} */ path, /** @type {import("./print-options.js").HtmlPrintOptions} */ options, /** @type {(selector?: any, args?: any) => any} */ print) {
   /** @type {{ node: import("./parse/ast.js").HtmlNode }} */ const { node } = path;
 
   switch (node.kind) {
@@ -68,7 +68,7 @@ function genericPrint(/** @type {AstPath} */ path, options, /** @type {(selector
       // print like "break-after-operator" layout assignment in estree printer
       return group([
         "@let ",
-        group([node.id, " =", group(indent([line, print("init")]))]),
+        group([/** @type {import("./parse/ast.js").Node} */ (node).id, " =", group(indent([line, print("init")]))]),
         // semicolon is required
         ";",
       ]);
@@ -91,13 +91,13 @@ function genericPrint(/** @type {AstPath} */ path, options, /** @type {(selector
         printClosingTagEnd(node, options),
       ];
     case "text": {
-      if (node.parent.kind === "interpolation") {
+      if (/** @type {import("./parse/ast.js").Node} */ (node).parent.kind === "interpolation") {
         // replace the trailing literalline with hardline for better readability
         const trailingNewlineRegex = /\n[^\S\n]*$/;
-        /** @type {boolean} */ const hasTrailingNewline = trailingNewlineRegex.test(node.value);
+        /** @type {boolean} */ const hasTrailingNewline = trailingNewlineRegex.test(/** @type {import("./parse/ast.js").Node} */ (node).value);
         const value = hasTrailingNewline
-          ? node.value.replace(trailingNewlineRegex, "")
-          : node.value;
+          ? /** @type {import("./parse/ast.js").Node} */ (node).value.replace(trailingNewlineRegex, "")
+          : /** @type {import("./parse/ast.js").Node} */ (node).value;
         return [replaceEndOfLine(value), hasTrailingNewline ? hardline : ""];
       }
 
@@ -118,7 +118,7 @@ function genericPrint(/** @type {AstPath} */ path, options, /** @type {(selector
         group([
           printOpeningTagStart(node, options),
           " ",
-          node.value.replace(/^html\b/i, "html").replaceAll(/\s+/g, " "),
+          /** @type {import("./parse/ast.js").Node} */ (node).value.replace(/^html\b/i, "html").replaceAll(/\s+/g, " "),
         ]),
         printClosingTagEnd(node, options),
       ];
@@ -132,7 +132,7 @@ function genericPrint(/** @type {AstPath} */ path, options, /** @type {(selector
       ];
 
     case "attribute": {
-      if (node.value === null) {
+      if (/** @type {import("./parse/ast.js").Node} */ (node).value === null) {
         return node.rawName;
       }
 

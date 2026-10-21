@@ -9,7 +9,7 @@ import { printExpand } from "./utilities.js";
 */
 
 /** @type {AttributeValuePredicate} */
-const isPermissionsPolicy = /** @returns {boolean} */ (/** @type {AttributePath} */ { node }, options) =>
+const isPermissionsPolicy = /** @returns {boolean} */ (/** @type {AttributePath} */ { node }, /** @type {import("../print-options.js").HtmlPrintOptions} */ options) =>
   node.fullName === "allow" &&
   !options.parentParser &&
   node.parent.fullName === "iframe" &&

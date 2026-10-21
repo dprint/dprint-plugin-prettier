@@ -6,7 +6,7 @@ import { getUnescapedAttributeValue } from "../utilities/index.js";
 */
 
 /** @type {AttributeValuePredicate} */
-const isClassNames = /** @returns {boolean} */ (/** @type {AttributePath} */ { node }, options) =>
+const isClassNames = /** @returns {boolean} */ (/** @type {AttributePath} */ { node }, /** @type {import("../print-options.js").HtmlPrintOptions} */ options) =>
   !options.parentParser &&
   node.fullName === "class" &&
   !node.value.includes("{{");

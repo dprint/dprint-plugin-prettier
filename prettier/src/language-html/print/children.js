@@ -44,7 +44,7 @@ import {
   return endLocation;
 }
 
-function printChild(/** @type {AstPath} */ path, options, /** @type {(selector?: any, args?: any) => any} */ print) {
+function printChild(/** @type {AstPath} */ path, /** @type {import("../print-options.js").HtmlPrintOptions} */ options, /** @type {(selector?: any, args?: any) => any} */ print) {
   /** @type {import("../parse/ast.js").Node} */ const child = path.node;
 
   if (hasPrettierIgnore(child)) {
@@ -165,7 +165,7 @@ function printBetweenLine(/** @type {import("../parse/ast.js").Node} */ prevNode
   return softline;
 }
 
-/** @returns {any[]} */ function printChildren(/** @type {AstPath} */ path, options, /** @type {(selector?: any, args?: any) => any} */ print) {
+/** @returns {any[]} */ function printChildren(/** @type {AstPath} */ path, /** @type {import("../print-options.js").HtmlPrintOptions} */ options, /** @type {(selector?: any, args?: any) => any} */ print) {
   /** @type {{ node: import("../parse/ast.js").Node }} */ const { node } = path;
 
   if (forceBreakChildren(node)) {

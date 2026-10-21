@@ -16,7 +16,7 @@ import vueAttributePrinters from "./vue-attributes.js";
 @import {Doc} from "../../document/index.js"
 @import AstPath from "../../common/ast-path.js"
 
-@typedef {(path: AstPath, options: any) => boolean} AttributeValuePredicate
+@typedef {(path: AstPath, options: import("../print-options.js").HtmlPrintOptions) => boolean} AttributeValuePredicate
 @typedef {AstPath & { node: import("../parse/ast.js").Node }} AttributePath
 @typedef {(textToDoc: any, print: any, path: AstPath, options: any) => Promise<Doc>} AsyncAttributeValuePrint
 @typedef {(textToDoc: any, print: any, path: AstPath, options: any) => Doc} SyncAttributeValuePrint
@@ -38,7 +38,7 @@ const printers = [
   print: createAttributePrinter(print),
 }));
 
-function printAttribute(/** @type {AstPath} */ path, options) {
+function printAttribute(/** @type {AstPath} */ path, /** @type {import("../print-options.js").HtmlPrintOptions} */ options) {
   /** @type {{ node: import("../parse/ast.js").Node }} */ const { node } = path;
   const { value } = node;
 

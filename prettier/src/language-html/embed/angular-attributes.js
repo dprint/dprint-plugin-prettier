@@ -80,7 +80,7 @@ const printers = [
     print: printAngularInterpolation,
   },
 ].map(({ test, print }) => ({
-  test: /** @returns {boolean} */ (/** @type {import("../../common/ast-path.js").default} */ path, options) =>
+  test: /** @returns {boolean} */ (/** @type {import("../../common/ast-path.js").default} */ path, /** @type {import("../print-options.js").HtmlPrintOptions} */ options) =>
     options.parser === "angular" && test(path /* , options */),
   print,
 }));

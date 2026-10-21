@@ -1,3 +1,4 @@
+// @nts-check
 import { getHtmlTagDefinition } from "./html_tags.mjs";
 import { Parser } from "./parser.mjs";
 //#region ../compiler/src/ml_parser/html_parser.ts
@@ -12,7 +13,7 @@ var HtmlParser = class extends Parser {
 	constructor() {
 		super(getHtmlTagDefinition);
 	}
-	parse(source, url, options, isTagNameCaseSensitive = false, getTagContentType) {
+	/** @returns {import("./parser.mjs").ParseTreeResult} */ parse(/** @type {string} */ source, /** @type {string} */ url, options, isTagNameCaseSensitive = false, getTagContentType) {
 		return super.parse(source, url, options, isTagNameCaseSensitive, getTagContentType);
 	}
 };

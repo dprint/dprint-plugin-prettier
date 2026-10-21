@@ -24,7 +24,7 @@ const htmlTrimLeadingBlankLines = /** @returns {string} */ (/** @type {string} *
   string.replaceAll(/^[\t\f\r ]*\n/g, "");
 const htmlTrimPreserveIndentation = /** @returns {string} */ (/** @type {string} */ string) =>
   htmlTrimLeadingBlankLines(htmlWhitespace.trimEnd(string));
-const getLeadingAndTrailingHtmlWhitespace = (/** @type {string} */ string) => {
+const getLeadingAndTrailingHtmlWhitespace = /** @returns {{ leadingWhitespace: string, trailingWhitespace: string, text: string }} */ (/** @type {string} */ string) => {
   /** @type {string} */ let text = string;
   const leadingWhitespace = htmlWhitespace.getLeadingWhitespace(text);
   if (leadingWhitespace) {
@@ -42,7 +42,7 @@ const getLeadingAndTrailingHtmlWhitespace = (/** @type {string} */ string) => {
   };
 };
 
-/** @returns {boolean} */ function shouldPreserveContent(/** @type {import("../parse/ast.js").Node} */ node, options) {
+/** @returns {boolean} */ function shouldPreserveContent(/** @type {import("../parse/ast.js").Node} */ node, /** @type {import("../print-options.js").HtmlPrintOptions} */ options) {
   // unterminated node in ie conditional comment
   // e.g. <!--[if lt IE 9]><html><![endif]-->
   if (
@@ -108,7 +108,7 @@ function isTextLikeNode(/** @type {import("../parse/ast.js").Node} */ node) {
   return node.kind === "text" || node.kind === "comment";
 }
 
-/** @returns {boolean} */ function isScriptLikeTag(/** @type {import("../parse/ast.js").Node} */ node, options) {
+/** @returns {boolean} */ function isScriptLikeTag(/** @type {import("../parse/ast.js").Node} */ node, /** @type {import("../print-options.js").HtmlPrintOptions} */ options) {
   return (
     node.kind === "element" &&
     (node.fullName === "script" ||
@@ -121,11 +121,11 @@ function isTextLikeNode(/** @type {import("../parse/ast.js").Node} */ node) {
   );
 }
 
-/** @returns {boolean | undefined} */ function canHaveInterpolation(/** @type {import("../parse/ast.js").Node} */ node, options) {
+/** @returns {boolean | undefined} */ function canHaveInterpolation(/** @type {import("../parse/ast.js").Node} */ node, /** @type {import("../print-options.js").HtmlPrintOptions} */ options) {
   return node.children && !isScriptLikeTag(node, options);
 }
 
-/** @returns {boolean} */ function isWhitespaceSensitiveNode(/** @type {import("../parse/ast.js").Node} */ node, options) {
+/** @returns {boolean} */ function isWhitespaceSensitiveNode(/** @type {import("../parse/ast.js").Node} */ node, /** @type {import("../print-options.js").HtmlPrintOptions} */ options) {
   return (
     isScriptLikeTag(node, options) ||
     node.kind === "interpolation" ||
@@ -137,7 +137,7 @@ function isTextLikeNode(/** @type {import("../parse/ast.js").Node} */ node) {
   return getNodeCssStyleWhiteSpace(node).startsWith("pre");
 }
 
-/** @returns {boolean} */ function isLeadingSpaceSensitiveNode(/** @type {import("../parse/ast.js").Node} */ node, options) {
+/** @returns {boolean} */ function isLeadingSpaceSensitiveNode(/** @type {import("../parse/ast.js").Node} */ node, /** @type {import("../print-options.js").HtmlPrintOptions} */ options) {
   /** @type {boolean} */ const isLeadingSpaceSensitive = _isLeadingSpaceSensitiveNode();
 
   if (
@@ -193,7 +193,7 @@ function isTextLikeNode(/** @type {import("../parse/ast.js").Node} */ node) {
   }
 }
 
-/** @returns {boolean} */ function isTrailingSpaceSensitiveNode(/** @type {import("../parse/ast.js").Node} */ node, options) {
+/** @returns {boolean} */ function isTrailingSpaceSensitiveNode(/** @type {import("../parse/ast.js").Node} */ node, /** @type {import("../print-options.js").HtmlPrintOptions} */ options) {
   if (isFrontMatter(node) || node.kind === "angularControlFlowBlock") {
     return false;
   }
@@ -235,7 +235,7 @@ function isTextLikeNode(/** @type {import("../parse/ast.js").Node} */ node) {
   return true;
 }
 
-/** @returns {boolean} */ function isDanglingSpaceSensitiveNode(/** @type {import("../parse/ast.js").Node} */ node, options) {
+/** @returns {boolean} */ function isDanglingSpaceSensitiveNode(/** @type {import("../parse/ast.js").Node} */ node, /** @type {import("../print-options.js").HtmlPrintOptions} */ options) {
   return (
     isDanglingSpaceSensitiveCssDisplay(node.cssDisplay) &&
     !isScriptLikeTag(node, options)
@@ -375,7 +375,7 @@ function forceBreakChildren(/** @type {import("../parse/ast.js").Node} */ node) 
   }
 }
 
-/** @returns {string | undefined} */ function inferScriptParser(/** @type {import("../parse/ast.js").Node} */ node, options) {
+/** @returns {string | undefined} */ function inferScriptParser(/** @type {import("../parse/ast.js").Node} */ node, /** @type {import("../print-options.js").HtmlPrintOptions} */ options) {
   const { name, attrMap } = node;
 
   if (name !== "script" || Object.hasOwn(attrMap, "src")) {
@@ -393,7 +393,7 @@ function forceBreakChildren(/** @type {import("../parse/ast.js").Node} */ node) 
   );
 }
 
-/** @returns {string | undefined} */ function inferVueSfcBlockParser(/** @type {import("../parse/ast.js").Node} */ node, options) {
+/** @returns {string | undefined} */ function inferVueSfcBlockParser(/** @type {import("../parse/ast.js").Node} */ node, /** @type {import("../print-options.js").HtmlPrintOptions} */ options) {
   if (!isVueNonHtmlBlock(node, options)) {
     return;
   }
@@ -410,7 +410,7 @@ function forceBreakChildren(/** @type {import("../parse/ast.js").Node} */ node) 
   );
 }
 
-/** @returns {string | undefined} */ function inferStyleParser(/** @type {import("../parse/ast.js").Node} */ node, options) {
+/** @returns {string | undefined} */ function inferStyleParser(/** @type {import("../parse/ast.js").Node} */ node, /** @type {import("../print-options.js").HtmlPrintOptions} */ options) {
   if (node.name === "style") {
     const { lang } = node.attrMap;
     return lang ? inferParser(options, { language: lang }) : "css";
@@ -421,7 +421,7 @@ function forceBreakChildren(/** @type {import("../parse/ast.js").Node} */ node) 
   }
 }
 
-/** @returns {string | undefined} */ function inferElementParser(/** @type {import("../parse/ast.js").Node} */ node, options) {
+/** @returns {string | undefined} */ function inferElementParser(/** @type {import("../parse/ast.js").Node} */ node, /** @type {import("../print-options.js").HtmlPrintOptions} */ options) {
   return (
     inferScriptParser(node, options) ??
     inferStyleParser(node, options) ??
@@ -475,7 +475,7 @@ function forceBreakChildren(/** @type {import("../parse/ast.js").Node} */ node) 
   return false;
 }
 
-/** @returns {string} */ function getNodeCssStyleDisplay(/** @type {import("../parse/ast.js").Node} */ node, options) {
+/** @returns {string} */ function getNodeCssStyleDisplay(/** @type {import("../parse/ast.js").Node} */ node, /** @type {import("../print-options.js").HtmlPrintOptions} */ options) {
   // Every root block in Vue.js SFC is a block
   if (isVueSfcBlock(node, options)) {
     return "block";
@@ -539,11 +539,11 @@ function forceBreakChildren(/** @type {import("../parse/ast.js").Node} */ node) 
 // top-level elements (excluding <template>, <style> and <script>) in Vue.js SFC are considered custom block
 // See https://vue-loader.vuejs.org/spec.html for detail
 const vueRootElementsSet = new Set(["template", "style", "script"]);
-/** @returns {boolean} */ function isVueCustomBlock(/** @type {import("../parse/ast.js").Node} */ node, options) {
+/** @returns {boolean} */ function isVueCustomBlock(/** @type {import("../parse/ast.js").Node} */ node, /** @type {import("../print-options.js").HtmlPrintOptions} */ options) {
   return isVueSfcBlock(node, options) && !vueRootElementsSet.has(node.fullName);
 }
 
-/** @returns {boolean} */ function isVueSfcBlock(/** @type {import("../parse/ast.js").Node} */ node, options) {
+/** @returns {boolean} */ function isVueSfcBlock(/** @type {import("../parse/ast.js").Node} */ node, /** @type {import("../print-options.js").HtmlPrintOptions} */ options) {
   return (
     options.parser === "vue" &&
     node.kind === "element" &&
@@ -552,7 +552,7 @@ const vueRootElementsSet = new Set(["template", "style", "script"]);
   );
 }
 
-function isVueNonHtmlBlock(/** @type {import("../parse/ast.js").Node} */ node, options) {
+function isVueNonHtmlBlock(/** @type {import("../parse/ast.js").Node} */ node, /** @type {import("../print-options.js").HtmlPrintOptions} */ options) {
   return (
     isVueSfcBlock(node, options) &&
     (isVueCustomBlock(node, options) ||
@@ -570,7 +570,7 @@ function isVueNonHtmlBlock(/** @type {import("../parse/ast.js").Node} */ node, o
   );
 }
 
-/** @returns {boolean} */ function isVueSfcBindingsAttribute(/** @type {import("../parse/ast.js").Node} */ attribute, options) {
+/** @returns {boolean} */ function isVueSfcBindingsAttribute(/** @type {import("../parse/ast.js").Node} */ attribute, /** @type {import("../print-options.js").HtmlPrintOptions} */ options) {
   const element = attribute.parent;
   if (!isVueSfcBlock(element, options)) {
     return false;
@@ -597,7 +597,7 @@ function isVueNonHtmlBlock(/** @type {import("../parse/ast.js").Node} */ node, o
     : join(line, htmlWhitespace.split(value));
 }
 
-/** @returns {boolean} */ function isVueScriptTag(/** @type {import("../parse/ast.js").Node} */ node, options) {
+/** @returns {boolean} */ function isVueScriptTag(/** @type {import("../parse/ast.js").Node} */ node, /** @type {import("../print-options.js").HtmlPrintOptions} */ options) {
   return isVueSfcBlock(node, options) && node.name === "script";
 }
 
@@ -606,7 +606,7 @@ function isVueNonHtmlBlock(/** @type {import("../parse/ast.js").Node} */ node, o
   return valueSpan.end.offset - valueSpan.start.offset === value.length + 2;
 }
 
-/** @returns {boolean} */ function shouldUnquoteAttributeValue(/** @type {import("../parse/ast.js").Node} */ node, options) {
+/** @returns {boolean} */ function shouldUnquoteAttributeValue(/** @type {import("../parse/ast.js").Node} */ node, /** @type {import("../print-options.js").HtmlPrintOptions} */ options) {
   if (isAttributeValueQuoted(node)) {
     return false;
   }

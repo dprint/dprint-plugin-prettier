@@ -35,7 +35,7 @@ const embeddedAngularControlFlowBlocks = new Set([
   "case",
 ]);
 
-function embed(/** @type {AstPath} */ path, options) {
+function embed(/** @type {AstPath} */ path, /** @type {import("./print-options.js").HtmlPrintOptions} */ options) {
   /** @type {{ node: import("./parse/ast.js").HtmlNode }} */ const { node } = path;
 
   switch (node.kind) {
@@ -45,7 +45,7 @@ function embed(/** @type {AstPath} */ path, options) {
         return;
       }
 
-      if (!node.isSelfClosing && isVueNonHtmlBlock(node, options)) {
+      if (!/** @type {import("./parse/ast.js").Node} */ (node).isSelfClosing && isVueNonHtmlBlock(node, options)) {
         /** @type {string | undefined} */ const parser = inferElementParser(node, options);
         if (!parser) {
           return;
@@ -77,8 +77,8 @@ function embed(/** @type {AstPath} */ path, options) {
       break;
 
     case "text":
-      if (isScriptLikeTag(node.parent, options)) {
-        /** @type {string | undefined} */ const parser = inferElementParser(node.parent, options);
+      if (isScriptLikeTag(/** @type {import("./parse/ast.js").Node} */ (node).parent, options)) {
+        /** @type {string | undefined} */ const parser = inferElementParser(/** @type {import("./parse/ast.js").Node} */ (node).parent, options);
         if (parser) {
           return async (textToDoc) => {
             const value =
@@ -111,7 +111,7 @@ function embed(/** @type {AstPath} */ path, options) {
             ];
           };
         }
-      } else if (node.parent.kind === "interpolation") {
+      } else if (/** @type {import("./parse/ast.js").Node} */ (node).parent.kind === "interpolation") {
         return async (textToDoc) => {
           const textToDocOptions = {
             __isInHtmlInterpolation: true, // to avoid unexpected `}}`

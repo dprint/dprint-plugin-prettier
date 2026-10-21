@@ -23,10 +23,19 @@ export type GraphqlAstNode = {
   selectionSet?: any;
   selections?: any;
   tokenCount?: any;
+  type?: any;
   typeCondition?: any;
   types?: any;
   value?: any;
   values?: any;
   variable?: any;
   variableDefinitions?: any;
+};
+
+// the options that graphql's parser is created with, of which prettier gives `experimentalFragmentArguments`
+export type GraphqlParseOptions = {
+  lexer?: any;
+  noLocation?: boolean;
+  maxTokens?: number;
+  experimentalFragmentArguments?: boolean;
 };

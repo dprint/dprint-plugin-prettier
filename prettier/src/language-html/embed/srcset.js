@@ -11,7 +11,7 @@ import { printExpand } from "./utilities.js";
 */
 
 /** @type {AttributeValuePredicate} */
-const isSrcset = /** @returns {boolean} */ (path /* , options*/) =>
+const isSrcset = /** @returns {boolean} */ (/** @type {import("../../common/ast-path.js").default} */ path /* , options*/) =>
   /** @type {import("../parse/ast.js").Node} */ (path.node).fullName === "srcset" &&
   (/** @type {import("../parse/ast.js").Node} */ (path.parent).fullName === "img" || /** @type {import("../parse/ast.js").Node} */ (path.parent).fullName === "source");
 

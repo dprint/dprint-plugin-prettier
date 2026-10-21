@@ -8,9 +8,9 @@ import { hasIgnorePragma, hasPragma } from "./pragma.js";
 @import {ParseOptions} from "graphql"
 */
 
-/** @returns {any[]} */ function parseComments(ast) {
+/** @returns {any[]} */ function parseComments(/** @type {import("graphql-ast-types").GraphqlAstNode} */ ast) {
   const comments = [];
-  const { startToken, endToken } = ast.loc;
+  const { startToken, endToken } = /** @type {import("../../../src/vendor/graphql/language/ast.mjs").Location} */ (ast.loc);
   for (let token = startToken; token !== endToken; token = token.next) {
     if (token.kind === "Comment") {
       comments.push({ ...token, loc: { start: token.start, end: token.end } });

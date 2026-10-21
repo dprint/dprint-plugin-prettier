@@ -8,12 +8,12 @@ import { isPunctuatorTokenKind, Lexer } from "./lexer.mjs";
 import { SchemaCoordinateLexer } from "./schemaCoordinateLexer.mjs";
 import { isSource, Source } from "./source.mjs";
 import { TokenKind } from "./tokenKind.mjs";
-/** @returns {import("graphql-ast-types").GraphqlAstNode} */ export function parse(/** @type {string | undefined} */ source, options) {
+/** @returns {import("graphql-ast-types").GraphqlAstNode} */ export function parse(/** @type {string | undefined} */ source, /** @type {import("graphql-ast-types").GraphqlParseOptions | undefined} */ options) {
     return shouldTrace(parseChannel)
         ? parseChannel.traceSync(() => parseImpl(source, options), { source })
         : parseImpl(source, options);
 }
-function parseImpl(/** @type {string} */ source, options) {
+function parseImpl(/** @type {string} */ source, /** @type {import("graphql-ast-types").GraphqlParseOptions | undefined} */ options) {
     const parser = new Parser(source, options);
     const document = parser.parseDocument();
     Object.defineProperty(document, 'tokenCount', {
@@ -53,7 +53,7 @@ function parseImpl(/** @type {string} */ source, options) {
     return coordinate;
 }
 export class Parser {
-    constructor(/** @type {string} */ source, options = {}) {
+    constructor(/** @type {string} */ source, /** @type {import("graphql-ast-types").GraphqlParseOptions} */ options = {}) {
         const { lexer, ..._options } = options;
         if (lexer) {
             this._lexer = lexer;
@@ -62,7 +62,7 @@ export class Parser {
             const sourceObj = isSource(source) ? source : new Source(source);
             /** @type {Lexer} */ this._lexer = new Lexer(sourceObj);
         }
-        this._options = _options;
+        /** @type {import("graphql-ast-types").GraphqlParseOptions} */ this._options = _options;
         /** @type {number} */ this._tokenCounter = 0;
     }
     /** @returns {number} */ get tokenCount() {
@@ -144,7 +144,7 @@ export class Parser {
         }
         const description = this.parseDescription();
         /** @type {string} */ const operation = this.parseOperationType();
-        let name;
+        /** @type {import("graphql-ast-types").GraphqlAstNode | undefined} */ let name;
         if (this.peek(TokenKind.NAME)) {
             name = this.parseName();
         }
@@ -207,8 +207,8 @@ export class Parser {
     /** @returns {import("graphql-ast-types").GraphqlAstNode} */ parseField() {
         /** @type {import("./ast.mjs").Token} */ const start = this._lexer.token;
         const nameOrAlias = this.parseName();
-        let alias;
-        let name;
+        /** @type {import("graphql-ast-types").GraphqlAstNode | undefined} */ let alias;
+        /** @type {import("graphql-ast-types").GraphqlAstNode | undefined} */ let name;
         if (this.expectOptionalToken(TokenKind.COLON)) {
             alias = nameOrAlias;
             name = this.parseName();
@@ -435,7 +435,7 @@ export class Parser {
     }
     /** @returns {import("graphql-ast-types").GraphqlAstNode} */ parseTypeReference() {
         /** @type {import("./ast.mjs").Token} */ const start = this._lexer.token;
-        let type;
+        /** @type {import("graphql-ast-types").GraphqlAstNode | undefined} */ let type;
         if (this.expectOptionalToken(TokenKind.BRACKET_L)) {
             const innerType = this.parseTypeReference();
             this.expectToken(TokenKind.BRACKET_R);
@@ -557,7 +557,7 @@ export class Parser {
         const name = this.parseName();
         this.expectToken(TokenKind.COLON);
         const type = this.parseTypeReference();
-        let defaultValue;
+        /** @type {import("graphql-ast-types").GraphqlAstNode | undefined} */ let defaultValue;
         if (this.expectOptionalToken(TokenKind.EQUALS)) {
             defaultValue = this.parseConstValueLiteral();
         }
@@ -863,11 +863,11 @@ export class Parser {
         /** @type {import("./ast.mjs").Token} */ const start = this._lexer.token;
         const ofDirective = this.expectOptionalToken(TokenKind.AT);
         const name = this.parseName();
-        let memberName;
+        /** @type {import("graphql-ast-types").GraphqlAstNode | undefined} */ let memberName;
         if (!ofDirective && this.expectOptionalToken(TokenKind.DOT)) {
             memberName = this.parseName();
         }
-        let argumentName;
+        /** @type {import("graphql-ast-types").GraphqlAstNode | undefined} */ let argumentName;
         if ((ofDirective || memberName) &&
             this.expectOptionalToken(TokenKind.PAREN_L)) {
             argumentName = this.parseName();
@@ -907,7 +907,7 @@ export class Parser {
             name,
         });
     }
-    node(/** @type {import("./ast.mjs").Token | undefined} */ startToken, node) {
+    /** @returns {import("graphql-ast-types").GraphqlAstNode} */ node(/** @type {import("./ast.mjs").Token | undefined} */ startToken, /** @type {import("graphql-ast-types").GraphqlAstNode} */ node) {
         if (this._options.noLocation !== true) {
             node.loc = new Location(startToken, this._lexer.lastToken, this._lexer.source);
         }
@@ -953,7 +953,7 @@ export class Parser {
         const token = atToken ?? this._lexer.token;
         return syntaxError(this._lexer.source, token.start, `Unexpected ${getTokenDesc(token)}.`);
     }
-    /** @returns {any[]} */ any(/** @type {string} */ openKind, parseFn, /** @type {string} */ closeKind) {
+    /** @returns {any[]} */ any(/** @type {string} */ openKind, /** @type {(this: Parser) => any} */ parseFn, /** @type {string} */ closeKind) {
         this.expectToken(openKind);
         const nodes = [];
         while (!this.expectOptionalToken(closeKind)) {
@@ -961,7 +961,7 @@ export class Parser {
         }
         return nodes;
     }
-    /** @returns {any[] | undefined} */ optionalMany(/** @type {string} */ openKind, parseFn, /** @type {string} */ closeKind) {
+    /** @returns {any[] | undefined} */ optionalMany(/** @type {string} */ openKind, /** @type {(this: Parser) => any} */ parseFn, /** @type {string} */ closeKind) {
         if (this.expectOptionalToken(openKind)) {
             const nodes = [];
             do {
@@ -971,7 +971,7 @@ export class Parser {
         }
         return undefined;
     }
-    /** @returns {any[]} */ many(/** @type {string} */ openKind, parseFn, /** @type {string} */ closeKind) {
+    /** @returns {any[]} */ many(/** @type {string} */ openKind, /** @type {(this: Parser) => any} */ parseFn, /** @type {string} */ closeKind) {
         this.expectToken(openKind);
         const nodes = [];
         do {
@@ -979,7 +979,7 @@ export class Parser {
         } while (!this.expectOptionalToken(closeKind));
         return nodes;
     }
-    /** @returns {any[]} */ delimitedMany(/** @type {string} */ delimiterKind, parseFn) {
+    /** @returns {any[]} */ delimitedMany(/** @type {string} */ delimiterKind, /** @type {(this: Parser) => any} */ parseFn) {
         this.expectOptionalToken(delimiterKind);
         const nodes = [];
         do {

@@ -26,7 +26,7 @@ const PREPROCESS_PIPELINE = [
   mergeSimpleElementIntoText,
 ];
 
-/** @returns {import("./parse/ast.js").Node} */ function preprocess(/** @type {import("./parse/ast.js").Node} */ ast, options) {
+/** @returns {import("./parse/ast.js").Node} */ function preprocess(/** @type {import("./parse/ast.js").Node} */ ast, /** @type {import("./print-options.js").HtmlPrintOptions} */ options) {
   for (const fn of PREPROCESS_PIPELINE) {
     fn(ast, options);
   }
@@ -185,7 +185,7 @@ function mergeSimpleElementIntoText(/** @type {import("./parse/ast.js").Node} */
   });
 }
 
-function extractInterpolation(/** @type {import("./parse/ast.js").Node} */ ast, options) {
+function extractInterpolation(/** @type {import("./parse/ast.js").Node} */ ast, /** @type {import("./print-options.js").HtmlPrintOptions} */ options) {
   if (options.parser === "html") {
     return;
   }
@@ -255,7 +255,7 @@ function extractInterpolation(/** @type {import("./parse/ast.js").Node} */ ast, 
  * - add `isWhitespaceSensitive`, `isIndentationSensitive` field for text nodes
  * - remove insensitive whitespaces
  */
-function extractWhitespaces(/** @type {import("./parse/ast.js").Node} */ ast, options) {
+function extractWhitespaces(/** @type {import("./parse/ast.js").Node} */ ast, /** @type {import("./print-options.js").HtmlPrintOptions} */ options) {
   ast.walk((/** @type {import("./parse/ast.js").Node} */ node) => {
     const children = node.$children;
 
@@ -343,7 +343,7 @@ function addIsSelfClosing(/** @type {import("./parse/ast.js").Node} */ ast /* , 
   });
 }
 
-function addHasHtmComponentClosingTag(/** @type {import("./parse/ast.js").Node} */ ast, options) {
+function addHasHtmComponentClosingTag(/** @type {import("./parse/ast.js").Node} */ ast, /** @type {import("./print-options.js").HtmlPrintOptions} */ options) {
   ast.walk((/** @type {import("./parse/ast.js").Node} */ node) => {
     if (node.kind !== "element") {
       return;
@@ -360,7 +360,7 @@ function addHasHtmComponentClosingTag(/** @type {import("./parse/ast.js").Node} 
   });
 }
 
-function addCssDisplay(/** @type {import("./parse/ast.js").Node} */ ast, options) {
+function addCssDisplay(/** @type {import("./parse/ast.js").Node} */ ast, /** @type {import("./print-options.js").HtmlPrintOptions} */ options) {
   ast.walk((/** @type {import("./parse/ast.js").Node} */ node) => {
     node.cssDisplay = getNodeCssStyleDisplay(node, options);
   });
@@ -371,7 +371,7 @@ function addCssDisplay(/** @type {import("./parse/ast.js").Node} */ ast, options
  * - add `isTrailingSpaceSensitive` field
  * - add `isDanglingSpaceSensitive` field for parent nodes
  */
-function addIsSpaceSensitive(/** @type {import("./parse/ast.js").Node} */ ast, options) {
+function addIsSpaceSensitive(/** @type {import("./parse/ast.js").Node} */ ast, /** @type {import("./print-options.js").HtmlPrintOptions} */ options) {
   ast.walk((/** @type {import("./parse/ast.js").Node} */ node) => {
     const { children } = node;
     if (!children) {

@@ -14,7 +14,7 @@ import { printClosingTagEnd, printOpeningTagStart } from "./tag.js";
   </span>
 */
 
-/** @returns {any[]} */ function printAngularIcuExpression(/** @type {AstPath} */ path, options, /** @type {(selector?: any, args?: any) => any} */ print) {
+/** @returns {any[]} */ function printAngularIcuExpression(/** @type {AstPath} */ path, /** @type {import("../print-options.js").HtmlPrintOptions} */ options, /** @type {(selector?: any, args?: any) => any} */ print) {
   /** @type {{ node: import("../parse/ast.js").Node }} */ const { node } = path;
   return [
     printOpeningTagStart(node, options),
@@ -31,7 +31,7 @@ import { printClosingTagEnd, printOpeningTagStart } from "./tag.js";
   ];
 }
 
-/** @returns {any[]} */ function printAngularIcuCase(/** @type {AstPath} */ path, options, /** @type {() => any} */ print) {
+/** @returns {any[]} */ function printAngularIcuCase(/** @type {AstPath} */ path, /** @type {import("../print-options.js").HtmlPrintOptions} */ options, /** @type {() => any} */ print) {
   /** @type {{ node: import("../parse/ast.js").Node }} */ const { node } = path;
 
   return [

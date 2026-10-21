@@ -12,7 +12,7 @@ import { hasPrettierIgnore } from "../utilities/index.js";
 import { ANGULAR_CONTROL_FLOW_BLOCK_SETTINGS } from "./angular-control-flow-block-settings.evaluate.js";
 import { printChildren } from "./children.js";
 
-function printAngularControlFlowBlock(/** @type {AstPath} */ path, options, /** @type {(selector?: any, args?: any) => any} */ print) {
+function printAngularControlFlowBlock(/** @type {AstPath} */ path, /** @type {import("../print-options.js").HtmlPrintOptions} */ options, /** @type {(selector?: any, args?: any) => any} */ print) {
   /** @type {{ node: import("../parse/ast.js").Node }} */ const { node } = path;
   const docs = [];
 
@@ -91,7 +91,7 @@ const isSwitchExhaustiveCheck = /** @returns {boolean} */ (/** @type {import("..
   );
 }
 
-/** @returns {any[]} */ function printAngularControlFlowBlockParameters(/** @type {AstPath} */ path, options, /** @type {(selector?: any, args?: any) => any} */ print) {
+/** @returns {any[]} */ function printAngularControlFlowBlockParameters(/** @type {AstPath} */ path, /** @type {import("../print-options.js").HtmlPrintOptions} */ options, /** @type {(selector?: any, args?: any) => any} */ print) {
   return [
     indent([softline, join([";", line], path.map(print, "children"))]),
     softline,

@@ -101,7 +101,7 @@ function genericPrint(/** @type {AstPath} */ path, /** @type {GraphqlOptions} */
 
     case "StringValue":
       if (node.block) {
-        const lines = node.value
+        const lines = /** @type {string} */ (node.value)
           .replaceAll('"""', String.raw`\"""`)
           .split("\n");
         if (lines.length === 1) {
@@ -116,7 +116,7 @@ function genericPrint(/** @type {AstPath} */ path, /** @type {GraphqlOptions} */
       }
       return [
         '"',
-        node.value
+        /** @type {string} */ (node.value)
           .replaceAll(/["\\]/g, String.raw`\$&`)
           .replaceAll("\n", String.raw`\n`),
         '"',
@@ -442,11 +442,11 @@ function genericPrint(/** @type {AstPath} */ path, /** @type {GraphqlOptions} */
   }
 }
 
-/** @returns {boolean} */ function canAttachComment(node /* , ancestors */) {
+/** @returns {boolean} */ function canAttachComment(/** @type {GraphqlNode} */ node /* , ancestors */) {
   return node.kind !== "Comment";
 }
 
-/** @returns {string} */ function printComment(/** @type {AstPath} */ { node: comment }) {
+/** @returns {string} */ function printComment(/** @type {AstPath & { node: { kind: string, value: string } }} */ { node: comment }) {
   if (comment.kind === "Comment") {
     return "#" + comment.value.trimEnd();
   }
@@ -458,7 +458,7 @@ function genericPrint(/** @type {AstPath} */ path, /** @type {GraphqlOptions} */
 /** @returns {boolean | undefined} */ function hasPrettierIgnore(/** @type {AstPath} */ path) {
   /** @type {{ node: GraphqlNode }} */ const { node } = path;
   return node?.comments?.some(
-    /** @returns {boolean} */ (comment) => comment.value.trim() === "prettier-ignore",
+    /** @returns {boolean} */ (/** @type {{ value: string }} */ comment) => comment.value.trim() === "prettier-ignore",
   );
 }
 

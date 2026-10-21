@@ -30,7 +30,7 @@ import {
   printOpeningTagPrefix,
 } from "./tag.js";
 
-function printElement(/** @type {AstPath} */ path, options, /** @type {(selector?: any, args?: any) => any} */ print) {
+function printElement(/** @type {AstPath} */ path, /** @type {import("../print-options.js").HtmlPrintOptions} */ options, /** @type {(selector?: any, args?: any) => any} */ print) {
   /** @type {{ node: import("../parse/ast.js").Node }} */ const { node } = path;
 
   if (shouldPreserveContent(node, options)) {
@@ -73,7 +73,7 @@ function printElement(/** @type {AstPath} */ path, options, /** @type {(selector
 
   const attrGroupId = Symbol("element-attr-group-id");
 
-  const printTag = (doc) =>
+  const printTag = (/** @type {import("../../document/index.js").Doc} */ doc) =>
     group([
       group(printOpeningTag(path, options, print), { id: attrGroupId }),
       doc,

@@ -7,8 +7,8 @@ import { SUPPORTED_BLOCKS } from "./compiler/src/ml_parser/lexer.mjs";
 import { HtmlParser } from "./compiler/src/ml_parser/html_parser.mjs";
 import { XmlParser } from "./compiler/src/ml_parser/xml_parser.mjs";
 //#region src/index.ts
-let htmlParser;
-/** @returns {import("./compiler/src/ml_parser/parser.mjs").ParseTreeResult} */ function parseHtml(/** @type {string} */ input, options = {}) {
+/** @type {HtmlParser | undefined} */ let htmlParser;
+/** @returns {import("./compiler/src/ml_parser/parser.mjs").ParseTreeResult} */ function parseHtml(/** @type {string} */ input, /** @type {{ canSelfClose?: boolean, allowHtmComponentClosingTags?: boolean, allowStartTagComments?: boolean, isTagNameCaseSensitive?: boolean, getTagContentType?: any, tokenizeAngularBlocks?: boolean, tokenizeAngularLetDeclaration?: boolean, enableAngularSelectorlessSyntax?: boolean }} */ options = {}) {
 	const { canSelfClose = false, allowHtmComponentClosingTags = false, allowStartTagComments = false, isTagNameCaseSensitive = false, getTagContentType, tokenizeAngularBlocks = false, tokenizeAngularLetDeclaration = false, enableAngularSelectorlessSyntax = false } = options;
 	htmlParser ?? (htmlParser = new HtmlParser());
 	return htmlParser.parse(input, "angular-html-parser", {

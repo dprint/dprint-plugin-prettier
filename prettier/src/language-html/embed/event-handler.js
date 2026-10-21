@@ -10,7 +10,7 @@ import { formatAttributeValue } from "./utilities.js";
 const htmlEventAttributes = new Set(htmlEventAttributesArray);
 
 /** @type {AttributeValuePredicate} */
-const isEventHandler = /** @returns {boolean} */ (/** @type {AttributePath} */ { node }, options) =>
+const isEventHandler = /** @returns {boolean} */ (/** @type {AttributePath} */ { node }, /** @type {import("../print-options.js").HtmlPrintOptions} */ options) =>
   htmlEventAttributes.has(node.fullName) &&
   !options.parentParser &&
   !node.value.includes("{{");

@@ -25,12 +25,13 @@ import { postprocess } from "./postprocess.js";
 /**
 @param {string} input
 @param {import("./ast.js").NormalizedParseOptions} parseOptions
+@returns {{ parseOptions: import("./ast.js").NormalizedParseOptions, rootNodes: any[] }}
 */
 function parseHtml(input, parseOptions) {
-  const { rootNodes, errors } = angularHtmlParserParse(
+  const { rootNodes, errors } = /** @type {import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/parser.mjs").ParseTreeResult} */ (angularHtmlParserParse(
     input,
     toAngularHtmlParserParseOptions(parseOptions),
-  );
+  ));
 
   if (errors.length > 0) {
     throwParseError(errors[0]);
@@ -42,14 +43,15 @@ function parseHtml(input, parseOptions) {
 /**
 @param {string} input
 @param {import("./ast.js").NormalizedParseOptions} parseOptions
+@returns {{ parseOptions: import("./ast.js").NormalizedParseOptions, rootNodes: any[] }}
 */
 function parseVue(input, parseOptions) {
   const angularHtmlParserParseOptions =
     toAngularHtmlParserParseOptions(parseOptions);
-  let { rootNodes, errors } = angularHtmlParserParse(
+  let { rootNodes, errors } = /** @type {import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/parser.mjs").ParseTreeResult} */ (angularHtmlParserParse(
     input,
     angularHtmlParserParseOptions,
-  );
+  ));
 
   /** @type {boolean} */ const isHtml = rootNodes.some(
     /** @returns {boolean} */ (node) =>

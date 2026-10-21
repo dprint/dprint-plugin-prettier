@@ -19,7 +19,7 @@ import { formatAttributeValue } from "./utilities.js";
  * @param {*} options
  * @returns {Promise<Doc>}
  */
-async function printVueVForDirective(textToDoc, print, /** @type {AstPath} */ path, options) {
+async function printVueVForDirective(textToDoc, print, /** @type {AstPath} */ path, /** @type {import("../print-options.js").HtmlPrintOptions} */ options) {
   /** @type {string} */ const value = getUnescapedAttributeValue(path.node);
   const { left, operator, right } = parseVueVForDirective(value);
   /** @type {boolean} */ const parseWithTs = isVueSfcWithTypescriptScript(path, options);

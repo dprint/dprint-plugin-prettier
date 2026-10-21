@@ -9,7 +9,7 @@ function printExpand(doc, canHaveTrailingWhitespace = true) {
   return [indent([softline, doc]), canHaveTrailingWhitespace ? softline : ""];
 }
 
-/** @returns {boolean} */ function shouldHugJsExpression(ast, options) {
+/** @returns {boolean} */ function shouldHugJsExpression(ast, /** @type {import("../../language-js/print-options.js").JsPrintOptions} */ options) {
   const rootNode =
     ast.type === "NGRoot"
       ? ast.node.type === "NGMicrosyntax" &&

@@ -41,7 +41,7 @@ var Parser = class {
 	constructor(getTagDefinition) {
 		this.getTagDefinition = getTagDefinition;
 	}
-	parse(source, url, options, isTagNameCaseSensitive = false, getTagContentType) {
+	/** @returns {ParseTreeResult} */ parse(/** @type {string} */ source, /** @type {string} */ url, options, isTagNameCaseSensitive = false, getTagContentType) {
 		const lowercasify = (fn) => /** @returns {import("./html_tags.mjs").HtmlTagDefinition} */ (/** @type {string} */ x, ...args) => fn(x.toLowerCase(), ...args);
 		/** @type {(tagName: string) => HtmlTagDefinition} */ const getTagDefinition = isTagNameCaseSensitive ? this.getTagDefinition : lowercasify(this.getTagDefinition);
 		const getDefaultTagContentType = /** @returns {number} */ (/** @type {string} */ tagName) => getTagDefinition(tagName).getContentType();

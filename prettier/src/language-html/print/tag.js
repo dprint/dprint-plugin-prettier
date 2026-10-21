@@ -24,14 +24,14 @@ import {
   shouldPreserveContent,
 } from "../utilities/index.js";
 
-/** @returns {any[]} */ function printClosingTag(/** @type {import("../parse/ast.js").Node} */ node, options) {
+/** @returns {any[]} */ function printClosingTag(/** @type {import("../parse/ast.js").Node} */ node, /** @type {import("../print-options.js").HtmlPrintOptions} */ options) {
   return [
     node.isSelfClosing ? "" : printClosingTagStart(node, options),
     printClosingTagEnd(node, options),
   ];
 }
 
-function printClosingTagStart(/** @type {import("../parse/ast.js").Node} */ node, options) {
+function printClosingTagStart(/** @type {import("../parse/ast.js").Node} */ node, /** @type {import("../print-options.js").HtmlPrintOptions} */ options) {
   return node.lastChild &&
     needsToBorrowParentClosingTagStartMarker(node.lastChild)
     ? ""
@@ -41,7 +41,7 @@ function printClosingTagStart(/** @type {import("../parse/ast.js").Node} */ node
       ];
 }
 
-function printClosingTagEnd(/** @type {import("../parse/ast.js").Node} */ node, options) {
+function printClosingTagEnd(/** @type {import("../parse/ast.js").Node} */ node, /** @type {import("../print-options.js").HtmlPrintOptions} */ options) {
   return (
     node.next
       ? needsToBorrowPrevClosingTagEndMarker(node.next)
@@ -54,13 +54,13 @@ function printClosingTagEnd(/** @type {import("../parse/ast.js").Node} */ node, 
       ];
 }
 
-/** @returns {string} */ function printClosingTagPrefix(/** @type {import("../parse/ast.js").Node} */ node, options) {
+/** @returns {string} */ function printClosingTagPrefix(/** @type {import("../parse/ast.js").Node} */ node, /** @type {import("../print-options.js").HtmlPrintOptions} */ options) {
   return needsToBorrowLastChildClosingTagEndMarker(node)
     ? printClosingTagEndMarker(node.lastChild, options)
     : "";
 }
 
-/** @returns {string} */ function printClosingTagSuffix(/** @type {import("../parse/ast.js").Node} */ node, options) {
+/** @returns {string} */ function printClosingTagSuffix(/** @type {import("../parse/ast.js").Node} */ node, /** @type {import("../print-options.js").HtmlPrintOptions} */ options) {
   return needsToBorrowParentClosingTagStartMarker(node)
     ? printClosingTagStartMarker(node.parent, options)
     : needsToBorrowNextOpeningTagStartMarker(node)
@@ -68,7 +68,7 @@ function printClosingTagEnd(/** @type {import("../parse/ast.js").Node} */ node, 
       : "";
 }
 
-/** @returns {string} */ function printClosingTagStartMarker(/** @type {import("../parse/ast.js").Node} */ node, options) {
+/** @returns {string} */ function printClosingTagStartMarker(/** @type {import("../parse/ast.js").Node} */ node, /** @type {import("../print-options.js").HtmlPrintOptions} */ options) {
   /* c8 ignore next 3 */
   if (process.env.NODE_ENV !== "production") {
     assert.ok(!node.isSelfClosing);
@@ -90,7 +90,7 @@ function printClosingTagEnd(/** @type {import("../parse/ast.js").Node} */ node, 
   }
 }
 
-/** @returns {string} */ function printClosingTagEndMarker(/** @type {import("../parse/ast.js").Node} */ node, options) {
+/** @returns {string} */ function printClosingTagEndMarker(/** @type {import("../parse/ast.js").Node} */ node, /** @type {import("../print-options.js").HtmlPrintOptions} */ options) {
   if (shouldNotPrintClosingTag(node, options)) {
     return "";
   }
@@ -114,7 +114,7 @@ function printClosingTagEnd(/** @type {import("../parse/ast.js").Node} */ node, 
   }
 }
 
-/** @returns {boolean} */ function shouldNotPrintClosingTag(/** @type {import("../parse/ast.js").Node} */ node, options) {
+/** @returns {boolean} */ function shouldNotPrintClosingTag(/** @type {import("../parse/ast.js").Node} */ node, /** @type {import("../print-options.js").HtmlPrintOptions} */ options) {
   return (
     !node.isSelfClosing &&
     !node.endSourceSpan &&
@@ -220,7 +220,7 @@ function getPrettierIgnoreAttributeCommentData(/** @type {string} */ value) {
   return !node.prev && node.isLeadingSpaceSensitive && !node.hasLeadingSpaces;
 }
 
-function printAttributes(/** @type {AstPath} */ path, options, /** @type {() => any} */ print) {
+function printAttributes(/** @type {AstPath} */ path, /** @type {import("../print-options.js").HtmlPrintOptions} */ options, /** @type {() => any} */ print) {
   /** @type {{ node: import("../parse/ast.js").Node }} */ const { node } = path;
 
   const { attrs: attributes = [], startTagComments = [] } = node;
@@ -251,7 +251,7 @@ function printAttributes(/** @type {AstPath} */ path, options, /** @type {() => 
   );
   const printedAttributes = properties.flatMap((property) =>
     path.map(
-      ({ node }) => ({
+      (/** @type {AstPath & { node: import("../parse/ast.js").Node | import("../parse/ast.js").StartTagComment }} */ { node }) => ({
         loc: locStart(node),
         printed:
           node.kind === "attribute" && hasPrettierIgnoreAttribute(node)
@@ -265,7 +265,7 @@ function printAttributes(/** @type {AstPath} */ path, options, /** @type {() => 
   );
 
   if (properties.length > 1) {
-    printedAttributes.sort((a, b) => a.loc - b.loc);
+    printedAttributes.sort((/** @type {{ loc: number }} */ a, /** @type {{ loc: number }} */ b) => a.loc - b.loc);
   }
 
   /** @type {boolean} */ const forceNotToBreakAttrContent =
@@ -338,7 +338,7 @@ function printAttributes(/** @type {AstPath} */ path, options, /** @type {() => 
     : printOpeningTagEndMarker(node);
 }
 
-/** @returns {any[]} */ function printOpeningTag(/** @type {AstPath} */ path, options, /** @type {(selector?: any, args?: any) => any} */ print) {
+/** @returns {any[]} */ function printOpeningTag(/** @type {AstPath} */ path, /** @type {import("../print-options.js").HtmlPrintOptions} */ options, /** @type {(selector?: any, args?: any) => any} */ print) {
   /** @type {{ node: import("../parse/ast.js").Node }} */ const { node } = path;
 
   return [
@@ -348,7 +348,7 @@ function printAttributes(/** @type {AstPath} */ path, options, /** @type {() => 
   ];
 }
 
-function printOpeningTagStart(/** @type {import("../parse/ast.js").Node} */ node, options) {
+function printOpeningTagStart(/** @type {import("../parse/ast.js").Node} */ node, /** @type {import("../print-options.js").HtmlPrintOptions} */ options) {
   return node.prev && needsToBorrowNextOpeningTagStartMarker(node.prev)
     ? ""
     : [
@@ -357,7 +357,7 @@ function printOpeningTagStart(/** @type {import("../parse/ast.js").Node} */ node
       ];
 }
 
-/** @returns {string} */ function printOpeningTagPrefix(/** @type {import("../parse/ast.js").Node} */ node, options) {
+/** @returns {string} */ function printOpeningTagPrefix(/** @type {import("../parse/ast.js").Node} */ node, /** @type {import("../print-options.js").HtmlPrintOptions} */ options) {
   return needsToBorrowParentOpeningTagEndMarker(node)
     ? printOpeningTagEndMarker(node.parent)
     : needsToBorrowPrevClosingTagEndMarker(node)
@@ -366,7 +366,7 @@ function printOpeningTagStart(/** @type {import("../parse/ast.js").Node} */ node
 }
 
 /** @type {string} */ const HTML5_DOCTYPE_START_MARKER = "<!doctype";
-/** @returns {string} */ function printOpeningTagStartMarker(/** @type {import("../parse/ast.js").Node} */ node, options) {
+/** @returns {string} */ function printOpeningTagStartMarker(/** @type {import("../parse/ast.js").Node} */ node, /** @type {import("../print-options.js").HtmlPrintOptions} */ options) {
   switch (node.kind) {
     case "ieConditionalComment":
     case "ieConditionalStartComment":
