@@ -167,10 +167,18 @@ function optionInfoToSchema(optionInfo, { isCLI, optionInfos, FlagSchema }) {
   }
 
   if (optionInfo.exception) {
-    parameters.validate = /** @returns {boolean} */ (value, schema, utils) =>
+    parameters.validate = /** @returns {boolean} */ (
+      /** @type {unknown} */ value,
+      /** @type {vnopts.Schema} */ schema,
+      /** @type {import("../../../src/vendor/vnopts/lib/normalize.js").VnoptsUtils} */ utils,
+    ) =>
       optionInfo.exception(value) || schema.validate(value, utils);
   } else {
-    parameters.validate = /** @returns {boolean} */ (value, schema, utils) =>
+    parameters.validate = /** @returns {boolean} */ (
+      /** @type {unknown} */ value,
+      /** @type {vnopts.Schema} */ schema,
+      /** @type {import("../../../src/vendor/vnopts/lib/normalize.js").VnoptsUtils} */ utils,
+    ) =>
       value === undefined || schema.validate(value, utils);
   }
 

@@ -13,15 +13,16 @@ const nonTraversableKeys = new Set([
   "followingNode",
 ]);
 
-const defaultGetVisitorKeys = (node) =>
+const defaultGetVisitorKeys = (/** @type {object} */ node) =>
   Object.keys(node).filter((key) => !nonTraversableKeys.has(key));
 
 function createGetVisitorKeysFunction(
-  printerGetVisitorKeys,
+  /** @type {((node: object, nonTraversableKeys: Set<string>) => readonly string[]) | undefined} */ printerGetVisitorKeys,
   /** @type {boolean} */ supportFrontMatter,
 ) {
   const getVisitorKeys = printerGetVisitorKeys
-    ? /** @returns {any[]} */ (node) => printerGetVisitorKeys(node, nonTraversableKeys)
+    ? /** @returns {readonly string[]} */ (/** @type {object} */ node) =>
+        printerGetVisitorKeys(node, nonTraversableKeys)
     : defaultGetVisitorKeys;
   if (!supportFrontMatter) {
     return getVisitorKeys;

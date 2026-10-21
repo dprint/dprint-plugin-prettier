@@ -67,6 +67,7 @@
     "unherit": "./vendor/unherit/index.js",
     "unist-util-remove-position": "./vendor/unist-util-remove-position/index.js",
     "vfile-location": "./vendor/vfile-location/index.js",
+    "@prettier/parse-srcset": "./vendor/parse-srcset/index.js",
     "xtend": "./vendor/xtend/immutable.js",
     "decode-named-character-reference": "./shims/decode-named-character-reference.js",
     "character-entities": "../prettier/node_modules/character-entities/index.json",

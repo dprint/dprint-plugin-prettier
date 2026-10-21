@@ -12,7 +12,7 @@ class Position {
 class SourceLocation {
   /** @type {Position | undefined} */ start;
   /** @type {Position | undefined} */ end;
-  filename;
+  /** @type {string | undefined} */ filename;
   /** @type {string | undefined} */ identifierName;
   constructor(/** @type {Position} */ start, /** @type {Position | undefined} */ end) {
     this.start = start;

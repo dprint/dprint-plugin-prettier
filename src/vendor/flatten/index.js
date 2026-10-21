@@ -1,5 +1,5 @@
 // @nts-check
-module.exports = /** @returns {any[]} */ function flatten(/** @type {any[]} */ list, depth) {
+module.exports = /** @returns {any[]} */ function flatten(/** @type {any[]} */ list, /** @type {number | undefined} */ depth) {
   depth = (typeof depth == 'number') ? depth : Infinity;
 
   if (!depth) {
