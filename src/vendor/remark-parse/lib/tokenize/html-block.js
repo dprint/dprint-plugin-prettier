@@ -23,7 +23,7 @@ module.exports = blockHtml
 /** @type {RegExp} */ var elementCloseExpression = /^$/
 /** @type {RegExp} */ var otherElementOpenExpression = new RegExp(openCloseTag.source + '\\s*$')
 
-/** @this {import("../parser.js").RemarkParser} */ function blockHtml(/** @type {(a0?: any) => any} */ eat, /** @type {StringView} */ value, /** @type {boolean | undefined} */ silent) {
+/** @this {import("../parser.js").RemarkParser} */ function blockHtml(/** @type {import("../tokenizer.js").RemarkEat} */ eat, /** @type {StringView} */ value, /** @type {boolean | undefined} */ silent) {
   var self = this
   /** @type {string} */ var blocks = self.options.blocks.join('|')
   /** @type {RegExp} */ var elementOpenExpression = new RegExp(
@@ -37,10 +37,10 @@ module.exports = blockHtml
   /** @type {number} */ var offset
   /** @type {string} */ var character
   /** @type {number} */ var count
-  var sequence
+  /** @type {[RegExp, RegExp, boolean]} */ var sequence
   /** @type {string} */ var subvalue
 
-  var sequences = [
+  /** @type {[RegExp, RegExp, boolean][]} */ var sequences = [
     [rawOpenExpression, rawCloseExpression, true],
     [commentOpenExpression, commentCloseExpression, true],
     [instructionOpenExpression, instructionCloseExpression, true],

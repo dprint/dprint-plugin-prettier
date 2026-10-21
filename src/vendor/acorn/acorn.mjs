@@ -145,6 +145,28 @@ function kw(/** @type {string} */ name, /** @type {TokenTypeConf | undefined} */
   return keywords[name] = new TokenType(name, options)
 }
 
+/**
+@typedef {Readonly<{
+  num: TokenType, regexp: TokenType, string: TokenType, name: TokenType, privateId: TokenType, eof: TokenType,
+  bracketL: TokenType, bracketR: TokenType, braceL: TokenType, braceR: TokenType, parenL: TokenType,
+  parenR: TokenType, comma: TokenType, semi: TokenType, colon: TokenType, dot: TokenType, question: TokenType,
+  questionDot: TokenType, arrow: TokenType, template: TokenType, invalidTemplate: TokenType,
+  ellipsis: TokenType, backQuote: TokenType, dollarBraceL: TokenType, eq: TokenType, assign: TokenType,
+  incDec: TokenType, prefix: TokenType, logicalOR: TokenType, logicalAND: TokenType, bitwiseOR: TokenType,
+  bitwiseXOR: TokenType, bitwiseAND: TokenType, equality: TokenType, relational: TokenType,
+  bitShift: TokenType, plusMin: TokenType, modulo: TokenType, star: TokenType, slash: TokenType,
+  starstar: TokenType, coalesce: TokenType, _break: TokenType, _case: TokenType, _catch: TokenType,
+  _continue: TokenType, _debugger: TokenType, _default: TokenType, _do: TokenType, _else: TokenType,
+  _finally: TokenType, _for: TokenType, _function: TokenType, _if: TokenType, _return: TokenType,
+  _switch: TokenType, _throw: TokenType, _try: TokenType, _var: TokenType, _const: TokenType,
+  _while: TokenType, _with: TokenType, _new: TokenType, _this: TokenType, _super: TokenType,
+  _class: TokenType, _extends: TokenType, _export: TokenType, _import: TokenType, _null: TokenType,
+  _true: TokenType, _false: TokenType, _in: TokenType, _instanceof: TokenType, _typeof: TokenType,
+  _void: TokenType, _delete: TokenType
+}>} TokTypes
+*/
+
+/** @type {TokTypes} */
 var types$1 = {
   num: new TokenType("num", startsExpr),
   regexp: new TokenType("regexp", startsExpr),
@@ -2521,6 +2543,14 @@ var TokContext = function TokContext(/** @type {string} */ token, /** @type {boo
   this.generator = !!generator;
 };
 
+/**
+@typedef {Readonly<{
+  b_stat: TokContext, b_expr: TokContext, b_tmpl: TokContext, p_stat: TokContext, p_expr: TokContext,
+  q_tmpl: TokContext, f_stat: TokContext, f_expr: TokContext, f_expr_gen: TokContext, f_gen: TokContext
+}>} TokContexts
+*/
+
+/** @type {TokContexts} */
 var types = {
   b_stat: new TokContext("{", false),
   b_expr: new TokContext("{", true),

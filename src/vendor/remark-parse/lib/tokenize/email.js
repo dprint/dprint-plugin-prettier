@@ -16,7 +16,7 @@ email.notInLink = true
 /** @type {number} */ var atSign = 64 // '@'
 /** @type {number} */ var underscore = 95 // '_'
 
-/** @this {import("../parser.js").RemarkParser} */ function email(eat, /** @type {StringView} */ value, silent) {
+/** @this {import("../parser.js").RemarkParser} */ function email(/** @type {import("../tokenizer.js").RemarkEat} */ eat, /** @type {StringView} */ value, /** @type {boolean | undefined} */ silent) {
   var self = this
   /** @type {boolean} */ var gfm = self.options.gfm
   var tokenizers = self.inlineTokenizers
@@ -25,8 +25,8 @@ email.notInLink = true
   /** @type {number} */ var firstDot = -1
   /** @type {number} */ var code
   /** @type {string} */ var content
-  var children
-  var exit
+  /** @type {any[]} */ var children
+  /** @type {() => void} */ var exit
 
   if (!gfm) {
     return

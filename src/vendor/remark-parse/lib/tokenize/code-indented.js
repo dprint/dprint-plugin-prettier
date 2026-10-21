@@ -13,7 +13,7 @@ module.exports = indentedCode
 /** @type {number} */ var tabSize = 4
 /** @type {string} */ var codeIndent = repeat(space, tabSize)
 
-function indentedCode(/** @type {(a0?: any) => any} */ eat, /** @type {StringView} */ value, /** @type {boolean | undefined} */ silent) {
+function indentedCode(/** @type {import("../tokenizer.js").RemarkEat} */ eat, /** @type {StringView} */ value, /** @type {boolean | undefined} */ silent) {
   /** @type {number} */ var index = -1
   /** @type {number} */ var length = value.length
   /** @type {string} */ var subvalue = ''

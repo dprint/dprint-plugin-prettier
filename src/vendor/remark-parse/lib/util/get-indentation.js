@@ -10,11 +10,11 @@ module.exports = indentation
 /** @type {number} */ var tabSize = 4
 
 // Gets indentation information for a line.
-function indentation(/** @type {string} */ value) {
+/** @returns {{indent: number, stops: Record<string, number>}} */ function indentation(/** @type {string} */ value) {
   /** @type {number} */ var index = 0
   /** @type {number} */ var indent = 0
   /** @type {string} */ var character = value.charAt(index)
-  var stops = {}
+  /** @type {Record<string, number>} */ var stops = {}
   /** @type {number} */ var size
   /** @type {number} */ var lastIndent = 0
 

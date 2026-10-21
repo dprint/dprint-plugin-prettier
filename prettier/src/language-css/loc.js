@@ -4,7 +4,7 @@ import lineColumnToIndex from "../utilities/line-column-to-index.js";
 import { skipEverythingButNewLine } from "../utilities/skip.js";
 
 /** @returns {number} */ function fixValueWordLoc(/** @type {import("./types.js").CssNode} */ node, /** @type {number} */ originalIndex) {
-  const { value } = node;
+  /** @type {{ value: string }} */ const { value } = node;
   if (value === "-" || value === "--" || value.charAt(0) !== "-") {
     return originalIndex;
   }
@@ -310,8 +310,8 @@ function fillLocFromChildren(/** @type {import("./types.js").CssNode} */ node) {
 
   /** @type {number} */ let startOffset = Number.POSITIVE_INFINITY;
   /** @type {number} */ let endOffset = Number.NEGATIVE_INFINITY;
-  let start;
-  let end;
+  /** @type {import("./types.js").CssPosition | undefined} */ let start;
+  /** @type {import("./types.js").CssPosition | undefined} */ let end;
 
   for (const key in node) {
     if (key === "source" || key === "raws" || key === "spaces") {

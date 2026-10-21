@@ -1,3 +1,4 @@
+// @nts-check
 'use strict';
 
 exports.__esModule = true;
@@ -28,9 +29,9 @@ var Root = function (_Container) {
         return _this;
     }
 
-    Root.prototype.toString = function toString() {
-        var str = this.reduce(function (memo, selector) {
-            var sel = String(selector);
+    Root.prototype.toString = /** @returns {string} */ function toString() {
+        /** @type {string} */ var str = this.reduce(/** @returns {string} */ function (/** @type {string} */ memo, /** @type {any} */ selector) {
+            /** @type {string} */ var sel = String(selector);
             return sel ? memo + sel + ',' : '';
         }, '').slice(0, -1);
         return this.trailingComma ? str + ',' : str;

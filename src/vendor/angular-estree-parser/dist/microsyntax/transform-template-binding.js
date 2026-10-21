@@ -4,10 +4,14 @@ import { Source } from "../source.js";
 import { transformAstNode } from "../ast-transform/index.js";
 import { ExpressionBinding, VariableBinding } from "@angular/compiler";
 //#region src/microsyntax/transform-template-binding.ts
-/** @returns {boolean} */ function isExpressionBinding(templateBinding) {
+/**
+ * A name of a binding as angular's parser gives it (`TemplateBindingIdentifier`), or as `as` makes one
+ * @typedef {{ source: string, span: any }} BindingIdentifier
+ */
+/** @returns {boolean} */ function isExpressionBinding(/** @type {any} */ templateBinding) {
 	return templateBinding instanceof ExpressionBinding;
 }
-/** @returns {boolean} */ function isVariableBinding(templateBinding) {
+/** @returns {boolean} */ function isVariableBinding(/** @type {any} */ templateBinding) {
 	return templateBinding instanceof VariableBinding;
 }
 var TemplateBindingTransformer = class extends Source {
@@ -22,23 +26,23 @@ var TemplateBindingTransformer = class extends Source {
 	get expressions() {
 		return this.#transformTemplateBindings();
 	}
-	get #prefix() {
+	/** @returns {BindingIdentifier} */ get #prefix() {
 		return this.#rawTemplateBindings[0].key;
 	}
-	#create(properties, location) {
+	/** @returns {import("../source.js").NGNode} */ #create(/** @type {import("../source.js").NGNode} */ properties, /** @type {any} */ location) {
 		return super.createNode(properties, location);
 	}
-	#transform(node) {
+	/** @returns {import("../source.js").NGNode} */ #transform(/** @type {any} */ node) {
 		return transformAstNode(node, this.text);
 	}
-	#removePrefix(string) {
+	/** @returns {string} */ #removePrefix(/** @type {string} */ string) {
 		return lowercaseFirst(string.slice(this.#prefix.source.length));
 	}
 	/**
 	* - "a"  (start=0 end=1) -> (start=0 end=3)
 	* - '\'' (start=0 end=1) -> (start=0 end=4)
 	*/
-	#fixSpan(span) {
+	#fixSpan(/** @type {import("@angular/compiler").AbsoluteSourceSpan} */ span) {
 		const text = this.#text;
 		if (text[span.start] !== "\"" && text[span.start] !== "'") return;
 		const quote = text[span.start];
@@ -56,14 +60,14 @@ var TemplateBindingTransformer = class extends Source {
 				break;
 		}
 	}
-	#fixTemplateBindingSpan(templateBinding) {
+	#fixTemplateBindingSpan(/** @type {any} */ templateBinding) {
 		this.#fixSpan(templateBinding.key.span);
 		if (isVariableBinding(templateBinding) && templateBinding.value) this.#fixSpan(templateBinding.value.span);
 	}
 	/**
 	* - "as b" (value="NgEstreeParser" key="b") -> (value="$implicit" key="b")
 	*/
-	#getAsVariableBindingValue(variableBinding) {
+	/** @returns {BindingIdentifier} */ #getAsVariableBindingValue(/** @type {any} */ variableBinding) {
 		if (!variableBinding.value || variableBinding.value.source) return variableBinding.value;
 		const index = this.getCharacterIndex(/\S/, variableBinding.sourceSpan.start);
 		return {
@@ -74,26 +78,26 @@ var TemplateBindingTransformer = class extends Source {
 			}
 		};
 	}
-	#transformTemplateBindings() {
+	/** @returns {import("../source.js").NGNode} */ #transformTemplateBindings() {
 		const rawTemplateBindings = this.#rawTemplateBindings;
 		const [firstTemplateBinding] = rawTemplateBindings;
 		const templateBindings = this.#text.slice(firstTemplateBinding.sourceSpan.start, firstTemplateBinding.sourceSpan.end).trim().length === 0 ? rawTemplateBindings.slice(1) : rawTemplateBindings;
-		const body = [];
-		let lastTemplateBinding = null;
+		/** @type {import("../source.js").NGNode[]} */ const body = [];
+		/** @type {any} */ let lastTemplateBinding = null;
 		for (const [index, templateBinding] of templateBindings.entries()) {
 			if (lastTemplateBinding && isExpressionBinding(lastTemplateBinding) && isVariableBinding(templateBinding) && templateBinding.value && templateBinding.value.source === lastTemplateBinding.key.source) {
 				const alias = this.#create({
 					type: "NGMicrosyntaxKey",
 					name: templateBinding.key.source
 				}, templateBinding.key.span);
-				const updateSpanEnd = (node, /** @type {number} */ end) => ({
+				const updateSpanEnd = /** @returns {import("../source.js").NGNode} */ (/** @type {import("../source.js").NGNode} */ node, /** @type {number} */ end) => ({
 					...node,
 					...this.transformSpan({
 						start: node.start,
 						end
 					})
 				});
-				const updateExpressionAlias = (expression) => ({
+				const updateExpressionAlias = /** @returns {import("../source.js").NGNode} */ (/** @type {import("../source.js").NGNode} */ expression) => ({
 					...updateSpanEnd(expression, alias.end),
 					alias
 				});
@@ -119,7 +123,7 @@ var TemplateBindingTransformer = class extends Source {
 			end: body.at(-1).end
 		});
 	}
-	#transformTemplateBinding(templateBinding, index) {
+	/** @returns {import("../source.js").NGNode} */ #transformTemplateBinding(/** @type {any} */ templateBinding, /** @type {number} */ index) {
 		if (isExpressionBinding(templateBinding)) {
 			const { key, value } = templateBinding;
 			if (!value) return this.#create({
@@ -175,7 +179,7 @@ var TemplateBindingTransformer = class extends Source {
 		}
 	}
 };
-function transformTemplateBindings(/** @type {any[]} */ rawTemplateBindings, /** @type {string} */ text) {
+/** @returns {import("../source.js").NGNode} */ function transformTemplateBindings(/** @type {any[]} */ rawTemplateBindings, /** @type {string} */ text) {
 	return new TemplateBindingTransformer(rawTemplateBindings, text).expressions;
 }
 //#endregion

@@ -5,13 +5,13 @@ const Container = require('./container');
 const Node = require('./node');
 
 class StringNode extends Node {
-  constructor (opts) {
+  constructor (/** @type {any} */ opts) {
     super(opts);
     /** @type {string} */ this.type = 'string';
   }
 
-  toString () {
-    let quote = this.quoted ? this.raws.quote : '';
+  /** @returns {string} */ toString () {
+    /** @type {string} */ let quote = this.quoted ? this.raws.quote : '';
     return [
       this.raws.before,
       quote,

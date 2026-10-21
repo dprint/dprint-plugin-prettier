@@ -64,12 +64,12 @@ function printCommaSeparatedValueGroup(/** @type {AstPath} */ path, /** @type {C
     (declAncestorProp === "grid" ||
       declAncestorProp.startsWith("grid-template"));
   const atRuleAncestorNode = path.findAncestor(
-    /** @returns {boolean} */ (node) => node.type === "css-atrule",
+    /** @returns {boolean} */ (/** @type {import("../types.js").CssNode} */ node) => node.type === "css-atrule",
   );
   const isControlDirective =
     atRuleAncestorNode &&
     isSCSSControlDirectiveNode(atRuleAncestorNode, options);
-  const hasInlineComment = node.groups.some(/** @returns {boolean} */ (node) =>
+  const hasInlineComment = node.groups.some(/** @returns {boolean} */ (/** @type {import("../types.js").CssNode} */ node) =>
     isInlineValueCommentNode(node),
   );
 
@@ -151,8 +151,8 @@ function printCommaSeparatedValueGroup(/** @type {AstPath} */ path, /** @type {C
       iNextNode.value === ";" &&
       path.match(
         undefined,
-        (node, key) => key === "groups" && node.type === "value-paren_group",
-        (node, key) =>
+        (/** @type {import("../types.js").CssNode} */ node, /** @type {string | null} */ key) => key === "groups" && node.type === "value-paren_group",
+        (/** @type {import("../types.js").CssNode} */ node, /** @type {string | null} */ key) =>
           key === "group" && node.type === "value-func" && node.value === "if",
       )
     ) {
@@ -536,7 +536,7 @@ function printCommaSeparatedValueGroup(/** @type {AstPath} */ path, /** @type {C
       !atRuleAncestorNode &&
       iNode.type === "value-comment" &&
       !iNode.inline &&
-      node.groups.slice(0, i).every(/** @returns {boolean} */ (group) => group.type === "value-comment")
+      node.groups.slice(0, i).every(/** @returns {boolean} */ (/** @type {import("../types.js").CssNode} */ group) => group.type === "value-comment")
     ) {
       parts.push(dedent(line), "");
       continue;

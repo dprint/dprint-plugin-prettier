@@ -10,7 +10,7 @@ inlineCode.locator = locate
 /** @type {number} */ var space = 32 // ' '
 /** @type {number} */ var graveAccent = 96 //  '`'
 
-function inlineCode(/** @type {(a0?: any) => any} */ eat, /** @type {StringView} */ value, silent) {
+function inlineCode(/** @type {import("../tokenizer.js").RemarkEat} */ eat, /** @type {StringView} */ value, /** @type {boolean | undefined} */ silent) {
   /** @type {number | undefined} */ var length = value.length
   /** @type {number} */ var index = 0
   /** @type {number} */ var openingFenceEnd

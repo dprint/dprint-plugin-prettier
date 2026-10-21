@@ -1,13 +1,13 @@
 // mdast-util-from-markdown's lib/types.d.ts, which nts.json names under `types`, with its interfaces written as object
 // types: the compile context is an object that the compiler writes out and copies for each event, so it is a record
 // whose members have types rather than a class, and its functions are called as what they are rather than by name
-import type {Nodes, Parent, PhrasingContent, Root} from '../../prettier/node_modules/@types/mdast/index.js'
+import type {Nodes, Parent, Root} from '../../prettier/node_modules/@types/mdast/index.js'
 import type {ParseOptions, Token} from './micromark-util-types.js'
 
 export type CompileContext = {
   config: Config
   data: CompileData
-  stack: Array<Fragment | Nodes>
+  stack: Array<Nodes>
   tokenStack: Array<TokenTuple>
   buffer: (this: CompileContext) => undefined
   enter: (
@@ -29,6 +29,9 @@ export type CompileData = {
     | undefined
   expectingFirstListItemValue?: boolean | undefined
   flowCodeInside?: boolean | undefined
+  // (dprint-plugin-prettier: what mdast-util-gfm-table and mdast-util-math add to it)
+  inTable?: boolean | undefined
+  mathFlowInside?: boolean | undefined
   inReference?: boolean | undefined
   setextHeadingSlurpLineEnding?: boolean | undefined
   referenceType?: 'collapsed' | 'full' | undefined
@@ -48,10 +51,8 @@ export type Extension = {
   transforms?: Array<Transform> | null | undefined
 }
 
-export type Fragment = Parent & {
-  type: 'fragment'
-  children: Array<PhrasingContent>
-}
+// (dprint-plugin-prettier: a node like any other, as mdast-types.ts makes every node one object type)
+export type Fragment = Parent
 
 export type Handles = Record<string, Handle>
 

@@ -47,7 +47,7 @@ function attachParser(parser) {
     'math'
   ])
 
-  function mathBlockTokenizer(/** @type {(a0?: any) => any} */ eat, /** @type {StringView} */ value, /** @type {boolean | undefined} */ silent) {
+  function mathBlockTokenizer(/** @type {import("../remark-parse/lib/tokenizer.js").RemarkEat} */ eat, /** @type {StringView} */ value, /** @type {boolean | undefined} */ silent) {
     /** @type {number} */ var length = value.length
     /** @type {number} */ var index = 0
     /** @type {number} */ let code

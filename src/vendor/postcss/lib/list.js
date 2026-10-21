@@ -1,24 +1,25 @@
+// @nts-check
 'use strict'
 
 let list = {
-  comma(string) {
+  /** @returns {string[]} */ comma(/** @type {string} */ string) {
     return list.split(string, [','], true)
   },
 
-  space(string) {
-    let spaces = [' ', '\n', '\t']
+  /** @returns {string[]} */ space(/** @type {string} */ string) {
+    /** @type {string[]} */ let spaces = [' ', '\n', '\t']
     return list.split(string, spaces)
   },
 
-  split(string, separators, last) {
-    let array = []
-    let current = ''
-    let split = false
+  /** @returns {string[]} */ split(/** @type {string} */ string, /** @type {string[]} */ separators, /** @type {boolean | undefined} */ last) {
+    /** @type {string[]} */ let array = []
+    /** @type {string} */ let current = ''
+    /** @type {boolean} */ let split = false
 
-    let func = 0
-    let inQuote = false
-    let prevQuote = ''
-    let escape = false
+    /** @type {number} */ let func = 0
+    /** @type {boolean} */ let inQuote = false
+    /** @type {string} */ let prevQuote = ''
+    /** @type {boolean} */ let escape = false
 
     for (let letter of string) {
       if (escape) {

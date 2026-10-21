@@ -32,9 +32,9 @@ const ES_COMMENT_REGEX = /^\{\s*\/\*(.*)\*\/\s*\}/;
 
 const isImport = /** @returns {boolean} */ (/** @type {string} */ text) => IMPORT_REGEX.test(text);
 const isExport = /** @returns {boolean} */ (/** @type {string} */ text) => EXPORT_REGEX.test(text);
-const isImportOrExport = (text) => isImport(text) || isExport(text);
+const isImportOrExport = /** @returns {boolean} */ (/** @type {string} */ text) => isImport(text) || isExport(text);
 
-const tokenizeEsSyntax = (eat, /** @type {string} */ value) => {
+const tokenizeEsSyntax = (/** @type {import("../../../../src/vendor/remark-parse/lib/tokenizer.js").RemarkEat} */ eat, /** @type {string} */ value) => {
   const index = value.indexOf(EMPTY_NEWLINE);
   const subvalue = index === -1 ? value : value.slice(0, index);
 
@@ -48,10 +48,10 @@ const tokenizeEsSyntax = (eat, /** @type {string} */ value) => {
 
 tokenizeEsSyntax.notInBlock = true;
 
-tokenizeEsSyntax.locator = (value /* , fromIndex*/) =>
+tokenizeEsSyntax.locator = /** @returns {number} */ (/** @type {string} */ value /* , fromIndex*/) =>
   isImportOrExport(value) ? -1 : 1;
 
-const tokenizeEsComment = (eat, /** @type {string} */ value) => {
+const tokenizeEsComment = (/** @type {import("../../../../src/vendor/remark-parse/lib/tokenizer.js").RemarkEat} */ eat, /** @type {string} */ value) => {
   const match = ES_COMMENT_REGEX.exec(value);
 
   if (match) {

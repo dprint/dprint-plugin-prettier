@@ -114,7 +114,7 @@ function genericPrint(/** @type {AstPath} */ path, /** @type {CssOptions} */ opt
     case "css-decl": {
       /** @type {import("./types.js").CssNode} */ const parentNode = path.parent;
 
-      const { between: rawBetween } = node.raws;
+      /** @type {{ between: string }} */ const { between: rawBetween } = node.raws;
       const trimmedBetween = rawBetween.trim();
       /** @type {boolean} */ const isColon = trimmedBetween === ":";
       const hasSpaceAfterColon = rawBetween.endsWith(" ") && isColon;
@@ -363,7 +363,7 @@ function genericPrint(/** @type {AstPath} */ path, /** @type {CssOptions} */ opt
       return group([
         insideAtRuleNode(path, "custom-selector")
           ? [
-              path.findAncestor(/** @returns {boolean} */ (node) => node.type === "css-atrule")
+              path.findAncestor(/** @returns {boolean} */ (/** @type {import("./types.js").CssNode} */ node) => node.type === "css-atrule")
                 .customSelector,
               line,
             ]
@@ -482,7 +482,7 @@ function genericPrint(/** @type {AstPath} */ path, /** @type {CssOptions} */ opt
 
     case "selector-unknown": {
       const ruleAncestorNode = path.findAncestor(
-        /** @returns {boolean} */ (node) => node.type === "css-rule",
+        /** @returns {boolean} */ (/** @type {import("./types.js").CssNode} */ node) => node.type === "css-rule",
       );
 
       // Nested SCSS property

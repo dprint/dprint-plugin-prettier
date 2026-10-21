@@ -20,7 +20,7 @@ module.exports = definition
 /** @type {string} */ var lessThan = '<'
 /** @type {string} */ var greaterThan = '>'
 
-/** @this {import("../parser.js").RemarkParser} */ function definition(/** @type {(a0?: any) => any} */ eat, /** @type {StringView} */ value, silent) {
+/** @this {import("../parser.js").RemarkParser} */ function definition(/** @type {import("../tokenizer.js").RemarkEat} */ eat, /** @type {StringView} */ value, /** @type {boolean | undefined} */ silent) {
   var self = this
   /** @type {boolean} */ var commonmark = self.options.commonmark
   /** @type {number} */ var index = 0

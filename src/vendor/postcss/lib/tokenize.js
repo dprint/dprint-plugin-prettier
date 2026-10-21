@@ -26,7 +26,7 @@
 /** @type {RegExp} */ const RE_BAD_BRACKET = /.[\r\n"'(/\\]/
 /** @type {RegExp} */ const RE_HEX_ESCAPE = /[\da-f]/i
 
-module.exports = function tokenizer(/** @type {import("./input")} */ input, options = {}) {
+module.exports = /** @returns {import("./parser").Tokenizer} */ function tokenizer(/** @type {import("./input")} */ input, options = {}) {
   /** @type {string} */ let css = /** @type {string} */ (input.css.valueOf())
   let ignore = options.ignoreErrors
 

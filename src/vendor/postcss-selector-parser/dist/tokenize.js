@@ -29,7 +29,12 @@ var singleQuote = 39,
     atEnd = /[ \n\t\r\{\(\)'"\\;/]/g,
     wordEnd = /[ \n\t\r\(\)\*:;@!&'"\+\|~>,\[\]\\]|\/(?=\*)/g;
 
-/** @returns {[string, string, number, number, number?, number?, number?][]} */ function tokenize(input) {
+/**
+ * what a selector is parsed from: its text, whether to go on past what is not closed, and how to fail
+ * @typedef {{ css: string, safe?: boolean, error?: any, options?: any }} SelectorInput
+ */
+
+/** @returns {[string, string, number, number, number?, number?, number?][]} */ function tokenize(/** @type {SelectorInput} */ input) {
     /** @type {[string, string, number, number, number?, number?, number?][]} */ var tokens = [];
     /** @type {string} */ var css = input.css.valueOf();
 

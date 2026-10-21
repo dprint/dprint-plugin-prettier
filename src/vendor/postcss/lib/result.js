@@ -2,25 +2,28 @@
 
 let Warning = require('./warning')
 
+/**
+ * @property {any} [lastPlugin] given by the result that runs the plugins
+ */
 class Result {
-  get content() {
+  /** @returns {string} */ get content() {
     return this.css
   }
 
-  constructor(processor, root, opts) {
-    this.processor = processor
-    this.messages = []
-    this.root = root
-    this.opts = opts
+  constructor(/** @type {any} */ processor, /** @type {any} */ root, /** @type {any} */ opts) {
+    /** @type {any} */ this.processor = processor
+    /** @type {any[]} */ this.messages = []
+    /** @type {any} */ this.root = root
+    /** @type {any} */ this.opts = opts
     /** @type {string} */ this.css = ''
-    this.map = undefined
+    /** @type {any} */ this.map = undefined
   }
 
   /** @returns {string} */ toString() {
     return this.css
   }
 
-  warn(text, opts = {}) {
+  /** @returns {import("./warning")} */ warn(/** @type {string} */ text, /** @type {any} */ opts = {}) {
     if (!opts.plugin) {
       if (this.lastPlugin && this.lastPlugin.postcssPlugin) {
         opts.plugin = this.lastPlugin.postcssPlugin
@@ -33,8 +36,8 @@ class Result {
     return warning
   }
 
-  warnings() {
-    return this.messages.filter(i => i.type === 'warning')
+  /** @returns {any[]} */ warnings() {
+    return this.messages.filter(/** @returns {boolean} */ i => i.type === 'warning')
   }
 }
 

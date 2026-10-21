@@ -11,7 +11,12 @@ let stringify = require('./stringify')
 let { isClean, my } = require('./symbols')
 let warnOnce = require('./warn-once')
 
-const TYPE_TO_CLASS_NAME = {
+/**
+ * where a walk over a node of the tree is, with the events of its plugins that are still to come
+ * @typedef {{ eventIndex: number, events: (string | number)[], iterator: number, node: any, visitorIndex: number, visitors: [any, any][] }} Visit
+ */
+
+/** @type {Record<string, string>} */ const TYPE_TO_CLASS_NAME = {
   atrule: 'AtRule',
   comment: 'Comment',
   decl: 'Declaration',
@@ -20,7 +25,7 @@ const TYPE_TO_CLASS_NAME = {
   rule: 'Rule'
 }
 
-const PLUGIN_PROPS = {
+/** @type {Record<string, boolean>} */ const PLUGIN_PROPS = {
   AtRule: true,
   AtRuleExit: true,
   Comment: true,
@@ -39,7 +44,7 @@ const PLUGIN_PROPS = {
   RuleExit: true
 }
 
-const NOT_VISITORS = {
+/** @type {Record<string, boolean>} */ const NOT_VISITORS = {
   Once: true,
   postcssPlugin: true,
   prepare: true
@@ -47,13 +52,13 @@ const NOT_VISITORS = {
 
 /** @type {number} */ const CHILDREN = 0
 
-function isPromise(obj) {
+/** @returns {boolean} */ function isPromise(/** @type {any} */ obj) {
   return typeof obj === 'object' && typeof obj.then === 'function'
 }
 
-function getEvents(node) {
-  let key = false
-  let type = TYPE_TO_CLASS_NAME[node.type]
+/** @returns {(string | number)[]} */ function getEvents(/** @type {any} */ node) {
+  /** @type {any} */ let key = false
+  /** @type {string} */ let type = TYPE_TO_CLASS_NAME[node.type]
   if (node.type === 'decl') {
     key = node.prop.toLowerCase()
   } else if (node.type === 'atrule') {
@@ -77,8 +82,8 @@ function getEvents(node) {
   }
 }
 
-function toStack(node) {
-  let events
+/** @returns {Visit} */ function toStack(/** @type {any} */ node) {
+  /** @type {(string | number)[]} */ let events
   if (node.type === 'document') {
     events = ['Document', CHILDREN, 'DocumentExit']
   } else if (node.type === 'root') {
@@ -97,13 +102,13 @@ function toStack(node) {
   }
 }
 
-function cleanMarks(node) {
+/** @returns {any} */ function cleanMarks(/** @type {any} */ node) {
   node[isClean] = false
-  if (node.nodes) node.nodes.forEach(i => cleanMarks(i))
+  if (node.nodes) node.nodes.forEach((/** @type {any} */ i) => cleanMarks(i))
   return node
 }
 
-let postcss = {}
+/** @type {any} */ let postcss = {}
 
 class LazyResult {
   get content() {
@@ -138,11 +143,11 @@ class LazyResult {
     return 'LazyResult'
   }
 
-  constructor(processor, css, opts) {
-    this.stringified = false
-    this.processed = false
+  constructor(/** @type {import("./processor")} */ processor, /** @type {any} */ css, /** @type {any} */ opts) {
+    /** @type {boolean} */ this.stringified = false
+    /** @type {boolean} */ this.processed = false
 
-    let root
+    /** @type {any} */ let root
     if (
       typeof css === 'object' &&
       css !== null &&
@@ -157,7 +162,7 @@ class LazyResult {
         opts.map.prev = css.map
       }
     } else {
-      let parser = parse
+      /** @type {any} */ let parser = parse
       if (opts.syntax) parser = opts.syntax.parse
       if (opts.parser) parser = opts.parser
       if (parser.parse) parser = parser.parse
@@ -166,7 +171,7 @@ class LazyResult {
         root = parser(css, opts)
       } catch (error) {
         this.processed = true
-        this.error = error
+        /** @type {any} */ this.error = error
       }
 
       if (root && !root[my]) {
@@ -175,9 +180,9 @@ class LazyResult {
       }
     }
 
-    this.result = new Result(processor, root, opts)
-    this.helpers = { ...postcss, postcss, result: this.result }
-    this.plugins = this.processor.plugins.map(plugin => {
+    /** @type {any} */ this.result = new Result(processor, root, opts)
+    /** @type {any} */ this.helpers = { ...postcss, postcss, result: this.result }
+    /** @type {any[]} */ this.plugins = this.processor.plugins.map(/** @returns {any} */ (/** @type {any} */ plugin) => {
       if (typeof plugin === 'object' && plugin.prepare) {
         return { ...plugin, ...plugin.prepare(this.result) }
       } else {
@@ -190,16 +195,16 @@ class LazyResult {
     if (this.error) return Promise.reject(this.error)
     if (this.processed) return Promise.resolve(this.result)
     if (!this.processing) {
-      this.processing = this.runAsync()
+      /** @type {Promise<any>} */ this.processing = this.runAsync()
     }
     return this.processing
   }
 
-  catch(onRejected) {
+  catch(/** @type {any} */ onRejected) {
     return this.async().catch(onRejected)
   }
 
-  finally(onFinally) {
+  finally(/** @type {any} */ onFinally) {
     return this.async().then(onFinally, onFinally)
   }
 
@@ -207,8 +212,8 @@ class LazyResult {
     throw new Error('Use process(css).then(cb) to work with async plugins')
   }
 
-  handleError(error, node) {
-    let plugin = this.result.lastPlugin
+  /** @returns {any} */ handleError(/** @type {any} */ error, /** @type {any} */ node) {
+    /** @type {any} */ let plugin = this.result.lastPlugin
     try {
       if (node) node.addToError(error)
       this.error = error
@@ -217,11 +222,11 @@ class LazyResult {
         error.setMessage()
       } else if (plugin.postcssVersion) {
         if (process.env.NODE_ENV !== 'production') {
-          let pluginName = plugin.postcssPlugin
-          let pluginVer = plugin.postcssVersion
-          let runtimeVer = this.result.processor.version
-          let a = pluginVer.split('.')
-          let b = runtimeVer.split('.')
+          /** @type {string} */ let pluginName = plugin.postcssPlugin
+          /** @type {string} */ let pluginVer = plugin.postcssVersion
+          /** @type {string} */ let runtimeVer = this.result.processor.version
+          /** @type {string[]} */ let a = pluginVer.split('.')
+          /** @type {string[]} */ let b = runtimeVer.split('.')
 
           if (a[0] !== b[0] || parseInt(a[1]) > parseInt(b[1])) {
             // eslint-disable-next-line no-console
@@ -247,8 +252,8 @@ class LazyResult {
   }
 
   prepareVisitors() {
-    this.listeners = {}
-    let add = (plugin, type, cb) => {
+    /** @type {Record<string, [any, any][]>} */ this.listeners = {}
+    let add = (/** @type {any} */ plugin, /** @type {string} */ type, /** @type {any} */ cb) => {
       if (!this.listeners[type]) this.listeners[type] = []
       this.listeners[type].push([plugin, cb])
     }
@@ -281,14 +286,14 @@ class LazyResult {
         }
       }
     }
-    this.hasListener = Object.keys(this.listeners).length > 0
+    /** @type {boolean} */ this.hasListener = Object.keys(this.listeners).length > 0
   }
 
   async runAsync() {
-    this.plugin = 0
+    /** @type {number} */ this.plugin = 0
     for (let i = 0; i < this.plugins.length; i++) {
       let plugin = this.plugins[i]
-      let promise = this.runOnRoot(plugin)
+      /** @type {any} */ let promise = this.runOnRoot(plugin)
       if (isPromise(promise)) {
         try {
           await promise
@@ -300,12 +305,12 @@ class LazyResult {
 
     this.prepareVisitors()
     if (this.hasListener) {
-      let root = this.result.root
+      /** @type {any} */ let root = this.result.root
       while (!root[isClean]) {
         root[isClean] = true
-        let stack = [toStack(root)]
+        /** @type {Visit[]} */ let stack = [toStack(root)]
         while (stack.length > 0) {
-          let promise = this.visitTick(stack)
+          /** @type {any} */ let promise = this.visitTick(stack)
           if (isPromise(promise)) {
             try {
               await promise
@@ -322,7 +327,7 @@ class LazyResult {
           this.result.lastPlugin = plugin
           try {
             if (root.type === 'document') {
-              let roots = root.nodes.map(subRoot =>
+              /** @type {any[]} */ let roots = root.nodes.map(/** @returns {any} */ (/** @type {any} */ subRoot) =>
                 visitor(subRoot, this.helpers)
               )
 
@@ -341,12 +346,12 @@ class LazyResult {
     return this.stringify()
   }
 
-  runOnRoot(plugin) {
+  /** @returns {any} */ runOnRoot(/** @type {any} */ plugin) {
     this.result.lastPlugin = plugin
     try {
       if (typeof plugin === 'object' && plugin.Once) {
         if (this.result.root.type === 'document') {
-          let roots = this.result.root.nodes.map(root =>
+          /** @type {any[]} */ let roots = this.result.root.nodes.map(/** @returns {any} */ (/** @type {any} */ root) =>
             plugin.Once(root, this.helpers)
           )
 
@@ -373,8 +378,8 @@ class LazyResult {
 
     this.sync()
 
-    let opts = this.result.opts
-    let str = stringify
+    /** @type {any} */ let opts = this.result.opts
+    /** @type {any} */ let str = stringify
     if (opts.syntax) str = opts.syntax.stringify
     if (opts.stringifier) str = opts.stringifier
     if (str.stringify) str = str.stringify
@@ -384,8 +389,8 @@ class LazyResult {
       opts.map === undefined &&
       !(rootSource && rootSource.input && rootSource.input.map)
     ) {
-      let result = ''
-      str(this.result.root, i => {
+      /** @type {string} */ let result = ''
+      str(this.result.root, (/** @type {string} */ i) => {
         result += i
       })
       this.result.css = result
@@ -393,7 +398,7 @@ class LazyResult {
     }
 
     let map = new MapGenerator(str, this.result.root, this.result.opts)
-    let data = map.generate()
+    /** @type {any[]} */ let data = map.generate()
     this.result.css = data[0]
     this.result.map = data[1]
 
@@ -410,7 +415,7 @@ class LazyResult {
     }
 
     for (let plugin of this.plugins) {
-      let promise = this.runOnRoot(plugin)
+      /** @type {any} */ let promise = this.runOnRoot(plugin)
       if (isPromise(promise)) {
         throw this.getAsyncError()
       }
@@ -418,7 +423,7 @@ class LazyResult {
 
     this.prepareVisitors()
     if (this.hasListener) {
-      let root = this.result.root
+      /** @type {any} */ let root = this.result.root
       while (!root[isClean]) {
         root[isClean] = true
         this.walkSync(root)
@@ -437,7 +442,7 @@ class LazyResult {
     return this.result
   }
 
-  then(onFulfilled, onRejected) {
+  then(/** @type {any} */ onFulfilled, /** @type {any} */ onRejected) {
     if (process.env.NODE_ENV !== 'production') {
       if (!('from' in this.opts)) {
         warnOnce(
@@ -454,10 +459,10 @@ class LazyResult {
     return this.css
   }
 
-  visitSync(visitors, node) {
+  /** @returns {boolean | undefined} */ visitSync(/** @type {[any, any][]} */ visitors, /** @type {any} */ node) {
     for (let [plugin, visitor] of visitors) {
       this.result.lastPlugin = plugin
-      let promise
+      /** @type {any} */ let promise
       try {
         promise = visitor(node, this.helpers)
       } catch (e) {
@@ -472,7 +477,7 @@ class LazyResult {
     }
   }
 
-  visitTick(stack) {
+  /** @returns {any} */ visitTick(/** @type {Visit[]} */ stack) {
     let visit = stack[stack.length - 1]
     let { node, visitors } = visit
 
@@ -497,8 +502,8 @@ class LazyResult {
     }
 
     if (visit.iterator !== 0) {
-      let iterator = visit.iterator
-      let child
+      /** @type {number} */ let iterator = visit.iterator
+      /** @type {any} */ let child
       while ((child = node.nodes[node.indexes[iterator]])) {
         node.indexes[iterator] += 1
         if (!child[isClean]) {
@@ -529,13 +534,13 @@ class LazyResult {
     stack.pop()
   }
 
-  walkSync(node) {
+  walkSync(/** @type {any} */ node) {
     node[isClean] = true
-    let events = getEvents(node)
+    /** @type {(string | number)[]} */ let events = getEvents(node)
     for (let event of events) {
       if (event === CHILDREN) {
         if (node.nodes) {
-          node.each(child => {
+          node.each((/** @type {any} */ child) => {
             if (!child[isClean]) this.walkSync(child)
           })
         }
@@ -553,7 +558,7 @@ class LazyResult {
   }
 }
 
-LazyResult.registerPostcss = dependant => {
+LazyResult.registerPostcss = (/** @type {any} */ dependant) => {
   postcss = dependant
 }
 

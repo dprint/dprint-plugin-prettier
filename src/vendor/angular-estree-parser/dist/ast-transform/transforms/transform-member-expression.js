@@ -2,25 +2,25 @@
 import { isOptionalObjectOrCallee } from "../../utilities.js";
 import { ImplicitReceiver } from "@angular/compiler";
 //#region src/ast-transform/transforms/transform-member-expression.ts
-const keyedReadOptions = {
+/** @type {{ computed: boolean, optional: boolean }} */ const keyedReadOptions = {
 	computed: true,
 	optional: false
 };
-const safeKeyedReadOptions = {
+/** @type {{ computed: boolean, optional: boolean }} */ const safeKeyedReadOptions = {
 	computed: true,
 	optional: true
 };
-const propertyReadOptions = {
+/** @type {{ computed: boolean, optional: boolean }} */ const propertyReadOptions = {
 	computed: false,
 	optional: false
 };
-const safePropertyReadOptions = {
+/** @type {{ computed: boolean, optional: boolean }} */ const safePropertyReadOptions = {
 	computed: false,
 	optional: true
 };
-const transformMemberExpression = ({ computed, optional }) => (node, /** @type {import("../node-transformer.js").NodeTransformer} */ transformer) => {
+const transformMemberExpression = (/** @type {{ computed: boolean, optional: boolean }} */ { computed, optional }) => /** @returns {import("../../source.js").NGNode} */ (/** @type {import("@angular/compiler").PropertyRead | import("@angular/compiler").SafePropertyRead | import("@angular/compiler").KeyedRead | import("@angular/compiler").SafeKeyedRead} */ node, /** @type {import("../node-transformer.js").NodeTransformer} */ transformer) => {
 	const { receiver } = node;
-	let property;
+	/** @type {import("../../source.js").NGNode} */ let property;
 	if (computed) {
 		const { key } = node;
 		property = transformer.transformChild(key);

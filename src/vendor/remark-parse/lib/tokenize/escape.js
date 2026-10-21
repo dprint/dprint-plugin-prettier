@@ -9,10 +9,10 @@ escape.locator = locate
 /** @type {string} */ var lineFeed = '\n'
 /** @type {string} */ var backslash = '\\'
 
-/** @this {import("../parser.js").RemarkParser} */ function escape(/** @type {(a0?: any) => any} */ eat, /** @type {StringView} */ value, silent) {
+/** @this {import("../parser.js").RemarkParser} */ function escape(/** @type {import("../tokenizer.js").RemarkEat} */ eat, /** @type {StringView} */ value, /** @type {boolean | undefined} */ silent) {
   var self = this
   /** @type {string | undefined} */ var character
-  var node
+  /** @type {import("../tokenizer.js").RemarkNode} */ var node
 
   if (value.charAt(0) === backslash) {
     character = value.charAt(1)

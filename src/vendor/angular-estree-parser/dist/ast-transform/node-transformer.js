@@ -4,21 +4,21 @@ import { transformVisitors } from "./visitors.js";
 import { ParenthesizedExpression } from "@angular/compiler";
 //#region src/ast-transform/node-transformer.ts
 var NodeTransformer = class NodeTransformer extends Source {
-	node;
-	ancestors;
-	constructor({ node, text, ancestors = [] }) {
+	/** @type {any} */ node;
+	/** @type {any[]} */ ancestors;
+	constructor(/** @type {{ node: any, text: string, ancestors?: any[] }} */ { node, text, ancestors = [] }) {
 		super(text);
 		this.node = node;
 		this.ancestors = ancestors;
 	}
-	create(properties, location, ancestors = this.ancestors) {
+	/** @returns {import("../source.js").NGNode} */ create(/** @type {import("../source.js").NGNode} */ properties, /** @type {any} */ location, /** @type {any[]} */ ancestors = this.ancestors) {
 		if (ancestors[0] instanceof ParenthesizedExpression) properties.extra = {
 			...properties.extra,
 			parenthesized: true
 		};
 		return super.createNode(properties, properties.range ?? location ?? this.node);
 	}
-	transformChild(child) {
+	/** @returns {import("../source.js").NGNode} */ transformChild(/** @type {any} */ child) {
 		return new NodeTransformer({
 			node: child,
 			ancestors: [this.node, ...this.ancestors],
@@ -28,12 +28,12 @@ var NodeTransformer = class NodeTransformer extends Source {
 	/** @returns {any[]} */ transformChildren(/** @type {any[]} */ children) {
 		return children.map((child) => this.transformChild(child));
 	}
-	transform() {
+	/** @returns {import("../source.js").NGNode} */ transform() {
 		const { node } = this;
-		const properties = node.visit(transformVisitors, this);
+		const properties = /** @type {import("../source.js").NGNode} */ (node.visit(transformVisitors, this));
 		return this.create(properties, this.node);
 	}
-	static transform(node, /** @type {string | undefined} */ text) {
+	/** @returns {import("../source.js").NGNode} */ static transform(/** @type {any} */ node, /** @type {string | undefined} */ text) {
 		return new NodeTransformer({
 			node,
 			text,

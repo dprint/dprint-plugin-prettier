@@ -5,13 +5,13 @@ const Container = require('./container');
 const Node = require('./node');
 
 class NumberNode extends Node {
-  constructor (opts) {
+  constructor (/** @type {any} */ opts) {
     super(opts);
     /** @type {string} */ this.type = 'number';
     /** @type {string} */ this.unit = Object(opts).unit || '';
   }
 
-  toString () {
+  /** @returns {string} */ toString () {
     return [
       this.raws.before,
       String(this.value),

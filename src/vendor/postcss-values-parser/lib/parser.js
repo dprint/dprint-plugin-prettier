@@ -28,8 +28,8 @@ const ParserError = require('./errors/ParserError');
 }
 
 module.exports = class Parser {
-  constructor (/** @type {string} */ input, options) {
-    const defaults = { loose: false };
+  constructor (/** @type {string} */ input, /** @type {any} */ options) {
+    /** @type {{ loose: boolean }} */ const defaults = { loose: false };
 
     // cache needs to be an array for values with more than 1 level of function nesting
     /** @type {any[]} */ this.cache = [];
@@ -425,7 +425,7 @@ module.exports = class Parser {
       // to pass through.
       rNoFollow = /^(?!\#([a-z0-9]+))[\#\{\}]/gi,
 
-      hasAt, indices;
+      /** @type {any[]} */ hasAt, /** @type {number[]} */ indices;
 
     if (!rNoFollow.test(word)) {
       while (nextToken && nextToken[0] === 'word') {
@@ -516,10 +516,10 @@ module.exports = class Parser {
   string () {
     let /** @type {[string, string, number, number, number, number, number]} */ token = this.currToken,
       /** @type {string} */ value = this.currToken[1],
-      rQuote = /^(\"|\')/,
-      quoted = rQuote.test(value),
-      quote = '',
-      node;
+      /** @type {RegExp} */ rQuote = /^(\"|\')/,
+      /** @type {boolean} */ quoted = rQuote.test(value),
+      /** @type {string} */ quote = '',
+      /** @type {any} */ node;
 
     if (quoted) {
       quote = value.match(rQuote)[0];

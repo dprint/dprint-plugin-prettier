@@ -11,7 +11,7 @@ module.exports = blockquote
 /** @type {string} */ var space = ' '
 /** @type {string} */ var greaterThan = '>'
 
-/** @this {import("../parser.js").RemarkParser} */ function blockquote(eat, /** @type {StringView} */ value, /** @type {boolean | undefined} */ silent) {
+/** @this {import("../parser.js").RemarkParser} */ function blockquote(/** @type {import("../tokenizer.js").RemarkEat} */ eat, /** @type {StringView} */ value, /** @type {boolean | undefined} */ silent) {
   var self = this
   var offsets = self.offset
   var tokenizers = self.blockTokenizers
@@ -22,7 +22,7 @@ module.exports = blockquote
   var values = []
   var contents = []
   var indents = []
-  var add
+  /** @type {import("../tokenizer.js").RemarkApply} */ var add
   /** @type {number} */ var index = 0
   /** @type {string | undefined} */ var character
   /** @type {StringView | undefined} */ var rest
@@ -31,7 +31,7 @@ module.exports = blockquote
   /** @type {string} */ var line
   /** @type {number} */ var startIndex
   /** @type {boolean} */ var prefixed
-  var exit
+  /** @type {() => void} */ var exit
 
   while (index < length) {
     character = value.charAt(index)

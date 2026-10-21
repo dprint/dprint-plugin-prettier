@@ -5,7 +5,7 @@ let { existsSync, readFileSync } = require('fs')
 let { dirname, join } = require('path')
 let { SourceMapConsumer, SourceMapGenerator } = require('source-map-js')
 
-function fromBase64(str) {
+/** @returns {string} */ function fromBase64(/** @type {string} */ str) {
   if (Buffer) {
     return Buffer.from(str, 'base64').toString()
   } else {
@@ -15,45 +15,45 @@ function fromBase64(str) {
 }
 
 class PreviousMap {
-  constructor(/** @type {string} */ css, opts) {
+  constructor(/** @type {string} */ css, /** @type {any} */ opts) {
     if (opts.map === false) return
-    if (opts.unsafeMap) this.unsafeMap = true
+    if (opts.unsafeMap) /** @type {boolean | undefined} */ this.unsafeMap = true
     this.loadAnnotation(css)
     /** @type {boolean} */ this.inline = this.startWith(this.annotation, 'data:')
 
-    let prev = opts.map ? opts.map.prev : undefined
-    let text = this.loadMap(opts.from, prev)
+    /** @type {any} */ let prev = opts.map ? opts.map.prev : undefined
+    /** @type {any} */ let text = this.loadMap(opts.from, prev)
     if (!this.mapFile && opts.from) {
-      this.mapFile = opts.from
+      /** @type {string | undefined} */ this.mapFile = opts.from
     }
-    if (this.mapFile) this.root = dirname(this.mapFile)
-    if (text) this.text = text
+    if (this.mapFile) /** @type {string | undefined} */ this.root = dirname(this.mapFile)
+    if (text) /** @type {string | undefined} */ this.text = text
   }
 
-  consumer() {
+  /** @returns {any} */ consumer() {
     if (!this.consumerCache) {
-      this.consumerCache = new SourceMapConsumer(this.json || this.text)
+      /** @type {any} */ this.consumerCache = new SourceMapConsumer(this.json || this.text)
     }
     return this.consumerCache
   }
 
-  decodeInline(text) {
-    let baseCharsetUri = /^data:application\/json;charset=utf-?8;base64,/
-    let baseUri = /^data:application\/json;base64,/
-    let charsetUri = /^data:application\/json;charset=utf-?8,/
-    let uri = /^data:application\/json,/
+  /** @returns {string} */ decodeInline(/** @type {string} */ text) {
+    /** @type {RegExp} */ let baseCharsetUri = /^data:application\/json;charset=utf-?8;base64,/
+    /** @type {RegExp} */ let baseUri = /^data:application\/json;base64,/
+    /** @type {RegExp} */ let charsetUri = /^data:application\/json;charset=utf-?8,/
+    /** @type {RegExp} */ let uri = /^data:application\/json,/
 
-    let uriMatch = text.match(charsetUri) || text.match(uri)
+    /** @type {RegExpMatchArray | null} */ let uriMatch = text.match(charsetUri) || text.match(uri)
     if (uriMatch) {
       return decodeURIComponent(text.substr(uriMatch[0].length))
     }
 
-    let baseUriMatch = text.match(baseCharsetUri) || text.match(baseUri)
+    /** @type {RegExpMatchArray | null} */ let baseUriMatch = text.match(baseCharsetUri) || text.match(baseUri)
     if (baseUriMatch) {
       return fromBase64(text.substr(baseUriMatch[0].length))
     }
 
-    let encoding = text.slice('data:application/json;'.length)
+    /** @type {string} */ let encoding = text.slice('data:application/json;'.length)
     encoding = encoding.slice(0, encoding.indexOf(','))
     throw new Error('Unsupported source map encoding ' + encoding)
   }
@@ -62,7 +62,7 @@ class PreviousMap {
     return sourceMapString.replace(/^\/\*\s*# sourceMappingURL=/, '').trim()
   }
 
-  isMap(map) {
+  /** @returns {boolean} */ isMap(/** @type {any} */ map) {
     if (typeof map !== 'object') return false
     return (
       typeof map.mappings === 'string' ||
@@ -72,20 +72,20 @@ class PreviousMap {
   }
 
   loadAnnotation(/** @type {string} */ css) {
-    let comments = css.match(/\/\*\s*# sourceMappingURL=/g)
+    /** @type {RegExpMatchArray | null} */ let comments = css.match(/\/\*\s*# sourceMappingURL=/g)
     if (!comments) return
 
     // sourceMappingURLs from comments, strings, etc.
-    let start = css.lastIndexOf(comments.pop())
-    let end = css.indexOf('*/', start)
+    /** @type {number} */ let start = css.lastIndexOf(comments.pop())
+    /** @type {number} */ let end = css.indexOf('*/', start)
 
     if (start > -1 && end > -1) {
       // Locate the last sourceMappingURL to avoid pickin
-      this.annotation = this.getAnnotationURL(css.substring(start, end))
+      /** @type {string | undefined} */ this.annotation = this.getAnnotationURL(css.substring(start, end))
     }
   }
 
-  loadFile(/** @type {string} */ path, cssFile, /** @type {boolean} */ trusted) {
+  /** @returns {string | undefined} */ loadFile(/** @type {string} */ path, /** @type {any} */ cssFile, /** @type {boolean} */ trusted) {
     /* c8 ignore next 5 */
     if (!trusted && !this.unsafeMap) {
       if (!/\.map$/i.test(path)) {
@@ -99,16 +99,16 @@ class PreviousMap {
     }
   }
 
-  loadMap(file, prev) {
+  /** @returns {any} */ loadMap(/** @type {string | undefined} */ file, /** @type {any} */ prev) {
     if (prev === false) return false
 
     if (prev) {
       if (typeof prev === 'string') {
         return prev
       } else if (typeof prev === 'function') {
-        let prevPath = prev(file)
+        /** @type {any} */ let prevPath = prev(file)
         if (prevPath) {
-          let map = this.loadFile(prevPath, file, true)
+          /** @type {string | undefined} */ let map = this.loadFile(prevPath, file, true)
           if (!map) {
             throw new Error(
               'Unable to load previous source map: ' + prevPath.toString()
@@ -130,13 +130,13 @@ class PreviousMap {
     } else if (this.inline) {
       return this.decodeInline(this.annotation)
     } else if (this.annotation) {
-      let map = this.annotation
+      /** @type {string} */ let map = this.annotation
       if (file) map = join(dirname(file), map)
-      let unknown = this.loadFile(map, file, false)
+      /** @type {string | undefined} */ let unknown = this.loadFile(map, file, false)
       if (unknown) {
         try {
           /* c8 ignore next 4 */
-          this.json = JSON.parse(unknown.replace(/^\)]}'[^\n]*\n/, ''))
+          /** @type {any} */ this.json = JSON.parse(unknown.replace(/^\)]}'[^\n]*\n/, ''))
         } catch {
           return undefined
         }

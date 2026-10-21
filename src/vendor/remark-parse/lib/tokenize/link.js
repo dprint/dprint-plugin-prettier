@@ -20,7 +20,7 @@ link.locator = locate
 /** @type {string} */ var rightSquareBracket = ']'
 /** @type {string} */ var graveAccent = '`'
 
-/** @this {import("../parser.js").RemarkParser} */ function link(eat, /** @type {StringView} */ value, silent) {
+/** @this {import("../parser.js").RemarkParser} */ function link(/** @type {import("../tokenizer.js").RemarkEat} */ eat, /** @type {StringView} */ value, /** @type {boolean | undefined} */ silent) {
   var self = this
   /** @type {string} */ var subvalue = ''
   /** @type {number} */ var index = 0
@@ -43,9 +43,9 @@ link.locator = locate
   /** @type {number} */ var depth
   /** @type {string} */ var queue
   /** @type {string | undefined} */ var url
-  var now
-  var exit
-  var node
+  /** @type {import("../tokenizer.js").RemarkPoint} */ var now
+  /** @type {() => void} */ var exit
+  /** @type {import("../tokenizer.js").RemarkNode} */ var node
 
   // Detect whether this is an image.
   if (character === exclamationMark) {

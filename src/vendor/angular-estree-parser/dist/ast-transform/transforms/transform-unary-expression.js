@@ -1,6 +1,6 @@
 // @nts-check
 //#region src/ast-transform/transforms/transform-unary-expression.ts
-const transformUnaryExpression = (/** @type {string} */ operator) => (node, /** @type {import("../node-transformer.js").NodeTransformer} */ transformer) => ({
+const transformUnaryExpression = (/** @type {string} */ operator) => /** @returns {import("../../source.js").NGNode} */ (/** @type {import("@angular/compiler").PrefixNot | import("@angular/compiler").TypeofExpression | import("@angular/compiler").VoidExpression} */ node, /** @type {import("../node-transformer.js").NodeTransformer} */ transformer) => ({
 	type: "UnaryExpression",
 	prefix: true,
 	operator,
@@ -9,7 +9,7 @@ const transformUnaryExpression = (/** @type {string} */ operator) => (node, /** 
 const visitPrefixNot = transformUnaryExpression("!");
 const visitTypeofExpression = transformUnaryExpression("typeof");
 const visitVoidExpression = transformUnaryExpression("void");
-const visitUnary = (/** @type {import("../../../../../../prettier/node_modules/@angular/compiler/fesm2022/compiler.mjs").Unary} */ node, /** @type {import("../node-transformer.js").NodeTransformer} */ transformer) => ({
+const visitUnary = /** @returns {import("../../source.js").NGNode} */ (/** @type {import("@angular/compiler").Unary} */ node, /** @type {import("../node-transformer.js").NodeTransformer} */ transformer) => ({
 	type: "UnaryExpression",
 	prefix: true,
 	argument: transformer.transformChild(node.expr),

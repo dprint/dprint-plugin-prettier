@@ -50,7 +50,7 @@ function printTrailingComma(/** @type {AstPath} */ path, /** @type {CssOptions} 
     path.node.type !== "value-comment" &&
     !(
       path.node.type === "value-comma_group" &&
-      path.node.groups.every(/** @returns {boolean} */ (group) => group.type === "value-comment")
+      path.node.groups.every(/** @returns {boolean} */ (/** @type {import("../types.js").CssNode} */ group) => group.type === "value-comment")
     ) &&
     shouldPrintTrailingComma(options) &&
     path.callParent(/** @returns {boolean} */ () => isSCSSMapItemNode(path, options))
@@ -160,13 +160,13 @@ function printParenthesizedValueGroup(/** @type {AstPath} */ path, /** @type {Cs
 
 /** @returns {boolean} */ function shouldBreakList(/** @type {AstPath} */ path) {
   return path.match(
-    /** @returns {boolean} */ (node) =>
+    /** @returns {boolean} */ (/** @type {import("../types.js").CssNode} */ node) =>
       node.type === "value-paren_group" &&
       !node.open &&
-      node.groups.some(/** @returns {boolean} */ (node) => node.type === "value-comma_group"),
-    /** @returns {boolean} */ (node, key) => key === "group" && node.type === "value-value",
-    /** @returns {boolean} */ (node, key) => key === "group" && node.type === "value-root",
-    /** @returns {boolean | undefined} */ (node, key) =>
+      node.groups.some(/** @returns {boolean} */ (/** @type {import("../types.js").CssNode} */ node) => node.type === "value-comma_group"),
+    /** @returns {boolean} */ (/** @type {import("../types.js").CssNode} */ node, /** @type {string} */ key) => key === "group" && node.type === "value-value",
+    /** @returns {boolean} */ (/** @type {import("../types.js").CssNode} */ node, /** @type {string} */ key) => key === "group" && node.type === "value-root",
+    /** @returns {boolean | undefined} */ (/** @type {import("../types.js").CssNode} */ node, /** @type {string} */ key) =>
       key === "value" &&
       ((node.type === "css-decl" && !node.prop.startsWith("--")) ||
         (node.type === "css-atrule" && node.variable)),
@@ -175,10 +175,10 @@ function printParenthesizedValueGroup(/** @type {AstPath} */ path, /** @type {Cs
 
 /** @returns {boolean} */ function shouldPrecededBySoftline(/** @type {AstPath} */ path) {
   return path.match(
-    /** @returns {boolean} */ (node) => node.type === "value-paren_group" && !node.open,
-    /** @returns {boolean} */ (node, key) => key === "group" && node.type === "value-value",
-    /** @returns {boolean} */ (node, key) => key === "group" && node.type === "value-root",
-    /** @returns {boolean} */ (node, key) => key === "value" && node.type === "css-decl",
+    /** @returns {boolean} */ (/** @type {import("../types.js").CssNode} */ node) => node.type === "value-paren_group" && !node.open,
+    /** @returns {boolean} */ (/** @type {import("../types.js").CssNode} */ node, /** @type {string} */ key) => key === "group" && node.type === "value-value",
+    /** @returns {boolean} */ (/** @type {import("../types.js").CssNode} */ node, /** @type {string} */ key) => key === "group" && node.type === "value-root",
+    /** @returns {boolean} */ (/** @type {import("../types.js").CssNode} */ node, /** @type {string} */ key) => key === "value" && node.type === "css-decl",
   );
 }
 

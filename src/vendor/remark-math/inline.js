@@ -40,7 +40,7 @@ function attachParser(parser, options) {
     return value.indexOf('$', fromIndex)
   }
 
-  function mathInlineTokenizer(/** @type {(a0?: any) => any} */ eat, /** @type {StringView} */ value, silent) {
+  function mathInlineTokenizer(/** @type {import("../remark-parse/lib/tokenizer.js").RemarkEat} */ eat, /** @type {StringView} */ value, /** @type {boolean | undefined} */ silent) {
     /** @type {number} */ const length = value.length
     /** @type {boolean} */ let double = false
     /** @type {boolean} */ let escaped = false

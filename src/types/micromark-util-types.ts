@@ -84,7 +84,7 @@ export type ContentType = 'content' | 'document' | 'flow' | 'string' | 'text'
  * function names its own type, which nts compiles to a delegate that gives itself; constructs, the parser and the
  * combined extensions are object types, which are records with what they hold typed, as constructs are also written
  * out by code that is not checked, and their tokenizers are given the tokenize context first. The types of the
- * extensions as they are written, the compiler and the container state are `any`, which is what nts made of them
+ * extensions as they are written and the compiler are `any`, which is what nts made of them
  * before, as some of them are created as something else than they say.)
  *
  * `_bufferIndex` is `-1` when `_index` points to a code chunk and it’s a
@@ -508,7 +508,44 @@ export type ConstructRecord = any
 /**
  * State shared between container calls.
  */
-export type ContainerState = any
+// (dprint-plugin-prettier: an interface, which nts compiles to a class, as the document tokenizer creates it as `{}`
+// in a file whose comments are true, and only block quotes and lists give it what it holds)
+export interface ContainerState {
+  /**
+   * Special field to close the current flow (or containers).
+   */
+  _closeFlow?: boolean | undefined
+
+  /**
+   * Whether there are further blank lines, used by lists.
+   */
+  furtherBlankLines?: boolean | undefined
+
+  /**
+   * Whether there first line is blank, used by lists.
+   */
+  initialBlankLine?: boolean | undefined
+
+  /**
+   * Current marker, used by lists.
+   */
+  marker?: Code | undefined
+
+  /**
+   * Used by block quotes.
+   */
+  open?: boolean | undefined
+
+  /**
+   * Current size, used by lists.
+   */
+  size?: number | undefined
+
+  /**
+   * Current token type, used by lists.
+   */
+  type?: TokenType | undefined
+}
 
 /**
  * A context object that helps w/ tokenizing markdown constructs.
@@ -545,6 +582,10 @@ export type TokenizeContext = {
    * construct.
    */
   _gfmTasklistFirstContentOfListItem?: boolean | undefined
+
+  // (dprint-plugin-prettier: what micromark-core-commonmark's declarations add to the interface: the starts of labels
+  // that the label end looks for)
+  _labelStarts?: Array<Token> | undefined
 
   /**
    * Declares that trailing whitespace is sensitive,
@@ -715,7 +756,7 @@ export type FullNormalizedExtension = {
   document: Record<string, Array<Construct>>
   flowInitial: Record<string, Array<Construct>>
   flow: Record<string, Array<Construct>>
-  insideSpan: {null: Array<Pick<Construct, 'resolveAll'>>}
+  insideSpan: {null: Array<{resolveAll?: Resolver | undefined}>}
   string: Record<string, Array<Construct>>
   text: Record<string, Array<Construct>>
 }

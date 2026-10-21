@@ -5,7 +5,7 @@ const Node = require('./node');
 
 class Container extends Node {
 
-  constructor (opts) {
+  constructor (/** @type {any} */ opts) {
     super(opts);
 
     if (!this.nodes) {
@@ -13,21 +13,21 @@ class Container extends Node {
     }
   }
 
-  push (child) {
+  push (/** @type {any} */ child) {
     child.parent = this;
     this.nodes.push(child);
     return this;
   }
 
-  each (callback) {
+  each (/** @type {(node: any, index: number) => any} */ callback) {
     if (!this.lastEach) this.lastEach = 0;
     if (!this.indexes) this.indexes = { };
 
     this.lastEach += 1;
 
-    let id = this.lastEach,
-      index,
-      result;
+    /** @type {number} */ let id = this.lastEach,
+      /** @type {number} */ index,
+      /** @type {any} */ result;
 
     this.indexes[id] = 0;
 
@@ -46,9 +46,9 @@ class Container extends Node {
     return result;
   }
 
-  walk (callback) {
-    return this.each((child, i) => {
-      let result = callback(child, i);
+  walk (/** @type {(node: any, index: number) => any} */ callback) {
+    return this.each((/** @type {any} */ child, /** @type {number} */ i) => {
+      /** @type {any} */ let result = callback(child, i);
       if (result !== false && child.walk) {
         result = child.walk(callback);
       }
@@ -56,7 +56,7 @@ class Container extends Node {
     });
   }
 
-  walkType (type, callback) {
+  walkType (/** @type {any} */ type, /** @type {(node: any, index: number) => any} */ callback) {
     if (!type || !callback) {
       throw new Error('Parameters {type} and {callback} are required.');
     }
@@ -64,35 +64,35 @@ class Container extends Node {
     // allow users to pass a constructor, or node type string; eg. Word.
     const isTypeCallable = typeof type === 'function';
 
-    return this.walk((node, index) => {
+    return this.walk((/** @type {any} */ node, /** @type {number} */ index) => {
       if (isTypeCallable && node instanceof type || !isTypeCallable && node.type === type) {
         return callback.call(this, node, index);
       }
     });
   }
 
-  append (node) {
+  append (/** @type {any} */ node) {
     node.parent = this;
     this.nodes.push(node);
     return this;
   }
 
-  prepend (node) {
+  prepend (/** @type {any} */ node) {
     node.parent = this;
     this.nodes.unshift(node);
     return this;
   }
 
-  cleanRaws (keepBetween) {
+  cleanRaws (/** @type {boolean | undefined} */ keepBetween) {
     super.cleanRaws(keepBetween);
     if (this.nodes) {
       for (let node of this.nodes) node.cleanRaws(keepBetween);
     }
   }
 
-  insertAfter (oldNode, newNode) {
-    let oldIndex = this.index(oldNode),
-      index;
+  insertAfter (/** @type {any} */ oldNode, /** @type {any} */ newNode) {
+    /** @type {number} */ let oldIndex = this.index(oldNode),
+      /** @type {number} */ index;
 
     this.nodes.splice(oldIndex + 1, 0, newNode);
 
@@ -106,9 +106,9 @@ class Container extends Node {
     return this;
   }
 
-  insertBefore (oldNode, newNode) {
-    let oldIndex = this.index(oldNode),
-      index;
+  insertBefore (/** @type {any} */ oldNode, /** @type {any} */ newNode) {
+    /** @type {number} */ let oldIndex = this.index(oldNode),
+      /** @type {number} */ index;
 
     this.nodes.splice(oldIndex, 0, newNode);
 
@@ -122,12 +122,12 @@ class Container extends Node {
     return this;
   }
 
-  removeChild (child) {
+  removeChild (/** @type {any} */ child) {
     child = this.index(child);
     this.nodes[child].parent = undefined;
     this.nodes.splice(child, 1);
 
-    let index;
+    /** @type {number} */ let index;
     for (let id in this.indexes) {
       index = this.indexes[id];
       if (index >= child) {
@@ -144,15 +144,15 @@ class Container extends Node {
     return this;
   }
 
-  every (condition) {
+  every (/** @type {(node: any, index: number, nodes: any[]) => boolean} */ condition) {
     return this.nodes.every(condition);
   }
 
-  some (condition) {
+  some (/** @type {(node: any, index: number, nodes: any[]) => boolean} */ condition) {
     return this.nodes.some(condition);
   }
 
-  index (child) {
+  /** @returns {number} */ index (/** @type {any} */ child) {
     if (typeof child === 'number') {
       return child;
     }
@@ -171,8 +171,8 @@ class Container extends Node {
     return this.nodes[this.nodes.length - 1];
   }
 
-  toString () {
-    let result = this.nodes.map(String).join('');
+  /** @returns {string} */ toString () {
+    /** @type {string} */ let result = this.nodes.map(String).join('');
 
     if (this.value) {
       result = this.value + result;
@@ -190,7 +190,7 @@ class Container extends Node {
   }
 }
 
-Container.registerWalker = (constructor) => {
+Container.registerWalker = (/** @type {any} */ constructor) => {
   /** @type {string} */ let walkerName = 'walk' + constructor.name;
 
   // plural sugar
@@ -203,7 +203,7 @@ Container.registerWalker = (constructor) => {
   }
 
   // we need access to `this` so we can't use an arrow function
-  Container.prototype[walkerName] = function (callback) {
+  Container.prototype[walkerName] = function (/** @type {(node: any, index: number) => any} */ callback) {
     return this.walkType(constructor, callback);
   };
 };

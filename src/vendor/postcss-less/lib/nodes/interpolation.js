@@ -2,9 +2,13 @@
 /* eslint no-param-reassign: off */
 
 module.exports = {
-  /** @returns {boolean} */ interpolation(/** @type {any[] | undefined} */ token) {
-    const tokens = [token, this.tokenizer.nextToken()];
-    const validTypes = ['word', '}'];
+  /**
+   * @this {import("../LessParser")}
+   * @returns {boolean}
+   */
+  interpolation(/** @type {any[] | undefined} */ token) {
+    /** @type {any[][]} */ const tokens = [token, this.tokenizer.nextToken()];
+    /** @type {string[]} */ const validTypes = ['word', '}'];
 
     // look for @{ but not @[word]{
     if (tokens[0][1].length > 1 || tokens[1][0] !== '{') {
@@ -18,10 +22,10 @@ module.exports = {
       token = this.tokenizer.nextToken();
     }
 
-    const words = tokens.map(/** @returns {string} */ (tokn) => tokn[1]);
+    /** @type {string[]} */ const words = tokens.map(/** @returns {string} */ (tokn) => tokn[1]);
     const [first] = tokens;
     const last = tokens.pop();
-    const newToken = ['word', words.join(''), first[2], last[2]];
+    /** @type {any[]} */ const newToken = ['word', words.join(''), first[2], last[2]];
 
     this.tokenizer.back(token);
     this.tokenizer.back(newToken);

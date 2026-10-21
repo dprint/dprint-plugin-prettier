@@ -3,18 +3,18 @@
 
 module.exports = text
 
-/** @this {import("../parser.js").RemarkParser} */ function text(eat, /** @type {StringView} */ value, silent) {
+/** @this {import("../parser.js").RemarkParser} */ function text(/** @type {import("../tokenizer.js").RemarkEat} */ eat, /** @type {StringView} */ value, /** @type {boolean | undefined} */ silent) {
   var self = this
-  var methods
-  var tokenizers
+  /** @type {string[]} */ var methods
+  /** @type {Record<string, import("../tokenizer.js").RemarkTokenizer>} */ var tokenizers
   /** @type {number} */ var index
   /** @type {number} */ var length
   /** @type {string} */ var subvalue
   /** @type {number} */ var position
-  var tokenizer
+  /** @type {(this: import("../parser.js").RemarkParser, value: StringView, fromIndex: number) => number} */ var tokenizer
   /** @type {string} */ var name
   /** @type {number} */ var min
-  var now
+  /** @type {import("../tokenizer.js").RemarkPoint} */ var now
 
   /* istanbul ignore if - never used (yet) */
   if (silent) {

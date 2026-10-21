@@ -13,21 +13,27 @@ import { addTypePrefix } from "./utilities.js";
 const isClosingParenthesis = /** @returns {boolean} */ (/** @type {import("../types.js").CssNode} */ node) =>
   node.type === "paren" && node.value === ")";
 
-function parseValueNode(valueNode, /** @type {CssOptions} */ options) {
+/**
+ * the groups that a value's nodes are put in, by its parentheses and by the commas between them
+ * @typedef {{ open: any, close: any, groups: any[], type: string }} ParenGroup
+ * @typedef {{ groups: any[], type: string }} CommaGroup
+ */
+
+/** @returns {ParenGroup} */ function parseValueNode(/** @type {import("../types.js").CssNode} */ valueNode, /** @type {CssOptions} */ options) {
   const { nodes } = valueNode;
-  let parenGroup = {
+  /** @type {ParenGroup} */ let parenGroup = {
     open: null,
     close: null,
     groups: [],
     type: "paren_group",
   };
-  const parenGroupStack = [parenGroup];
+  /** @type {ParenGroup[]} */ const parenGroupStack = [parenGroup];
   const rootParenGroup = parenGroup;
-  let commaGroup = {
+  /** @type {CommaGroup} */ let commaGroup = {
     groups: [],
     type: "comma_group",
   };
-  const commaGroupStack = [commaGroup];
+  /** @type {CommaGroup[]} */ const commaGroupStack = [commaGroup];
 
   for (let i = 0; i < nodes.length; ++i) {
     const node = nodes[i];
@@ -47,11 +53,11 @@ function parseValueNode(valueNode, /** @type {CssOptions} */ options) {
 
     if (node.type === "func" && node.value === "selector") {
       const selector = getValueRoot(valueNode).text.slice(
-        node.group.open.sourceIndex + 1,
+        /** @type {number} */ (node.group.open.sourceIndex) + 1,
         node.group.close.sourceIndex,
       );
       const parsedSelector = parseSelector(selector);
-      parsedSelector.sourceIndex = node.group.open.sourceIndex + 1;
+      parsedSelector.sourceIndex = /** @type {number} */ (node.group.open.sourceIndex) + 1;
       parsedSelector.raws ??= {};
       parsedSelector.raws.selector = selector;
       node.group.groups = [parsedSelector];
@@ -182,7 +188,7 @@ function parseValue(/** @type {string} */ value, /** @type {CssOptions} */ optio
     return { type: "value-unknown", value };
   }
 
-  let result;
+  /** @type {any} */ let result;
 
   try {
     result = new PostcssValuesParser(value, { loose: true }).parse();

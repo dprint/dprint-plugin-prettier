@@ -1,3 +1,4 @@
+// @nts-check
 'use strict'
 
 let AtRule = require('./at-rule')
@@ -26,8 +27,8 @@ function postcss(...plugins) {
   return new Processor(plugins)
 }
 
-postcss.plugin = function plugin(name, initializer) {
-  let warningPrinted = false
+postcss.plugin = function plugin(/** @type {string} */ name, /** @type {any} */ initializer) {
+  /** @type {boolean} */ let warningPrinted = false
   function creator(...args) {
     // eslint-disable-next-line no-console
     if (console && console.warn && !warningPrinted) {
@@ -48,13 +49,13 @@ postcss.plugin = function plugin(name, initializer) {
         )
       }
     }
-    let transformer = initializer(...args)
+    /** @type {any} */ let transformer = initializer(...args)
     transformer.postcssPlugin = name
     transformer.postcssVersion = new Processor().version
     return transformer
   }
 
-  let cache
+  /** @type {any} */ let cache
   Object.defineProperty(creator, 'postcss', {
     get() {
       if (!cache) cache = creator()
@@ -62,7 +63,7 @@ postcss.plugin = function plugin(name, initializer) {
     }
   })
 
-  creator.process = function (css, processOpts, pluginOpts) {
+  creator.process = function (/** @type {any} */ css, /** @type {any} */ processOpts, /** @type {any} */ pluginOpts) {
     return postcss([creator(pluginOpts)]).process(css, processOpts)
   }
 
@@ -74,12 +75,12 @@ postcss.parse = parse
 postcss.fromJSON = fromJSON
 postcss.list = list
 
-postcss.comment = defaults => new Comment(defaults)
-postcss.atRule = defaults => new AtRule(defaults)
-postcss.decl = defaults => new Declaration(defaults)
-postcss.rule = defaults => new Rule(defaults)
-postcss.root = defaults => new Root(defaults)
-postcss.document = defaults => new Document(defaults)
+postcss.comment = (/** @type {any} */ defaults) => new Comment(defaults)
+postcss.atRule = (/** @type {any} */ defaults) => new AtRule(defaults)
+postcss.decl = (/** @type {any} */ defaults) => new Declaration(defaults)
+postcss.rule = (/** @type {any} */ defaults) => new Rule(defaults)
+postcss.root = (/** @type {any} */ defaults) => new Root(defaults)
+postcss.document = (/** @type {any} */ defaults) => new Document(defaults)
 
 postcss.CssSyntaxError = CssSyntaxError
 postcss.Declaration = Declaration

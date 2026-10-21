@@ -28,7 +28,7 @@ module.exports = list
 /** @type {RegExp} */ var pedanticBulletExpression = /^([ \t]*)([*+-]|\d+[.)])([ \t]+)/
 /** @type {RegExp} */ var initialIndentExpression = /^( {1,4}|\t)?/gm
 
-/** @this {import("../parser.js").RemarkParser} */ function list(eat, /** @type {StringView} */ value, /** @type {boolean | undefined} */ silent) {
+/** @this {import("../parser.js").RemarkParser} */ function list(/** @type {import("../tokenizer.js").RemarkEat} */ eat, /** @type {StringView} */ value, /** @type {boolean | undefined} */ silent) {
   var self = this
   /** @type {boolean} */ var commonmark = self.options.commonmark
   /** @type {boolean} */ var pedantic = self.options.pedantic
@@ -51,14 +51,14 @@ module.exports = list
   /** @type {boolean | undefined} */ var previousEmpty
   /** @type {boolean | undefined} */ var empty
   var items
-  var allLines
-  var emptyLines
+  /** @type {string[]} */ var allLines
+  /** @type {string[]} */ var emptyLines
   var item
-  var enterTop
-  var exitBlockquote
+  /** @type {() => void} */ var enterTop
+  /** @type {() => void} */ var exitBlockquote
   /** @type {boolean} */ var spread = false
-  var node
-  var now
+  /** @type {import("../tokenizer.js").RemarkNode} */ var node
+  /** @type {import("../tokenizer.js").RemarkPoint} */ var now
   /** @type {number | undefined} */ var end
   /** @type {boolean} */ var indented
 
@@ -338,11 +338,11 @@ module.exports = list
   return node
 }
 
-function listItem(ctx, /** @type {string} */ value, position) {
+/** @returns {import("../tokenizer.js").RemarkNode} */ function listItem(/** @type {import("../parser.js").RemarkParser} */ ctx, /** @type {string} */ value, /** @type {import("../tokenizer.js").RemarkPoint} */ position) {
   var offsets = ctx.offset
   var fn = ctx.options.pedantic ? pedanticListItem : normalListItem
   /** @type {boolean | null} */ var checked = null
-  var task
+  /** @type {RegExpMatchArray | null} */ var task
   /** @type {number | undefined} */ var indent
 
   value = fn.apply(null, arguments)
@@ -367,9 +367,9 @@ function listItem(ctx, /** @type {string} */ value, position) {
 }
 
 // Create a list-item using overly simple mechanics.
-function pedanticListItem(ctx, value, position) {
+/** @returns {string} */ function pedanticListItem(/** @type {import("../parser.js").RemarkParser} */ ctx, /** @type {string} */ value, /** @type {import("../tokenizer.js").RemarkPoint} */ position) {
   var offsets = ctx.offset
-  var line = position.line
+  /** @type {number} */ var line = position.line
 
   // Remove the list-item’s bullet.
   value = value.replace(pedanticBulletExpression, replacer)
@@ -381,7 +381,7 @@ function pedanticListItem(ctx, value, position) {
 
   // A simple replacer which removed all matches, and adds their length to
   // `offset`.
-  function replacer($0) {
+  /** @returns {string} */ function replacer(/** @type {string} */ $0) {
     offsets[line] = (offsets[line] || 0) + $0.length
     line++
 
@@ -390,14 +390,14 @@ function pedanticListItem(ctx, value, position) {
 }
 
 // Create a list-item using sane mechanics.
-/** @returns {string} */ function normalListItem(ctx, /** @type {string} */ value, position) {
+/** @returns {string} */ function normalListItem(/** @type {import("../parser.js").RemarkParser} */ ctx, /** @type {string} */ value, /** @type {import("../tokenizer.js").RemarkPoint} */ position) {
   var offsets = ctx.offset
   /** @type {number} */ var line = position.line
   /** @type {string | undefined} */ var max
   /** @type {string | undefined} */ var bullet
   /** @type {string | undefined} */ var rest
-  var lines
-  var trimmedLines
+  /** @type {string[]} */ var lines
+  /** @type {string[]} */ var trimmedLines
   /** @type {number} */ var index
   /** @type {number} */ var length
 

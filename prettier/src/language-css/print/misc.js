@@ -50,7 +50,7 @@ const WORD_PART_REGEX = /[$@]?[_a-z\u0080-\uFFFF][\w\u0080-\uFFFF-]*/gi;
 /** @returns {string} */ function adjustNumbers(/** @type {string} */ value) {
   return value.replaceAll(
     ADJUST_NUMBERS_REGEX,
-    /** @returns {string} */ (match, quote, wordPart, number, unit) => {
+    /** @returns {string} */ (/** @type {string} */ match, /** @type {string | undefined} */ quote, /** @type {string | undefined} */ wordPart, /** @type {string | undefined} */ number, /** @type {string | undefined} */ unit) => {
       if (!wordPart && number) {
         unit ??= "";
         unit = unit.toLowerCase();

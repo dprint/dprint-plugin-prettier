@@ -36,19 +36,19 @@ class NoWorkResult {
       return this._root
     }
 
-    let root
+    /** @type {any} */ let root
     let parser = parse
 
     try {
       root = parser(this._css, this._opts)
     } catch (error) {
-      this.error = error
+      /** @type {any} */ this.error = error
     }
 
     if (this.error) {
       throw this.error
     } else {
-      this._root = root
+      /** @type {any} */ this._root = root
       return root
     }
   }
@@ -57,17 +57,17 @@ class NoWorkResult {
     return 'NoWorkResult'
   }
 
-  constructor(processor, /** @type {string} */ css, opts) {
+  constructor(/** @type {import("./processor")} */ processor, /** @type {string} */ css, /** @type {any} */ opts) {
     css = css.toString()
-    this.stringified = false
+    /** @type {boolean} */ this.stringified = false
 
-    this._processor = processor
-    this._css = css
-    this._opts = opts
-    this._map = undefined
+    /** @type {import("./processor")} */ this._processor = processor
+    /** @type {string} */ this._css = css
+    /** @type {any} */ this._opts = opts
+    /** @type {any} */ this._map = undefined
 
     let str = stringify
-    this.result = new Result(this._processor, undefined, this._opts)
+    /** @type {import("./result")} */ this.result = new Result(this._processor, undefined, this._opts)
     this.result.css = css
 
     let self = this
@@ -79,7 +79,7 @@ class NoWorkResult {
 
     let map = new MapGenerator(str, undefined, this._opts, css)
     if (map.isMap()) {
-      let [generatedCSS, generatedMap] = map.generate()
+      let [/** @type {any} */ generatedCSS, /** @type {any} */ generatedMap] = map.generate()
       if (generatedCSS) {
         this.result.css = generatedCSS
       }
@@ -97,11 +97,11 @@ class NoWorkResult {
     return Promise.resolve(this.result)
   }
 
-  catch(onRejected) {
+  catch(/** @type {any} */ onRejected) {
     return this.async().catch(onRejected)
   }
 
-  finally(onFinally) {
+  finally(/** @type {any} */ onFinally) {
     return this.async().then(onFinally, onFinally)
   }
 
@@ -110,7 +110,7 @@ class NoWorkResult {
     return this.result
   }
 
-  then(onFulfilled, onRejected) {
+  then(/** @type {any} */ onFulfilled, /** @type {any} */ onRejected) {
     if (process.env.NODE_ENV !== 'production') {
       if (!('from' in this._opts)) {
         warnOnce(
@@ -128,7 +128,7 @@ class NoWorkResult {
     return this._css
   }
 
-  warnings() {
+  /** @returns {any[]} */ warnings() {
     return []
   }
 }

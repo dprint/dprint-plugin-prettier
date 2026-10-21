@@ -1,5 +1,5 @@
 // @nts-check
 //#region src/ast-transform/transforms/transform-ast-with-source.ts
-const visitASTWithSource = (/** @type {import("../../../../../../prettier/node_modules/@angular/compiler/fesm2022/compiler.mjs").ASTWithSource} */ node, /** @type {import("../ast-transformer.js").AstTransformer} */ transformer) => transformer.transformChild(node.ast);
+const visitASTWithSource = /** @returns {import("../../source.js").NGNode} */ (/** @type {import("@angular/compiler").ASTWithSource} */ node, /** @type {import("../ast-transformer.js").AstTransformer} */ transformer) => transformer.transformChild(node.ast);
 //#endregion
 export { visitASTWithSource };

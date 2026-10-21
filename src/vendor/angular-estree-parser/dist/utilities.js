@@ -1,11 +1,11 @@
 // @nts-check
 //#region src/utilities.ts
-function getCharacterSearchTestFunction(pattern) {
+/** @returns {(character: string) => boolean} */ function getCharacterSearchTestFunction(/** @type {string | RegExp} */ pattern) {
 	/* c8 ignore next 3 @preserve */
-	if (typeof pattern === "string") return (character) => character === pattern;
-	return (character) => pattern.test(character);
+	if (typeof pattern === "string") return (/** @type {string} */ character) => character === pattern;
+	return (/** @type {string} */ character) => pattern.test(character);
 }
-function getCharacterIndex(text, pattern, fromIndex) {
+/** @returns {number} */ function getCharacterIndex(/** @type {string} */ text, /** @type {string | RegExp} */ pattern, /** @type {number} */ fromIndex) {
 	const test = getCharacterSearchTestFunction(pattern);
 	for (let index = fromIndex; index < text.length; index++) {
 		const character = text[index];
@@ -17,7 +17,7 @@ function getCharacterIndex(text, pattern, fromIndex) {
 /** @returns {string} */ function lowercaseFirst(/** @type {string} */ str) {
 	return str.slice(0, 1).toLowerCase() + str.slice(1);
 }
-function sourceSpanToLocationInformation(span) {
+/** @returns {{ start: number, end: number, range: number[] }} */ function sourceSpanToLocationInformation(/** @type {{ start: number, end: number }} */ span) {
 	const { start, end } = span;
 	return {
 		start,
@@ -25,10 +25,10 @@ function sourceSpanToLocationInformation(span) {
 		range: [start, end]
 	};
 }
-/** @returns {boolean} */ function isParenthesized(node) {
+/** @returns {boolean} */ function isParenthesized(/** @type {import("./source.js").NGNode} */ node) {
 	return Boolean(node.extra?.parenthesized);
 }
-/** @returns {boolean} */ function isOptionalObjectOrCallee(node) {
+/** @returns {boolean} */ function isOptionalObjectOrCallee(/** @type {import("./source.js").NGNode} */ node) {
 	if (node.type === "TSNonNullExpression" && !isParenthesized(node)) return isOptionalObjectOrCallee(node.expression);
 	return (node.type === "OptionalCallExpression" || node.type === "OptionalMemberExpression") && !isParenthesized(node);
 }

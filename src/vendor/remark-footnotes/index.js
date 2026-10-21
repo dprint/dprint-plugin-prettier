@@ -55,8 +55,8 @@ function attachParser(parser, options) {
   var spans = proto.inlineTokenizers
   var blockMethods = proto.blockMethods
   var inlineMethods = proto.inlineMethods
-  var originalDefinition = blocks.definition
-  var originalReference = spans.reference
+  /** @type {import("../remark-parse/lib/tokenizer.js").RemarkTokenizer} */ var originalDefinition = blocks.definition
+  /** @type {import("../remark-parse/lib/tokenizer.js").RemarkTokenizer} */ var originalReference = spans.reference
   var interruptors = []
   /** @type {number} */ var index = -1
   /** @type {number} */ var length = blockMethods.length
@@ -99,9 +99,9 @@ function attachParser(parser, options) {
   footnoteCall.locator = locateFootnoteCall
   footnote.locator = locateFootnote
 
-  function footnoteDefinition(eat, /** @type {StringView} */ value, /** @type {boolean | undefined} */ silent) {
+  /** @this {import("../remark-parse/lib/parser.js").RemarkParser} */ function footnoteDefinition(/** @type {import("../remark-parse/lib/tokenizer.js").RemarkEat} */ eat, /** @type {StringView} */ value, /** @type {boolean | undefined} */ silent) {
     var self = this
-    var interruptors = self.interruptFootnoteDefinition
+    /** @type {any[]} */ var interruptors = self.interruptFootnoteDefinition
     var offsets = self.offset
     /** @type {number} */ var length = value.length + 1
     /** @type {number} */ var index = 0
@@ -111,9 +111,9 @@ function attachParser(parser, options) {
     /** @type {number | undefined} */ var labelEnd
     /** @type {number | undefined} */ var code
     /** @type {RemarkPoint} */ var now
-    var add
+    /** @type {import("../remark-parse/lib/tokenizer.js").RemarkApply} */ var add
     /** @type {() => void} */ var exit
-    var children
+    /** @type {any[]} */ var children
     /** @type {number} */ var start
     /** @type {number | undefined} */ var indent
     /** @type {number | undefined} */ var contentStart
@@ -274,7 +274,7 @@ function attachParser(parser, options) {
   }
 
   // Parse a footnote call / footnote reference, such as `[^label]`
-  function footnoteCall(/** @type {(a0?: any) => any} */ eat, /** @type {StringView} */ value, silent) {
+  function footnoteCall(/** @type {import("../remark-parse/lib/tokenizer.js").RemarkEat} */ eat, /** @type {StringView} */ value, /** @type {boolean | undefined} */ silent) {
     /** @type {number} */ var length = value.length + 1
     /** @type {number} */ var index = 0
     /** @type {string} */ var label
@@ -327,7 +327,7 @@ function attachParser(parser, options) {
   }
 
   // Parse an inline note / footnote, such as `^[text]`
-  function footnote(eat, /** @type {StringView} */ value, silent) {
+  /** @this {import("../remark-parse/lib/parser.js").RemarkParser} */ function footnote(/** @type {import("../remark-parse/lib/tokenizer.js").RemarkEat} */ eat, /** @type {StringView} */ value, /** @type {boolean | undefined} */ silent) {
     var self = this
     /** @type {number} */ var length = value.length + 1
     /** @type {number} */ var index = 0
@@ -429,7 +429,7 @@ function attachParser(parser, options) {
 
   // Do not allow `![^` or `[^` as a normal reference, do pass all other values
   // through.
-  function reference(eat, /** @type {StringView} */ value, silent) {
+  /** @this {import("../remark-parse/lib/parser.js").RemarkParser} */ function reference(/** @type {import("../remark-parse/lib/tokenizer.js").RemarkEat} */ eat, /** @type {StringView} */ value, /** @type {boolean | undefined} */ silent) {
     /** @type {number} */ var index = 0
     if (value.charCodeAt(index) === exclamationMark) index++
     if (value.charCodeAt(index) !== leftSquareBracket) return
@@ -438,7 +438,7 @@ function attachParser(parser, options) {
   }
 
   // Do not allow `[^` as a normal definition, do pass all other values through.
-  function definition(eat, /** @type {StringView} */ value, /** @type {boolean | undefined} */ silent) {
+  /** @this {import("../remark-parse/lib/parser.js").RemarkParser} */ function definition(/** @type {import("../remark-parse/lib/tokenizer.js").RemarkEat} */ eat, /** @type {StringView} */ value, /** @type {boolean | undefined} */ silent) {
     /** @type {number} */ var index = 0
     /** @type {number} */ var code = value.charCodeAt(index)
     while (code === space || code === tab) code = value.charCodeAt(++index)
@@ -451,7 +451,7 @@ function attachParser(parser, options) {
     return value.indexOf('[', from)
   }
 
-  function locateFootnote(value, from) {
+  /** @returns {number} */ function locateFootnote(/** @type {string} */ value, /** @type {number} */ from) {
     return value.indexOf('^[', from)
   }
 }
@@ -495,7 +495,7 @@ function before(/** @type {any[]} */ list, /** @type {string} */ before, /** @ty
 
 // Mimics <https://github.com/remarkjs/remark/blob/b4c993e/packages/remark-parse/lib/util/interrupt.js>,
 // but simplified for our needs.
-/** @returns {boolean} */ function interrupt(/** @type {any[]} */ list, tokenizers, ctx, /** @type {any[]} */ parameters) {
+/** @returns {boolean} */ function interrupt(/** @type {any[]} */ list, /** @type {Record<string, import("../remark-parse/lib/tokenizer.js").RemarkTokenizer>} */ tokenizers, /** @type {import("../remark-parse/lib/parser.js").RemarkParser} */ ctx, /** @type {any[]} */ parameters) {
   /** @type {number} */ var length = list.length
   /** @type {number} */ var index = -1
 

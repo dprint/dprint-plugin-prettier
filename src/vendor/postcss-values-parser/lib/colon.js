@@ -5,7 +5,7 @@ const Container = require('./container');
 const Node = require('./node');
 
 class Colon extends Node {
-  constructor (opts) {
+  constructor (/** @type {any} */ opts) {
     super(opts);
     /** @type {string} */ this.type = 'colon';
   }

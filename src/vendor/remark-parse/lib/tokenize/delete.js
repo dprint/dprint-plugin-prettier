@@ -10,7 +10,7 @@ strikethrough.locator = locate
 /** @type {string} */ var tilde = '~'
 /** @type {string} */ var fence = '~~'
 
-/** @this {import("../parser.js").RemarkParser} */ function strikethrough(eat, /** @type {StringView} */ value, silent) {
+/** @this {import("../parser.js").RemarkParser} */ function strikethrough(/** @type {import("../tokenizer.js").RemarkEat} */ eat, /** @type {StringView} */ value, /** @type {boolean | undefined} */ silent) {
   var self = this
   /** @type {string} */ var character = ''
   /** @type {string} */ var previous = ''
@@ -18,7 +18,7 @@ strikethrough.locator = locate
   /** @type {string} */ var subvalue = ''
   /** @type {number} */ var index
   /** @type {number} */ var length
-  var now
+  /** @type {import("../tokenizer.js").RemarkPoint} */ var now
 
   if (
     !self.options.gfm ||

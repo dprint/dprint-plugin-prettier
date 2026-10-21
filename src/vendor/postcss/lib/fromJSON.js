@@ -1,3 +1,4 @@
+// @nts-check
 'use strict'
 
 let AtRule = require('./at-rule')
@@ -8,14 +9,14 @@ let PreviousMap = require('./previous-map')
 let Root = require('./root')
 let Rule = require('./rule')
 
-function fromJSON(json, inputs) {
-  if (Array.isArray(json)) return json.map(n => fromJSON(n))
+/** @returns {any} */ function fromJSON(/** @type {any} */ json, /** @type {any} */ inputs) {
+  if (Array.isArray(json)) return json.map(/** @returns {any} */ n => fromJSON(n))
 
   let { inputs: ownInputs, ...defaults } = json
   if (ownInputs) {
     inputs = []
     for (let input of ownInputs) {
-      let inputHydrated = { ...input, __proto__: Input.prototype }
+      /** @type {any} */ let inputHydrated = { ...input, __proto__: Input.prototype }
       if (inputHydrated.map) {
         inputHydrated.map = {
           ...inputHydrated.map,
@@ -28,9 +29,9 @@ function fromJSON(json, inputs) {
   // Rehydrate children separately and attach them after construction.
   // Passing them through the container constructor would re-run insertion
   // spacing normalization and overwrite each child's own `raws.before`.
-  let nodes
+  /** @type {import("./node")[] | undefined} */ let nodes
   if (defaults.nodes) {
-    nodes = json.nodes.map(n => fromJSON(n, inputs))
+    nodes = json.nodes.map(/** @returns {any} */ (/** @type {any} */ n) => fromJSON(n, inputs))
     delete defaults.nodes
   }
   if (defaults.source) {
@@ -41,7 +42,7 @@ function fromJSON(json, inputs) {
     }
   }
 
-  let node
+  /** @type {any} */ let node
   if (defaults.type === 'root') {
     node = new Root(defaults)
   } else if (defaults.type === 'decl') {

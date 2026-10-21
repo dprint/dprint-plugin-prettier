@@ -1,8 +1,9 @@
+// @nts-check
 'use strict'
 
 let Stringifier = require('./stringifier')
 
-function stringify(node, builder) {
+function stringify(/** @type {import("./node")} */ node, /** @type {import("./stringifier").Builder} */ builder) {
   let str = new Stringifier(builder)
   str.stringify(node)
 }

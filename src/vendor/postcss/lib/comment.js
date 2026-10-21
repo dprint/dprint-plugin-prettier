@@ -7,7 +7,7 @@ let Node = require('./node')
  * @property {boolean} [inline] given by postcss-less
  */
 class Comment extends Node {
-  constructor(defaults) {
+  constructor(/** @type {any} */ defaults) {
     super(defaults)
     /** @type {string} */ this.type = 'comment'
   }

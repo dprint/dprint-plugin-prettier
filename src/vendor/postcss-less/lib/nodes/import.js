@@ -5,13 +5,13 @@ const tokenize = require('postcss/lib/tokenize');
 
 /** @type {RegExp} */ const urlPattern = /^url\((.+)\)/;
 
-module.exports = (node) => {
+module.exports = (/** @type {import("postcss/lib/node")} */ node) => {
   const { name, params = '' } = node;
 
   if (name === 'import' && params.length) {
     node.import = true;
 
-    const tokenizer = tokenize({ css: params });
+    /** @type {import("postcss/lib/parser").Tokenizer} */ const tokenizer = tokenize({ css: params });
 
     node.filename = params.replace(urlPattern, '$1');
 

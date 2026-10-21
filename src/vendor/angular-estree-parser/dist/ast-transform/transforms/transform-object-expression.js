@@ -1,11 +1,11 @@
 // @nts-check
 //#region src/ast-transform/transforms/transform-object-expression.ts
-const visitLiteralMap = (/** @type {import("../../../../../../prettier/node_modules/@angular/compiler/fesm2022/compiler.mjs").LiteralMap} */ node, /** @type {import("../node-transformer.js").NodeTransformer} */ transformer) => {
+const visitLiteralMap = /** @returns {import("../../source.js").NGNode} */ (/** @type {import("@angular/compiler").LiteralMap} */ node, /** @type {import("../node-transformer.js").NodeTransformer} */ transformer) => {
 	const { keys, values } = node;
-	const createChild = (properties, location = node) => transformer.create(properties, location, [node, ...transformer.ancestors]);
+	const createChild = /** @returns {import("../../source.js").NGNode} */ (/** @type {import("../../source.js").NGNode} */ properties, /** @type {any} */ location = node) => transformer.create(properties, location, [node, ...transformer.ancestors]);
 	return {
 		type: "ObjectExpression",
-		properties: keys.map((keyNode, /** @type {number} */ index) => {
+		properties: keys.map((/** @type {import("@angular/compiler").LiteralMapKey} */ keyNode, /** @type {number} */ index) => {
 			const valueNode = values[index];
 			const range = [keyNode.sourceSpan.start, valueNode.sourceSpan.end];
 			if (keyNode.kind === "spread") return createChild({

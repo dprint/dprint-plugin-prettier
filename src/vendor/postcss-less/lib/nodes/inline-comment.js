@@ -5,12 +5,16 @@ const tokenizer = require('postcss/lib/tokenize');
 const Input = require('postcss/lib/input');
 
 module.exports = {
-  /** @returns {boolean} */ isInlineComment(/** @type {any[]} */ token) {
+  /**
+   * @this {import("../LessParser")}
+   * @returns {boolean}
+   */
+  isInlineComment(/** @type {any[]} */ token) {
     if (token[0] === 'word' && token[1].slice(0, 2) === '//') {
       const first = token;
-      const bits = [];
-      let endOffset;
-      let remainingInput;
+      /** @type {string[]} */ const bits = [];
+      /** @type {number} */ let endOffset;
+      /** @type {string} */ let remainingInput;
 
       while (token) {
         if (/\r?\n/.test(token[1])) {
@@ -21,7 +25,7 @@ module.exports = {
 
             // Get remaining input and retokenize
             remainingInput = token[1].substring(token[1].indexOf('\n'));
-            const untokenizedRemainingInput = this.input.css
+            /** @type {string} */ const untokenizedRemainingInput = this.input.css
               .valueOf()
               .substring(this.tokenizer.position());
             remainingInput += untokenizedRemainingInput;
@@ -40,7 +44,7 @@ module.exports = {
         token = this.tokenizer.nextToken({ ignoreUnclosed: true });
       }
 
-      const newToken = ['comment', bits.join(''), first[2], endOffset];
+      /** @type {any[]} */ const newToken = ['comment', bits.join(''), first[2], endOffset];
       this.inlineComment(newToken);
 
       // Replace tokenizer to retokenize the rest of the string
@@ -53,7 +57,7 @@ module.exports = {
       return true;
     } else if (token[1] === '/') {
       // issue #135
-      const next = this.tokenizer.nextToken({ ignoreUnclosed: true });
+      /** @type {any[]} */ const next = this.tokenizer.nextToken({ ignoreUnclosed: true });
 
       if (next[0] === 'comment' && /^\/\*/.test(next[1])) {
         next[0] = 'word';

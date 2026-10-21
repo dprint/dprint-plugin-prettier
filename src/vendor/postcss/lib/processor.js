@@ -6,13 +6,13 @@ let NoWorkResult = require('./no-work-result')
 let Root = require('./root')
 
 class Processor {
-  constructor(plugins = []) {
+  constructor(/** @type {any[]} */ plugins = []) {
     /** @type {string} */ this.version = '8.5.16'
-    this.plugins = this.normalize(plugins)
+    /** @type {any[]} */ this.plugins = this.normalize(plugins)
   }
 
-  normalize(plugins) {
-    let normalized = []
+  /** @returns {any[]} */ normalize(/** @type {any[]} */ plugins) {
+    /** @type {any[]} */ let normalized = []
     for (let i of plugins) {
       if (i.postcss === true) {
         i = i()
@@ -41,7 +41,7 @@ class Processor {
     return normalized
   }
 
-  process(css, opts = {}) {
+  /** @returns {any} */ process(/** @type {any} */ css, /** @type {any} */ opts = {}) {
     if (
       !this.plugins.length &&
       !opts.parser &&
@@ -54,7 +54,7 @@ class Processor {
     }
   }
 
-  use(plugin) {
+  /** @returns {Processor} */ use(/** @type {any} */ plugin) {
     this.plugins = this.plugins.concat(this.normalize([plugin]))
     return this
   }

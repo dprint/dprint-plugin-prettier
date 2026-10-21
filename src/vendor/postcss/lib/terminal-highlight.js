@@ -1,16 +1,17 @@
+// @nts-check
 'use strict'
 
 let pico = require('picocolors')
 
 let tokenizer = require('./tokenize')
 
-let Input
+/** @type {typeof import("./input")} */ let Input
 
-function registerInput(dependant) {
+function registerInput(/** @type {typeof import("./input")} */ dependant) {
   Input = dependant
 }
 
-const HIGHLIGHT_THEME = {
+/** @type {Record<string, (text: string) => string>} */ const HIGHLIGHT_THEME = {
   ';': pico.yellow,
   ':': pico.yellow,
   '(': pico.cyan,
@@ -28,7 +29,7 @@ const HIGHLIGHT_THEME = {
   'string': pico.green
 }
 
-function getTokenType([type, value], processor) {
+/** @returns {string} */ function getTokenType(/** @type {[string, string, number?, number?]} */ [type, value], /** @type {import("./parser").Tokenizer} */ processor) {
   if (type === 'word') {
     if (value[0] === '.') {
       return 'class'
@@ -39,7 +40,7 @@ function getTokenType([type, value], processor) {
   }
 
   if (!processor.endOfFile()) {
-    let next = processor.nextToken()
+    /** @type {[string, string, number?, number?]} */ let next = processor.nextToken()
     processor.back(next)
     if (next[0] === 'brackets' || next[0] === '(') return 'call'
   }
@@ -47,16 +48,16 @@ function getTokenType([type, value], processor) {
   return type
 }
 
-function terminalHighlight(css) {
-  let processor = tokenizer(new Input(css), { ignoreErrors: true })
-  let result = ''
+/** @returns {string} */ function terminalHighlight(/** @type {string} */ css) {
+  /** @type {import("./parser").Tokenizer} */ let processor = tokenizer(new Input(css), { ignoreErrors: true })
+  /** @type {string} */ let result = ''
   while (!processor.endOfFile()) {
-    let token = processor.nextToken()
-    let color = HIGHLIGHT_THEME[getTokenType(token, processor)]
+    /** @type {[string, string, number?, number?]} */ let token = processor.nextToken()
+    /** @type {(text: string) => string} */ let color = HIGHLIGHT_THEME[getTokenType(token, processor)]
     if (color) {
       result += token[1]
         .split(/\r?\n/)
-        .map(i => color(i))
+        .map(/** @returns {string} */ i => color(i))
         .join('\n')
     } else {
       result += token[1]

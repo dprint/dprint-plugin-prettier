@@ -1,9 +1,10 @@
+// @nts-check
 /* eslint-disable no-console */
 'use strict'
 
-let printed = {}
+/** @type {Record<string, boolean>} */ let printed = {}
 
-module.exports = function warnOnce(message) {
+module.exports = function warnOnce(/** @type {string} */ message) {
   if (printed[message]) return
   printed[message] = true
 

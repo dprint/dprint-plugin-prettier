@@ -14,8 +14,8 @@
 // Therefore, configs such as `blankLine.notInList` do not have to be set here.
 module.exports = blankLine
 
-function blankLine(/** @type {(a0?: any) => any} */ eat, /** @type {StringView} */ value, /** @type {boolean | undefined} */ silent) {
-  var match
+function blankLine(/** @type {import("../tokenizer.js").RemarkEat} */ eat, /** @type {StringView} */ value, /** @type {boolean | undefined} */ silent) {
+  /** @type {RegExpExecArray | null} */ var match
   /** @type {string} */ var subvalue = ''
   /** @type {number} */ var index = 0
   /** @type {number} */ var length = value.length

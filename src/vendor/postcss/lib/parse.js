@@ -5,7 +5,7 @@ let Container = require('./container')
 let Input = require('./input')
 let Parser = require('./parser')
 
-function parse(/** @type {string | undefined} */ css, opts) {
+/** @returns {import("./root")} */ function parse(/** @type {string | undefined} */ css, /** @type {import("./input").InputOptions | undefined} */ opts) {
   let input = new Input(css, opts)
   let parser = new Parser(input)
   try {

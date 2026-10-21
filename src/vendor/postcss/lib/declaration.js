@@ -14,7 +14,7 @@ class Declaration extends Node {
     return this.prop.startsWith('--') || this.prop[0] === '$'
   }
 
-  constructor(defaults) {
+  constructor(/** @type {any} */ defaults) {
     if (
       defaults &&
       typeof defaults.value !== 'undefined' &&

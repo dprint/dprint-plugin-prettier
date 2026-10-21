@@ -29,7 +29,7 @@ url.notInLink = true
 /** @type {string} */ var leftParenthesisCharacter = '('
 /** @type {string} */ var rightParenthesisCharacter = ')'
 
-/** @this {import("../parser.js").RemarkParser} */ function url(eat, /** @type {StringView} */ value, silent) {
+/** @this {import("../parser.js").RemarkParser} */ function url(/** @type {import("../tokenizer.js").RemarkEat} */ eat, /** @type {StringView} */ value, /** @type {boolean | undefined} */ silent) {
   var self = this
   /** @type {boolean} */ var gfm = self.options.gfm
   var tokenizers = self.inlineTokenizers
@@ -47,9 +47,9 @@ url.notInLink = true
   /** @type {number | undefined} */ var leftCount
   /** @type {number | undefined} */ var rightCount
   /** @type {string} */ var content
-  var children
+  /** @type {any[]} */ var children
   /** @type {string} */ var url
-  var exit
+  /** @type {() => void} */ var exit
 
   if (!gfm) {
     return

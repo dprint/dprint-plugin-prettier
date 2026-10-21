@@ -6,7 +6,7 @@ let Stringifier = require('./stringifier')
 let stringify = require('./stringify')
 let { isClean, my } = require('./symbols')
 
-function cloneNode(obj, parent) {
+/** @returns {any} */ function cloneNode(/** @type {any} */ obj, /** @type {any} */ parent) {
   let cloned = new obj.constructor()
 
   for (let i in obj) {
@@ -33,7 +33,7 @@ function cloneNode(obj, parent) {
   return cloned
 }
 
-function sourceOffset(inputCSS, position) {
+/** @returns {number} */ function sourceOffset(/** @type {string} */ inputCSS, /** @type {Position | undefined} */ position) {
   // Not all custom syntaxes support `offset` in `source.start` and `source.end`
   if (position && typeof position.offset !== 'undefined') {
     return position.offset
@@ -72,6 +72,7 @@ function sourceOffset(inputCSS, position) {
  *   ownSemicolon?: string,
  *   important?: string,
  *   identifier?: string,
+ *   indent?: string,
  *   inline?: boolean,
  *   left?: string,
  *   right?: string,
@@ -84,14 +85,16 @@ function sourceOffset(inputCSS, position) {
  *   params?: any,
  * }} Raws
  * where a node is, which prettier gives its offsets as well
- * @typedef {{ input?: any, start?: Position, end?: Position, startOffset?: number, endOffset?: number | null }} Source
+ * @typedef {{ input?: import("./input"), start?: Position, end?: Position, startOffset?: number, endOffset?: number | null }} Source
  * @typedef {{ column: number, line: number, offset?: number }} Position
+ * what a range of a node is asked for with
+ * @typedef {{ index?: number, endIndex?: number, word?: string, start?: Position, end?: Position, plugin?: string }} RangeOptions
  */
 
 /**
  * @property {Source} [source]
- * @property {any} [parent]
- * @property {any} [nodes]
+ * @property {import("./container") | undefined} [parent]
+ * @property {Node[]} [nodes]
  * @property {string} [name]
  * @property {any} [params]
  * @property {any} [selector]
@@ -99,8 +102,8 @@ function sourceOffset(inputCSS, position) {
  * @property {any} [value]
  * @property {boolean} [important]
  * @property {string} [text]
- * @property {any} [lastEach]
- * @property {any} [indexes]
+ * @property {number} [lastEach]
+ * @property {Record<string, number>} [indexes]
  * @property {any} [proxyCache]
  */
 class Node {
@@ -108,14 +111,14 @@ class Node {
     return this
   }
 
-  constructor(defaults = {}) {
+  constructor(/** @type {any} */ defaults = {}) {
     /** @type {Raws} */ this.raws = {}
     this[isClean] = false
     this[my] = true
 
     for (let name in defaults) {
       if (name === 'nodes') {
-        this.nodes = []
+        /** @type {Node[]} */ this.nodes = []
         for (let node of defaults[name]) {
           // Clone only nodes that already belong to another tree, so passing a
           // freshly created (parent-less) node adopts that instance instead of
@@ -132,7 +135,7 @@ class Node {
     }
   }
 
-  addToError(error) {
+  addToError(/** @type {any} */ error) {
     error.postcssNode = this
     if (error.stack && this.source && /\n\s{4}at /.test(error.stack)) {
       let s = this.source
@@ -144,7 +147,7 @@ class Node {
     return error
   }
 
-  after(add) {
+  /** @returns {Node} */ after(add) {
     this.parent.insertAfter(this, add)
     return this
   }
@@ -156,7 +159,7 @@ class Node {
     return this
   }
 
-  before(add) {
+  /** @returns {Node} */ before(add) {
     this.parent.insertBefore(this, add)
     return this
   }
@@ -187,7 +190,7 @@ class Node {
     return cloned
   }
 
-  error(/** @type {string} */ message, opts = {}) {
+  /** @returns {import("./css-syntax-error")} */ error(/** @type {string} */ message, /** @type {RangeOptions} */ opts = {}) {
     if (this.source) {
       let { end, start } = this.rangeBy(opts)
       return this.source.input.error(
@@ -239,25 +242,25 @@ class Node {
   markDirty() {
     if (this[isClean]) {
       this[isClean] = false
-      let next = this
+      /** @type {Node | undefined} */ let next = this
       while ((next = next.parent)) {
         next[isClean] = false
       }
     }
   }
 
-  next() {
+  /** @returns {Node | undefined} */ next() {
     if (!this.parent) return undefined
-    let index = this.parent.index(this)
+    /** @type {number} */ let index = this.parent.index(this)
     return this.parent.nodes[index + 1]
   }
 
-  positionBy(opts = {}) {
-    let inputString =
+  /** @returns {Position} */ positionBy(/** @type {RangeOptions} */ opts = {}) {
+    /** @type {string} */ let inputString =
       'document' in this.source.input
         ? this.source.input.document
         : this.source.input.css
-    let pos = {
+    /** @type {Position} */ let pos = {
       column: this.source.start.column,
       line: this.source.start.line,
       offset: sourceOffset(inputString, this.source.start)
@@ -275,15 +278,15 @@ class Node {
     return pos
   }
 
-  positionInside(/** @type {number} */ index) {
-    let column = this.source.start.column
-    let line = this.source.start.line
-    let inputString =
+  /** @returns {Position} */ positionInside(/** @type {number} */ index) {
+    /** @type {number} */ let column = this.source.start.column
+    /** @type {number} */ let line = this.source.start.line
+    /** @type {string} */ let inputString =
       'document' in this.source.input
         ? this.source.input.document
         : this.source.input.css
-    let offset = sourceOffset(inputString, this.source.start)
-    let end = offset + index
+    /** @type {number} */ let offset = sourceOffset(inputString, this.source.start)
+    /** @type {number} */ let end = offset + index
 
     for (let i = offset; i < end; i++) {
       if (inputString[i] === '\n') {
@@ -297,23 +300,23 @@ class Node {
     return { column, line, offset: end }
   }
 
-  prev() {
+  /** @returns {Node | undefined} */ prev() {
     if (!this.parent) return undefined
-    let index = this.parent.index(this)
+    /** @type {number} */ let index = this.parent.index(this)
     return this.parent.nodes[index - 1]
   }
 
-  rangeBy(opts = {}) {
-    let inputString =
+  /** @returns {{ end: Position, start: Position }} */ rangeBy(/** @type {RangeOptions} */ opts = {}) {
+    /** @type {string} */ let inputString =
       'document' in this.source.input
         ? this.source.input.document
         : this.source.input.css
-    let start = {
+    /** @type {Position} */ let start = {
       column: this.source.start.column,
       line: this.source.start.line,
       offset: sourceOffset(inputString, this.source.start)
     }
-    let end = this.source.end
+    /** @type {Position} */ let end = this.source.end
       ? {
           column: this.source.end.column + 1,
           line: this.source.end.line,
@@ -385,17 +388,17 @@ class Node {
     return str.raw(this, prop, defaultType)
   }
 
-  remove() {
+  /** @returns {Node} */ remove() {
     if (this.parent) {
       this.parent.removeChild(this)
     }
-    this.parent = undefined
+    /** @type {import("./container") | undefined} */ this.parent = undefined
     return this
   }
 
-  replaceWith(...nodes) {
+  /** @returns {Node} */ replaceWith(...nodes) {
     if (this.parent) {
-      let bookmark = this
+      /** @type {any} */ let bookmark = this
       let foundSelf = false
       for (let node of nodes) {
         if (node === this) {
@@ -416,19 +419,19 @@ class Node {
     return this
   }
 
-  root() {
-    let result = this
+  /** @returns {Node} */ root() {
+    /** @type {Node} */ let result = this
     while (result.parent && result.parent.type !== 'document') {
       result = result.parent
     }
     return result
   }
 
-  toJSON(_, inputs) {
-    let fixed = {}
-    let emitInputs = inputs == null
+  /** @returns {any} */ toJSON(/** @type {any} */ _, /** @type {Map<any, number> | undefined} */ inputs) {
+    /** @type {Record<string, any>} */ let fixed = {}
+    /** @type {boolean} */ let emitInputs = inputs == null
     inputs = inputs || new Map()
-    let inputsNextIndex = 0
+    /** @type {number} */ let inputsNextIndex = 0
 
     for (let name in this) {
       if (!Object.prototype.hasOwnProperty.call(this, name)) {
@@ -436,10 +439,10 @@ class Node {
         continue
       }
       if (name === 'parent' || name === 'proxyCache') continue
-      let value = this[name]
+      /** @type {any} */ let value = this[name]
 
       if (Array.isArray(value)) {
-        fixed[name] = value.map(i => {
+        fixed[name] = value.map(/** @returns {any} */ (/** @type {any} */ i) => {
           if (typeof i === 'object' && i.toJSON) {
             return i.toJSON(null, inputs)
           } else {
@@ -450,7 +453,7 @@ class Node {
         fixed[name] = value.toJSON(null, inputs)
       } else if (name === 'source') {
         if (value == null) continue
-        let inputId = inputs.get(value.input)
+        /** @type {number | undefined} */ let inputId = inputs.get(value.input)
         if (inputId == null) {
           inputId = inputsNextIndex
           inputs.set(value.input, inputsNextIndex)
@@ -467,30 +470,30 @@ class Node {
     }
 
     if (emitInputs) {
-      fixed.inputs = [...inputs.keys()].map(input => input.toJSON())
+      fixed.inputs = [...inputs.keys()].map(/** @returns {any} */ (/** @type {any} */ input) => input.toJSON())
     }
 
     return fixed
   }
 
-  toProxy() {
+  /** @returns {any} */ toProxy() {
     if (!this.proxyCache) {
       this.proxyCache = new Proxy(this, this.getProxyProcessor())
     }
     return this.proxyCache
   }
 
-  /** @returns {string} */ toString(stringifier = stringify) {
+  /** @returns {string} */ toString(/** @type {any} */ stringifier = stringify) {
     if (stringifier.stringify) stringifier = stringifier.stringify
-    let result = ''
-    stringifier(this, i => {
+    /** @type {string} */ let result = ''
+    stringifier(this, (/** @type {string} */ i) => {
       result += i
     })
     return result
   }
 
-  warn(result, text, opts = {}) {
-    let data = { node: this }
+  warn(/** @type {import("./result")} */ result, /** @type {string} */ text, opts = {}) {
+    /** @type {Record<string, any>} */ let data = { node: this }
     for (let i in opts) data[i] = opts[i]
     return result.warn(text, data)
   }

@@ -3,11 +3,11 @@
 
 module.exports = interrupt
 
-/** @returns {boolean} */ function interrupt(/** @type {any[]} */ interruptors, tokenizers, ctx, /** @type {any[]} */ parameters) {
+/** @returns {boolean} */ function interrupt(/** @type {any[]} */ interruptors, /** @type {Record<string, import("../tokenizer.js").RemarkTokenizer>} */ tokenizers, /** @type {import("../parser.js").RemarkParser} */ ctx, /** @type {any[]} */ parameters) {
   /** @type {number} */ var length = interruptors.length
   /** @type {number} */ var index = -1
-  var interruptor
-  var config
+  /** @type {any[]} */ var interruptor
+  /** @type {{pedantic?: boolean, commonmark?: boolean}} */ var config
 
   while (++index < length) {
     interruptor = interruptors[index]

@@ -124,7 +124,8 @@
     "./vendor/angular-compiler/compiler.mjs"
   ],
   "types": {
-    "../prettier/node_modules/mdast-util-from-markdown/lib/types.d.ts": "./types/mdast-util-from-markdown-types.ts"
+    "../prettier/node_modules/mdast-util-from-markdown/lib/types.d.ts": "./types/mdast-util-from-markdown-types.ts",
+    "../prettier/node_modules/@types/mdast/index.d.ts": "./types/mdast-types.ts"
   },
   "checked": [
     "../prettier/node_modules/mdast-util-find-and-replace",

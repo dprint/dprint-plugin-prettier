@@ -9,6 +9,25 @@ module.exports = factory
  * Where a node is, with the indentation of each of its lines after the first
  * @typedef {{ start: RemarkPoint, end: RemarkPoint, indent?: number[] }} RemarkPosition
  * @typedef {{ line: number, column: number, offset?: number }} RemarkPoint
+ * What eating gives: a function that adds a node where the eaten text was, and that resets the text to before it was
+ * eaten (`reset`) or tells where the node would be (`test`)
+ * @typedef {{
+ *   (node: RemarkNode, parent?: RemarkNode): RemarkNode,
+ *   reset: (node: RemarkNode, parent?: RemarkNode) => RemarkNode,
+ *   test: () => RemarkPosition,
+ * }} RemarkApply
+ * What the tokenizers are given to eat the start of their text with, which also tells where they are
+ * @typedef {{ (subvalue: string): RemarkApply, now: () => RemarkPoint, file: any }} RemarkEat
+ * A tokenizer, which is called on the parser, and what the parser asks of it (`locator` finds where an inline one may
+ * start)
+ * @typedef {{
+ *   (this: import("./parser.js").RemarkParser, eat: RemarkEat, value: StringView, silent?: boolean): any,
+ *   locator?: (this: import("./parser.js").RemarkParser, value: StringView, fromIndex: number) => number,
+ *   onlyAtStart?: boolean,
+ *   notInList?: boolean,
+ *   notInBlock?: boolean,
+ *   notInLink?: boolean,
+ * }} RemarkTokenizer
  */
 
 // Construct a tokenizer.  This creates both `tokenizeInline` and `tokenizeBlock`.
@@ -21,12 +40,12 @@ function factory(/** @type {string} */ type) {
     var offset = self.offset
     var tokens = []
     /** @type {string[]} */ var methods = self[type + 'Methods']
-    /** @type {Record<string, any>} */ var tokenizers = self[type + 'Tokenizers']
+    /** @type {Record<string, RemarkTokenizer>} */ var tokenizers = self[type + 'Tokenizers']
     /** @type {number} */ var line = location.line
     /** @type {number} */ var column = location.column
     /** @type {number} */ var index
     /** @type {number} */ var length
-    var method
+    /** @type {RemarkTokenizer} */ var method
     /** @type {string} */ var name
     /** @type {boolean} */ var matched
     /** @type {number | undefined} */ var valueLength
@@ -211,7 +230,7 @@ function factory(/** @type {string} */ type) {
     function add(/** @type {RemarkNode} */ node, /** @type {RemarkNode | undefined} */ parent) {
       /** @type {any[]} */ var children = parent ? parent.children : tokens
       /** @type {RemarkNode | undefined} */ var previous = children[children.length - 1]
-      var fn
+      /** @type {(this: import("./parser.js").RemarkParser, previous: RemarkNode, node: RemarkNode) => RemarkNode} */ var fn
 
       if (
         previous &&
@@ -309,14 +328,14 @@ function factory(/** @type {string} */ type) {
 }
 
 // Merge two text nodes: `node` into `prev`.
-function mergeText(/** @type {RemarkNode} */ previous, /** @type {RemarkNode} */ node) {
+/** @returns {RemarkNode} */ function mergeText(/** @type {RemarkNode} */ previous, /** @type {RemarkNode} */ node) {
   previous.value += node.value
 
   return previous
 }
 
 // Merge two blockquotes: `node` into `prev`, unless in CommonMark or gfm modes.
-/** @this {import("./parser.js").RemarkParser} */ function mergeBlockquote(previous, node) {
+/** @returns {RemarkNode} */ /** @this {import("./parser.js").RemarkParser} */ function mergeBlockquote(/** @type {RemarkNode} */ previous, /** @type {RemarkNode} */ node) {
   if (this.options.commonmark || this.options.gfm) {
     return node
   }

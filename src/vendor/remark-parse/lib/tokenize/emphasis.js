@@ -13,11 +13,11 @@ emphasis.locator = locate
 /** @type {string} */ var underscore = '_'
 /** @type {string} */ var backslash = '\\'
 
-/** @this {import("../parser.js").RemarkParser} */ function emphasis(eat, /** @type {StringView} */ value, silent) {
+/** @this {import("../parser.js").RemarkParser} */ function emphasis(/** @type {import("../tokenizer.js").RemarkEat} */ eat, /** @type {StringView} */ value, /** @type {boolean | undefined} */ silent) {
   var self = this
   /** @type {number} */ var index = 0
   /** @type {string} */ var character = value.charAt(index)
-  var now
+  /** @type {import("../tokenizer.js").RemarkPoint} */ var now
   /** @type {boolean} */ var pedantic
   /** @type {string} */ var marker
   /** @type {string} */ var queue

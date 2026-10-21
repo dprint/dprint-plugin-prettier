@@ -3,17 +3,18 @@
 
 let Container = require('./container')
 
-let LazyResult, Processor
+/** @type {typeof import("./lazy-result")} */ let LazyResult
+/** @type {typeof import("./processor")} */ let Processor
 
 class Root extends Container {
-  constructor(defaults) {
+  constructor(/** @type {any} */ defaults) {
     super(defaults)
     /** @type {string} */ this.type = 'root'
     if (!this.nodes) this.nodes = []
   }
 
-  normalize(child, sample, type) {
-    let nodes = super.normalize(child)
+  /** @returns {import("./node")[]} */ normalize(child, /** @type {import("./node") | undefined} */ sample, /** @type {any} */ type) {
+    /** @type {import("./node")[]} */ let nodes = super.normalize(child)
 
     if (sample) {
       if (type === 'prepend') {
@@ -32,8 +33,8 @@ class Root extends Container {
     return nodes
   }
 
-  removeChild(child, ignore) {
-    let index = this.index(child)
+  /** @returns {import("./container")} */ removeChild(child, /** @type {any} */ ignore) {
+    /** @type {number} */ let index = this.index(child)
 
     if (!ignore && index === 0 && this.nodes.length > 1) {
       this.nodes[1].raws.before = this.nodes[index].raws.before
@@ -42,17 +43,17 @@ class Root extends Container {
     return super.removeChild(child)
   }
 
-  toResult(opts = {}) {
+  /** @returns {any} */ toResult(/** @type {any} */ opts = {}) {
     let lazy = new LazyResult(new Processor(), this, opts)
     return lazy.stringify()
   }
 }
 
-Root.registerLazyResult = dependant => {
+Root.registerLazyResult = (/** @type {typeof import("./lazy-result")} */ dependant) => {
   LazyResult = dependant
 }
 
-Root.registerProcessor = dependant => {
+Root.registerProcessor = (/** @type {typeof import("./processor")} */ dependant) => {
   Processor = dependant
 }
 

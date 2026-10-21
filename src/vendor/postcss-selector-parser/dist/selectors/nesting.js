@@ -1,3 +1,4 @@
+// @nts-check
 'use strict';
 
 exports.__esModule = true;

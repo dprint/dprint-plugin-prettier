@@ -10,7 +10,7 @@ const liquid = function () {
   methods.splice(methods.indexOf("text"), 0, "liquid");
   proto.inlineTokenizers.liquid = tokenizer;
 
-  function tokenizer(/** @type {(a0?: any) => any} */ eat, /** @type {string | undefined} */ value) {
+  function tokenizer(/** @type {import("../../../../../src/vendor/remark-parse/lib/tokenizer.js").RemarkEat} */ eat, /** @type {string | undefined} */ value) {
     const match = value.match(/^(\{%.*?%\}|\{\{.*?\}\})/s);
 
     if (match) {

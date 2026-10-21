@@ -1,6 +1,6 @@
 // @nts-check
 //#region src/ast-transform/transforms/transform-pipe-expression.ts
-const visitPipe = (/** @type {import("../../../../../../prettier/node_modules/@angular/compiler/fesm2022/compiler.mjs").BindingPipe} */ node, /** @type {import("../node-transformer.js").NodeTransformer} */ transformer) => ({
+const visitPipe = /** @returns {import("../../source.js").NGNode} */ (/** @type {import("@angular/compiler").BindingPipe} */ node, /** @type {import("../node-transformer.js").NodeTransformer} */ transformer) => ({
 	type: "NGPipeExpression",
 	left: transformer.transformChild(node.exp),
 	right: transformer.create({

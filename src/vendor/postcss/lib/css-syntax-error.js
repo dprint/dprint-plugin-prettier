@@ -5,8 +5,11 @@ let pico = require('picocolors')
 
 let terminalHighlight = require('./terminal-highlight')
 
+/**
+ * @property {import("./input").ErrorInput} [input] given by the input that the error is of
+ */
 class CssSyntaxError extends Error {
-  constructor(/** @type {string} */ message, line, column, /** @type {string} */ source, /** @type {undefined | string} */ file, /** @type {undefined | string} */ plugin) {
+  constructor(/** @type {string} */ message, /** @type {any} */ line, /** @type {any} */ column, /** @type {string} */ source, /** @type {undefined | string} */ file, /** @type {undefined | string} */ plugin) {
     super(message)
     /** @type {string} */ this.name = 'CssSyntaxError'
     /** @type {string} */ this.reason = message
@@ -22,13 +25,13 @@ class CssSyntaxError extends Error {
     }
     if (typeof line !== 'undefined' && typeof column !== 'undefined') {
       if (typeof line === 'number') {
-        this.line = line
-        this.column = column
+        /** @type {number | undefined} */ this.line = line
+        /** @type {number | undefined} */ this.column = column
       } else {
         this.line = line.line
         this.column = line.column
-        this.endLine = column.line
-        this.endColumn = column.column
+        /** @type {number | undefined} */ this.endLine = column.line
+        /** @type {number | undefined} */ this.endColumn = column.column
       }
     }
 
@@ -54,9 +57,9 @@ class CssSyntaxError extends Error {
     let css = this.source
     if (color == null) color = pico.isColorSupported
 
-    let aside = text => text
-    let mark = text => text
-    let highlight = text => text
+    /** @type {(text: string) => string} */ let aside = text => text
+    /** @type {(text: string) => string} */ let mark = text => text
+    /** @type {(text: string) => string} */ let highlight = text => text
     if (color) {
       let { bold, gray, red } = pico.createColors(true)
       mark = text => bold(red(text))
@@ -66,14 +69,14 @@ class CssSyntaxError extends Error {
       }
     }
 
-    let lines = css.split(/\r?\n/)
-    let start = Math.max(this.line - 3, 0)
-    let end = Math.min(this.line + 2, lines.length)
-    let maxWidth = String(end).length
+    /** @type {string[]} */ let lines = css.split(/\r?\n/)
+    /** @type {number} */ let start = Math.max(this.line - 3, 0)
+    /** @type {number} */ let end = Math.min(this.line + 2, lines.length)
+    /** @type {number} */ let maxWidth = String(end).length
 
     return lines
       .slice(start, end)
-      .map((line, index) => {
+      .map(/** @returns {string} */ (/** @type {string} */ line, /** @type {number} */ index) => {
         let number = start + 1 + index
         let gutter = ' ' + (' ' + number).slice(-maxWidth) + ' | '
         if (number === this.line) {

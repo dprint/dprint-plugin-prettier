@@ -84,11 +84,11 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Parser = function () {
-    function Parser(input) {
+    function Parser(/** @type {import("./tokenize").SelectorInput} */ input) {
         _classCallCheck(this, Parser);
 
-        this.input = input;
-        this.lossy = input.options.lossless === false;
+        /** @type {import("./tokenize").SelectorInput} */ this.input = input;
+        /** @type {boolean} */ this.lossy = input.options.lossless === false;
         /** @type {number} */ this.position = 0;
         this.root = new _root2.default();
 
@@ -107,7 +107,7 @@ var Parser = function () {
 
     Parser.prototype.attribute = function attribute() {
         /** @type {string} */ var str = '';
-        var attr = void 0;
+        /** @type {any} */ var attr = void 0;
         var startingToken = this.currToken;
         this.position++;
         while (this.position < this.tokens.length && this.currToken[0] !== ']') {
@@ -337,7 +337,7 @@ var Parser = function () {
             return this.error('Expected pseudo-class or pseudo-element');
         }
         if (this.currToken[0] === 'word') {
-            var pseudo = void 0;
+            /** @type {any} */ var pseudo = void 0;
             this.splitWord(false, function (/** @type {string} */ first, /** @type {number} */ length) {
                 pseudoStr += first;
                 pseudo = new _pseudo2.default({
@@ -454,7 +454,7 @@ var Parser = function () {
             if (i === 0 && firstCallback) {
                 return firstCallback.call(_this2, value, indices.length);
             }
-            var node = void 0;
+            /** @type {any} */ var node = void 0;
             if (~hasClass.indexOf(ind)) {
                 node = new _className2.default({
                     value: value.slice(1),

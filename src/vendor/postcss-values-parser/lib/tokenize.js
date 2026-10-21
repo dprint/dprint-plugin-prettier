@@ -37,7 +37,7 @@
 const util = require('util');
 const TokenizeError = require('./errors/TokenizeError');
 
-module.exports = /** @returns {any[]} */ function tokenize (/** @type {string | undefined} */ input, options) {
+module.exports = /** @returns {any[]} */ function tokenize (/** @type {string | undefined} */ input, /** @type {any} */ options) {
 
   options = options || {};
 
@@ -48,13 +48,13 @@ module.exports = /** @returns {any[]} */ function tokenize (/** @type {string | 
     /** @type {number} */ line =  1,
     /** @type {number} */ pos =  0,
     /** @type {number} */ parentCount = 0,
-    isURLArg = null,
+    /** @type {boolean | null} */ isURLArg = null,
 
-    /** @type {number} */ code, next, /** @type {string} */ quote, /** @type {string[]} */ lines, /** @type {number} */ last, /** @type {string} */ content, /** @type {boolean} */ escape, /** @type {number} */ nextLine, /** @type {number} */ nextOffset,
+    /** @type {number} */ code, /** @type {number} */ next, /** @type {string} */ quote, /** @type {string[]} */ lines, /** @type {number} */ last, /** @type {string} */ content, /** @type {boolean} */ escape, /** @type {number} */ nextLine, /** @type {number} */ nextOffset,
     /** @type {boolean} */ escaped, /** @type {number} */ escapePos, /** @type {string} */ nextChar;
 
   function unclosed (/** @type {string} */ what) {
-    let message = util.format('Unclosed %s at line: %d, column: %d, token: %d', what, line, pos - offset, pos);
+    /** @type {string} */ let message = util.format('Unclosed %s at line: %d, column: %d, token: %d', what, line, pos - offset, pos);
     throw new TokenizeError(message);
   }
 

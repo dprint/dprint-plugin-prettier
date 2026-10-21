@@ -14,7 +14,7 @@ module.exports = paragraph
 /** @type {number} */ var tabSize = 4
 
 // Tokenise paragraph.
-/** @this {import("../parser.js").RemarkParser} */ function paragraph(eat, /** @type {StringView} */ value, silent) {
+/** @this {import("../parser.js").RemarkParser} */ function paragraph(/** @type {import("../tokenizer.js").RemarkEat} */ eat, /** @type {StringView} */ value, /** @type {boolean | undefined} */ silent) {
   var self = this
   var settings = self.options
   /** @type {boolean} */ var commonmark = settings.commonmark
@@ -26,7 +26,7 @@ module.exports = paragraph
   /** @type {StringView | undefined} */ var subvalue
   /** @type {string | undefined} */ var character
   /** @type {number | undefined} */ var size
-  var now
+  /** @type {import("../tokenizer.js").RemarkPoint} */ var now
 
   while (index < length) {
     // Eat everything if there’s no following newline.

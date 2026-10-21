@@ -12,7 +12,7 @@ const wikiLink = function () {
   methods.splice(methods.indexOf("link"), 0, entityType);
   proto.inlineTokenizers.wikiLink = tokenizer;
 
-  function tokenizer(/** @type {(a0?: any) => any} */ eat, /** @type {string | undefined} */ value) {
+  function tokenizer(/** @type {import("../../../../../src/vendor/remark-parse/lib/tokenizer.js").RemarkEat} */ eat, /** @type {string | undefined} */ value) {
     const match = wikiLinkRegex.exec(value);
 
     if (match) {

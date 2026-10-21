@@ -5,13 +5,13 @@ const Container = require('./container');
 const Node = require('./node');
 
 class Comment extends Node {
-  constructor (opts) {
+  constructor (/** @type {any} */ opts) {
     super(opts);
     /** @type {string} */ this.type = 'comment';
     /** @type {boolean} */ this.inline = Object(opts).inline || false;
   }
 
-  toString () {
+  /** @returns {string} */ toString () {
     return [
       this.raws.before,
       this.inline ? '//' : '/*',

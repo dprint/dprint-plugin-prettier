@@ -1,11 +1,13 @@
+// @nts-check
 'use strict'
 
 let Container = require('./container')
 
-let LazyResult, Processor
+/** @type {typeof import("./lazy-result")} */ let LazyResult
+/** @type {typeof import("./processor")} */ let Processor
 
 class Document extends Container {
-  constructor(defaults) {
+  constructor(/** @type {any} */ defaults) {
     // type needs to be passed to super, otherwise child roots won't be normalized correctly
     super({ type: 'document', ...defaults })
 
@@ -14,18 +16,18 @@ class Document extends Container {
     }
   }
 
-  toResult(opts = {}) {
+  /** @returns {any} */ toResult(/** @type {any} */ opts = {}) {
     let lazy = new LazyResult(new Processor(), this, opts)
 
     return lazy.stringify()
   }
 }
 
-Document.registerLazyResult = dependant => {
+Document.registerLazyResult = (/** @type {typeof import("./lazy-result")} */ dependant) => {
   LazyResult = dependant
 }
 
-Document.registerProcessor = dependant => {
+Document.registerProcessor = (/** @type {typeof import("./processor")} */ dependant) => {
   Processor = dependant
 }
 

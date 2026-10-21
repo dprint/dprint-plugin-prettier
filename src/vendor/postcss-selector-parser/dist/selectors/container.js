@@ -37,13 +37,13 @@ var Container = function (_Node) {
         return _this;
     }
 
-    Container.prototype.append = function append(selector) {
+    Container.prototype.append = function append(/** @type {any} */ selector) {
         selector.parent = this;
         this.nodes.push(selector);
         return this;
     };
 
-    Container.prototype.prepend = function prepend(selector) {
+    Container.prototype.prepend = function prepend(/** @type {any} */ selector) {
         selector.parent = this;
         this.nodes.unshift(selector);
         return this;
@@ -53,19 +53,19 @@ var Container = function (_Node) {
         return this.nodes[index];
     };
 
-    Container.prototype.index = function index(child) {
+    Container.prototype.index = /** @returns {number} */ function index(/** @type {any} */ child) {
         if (typeof child === 'number') {
             return child;
         }
         return this.nodes.indexOf(child);
     };
 
-    Container.prototype.removeChild = function removeChild(child) {
+    Container.prototype.removeChild = function removeChild(/** @type {any} */ child) {
         child = this.index(child);
         this.at(child).parent = undefined;
         this.nodes.splice(child, 1);
 
-        var index = void 0;
+        /** @type {number} */ var index = void 0;
         for (var id in this.indexes) {
             index = this.indexes[id];
             if (index >= child) {
@@ -78,7 +78,7 @@ var Container = function (_Node) {
 
     Container.prototype.removeAll = function removeAll() {
         for (var _iterator = this.nodes, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
-            var _ref;
+            /** @type {any} */ var _ref;
 
             if (_isArray) {
                 if (_i >= _iterator.length) break;
@@ -101,11 +101,11 @@ var Container = function (_Node) {
         return this.removeAll();
     };
 
-    Container.prototype.insertAfter = function insertAfter(oldNode, newNode) {
-        var oldIndex = this.index(oldNode);
+    Container.prototype.insertAfter = function insertAfter(/** @type {any} */ oldNode, /** @type {any} */ newNode) {
+        /** @type {number} */ var oldIndex = this.index(oldNode);
         this.nodes.splice(oldIndex + 1, 0, newNode);
 
-        var index = void 0;
+        /** @type {number} */ var index = void 0;
         for (var id in this.indexes) {
             index = this.indexes[id];
             if (oldIndex <= index) {
@@ -116,11 +116,11 @@ var Container = function (_Node) {
         return this;
     };
 
-    Container.prototype.insertBefore = function insertBefore(oldNode, newNode) {
-        var oldIndex = this.index(oldNode);
+    Container.prototype.insertBefore = function insertBefore(/** @type {any} */ oldNode, /** @type {any} */ newNode) {
+        /** @type {number} */ var oldIndex = this.index(oldNode);
         this.nodes.splice(oldIndex, 0, newNode);
 
-        var index = void 0;
+        /** @type {number} */ var index = void 0;
         for (var id in this.indexes) {
             index = this.indexes[id];
             if (oldIndex <= index) {
@@ -131,7 +131,7 @@ var Container = function (_Node) {
         return this;
     };
 
-    Container.prototype.each = function each(callback) {
+    Container.prototype.each = function each(/** @type {(node: any, index: number) => any} */ callback) {
         if (!this.lastEach) {
             this.lastEach = 0;
         }
@@ -140,15 +140,15 @@ var Container = function (_Node) {
         }
 
         this.lastEach++;
-        var id = this.lastEach;
+        /** @type {number} */ var id = this.lastEach;
         this.indexes[id] = 0;
 
         if (!this.length) {
             return undefined;
         }
 
-        var index = void 0,
-            result = void 0;
+        /** @type {number} */ var index = void 0,
+            /** @type {any} */ result = void 0;
         while (this.indexes[id] < this.length) {
             index = this.indexes[id];
             result = callback(this.at(index), index);
@@ -166,9 +166,9 @@ var Container = function (_Node) {
         }
     };
 
-    Container.prototype.walk = function walk(callback) {
-        return this.each(function (node, i) {
-            var result = callback(node, i);
+    Container.prototype.walk = function walk(/** @type {(node: any, index: number) => any} */ callback) {
+        return this.each(function (/** @type {any} */ node, /** @type {number} */ i) {
+            /** @type {any} */ var result = callback(node, i);
 
             if (result !== false && node.length) {
                 result = node.walk(callback);
@@ -180,101 +180,101 @@ var Container = function (_Node) {
         });
     };
 
-    Container.prototype.walkAttributes = function walkAttributes(callback) {
+    Container.prototype.walkAttributes = function walkAttributes(/** @type {any} */ callback) {
         var _this2 = this;
 
-        return this.walk(function (selector) {
+        return this.walk(function (/** @type {any} */ selector) {
             if (selector.type === types.ATTRIBUTE) {
                 return callback.call(_this2, selector);
             }
         });
     };
 
-    Container.prototype.walkClasses = function walkClasses(callback) {
+    Container.prototype.walkClasses = function walkClasses(/** @type {any} */ callback) {
         var _this3 = this;
 
-        return this.walk(function (selector) {
+        return this.walk(function (/** @type {any} */ selector) {
             if (selector.type === types.CLASS) {
                 return callback.call(_this3, selector);
             }
         });
     };
 
-    Container.prototype.walkCombinators = function walkCombinators(callback) {
+    Container.prototype.walkCombinators = function walkCombinators(/** @type {any} */ callback) {
         var _this4 = this;
 
-        return this.walk(function (selector) {
+        return this.walk(function (/** @type {any} */ selector) {
             if (selector.type === types.COMBINATOR) {
                 return callback.call(_this4, selector);
             }
         });
     };
 
-    Container.prototype.walkComments = function walkComments(callback) {
+    Container.prototype.walkComments = function walkComments(/** @type {any} */ callback) {
         var _this5 = this;
 
-        return this.walk(function (selector) {
+        return this.walk(function (/** @type {any} */ selector) {
             if (selector.type === types.COMMENT) {
                 return callback.call(_this5, selector);
             }
         });
     };
 
-    Container.prototype.walkIds = function walkIds(callback) {
+    Container.prototype.walkIds = function walkIds(/** @type {any} */ callback) {
         var _this6 = this;
 
-        return this.walk(function (selector) {
+        return this.walk(function (/** @type {any} */ selector) {
             if (selector.type === types.ID) {
                 return callback.call(_this6, selector);
             }
         });
     };
 
-    Container.prototype.walkNesting = function walkNesting(callback) {
+    Container.prototype.walkNesting = function walkNesting(/** @type {any} */ callback) {
         var _this7 = this;
 
-        return this.walk(function (selector) {
+        return this.walk(function (/** @type {any} */ selector) {
             if (selector.type === types.NESTING) {
                 return callback.call(_this7, selector);
             }
         });
     };
 
-    Container.prototype.walkPseudos = function walkPseudos(callback) {
+    Container.prototype.walkPseudos = function walkPseudos(/** @type {any} */ callback) {
         var _this8 = this;
 
-        return this.walk(function (selector) {
+        return this.walk(function (/** @type {any} */ selector) {
             if (selector.type === types.PSEUDO) {
                 return callback.call(_this8, selector);
             }
         });
     };
 
-    Container.prototype.walkTags = function walkTags(callback) {
+    Container.prototype.walkTags = function walkTags(/** @type {any} */ callback) {
         var _this9 = this;
 
-        return this.walk(function (selector) {
+        return this.walk(function (/** @type {any} */ selector) {
             if (selector.type === types.TAG) {
                 return callback.call(_this9, selector);
             }
         });
     };
 
-    Container.prototype.walkUniversals = function walkUniversals(callback) {
+    Container.prototype.walkUniversals = function walkUniversals(/** @type {any} */ callback) {
         var _this10 = this;
 
-        return this.walk(function (selector) {
+        return this.walk(function (/** @type {any} */ selector) {
             if (selector.type === types.UNIVERSAL) {
                 return callback.call(_this10, selector);
             }
         });
     };
 
-    Container.prototype.split = function split(callback) {
+    Container.prototype.split = function split(/** @type {any} */ callback) {
         var _this11 = this;
 
-        var current = [];
-        return this.reduce(function (memo, node, index) {
+        /** @type {any[]} */ var current = [];
+        return this.reduce(function (/** @type {any[][]} */ memo, /** @type {any} */ node, /** @type {number} */ index) {
             var split = callback.call(_this11, node);
             current.push(node);
             if (split) {
@@ -287,31 +287,31 @@ var Container = function (_Node) {
         }, []);
     };
 
-    Container.prototype.map = function map(callback) {
+    Container.prototype.map = function map(/** @type {any} */ callback) {
         return this.nodes.map(callback);
     };
 
-    Container.prototype.reduce = function reduce(callback, memo) {
+    Container.prototype.reduce = function reduce(/** @type {any} */ callback, /** @type {any} */ memo) {
         return this.nodes.reduce(callback, memo);
     };
 
-    Container.prototype.every = function every(callback) {
+    Container.prototype.every = function every(/** @type {any} */ callback) {
         return this.nodes.every(callback);
     };
 
-    Container.prototype.some = function some(callback) {
+    Container.prototype.some = function some(/** @type {any} */ callback) {
         return this.nodes.some(callback);
     };
 
-    Container.prototype.filter = function filter(callback) {
+    Container.prototype.filter = function filter(/** @type {any} */ callback) {
         return this.nodes.filter(callback);
     };
 
-    Container.prototype.sort = function sort(callback) {
+    Container.prototype.sort = function sort(/** @type {any} */ callback) {
         return this.nodes.sort(callback);
     };
 
-    Container.prototype.toString = function toString() {
+    Container.prototype.toString = /** @returns {string} */ function toString() {
         return this.map(String).join('');
     };
 

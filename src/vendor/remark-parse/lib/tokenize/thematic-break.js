@@ -12,7 +12,7 @@ module.exports = thematicBreak
 
 /** @type {number} */ var maxCount = 3
 
-function thematicBreak(/** @type {(a0?: any) => any} */ eat, /** @type {StringView} */ value, /** @type {boolean | undefined} */ silent) {
+function thematicBreak(/** @type {import("../tokenizer.js").RemarkEat} */ eat, /** @type {StringView} */ value, /** @type {boolean | undefined} */ silent) {
   /** @type {number} */ var index = -1
   /** @type {number} */ var length = value.length + 1
   /** @type {string} */ var subvalue = ''

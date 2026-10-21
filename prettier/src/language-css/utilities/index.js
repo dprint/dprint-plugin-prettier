@@ -42,7 +42,7 @@ const colorAdjusterFunctions = new Set([
 
 /** @returns {string | undefined} */ function getPropOfDeclNode(/** @type {AstPath} */ path) {
   return path
-    .findAncestor(/** @returns {boolean} */ (node) => node.type === "css-decl")
+    .findAncestor(/** @returns {boolean} */ (/** @type {import("../types.js").CssNode} */ node) => node.type === "css-decl")
     ?.prop?.toLowerCase();
 }
 
@@ -53,7 +53,7 @@ const wideKeywords = new Set(["initial", "inherit", "unset", "revert"]);
 
 /** @returns {boolean | undefined} */ function isKeyframeAtRuleKeywords(/** @type {AstPath} */ path, /** @type {string} */ value) {
   const atRuleAncestorNode = path.findAncestor(
-    /** @returns {boolean} */ (node) => node.type === "css-atrule",
+    /** @returns {boolean} */ (/** @type {import("../types.js").CssNode} */ node) => node.type === "css-atrule",
   );
   return (
     atRuleAncestorNode?.name?.toLowerCase().endsWith("keyframes") &&
@@ -75,14 +75,14 @@ const wideKeywords = new Set(["initial", "inherit", "unset", "revert"]);
 
 /** @returns {boolean} */ function insideValueFunctionNode(/** @type {AstPath} */ path, /** @type {string} */ functionName) {
   const funcAncestorNode = path.findAncestor(
-    /** @returns {boolean} */ (node) => node.type === "value-func",
+    /** @returns {boolean} */ (/** @type {import("../types.js").CssNode} */ node) => node.type === "value-func",
   );
   return funcAncestorNode?.value?.toLowerCase() === functionName;
 }
 
 // https://github.com/css-modules/icss
 /** @returns {boolean} */ function insideIcssRuleNode(/** @type {AstPath} */ path) {
-  return path.hasAncestor(/** @returns {boolean | undefined} */ (node) => {
+  return path.hasAncestor(/** @returns {boolean | undefined} */ (/** @type {import("../types.js").CssNode} */ node) => {
     if (node.type !== "css-rule") {
       return false;
     }
@@ -100,7 +100,7 @@ const wideKeywords = new Set(["initial", "inherit", "unset", "revert"]);
     ? atRuleNameOrAtRuleNames
     : [atRuleNameOrAtRuleNames];
   const atRuleAncestorNode = path.findAncestor(
-    /** @returns {boolean} */ (node) => node.type === "css-atrule",
+    /** @returns {boolean} */ (/** @type {import("../types.js").CssNode} */ node) => node.type === "css-atrule",
   );
 
   return (
@@ -114,7 +114,7 @@ const wideKeywords = new Set(["initial", "inherit", "unset", "revert"]);
   return (
     node.groups[0]?.value === "url" &&
     node.groups.length === 2 &&
-    path.findAncestor(/** @returns {boolean} */ (node) => node.type === "css-atrule")?.name === "import"
+    path.findAncestor(/** @returns {boolean} */ (/** @type {import("../types.js").CssNode} */ node) => node.type === "css-atrule")?.name === "import"
   );
 }
 
@@ -308,7 +308,7 @@ function isDetachedRulesetCallNode(/** @type {import("../types.js").CssNode} */ 
     return false;
   }
 
-  const declNode = path.findAncestor(/** @returns {boolean} */ (node) => node.type === "css-decl");
+  const declNode = path.findAncestor(/** @returns {boolean} */ (/** @type {import("../types.js").CssNode} */ node) => node.type === "css-decl");
 
   // SCSS map declaration (i.e. `$map: (key: value, other-key: other-value)`)
   if (declNode?.prop?.startsWith("$")) {
@@ -318,7 +318,7 @@ function isDetachedRulesetCallNode(/** @type {import("../types.js").CssNode} */ 
   // List as value of key inside SCSS map (i.e. `$map: (key: (value other-value other-other-value))`)
   if (isKeyValuePairInParenGroupNode(parentParentNode)) {
     // If there is any operator in the value, it is not a map item
-    if (parentNode.groups.some(/** @returns {boolean} */ (node) => isMathOperatorNode(node))) {
+    if (parentNode.groups.some(/** @returns {boolean} */ (/** @type {import("../types.js").CssNode} */ node) => isMathOperatorNode(node))) {
       return false;
     }
 

@@ -7,7 +7,7 @@ const LessParser = require('./LessParser');
 const LessStringifier = require('./LessStringifier');
 
 module.exports = {
-  parse(/** @type {string | undefined} */ less, options) {
+  parse(/** @type {string | undefined} */ less, /** @type {any} */ options) {
     const input = new Input(less, options);
     const parser = new LessParser(input);
 
@@ -18,7 +18,7 @@ module.exports = {
     // that any following node in the AST will have incorrect start/end positions
     // on the `source` property. To fix that, we'll walk the AST and compute
     // updated positions for all nodes.
-    parser.root.walk((node) => {
+    parser.root.walk((/** @type {import("postcss/lib/node")} */ node) => {
       const offset = input.css.lastIndexOf(node.source.input.css);
 
       if (offset === 0) {
@@ -63,15 +63,15 @@ module.exports = {
     return parser.root;
   },
 
-  stringify(node, builder) {
+  stringify(/** @type {import("postcss/lib/node")} */ node, /** @type {import("postcss/lib/stringifier").Builder} */ builder) {
     const stringifier = new LessStringifier(builder);
     stringifier.stringify(node);
   },
 
-  nodeToString(node) {
-    let result = '';
+  /** @returns {string} */ nodeToString(/** @type {import("postcss/lib/node")} */ node) {
+    /** @type {string} */ let result = '';
 
-    module.exports.stringify(node, (bit) => {
+    module.exports.stringify(node, (/** @type {string} */ bit) => {
       result += bit;
     });
 

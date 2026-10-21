@@ -10,17 +10,17 @@ let list = require('./list')
  * @property {boolean} [isScssNestedProperty] given by prettier
  */
 class Rule extends Container {
-  get selectors() {
+  /** @returns {string[]} */ get selectors() {
     return list.comma(this.selector)
   }
 
-  set selectors(values) {
-    let match = this.selector ? this.selector.match(/,\s*/) : null
-    let sep = match ? match[0] : ',' + this.raw('between', 'beforeOpen')
+  set selectors(/** @type {string[]} */ values) {
+    /** @type {RegExpMatchArray | null} */ let match = this.selector ? this.selector.match(/,\s*/) : null
+    /** @type {string} */ let sep = match ? match[0] : ',' + this.raw('between', 'beforeOpen')
     this.selector = values.join(sep)
   }
 
-  constructor(defaults) {
+  constructor(/** @type {any} */ defaults) {
     super(defaults)
     /** @type {string} */ this.type = 'rule'
     if (!this.nodes) this.nodes = []

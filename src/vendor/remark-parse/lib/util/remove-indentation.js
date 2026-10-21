@@ -14,13 +14,13 @@ module.exports = indentation
 // Remove the minimum indent from every line in `value`.  Supports both tab,
 // spaced, and mixed indentation (as well as possible).
 /** @returns {string} */ function indentation(/** @type {string} */ value, /** @type {number} */ maximum) {
-  var values = value.split(lineFeed)
+  /** @type {string[]} */ var values = value.split(lineFeed)
   /** @type {number} */ var position = values.length + 1
   /** @type {number} */ var minIndent = Infinity
-  var matrix = []
+  /** @type {Record<string, number>[]} */ var matrix = []
   /** @type {number | undefined} */ var index
-  var indentation
-  var stops
+  /** @type {{indent: number, stops: Record<string, number>}} */ var indentation
+  /** @type {Record<string, number>} */ var stops
 
   values.unshift(repeat(space, maximum) + exclamationMark)
 

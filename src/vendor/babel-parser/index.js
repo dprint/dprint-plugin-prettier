@@ -573,7 +573,7 @@ const estree = superClass => class ESTreeParserMixin extends superClass {
   /** @returns {boolean} */ isValidDirective(/** @type {Node} */ stmt) {
     return stmt.type === "ExpressionStatement" && stmt.expression.type === "Literal" && typeof stmt.expression.value === "string" && !stmt.expression.extra?.parenthesized;
   }
-  parseBlockBody(/** @type {Node} */ node, /** @type {boolean} */ allowDirectives, /** @type {boolean} */ topLevel, /** @type {number} */ end, afterBlockParse) {
+  parseBlockBody(/** @type {Node} */ node, /** @type {boolean} */ allowDirectives, /** @type {boolean} */ topLevel, /** @type {number} */ end, /** @type {AfterBlockParse | undefined} */ afterBlockParse) {
     super.parseBlockBody(node, allowDirectives, topLevel, end, afterBlockParse);
     const directiveStatements = node.directives.map(d => this.directiveToStmt(d));
     node.body = directiveStatements.concat(node.body);
@@ -758,14 +758,14 @@ const estree = superClass => class ESTreeParserMixin extends superClass {
     }
     return node;
   }
-  /** @returns {Node} */ stopParseSubscript(/** @type {Node} */ base, state) {
+  /** @returns {Node} */ stopParseSubscript(/** @type {Node} */ base, /** @type {SubscriptState} */ state) {
     const node = super.stopParseSubscript(base, state);
     if (state.optionalChainMember) {
       return this.estreeParseChainExpression(node, base);
     }
     return node;
   }
-  /** @returns {Node} */ parseMember(/** @type {Node} */ base, /** @type {Position} */ startLoc, /** @type {any} */ state, /** @type {boolean} */ computed, /** @type {boolean} */ optional) {
+  /** @returns {Node} */ parseMember(/** @type {Node} */ base, /** @type {Position} */ startLoc, /** @type {SubscriptState} */ state, /** @type {boolean} */ computed, /** @type {boolean} */ optional) {
     const node = super.parseMember(base, startLoc, state, computed, optional);
     if (node.type === "OptionalMemberExpression") {
       this.castNodeTo(node, "MemberExpression");
@@ -1735,7 +1735,7 @@ const flow = superClass => class FlowParserMixin extends superClass {
   /** @returns {boolean} */ shouldParseTypes() {
     return this.getPluginOption("flow", "all") || this.flowPragma === "flow";
   }
-  finishToken(/** @type {number} */ type, val) {
+  finishToken(/** @type {int} */ type, /** @type {any} */ val) {
     if (type !== 130 && type !== 9 && type !== 24) {
       if (this.flowPragma === undefined) {
         this.flowPragma = null;
@@ -3386,7 +3386,7 @@ const flow = superClass => class FlowParserMixin extends superClass {
         return super.parseBindingAtom();
     }
   }
-  parseFunctionParams(/** @type {Node} */ node, isConstructor) {
+  parseFunctionParams(/** @type {Node} */ node, /** @type {boolean | undefined} */ isConstructor) {
     const kind = node.kind;
     if (kind !== "get" && kind !== "set" && this.match(43)) {
       node.typeParameters = this.flowParseTypeParameterDeclaration();
@@ -3500,7 +3500,7 @@ const flow = superClass => class FlowParserMixin extends superClass {
       super.setArrowFunctionParameters(node, params);
     }
   }
-  checkParams(/** @type {Node} */ node, /** @type {boolean} */ allowDuplicates, isArrowFunction, strictModeChanged = true) {
+  checkParams(/** @type {Node} */ node, /** @type {boolean} */ allowDuplicates, /** @type {boolean | undefined} */ isArrowFunction, /** @type {boolean} */ strictModeChanged = true) {
     if (isArrowFunction && this.state.noArrowParamsConversionAt.includes(this.offsetToSourcePos(node.start))) {
       return;
     }
@@ -3539,7 +3539,7 @@ const flow = superClass => class FlowParserMixin extends superClass {
     }
     return super.parseSubscripts(base, startLoc, noCalls);
   }
-  parseSubscript(/** @type {Node} */ base, /** @type {Position} */ startLoc, /** @type {boolean | undefined} */ noCalls, subscriptState) {
+  parseSubscript(/** @type {Node} */ base, /** @type {Position} */ startLoc, /** @type {boolean | undefined} */ noCalls, /** @type {SubscriptState} */ subscriptState) {
     if (this.match(14) && this.isLookaheadToken_lt()) {
       subscriptState.optionalChainMember = true;
       if (noCalls) {
@@ -4903,8 +4903,8 @@ function setInnerComments(/** @type {Node} */ node, comments) {
     node.innerComments.unshift(...comments);
   }
 }
-function adjustInnerComments(/** @type {Node} */ node, elements, commentWS) {
-  let lastElement = null;
+function adjustInnerComments(/** @type {Node} */ node, /** @type {(Node | null)[]} */ elements, /** @type {CommentWhitespace} */ commentWS) {
+  /** @type {Node | null} */ let lastElement = null;
   let i = elements.length;
   while (lastElement === null && i > 0) {
     lastElement = elements[--i];
@@ -4921,10 +4921,10 @@ class CommentsParser extends BaseParser {
     const {
       commentsLen
     } = /** @type {Parser} */ (this).state;
-    if (this.comments.length !== commentsLen) {
-      this.comments.length = commentsLen;
+    if (/** @type {Parser} */ (this).comments.length !== commentsLen) {
+      /** @type {Parser} */ (this).comments.length = commentsLen;
     }
-    this.comments.push(comment);
+    /** @type {Parser} */ (this).comments.push(comment);
     /** @type {Parser} */ (this).state.commentsLen++;
   }
   processComment(/** @type {Node} */ node) {
@@ -4955,7 +4955,7 @@ class CommentsParser extends BaseParser {
       }
     }
   }
-  finalizeComment(commentWS) {
+  finalizeComment(/** @type {CommentWhitespace} */ commentWS) {
     const {
       comments
     } = commentWS;
@@ -5038,7 +5038,7 @@ class CommentsParser extends BaseParser {
       commentWS.leadingNode = null;
     }
   }
-  takeSurroundingComments(node, start, end) {
+  takeSurroundingComments(/** @type {Node} */ node, /** @type {number} */ start, /** @type {number} */ end) {
     const {
       commentStack
     } = /** @type {Parser} */ (this).state;
@@ -5059,6 +5059,7 @@ class CommentsParser extends BaseParser {
     }
   }
 }
+/** @typedef {{ start: int, end: int, comments: any[], leadingNode: Node | null, trailingNode: Node | null, containingNode: Node | null }} CommentWhitespace Comments with the whitespace around them, and the nodes they belong to. */
 class State {
   /** @type {int} */ flags = 2048;
   /** @returns {boolean} */ get strict() {
@@ -5150,7 +5151,7 @@ class State {
   }
   labels = [];
   /** @type {int} */ commentsLen = 0;
-  commentStack = [];
+  /** @type {CommentWhitespace[]} */ commentStack = [];
   /** @type {int} */ pos = 0;
   /** @type {int} */ type = 135;
   value = null;
@@ -5644,7 +5645,7 @@ class Tokenizer extends CommentsParser {
     this.getTokenFromCode(this.codePointAtPos(this.state.pos));
   }
   skipBlockComment(/** @type {string | undefined} */ commentEnd) {
-    let startLoc;
+    /** @type {Position | undefined} */ let startLoc;
     if (!this.isLookahead) startLoc = this.state.curPosition();
     const start = this.state.pos;
     const end = this.input.indexOf(commentEnd, start + 2);
@@ -5670,7 +5671,7 @@ class Tokenizer extends CommentsParser {
   }
   skipLineComment(/** @type {int} */ startSkip) {
     const start = this.state.pos;
-    let startLoc;
+    /** @type {Position | undefined} */ let startLoc;
     if (!this.isLookahead) startLoc = this.state.curPosition();
     let ch = this.input.charCodeAt(this.state.pos += startSkip);
     if (this.state.pos < this.length) {
@@ -5740,7 +5741,7 @@ class Tokenizer extends CommentsParser {
         default:
           if (isWhitespace(ch)) {
             ++this.state.pos;
-          } else if (ch === 45 && !this.inModule && /** @type {Parser} */ (this).optionFlags & 16384) {
+          } else if (ch === 45 && !/** @type {Parser} */ (this).inModule && /** @type {Parser} */ (this).optionFlags & 16384) {
             const pos = this.state.pos;
             if (this.input.charCodeAt(pos + 1) === 45 && this.input.charCodeAt(pos + 2) === 62 && (spaceStart === 0 || this.state.lineStart > spaceStart)) {
               const comment = this.skipLineComment(3);
@@ -5751,7 +5752,7 @@ class Tokenizer extends CommentsParser {
             } else {
               break loop;
             }
-          } else if (ch === 60 && !this.inModule && /** @type {Parser} */ (this).optionFlags & 16384) {
+          } else if (ch === 60 && !/** @type {Parser} */ (this).inModule && /** @type {Parser} */ (this).optionFlags & 16384) {
             const pos = this.state.pos;
             if (this.input.charCodeAt(pos + 1) === 33 && this.input.charCodeAt(pos + 2) === 45 && this.input.charCodeAt(pos + 3) === 45) {
               const comment = this.skipLineComment(4);
@@ -5769,7 +5770,7 @@ class Tokenizer extends CommentsParser {
     }
     if (comments?.length > 0) {
       const end = this.state.pos;
-      const commentWhitespace = {
+      /** @type {CommentWhitespace} */ const commentWhitespace = {
         start: this.sourceToOffsetPos(spaceStart),
         end: this.sourceToOffsetPos(end),
         comments: comments,
@@ -5780,7 +5781,7 @@ class Tokenizer extends CommentsParser {
       this.state.commentStack.push(commentWhitespace);
     }
   }
-  finishToken(/** @type {number} */ type, val) {
+  finishToken(/** @type {int} */ type, /** @type {any} */ val) {
     this.state.end = this.state.pos;
     this.state.endLoc = this.state.curPosition();
     const prevType = this.state.type;
@@ -6478,9 +6479,9 @@ class Tokenizer extends CommentsParser {
   };
 }
 class ClassScope {
-  privateNames = new Set();
-  loneAccessors = new Map();
-  undefinedPrivateNames = new Map();
+  /** @type {Set<string>} */ privateNames = new Set();
+  /** @type {Map<string, int>} */ loneAccessors = new Map();
+  /** @type {Map<string, Position>} */ undefinedPrivateNames = new Map();
 }
 class ClassScopeHandler {
   /** @type {Parser} */ parser;
@@ -6538,7 +6539,7 @@ class ClassScopeHandler {
     undefinedPrivateNames.delete(name);
   }
   usePrivateName(/** @type {string} */ name, /** @type {Position} */ loc) {
-    let classScope;
+    /** @type {ClassScope | undefined} */ let classScope;
     for (classScope of this.stack) {
       if (classScope.privateNames.has(name)) return;
     }
@@ -6597,7 +6598,7 @@ class ExpressionScopeHandler {
     let scope = stack[i];
     while (!scope.isCertainlyParameterDeclaration()) {
       if (scope.canBeArrowParameterDeclaration()) {
-        scope.recordDeclarationError(toParseError, loc);
+        /** @type {ArrowHeadParsingScope} */ (scope).recordDeclarationError(toParseError, loc);
       } else {
         return;
       }
@@ -6614,7 +6615,7 @@ class ExpressionScopeHandler {
     if (scope.isCertainlyParameterDeclaration()) {
       this.parser.raise(error, origin);
     } else if (scope.canBeArrowParameterDeclaration()) {
-      scope.recordDeclarationError(error, origin);
+      /** @type {ArrowHeadParsingScope} */ (scope).recordDeclarationError(error, origin);
     } else {
       return;
     }
@@ -6627,7 +6628,7 @@ class ExpressionScopeHandler {
     let scope = stack[i];
     while (scope.canBeArrowParameterDeclaration()) {
       if (scope.type === 2) {
-        scope.recordDeclarationError(Errors.AwaitBindingIdentifier, at);
+        /** @type {ArrowHeadParsingScope} */ (scope).recordDeclarationError(Errors.AwaitBindingIdentifier, at);
       }
       scope = stack[--i];
     }
@@ -6638,12 +6639,12 @@ class ExpressionScopeHandler {
     } = this;
     const currentScope = stack[stack.length - 1];
     if (!currentScope.canBeArrowParameterDeclaration()) return;
-    currentScope.iterateErrors((toParseError, key) => {
+    /** @type {ArrowHeadParsingScope} */ (currentScope).iterateErrors((toParseError, key) => {
       this.parser.raise(toParseError, key);
       let i = stack.length - 2;
       let scope = stack[i];
       while (scope.canBeArrowParameterDeclaration()) {
-        scope.clearDeclarationError(key);
+        /** @type {ArrowHeadParsingScope} */ (scope).clearDeclarationError(key);
         scope = stack[--i];
       }
     });
@@ -6692,7 +6693,7 @@ class ProductionParameterHandler {
   return (isAsync ? 2 : 0) | (isGenerator ? 1 : 0);
 }
 class UtilParser extends Tokenizer {
-  addExtra(/** @type {Node} */ node, /** @type {string} */ key, value, enumerable = true) {
+  addExtra(/** @type {Node} */ node, /** @type {string} */ key, /** @type {any} */ value, /** @type {boolean} */ enumerable = true) {
     if (!node) return;
     let {
       extra
@@ -6751,7 +6752,7 @@ class UtilParser extends Tokenizer {
   /** @returns {boolean} */ isLineTerminator() {
     return this.eat(9) || this.canInsertSemicolon();
   }
-  semicolon(allowAsi = true) {
+  semicolon(/** @type {boolean} */ allowAsi = true) {
     if (allowAsi ? this.isLineTerminator() : this.eat(9)) return;
     this.raise(Errors.MissingSemicolon, this.state.lastTokEndLoc);
   }
@@ -6859,15 +6860,15 @@ class UtilParser extends Tokenizer {
   /** @returns {boolean} */ isObjectMethod(/** @type {Node} */ node) {
     return node.type === "ObjectMethod";
   }
-  initializeScopes(inModule = /** @type {Parser} */ (this).options.sourceType === "module") {
+  initializeScopes(/** @type {boolean} */ inModule = /** @type {Parser} */ (this).options.sourceType === "module") {
     const oldLabels = this.state.labels;
     this.state.labels = [];
     const oldExportedIdentifiers = this.exportedIdentifiers;
-    this.exportedIdentifiers = new Set();
+    /** @type {Set<string>} */ this.exportedIdentifiers = new Set();
     const oldInModule = this.inModule;
-    this.inModule = inModule;
+    /** @type {boolean} */ this.inModule = inModule;
     const oldScope = this.scope;
-    const ScopeHandler = this.getScopeHandler();
+    const ScopeHandler = /** @type {Parser} */ (this).getScopeHandler();
     /** @type {ScopeHandler} */ this.scope = new ScopeHandler(this, inModule);
     const oldProdParam = this.prodParam;
     /** @type {ProductionParameterHandler} */ this.prodParam = new ProductionParameterHandler();
@@ -6919,10 +6920,10 @@ class UtilParser extends Tokenizer {
 /** @typedef {{ node: Node | null | undefined, error: SyntaxError | null | undefined, thrown: boolean, aborted: boolean, failState: State | null }} TryParseResult What tryParse gives. */
 class ExpressionErrors {
   /** @type {Position | null} */ shorthandAssignLoc = null;
-  doubleProtoLoc = null;
+  /** @type {Position | null} */ doubleProtoLoc = null;
   /** @type {Position | null} */ privateKeyLoc = null;
   /** @type {Position | null} */ optionalParametersLoc = null;
-  voidPatternLoc = null;
+  /** @type {Position | null} */ voidPatternLoc = null;
 }
 /**
  * @property {any} [value]
@@ -7079,7 +7080,9 @@ class Node {
   }
   /** @type {string} */ type = "";
 }
+/** @typedef {{ optionalChainMember: boolean, maybeAsyncArrow: boolean, stop: boolean }} SubscriptState Where the parsing of a chain of member accesses and calls is. */
 /** @typedef {Node} BabelNode A node of the tree that the parser gives, as code outside of the parser names it. */
+/** @typedef {(hasStrictModeDirective: boolean) => void} AfterBlockParse What a block's body is followed by, which is told if it has a "use strict" directive. */
 const NodePrototype = Node.prototype;
 class NodeUtils extends UtilParser {
   /** @returns {Position} */ createPosition(/** @type {Position} */ loc) {
@@ -7229,7 +7232,7 @@ const unwrapParenthesizedExpression = /** @returns {Node} */ (/** @type {Node} *
 };
 class LValParser extends NodeUtils {
   toAssignable(/** @type {Node} */ node, /** @type {boolean} */ isLHS = false) {
-    let parenthesized = undefined;
+    /** @type {Node | undefined} */ let parenthesized = undefined;
     if (node.type === "ParenthesizedExpression" || node.extra?.parenthesized) {
       parenthesized = unwrapParenthesizedExpression(node);
       if (isLHS) {
@@ -7377,7 +7380,7 @@ class LValParser extends NodeUtils {
   /** @returns {Node} */ parseSpread(/** @type {ExpressionErrors | undefined | null} */ refExpressionErrors) {
     const node = this.startNode();
     this.next();
-    node.argument = this.parseMaybeAssignAllowIn(refExpressionErrors, undefined);
+    node.argument = /** @type {Parser} */ (this).parseMaybeAssignAllowIn(refExpressionErrors, undefined);
     return this.finishNode(node, "SpreadElement");
   }
   /** @returns {Node} */ parseRestBinding() {
@@ -7400,11 +7403,11 @@ class LValParser extends NodeUtils {
           return this.finishNode(node, "ArrayPattern");
         }
       case 2:
-        return this.parseObjectLike(4, true);
+        return /** @type {Parser} */ (this).parseObjectLike(4, true);
       case 84:
-        return this.parseVoidPattern(null);
+        return /** @type {Parser} */ (this).parseVoidPattern(null);
     }
-    return this.parseIdentifier();
+    return /** @type {Parser} */ (this).parseIdentifier();
   }
   parseBindingList(/** @type {int} */ close, /** @type {int} */ closeCharCode, /** @type {int} */ flags) {
     const allowEmpty = flags & 1;
@@ -7437,7 +7440,7 @@ class LValParser extends NodeUtils {
             this.raise(Errors.UnsupportedParameterDecorator, this.state.startLoc);
           }
           while (this.match(22)) {
-            decorators.push(this.parseDecorator());
+            decorators.push(/** @type {Parser} */ (this).parseDecorator());
           }
         }
         elts.push(this.parseBindingElement(flags, decorators));
@@ -7448,10 +7451,10 @@ class LValParser extends NodeUtils {
   /** @returns {Node} */ parseBindingRestProperty(/** @type {Node} */ prop) {
     this.next();
     if (this.hasPlugin("discardBinding") && this.match(84)) {
-      prop.argument = this.parseVoidPattern(null);
+      prop.argument = /** @type {Parser} */ (this).parseVoidPattern(null);
       this.raise(Errors.UnexpectedVoidPattern, prop.argument);
     } else {
-      prop.argument = this.parseIdentifier();
+      prop.argument = /** @type {Parser} */ (this).parseIdentifier();
     }
     this.checkCommaAfterRest(125);
     return this.finishNode(prop, "RestElement");
@@ -7468,9 +7471,9 @@ class LValParser extends NodeUtils {
     if (type === 134) {
       this.expectPlugin("destructuringPrivate", startLoc);
       this.classScope.usePrivateName(this.state.value, startLoc);
-      prop.key = this.parsePrivateName();
+      prop.key = /** @type {Parser} */ (this).parsePrivateName();
     } else {
-      this.parsePropertyName(prop);
+      /** @type {Parser} */ (this).parsePropertyName(prop);
     }
     prop.method = false;
     return this.parseObjPropValue(prop, startLoc, false, false, true, false);
@@ -7502,7 +7505,7 @@ class LValParser extends NodeUtils {
       this.raise(Errors.VoidPatternInitializer, left);
     }
     node.left = left;
-    node.right = this.parseMaybeAssignAllowIn();
+    node.right = /** @type {Parser} */ (this).parseMaybeAssignAllowIn();
     return this.finishNode(node, "AssignmentPattern");
   }
   isValidLVal(/** @type {string} */ type, /** @type {boolean} */ disallowCallExpression, /** @type {boolean} */ isUnparenthesizedInAssign, /** @type {number} */ binding) {
@@ -7531,7 +7534,7 @@ class LValParser extends NodeUtils {
   /** @returns {boolean} */ isOptionalMemberExpression(/** @type {Node} */ expression) {
     return expression.type === "OptionalMemberExpression";
   }
-  checkLVal(/** @type {Node} */ expression, /** @type {object | Node} */ ancestor, binding = 64, checkClashes = false, strictModeChanged = false, hasParenthesizedAncestor = false, disallowCallExpression = false) {
+  checkLVal(/** @type {Node} */ expression, /** @type {object | Node} */ ancestor, /** @type {int} */ binding = 64, /** @type {Set<any> | false} */ checkClashes = false, /** @type {boolean} */ strictModeChanged = false, /** @type {boolean} */ hasParenthesizedAncestor = false, /** @type {boolean} */ disallowCallExpression = false) {
     const type = expression.type;
     if (this.isObjectMethod(expression)) return;
     const isOptionalMemberExpression = this.isOptionalMemberExpression(expression);
@@ -7973,7 +7976,7 @@ class ExpressionParser extends LValParser {
     return this.parseSubscripts(expr, startLoc);
   }
   /** @returns {Node} */ parseSubscripts(/** @type {Node} */ base, /** @type {Position} */ startLoc, /** @type {boolean | undefined} */ noCalls) {
-    const state = {
+    /** @type {SubscriptState} */ const state = {
       optionalChainMember: false,
       maybeAsyncArrow: this.atPossibleAsyncArrow(base),
       stop: false
@@ -7984,7 +7987,7 @@ class ExpressionParser extends LValParser {
     } while (!state.stop);
     return base;
   }
-  /** @returns {Node} */ parseSubscript(/** @type {Node} */ base, /** @type {Position} */ startLoc, /** @type {boolean | undefined} */ noCalls, state) {
+  /** @returns {Node} */ parseSubscript(/** @type {Node} */ base, /** @type {Position} */ startLoc, /** @type {boolean | undefined} */ noCalls, /** @type {SubscriptState} */ state) {
     const {
       type
     } = this.state;
@@ -8015,11 +8018,11 @@ class ExpressionParser extends LValParser {
       }
     }
   }
-  /** @returns {Node} */ stopParseSubscript(/** @type {Node} */ base, state) {
+  /** @returns {Node} */ stopParseSubscript(/** @type {Node} */ base, /** @type {SubscriptState} */ state) {
     state.stop = true;
     return base;
   }
-  /** @returns {Node} */ parseMember(/** @type {Node} */ base, /** @type {Position} */ startLoc, /** @type {any} */ state, /** @type {boolean} */ computed, /** @type {boolean} */ optional) {
+  /** @returns {Node} */ parseMember(/** @type {Node} */ base, /** @type {Position} */ startLoc, /** @type {SubscriptState} */ state, /** @type {boolean} */ computed, /** @type {boolean} */ optional) {
     const node = this.startNodeAt(startLoc);
     node.object = base;
     node.computed = computed;
@@ -8042,7 +8045,7 @@ class ExpressionParser extends LValParser {
       return this.finishNode(node, "MemberExpression");
     }
   }
-  parseBind(base, startLoc, state) {
+  /** @returns {Node} */ parseBind(/** @type {Node} */ base, /** @type {Position} */ startLoc, /** @type {SubscriptState} */ state) {
     const node = this.startNodeAt(startLoc);
     node.object = base;
     this.next();
@@ -8055,8 +8058,8 @@ class ExpressionParser extends LValParser {
     state.stop = true;
     return this.parseSubscripts(this.finishNode(node, "BindExpression"), startLoc, false);
   }
-  /** @returns {Node} */ parseCoverCallAndAsyncArrowHead(/** @type {Node} */ base, /** @type {Position} */ startLoc, state, /** @type {boolean} */ optional) {
-    let refExpressionErrors = null;
+  /** @returns {Node} */ parseCoverCallAndAsyncArrowHead(/** @type {Node} */ base, /** @type {Position} */ startLoc, /** @type {SubscriptState} */ state, /** @type {boolean} */ optional) {
+    /** @type {ExpressionErrors | null} */ let refExpressionErrors = null;
     this.next();
     const node = this.startNodeAt(startLoc);
     node.callee = base;
@@ -8092,7 +8095,7 @@ class ExpressionParser extends LValParser {
     }
     return finishedNode;
   }
-  /** @returns {Node} */ parseTaggedTemplateExpression(/** @type {Node} */ base, /** @type {Position} */ startLoc, state) {
+  /** @returns {Node} */ parseTaggedTemplateExpression(/** @type {Node} */ base, /** @type {Position} */ startLoc, /** @type {SubscriptState} */ state) {
     const node = this.startNodeAt(startLoc);
     node.tag = base;
     node.quasi = this.parseTemplate(true);
@@ -8158,8 +8161,8 @@ class ExpressionParser extends LValParser {
     return this.parseSubscripts(this.parseExprAtom(), startLoc, true);
   }
   parseExprAtom(/** @type {ExpressionErrors | undefined | null} */ refExpressionErrors) {
-    let node;
-    let decorators = null;
+    /** @type {Node} */ let node;
+    /** @type {Node[] | null} */ let decorators = null;
     const {
       type
     } = this.state;
@@ -8223,9 +8226,9 @@ class ExpressionParser extends LValParser {
       case 64:
         return this.parseFunctionOrFunctionSent();
       case 22:
-        decorators = this.parseDecorators();
+        decorators = /** @type {Parser} */ (this).parseDecorators();
       case 76:
-        return this.parseClass(this.maybeTakeDecorators(decorators, this.startNode()), false);
+        return /** @type {Parser} */ (this).parseClass(/** @type {Parser} */ (this).maybeTakeDecorators(decorators, this.startNode()), false);
       case 73:
         return this.parseNewOrNewTarget();
       case 21:
@@ -8298,7 +8301,7 @@ class ExpressionParser extends LValParser {
             if (type === 64) {
               this.resetPreviousNodeTrailingComments(id);
               this.next();
-              return this.parseAsyncFunctionExpression(this.startNodeAtNode(id));
+              return /** @type {Parser} */ (this).parseAsyncFunctionExpression(this.startNodeAtNode(id));
             } else if (tokenIsIdentifier(type)) {
               if (canStartArrow && this.lookaheadCharCode() === 61) {
                 return this.parseAsyncArrowUnaryFunction(this.startNodeAtNode(id));
@@ -8385,10 +8388,10 @@ class ExpressionParser extends LValParser {
     this.state.labels = [];
     if (isAsync) {
       this.prodParam.enter(2);
-      node.body = this.parseBlock();
+      node.body = /** @type {Parser} */ (this).parseBlock();
       this.prodParam.exit();
     } else {
-      node.body = this.parseBlock();
+      node.body = /** @type {Parser} */ (this).parseBlock();
     }
     this.state.labels = oldLabels;
     return this.finishNode(node, "DoExpression");
@@ -8427,7 +8430,7 @@ class ExpressionParser extends LValParser {
       }
       return this.parseMetaProperty(node, meta, "sent");
     }
-    return this.parseFunction(node);
+    return /** @type {Parser} */ (this).parseFunction(node);
   }
   /** @returns {Node} */ parseMetaProperty(/** @type {Node} */ node, /** @type {Node} */ meta, /** @type {string} */ propertyName) {
     node.meta = meta;
@@ -8460,7 +8463,7 @@ class ExpressionParser extends LValParser {
       return this.parseMetaProperty(node, id, "meta");
     }
   }
-  /** @returns {Node} */ parseLiteralAtNode(value, /** @type {string} */ type, /** @type {Node} */ node) {
+  /** @returns {Node} */ parseLiteralAtNode(/** @type {any} */ value, /** @type {string} */ type, /** @type {Node} */ node) {
     this.addExtra(node, "rawValue", value);
     this.addExtra(node, "raw", this.input.slice(this.offsetToSourcePos(node.start), this.state.end));
     node.value = value;
@@ -8508,15 +8511,15 @@ class ExpressionParser extends LValParser {
   }
   /** @returns {Node} */ parseParenAndDistinguishExpression(/** @type {boolean} */ canStartArrow) {
     const startLoc = this.state.startLoc;
-    let val;
+    /** @type {Node} */ let val;
     this.next();
     this.expressionScope.enter(newArrowHeadScope());
     const innerStartLoc = this.state.startLoc;
     const exprList = [];
     const refExpressionErrors = new ExpressionErrors();
     let first = true;
-    let spreadStartLoc;
-    let optionalCommaStartLoc;
+    /** @type {Position | undefined} */ let spreadStartLoc;
+    /** @type {Position | undefined} */ let optionalCommaStartLoc;
     while (!this.match(7)) {
       if (first) {
         first = false;
@@ -8654,7 +8657,7 @@ class ExpressionParser extends LValParser {
     this.resetEndLocation(finishedNode, createPositionWithColumnOffset(this.state.lastTokEndLoc, endOffset));
     return finishedNode;
   }
-  /** @returns {Node} */ parseTemplate(isTagged) {
+  /** @returns {Node} */ parseTemplate(/** @type {boolean} */ isTagged) {
     const node = this.startNode();
     let curElt = this.parseTemplateElement(isTagged);
     const quasis = [curElt];
@@ -8687,7 +8690,7 @@ class ExpressionParser extends LValParser {
           break;
         }
       }
-      let prop;
+      /** @type {Node} */ let prop;
       if (isPattern) {
         prop = this.parseBindingProperty();
       } else {
@@ -8714,13 +8717,13 @@ class ExpressionParser extends LValParser {
         this.raise(Errors.UnsupportedPropertyDecorator, this.state.startLoc);
       }
       while (this.match(22)) {
-        decorators.push(this.parseDecorator());
+        decorators.push(/** @type {Parser} */ (this).parseDecorator());
       }
     }
     const prop = this.startNode();
     let isAsync = false;
     let isAccessor = false;
-    let startLoc;
+    /** @type {Position | undefined} */ let startLoc;
     if (this.match(17)) {
       if (decorators.length) this.unexpected();
       return this.parseSpread();
@@ -8837,7 +8840,7 @@ class ExpressionParser extends LValParser {
         type,
         value
       } = this.state;
-      let key;
+      /** @type {Node} */ let key;
       if (tokenIsKeywordOrIdentifier(type)) {
         key = this.parseIdentifier(true);
       } else {
@@ -8884,7 +8887,7 @@ class ExpressionParser extends LValParser {
     node.generator = isGenerator;
     this.scope.enter(514 | 16 | (inClassScope ? 576 : 0) | (allowDirectSuper ? 32 : 0));
     this.prodParam.enter(functionFlags(isAsync, node.generator));
-    this.parseFunctionParams(node, isConstructor);
+    /** @type {Parser} */ (this).parseFunctionParams(node, isConstructor);
     const finishedNode = this.parseFunctionBodyAndFinish(node, type, true);
     this.prodParam.exit();
     this.scope.exit();
@@ -8931,7 +8934,7 @@ class ExpressionParser extends LValParser {
       const oldLabels = this.state.labels;
       this.state.labels = [];
       this.prodParam.enter(this.prodParam.currentFlags() | 4);
-      node.body = this.parseBlock(true, false, hasStrictModeDirective => {
+      node.body = /** @type {Parser} */ (this).parseBlock(true, false, hasStrictModeDirective => {
         const nonSimple = !this.isSimpleParamList(node.params);
         if (hasStrictModeDirective && nonSimple) {
           this.raise(Errors.IllegalLanguageModeDirective, (node.kind === "method" || node.kind === "constructor") && !!node.key ? /** @type {Parser} */ (this).optionFlags & 256 ? node.key.loc.end : node.key : node);
@@ -8956,7 +8959,7 @@ class ExpressionParser extends LValParser {
     }
     return true;
   }
-  checkParams(/** @type {Node} */ node, /** @type {boolean} */ allowDuplicates, isArrowFunction, strictModeChanged = true) {
+  checkParams(/** @type {Node} */ node, /** @type {boolean} */ allowDuplicates, /** @type {boolean | undefined} */ isArrowFunction, /** @type {boolean} */ strictModeChanged = true) {
     const checkClashes = !allowDuplicates && new Set();
     const formalParameters = {
       type: "FormalParameters"
@@ -8986,7 +8989,7 @@ class ExpressionParser extends LValParser {
     return elts;
   }
   /** @returns {Node | null} */ parseExprListItem(/** @type {number} */ close, /** @type {boolean | undefined} */ allowEmpty, /** @type {ExpressionErrors | undefined | null} */ refExpressionErrors, /** @type {boolean | undefined} */ allowPlaceholder) {
-    let elt;
+    /** @type {Node | null} */ let elt;
     if (this.match(8)) {
       if (!allowEmpty) {
         this.raise(Errors.UnexpectedToken, this.state.curPosition(), {
@@ -9030,7 +9033,7 @@ class ExpressionParser extends LValParser {
     return this.finishNodeAt(node, "Identifier", endLoc);
   }
   /** @returns {string} */ parseIdentifierName(/** @type {boolean | undefined} */ liberal) {
-    let name;
+    /** @type {string} */ let name;
     const {
       start,
       type
@@ -9131,7 +9134,7 @@ class ExpressionParser extends LValParser {
     const node = this.startNodeAt(startLoc);
     this.expressionScope.recordParameterInitializerError(Errors.YieldInParameter, startLoc.index);
     let delegating = false;
-    let argument = null;
+    /** @type {Node | null} */ let argument = null;
     if (!this.hasPrecedingLineBreak()) {
       delegating = this.eat(51);
       switch (this.state.type) {
@@ -9219,7 +9222,7 @@ class ExpressionParser extends LValParser {
   /** @returns {Node} */ parseFSharpPipelineBody(/** @type {int} */ prec) {
     const startLoc = this.state.startLoc;
     this.prodParam.enter(this.prodParam.currentFlags() & -17);
-    let ret;
+    /** @type {Node} */ let ret;
     if (this.isContextual(92) && this.recordAwaitIfAllowed()) {
       this.next();
       ret = this.parseAwait(startLoc, true);
@@ -9246,7 +9249,7 @@ class ExpressionParser extends LValParser {
     const revertScopes = this.initializeScopes(true);
     this.enterInitialScopes();
     try {
-      node.body = this.parseProgram(program, 4, "module");
+      node.body = /** @type {Parser} */ (this).parseProgram(program, 4, "module");
     } finally {
       revertScopes();
     }
@@ -9315,7 +9318,7 @@ class StatementParser extends ExpressionParser {
       }
       this.addExtra(program, "topLevelAwait", this.state.hasTopLevelAwait);
     }
-    let finishedProgram;
+    /** @type {Node} */ let finishedProgram;
     if (end === 135) {
       finishedProgram = this.finishNode(program, "Program");
     } else {
@@ -9445,7 +9448,7 @@ class StatementParser extends ExpressionParser {
     return this.parseStatementLike(0);
   }
   /** @returns {Node} */ parseStatementLike(/** @type {number} */ flags) {
-    let decorators = null;
+    /** @type {Node[] | null} */ let decorators = null;
     if (this.match(22)) {
       decorators = this.parseDecorators(true);
     }
@@ -9556,7 +9559,7 @@ class StatementParser extends ExpressionParser {
             this.raise(Errors.UnexpectedImportExport, this.state.startLoc);
           }
           this.next();
-          let result;
+          /** @type {Node} */ let result;
           if (startType === 79) {
             result = this.parseImport(node);
           } else {
@@ -9605,8 +9608,8 @@ class StatementParser extends ExpressionParser {
   /** @returns {boolean} */ canHaveLeadingDecorator() {
     return this.match(76);
   }
-  parseDecorators(/** @type {boolean | undefined} */ allowExport) {
-    const decorators = [];
+  /** @returns {Node[]} */ parseDecorators(/** @type {boolean | undefined} */ allowExport) {
+    /** @type {Node[]} */ const decorators = [];
     do {
       decorators.push(this.parseDecorator());
     } while (this.match(22));
@@ -9625,7 +9628,7 @@ class StatementParser extends ExpressionParser {
     this.next();
     if (this.hasPlugin("decorators")) {
       const startLoc = this.state.startLoc;
-      let expr;
+      /** @type {Node} */ let expr;
       if (this.match(6)) {
         const startLoc = this.state.startLoc;
         this.next();
@@ -9901,7 +9904,7 @@ class StatementParser extends ExpressionParser {
     }
     return this.finishNode(node, "TryStatement");
   }
-  /** @returns {Node} */ parseVarStatement(/** @type {Node} */ node, /** @type {string} */ kind, allowMissingInitializer = false) {
+  /** @returns {Node} */ parseVarStatement(/** @type {Node} */ node, /** @type {string} */ kind, /** @type {boolean} */ allowMissingInitializer = false) {
     this.next();
     this.parseVar(node, false, kind, allowMissingInitializer);
     this.semicolon();
@@ -9961,7 +9964,7 @@ class StatementParser extends ExpressionParser {
     this.semicolon();
     return this.finishNode(node, "ExpressionStatement");
   }
-  /** @returns {Node} */ parseBlock(allowDirectives = false, createNewLexicalScope = true, afterBlockParse) {
+  /** @returns {Node} */ parseBlock(/** @type {boolean} */ allowDirectives = false, /** @type {boolean} */ createNewLexicalScope = true, /** @type {AfterBlockParse | undefined} */ afterBlockParse) {
     const node = this.startNode();
     if (allowDirectives) {
       this.state.strictErrors.clear();
@@ -9979,12 +9982,12 @@ class StatementParser extends ExpressionParser {
   /** @returns {boolean} */ isValidDirective(/** @type {Node} */ stmt) {
     return stmt.type === "ExpressionStatement" && stmt.expression.type === "StringLiteral" && !stmt.expression.extra.parenthesized;
   }
-  parseBlockBody(/** @type {Node} */ node, /** @type {boolean} */ allowDirectives, /** @type {boolean} */ topLevel, /** @type {number} */ end, afterBlockParse) {
+  parseBlockBody(/** @type {Node} */ node, /** @type {boolean} */ allowDirectives, /** @type {boolean} */ topLevel, /** @type {number} */ end, /** @type {AfterBlockParse | undefined} */ afterBlockParse) {
     const body = node.body = [];
     const directives = node.directives = [];
     this.parseBlockOrModuleBlockBody(body, allowDirectives ? directives : undefined, topLevel, end, afterBlockParse);
   }
-  parseBlockOrModuleBlockBody(body, directives, /** @type {boolean} */ topLevel, /** @type {int} */ end, afterBlockParse) {
+  parseBlockOrModuleBlockBody(/** @type {Node[]} */ body, /** @type {Node[] | undefined} */ directives, /** @type {boolean} */ topLevel, /** @type {int} */ end, /** @type {AfterBlockParse | undefined} */ afterBlockParse) {
     const oldStrict = this.state.strict;
     let hasStrictModeDirective = false;
     let parsedNonDirective = false;
@@ -10051,7 +10054,7 @@ class StatementParser extends ExpressionParser {
     this.state.labels.pop();
     return this.finishNode(node, isForIn ? "ForInStatement" : "ForOfStatement");
   }
-  /** @returns {Node} */ parseVar(/** @type {Node} */ node, /** @type {boolean} */ isFor, /** @type {string} */ kind, allowMissingInitializer = false) {
+  /** @returns {Node} */ parseVar(/** @type {Node} */ node, /** @type {boolean} */ isFor, /** @type {string} */ kind, /** @type {boolean} */ allowMissingInitializer = false) {
     const declarations = node.declarations = [];
     node.kind = kind;
     for (;;) {
@@ -10093,7 +10096,7 @@ class StatementParser extends ExpressionParser {
   /** @returns {Node} */ parseAsyncFunctionExpression(/** @type {Node} */ node) {
     return this.parseFunction(node, 8);
   }
-  /** @returns {Node} */ parseFunction(/** @type {Node} */ node, flags = 0) {
+  /** @returns {Node} */ parseFunction(/** @type {Node} */ node, /** @type {int} */ flags = 0) {
     const hangingDeclaration = flags & 2;
     const isDeclaration = !!(flags & 1);
     const requireId = isDeclaration && !(flags & 4);
@@ -10126,7 +10129,7 @@ class StatementParser extends ExpressionParser {
   /** @returns {Node | null} */ parseFunctionId(/** @type {boolean | undefined} */ requireId) {
     return requireId || tokenIsIdentifier(this.state.type) ? this.parseIdentifier() : null;
   }
-  parseFunctionParams(/** @type {Node} */ node, isConstructor) {
+  parseFunctionParams(/** @type {Node} */ node, /** @type {boolean | undefined} */ isConstructor) {
     this.expect(6);
     this.expressionScope.enter(newParameterDeclarationScope());
     node.params = this.parseBindingList(7, 41, 2 | (isConstructor ? 4 : 0));
@@ -12654,7 +12657,7 @@ const typescript = superClass => class TypeScriptParserMixin extends superClass 
     }
     return node;
   }
-  parseSubscript(/** @type {Node} */ base, /** @type {Position} */ startLoc, /** @type {boolean | undefined} */ noCalls, state) {
+  parseSubscript(/** @type {Node} */ base, /** @type {Position} */ startLoc, /** @type {boolean | undefined} */ noCalls, /** @type {SubscriptState} */ state) {
     if (!this.hasPrecedingLineBreak() && this.match(31)) {
       this.state.canStartJSXElement = false;
       this.next();
@@ -12880,7 +12883,7 @@ const typescript = superClass => class TypeScriptParserMixin extends superClass 
     }
     return super.parseExportDefaultExpression();
   }
-  /** @returns {Node} */ parseVarStatement(/** @type {Node} */ node, /** @type {string} */ kind, allowMissingInitializer = false) {
+  /** @returns {Node} */ parseVarStatement(/** @type {Node} */ node, /** @type {string} */ kind, /** @type {boolean} */ allowMissingInitializer = false) {
     const {
       isAmbientContext
     } = this.state;
@@ -13257,7 +13260,7 @@ const typescript = superClass => class TypeScriptParserMixin extends superClass 
     if (typeParameters) prop.typeParameters = typeParameters;
     return super.parseObjPropValue(prop, startLoc, isGenerator, isAsync, isPattern, isAccessor, refExpressionErrors);
   }
-  parseFunctionParams(/** @type {Node} */ node, isConstructor) {
+  parseFunctionParams(/** @type {Node} */ node, /** @type {boolean | undefined} */ isConstructor) {
     const typeParameters = this.tsTryParseTypeParameters(this.tsParseConstModifier);
     if (typeParameters) node.typeParameters = typeParameters;
     super.parseFunctionParams(node, isConstructor);

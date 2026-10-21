@@ -2,6 +2,8 @@
 /** @typedef {(node: any) => any} TsNodeVisitor */
 /** @typedef {(nodes: any) => any} TsNodesVisitor */
 /** @typedef {Readonly<{ line: number, character: number }>} TsLineAndCharacter */
+/** @typedef {{ column: number, line: number }} TsPosition */
+/** @typedef {{ end: TsPosition, start: TsPosition }} TsLocation */
 /** @typedef {{ onEnter?: (node: any) => any, onLeave?: (node: any) => any }} EstreeVisitor */
 var hy = Object.defineProperty;
 var Sd = (e, t) => {
@@ -23448,7 +23450,7 @@ function dh(e) {
 function Gv(e) {
   return dv(e) && e.keywordToken === 102 && e.name.escapedText === "meta";
 }
-/** @type {Record<number, (node: any, cbNode: TsNodeVisitor, cbNodes: TsNodesVisitor | undefined) => unknown>} */
+/** @type {Record<number, (node: Kf, cbNode: TsNodeVisitor, cbNodes: TsNodesVisitor | undefined) => unknown>} */
 var Yv = {
   167: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.left) || S(a, t.right);
@@ -23509,7 +23511,7 @@ var Yv = {
   186: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return ie(a, s, t.modifiers) || ie(a, s, t.typeParameters) || ie(a, s, t.parameters) || S(a, t.type);
   },
-  185: function (/** @type {InstanceType<typeof Kf>} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  185: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return ie(a, s, t.modifiers) || ie(a, s, t.typeParameters) || ie(a, s, t.parameters) || S(a, t.type);
   },
   180: cm,
@@ -23547,7 +23549,7 @@ var Yv = {
       S(a, t.body)
     );
   },
-  178: function (/** @type {InstanceType<typeof Kf>} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  178: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return (
       ie(a, s, t.modifiers) ||
       S(a, t.name) ||
@@ -23625,13 +23627,13 @@ var Yv = {
   195: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.checkType) || S(a, t.extendsType) || S(a, t.trueType) || S(a, t.falseType);
   },
-  196: function (t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  196: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.typeParameter);
   },
   206: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.argument) || S(a, t.attributes) || S(a, t.qualifier) || ie(a, s, t.typeArguments);
   },
-  303: function (t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  303: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.assertClause);
   },
   197: um,
@@ -23680,16 +23682,16 @@ var Yv = {
   218: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.expression);
   },
-  221: function (/** @type {InstanceType<typeof Kf>} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  221: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.expression);
   },
-  222: function (/** @type {InstanceType<typeof Kf>} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  222: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.expression);
   },
   223: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.expression);
   },
-  225: function (/** @type {InstanceType<typeof Kf>} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  225: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.operand);
   },
   230: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
@@ -23724,7 +23726,7 @@ var Yv = {
   },
   242: dm,
   269: dm,
-  308: function (/** @type {d6} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  308: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return ie(a, s, t.statements) || S(a, t.endOfFileToken);
   },
   244: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
@@ -23759,7 +23761,7 @@ var Yv = {
   254: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.expression);
   },
-  255: function (t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  255: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.expression) || S(a, t.statement);
   },
   256: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
@@ -23827,7 +23829,7 @@ var Yv = {
   302: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.name) || S(a, t.value);
   },
-  271: function (t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  271: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return ie(a, s, t.modifiers) || S(a, t.name);
   },
   275: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
@@ -23873,7 +23875,7 @@ var Yv = {
   283: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return ie(a, s, t.modifiers);
   },
-  357: function (t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  357: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return ie(a, s, t.elements);
   },
   285: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
@@ -23909,33 +23911,33 @@ var Yv = {
   315: Xi,
   317: Xi,
   319: Xi,
-  318: function (t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  318: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return ie(a, s, t.parameters) || S(a, t.type);
   },
-  321: function (t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  321: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return (typeof t.comment == "string" ? void 0 : ie(a, s, t.comment)) || ie(a, s, t.tags);
   },
-  348: function (t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  348: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.tagName) || S(a, t.name) || (typeof t.comment == "string" ? void 0 : ie(a, s, t.comment));
   },
-  311: function (t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  311: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.name);
   },
-  312: function (t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  312: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.left) || S(a, t.right);
   },
   342: vm,
   349: vm,
-  331: function (t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  331: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.tagName) || (typeof t.comment == "string" ? void 0 : ie(a, s, t.comment));
   },
-  330: function (t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  330: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.tagName) || S(a, t.class) || (typeof t.comment == "string" ? void 0 : ie(a, s, t.comment));
   },
-  329: function (t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  329: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.tagName) || S(a, t.class) || (typeof t.comment == "string" ? void 0 : ie(a, s, t.comment));
   },
-  346: function (t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  346: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return (
       S(a, t.tagName) ||
       S(a, t.constraint) ||
@@ -23943,7 +23945,7 @@ var Yv = {
       (typeof t.comment == "string" ? void 0 : ie(a, s, t.comment))
     );
   },
-  347: function (t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  347: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return (
       S(a, t.tagName) ||
       (t.typeExpression && t.typeExpression.kind === 310
@@ -23951,7 +23953,7 @@ var Yv = {
         : S(a, t.fullName) || S(a, t.typeExpression) || (typeof t.comment == "string" ? void 0 : ie(a, s, t.comment)))
     );
   },
-  339: function (t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  339: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return (
       S(a, t.tagName) ||
       S(a, t.fullName) ||
@@ -23966,13 +23968,13 @@ var Yv = {
   351: $i,
   350: $i,
   340: $i,
-  324: function (t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  324: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return Bn(t.typeParameters, a) || Bn(t.parameters, a) || S(a, t.type);
   },
   325: Op,
   326: Op,
   327: Op,
-  323: function (t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  323: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return Bn(t.jsDocPropertyTags, a);
   },
   328: di,
@@ -24028,23 +24030,23 @@ function bm(/** @type {Kf} */ e, /** @type {TsNodeVisitor} */ t, /** @type {TsNo
 function Xi(/** @type {Kf} */ e, /** @type {TsNodeVisitor} */ t, /** @type {TsNodesVisitor | undefined} */ a) {
   return S(t, e.type);
 }
-function vm(e, /** @type {TsNodeVisitor} */ t, /** @type {TsNodesVisitor | undefined} */ a) {
+function vm(/** @type {Kf} */ e, /** @type {TsNodeVisitor} */ t, /** @type {TsNodesVisitor | undefined} */ a) {
   return (
     S(t, e.tagName) ||
     (e.isNameFirst ? S(t, e.name) || S(t, e.typeExpression) : S(t, e.typeExpression) || S(t, e.name)) ||
     (typeof e.comment == "string" ? void 0 : ie(t, a, e.comment))
   );
 }
-function $i(e, /** @type {TsNodeVisitor} */ t, /** @type {TsNodesVisitor | undefined} */ a) {
+function $i(/** @type {Kf} */ e, /** @type {TsNodeVisitor} */ t, /** @type {TsNodesVisitor | undefined} */ a) {
   return S(t, e.tagName) || S(t, e.typeExpression) || (typeof e.comment == "string" ? void 0 : ie(t, a, e.comment));
 }
-function Op(e, /** @type {TsNodeVisitor} */ t, /** @type {TsNodesVisitor | undefined} */ a) {
+function Op(/** @type {Kf} */ e, /** @type {TsNodeVisitor} */ t, /** @type {TsNodesVisitor | undefined} */ a) {
   return S(t, e.name);
 }
-function di(e, /** @type {TsNodeVisitor} */ t, /** @type {TsNodesVisitor | undefined} */ a) {
+function di(/** @type {Kf} */ e, /** @type {TsNodeVisitor} */ t, /** @type {TsNodesVisitor | undefined} */ a) {
   return S(t, e.tagName) || (typeof e.comment == "string" ? void 0 : ie(t, a, e.comment));
 }
-function Hv(e, /** @type {TsNodeVisitor} */ t, /** @type {TsNodesVisitor | undefined} */ a) {
+function Hv(/** @type {Kf} */ e, /** @type {TsNodeVisitor} */ t, /** @type {TsNodesVisitor | undefined} */ a) {
   return (
     S(t, e.tagName) ||
     S(t, e.importClause) ||
@@ -24053,7 +24055,7 @@ function Hv(e, /** @type {TsNodeVisitor} */ t, /** @type {TsNodesVisitor | undef
     (typeof e.comment == "string" ? void 0 : ie(t, a, e.comment))
   );
 }
-function Xv(e, /** @type {TsNodeVisitor} */ t, /** @type {TsNodesVisitor | undefined} */ a) {
+function Xv(/** @type {Kf} */ e, /** @type {TsNodeVisitor} */ t, /** @type {TsNodesVisitor | undefined} */ a) {
   return S(t, e.expression);
 }
 function $t(/** @type {d6 | Kf} */ e, /** @type {TsNodeVisitor} */ t, /** @type {TsNodesVisitor | undefined} */ a) {
@@ -29594,7 +29596,7 @@ function wh(e, t, a) {
 }
 /**
  * @property {string} [text]
- * @property {any} [lineMap]
+ * @property {number[]} [lineMap]
  */
 var d6 = class extends Kf {
     constructor(/** @type {int} */ e, /** @type {number} */ t, /** @type {number} */ a) {
@@ -29891,11 +29893,11 @@ function Ih(/** @type {InstanceType<typeof vh>} */ e) {
   if (E6(e)) return { type: A.BinaryExpression, operator: qn(e.kind) };
   throw new Error(`Unexpected binary operator ${rt(e.kind)}`);
 }
-function C_(/** @type {number} */ e, /** @type {InstanceType<typeof d6>} */ t) {
+/** @returns {TsPosition} */ function C_(/** @type {number} */ e, /** @type {InstanceType<typeof d6>} */ t) {
   let a = t.getLineAndCharacterOfPosition(e);
   return { column: a.character, line: a.line + 1 };
 }
-function Zr(e, /** @type {InstanceType<typeof d6>} */ t) {
+/** @returns {TsLocation} */ function Zr(/** @type {any[]} */ e, /** @type {InstanceType<typeof d6>} */ t) {
   let [a, s] = e.map((/** @type {number} */ f) => C_(f, t));
   return { end: s, start: a };
 }

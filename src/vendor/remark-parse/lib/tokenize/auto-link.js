@@ -16,7 +16,7 @@ autoLink.notInLink = true
 /** @type {string} */ var mailto = 'mailto:'
 /** @type {number} */ var mailtoLength = mailto.length
 
-/** @this {import("../parser.js").RemarkParser} */ function autoLink(eat, /** @type {StringView} */ value, silent) {
+/** @this {import("../parser.js").RemarkParser} */ function autoLink(/** @type {import("../tokenizer.js").RemarkEat} */ eat, /** @type {StringView} */ value, /** @type {boolean | undefined} */ silent) {
   var self = this
   /** @type {string} */ var subvalue = ''
   /** @type {number} */ var length = value.length
@@ -25,10 +25,10 @@ autoLink.notInLink = true
   /** @type {boolean} */ var hasAtCharacter = false
   /** @type {string} */ var link = ''
   /** @type {string | undefined} */ var character
-  var now
+  /** @type {import("../tokenizer.js").RemarkPoint} */ var now
   var content
-  var tokenizers
-  var exit
+  /** @type {Record<string, import("../tokenizer.js").RemarkTokenizer>} */ var tokenizers
+  /** @type {() => void} */ var exit
 
   if (value.charAt(0) !== lessThan) {
     return

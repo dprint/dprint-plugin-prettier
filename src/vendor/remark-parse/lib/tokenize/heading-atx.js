@@ -10,7 +10,7 @@ module.exports = atxHeading
 
 /** @type {number} */ var maxFenceCount = 6
 
-/** @this {import("../parser.js").RemarkParser} */ function atxHeading(eat, /** @type {StringView} */ value, /** @type {boolean | undefined} */ silent) {
+/** @this {import("../parser.js").RemarkParser} */ function atxHeading(/** @type {import("../tokenizer.js").RemarkEat} */ eat, /** @type {StringView} */ value, /** @type {boolean | undefined} */ silent) {
   var self = this
   /** @type {boolean} */ var pedantic = self.options.pedantic
   /** @type {number} */ var length = value.length + 1

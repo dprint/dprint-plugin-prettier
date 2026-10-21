@@ -14,10 +14,10 @@ function parseSelector(/** @type {string} */ selector) {
     };
   }
 
-  let result;
+  /** @type {any} */ let result;
 
   try {
-    new PostcssSelectorParser((selectors) => {
+    new PostcssSelectorParser((/** @type {any} */ selectors) => {
       result = selectors;
     }).process(selector);
   } catch {

@@ -1,6 +1,6 @@
 // @nts-check
 //#region src/ast-transform/transforms/transform-literal.ts
-const visitLiteralPrimitive = (/** @type {import("../../../../../../prettier/node_modules/@angular/compiler/fesm2022/compiler.mjs").LiteralPrimitive} */ node) => {
+const visitLiteralPrimitive = /** @returns {import("../../source.js").NGNode} */ (/** @type {import("@angular/compiler").LiteralPrimitive} */ node) => {
 	const { value } = node;
 	switch (typeof value) {
 		case "boolean": return {
@@ -24,7 +24,7 @@ const visitLiteralPrimitive = (/** @type {import("../../../../../../prettier/nod
 		default: throw new Error(`Unexpected 'LiteralPrimitive' value type ${typeof value}`);
 	}
 };
-const visitRegularExpressionLiteral = (/** @type {import("../../../../../../prettier/node_modules/@angular/compiler/fesm2022/compiler.mjs").RegularExpressionLiteral} */ node) => ({
+const visitRegularExpressionLiteral = /** @returns {import("../../source.js").NGNode} */ (/** @type {import("@angular/compiler").RegularExpressionLiteral} */ node) => ({
 	type: "RegExpLiteral",
 	pattern: node.body,
 	flags: node.flags ?? ""

@@ -11,7 +11,7 @@ const frontMatter = function () {
   proto.blockMethods = ["frontMatter", ...proto.blockMethods];
   proto.blockTokenizers.frontMatter = tokenizer;
 
-  function tokenizer(/** @type {(a0?: any) => any} */ eat, /** @type {string | undefined} */ value) {
+  function tokenizer(/** @type {import("../../../../../src/vendor/remark-parse/lib/tokenizer.js").RemarkEat} */ eat, /** @type {string | undefined} */ value) {
     const { frontMatter } = parseFrontMatter(value);
 
     if (frontMatter) {

@@ -12,7 +12,7 @@ var alphabetical = require('is-alphabetical')
 module.exports = locate
 
 // See: <https://github.github.com/gfm/#extended-email-autolink>
-/** @returns {number} */ function locate(/** @type {StringView} */ value, /** @type {number} */ fromIndex) {
+/** @returns {number} */ /** @this {import("../parser.js").RemarkParser} */ function locate(/** @type {StringView} */ value, /** @type {number} */ fromIndex) {
   var self = this
   /** @type {number} */ var at
   /** @type {number} */ var position

@@ -5,7 +5,7 @@ import { addMissingType, addTypePrefix } from "./utilities.js";
 const parse = postcssMediaQueryParser.default;
 
 function parseMediaQuery(/** @type {string} */ params) {
-  let result;
+  /** @type {any} */ let result;
 
   try {
     result = parse(params);

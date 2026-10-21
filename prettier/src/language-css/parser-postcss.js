@@ -47,7 +47,7 @@ function parseNestedCSS(/** @type {import("./types.js").CssNode} */ node, /** @t
       typeof node.value === "string" &&
       node.value.startsWith("{")
     ) {
-      let rules;
+      /** @type {import("./types.js").CssNode[] | undefined} */ let rules;
       if (node.value.trimEnd().endsWith("}")) {
         const textBefore = options.originalText.slice(
           0,
@@ -61,7 +61,7 @@ function parseNestedCSS(/** @type {import("./types.js").CssNode} */ node, /** @t
           );
         const fakeContent =
           replaceNonLineBreaksWithSpace(textBefore) + nodeText;
-        let parse;
+        /** @type {(text: string, options?: any) => any} */ let parse;
         if (options.parser === "scss") {
           parse = parseScss;
         } else if (options.parser === "less") {
@@ -69,7 +69,7 @@ function parseNestedCSS(/** @type {import("./types.js").CssNode} */ node, /** @t
         } else {
           parse = parseCss;
         }
-        let ast;
+        /** @type {any} */ let ast;
         try {
           ast = parse(fakeContent, { ...options });
         } catch {
@@ -398,7 +398,7 @@ function parseNestedCSS(/** @type {import("./types.js").CssNode} */ node, /** @t
 function parseWithParser(/** @type {(a0?: any, a1?: any) => any} */ parse, /** @type {string} */ text, /** @type {CssOptions} */ options) {
   const { frontMatter, content: textToParse } = parseFrontMatter(text);
 
-  let result;
+  /** @type {any} */ let result;
 
   try {
     result = parse(textToParse, {
@@ -445,7 +445,7 @@ function parseLess(/** @type {string} */ text, options = {}) {
   return parseWithParser(
     // Workaround for https://github.com/shellscape/postcss-less/issues/145
     // See comments for `replaceQuotesInInlineComments` in `loc.js`.
-    (text) => postcssLess.parse(replaceQuotesInInlineComments(text)),
+    (/** @type {string} */ text) => postcssLess.parse(replaceQuotesInInlineComments(text)),
     text,
     options,
   );

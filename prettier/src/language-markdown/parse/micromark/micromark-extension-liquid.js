@@ -3,10 +3,10 @@ import { markdownLineEnding, markdownSpace } from "micromark-util-character";
 import { codes, types } from "micromark-util-symbol";
 
 /**
- * @typedef {import('mdast-util-from-markdown').Extension} FromMarkdownExtension
- * @typedef {import('mdast-util-from-markdown').Token} Token
- * @typedef {import('mdast-util-from-markdown').CompileContext} CompileContext
- * @typedef {import('mdast-util-from-markdown').Handle} Handle
+ * @typedef {import('../../../../../src/types/mdast-util-from-markdown-types.ts').Extension} FromMarkdownExtension
+ * @typedef {import('micromark-util-types').Token} Token
+ * @typedef {import('../../../../../src/types/mdast-util-from-markdown-types.ts').CompileContext} CompileContext
+ * @typedef {import('../../../../../src/types/mdast-util-from-markdown-types.ts').Handle} Handle
  * @typedef {import('micromark-util-types').State} State
  * @typedef {import('micromark-util-types').TokenizeContext} TokenizeContext
  * @typedef {import('micromark-util-types').Tokenizer} Tokenizer
@@ -25,7 +25,10 @@ function liquidFromMarkdown() {
     exit: { [nodeType]: exit },
   };
 
-  /** @type {Handle} */
+  /**
+   * @this {CompileContext}
+   * @type {Handle}
+   */
   function enter(token) {
     this.enter(
       // @ts-expect-error
@@ -35,7 +38,10 @@ function liquidFromMarkdown() {
     this.buffer();
   }
 
-  /** @type {Handle} */
+  /**
+   * @this {CompileContext}
+   * @type {Handle}
+   */
   function exit(token) {
     this.resume();
     /** @type {any} */

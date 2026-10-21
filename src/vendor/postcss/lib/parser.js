@@ -367,7 +367,7 @@ class Parser {
 
   // Helpers
 
-  getPosition(/** @type {number} */ offset) {
+  /** @returns {import("./node").Position} */ getPosition(/** @type {number} */ offset) {
     let pos = this.input.fromOffset(offset)
     return {
       column: pos.col,

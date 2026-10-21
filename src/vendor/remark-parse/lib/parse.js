@@ -15,7 +15,7 @@ module.exports = parse
   /** @type {string} */ var value = String(self.file)
   var start = {line: 1, column: 1, offset: 0}
   var content = xtend(start)
-  var node
+  /** @type {import("./tokenizer.js").RemarkNode} */ var node
 
   // Clean non-unix newlines: `\r\n` and `\r` are all changed to `\n`.
   // This should not affect positional information.

@@ -1,4 +1,5 @@
-const getValueRoot = (/** @type {import("../types.js").CssNode} */ node) => {
+// @nts-check
+const getValueRoot = /** @returns {import("../types.js").CssNode} */ (/** @type {import("../types.js").CssNode} */ node) => {
   while (node.parent) {
     node = node.parent;
   }

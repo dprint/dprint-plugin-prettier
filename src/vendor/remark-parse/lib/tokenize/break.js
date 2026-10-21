@@ -10,7 +10,7 @@ hardBreak.locator = locate
 /** @type {string} */ var lineFeed = '\n'
 /** @type {number} */ var minBreakLength = 2
 
-function hardBreak(/** @type {(a0?: any) => any} */ eat, /** @type {StringView} */ value, silent) {
+function hardBreak(/** @type {import("../tokenizer.js").RemarkEat} */ eat, /** @type {StringView} */ value, /** @type {boolean | undefined} */ silent) {
   /** @type {number} */ var length = value.length
   /** @type {number} */ var index = -1
   /** @type {string} */ var queue = ''

@@ -5,7 +5,7 @@ module.exports = locate
 
 var values = ['www.', 'http://', 'https://']
 
-/** @returns {number} */ function locate(/** @type {StringView} */ value, /** @type {number} */ fromIndex) {
+/** @returns {number} */ /** @this {import("../parser.js").RemarkParser} */ function locate(/** @type {StringView} */ value, /** @type {number} */ fromIndex) {
   /** @type {number} */ var min = -1
   /** @type {number} */ var index
   /** @type {number} */ var length

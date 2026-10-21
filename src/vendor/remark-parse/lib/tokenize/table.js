@@ -20,27 +20,27 @@ module.exports = table
 /** @type {string} */ var center = 'center'
 /** @type {string} */ var right = 'right'
 
-/** @this {import("../parser.js").RemarkParser} */ function table(eat, /** @type {StringView} */ value, /** @type {boolean | undefined} */ silent) {
+/** @this {import("../parser.js").RemarkParser} */ function table(/** @type {import("../tokenizer.js").RemarkEat} */ eat, /** @type {StringView} */ value, /** @type {boolean | undefined} */ silent) {
   var self = this
   /** @type {number} */ var index
   var alignments
   var alignment
   /** @type {string} */ var subvalue
-  var row
+  /** @type {import("../tokenizer.js").RemarkNode} */ var row
   /** @type {number} */ var length
-  var lines
+  /** @type {string[]} */ var lines
   /** @type {string} */ var queue
   /** @type {string | undefined} */ var character
   /** @type {boolean | undefined | null} */ var hasDash
-  var align
+  /** @type {any[]} */ var align
   /** @type {string} */ var cell
   /** @type {boolean} */ var preamble
-  var now
+  /** @type {import("../tokenizer.js").RemarkPoint} */ var now
   /** @type {number} */ var position
   /** @type {number} */ var lineCount
   /** @type {string} */ var line
-  var rows
-  var table
+  /** @type {import("../tokenizer.js").RemarkNode[]} */ var rows
+  /** @type {import("../tokenizer.js").RemarkNode} */ var table
   /** @type {number} */ var lineIndex
   /** @type {number} */ var pipeIndex
   /** @type {boolean | undefined} */ var first

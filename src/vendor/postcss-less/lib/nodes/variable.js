@@ -5,7 +5,7 @@
 /** @type {RegExp} */ const beforePattern = /^:(\s+)?/;
 // const bracketsPattern = /\{/;
 
-module.exports = (node) => {
+module.exports = (/** @type {import("postcss/lib/node")} */ node) => {
   const { name, params = '' } = node;
 
   // situations like @page :last { color: red } should default to the built-in AtRule

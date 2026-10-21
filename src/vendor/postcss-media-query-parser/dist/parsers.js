@@ -19,6 +19,11 @@ var _Container2 = _interopRequireDefault(_Container);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /**
+ * what a media feature's characters are read in, which is pushed for each string or interpolation entered
+ * @typedef {{ mode: string, character?: string | null, isCalculationEnabled?: boolean }} Mode
+ */
+
+/**
  * Parses a media feature expression, e.g. `max-width: 10px`, `(color)`
  *
  * @param {string} string - the source expression string, can be inside parens
@@ -28,19 +33,19 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  *    the secont - its value (may be missing)
  */
 
-function parseMediaFeature(string) {
-  var index = arguments.length <= 1 || arguments[1] === undefined ? 0 : arguments[1];
+function parseMediaFeature(/** @type {string} */ string) {
+  /** @type {number} */ var index = arguments.length <= 1 || arguments[1] === undefined ? 0 : arguments[1];
 
-  var modesEntered = [{
+  /** @type {Mode[]} */ var modesEntered = [{
     mode: 'normal',
     character: null
   }];
-  var result = [];
+  /** @type {any[]} */ var result = [];
   /** @type {number} */ var lastModeIndex = 0;
-  var mediaFeature = '';
-  var colon = null;
-  var mediaFeatureValue = null;
-  var indexLocal = index;
+  /** @type {any} */ var mediaFeature = '';
+  /** @type {any} */ var colon = null;
+  /** @type {any} */ var mediaFeatureValue = null;
+  /** @type {number} */ var indexLocal = index;
 
   /** @type {string} */ var stringNormalized = string;
   // Strip trailing parens (if any), and correct the starting index
@@ -133,19 +138,19 @@ function parseMediaFeature(string) {
  * @return {Array} an array of Nodes and Containers
  */
 
-function parseMediaQuery(string) {
-  var index = arguments.length <= 1 || arguments[1] === undefined ? 0 : arguments[1];
+function parseMediaQuery(/** @type {string} */ string) {
+  /** @type {number} */ var index = arguments.length <= 1 || arguments[1] === undefined ? 0 : arguments[1];
 
-  var result = [];
+  /** @type {any[]} */ var result = [];
 
   // How many timies the parser entered parens/curly braces
   /** @type {number} */ var localLevel = 0;
   // Has any keyword, media type, media feature expression or interpolation
   // ('element' hereafter) started
   /** @type {boolean} */ var insideSomeValue = false;
-  var node = void 0;
+  /** @type {any} */ var node = void 0;
 
-  function resetNode() {
+  /** @returns {any} */ function resetNode() {
     return {
       before: '',
       after: '',
@@ -295,18 +300,18 @@ function parseMediaQuery(string) {
  * @return {Array} an array of Nodes/Containers
  */
 
-function parseMediaList(string) {
-  var result = [];
+function parseMediaList(/** @type {string} */ string) {
+  /** @type {any[]} */ var result = [];
   /** @type {number} */ var interimIndex = 0;
   /** @type {number} */ var levelLocal = 0;
 
   // Check for a `url(...)` part (if it is contents of an @import rule)
-  var doesHaveUrl = /^(\s*)url\s*\(/.exec(string);
+  /** @type {RegExpExecArray | null} */ var doesHaveUrl = /^(\s*)url\s*\(/.exec(string);
   if (doesHaveUrl !== null) {
-    var i = doesHaveUrl[0].length;
-    var parenthesesLv = 1;
+    /** @type {number} */ var i = doesHaveUrl[0].length;
+    /** @type {number} */ var parenthesesLv = 1;
     while (parenthesesLv > 0) {
-      var character = string[i];
+      /** @type {string} */ var character = string[i];
       if (character === '(') {
         parenthesesLv++;
       }

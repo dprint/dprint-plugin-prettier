@@ -6,17 +6,20 @@ let Declaration = require('./declaration')
 let Node = require('./node')
 let { isClean, my } = require('./symbols')
 
-let AtRule, parse, Root, Rule
+/** @type {typeof import("./at-rule")} */ let AtRule
+/** @type {(css: string, opts?: any) => import("./root")} */ let parse
+/** @type {typeof import("./root")} */ let Root
+/** @type {typeof import("./rule")} */ let Rule
 
-function cleanSource(nodes) {
-  return nodes.map(i => {
+/** @returns {import("./node")[]} */ function cleanSource(/** @type {import("./node")[]} */ nodes) {
+  return nodes.map(/** @returns {import("./node")} */ i => {
     if (i.nodes) i.nodes = cleanSource(i.nodes)
     delete i.source
     return i
   })
 }
 
-function markTreeDirty(node) {
+function markTreeDirty(/** @type {import("./node")} */ node) {
   node[isClean] = false
   if (node.proxyOf.nodes) {
     for (let i of node.proxyOf.nodes) {
@@ -26,17 +29,17 @@ function markTreeDirty(node) {
 }
 
 class Container extends Node {
-  get first() {
+  /** @returns {import("./node") | undefined} */ get first() {
     if (!this.proxyOf.nodes) return undefined
     return this.proxyOf.nodes[0]
   }
 
-  get last() {
+  /** @returns {import("./node") | undefined} */ get last() {
     if (!this.proxyOf.nodes) return undefined
     return this.proxyOf.nodes[this.proxyOf.nodes.length - 1]
   }
 
-  append(...children) {
+  /** @returns {Container} */ append(...children) {
     for (let child of children) {
       let nodes = this.normalize(child, this.last)
       for (let node of nodes) this.proxyOf.nodes.push(node)
@@ -47,7 +50,7 @@ class Container extends Node {
     return this
   }
 
-  cleanRaws(keepBetween) {
+  cleanRaws(/** @type {undefined | boolean} */ keepBetween) {
     super.cleanRaws(keepBetween)
     if (this.nodes) {
       for (let node of this.nodes) node.cleanRaws(keepBetween)
@@ -58,7 +61,8 @@ class Container extends Node {
     if (!this.proxyOf.nodes) return undefined
     /** @type {number} */ let iterator = this.getIterator()
 
-    let index, result
+    /** @type {number} */ let index
+    /** @type {any} */ let result
     while (this.indexes[iterator] < this.proxyOf.nodes.length) {
       index = this.indexes[iterator]
       result = callback(this.proxyOf.nodes[index], index)
@@ -71,7 +75,7 @@ class Container extends Node {
     return result
   }
 
-  /** @returns {boolean} */ every(condition) {
+  /** @returns {boolean} */ every(/** @type {(node: import("./node"), index: number, nodes: import("./node")[]) => boolean} */ condition) {
     return this.nodes.every(condition)
   }
 
@@ -136,19 +140,19 @@ class Container extends Node {
     }
   }
 
-  /** @returns {number} */ index(child) {
+  /** @returns {number} */ index(/** @type {any} */ child) {
     if (typeof child === 'number') return child
     if (child.proxyOf) child = child.proxyOf
     return this.proxyOf.nodes.indexOf(child)
   }
 
-  insertAfter(exist, add) {
-    let existIndex = this.index(exist)
-    let nodes = this.normalize(add, this.proxyOf.nodes[existIndex]).reverse()
+  /** @returns {Container} */ insertAfter(exist, add) {
+    /** @type {number} */ let existIndex = this.index(exist)
+    /** @type {import("./node")[]} */ let nodes = this.normalize(add, this.proxyOf.nodes[existIndex]).reverse()
     existIndex = this.index(exist)
     for (let node of nodes) this.proxyOf.nodes.splice(existIndex + 1, 0, node)
 
-    let index
+    /** @type {number} */ let index
     for (let id in this.indexes) {
       index = this.indexes[id]
       if (existIndex < index) {
@@ -161,10 +165,10 @@ class Container extends Node {
     return this
   }
 
-  insertBefore(exist, add) {
-    let existIndex = this.index(exist)
+  /** @returns {Container} */ insertBefore(exist, add) {
+    /** @type {number} */ let existIndex = this.index(exist)
     let type = existIndex === 0 ? 'prepend' : false
-    let nodes = this.normalize(
+    /** @type {import("./node")[]} */ let nodes = this.normalize(
       add,
       this.proxyOf.nodes[existIndex],
       type
@@ -172,7 +176,7 @@ class Container extends Node {
     existIndex = this.index(exist)
     for (let node of nodes) this.proxyOf.nodes.splice(existIndex, 0, node)
 
-    let index
+    /** @type {number} */ let index
     for (let id in this.indexes) {
       index = this.indexes[id]
       if (existIndex <= index) {
@@ -185,7 +189,7 @@ class Container extends Node {
     return this
   }
 
-  normalize(nodes, sample) {
+  /** @returns {import("./node")[]} */ normalize(nodes, /** @type {import("./node") | undefined} */ sample) {
     if (typeof nodes === 'string') {
       nodes = cleanSource(parse(nodes).nodes)
     } else if (typeof nodes === 'undefined') {
@@ -219,7 +223,7 @@ class Container extends Node {
       throw new Error('Unknown node type in node creation')
     }
 
-    let processed = nodes.map(i => {
+    /** @type {any[]} */ let processed = nodes.map(/** @returns {any} */ (/** @type {any} */ i) => {
       /* c8 ignore next */
       if (!i[my]) Container.rebuild(i)
       i = i.proxyOf
@@ -239,10 +243,10 @@ class Container extends Node {
     return processed
   }
 
-  prepend(...children) {
+  /** @returns {Container} */ prepend(...children) {
     children = children.reverse()
     for (let child of children) {
-      let nodes = this.normalize(child, this.first, 'prepend').reverse()
+      /** @type {import("./node")[]} */ let nodes = this.normalize(child, this.first, 'prepend').reverse()
       for (let node of nodes) this.proxyOf.nodes.unshift(node)
       for (let id in this.indexes) {
         this.indexes[id] = this.indexes[id] + nodes.length
@@ -254,13 +258,13 @@ class Container extends Node {
     return this
   }
 
-  push(child) {
+  /** @returns {Container} */ push(/** @type {import("./node")} */ child) {
     child.parent = this
     this.proxyOf.nodes.push(child)
     return this
   }
 
-  removeAll() {
+  /** @returns {Container} */ removeAll() {
     for (let node of this.proxyOf.nodes) node.parent = undefined
     this.proxyOf.nodes = []
 
@@ -269,12 +273,12 @@ class Container extends Node {
     return this
   }
 
-  removeChild(child) {
+  /** @returns {Container} */ removeChild(child) {
     child = this.index(child)
     this.proxyOf.nodes[child].parent = undefined
     this.proxyOf.nodes.splice(child, 1)
 
-    let index
+    /** @type {number} */ let index
     for (let id in this.indexes) {
       index = this.indexes[id]
       if (index >= child) {
@@ -287,13 +291,13 @@ class Container extends Node {
     return this
   }
 
-  replaceValues(pattern, opts, callback) {
+  /** @returns {Container} */ replaceValues(/** @type {any} */ pattern, /** @type {any} */ opts, /** @type {any} */ callback) {
     if (!callback) {
       callback = opts
       opts = {}
     }
 
-    this.walkDecls(decl => {
+    this.walkDecls((/** @type {import("./node")} */ decl) => {
       if (opts.props && !opts.props.includes(decl.prop)) return
       if (opts.fast && !decl.value.includes(opts.fast)) return
 
@@ -305,13 +309,13 @@ class Container extends Node {
     return this
   }
 
-  /** @returns {boolean} */ some(condition) {
+  /** @returns {boolean} */ some(/** @type {(node: import("./node"), index: number, nodes: import("./node")[]) => boolean} */ condition) {
     return this.nodes.some(condition)
   }
 
-  /** @returns {undefined | boolean} */ walk(callback) {
-    return this.each((child, i) => {
-      let result
+  /** @returns {undefined | boolean} */ walk(/** @type {(node: import("./node"), index: number) => any} */ callback) {
+    return this.each((/** @type {import("./node")} */ child, /** @type {number} */ i) => {
+      /** @type {any} */ let result
       try {
         result = callback(child, i)
       } catch (e) {
@@ -325,7 +329,7 @@ class Container extends Node {
     })
   }
 
-  walkAtRules(name, callback) {
+  /** @returns {undefined | boolean} */ walkAtRules(/** @type {any} */ name, /** @type {any} */ callback) {
     if (!callback) {
       callback = name
       return this.walk((child, i) => {
@@ -348,7 +352,7 @@ class Container extends Node {
     })
   }
 
-  /** @returns {undefined | boolean} */ walkComments(callback) {
+  /** @returns {undefined | boolean} */ walkComments(/** @type {(node: import("./node"), index: number) => any} */ callback) {
     return this.walk((child, i) => {
       if (child.type === 'comment') {
         return callback(child, i)
@@ -356,7 +360,7 @@ class Container extends Node {
     })
   }
 
-  walkDecls(prop, callback) {
+  /** @returns {undefined | boolean} */ walkDecls(/** @type {any} */ prop, /** @type {any} */ callback) {
     if (!callback) {
       callback = prop
       return this.walk((child, i) => {
@@ -379,7 +383,7 @@ class Container extends Node {
     })
   }
 
-  walkRules(selector, callback) {
+  /** @returns {undefined | boolean} */ walkRules(/** @type {any} */ selector, /** @type {any} */ callback) {
     if (!callback) {
       callback = selector
 
@@ -404,19 +408,19 @@ class Container extends Node {
   }
 }
 
-Container.registerParse = dependant => {
+Container.registerParse = (/** @type {(css: string, opts?: any) => import("./root")} */ dependant) => {
   parse = dependant
 }
 
-Container.registerRule = dependant => {
+Container.registerRule = (/** @type {typeof import("./rule")} */ dependant) => {
   Rule = dependant
 }
 
-Container.registerAtRule = dependant => {
+Container.registerAtRule = (/** @type {typeof import("./at-rule")} */ dependant) => {
   AtRule = dependant
 }
 
-Container.registerRoot = dependant => {
+Container.registerRoot = (/** @type {typeof import("./root")} */ dependant) => {
   Root = dependant
 }
 
@@ -424,7 +428,7 @@ module.exports = Container
 Container.default = Container
 
 /* c8 ignore start */
-Container.rebuild = node => {
+Container.rebuild = (/** @type {any} */ node) => {
   if (node.type === 'atrule') {
     Object.setPrototypeOf(node, AtRule.prototype)
   } else if (node.type === 'rule') {
@@ -440,7 +444,7 @@ Container.rebuild = node => {
   node[my] = true
 
   if (node.nodes) {
-    node.nodes.forEach(child => {
+    node.nodes.forEach((/** @type {any} */ child) => {
       Container.rebuild(child)
     })
   }

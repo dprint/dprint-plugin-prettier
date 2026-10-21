@@ -3,7 +3,7 @@ import { parseAction as parseAction$1, parseBinding as parseBinding$1, parseInte
 import { transformAst } from "./ast-transform/index.js";
 import { transformTemplateBindings } from "./microsyntax/transform-template-binding.js";
 //#region src/estree-parser.ts
-const createAstParser = (parse) => (/** @type {string} */ text) => {
+const createAstParser = (/** @type {(text: string) => import("./angular-parser.js").AngularParseResult} */ parse) => (/** @type {string} */ text) => {
 	const { result, comments } = parse(text);
 	return Object.assign(transformAst(result), { comments });
 };

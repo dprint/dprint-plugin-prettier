@@ -1,6 +1,7 @@
+// @nts-check
 import { isFrontMatter } from "../../main/front-matter/index.js";
 
-const ignoredProperties = new Set([
+/** @type {Set<string>} */ const ignoredProperties = new Set([
   "raw", // front-matter
   "raws",
   "sourceIndex",
@@ -11,7 +12,7 @@ const ignoredProperties = new Set([
   "spaces",
 ]);
 
-function massageAstNode(/** @type {import("../types.js").CssNode} */ original, cloned, /** @type {import("../types.js").CssNode} */ parent) {
+/** @returns {any} */ function massageAstNode(/** @type {import("../types.js").CssNode} */ original, /** @type {import("../types.js").CssNode} */ cloned, /** @type {import("../types.js").CssNode} */ parent) {
   if (
     original.type === "css-comment" &&
     parent.type === "css-root" &&
@@ -123,7 +124,7 @@ function massageAstNode(/** @type {import("../types.js").CssNode} */ original, c
     }
 
     if (original.value) {
-      let { value } = cloned;
+      /** @type {{ value: string }} */ let { value } = cloned;
       // Parser only understands the `i` flag
       if (/\s[a-z]$/i.test(value)) {
         // Add an extra property to make sure flag is preserved
@@ -155,8 +156,8 @@ function massageAstNode(/** @type {import("../types.js").CssNode} */ original, c
   ) {
     cloned.value = cloned.value.replaceAll(
       /([\d+.e-]+)([a-z]*)/gi,
-      (match, numStr, unit) => {
-        const num = Number(numStr);
+      /** @returns {string} */ (/** @type {string} */ match, /** @type {string} */ numStr, /** @type {string} */ unit) => {
+        /** @type {number} */ const num = Number(numStr);
         return Number.isNaN(num) ? match : num + unit.toLowerCase();
       },
     );
@@ -253,14 +254,14 @@ function massageAstNode(/** @type {import("../types.js").CssNode} */ original, c
 
 massageAstNode.ignoredProperties = ignoredProperties;
 
-function cleanCSSStrings(value) {
+/** @returns {string} */ function cleanCSSStrings(/** @type {string} */ value) {
   return value.replaceAll("'", '"').replaceAll(/\\([^\da-f])/gi, "$1");
 }
 
-function hasLessExtendSelector(selector) {
-  return selector?.nodes?.some((selectorNode) =>
+/** @returns {boolean | undefined} */ function hasLessExtendSelector(/** @type {any} */ selector) {
+  return selector?.nodes?.some(/** @returns {boolean | undefined} */ (/** @type {import("../types.js").CssNode} */ selectorNode) =>
     selectorNode.nodes?.some(
-      (node) => node.type === "selector-pseudo" && node.value === ":extend",
+      /** @returns {boolean} */ (/** @type {import("../types.js").CssNode} */ node) => node.type === "selector-pseudo" && node.value === ":extend",
     ),
   );
 }

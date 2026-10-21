@@ -6,8 +6,8 @@ import {
 } from "../language-js/pragma.js";
 import { parseFrontMatter } from "../main/front-matter/index.js";
 
-const hasPragma = (text) => jsHasPragma(parseFrontMatter(text).content);
-const hasIgnorePragma = (text) =>
+const hasPragma = /** @returns {boolean} */ (/** @type {string} */ text) => jsHasPragma(parseFrontMatter(text).content);
+const hasIgnorePragma = /** @returns {boolean} */ (/** @type {string} */ text) =>
   jsHasIgnorePragma(parseFrontMatter(text).content);
 const insertPragma = /** @returns {string} */ (/** @type {string} */ text) => {
   const { frontMatter, content } = parseFrontMatter(text);

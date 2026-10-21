@@ -4,13 +4,13 @@
 const Container = require('./container');
 
 class AtWord extends Container {
-  constructor (opts) {
+  constructor (/** @type {any} */ opts) {
     super(opts);
     /** @type {string} */ this.type = 'atword';
   }
 
-  toString () {
-    let quote = this.quoted ? this.raws.quote : '';
+  /** @returns {string} */ toString () {
+    /** @type {string} */ let quote = this.quoted ? this.raws.quote : '';
     return [
       this.raws.before,
       '@',

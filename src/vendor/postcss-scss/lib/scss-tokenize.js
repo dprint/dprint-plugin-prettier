@@ -34,7 +34,7 @@
 /** @type {RegExp} */ const RE_NEW_LINE = /[\n\f\r]/g // SCSS PATCH
 
 // SCSS PATCH function name was changed
-module.exports = function scssTokenize(/** @type {import("postcss/lib/input")} */ input, options = {}) {
+module.exports = /** @returns {import("postcss/lib/parser").Tokenizer} */ function scssTokenize(/** @type {import("postcss/lib/input")} */ input, options = {}) {
   /** @type {string} */ let css = /** @type {string} */ (input.css.valueOf())
   let ignore = options.ignoreErrors
 
@@ -63,7 +63,7 @@ module.exports = function scssTokenize(/** @type {import("postcss/lib/input")} *
   // SCSS PATCH {
   function interpolation() {
     /** @type {number} */ let deep = 1
-    let stringQuote = false
+    /** @type {any} */ let stringQuote = false
     /** @type {boolean} */ let stringEscaped = false
     while (deep > 0) {
       next += 1

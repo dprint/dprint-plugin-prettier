@@ -2,8 +2,20 @@
 import { sourceSpanToLocationInformation } from "./utilities.js";
 import { Lexer, ParseError, ParseLocation, ParseSourceFile, ParseSourceSpan, Parser } from "@angular/compiler";
 //#region src/angular-parser.ts
-const FILE_NAME = "test.html";
-function getParseSourceSpan(/** @type {string} */ text) {
+/** @type {string} */ const FILE_NAME = "test.html";
+/**
+ * The text that is parsed and where it is, which a parse gives with what it parsed (`result`, an `ASTWithSource` or
+ * the result of parsing template bindings) and the comments it found
+ * @typedef {{
+ *   text: string,
+ *   file: import("@angular/compiler").ParseSourceFile,
+ *   start: import("@angular/compiler").ParseLocation,
+ *   end: import("@angular/compiler").ParseLocation,
+ *   sourceSpan: import("@angular/compiler").ParseSourceSpan,
+ * }} AngularSourceSpan
+ * @typedef {AngularSourceSpan & { result: any, comments: any[] }} AngularParseResult
+ */
+/** @returns {AngularSourceSpan} */ function getParseSourceSpan(/** @type {string} */ text) {
 	const file = new ParseSourceFile(text, FILE_NAME);
 	const start = new ParseLocation(file, 0, 0, 0);
 	const end = start.moveBy(text.length);
@@ -15,8 +27,8 @@ function getParseSourceSpan(/** @type {string} */ text) {
 		sourceSpan: new ParseSourceSpan(start, end)
 	};
 }
-let parser;
-/** @returns {import("../../../../prettier/node_modules/@angular/compiler/fesm2022/compiler.mjs").Parser} */ function getParser() {
+/** @type {import("@angular/compiler").Parser | undefined} */ let parser;
+/** @returns {import("@angular/compiler").Parser} */ function getParser() {
 	return parser ??= new Parser(new Lexer());
 }
 const getCommentStart = /** @returns {number | null} */ (/** @type {string} */ text) => Parser.prototype._commentStart(text);
@@ -32,7 +44,7 @@ const getCommentStart = /** @returns {number | null} */ (/** @type {string} */ t
 		})
 	}];
 }
-function throwErrors(parseResult) {
+/** @returns {AngularParseResult} */ function throwErrors(/** @type {AngularParseResult} */ parseResult) {
 	const { result } = parseResult;
 	if (result.errors.length !== 0) {
 		const [originalError] = result.errors;

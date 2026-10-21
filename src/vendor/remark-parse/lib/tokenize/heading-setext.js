@@ -14,7 +14,7 @@ module.exports = setextHeading
 /** @type {number} */ var equalsToDepth = 1
 /** @type {number} */ var dashDepth = 2
 
-/** @this {import("../parser.js").RemarkParser} */ function setextHeading(eat, /** @type {StringView} */ value, /** @type {boolean | undefined} */ silent) {
+/** @this {import("../parser.js").RemarkParser} */ function setextHeading(/** @type {import("../tokenizer.js").RemarkEat} */ eat, /** @type {StringView} */ value, /** @type {boolean | undefined} */ silent) {
   var self = this
   var now = eat.now()
   /** @type {number} */ var length = value.length

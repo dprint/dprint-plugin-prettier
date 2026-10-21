@@ -11,22 +11,22 @@ let Input = require('./input')
 /** @type {boolean} */ let pathAvailable = Boolean(dirname && resolve && relative && sep)
 
 class MapGenerator {
-  constructor(stringify, root, opts, cssString) {
-    this.stringify = stringify
-    this.mapOpts = opts.map || {}
-    this.root = root
-    this.opts = opts
-    this.css = cssString
-    this.originalCSS = cssString
-    this.usesFileUrls = !this.mapOpts.from && this.mapOpts.absolute
+  constructor(/** @type {any} */ stringify, /** @type {any} */ root, /** @type {any} */ opts, /** @type {string | undefined} */ cssString) {
+    /** @type {any} */ this.stringify = stringify
+    /** @type {any} */ this.mapOpts = opts.map || {}
+    /** @type {any} */ this.root = root
+    /** @type {any} */ this.opts = opts
+    /** @type {string | undefined} */ this.css = cssString
+    /** @type {string | undefined} */ this.originalCSS = cssString
+    /** @type {any} */ this.usesFileUrls = !this.mapOpts.from && this.mapOpts.absolute
 
-    this.memoizedFileURLs = new Map()
-    this.memoizedPaths = new Map()
-    this.memoizedURLs = new Map()
+    /** @type {Map<string, string>} */ this.memoizedFileURLs = new Map()
+    /** @type {Map<string, string>} */ this.memoizedPaths = new Map()
+    /** @type {Map<string, string>} */ this.memoizedURLs = new Map()
   }
 
   addAnnotation() {
-    let content
+    /** @type {string} */ let content
 
     if (this.isInline()) {
       content =
@@ -38,7 +38,7 @@ class MapGenerator {
     } else {
       content = this.outputFile() + '.map'
     }
-    let eol = '\n'
+    /** @type {string} */ let eol = '\n'
     if (this.css.includes('\r\n')) eol = '\r\n'
 
     this.css += eol + '/*# sourceMappingURL=' + content + ' */'
@@ -46,9 +46,9 @@ class MapGenerator {
 
   applyPrevMaps() {
     for (let prev of this.previous()) {
-      let from = this.toUrl(this.path(prev.file))
-      let root = prev.root || dirname(prev.file)
-      let map
+      /** @type {string} */ let from = this.toUrl(this.path(prev.file))
+      /** @type {string} */ let root = prev.root || dirname(prev.file)
+      /** @type {any} */ let map
 
       if (this.mapOpts.sourcesContent === false) {
         map = new SourceMapConsumer(prev.text)
@@ -67,7 +67,7 @@ class MapGenerator {
     if (this.mapOpts.annotation === false) return
 
     if (this.root) {
-      let node
+      /** @type {any} */ let node
       for (let i = this.root.nodes.length - 1; i >= 0; i--) {
         node = this.root.nodes[i]
         if (node.type !== 'comment') continue
@@ -76,7 +76,7 @@ class MapGenerator {
         }
       }
     } else if (this.css) {
-      let startIndex
+      /** @type {number} */ let startIndex
       while ((startIndex = this.css.lastIndexOf('/*#')) !== -1) {
         let endIndex = this.css.indexOf('*/', startIndex + 3)
         if (endIndex === -1) break
@@ -88,26 +88,26 @@ class MapGenerator {
     }
   }
 
-  generate() {
+  /** @returns {any[]} */ generate() {
     this.clearAnnotation()
     if (pathAvailable && sourceMapAvailable && this.isMap()) {
       return this.generateMap()
     } else {
-      let result = ''
-      this.stringify(this.root, i => {
+      /** @type {string} */ let result = ''
+      this.stringify(this.root, (/** @type {string} */ i) => {
         result += i
       })
       return [result]
     }
   }
 
-  generateMap() {
+  /** @returns {any[]} */ generateMap() {
     if (this.root) {
       this.generateString()
     } else if (this.previous().length === 1) {
-      let prev = this.previous()[0].consumer()
+      /** @type {any} */ let prev = this.previous()[0].consumer()
       prev.file = this.outputFile()
-      this.map = SourceMapGenerator.fromSourceMap(prev, {
+      /** @type {any} */ this.map = SourceMapGenerator.fromSourceMap(prev, {
         ignoreInvalidMapping: true
       })
     } else {
@@ -142,18 +142,19 @@ class MapGenerator {
       ignoreInvalidMapping: true
     })
 
-    let line = 1
-    let column = 1
+    /** @type {number} */ let line = 1
+    /** @type {number} */ let column = 1
 
-    let noSource = '<no source>'
-    let mapping = {
+    /** @type {string} */ let noSource = '<no source>'
+    /** @type {{ generated: { column: number, line: number }, original: { column: number, line: number }, source: string }} */ let mapping = {
       generated: { column: 0, line: 0 },
       original: { column: 0, line: 0 },
       source: ''
     }
 
-    let last, lines
-    this.stringify(this.root, (str, node, type) => {
+    /** @type {number} */ let last
+    /** @type {RegExpMatchArray | null} */ let lines
+    this.stringify(this.root, (/** @type {string} */ str, /** @type {any} */ node, /** @type {string | undefined} */ type) => {
       this.css += str
 
       if (node && type !== 'end') {
@@ -182,8 +183,8 @@ class MapGenerator {
       }
 
       if (node && type !== 'start') {
-        let p = node.parent || { raws: {} }
-        let childless =
+        /** @type {any} */ let p = node.parent || { raws: {} }
+        /** @type {boolean} */ let childless =
           node.type === 'decl' || (node.type === 'atrule' && !node.nodes)
         if (!childless || node !== p.last || p.raws.semicolon) {
           if (node.source && node.source.end) {
@@ -206,7 +207,7 @@ class MapGenerator {
     })
   }
 
-  isAnnotation() {
+  /** @returns {any} */ isAnnotation() {
     if (this.isInline()) {
       return true
     }
@@ -214,45 +215,45 @@ class MapGenerator {
       return this.mapOpts.annotation
     }
     if (this.previous().length) {
-      return this.previous().some(i => i.annotation)
+      return this.previous().some(/** @returns {boolean} */ i => i.annotation)
     }
     return true
   }
 
-  isInline() {
+  /** @returns {any} */ isInline() {
     if (typeof this.mapOpts.inline !== 'undefined') {
       return this.mapOpts.inline
     }
 
-    let annotation = this.mapOpts.annotation
+    /** @type {any} */ let annotation = this.mapOpts.annotation
     if (typeof annotation !== 'undefined' && annotation !== true) {
       return false
     }
 
     if (this.previous().length) {
-      return this.previous().some(i => i.inline)
+      return this.previous().some(/** @returns {boolean} */ i => i.inline)
     }
     return true
   }
 
-  isMap() {
+  /** @returns {boolean} */ isMap() {
     if (typeof this.opts.map !== 'undefined') {
       return !!this.opts.map
     }
     return this.previous().length > 0
   }
 
-  isSourcesContent() {
+  /** @returns {any} */ isSourcesContent() {
     if (typeof this.mapOpts.sourcesContent !== 'undefined') {
       return this.mapOpts.sourcesContent
     }
     if (this.previous().length) {
-      return this.previous().some(i => i.withContent())
+      return this.previous().some(/** @returns {boolean} */ i => i.withContent())
     }
     return true
   }
 
-  outputFile() {
+  /** @returns {string} */ outputFile() {
     if (this.opts.to) {
       return this.path(this.opts.to)
     } else if (this.opts.from) {
@@ -262,30 +263,30 @@ class MapGenerator {
     }
   }
 
-  path(file) {
+  /** @returns {string} */ path(/** @type {string} */ file) {
     if (this.mapOpts.absolute) return file
     if (file.charCodeAt(0) === 60 /* `<` */) return file
     if (/^\w+:\/\//.test(file)) return file
-    let cached = this.memoizedPaths.get(file)
+    /** @type {string | undefined} */ let cached = this.memoizedPaths.get(file)
     if (cached) return cached
 
-    let from = this.opts.to ? dirname(this.opts.to) : '.'
+    /** @type {string} */ let from = this.opts.to ? dirname(this.opts.to) : '.'
 
     if (typeof this.mapOpts.annotation === 'string') {
       from = dirname(resolve(from, this.mapOpts.annotation))
     }
 
-    let path = relative(from, file)
+    /** @type {string} */ let path = relative(from, file)
     this.memoizedPaths.set(file, path)
 
     return path
   }
 
-  previous() {
+  /** @returns {import("./previous-map")[]} */ previous() {
     if (!this.previousMaps) {
-      this.previousMaps = []
+      /** @type {import("./previous-map")[]} */ this.previousMaps = []
       if (this.root) {
-        this.root.walk(node => {
+        this.root.walk((/** @type {import("./node")} */ node) => {
           if (node.source && node.source.input.map) {
             let map = node.source.input.map
             if (!this.previousMaps.includes(map)) {
@@ -303,14 +304,14 @@ class MapGenerator {
   }
 
   setSourcesContent() {
-    let already = {}
+    /** @type {Record<string, boolean>} */ let already = {}
     if (this.root) {
-      this.root.walk(node => {
+      this.root.walk((/** @type {import("./node")} */ node) => {
         if (node.source) {
-          let from = node.source.input.from
+          /** @type {string} */ let from = node.source.input.from
           if (from && !already[from]) {
             already[from] = true
-            let fromUrl = this.usesFileUrls
+            /** @type {string} */ let fromUrl = this.usesFileUrls
               ? this.toFileUrl(from)
               : this.toUrl(this.path(from))
             this.map.setSourceContent(fromUrl, node.source.input.css)
@@ -318,14 +319,14 @@ class MapGenerator {
         }
       })
     } else if (this.css) {
-      let from = this.opts.from
+      /** @type {string} */ let from = this.opts.from
         ? this.toUrl(this.path(this.opts.from))
         : '<no source>'
       this.map.setSourceContent(from, this.css)
     }
   }
 
-  sourcePath(node) {
+  /** @returns {string} */ sourcePath(/** @type {import("./node")} */ node) {
     if (this.mapOpts.from) {
       return this.toUrl(this.mapOpts.from)
     } else if (this.usesFileUrls) {
@@ -335,7 +336,7 @@ class MapGenerator {
     }
   }
 
-  toBase64(str) {
+  /** @returns {string} */ toBase64(/** @type {string} */ str) {
     if (Buffer) {
       return Buffer.from(str).toString('base64')
     } else {
@@ -343,12 +344,12 @@ class MapGenerator {
     }
   }
 
-  toFileUrl(path) {
-    let cached = this.memoizedFileURLs.get(path)
+  /** @returns {string} */ toFileUrl(/** @type {string} */ path) {
+    /** @type {string | undefined} */ let cached = this.memoizedFileURLs.get(path)
     if (cached) return cached
 
     if (pathToFileURL) {
-      let fileURL = pathToFileURL(path).toString()
+      /** @type {string} */ let fileURL = pathToFileURL(path).toString()
       this.memoizedFileURLs.set(path, fileURL)
 
       return fileURL
@@ -359,15 +360,15 @@ class MapGenerator {
     }
   }
 
-  toUrl(path) {
-    let cached = this.memoizedURLs.get(path)
+  /** @returns {string} */ toUrl(/** @type {string} */ path) {
+    /** @type {string | undefined} */ let cached = this.memoizedURLs.get(path)
     if (cached) return cached
 
     if (sep === '\\') {
       path = path.replace(/\\/g, '/')
     }
 
-    let url = encodeURI(path).replace(/[#?]/g, encodeURIComponent)
+    /** @type {string} */ let url = encodeURI(path).replace(/[#?]/g, encodeURIComponent)
     this.memoizedURLs.set(path, url)
 
     return url

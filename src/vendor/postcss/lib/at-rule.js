@@ -11,17 +11,17 @@ let Container = require('./container')
  * @property {string} [customSelector] given by prettier
  */
 class AtRule extends Container {
-  constructor(defaults) {
+  constructor(/** @type {any} */ defaults) {
     super(defaults)
     /** @type {string} */ this.type = 'atrule'
   }
 
-  append(...children) {
+  /** @returns {import("./container")} */ append(...children) {
     if (!this.proxyOf.nodes) this.nodes = []
     return super.append(...children)
   }
 
-  prepend(...children) {
+  /** @returns {import("./container")} */ prepend(...children) {
     if (!this.proxyOf.nodes) this.nodes = []
     return super.prepend(...children)
   }

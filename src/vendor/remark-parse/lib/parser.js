@@ -25,7 +25,7 @@ module.exports = Parser
  *   eof?: any,
  *   toOffset: (position: any) => number,
  *   unescape: (value: string) => string,
- *   decode: any,
+ *   decode: import("./decode.js").RemarkDecode,
  *   setOptions(options: any): RemarkParser,
  *   parse(): any,
  *   exitStart(): () => void,
@@ -35,12 +35,13 @@ module.exports = Parser
  *   interruptParagraph: any[],
  *   interruptList: any[],
  *   interruptBlockquote: any[],
- *   blockTokenizers: Record<string, any>,
- *   inlineTokenizers: Record<string, any>,
- *   blockMethods: any[],
- *   inlineMethods: any[],
- *   tokenizeBlock(value: string, location: any): any[],
- *   tokenizeInline(value: string, location: any): any[],
+ *   interruptFootnoteDefinition?: any[],
+ *   blockTokenizers: Record<string, import("./tokenizer.js").RemarkTokenizer>,
+ *   inlineTokenizers: Record<string, import("./tokenizer.js").RemarkTokenizer>,
+ *   blockMethods: string[],
+ *   inlineMethods: string[],
+ *   tokenizeBlock(value: string, location: import("./tokenizer.js").RemarkPoint): any[],
+ *   tokenizeInline(value: string, location: import("./tokenizer.js").RemarkPoint): any[],
  *   tokenizeFactory: typeof tokenizer,
  * }} RemarkParser
  * The options of the parser, which are booleans apart from the names of the elements of HTML blocks
@@ -174,7 +175,7 @@ proto.tokenizeFactory = tokenizer
 // Get all keys in `value`.
 /** @returns {any[]} */ function keys(value) {
   var result = []
-  var key
+  /** @type {string} */ var key
 
   for (key in value) {
     result.push(key)

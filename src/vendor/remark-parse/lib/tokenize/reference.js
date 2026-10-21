@@ -18,7 +18,7 @@ reference.locator = locate
 /** @type {string} */ var backslash = '\\'
 /** @type {string} */ var rightSquareBracket = ']'
 
-/** @this {import("../parser.js").RemarkParser} */ function reference(eat, /** @type {StringView} */ value, silent) {
+/** @this {import("../parser.js").RemarkParser} */ function reference(/** @type {import("../tokenizer.js").RemarkEat} */ eat, /** @type {StringView} */ value, /** @type {boolean | undefined} */ silent) {
   var self = this
   /** @type {boolean} */ var commonmark = self.options.commonmark
   /** @type {string} */ var character = value.charAt(0)
@@ -30,9 +30,9 @@ reference.locator = locate
   /** @type {string} */ var referenceType = shortcut
   /** @type {string} */ var content
   /** @type {string | undefined} */ var identifier
-  var now
-  var node
-  var exit
+  /** @type {import("../tokenizer.js").RemarkPoint} */ var now
+  /** @type {import("../tokenizer.js").RemarkNode} */ var node
+  /** @type {() => void} */ var exit
   /** @type {string} */ var queue
   /** @type {boolean | undefined} */ var bracketed
   /** @type {number} */ var depth

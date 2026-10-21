@@ -1,16 +1,22 @@
 'use strict'
 
+/**
+ * @property {any} [node] given with the options
+ * @property {number} [index] given with the options
+ * @property {string} [plugin] given with the options
+ * @property {string} [word] given with the options
+ */
 class Warning {
-  constructor(/** @type {string} */ text, opts = {}) {
+  constructor(/** @type {string} */ text, /** @type {any} */ opts = {}) {
     /** @type {string} */ this.type = 'warning'
     /** @type {string} */ this.text = text
 
     if (opts.node && opts.node.source) {
       let range = opts.node.rangeBy(opts)
-      this.line = range.start.line
-      this.column = range.start.column
-      this.endLine = range.end.line
-      this.endColumn = range.end.column
+      /** @type {number | undefined} */ this.line = range.start.line
+      /** @type {number | undefined} */ this.column = range.start.column
+      /** @type {number | undefined} */ this.endLine = range.end.line
+      /** @type {number | undefined} */ this.endColumn = range.end.column
     }
 
     for (let opt in opts) this[opt] = opts[opt]

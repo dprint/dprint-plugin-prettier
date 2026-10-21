@@ -1,13 +1,14 @@
+// @nts-check
 'use strict';
 
-let cloneNode = function (obj, parent) {
-  let cloned = new obj.constructor();
+let cloneNode = function (/** @type {any} */ obj, /** @type {any} */ parent) {
+  /** @type {any} */ let cloned = new obj.constructor();
 
   for (let i in obj) {
     if (!obj.hasOwnProperty(i)) continue;
 
-    let value = obj[i],
-      type  = typeof value;
+    /** @type {any} */ let value = obj[i],
+      /** @type {string} */ type  = typeof value;
 
     if (i === 'parent' && type === 'object') {
       if (parent) cloned[i] = parent;
@@ -16,7 +17,7 @@ let cloneNode = function (obj, parent) {
       cloned[i] = value;
     }
     else if (value instanceof Array) {
-      cloned[i] = value.map(j => cloneNode(j, cloned));
+      cloned[i] = value.map(/** @returns {any} */ (/** @type {any} */ j) => cloneNode(j, cloned));
     }
     else if (i !== 'before'  && i !== 'after' && i !== 'between' && i !== 'semicolon') {
       if (type === 'object' && value !== null) value = cloneNode(value);
@@ -29,7 +30,7 @@ let cloneNode = function (obj, parent) {
 
 module.exports = class Node {
 
-  constructor (defaults) {
+  constructor (/** @type {any} */ defaults) {
     defaults = defaults || {};
     this.raws = { before: '', after: '' };
 
@@ -48,7 +49,7 @@ module.exports = class Node {
     return this;
   }
 
-  toString () {
+  /** @returns {string} */ toString () {
     return [
       this.raws.before,
       String(this.value),
@@ -56,10 +57,10 @@ module.exports = class Node {
     ].join('');
   }
 
-  clone (overrides) {
+  clone (/** @type {any} */ overrides) {
     overrides = overrides || {};
 
-    let cloned = cloneNode(this);
+    /** @type {any} */ let cloned = cloneNode(this);
 
     for (let name in overrides) {
       cloned[name] = overrides[name];
@@ -68,26 +69,26 @@ module.exports = class Node {
     return cloned;
   }
 
-  cloneBefore (overrides) {
+  cloneBefore (/** @type {any} */ overrides) {
     overrides = overrides || {};
 
-    let cloned = this.clone(overrides);
+    /** @type {any} */ let cloned = this.clone(overrides);
 
     this.parent.insertBefore(this, cloned);
     return cloned;
   }
 
-  cloneAfter (overrides) {
+  cloneAfter (/** @type {any} */ overrides) {
     overrides = overrides || {};
 
-    let cloned = this.clone(overrides);
+    /** @type {any} */ let cloned = this.clone(overrides);
 
     this.parent.insertAfter(this, cloned);
     return cloned;
   }
 
   replaceWith () {
-    let nodes = Array.prototype.slice.call(arguments);
+    /** @type {any[]} */ let nodes = Array.prototype.slice.call(arguments);
 
     if (this.parent) {
       for (let node of nodes) {
@@ -100,7 +101,7 @@ module.exports = class Node {
     return this;
   }
 
-  moveTo (container) {
+  moveTo (/** @type {any} */ container) {
     this.cleanRaws(this.root() === container.root());
     this.remove();
 
@@ -109,7 +110,7 @@ module.exports = class Node {
     return this;
   }
 
-  moveBefore (node) {
+  moveBefore (/** @type {any} */ node) {
     this.cleanRaws(this.root() === node.root());
     this.remove();
 
@@ -118,7 +119,7 @@ module.exports = class Node {
     return this;
   }
 
-  moveAfter (node) {
+  moveAfter (/** @type {any} */ node) {
     this.cleanRaws(this.root() === node.root());
     this.remove();
     node.parent.insertAfter(node, this);
@@ -126,27 +127,27 @@ module.exports = class Node {
   }
 
   next () {
-    let index = this.parent.index(this);
+    /** @type {number} */ let index = this.parent.index(this);
 
     return this.parent.nodes[index + 1];
   }
 
   prev () {
-    let index = this.parent.index(this);
+    /** @type {number} */ let index = this.parent.index(this);
 
     return this.parent.nodes[index - 1];
   }
 
   toJSON () {
-    let fixed = { };
+    /** @type {Record<string, any>} */ let fixed = { };
 
     for (let name in this) {
       if (!this.hasOwnProperty(name)) continue;
       if (name === 'parent') continue;
-      let value = this[name];
+      /** @type {any} */ let value = this[name];
 
       if (value instanceof Array) {
-        fixed[name] = value.map(i => {
+        fixed[name] = value.map(/** @returns {any} */ (/** @type {any} */ i) => {
           if (typeof i === 'object' && i.toJSON) {
             return i.toJSON();
           }
@@ -167,23 +168,23 @@ module.exports = class Node {
   }
 
   root () {
-    let result = this;
+    /** @type {any} */ let result = this;
 
     while (result.parent) result = result.parent;
 
     return result;
   }
 
-  cleanRaws (keepBetween) {
+  cleanRaws (/** @type {boolean | undefined} */ keepBetween) {
     delete this.raws.before;
     delete this.raws.after;
     if (!keepBetween) delete this.raws.between;
   }
 
-  positionInside (index) {
-    let string = this.toString(),
-      column = this.source.start.column,
-      line   = this.source.start.line;
+  positionInside (/** @type {number} */ index) {
+    /** @type {string} */ let string = this.toString(),
+      /** @type {number} */ column = this.source.start.column,
+      /** @type {number} */ line   = this.source.start.line;
 
     for (let i = 0; i < index; i++) {
       if (string[i] === '\n') {
@@ -198,14 +199,14 @@ module.exports = class Node {
     return { line, column };
   }
 
-  positionBy (opts) {
-    let pos = this.source.start;
+  positionBy (/** @type {any} */ opts) {
+    /** @type {any} */ let pos = this.source.start;
 
     if (Object(opts).index) {
       pos = this.positionInside(opts.index);
     }
     else if (Object(opts).word) {
-      let index = this.toString().indexOf(opts.word);
+      /** @type {number} */ let index = this.toString().indexOf(opts.word);
       if (index !== -1) pos = this.positionInside(index);
     }
 

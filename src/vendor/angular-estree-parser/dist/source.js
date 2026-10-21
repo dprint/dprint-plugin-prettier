@@ -1,18 +1,29 @@
 // @nts-check
 import { getCharacterIndex, sourceSpanToLocationInformation } from "./utilities.js";
 //#region src/source.ts
+/**
+ * A node of ESTree that the transforms write out, which `createNode` gives where it is in the text
+ * @typedef {{
+ *   type: string,
+ *   start?: number,
+ *   end?: number,
+ *   range?: number[],
+ *   extra?: any,
+ *   [key: string]: any,
+ * }} NGNode
+ */
 var Source = class {
 	/** @type {string} */ text;
 	constructor(/** @type {string} */ text) {
 		this.text = text;
 	}
-	getCharacterIndex(pattern, index) {
+	/** @returns {number} */ getCharacterIndex(/** @type {string | RegExp} */ pattern, /** @type {number} */ index) {
 		return getCharacterIndex(this.text, pattern, index);
 	}
-	transformSpan(span) {
+	transformSpan(/** @type {{ start: number, end: number }} */ span) {
 		return sourceSpanToLocationInformation(span);
 	}
-	createNode(properties, location) {
+	/** @returns {NGNode} */ createNode(/** @type {NGNode} */ properties, /** @type {any} */ location) {
 		let start = properties.start;
 		let end = properties.end;
 		let range = properties.range;
@@ -28,7 +39,7 @@ var Source = class {
 		else if (typeof start === "number" && typeof end === "number") range = [start, end];
 		/* c8 ignore next 3 @preserve */
 		if (!(typeof start === "number" && typeof end === "number" && range)) throw new Error("Missing location information");
-		const node = {
+		/** @type {NGNode} */ const node = {
 			...properties,
 			start,
 			end,
