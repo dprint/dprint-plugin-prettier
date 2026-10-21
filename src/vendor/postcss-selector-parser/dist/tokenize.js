@@ -29,8 +29,8 @@ var singleQuote = 39,
     atEnd = /[ \n\t\r\{\(\)'"\\;/]/g,
     wordEnd = /[ \n\t\r\(\)\*:;@!&'"\+\|~>,\[\]\\]|\/(?=\*)/g;
 
-/** @returns {any[]} */ function tokenize(input) {
-    var tokens = [];
+/** @returns {[string, string, number, number, number?, number?, number?][]} */ function tokenize(input) {
+    /** @type {[string, string, number, number, number?, number?, number?][]} */ var tokens = [];
     /** @type {string} */ var css = input.css.valueOf();
 
     var /** @type {number | undefined} */ code = void 0,

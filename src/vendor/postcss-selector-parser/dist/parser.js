@@ -89,7 +89,7 @@ var Parser = function () {
 
         this.input = input;
         this.lossy = input.options.lossless === false;
-        this.position = 0;
+        /** @type {number} */ this.position = 0;
         this.root = new _root2.default();
 
         var selectors = new _selector2.default();
@@ -97,9 +97,9 @@ var Parser = function () {
 
         this.current = selectors;
         if (this.lossy) {
-            this.tokens = (0, _tokenize2.default)({ safe: input.safe, css: input.css.trim() });
+            /** @type {[string, string, number, number, number?, number?, number?][]} */ this.tokens = (0, _tokenize2.default)({ safe: input.safe, css: input.css.trim() });
         } else {
-            this.tokens = (0, _tokenize2.default)(input);
+            /** @type {[string, string, number, number, number?, number?, number?][]} */ this.tokens = (0, _tokenize2.default)(input);
         }
 
         return this.loop();
@@ -597,7 +597,7 @@ var Parser = function () {
         return this.lossy && value && typeof value === 'string' ? value.trim() : value;
     };
 
-    Parser.prototype.parseParenthesisToken = /** @returns {string} */ function parseParenthesisToken(/** @type {any[]} */ token) {
+    Parser.prototype.parseParenthesisToken = /** @returns {string} */ function parseParenthesisToken(/** @type {[string, string, number, number, number?, number?, number?]} */ token) {
         if (!this.lossy) {
             return token[1];
         }
@@ -622,17 +622,17 @@ var Parser = function () {
 
     _createClass(Parser, [{
         key: 'currToken',
-        get: /** @returns {any[] | undefined} */ function get() {
+        get: /** @returns {[string, string, number, number, number?, number?, number?] | undefined} */ function get() {
             return this.tokens[this.position];
         }
     }, {
         key: 'nextToken',
-        get: /** @returns {any[] | undefined} */ function get() {
+        get: /** @returns {[string, string, number, number, number?, number?, number?] | undefined} */ function get() {
             return this.tokens[this.position + 1];
         }
     }, {
         key: 'prevToken',
-        get: /** @returns {any[] | undefined} */ function get() {
+        get: /** @returns {[string, string, number, number, number?, number?, number?] | undefined} */ function get() {
             return this.tokens[this.position - 1];
         }
     }]);
