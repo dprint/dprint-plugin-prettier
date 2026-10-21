@@ -412,6 +412,12 @@ function getFirst(/** @type {any[]} */ list) {
     return 0 === list.length ? void 0 : list[0];
 }
 
+/**
+@typedef {{ line: number, column: number }} SourcePosition
+@typedef {{ start: HbsPosition, end: HbsPosition }} HbsPositions
+@typedef {{ start: CharPosition, end: CharPosition }} CharPositions
+*/
+
 const UNKNOWN_POSITION = Object.freeze({
     line: 1,
     column: 0
@@ -705,9 +711,13 @@ class SourceSlice {
     }
 }
 
+/**
+ * @property {Source} source
+ * @property {CharPositions} charPositions
+ */
 class CharPositionSpan {
     #locPosSpan;
-    constructor(/** @type {Source} */ source, charPositions) {
+    constructor(/** @type {Source} */ source, /** @type {CharPositions} */ charPositions) {
         this.source = source, this.charPositions = charPositions, this.kind = "CharPosition", 
         this.#locPosSpan = null;
     }
@@ -747,11 +757,15 @@ class CharPositionSpan {
     }
 }
 
+/**
+ * @property {Source} source
+ * @property {HbsPositions} hbsPositions
+ */
 class HbsSpan {
     #charPosSpan;
     // the source location from Handlebars + AST Plugins -- could be wrong
     #providedHbsLoc;
-    constructor(/** @type {Source} */ source, hbsPositions, providedHbsLoc = null) {
+    constructor(/** @type {Source} */ source, /** @type {HbsPositions} */ hbsPositions, providedHbsLoc = null) {
         this.source = source, this.hbsPositions = hbsPositions, this.kind = "HbsPosition", 
         this.#charPosSpan = null, this.#providedHbsLoc = providedHbsLoc;
     }
@@ -962,6 +976,9 @@ class SourceOffset {
     }
 }
 
+/**
+ * @property {Source} source
+ */
 class CharPosition {
     constructor(/** @type {Source} */ source, /** @type {number} */ charPos) {
         this.source = source, this.charPos = charPos, this.kind = "CharPosition", this._locPos = null;
@@ -1006,8 +1023,12 @@ class CharPosition {
     }
 }
 
+/**
+ * @property {Source} source
+ * @property {SourcePosition} hbsPos
+ */
 class HbsPosition {
-    constructor(/** @type {Source} */ source, hbsPos, charPos = null) {
+    constructor(/** @type {Source} */ source, /** @type {SourcePosition} */ hbsPos, charPos = null) {
         this.source = source, this.hbsPos = hbsPos, this.kind = "HbsPosition", this._charPos = null === charPos ? null : new CharPosition(source, charPos);
     }
     /**
@@ -1109,7 +1130,7 @@ class Source {
             }
         });
     }
-    hbsPosFor(/** @type {number} */ offset) {
+    /** @returns {SourcePosition | null} */ hbsPosFor(/** @type {number} */ offset) {
         let seenLines = 0, seenChars = 0;
         if (offset > this.source.length) return null;
         for (;;) {
@@ -1121,7 +1142,7 @@ class Source {
             seenLines += 1, seenChars = nextLine + 1;
         }
     }
-    /** @returns {number} */ charPosFor(position) {
+    /** @returns {number} */ charPosFor(/** @type {SourcePosition} */ position) {
         let {line: line, column: column} = position, sourceLength = this.source.length, seenLines = 0, seenChars = 0;
         for (;seenChars < sourceLength; ) {
             let nextLine = this.source.indexOf("\n", seenChars);
@@ -2008,6 +2029,11 @@ class {
     }
 };
 
+/**
+ * @property {EventedTokenizer} tokenizer
+ * @property {string[]} lines
+ * @property {Source} source
+ */
 class Parser {
     constructor(/** @type {Source} */ source, entityParser = new EntityParser(HTML5NamedCharRefs), mode = "precompile") {
         this.elementStack = [], this.currentAttribute = null, this.currentNode = null, this.source = source, 

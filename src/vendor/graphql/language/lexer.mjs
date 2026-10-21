@@ -285,7 +285,7 @@ export class Lexer {
     }
     throw syntaxError(lexer.source, position, 'Unterminated string.');
 }
-function readEscapedUnicodeVariableWidth(lexer, position) {
+/** @returns {{ value: string, size: number }} */ function readEscapedUnicodeVariableWidth(/** @type {Lexer} */ lexer, /** @type {number} */ position) {
     const body = lexer.source.body;
     let point = 0;
     let size = 3;
@@ -304,7 +304,7 @@ function readEscapedUnicodeVariableWidth(lexer, position) {
     }
     throw syntaxError(lexer.source, position, `Invalid Unicode escape sequence: "${body.slice(position, position + size)}".`);
 }
-function readEscapedUnicodeFixedWidth(lexer, position) {
+/** @returns {{ value: string, size: number }} */ function readEscapedUnicodeFixedWidth(/** @type {Lexer} */ lexer, /** @type {number} */ position) {
     const body = lexer.source.body;
     const code = read16BitHexCode(body, position + 2);
     if (isUnicodeScalarValue(code)) {
@@ -321,13 +321,13 @@ function readEscapedUnicodeFixedWidth(lexer, position) {
     }
     throw syntaxError(lexer.source, position, `Invalid Unicode escape sequence: "${body.slice(position, position + 6)}".`);
 }
-function read16BitHexCode(body, position) {
+/** @returns {number} */ function read16BitHexCode(/** @type {string} */ body, /** @type {number} */ position) {
     return ((readHexDigit(body.charCodeAt(position)) << 12) |
         (readHexDigit(body.charCodeAt(position + 1)) << 8) |
         (readHexDigit(body.charCodeAt(position + 2)) << 4) |
         readHexDigit(body.charCodeAt(position + 3)));
 }
-function readHexDigit(code) {
+/** @returns {number} */ function readHexDigit(/** @type {number} */ code) {
     return code >= 0x0030 && code <= 0x0039
         ? code - 0x0030
         : code >= 0x0041 && code <= 0x0046
@@ -336,7 +336,7 @@ function readHexDigit(code) {
                 ? code - 0x0057
                 : -1;
 }
-function readEscapedCharacter(/** @type {Lexer} */ lexer, /** @type {number} */ position) {
+/** @returns {{ value: string, size: number }} */ function readEscapedCharacter(/** @type {Lexer} */ lexer, /** @type {number} */ position) {
     const body = lexer.source.body;
     /** @type {number} */ const code = body.charCodeAt(position + 1);
     switch (code) {

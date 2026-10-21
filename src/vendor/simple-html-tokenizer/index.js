@@ -48,7 +48,7 @@ var EntityParser = /** @class */ (function () {
 }
 
 var EventedTokenizer = /** @class */ (function () {
-    function EventedTokenizer(delegate, entityParser, /** @type {string} */ mode) {
+    function EventedTokenizer(delegate, /** @type {EntityParser} */ entityParser, /** @type {string} */ mode) {
         if (mode === void 0) { mode = 'precompile'; }
         this.delegate = delegate;
         this.entityParser = entityParser;
@@ -60,7 +60,7 @@ var EventedTokenizer = /** @class */ (function () {
         this.index = -1;
         this.tagNameBuffer = '';
         this.states = {
-            beforeData: function () {
+            beforeData: /** @this {EventedTokenizer} */ function () {
                 var char = this.peek();
                 if (char === '<' && !this.isIgnoredEndTag()) {
                     this.transitionTo("tagOpen" /* tagOpen */);
@@ -78,7 +78,7 @@ var EventedTokenizer = /** @class */ (function () {
                     this.delegate.beginData();
                 }
             },
-            data: function () {
+            data: /** @this {EventedTokenizer} */ function () {
                 var char = this.peek();
                 var tag = this.tagNameBuffer;
                 if (char === '<' && !this.isIgnoredEndTag()) {
@@ -96,7 +96,7 @@ var EventedTokenizer = /** @class */ (function () {
                     this.delegate.appendToData(char);
                 }
             },
-            tagOpen: function () {
+            tagOpen: /** @this {EventedTokenizer} */ function () {
                 var char = this.consume();
                 if (char === '!') {
                     this.transitionTo("markupDeclarationOpen" /* markupDeclarationOpen */);
@@ -111,7 +111,7 @@ var EventedTokenizer = /** @class */ (function () {
                     this.appendToTagName(char);
                 }
             },
-            markupDeclarationOpen: function () {
+            markupDeclarationOpen: /** @this {EventedTokenizer} */ function () {
                 var char = this.consume();
                 if (char === '-' && this.peek() === '-') {
                     this.consume();
@@ -133,13 +133,13 @@ var EventedTokenizer = /** @class */ (function () {
                     }
                 }
             },
-            doctype: function () {
+            doctype: /** @this {EventedTokenizer} */ function () {
                 var char = this.consume();
                 if (isSpace(char)) {
                     this.transitionTo("beforeDoctypeName" /* beforeDoctypeName */);
                 }
             },
-            beforeDoctypeName: function () {
+            beforeDoctypeName: /** @this {EventedTokenizer} */ function () {
                 var char = this.consume();
                 if (isSpace(char)) {
                     return;
@@ -150,7 +150,7 @@ var EventedTokenizer = /** @class */ (function () {
                         this.delegate.appendToDoctypeName(char.toLowerCase());
                 }
             },
-            doctypeName: function () {
+            doctypeName: /** @this {EventedTokenizer} */ function () {
                 var char = this.consume();
                 if (isSpace(char)) {
                     this.transitionTo("afterDoctypeName" /* afterDoctypeName */);
@@ -165,7 +165,7 @@ var EventedTokenizer = /** @class */ (function () {
                         this.delegate.appendToDoctypeName(char.toLowerCase());
                 }
             },
-            afterDoctypeName: function () {
+            afterDoctypeName: /** @this {EventedTokenizer} */ function () {
                 var char = this.consume();
                 if (isSpace(char)) {
                     return;
@@ -195,7 +195,7 @@ var EventedTokenizer = /** @class */ (function () {
                     }
                 }
             },
-            afterDoctypePublicKeyword: function () {
+            afterDoctypePublicKeyword: /** @this {EventedTokenizer} */ function () {
                 var char = this.peek();
                 if (isSpace(char)) {
                     this.transitionTo("beforeDoctypePublicIdentifier" /* beforeDoctypePublicIdentifier */);
@@ -216,7 +216,7 @@ var EventedTokenizer = /** @class */ (function () {
                     this.transitionTo("beforeData" /* beforeData */);
                 }
             },
-            doctypePublicIdentifierDoubleQuoted: function () {
+            doctypePublicIdentifierDoubleQuoted: /** @this {EventedTokenizer} */ function () {
                 var char = this.consume();
                 if (char === '"') {
                     this.transitionTo("afterDoctypePublicIdentifier" /* afterDoctypePublicIdentifier */);
@@ -231,7 +231,7 @@ var EventedTokenizer = /** @class */ (function () {
                         this.delegate.appendToDoctypePublicIdentifier(char);
                 }
             },
-            doctypePublicIdentifierSingleQuoted: function () {
+            doctypePublicIdentifierSingleQuoted: /** @this {EventedTokenizer} */ function () {
                 var char = this.consume();
                 if (char === "'") {
                     this.transitionTo("afterDoctypePublicIdentifier" /* afterDoctypePublicIdentifier */);
@@ -246,7 +246,7 @@ var EventedTokenizer = /** @class */ (function () {
                         this.delegate.appendToDoctypePublicIdentifier(char);
                 }
             },
-            afterDoctypePublicIdentifier: function () {
+            afterDoctypePublicIdentifier: /** @this {EventedTokenizer} */ function () {
                 var char = this.consume();
                 if (isSpace(char)) {
                     this.transitionTo("betweenDoctypePublicAndSystemIdentifiers" /* betweenDoctypePublicAndSystemIdentifiers */);
@@ -263,7 +263,7 @@ var EventedTokenizer = /** @class */ (function () {
                     this.transitionTo("doctypeSystemIdentifierSingleQuoted" /* doctypeSystemIdentifierSingleQuoted */);
                 }
             },
-            betweenDoctypePublicAndSystemIdentifiers: function () {
+            betweenDoctypePublicAndSystemIdentifiers: /** @this {EventedTokenizer} */ function () {
                 var char = this.consume();
                 if (isSpace(char)) {
                     return;
@@ -280,7 +280,7 @@ var EventedTokenizer = /** @class */ (function () {
                     this.transitionTo("doctypeSystemIdentifierSingleQuoted" /* doctypeSystemIdentifierSingleQuoted */);
                 }
             },
-            doctypeSystemIdentifierDoubleQuoted: function () {
+            doctypeSystemIdentifierDoubleQuoted: /** @this {EventedTokenizer} */ function () {
                 var char = this.consume();
                 if (char === '"') {
                     this.transitionTo("afterDoctypeSystemIdentifier" /* afterDoctypeSystemIdentifier */);
@@ -295,7 +295,7 @@ var EventedTokenizer = /** @class */ (function () {
                         this.delegate.appendToDoctypeSystemIdentifier(char);
                 }
             },
-            doctypeSystemIdentifierSingleQuoted: function () {
+            doctypeSystemIdentifierSingleQuoted: /** @this {EventedTokenizer} */ function () {
                 var char = this.consume();
                 if (char === "'") {
                     this.transitionTo("afterDoctypeSystemIdentifier" /* afterDoctypeSystemIdentifier */);
@@ -310,7 +310,7 @@ var EventedTokenizer = /** @class */ (function () {
                         this.delegate.appendToDoctypeSystemIdentifier(char);
                 }
             },
-            afterDoctypeSystemIdentifier: function () {
+            afterDoctypeSystemIdentifier: /** @this {EventedTokenizer} */ function () {
                 var char = this.consume();
                 if (isSpace(char)) {
                     return;
@@ -321,7 +321,7 @@ var EventedTokenizer = /** @class */ (function () {
                     this.transitionTo("beforeData" /* beforeData */);
                 }
             },
-            commentStart: function () {
+            commentStart: /** @this {EventedTokenizer} */ function () {
                 var char = this.consume();
                 if (char === '-') {
                     this.transitionTo("commentStartDash" /* commentStartDash */);
@@ -335,7 +335,7 @@ var EventedTokenizer = /** @class */ (function () {
                     this.transitionTo("comment" /* comment */);
                 }
             },
-            commentStartDash: function () {
+            commentStartDash: /** @this {EventedTokenizer} */ function () {
                 var char = this.consume();
                 if (char === '-') {
                     this.transitionTo("commentEnd" /* commentEnd */);
@@ -349,7 +349,7 @@ var EventedTokenizer = /** @class */ (function () {
                     this.transitionTo("comment" /* comment */);
                 }
             },
-            comment: function () {
+            comment: /** @this {EventedTokenizer} */ function () {
                 var char = this.consume();
                 if (char === '-') {
                     this.transitionTo("commentEndDash" /* commentEndDash */);
@@ -358,7 +358,7 @@ var EventedTokenizer = /** @class */ (function () {
                     this.delegate.appendToCommentData(char);
                 }
             },
-            commentEndDash: function () {
+            commentEndDash: /** @this {EventedTokenizer} */ function () {
                 var char = this.consume();
                 if (char === '-') {
                     this.transitionTo("commentEnd" /* commentEnd */);
@@ -368,7 +368,7 @@ var EventedTokenizer = /** @class */ (function () {
                     this.transitionTo("comment" /* comment */);
                 }
             },
-            commentEnd: function () {
+            commentEnd: /** @this {EventedTokenizer} */ function () {
                 var char = this.consume();
                 if (char === '>') {
                     this.delegate.finishComment();
@@ -379,7 +379,7 @@ var EventedTokenizer = /** @class */ (function () {
                     this.transitionTo("comment" /* comment */);
                 }
             },
-            tagName: function () {
+            tagName: /** @this {EventedTokenizer} */ function () {
                 var char = this.consume();
                 if (isSpace(char)) {
                     this.transitionTo("beforeAttributeName" /* beforeAttributeName */);
@@ -395,7 +395,7 @@ var EventedTokenizer = /** @class */ (function () {
                     this.appendToTagName(char);
                 }
             },
-            endTagName: function () {
+            endTagName: /** @this {EventedTokenizer} */ function () {
                 var char = this.consume();
                 if (isSpace(char)) {
                     this.transitionTo("beforeAttributeName" /* beforeAttributeName */);
@@ -414,7 +414,7 @@ var EventedTokenizer = /** @class */ (function () {
                     this.appendToTagName(char);
                 }
             },
-            beforeAttributeName: function () {
+            beforeAttributeName: /** @this {EventedTokenizer} */ function () {
                 var char = this.peek();
                 if (isSpace(char)) {
                     this.consume();
@@ -441,7 +441,7 @@ var EventedTokenizer = /** @class */ (function () {
                     this.delegate.beginAttribute();
                 }
             },
-            attributeName: function () {
+            attributeName: /** @this {EventedTokenizer} */ function () {
                 var char = this.peek();
                 if (isSpace(char)) {
                     this.transitionTo("afterAttributeName" /* afterAttributeName */);
@@ -474,7 +474,7 @@ var EventedTokenizer = /** @class */ (function () {
                     this.delegate.appendToAttributeName(char);
                 }
             },
-            afterAttributeName: function () {
+            afterAttributeName: /** @this {EventedTokenizer} */ function () {
                 var char = this.peek();
                 if (isSpace(char)) {
                     this.consume();
@@ -506,7 +506,7 @@ var EventedTokenizer = /** @class */ (function () {
                     this.delegate.appendToAttributeName(char);
                 }
             },
-            beforeAttributeValue: function () {
+            beforeAttributeValue: /** @this {EventedTokenizer} */ function () {
                 var char = this.peek();
                 if (isSpace(char)) {
                     this.consume();
@@ -535,7 +535,7 @@ var EventedTokenizer = /** @class */ (function () {
                     this.delegate.appendToAttributeValue(char);
                 }
             },
-            attributeValueDoubleQuoted: function () {
+            attributeValueDoubleQuoted: /** @this {EventedTokenizer} */ function () {
                 var char = this.consume();
                 if (char === '"') {
                     this.delegate.finishAttributeValue();
@@ -548,7 +548,7 @@ var EventedTokenizer = /** @class */ (function () {
                     this.delegate.appendToAttributeValue(char);
                 }
             },
-            attributeValueSingleQuoted: function () {
+            attributeValueSingleQuoted: /** @this {EventedTokenizer} */ function () {
                 var char = this.consume();
                 if (char === "'") {
                     this.delegate.finishAttributeValue();
@@ -561,7 +561,7 @@ var EventedTokenizer = /** @class */ (function () {
                     this.delegate.appendToAttributeValue(char);
                 }
             },
-            attributeValueUnquoted: function () {
+            attributeValueUnquoted: /** @this {EventedTokenizer} */ function () {
                 var char = this.peek();
                 if (isSpace(char)) {
                     this.delegate.finishAttributeValue();
@@ -588,7 +588,7 @@ var EventedTokenizer = /** @class */ (function () {
                     this.delegate.appendToAttributeValue(char);
                 }
             },
-            afterAttributeValueQuoted: function () {
+            afterAttributeValueQuoted: /** @this {EventedTokenizer} */ function () {
                 var char = this.peek();
                 if (isSpace(char)) {
                     this.consume();
@@ -607,7 +607,7 @@ var EventedTokenizer = /** @class */ (function () {
                     this.transitionTo("beforeAttributeName" /* beforeAttributeName */);
                 }
             },
-            selfClosingStartTag: function () {
+            selfClosingStartTag: /** @this {EventedTokenizer} */ function () {
                 var char = this.peek();
                 if (char === '>') {
                     this.consume();
@@ -619,7 +619,7 @@ var EventedTokenizer = /** @class */ (function () {
                     this.transitionTo("beforeAttributeName" /* beforeAttributeName */);
                 }
             },
-            endTagOpen: function () {
+            endTagOpen: /** @this {EventedTokenizer} */ function () {
                 var char = this.consume();
                 if (char === '@' || char === ':' || isAlpha(char)) {
                     this.transitionTo("endTagName" /* endTagName */);
