@@ -13,7 +13,7 @@ import {
 import { printDocToString } from "../../document/printer/printer.js";
 import getStringWidth from "../../utilities/get-string-width.js";
 
-function printTable(/** @type {AstPath} */ path, options, /** @type {() => any} */ print) {
+function printTable(/** @type {AstPath} */ path, options, /** @type {(selector?: any, args?: any) => any} */ print) {
   /** @type {{ node: MdastNode }} */ const { node } = path;
 
   const columnMaxWidths = [];

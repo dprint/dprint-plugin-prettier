@@ -3,17 +3,25 @@
 
 module.exports = factory
 
+/**
+ * A node that the tokenizers write out, which the tokenizer gives a position and adds to its parent
+ * @typedef {{ type: string, value?: string, children?: RemarkNode[], position?: RemarkPosition }} RemarkNode
+ * Where a node is, with the indentation of each of its lines after the first
+ * @typedef {{ start: RemarkPoint, end: RemarkPoint, indent?: number[] }} RemarkPosition
+ * @typedef {{ line: number, column: number, offset?: number }} RemarkPoint
+ */
+
 // Construct a tokenizer.  This creates both `tokenizeInline` and `tokenizeBlock`.
 function factory(/** @type {string} */ type) {
   return tokenize
 
   // Tokenizer for a bound `type`.
-  /** @returns {any[]} */ /** @this {import("./parser.js").RemarkParser} */ function tokenize(/** @type {StringView} */ value, location) {
+  /** @returns {any[]} */ /** @this {import("./parser.js").RemarkParser} */ function tokenize(/** @type {StringView} */ value, /** @type {RemarkPoint} */ location) {
     var self = this
     var offset = self.offset
     var tokens = []
-    var methods = self[type + 'Methods']
-    var tokenizers = self[type + 'Tokenizers']
+    /** @type {string[]} */ var methods = self[type + 'Methods']
+    /** @type {Record<string, any>} */ var tokenizers = self[type + 'Tokenizers']
     /** @type {number} */ var line = location.line
     /** @type {number} */ var column = location.column
     /** @type {number} */ var index
@@ -109,7 +117,7 @@ function factory(/** @type {string} */ type) {
     // Get offset.  Called before the first character is eaten to retrieve the
     // range’s offsets.
     function getOffset() {
-      var indentation = []
+      /** @type {number[]} */ var indentation = []
       /** @type {number} */ var pos = line + 1
 
       // Done.  Called when the last character is eaten to retrieve the range’s
@@ -128,8 +136,8 @@ function factory(/** @type {string} */ type) {
     }
 
     // Get the current position.
-    function now() {
-      var pos = {line: line, column: column}
+    /** @returns {RemarkPoint} */ function now() {
+      /** @type {RemarkPoint} */ var pos = {line: line, column: column}
 
       pos.offset = self.toOffset(pos)
 
@@ -164,10 +172,10 @@ function factory(/** @type {string} */ type) {
       return update
 
       // Add the position to a node.
-      function update(node, /** @type {any[] | undefined} */ indent) {
-        var previous = node.position
-        var start = previous ? previous.start : before
-        var combined = []
+      function update(/** @type {RemarkNode} */ node, /** @type {any[] | undefined} */ indent) {
+        /** @type {RemarkPosition | undefined} */ var previous = node.position
+        /** @type {RemarkPoint} */ var start = previous ? previous.start : before
+        /** @type {any[]} */ var combined = []
         /** @type {number | undefined} */ var n = previous && previous.end.line
         /** @type {number} */ var l = before.line
 
@@ -200,9 +208,9 @@ function factory(/** @type {string} */ type) {
 
     // Add `node` to `parent`s children or to `tokens`.  Performs merges where
     // possible.
-    function add(node, parent) {
-      var children = parent ? parent.children : tokens
-      var previous = children[children.length - 1]
+    function add(/** @type {RemarkNode} */ node, /** @type {RemarkNode | undefined} */ parent) {
+      /** @type {any[]} */ var children = parent ? parent.children : tokens
+      /** @type {RemarkNode | undefined} */ var previous = children[children.length - 1]
       var fn
 
       if (
@@ -283,9 +291,9 @@ function factory(/** @type {string} */ type) {
 }
 
 // Check whether a node is mergeable with adjacent nodes.
-/** @returns {boolean} */ function mergeable(node) {
-  var start
-  var end
+/** @returns {boolean} */ function mergeable(/** @type {RemarkNode} */ node) {
+  /** @type {RemarkPoint} */ var start
+  /** @type {RemarkPoint} */ var end
 
   if (node.type !== 'text' || !node.position) {
     return true
@@ -301,7 +309,7 @@ function factory(/** @type {string} */ type) {
 }
 
 // Merge two text nodes: `node` into `prev`.
-function mergeText(previous, node) {
+function mergeText(/** @type {RemarkNode} */ previous, /** @type {RemarkNode} */ node) {
   previous.value += node.value
 
   return previous

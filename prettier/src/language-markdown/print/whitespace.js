@@ -9,7 +9,7 @@ import {
 } from "../utilities.js";
 
 /**
- * @import {WordNode, WhitespaceValue, WordKind} from "../utilities.js"
+ * @import {WordNode, WhitespaceValue, WordKind, MdastNode, MarkdownOptions} from "../utilities.js"
  * @import AstPath from "../../common/ast-path.js"
  * @typedef {"always" | "never" | "preserve"} ProseWrap
  * @typedef {{ next?: WordNode | null, previous?: WordNode | null }}
@@ -35,8 +35,9 @@ const lineBreakBetweenTheseAndCJConvertsToSpace = new Set(
  * @returns {boolean} `true` if Space tends to be inserted between CJ and
  * non-CJK, `false` otherwise.
  */
-function isInSentenceWithCJSpaces(/** @type {AstPath} */ { parent: sentenceNode }) {
+function isInSentenceWithCJSpaces(/** @type {AstPath & { parent: MdastNode }} */ { parent: sentenceNode }) {
   if (sentenceNode.usesCJSpaces === undefined) {
+    /** @type {Record<string, number>} */
     const stats = { " ": 0, "": 0 };
     const { children } = sentenceNode;
 
@@ -179,11 +180,11 @@ function isNonCJKOrKoreanLetter(kind) {
  * @param {boolean} isLink
  * @returns {boolean}
  */
-function isBreakable(path, value, proseWrap, isLink, options) {
+function isBreakable(path, value, proseWrap, isLink, /** @type {MarkdownOptions} */ options) {
   if (
     proseWrap !== "always" ||
     path.hasAncestor(
-      (node) =>
+      /** @returns {boolean} */ (/** @type {MdastNode} */ node) =>
         SINGLE_LINE_NODE_TYPES.has(node.type) ||
         (node.type === "heading" &&
           (options.parser === "mdx" || !isSetextHeading(node))),
@@ -247,7 +248,7 @@ function isBreakable(path, value, proseWrap, isLink, options) {
  * @param {WhitespaceValue} value
  * @param {ProseWrap} proseWrap
  * @param {boolean} isLink Special mode of (un)wrapping that preserves the
- * @param {any} options Special mode of (un)wrapping that preserves the
+ * @param {MarkdownOptions} options Special mode of (un)wrapping that preserves the
  * normalized form of link labels. https://spec.commonmark.org/0.30/#matches
  */
 function printWhitespace(path, value, proseWrap, isLink, options) {

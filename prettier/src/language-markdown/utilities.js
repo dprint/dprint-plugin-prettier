@@ -79,16 +79,24 @@ const K_REGEXP = /\p{Script_Extensions=Hangul}/u;
  *   isAligned?: boolean,
  *   hasIndentedCodeblock?: boolean,
  *   align?: any[],
+ *   raw?: string,
+ *   originalLabelText?: string,
+ *   usesCJSpaces?: boolean,
+ *   kind?: string,
+ *   isCJ?: boolean,
+ *   hasLeadingPunctuation?: boolean,
+ *   hasTrailingPunctuation?: boolean,
  * }} MdastNode
  * Where a node is in the text, as unist says
  * @typedef {{ start: MdastPoint, end: MdastPoint }} MdastPosition
- * @typedef {{ line: number, column: number, offset?: number }} MdastPoint
+ * @typedef {{ line: number, column: number, offset: number }} MdastPoint
  * The options that prettier's markdown printers read
  * @typedef {{
  *   parser: string,
  *   originalText: string,
  *   proseWrap: string,
  *   singleQuote: boolean,
+ *   tabWidth: number,
  *   __inJsTemplate?: boolean,
  * }} MarkdownOptions
  */
@@ -243,7 +251,7 @@ function getOrderedListItemInfo(
   return { number: Number(numberText), leadingSpaces };
 }
 
-/** @returns {boolean} */ function hasGitDiffFriendlyOrderedList(/** @type {import("./utilities.js").MdastNode} */ node, options) {
+/** @returns {boolean} */ function hasGitDiffFriendlyOrderedList(/** @type {import("./utilities.js").MdastNode} */ node, /** @type {MarkdownOptions} */ options) {
   if (!node.ordered || node.children.length < 2) {
     return false;
   }
@@ -269,7 +277,7 @@ function getOrderedListItemInfo(
 // The final new line should not include in value
 // https://github.com/remarkjs/remark/issues/512
 // TODO[@fisker]: Use `node.value` directly when we update mdx to use latest remark
-function getFencedCodeBlockValue(/** @type {import("./utilities.js").MdastNode} */ node, originalText) {
+function getFencedCodeBlockValue(/** @type {import("./utilities.js").MdastNode} */ node, /** @type {string} */ originalText) {
   const { value } = node;
   if (
     node.position.end.offset === originalText.length &&
@@ -282,10 +290,15 @@ function getFencedCodeBlockValue(/** @type {import("./utilities.js").MdastNode} 
   return value;
 }
 
+/**
+ * @param {MdastNode} ast
+ * @param {(node: MdastNode, index: number | null, parentStack: MdastNode[]) => MdastNode} handler
+ * @returns {MdastNode}
+ */
 function mapAst(ast, handler) {
-  return (function preorder(/** @type {import("./utilities.js").MdastNode} */ node, /** @type {number | null} */ index, parentStack) {
-    const newNode = { ...handler(node, index, parentStack) };
-    newNode.children &&= newNode.children.map((child, index) =>
+  return (/** @returns {MdastNode} */ function preorder(/** @type {MdastNode} */ node, /** @type {number | null} */ index, /** @type {MdastNode[]} */ parentStack) {
+    /** @type {MdastNode} */ const newNode = { ...handler(node, index, parentStack) };
+    newNode.children &&= newNode.children.map(/** @returns {MdastNode} */ (/** @type {MdastNode} */ child, /** @type {number} */ index) =>
       preorder(child, index, [newNode, ...parentStack]),
     );
 
@@ -304,6 +317,7 @@ function mapAst(ast, handler) {
 
 /** @return {false | 'next' | 'start' | 'end'} */
 function isPrettierIgnore(/** @type {MdastNode} */ node) {
+  /** @type {RegExpMatchArray | null | undefined} */
   let match;
 
   if (node.type === "html") {
@@ -333,10 +347,10 @@ function isPrettierIgnore(/** @type {MdastNode} */ node) {
   return getNthSiblingIndex(
     node,
     parentNode,
-    /** @returns {boolean} */ (siblingNode) => siblingNode.ordered === node.ordered,
+    /** @returns {boolean} */ (/** @type {MdastNode} */ siblingNode) => siblingNode.ordered === node.ordered,
   );
 
-  /** @returns {number | undefined} */ function getNthSiblingIndex(/** @type {import("./utilities.js").MdastNode} */ node, /** @type {import("./utilities.js").MdastNode} */ parentNode, /** @type {(a0?: any) => any} */ condition) {
+  /** @returns {number | undefined} */ function getNthSiblingIndex(/** @type {import("./utilities.js").MdastNode} */ node, /** @type {import("./utilities.js").MdastNode} */ parentNode, /** @type {(node: MdastNode) => boolean} */ condition) {
     let index = -1;
 
     for (const childNode of parentNode.children) {

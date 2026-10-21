@@ -9,7 +9,7 @@ import { DOC_TYPE_STRING, fill, getDocType } from "../../document/index.js";
 
 /**
  * @param {AstPath} path
- * @param {() => Doc} print
+ * @param {(selector?: any, args?: any) => any} print
  * @returns {Doc}
  */
 function printSentence(path, print) {

@@ -9,7 +9,7 @@ import { printChildren } from "./children.js";
 /**
  * @import AstPath from "../../common/ast-path.js"
  * @import {Doc} from "../../document/index.js"
- * @import {MdastNode} from "../utilities.js"
+ * @import {MdastNode, MarkdownOptions} from "../utilities.js"
  */
 
 // 999,999,999 is the maximum number that can be parsed as a list item number as intended in CommonMark
@@ -18,8 +18,8 @@ const MAXIMUM_ORDERED_LIST_MARKER = 999_999_999;
 
 /**
  * @param {AstPath} path
- * @param {*} options
- * @param {() => Doc} print
+ * @param {MarkdownOptions} options
+ * @param {(selector?: any, args?: any) => any} print
  * @return {Doc}
  */
 function printList(path, options, print) {
@@ -94,13 +94,13 @@ function printList(path, options, print) {
   });
 }
 
-/** @returns {any[]} */ function printListItem(/** @type {AstPath} */ path, options, /** @type {(selector?: any, args?: any) => any} */ print, /** @type {string} */ listPrefix) {
+/** @returns {any[]} */ function printListItem(/** @type {AstPath} */ path, /** @type {MarkdownOptions} */ options, /** @type {(selector?: any, args?: any) => any} */ print, /** @type {string} */ listPrefix) {
   /** @type {{ node: MdastNode }} */ const { node } = path;
   /** @type {string} */ const prefix = node.checked === null ? "" : node.checked ? "[x] " : "[ ] ";
   return [
     prefix,
     printChildren(path, options, print, {
-      processor(/** @type {AstPath} */ { node, isFirst }) {
+      processor(/** @type {AstPath & { node: MdastNode }} */ { node, isFirst }) {
         if ((isFirst && node.type !== "list") || node.type === "html") {
           return align(" ".repeat(prefix.length), print());
         }
@@ -146,8 +146,8 @@ function requiredIndent(path) {
 
 /**
  * @param {AstPath} path
- * @param {*} options
- * @param {() => Doc} print
+ * @param {MarkdownOptions} options
+ * @param {(selector?: any, args?: any) => any} print
  * @return {Doc}
  */
 function printListLegacy(path, options, print) {
@@ -203,13 +203,13 @@ function printListLegacy(path, options, print) {
   });
 }
 
-/** @returns {any[]} */ function printListItemLegacy(/** @type {AstPath} */ path, options, /** @type {(selector?: any, args?: any) => any} */ print, /** @type {string} */ listPrefix) {
+/** @returns {any[]} */ function printListItemLegacy(/** @type {AstPath} */ path, /** @type {MarkdownOptions} */ options, /** @type {(selector?: any, args?: any) => any} */ print, /** @type {string} */ listPrefix) {
   /** @type {{ node: MdastNode }} */ const { node } = path;
   /** @type {string} */ const prefix = node.checked === null ? "" : node.checked ? "[x] " : "[ ] ";
   return [
     prefix,
     printChildren(path, options, print, {
-      processor(/** @type {AstPath} */ { node, isFirst }) {
+      processor(/** @type {AstPath & { node: MdastNode }} */ { node, isFirst }) {
         if (isFirst && node.type !== "list") {
           return align(" ".repeat(prefix.length), print());
         }
@@ -227,7 +227,7 @@ function printListLegacy(path, options, print) {
   ];
 }
 
-/** @returns {string} */ function alignListPrefix(/** @type {string} */ prefix, options) {
+/** @returns {string} */ function alignListPrefix(/** @type {string} */ prefix, /** @type {MarkdownOptions} */ options) {
   /** @type {number} */ const additionalSpaces = getAdditionalSpaces();
   return (
     prefix +

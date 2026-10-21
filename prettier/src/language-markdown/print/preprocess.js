@@ -1,4 +1,5 @@
 // @nts-check
+/** @import {MdastNode, MdastPosition, MarkdownOptions} from "../utilities.js" */
 import htmlWhitespace from "../../utilities/html-whitespace.js";
 import { getOrderedListItemInfo, mapAst, splitText } from "../utilities.js";
 import { getBlockquoteRawText } from "../utilities/get-blockquote-raw-text.js";
@@ -7,7 +8,7 @@ import { getBlockquoteRawText } from "../utilities/get-blockquote-raw-text.js";
 const isSingleCharRegex = /^\\?.$/su;
 const isNewLineBlockquoteRegex = /^\n *>[ >]*$/;
 
-function preprocess(ast, options) {
+/** @returns {MdastNode} */ function preprocess(/** @type {MdastNode} */ ast, /** @type {MarkdownOptions} */ options) {
   if (options.parser === "mdx") {
     ast = restoreUnescapedCharacter(ast, options);
   } else {
@@ -35,7 +36,7 @@ function preprocess(ast, options) {
   return ast;
 }
 
-function restoreUnescapedCharacter(ast, options) {
+/** @returns {MdastNode} */ function restoreUnescapedCharacter(/** @type {MdastNode} */ ast, /** @type {MarkdownOptions} */ options) {
   return mapAst(ast, (node) => {
     if (node.type !== "text") {
       return node;
@@ -65,7 +66,7 @@ function restoreUnescapedCharacter(ast, options) {
   });
 }
 
-function addRawToText(ast, options) {
+/** @returns {MdastNode} */ function addRawToText(/** @type {MdastNode} */ ast, /** @type {MarkdownOptions} */ options) {
   return mapAst(ast, (node) => {
     if (node.type === "text") {
       // https://github.com/remarkjs/remark-gfm/issues/16
@@ -78,14 +79,17 @@ function addRawToText(ast, options) {
   });
 }
 
-function mergeChildren(ast, /** @type {(a0?: any, a1?: any) => any} */ shouldMerge, /** @type {(a0?: any, a1?: any) => any} */ mergeNode) {
+/** @returns {MdastNode} */ function mergeChildren(/** @type {MdastNode} */ ast, /** @type {(a0: MdastNode, a1: MdastNode) => boolean} */ shouldMerge, /** @type {(a0: MdastNode, a1: MdastNode) => MdastNode} */ mergeNode) {
   return mapAst(ast, (node) => {
     if (!node.children) {
       return node;
     }
 
+    /** @type {MdastNode[]} */
     const children = [];
+    /** @type {MdastNode | undefined} */
     let lastChild;
+    /** @type {boolean | undefined} */
     let changed;
     for (let child of node.children) {
       if (lastChild && shouldMerge(lastChild, child)) {
@@ -105,7 +109,7 @@ function mergeChildren(ast, /** @type {(a0?: any, a1?: any) => any} */ shouldMer
   });
 }
 
-function mergeContinuousTexts(ast) {
+/** @returns {MdastNode} */ function mergeContinuousTexts(/** @type {MdastNode} */ ast) {
   return mergeChildren(
     ast,
     /** @returns {boolean} */ (prevNode, node) => prevNode.type === "text" && node.type === "text",
@@ -120,7 +124,7 @@ function mergeContinuousTexts(ast) {
   );
 }
 
-function splitTextIntoSentencesLegacy(ast) {
+/** @returns {MdastNode} */ function splitTextIntoSentencesLegacy(/** @type {MdastNode} */ ast) {
   return mapAst(ast, (node, index, [parentNode]) => {
     if (node.type !== "text") {
       return node;
@@ -147,8 +151,10 @@ function splitTextIntoSentencesLegacy(ast) {
   });
 }
 
-function splitTextIntoSentences(ast) {
+/** @returns {MdastNode} */ function splitTextIntoSentences(/** @type {MdastNode} */ ast) {
+  /** @type {Set<MdastNode>} */
   const canOpenAccidentalWikiLink = new Set();
+  /** @type {Set<MdastPosition>} */
   const riskyParagraphPositions = new Set(); // we can't use nodes themselves because they will be cloned.
 
   walkAst(ast, (node, parentStack) => {
@@ -230,8 +236,8 @@ function splitTextIntoSentences(ast) {
     };
   });
 
-  function walkAst(ast, handler) {
-    return (function preorder(/** @type {import("../utilities.js").MdastNode} */ node, parentStack) {
+  function walkAst(/** @type {MdastNode} */ ast, /** @type {(node: MdastNode, parentStack: MdastNode[]) => void} */ handler) {
+    return (function preorder(/** @type {MdastNode} */ node, /** @type {MdastNode[]} */ parentStack) {
       handler(node, parentStack);
       if (node.children) {
         for (const child of node.children) {
@@ -241,7 +247,7 @@ function splitTextIntoSentences(ast) {
     })(ast, []);
   }
 
-  function markAncestors(parentStack) {
+  function markAncestors(/** @type {MdastNode[]} */ parentStack) {
     for (const ancestor of parentStack) {
       if (
         ancestor.type === "paragraph" &&
@@ -253,7 +259,7 @@ function splitTextIntoSentences(ast) {
   }
 }
 
-function transformIndentedCodeblock(ast, options) {
+/** @returns {MdastNode} */ function transformIndentedCodeblock(/** @type {MdastNode} */ ast, /** @type {MarkdownOptions} */ options) {
   return mapAst(ast, (node) => {
     if (node.type !== "code") {
       return node;
@@ -271,7 +277,7 @@ function transformIndentedCodeblock(ast, options) {
   });
 }
 
-function transformIndentedCodeblockAndMarkItsParentList(ast, options) {
+/** @returns {MdastNode} */ function transformIndentedCodeblockAndMarkItsParentList(/** @type {MdastNode} */ ast, /** @type {MarkdownOptions} */ options) {
   return mapAst(ast, (node, index, parentStack) => {
     if (node.type === "code") {
       // the first char may point to `\n`, e.g. `\n\t\tbar`, just ignore it
@@ -304,7 +310,7 @@ function transformIndentedCodeblockAndMarkItsParentList(ast, options) {
 }
 
 // remark 11 removes nested links so we need to recover the original alt text
-function markOriginalImageAndLinkAlt(ast, options) {
+/** @returns {MdastNode} */ function markOriginalImageAndLinkAlt(/** @type {MdastNode} */ ast, /** @type {MarkdownOptions} */ options) {
   const { originalText } = options;
   return mapAst(ast, (node) => {
     if (node.type === "image" || node.type === "imageReference") {
@@ -367,7 +373,7 @@ function markOriginalImageAndLinkAlt(ast, options) {
   return null;
 }
 
-function markAlignedList(ast, options) {
+/** @returns {MdastNode} */ function markAlignedList(/** @type {MdastNode} */ ast, /** @type {MarkdownOptions} */ options) {
   return mapAst(ast, (node, index, parentStack) => {
     if (node.type === "list" && node.children.length > 0) {
       // if one of its parents is not aligned, it's not possible to be aligned in sub-lists
@@ -392,13 +398,13 @@ function markAlignedList(ast, options) {
     return node;
   });
 
-  /** @returns {number} */ function getListItemStart(listItem) {
+  /** @returns {number} */ function getListItemStart(/** @type {MdastNode} */ listItem) {
     return listItem.children.length === 0
       ? -1
       : listItem.children[0].position.start.column - 1;
   }
 
-  /** @returns {boolean} */ function isAligned(list) {
+  /** @returns {boolean} */ function isAligned(/** @type {MdastNode} */ list) {
     if (!list.ordered) {
       /**
        * - 123
@@ -483,7 +489,7 @@ function markAlignedList(ast, options) {
   }
 }
 
-function markAlignedListLegacy(ast, options) {
+/** @returns {MdastNode} */ function markAlignedListLegacy(/** @type {MdastNode} */ ast, /** @type {MarkdownOptions} */ options) {
   return mapAst(ast, (node, index, parentStack) => {
     if (node.type === "list" && node.children.length > 0) {
       // if one of its parents is not aligned, it's not possible to be aligned in sub-lists
@@ -501,13 +507,13 @@ function markAlignedListLegacy(ast, options) {
     return node;
   });
 
-  /** @returns {number} */ function getListItemStart(listItem) {
+  /** @returns {number} */ function getListItemStart(/** @type {MdastNode} */ listItem) {
     return listItem.children.length === 0
       ? -1
       : listItem.children[0].position.start.column - 1;
   }
 
-  /** @returns {boolean} */ function isAligned(list) {
+  /** @returns {boolean} */ function isAligned(/** @type {MdastNode} */ list) {
     if (!list.ordered) {
       /**
        * - 123

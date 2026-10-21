@@ -10,13 +10,14 @@ import {
 /**
  * @import AstPath from "../../common/ast-path.js"
  * @import {Doc} from "../../document/index.js"
+ * @import {MdastNode, MarkdownOptions} from "../utilities.js"
  */
 
 /**
  * @param {AstPath} path
- * @param {*} options
- * @param {() => Doc} print
- * @param {*} [events]
+ * @param {MarkdownOptions} options
+ * @param {(selector?: any, args?: any) => any} print
+ * @param {{ processor?: (path: AstPath) => any }} [events]
  * @returns {any[]}
  */
 function printChildren(/** @type {AstPath} */ path, options, print, events = {}) {
@@ -42,7 +43,7 @@ function printChildren(/** @type {AstPath} */ path, options, print, events = {})
   return parts;
 }
 
-/** @returns {boolean} */ function shouldPrePrintHardline(/** @type {AstPath} */ { node, parent }) {
+/** @returns {boolean} */ function shouldPrePrintHardline(/** @type {AstPath & { node: MdastNode, parent: MdastNode }} */ { node, parent }) {
   const isInlineNode =
     INLINE_NODE_TYPES.has(node.type) &&
     !(
@@ -61,8 +62,8 @@ const SIBLING_NODE_TYPES = new Set(["listItem", "definition"]);
  * @param {AstPath} path
  * @returns {boolean}
  */
-function shouldPrePrintDoubleHardline(path, options) {
-  /** @type {{ node: import("../utilities.js").MdastNode, previous: any, parent: import("../utilities.js").MdastNode }} */ const { node, previous, parent } = path;
+function shouldPrePrintDoubleHardline(path, /** @type {MarkdownOptions} */ options) {
+  /** @type {{ node: MdastNode, previous: MdastNode, parent: MdastNode }} */ const { node, previous, parent } = path;
 
   if (options.parser === "mdx") {
     if (
@@ -139,7 +140,7 @@ function shouldPrePrintDoubleHardline(path, options) {
   );
 }
 
-function isLooseListItemLegacy(/** @type {import("../utilities.js").MdastNode} */ node, options) {
+function isLooseListItemLegacy(/** @type {MdastNode} */ node, /** @type {MarkdownOptions} */ options) {
   return (
     node.type === "listItem" &&
     (node.spread ||
@@ -149,7 +150,7 @@ function isLooseListItemLegacy(/** @type {import("../utilities.js").MdastNode} *
   );
 }
 
-/** @returns {boolean} */ function isLooseListItem({ node, parent, next }) {
+/** @returns {boolean} */ function isLooseListItem(/** @type {{ node: MdastNode, parent: MdastNode, next: MdastNode | null }} */ { node, parent, next }) {
   return (
     node.type === "listItem" &&
     (node.spread ||

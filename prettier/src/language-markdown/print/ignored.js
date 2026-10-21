@@ -2,27 +2,28 @@
 /**
  * @import AstPath from "../../common/ast-path.js";
  * @import {Doc} from "../../document/index.js";
+ * @import {MdastNode, MarkdownOptions} from "../utilities.js";
  */
 
 /**
  * @param {AstPath} path
- * @param {*} options
+ * @param {MarkdownOptions} options
  * @returns {Doc}
  */
 function printPrettierIgnored(path, options) {
   const originalText = options.originalText.slice(
-    path.node.position.start.offset,
-    path.node.position.end.offset,
+    /** @type {MdastNode} */ (path.node).position.start.offset,
+    /** @type {MdastNode} */ (path.node).position.end.offset,
   );
 
   if (options.parser === "mdx") {
     return originalText;
   }
 
-  switch (path.node.type) {
+  switch (/** @type {MdastNode} */ (path.node).type) {
     case "list":
       if (
-        path.findAncestor((p) => p.type === "blockquote") &&
+        path.findAncestor(/** @returns {boolean} */ (/** @type {MdastNode} */ p) => p.type === "blockquote") &&
         options.proseWrap !== "always"
       ) {
         return originalText.replace(/\n>\s*$/, "");

@@ -14,7 +14,7 @@ import {
 /**
  * @param {AstPath} path
  * @param {*} options
- * @param {*} print
+ * @param {(selector?: any, args?: any) => any} print
  * @returns {Doc}
  */
 function printParagraph(path, options, print) {

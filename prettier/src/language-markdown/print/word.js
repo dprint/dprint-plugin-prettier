@@ -18,13 +18,13 @@ const fakeSetextHeaderRegex = /^(?:=+|-+)$/;
 function printWord(path, options) {
   /** @type {{ node: MdastNode }} */ const { node } = path;
   const emphasisOrStrong = path.findAncestor(
-    /** @returns {boolean} */ (p) => p.type === "emphasis" || p.type === "strong",
+    /** @returns {boolean} */ (/** @type {MdastNode} */ p) => p.type === "emphasis" || p.type === "strong",
   );
   let text = node.value;
   if (!emphasisOrStrong) {
     if (
       options.proseWrap === "preserve" &&
-      path.parent.type === "sentence" &&
+      /** @type {MdastNode} */ (path.parent).type === "sentence" &&
       fakeSetextHeaderRegex.test(text) &&
       isNewLine(path.previous) &&
       (path.isLast || isNewLine(path.next))
@@ -49,7 +49,7 @@ function printWord(path, options) {
   // escape internal `*` or `_` that can open or close emphasis/strong
   text = text.replaceAll(
     /(\\+|^|.)(\*+|_+)($|.)/g,
-    /** @returns {string} */ (match, preceding, delimiterRun, following) => {
+    /** @returns {string} */ (/** @type {string} */ match, /** @type {string} */ preceding, /** @type {string} */ delimiterRun, /** @type {string} */ following) => {
       if (
         [...preceding].every(/** @returns {boolean} */ (c) => c === "\\") &&
         preceding.length % 2 === 1
@@ -59,9 +59,9 @@ function printWord(path, options) {
       }
       if (
         canOpenOrCloseStrongOrEmphasis(
-          preceding.at(-1) || path.previous?.value.at(-1),
+          preceding.at(-1) || /** @type {MdastNode | null} */ (path.previous)?.value.at(-1),
           delimiterRun,
-          following[0] || path.next?.value[0],
+          following[0] || /** @type {MdastNode | null} */ (path.next)?.value[0],
         )
       ) {
         return `${preceding}\\${delimiterRun}${following}`;
@@ -151,7 +151,7 @@ function printWordLegacy(path) {
       path.match(
         undefined,
         isFirstSentence,
-        /** @returns {boolean} */ (node, name, index) => node.type === "emphasis" && index === 0,
+        /** @returns {boolean} */ (/** @type {MdastNode} */ node, /** @type {string} */ name, /** @type {number} */ index) => node.type === "emphasis" && index === 0,
         isLastChildAutolink,
       ))
   ) {

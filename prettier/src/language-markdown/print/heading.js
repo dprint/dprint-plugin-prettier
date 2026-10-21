@@ -7,7 +7,7 @@ import { hardline } from "../../document/index.js";
 import { isSetextHeading } from "../utilities.js";
 import { printChildren } from "./children.js";
 
-function printAtxHeading(/** @type {AstPath} */ path, options, /** @type {(selector?: any, args?: any) => any} */ print) {
+function printAtxHeading(/** @type {AstPath} */ path, /** @type {MarkdownOptions} */ options, /** @type {(selector?: any, args?: any) => any} */ print) {
   return [
     "#".repeat(/** @type {MdastNode} */ (path.node).depth) + " ",
     printChildren(path, options, print),

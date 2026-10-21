@@ -45,6 +45,7 @@ import { printWord, printWordLegacy } from "./word.js";
  */
 
 function prevOrNextWord(/** @type {AstPath} */ path) {
+  /** @type {{ previous: MdastNode | null, next: MdastNode | null }} */
   const { previous, next } = path;
   const hasPrevOrNextWord =
     (previous?.type === "sentence" &&
@@ -66,6 +67,7 @@ function prevOrNextWord(/** @type {AstPath} */ path) {
   if (!siblings || typeof index !== "number") {
     return false;
   }
+  /** @type {MdastNode | undefined} */
   const afterNext = siblings[index + 2];
   return afterNext?.type === "whitespace" && afterNext.value === "";
 }
@@ -75,10 +77,11 @@ function prevOrNextWord(/** @type {AstPath} */ path) {
  * @returns {boolean}
  */
 function isNextTokenFakeSetextH2Line(path) {
-  if (!isNewLine(path.node) || path.next?.value !== "-") {
+  if (!isNewLine(path.node) || /** @type {MdastNode | null} */ (path.next)?.value !== "-") {
     return false;
   }
 
+  /** @type {MdastNode | undefined} */
   const afterNext = path.siblings[path.index + 2];
   return !afterNext || isNewLine(afterNext);
 }
@@ -142,7 +145,7 @@ function printMdast(
         ? printWord(path, options)
         : printWordLegacy(path);
     case "whitespace": {
-      const { next } = path;
+      /** @type {{ next: MdastNode | null }} */ const { next } = path;
 
       /** @type {string} */ const proseWrap =
         // leading char that may cause different syntax
@@ -165,12 +168,12 @@ function printMdast(
         const hasPrevOrNextWord = prevOrNextWord(path); // `1*2*3` is considered emphasis but `1_2_3` is not
         const inStrongAndHasPrevOrNextWord = // `1***2***3` is considered strong emphasis but `1**_2_**3` is not
           path.callParent(
-            /** @returns {boolean} */ ({ node }) => node.type === "strong" && prevOrNextWord(path),
+            /** @returns {boolean} */ (/** @type {AstPath & { node: MdastNode }} */ { node }) => node.type === "strong" && prevOrNextWord(path),
           );
         style =
           hasPrevOrNextWord ||
           inStrongAndHasPrevOrNextWord ||
-          path.hasAncestor(/** @returns {boolean} */ (node) => node.type === "emphasis")
+          path.hasAncestor(/** @returns {boolean} */ (/** @type {MdastNode} */ node) => node.type === "emphasis")
             ? "*"
             : "_";
       }
@@ -187,7 +190,7 @@ function printMdast(
           : node.value.replaceAll("\n", " ");
       if (
         options.parser !== "mdx" &&
-        path.hasAncestor(/** @returns {boolean} */ (node) => node.type === "tableCell")
+        path.hasAncestor(/** @returns {boolean} */ (/** @type {MdastNode} */ node) => node.type === "tableCell")
       ) {
         code = code.replaceAll("|", String.raw`\|`);
       }
@@ -202,7 +205,7 @@ function printMdast(
       return [backtickString, padding, code, padding, backtickString];
     }
     case "wikiLink": {
-      let contents;
+      /** @type {string} */ let contents;
       if (options.proseWrap === "preserve") {
         contents = node.value;
       } else {
@@ -306,7 +309,7 @@ function printMdast(
       return printList(path, options, print);
     case "thematicBreak": {
       const { ancestors } = path;
-      /** @type {number} */ const counter = ancestors.findIndex(/** @returns {boolean} */ (node) => node.type === "list");
+      /** @type {number} */ const counter = ancestors.findIndex(/** @returns {boolean} */ (/** @type {MdastNode} */ node) => node.type === "list");
       if (counter === -1) {
         return "---";
       }
@@ -432,7 +435,7 @@ function printMdast(
   }
 }
 
-/** @returns {any[]} */ function printRoot(/** @type {AstPath} */ path, options, /** @type {(selector?: any, args?: any) => any} */ print) {
+/** @returns {any[]} */ function printRoot(/** @type {AstPath} */ path, /** @type {MarkdownOptions} */ options, /** @type {(selector?: any, args?: any) => any} */ print) {
   /** @typedef {{ index: number, offset: number }} IgnorePosition */
   /** @type {Array<{start: IgnorePosition, end: IgnorePosition}>} */
   const ignoreRanges = [];
@@ -440,7 +443,7 @@ function printMdast(
   /** @type {IgnorePosition | null} */
   let ignoreStart = null;
 
-  const { children } = path.node;
+  const { children } = /** @type {MdastNode} */ (path.node);
   for (const [index, childNode] of children.entries()) {
     switch (isPrettierIgnore(childNode)) {
       case "start":
@@ -510,8 +513,9 @@ function printIgnoreComment(/** @type {import("../utilities.js").MdastNode} */ n
 }
 
 /** @returns {boolean | undefined} */ function shouldRemainTheSameContent(/** @type {AstPath} */ path) {
+  /** @type {MdastNode | undefined} */
   const node = path.findAncestor(
-    /** @returns {boolean} */ (node) => node.type === "linkReference" || node.type === "imageReference",
+    /** @returns {boolean} */ (/** @type {MdastNode} */ node) => node.type === "linkReference" || node.type === "imageReference",
   );
   return (
     node && (node.type !== "linkReference" || node.referenceType !== "full")
@@ -545,7 +549,7 @@ function printUrl(url, dangerousCharOrChars = []) {
     : url;
 }
 
-/** @returns {string} */ function printTitle(/** @type {string | null} */ title, options, printSpace = true) {
+/** @returns {string} */ function printTitle(/** @type {string | null} */ title, /** @type {MarkdownOptions} */ options, printSpace = true) {
   if (!title) {
     return "";
   }
@@ -567,7 +571,7 @@ function printUrl(url, dangerousCharOrChars = []) {
   return `${quote}${title}${quote}`;
 }
 
-/** @returns {string} */ function printLinkReference(/** @type {import("../utilities.js").MdastNode} */ node, options) {
+/** @returns {string} */ function printLinkReference(/** @type {import("../utilities.js").MdastNode} */ node, /** @type {MarkdownOptions | undefined} */ options) {
   // `remark-parse` lowercase the `label` as `identifier`, we don't want do that
   // https://github.com/remarkjs/remark/blob/daddcb463af2d5b2115496c395d0571c0ff87d15/packages/remark-parse/lib/tokenize/reference.js
   const label = collapseWhiteSpace(node.label);
@@ -582,7 +586,7 @@ function printUrl(url, dangerousCharOrChars = []) {
   return `[^${node.label}]`;
 }
 
-function printImageAlt(/** @type {import("../utilities.js").MdastNode} */ node, options) {
+/** @returns {string} */ function printImageAlt(/** @type {import("../utilities.js").MdastNode} */ node, /** @type {MarkdownOptions} */ options) {
   if (options.parser !== "mdx" && node.originalAltText) {
     return node.originalAltText;
   }
