@@ -2705,7 +2705,7 @@ pp$5.checkPropClash = /** @this {Parser} */ function(prop, propHash, refDestruct
 // and object pattern might appear (so it's possible to raise
 // delayed syntax error at correct position).
 
-pp$5.parseExpression = /** @this {Parser} */ function(/** @type {boolean | undefined} */ forInit, refDestructuringErrors) {
+pp$5.parseExpression = /** @this {Parser} */ function(/** @type {boolean | string | undefined} */ forInit, refDestructuringErrors) {
   var this$1$1 = this;
 
   return this.catchStackOverflow(function () {
@@ -2724,7 +2724,7 @@ pp$5.parseExpression = /** @this {Parser} */ function(/** @type {boolean | undef
 // Parse an assignment expression. This includes applications of
 // operators like `+=`.
 
-pp$5.parseMaybeAssign = /** @this {Parser} */ function(/** @type {boolean | undefined} */ forInit, refDestructuringErrors, afterLeftParse) {
+pp$5.parseMaybeAssign = /** @this {Parser} */ function(/** @type {boolean | string | undefined} */ forInit, refDestructuringErrors, afterLeftParse) {
   if (this.isContextual("yield")) {
     if (this.inGenerator) { return this.parseYield(forInit) }
     // The tokenizer will assume an expression is allowed after
@@ -2779,7 +2779,7 @@ pp$5.parseMaybeAssign = /** @this {Parser} */ function(/** @type {boolean | unde
 
 // Parse a ternary conditional (`?:`) operator.
 
-pp$5.parseMaybeConditional = /** @this {Parser} */ function(/** @type {boolean | undefined} */ forInit, refDestructuringErrors) {
+pp$5.parseMaybeConditional = /** @this {Parser} */ function(/** @type {boolean | string | undefined} */ forInit, refDestructuringErrors) {
   var startPos = this.start, startLoc = this.startLoc;
   var expr = this.parseExprOps(forInit, refDestructuringErrors);
   if (this.checkExpressionErrors(refDestructuringErrors)) { return expr }
@@ -2796,7 +2796,7 @@ pp$5.parseMaybeConditional = /** @this {Parser} */ function(/** @type {boolean |
 
 // Start the precedence parser.
 
-pp$5.parseExprOps = /** @this {Parser} */ function(/** @type {boolean | undefined} */ forInit, refDestructuringErrors) {
+pp$5.parseExprOps = /** @this {Parser} */ function(/** @type {boolean | string | undefined} */ forInit, refDestructuringErrors) {
   var startPos = this.start, startLoc = this.startLoc;
   var expr = this.parseMaybeUnary(refDestructuringErrors, false, false, forInit);
   if (this.checkExpressionErrors(refDestructuringErrors)) { return expr }
@@ -2809,7 +2809,7 @@ pp$5.parseExprOps = /** @this {Parser} */ function(/** @type {boolean | undefine
 // defer further parser to one of its callers when it encounters an
 // operator that has a lower precedence than the set it is parsing.
 
-pp$5.parseExprOp = /** @this {Parser} */ function(left, /** @type {number} */ leftStartPos, leftStartLoc, /** @type {number} */ minPrec, /** @type {boolean | undefined} */ forInit) {
+pp$5.parseExprOp = /** @this {Parser} */ function(left, /** @type {number} */ leftStartPos, leftStartLoc, /** @type {number} */ minPrec, /** @type {boolean | string | undefined} */ forInit) {
   var prec = this.type.binop;
   if (prec != null && (!forInit || this.type !== types$1._in)) {
     if (prec > minPrec) {
@@ -2845,7 +2845,7 @@ pp$5.buildBinary = /** @this {Parser} */ function(/** @type {number} */ startPos
 
 // Parse unary operators, both prefix and postfix.
 
-pp$5.parseMaybeUnary = /** @this {Parser} */ function(refDestructuringErrors, /** @type {boolean} */ sawUnary, /** @type {boolean} */ incDec, /** @type {boolean | undefined} */ forInit) {
+pp$5.parseMaybeUnary = /** @this {Parser} */ function(refDestructuringErrors, /** @type {boolean} */ sawUnary, /** @type {boolean} */ incDec, /** @type {boolean | string | undefined} */ forInit) {
   var startPos = this.start, startLoc = this.startLoc, expr;
   if (this.isContextual("await") && this.canAwait) {
     expr = this.parseAwait(forInit);
@@ -2910,7 +2910,7 @@ pp$5.parseMaybeUnary = /** @this {Parser} */ function(refDestructuringErrors, /*
 
 // Parse call, dot, and `[]`-subscript expressions.
 
-pp$5.parseExprSubscripts = /** @this {Parser} */ function(refDestructuringErrors, /** @type {boolean | undefined} */ forInit) {
+pp$5.parseExprSubscripts = /** @this {Parser} */ function(refDestructuringErrors, /** @type {boolean | string | undefined} */ forInit) {
   var startPos = this.start, startLoc = this.startLoc;
   var expr = this.parseExprAtom(refDestructuringErrors, forInit);
   if (expr.type === "ArrowFunctionExpression" && this.input.slice(this.lastTokStart, this.lastTokEnd) !== ")")
@@ -2924,7 +2924,7 @@ pp$5.parseExprSubscripts = /** @this {Parser} */ function(refDestructuringErrors
   return result
 };
 
-pp$5.parseSubscripts = /** @this {Parser} */ function(base, /** @type {number} */ startPos, startLoc, /** @type {boolean} */ noCalls, /** @type {boolean | undefined} */ forInit) {
+pp$5.parseSubscripts = /** @this {Parser} */ function(base, /** @type {number} */ startPos, startLoc, /** @type {boolean} */ noCalls, /** @type {boolean | string | undefined} */ forInit) {
   var maybeAsyncArrow = this.options.ecmaVersion >= 8 && base.type === "Identifier" && base.name === "async" &&
       this.lastTokEnd === base.end && !this.canInsertSemicolon() && base.end - base.start === 5 &&
       this.potentialArrowAt === base.start;
@@ -2951,11 +2951,11 @@ pp$5.shouldParseAsyncArrow = /** @returns {boolean} */ /** @this {Parser} */ fun
   return !this.canInsertSemicolon() && this.eat(types$1.arrow)
 };
 
-pp$5.parseSubscriptAsyncArrow = /** @this {Parser} */ function(/** @type {number} */ startPos, startLoc, /** @type {any[]} */ exprList, /** @type {boolean | undefined} */ forInit) {
+pp$5.parseSubscriptAsyncArrow = /** @this {Parser} */ function(/** @type {number} */ startPos, startLoc, /** @type {any[]} */ exprList, /** @type {boolean | string | undefined} */ forInit) {
   return this.parseArrowExpression(this.startNodeAt(startPos, startLoc), exprList, true, forInit)
 };
 
-pp$5.parseSubscript = /** @this {Parser} */ function(base, /** @type {number} */ startPos, startLoc, /** @type {boolean} */ noCalls, /** @type {boolean} */ maybeAsyncArrow, /** @type {boolean} */ optionalChained, /** @type {boolean | undefined} */ forInit) {
+pp$5.parseSubscript = /** @this {Parser} */ function(base, /** @type {number} */ startPos, startLoc, /** @type {boolean} */ noCalls, /** @type {boolean} */ maybeAsyncArrow, /** @type {boolean} */ optionalChained, /** @type {boolean | string | undefined} */ forInit) {
   var optionalSupported = this.options.ecmaVersion >= 11;
   var optional = optionalSupported && this.eat(types$1.questionDot);
   if (noCalls && optional) { this.raise(this.lastTokStart, "Optional chaining cannot appear in the callee of new expressions"); }
@@ -3560,7 +3560,7 @@ pp$5.parseMethod = /** @this {Parser} */ function(/** @type {boolean} */ isGener
 
 // Parse arrow function expression with given parameters.
 
-pp$5.parseArrowExpression = /** @this {Parser} */ function(node, /** @type {any[]} */ params, /** @type {boolean} */ isAsync, /** @type {boolean | undefined} */ forInit) {
+pp$5.parseArrowExpression = /** @this {Parser} */ function(node, /** @type {any[]} */ params, /** @type {boolean} */ isAsync, /** @type {boolean | string | undefined} */ forInit) {
   var oldYieldPos = this.yieldPos, oldAwaitPos = this.awaitPos, oldAwaitIdentPos = this.awaitIdentPos;
 
   this.enterScope(functionFlags(isAsync, false) | SCOPE_ARROW);
@@ -3582,7 +3582,7 @@ pp$5.parseArrowExpression = /** @this {Parser} */ function(node, /** @type {any[
 
 // Parse function body and check parameters.
 
-pp$5.parseFunctionBody = /** @this {Parser} */ function(node, /** @type {boolean | undefined} */ isArrowFunction, /** @type {boolean} */ isMethod, /** @type {boolean | undefined} */ forInit) {
+pp$5.parseFunctionBody = /** @this {Parser} */ function(node, /** @type {boolean | undefined} */ isArrowFunction, /** @type {boolean} */ isMethod, /** @type {boolean | string | undefined} */ forInit) {
   var isExpression = isArrowFunction && this.type !== types$1.braceL;
   var oldStrict = this.strict, useStrict = false;
 
@@ -3758,7 +3758,7 @@ pp$5.parsePrivateIdent = /** @this {Parser} */ function() {
 
 // Parses yield expression inside generator.
 
-pp$5.parseYield = /** @this {Parser} */ function(/** @type {boolean | undefined} */ forInit) {
+pp$5.parseYield = /** @this {Parser} */ function(/** @type {boolean | string | undefined} */ forInit) {
   if (!this.yieldPos) { this.yieldPos = this.start; }
 
   var node = this.startNode();
@@ -3773,7 +3773,7 @@ pp$5.parseYield = /** @this {Parser} */ function(/** @type {boolean | undefined}
   return this.finishNode(node, "YieldExpression")
 };
 
-pp$5.parseAwait = /** @this {Parser} */ function(/** @type {boolean | undefined} */ forInit) {
+pp$5.parseAwait = /** @this {Parser} */ function(/** @type {boolean | string | undefined} */ forInit) {
   if (!this.awaitPos) { this.awaitPos = this.start; }
 
   var node = this.startNode();
