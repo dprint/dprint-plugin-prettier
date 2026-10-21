@@ -1,4 +1,8 @@
 // @nts-check
+/** @typedef {(node: any) => any} TsNodeVisitor */
+/** @typedef {(nodes: any) => any} TsNodesVisitor */
+/** @typedef {Readonly<{ line: number, character: number }>} TsLineAndCharacter */
+/** @typedef {{ onEnter?: (node: any) => any, onLeave?: (node: any) => any }} EstreeVisitor */
 var hy = Object.defineProperty;
 var Sd = (e, t) => {
   for (var a in t) hy(e, a, { get: t[a], enumerable: !0 });
@@ -175,7 +179,7 @@ var S3 = Array.prototype.at
   : (e, t) => {
       if (e !== void 0 && ((t = jp(e, t)), t < e.length)) return e[t];
     };
-/** @returns {any} */ function Zp(e) {
+/** @returns {Kf | xh | vh | Th | undefined} */ function Zp(e) {
   return e === void 0 || e.length === 0 ? void 0 : e[0];
 }
 /** @returns {Kf | xh | object | vh | undefined} */ function Va(e) {
@@ -14207,7 +14211,7 @@ function hg(e, t) {
 function Vm(e) {
   let t = [];
   return (
-    e.forEach((a, s) => {
+    e.forEach((/** @type {number} */ a, s) => {
       t[a] = s;
     }),
     t
@@ -14263,7 +14267,7 @@ function gg(e, t, a, s, f) {
 /** @returns {number[]} */ function Up(/** @type {d6} */ e) {
   return e.lineMap || (e.lineMap = Gm(e.text));
 }
-function bg(/** @type {number[]} */ e, /** @type {number} */ t) {
+/** @returns {TsLineAndCharacter} */ function bg(/** @type {number[]} */ e, /** @type {number} */ t) {
   let a = vg(e, t);
   return { line: a, character: t - e[a] };
 }
@@ -14271,7 +14275,7 @@ function bg(/** @type {number[]} */ e, /** @type {number} */ t) {
   let s = Ny(e, t, xt, Pm, a);
   return (s < 0 && ((s = ~s - 1), q.assert(s !== -1, "position cannot precede the beginning of the file")), s);
 }
-function Ym(/** @type {d6 | m6} */ e, /** @type {number} */ t) {
+/** @returns {TsLineAndCharacter} */ function Ym(/** @type {d6 | m6} */ e, /** @type {number} */ t) {
   return bg(Up(e), t);
 }
 /** @returns {boolean} */ function Wa(/** @type {number} */ e) {
@@ -14902,7 +14906,7 @@ function uf(/** @type {number} */ e, /** @type {boolean} */ t, a = 0, s, f, h, b
         );
     }
   }
-  function Fn(U) {
+  /** @returns {string} */ function Fn(/** @type {boolean} */ U) {
     let K = l;
     l += 3;
     let Z = l,
@@ -16294,8 +16298,8 @@ function kg(e) {
     a = ((e - 65536) % 1024) + 56320;
   return String.fromCharCode(t, a);
 }
-var Eg = String.fromCodePoint ? (e) => String.fromCodePoint(e) : kg;
-function Id(e) {
+var Eg = String.fromCodePoint ? /** @returns {string} */ (/** @type {number} */ e) => String.fromCodePoint(e) : kg;
+/** @returns {string} */ function Id(/** @type {number} */ e) {
   return Eg(e);
 }
 var Od = new Map(
@@ -16854,7 +16858,7 @@ function e1(e, /** @type {number} */ t) {
   return { span: e, newLength: t };
 }
 var E3 = e1(pf(0, 0), 0);
-function ff(e, t) {
+function ff(/** @type {Kf | xh | vh | Th} */ e, t) {
   for (; e;) {
     let a = t(e);
     if (a === "quit") return;
@@ -16923,7 +16927,7 @@ function cl(e) {
 function Ng(e) {
   return e.name || t1(e);
 }
-/** @returns {boolean} */ function Ig(/** @type {any} */ e) {
+/** @returns {boolean} */ function Ig(/** @type {Kf | xh | vh | Th} */ e) {
   return !!e.name;
 }
 function mf(e) {
@@ -16979,10 +16983,10 @@ function Og(e) {
     } else if (Ff(e.parent) && et(e.parent.name)) return e.parent.name;
   } else return;
 }
-function hf(/** @type {any} */ e) {
+function hf(/** @type {d6 | Kf | xh | vh | Th} */ e) {
   if (rb(e)) return $r(e.modifiers, Ka);
 }
-function r1(/** @type {any} */ e) {
+function r1(/** @type {d6 | Kf | xh | vh | Th} */ e) {
   if (E_(e, 98303)) return $r(e.modifiers, t2);
 }
 function i1(e, t) {
@@ -17091,7 +17095,7 @@ function $g(e) {
 /** @returns {boolean} */ function vf(/** @type {number} */ e) {
   return e >= 0 && e <= 166;
 }
-/** @returns {boolean} */ function _1(/** @type {any} */ e) {
+/** @returns {boolean} */ function _1(/** @type {d6 | Kf | xh | vh | Th} */ e) {
   return vf(e.kind);
 }
 /** @returns {boolean} */ function gi(e) {
@@ -17144,7 +17148,7 @@ function Kg(e) {
 /** @returns {boolean} */ function t2(/** @type {vh | Kf} */ e) {
   return Xr(e.kind);
 }
-/** @returns {boolean} */ function c1(/** @type {any} */ e) {
+/** @returns {boolean} */ function c1(/** @type {Kf | xh | vh | Th} */ e) {
   let t = e.kind;
   return t === 80 || t === 81 || t === 11 || t === 9 || t === 168;
 }
@@ -17220,7 +17224,7 @@ function o2(e) {
   }
   return !1;
 }
-/** @returns {boolean} */ function Ga(/** @type {any} */ e) {
+/** @returns {boolean} */ function Ga(/** @type {Kf | xh | vh | Th} */ e) {
   return u1(gf(e).kind);
 }
 /** @returns {boolean} */ function u1(/** @type {number} */ e) {
@@ -17414,7 +17418,7 @@ function ul(e) {
 function y2(e) {
   return !!e.initializer;
 }
-/** @returns {boolean} */ function Il(/** @type {any} */ e) {
+/** @returns {boolean} */ function Il(/** @type {Kf | xh | vh | Th} */ e) {
   return e.kind === 11 || e.kind === 15;
 }
 /** @returns {boolean} */ function g2(/** @type {Kf | d6} */ e) {
@@ -17462,7 +17466,7 @@ function v2(e, t) {
     if (h) return h;
   }
 }
-/** @returns {number} */ function x2(/** @type {any} */ e) {
+/** @returns {number} */ function x2(/** @type {Kf | xh | vh | Th} */ e) {
   return e.end - e.pos;
 }
 function y1(e) {
@@ -17471,17 +17475,17 @@ function y1(e) {
 function T2(e) {
   e.flags & 2097152 || (((e.flags & 262144) !== 0 || $t(e, y1)) && (e.flags |= 1048576), (e.flags |= 2097152));
 }
-function bi(/** @type {Kf | d6 | xh} */ e) {
+/** @returns {d6} */ function bi(/** @type {Kf | d6 | xh | vh | Th} */ e) {
   for (; e && e.kind !== 308;) e = e.parent;
   return e;
 }
-/** @returns {boolean} */ function ea(/** @type {any} */ e) {
+/** @returns {boolean} */ function ea(/** @type {d6 | Kf | xh | vh | Th} */ e) {
   return e === void 0 ? !0 : e.pos === e.end && e.pos >= 0 && e.kind !== 1;
 }
 /** @returns {boolean} */ function zp(/** @type {InstanceType<typeof vh>} */ e) {
   return !ea(e);
 }
-/** @returns {number} */ function kl(/** @type {InstanceType<typeof d6> | InstanceType<typeof Kf> | InstanceType<typeof xh> | InstanceType<typeof vh>} */ e, t, a) {
+/** @returns {number} */ function kl(/** @type {InstanceType<typeof d6> | InstanceType<typeof Kf> | InstanceType<typeof xh> | InstanceType<typeof vh>} */ e, /** @type {d6 | undefined} */ t, /** @type {boolean | undefined} */ a) {
   if (ea(e)) return e.pos;
   if (h1(e) || e.kind === 12) return Ir((t ?? bi(e)).text, e.pos, !1, !0);
   if (a && Zi(e)) return kl(e.jsDoc[0], t);
@@ -17571,14 +17575,14 @@ function A2(e) {
 function C2(e) {
   return e && e.kind === 242 && xf(e.parent);
 }
-/** @returns {boolean} */ function zd(/** @type {any} */ e) {
+/** @returns {boolean} */ function zd(/** @type {Kf | xh | vh | Th} */ e) {
   let t = e.kind;
   return (t === 212 || t === 213) && e.expression.kind === 108;
 }
 function aa(e) {
   return !!e && !!(e.flags & 524288);
 }
-/** @returns {boolean} */ function D2(/** @type {any} */ e) {
+/** @returns {boolean} */ function D2(/** @type {d6 | Kf | xh | vh | Th} */ e) {
   return !!e && !!(e.flags & 16777216);
 }
 function P2(e) {
@@ -17691,7 +17695,7 @@ function Vp(e) {
 function B2(e) {
   return Si(e) && e.body && e.body.kind === 268 ? e.body : void 0;
 }
-/** @returns {boolean} */ function kf(/** @type {any} */ e) {
+/** @returns {boolean} */ function kf(/** @type {Kf | xh | vh | Th} */ e) {
   switch (e.kind) {
     case 220:
     case 227:
@@ -17852,7 +17856,7 @@ function X2(e) {
 function Ap(e) {
   return yi(e) || X2(e);
 }
-/** @returns {boolean} */ function Ol(/** @type {any} */ e) {
+/** @returns {boolean} */ function Ol(/** @type {Kf | xh | vh | Th} */ e) {
   return Il(e) || sa(e);
 }
 function $2(e) {
@@ -17917,7 +17921,7 @@ function Ba(e) {
   return !!((e.templateFlags || 0) & 2048);
 }
 /** @returns {boolean} */ function Z2(/** @type {Kf} */ e) {
-  return e && !!(I1(e) ? Dp(e) : Dp(e.head) || nn(e.templateSpans, /** @returns {boolean} */ (t) => Dp(t.literal)));
+  return e && !!(I1(e) ? Dp(e) : Dp(e.head) || nn(e.templateSpans, /** @returns {boolean} */ (/** @type {Kf} */ t) => Dp(t.literal)));
 }
 var C3 = new Map(
   Object.entries({
@@ -17938,22 +17942,22 @@ var C3 = new Map(
   }),
 );
 var D3 = new Map(Object.entries({ '"': "&quot;", "'": "&apos;" }));
-/** @returns {boolean} */ function eb(/** @type {any} */ e) {
+/** @returns {boolean} */ function eb(/** @type {Kf | xh | vh | Th} */ e) {
   return !!e && e.kind === 80 && tb(e);
 }
 /** @returns {boolean} */ function tb(/** @type {InstanceType<typeof xh>} */ e) {
   return e.escapedText === "this";
 }
-/** @returns {boolean} */ function E_(/** @type {any} */ e, /** @type {number} */ t) {
+/** @returns {boolean} */ function E_(/** @type {d6 | Kf | xh | vh | Th} */ e, /** @type {number} */ t) {
   return !!ib(e, t);
 }
 function nb(e) {
   return E_(e, 256);
 }
-/** @returns {boolean} */ function rb(/** @type {any} */ e) {
+/** @returns {boolean} */ function rb(/** @type {d6 | Kf | xh | vh | Th} */ e) {
   return E_(e, 32768);
 }
-/** @returns {number} */ function ib(/** @type {any} */ e, /** @type {number} */ t) {
+/** @returns {number} */ function ib(/** @type {d6 | Kf | xh | vh | Th} */ e, /** @type {number} */ t) {
   return sb(e) & t;
 }
 /** @returns {number} */ function ab(/** @type {d6 | Kf | xh | vh | Th} */ e, /** @type {boolean} */ t, a) {
@@ -17965,7 +17969,7 @@ function nb(e) {
           T1(e.modifierFlagsCache))
         : _b(e.modifierFlagsCache));
 }
-/** @returns {number} */ function sb(/** @type {any} */ e) {
+/** @returns {number} */ function sb(/** @type {d6 | Kf | xh | vh | Th} */ e) {
   return ab(e, !1);
 }
 function x1(e) {
@@ -17995,7 +17999,7 @@ function ob(e) {
 function cb(e) {
   return S1(e) | ob(e);
 }
-/** @returns {number} */ function S1(/** @type {any} */ e) {
+/** @returns {number} */ function S1(/** @type {d6 | Kf | xh | vh | Th} */ e) {
   let t = Rl(e) ? Un(e.modifiers) : 0;
   return ((e.flags & 8 || (e.kind === 80 && e.flags & 4096)) && (t |= 32), t);
 }
@@ -18233,7 +18237,7 @@ function A1(e, /** @type {InstanceType<typeof d6>} */ t) {
   }
   return f;
 }
-function Hi(e, t) {
+function Hi(e, /** @type {d6 | Kf | xh | vh | Th} */ t) {
   let a = [];
   for (let s of e) a.push(A1(s, t));
   return a;
@@ -18634,16 +18638,16 @@ function zb() {
 var Vb = {
     getParenthesizeLeftSideOfBinaryForOperator: (e) => xt,
     getParenthesizeRightSideOfBinaryForOperator: (e) => xt,
-    parenthesizeLeftSideOfBinary: /** @returns {any} */ (/** @type {number} */ e, /** @type {any} */ t) => t,
-    parenthesizeRightSideOfBinary: /** @returns {any} */ (/** @type {number} */ e, /** @type {any} */ t, /** @type {any} */ a) => a,
+    parenthesizeLeftSideOfBinary: /** @returns {Kf | xh | vh | Th} */ (/** @type {number} */ e, /** @type {Kf | xh | vh | Th} */ t) => t,
+    parenthesizeRightSideOfBinary: /** @returns {Kf | xh | vh | Th} */ (/** @type {number} */ e, /** @type {Kf | xh | vh | Th | undefined} */ t, /** @type {Kf | xh | vh | Th} */ a) => a,
     parenthesizeExpressionOfComputedPropertyName: xt,
     parenthesizeConditionOfConditionalExpression: xt,
     parenthesizeBranchOfConditionalExpression: xt,
     parenthesizeExpressionOfExportDefault: xt,
-    parenthesizeExpressionOfNew: /** @returns {any} */ (/** @type {any} */ e) => Pr(e, Ga),
-    parenthesizeLeftSideOfAccess: /** @returns {any} */ (/** @type {any} */ e) => Pr(e, Ga),
-    parenthesizeOperandOfPostfixUnary: /** @returns {any} */ (/** @type {any} */ e) => Pr(e, Ga),
-    parenthesizeOperandOfPrefixUnary: /** @returns {any} */ (/** @type {any} */ e) => Pr(e, c2),
+    parenthesizeExpressionOfNew: /** @returns {Kf | xh | vh | Th} */ (/** @type {Kf | xh | vh | Th} */ e) => Pr(e, Ga),
+    parenthesizeLeftSideOfAccess: /** @returns {Kf | xh | vh | Th} */ (/** @type {Kf | xh | vh | Th} */ e) => Pr(e, Ga),
+    parenthesizeOperandOfPostfixUnary: /** @returns {Kf | xh | vh | Th} */ (/** @type {Kf | xh | vh | Th} */ e) => Pr(e, Ga),
+    parenthesizeOperandOfPrefixUnary: /** @returns {Kf | xh | vh | Th} */ (/** @type {Kf | xh | vh | Th} */ e) => Pr(e, c2),
     parenthesizeExpressionsOfCommaDelimitedList: (e) => Pr(e, gi),
     parenthesizeExpressionForDisallowedComma: xt,
     parenthesizeExpressionOfExpressionStatement: xt,
@@ -18665,7 +18669,7 @@ var Vb = {
   },
   fl = 0;
 var Wb = [];
-function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kind: number) => any, createBaseIdentifierNode: (kind: number) => any, createBasePrivateIdentifierNode: (kind: number) => any, createBaseTokenNode: (kind: number) => any, createBaseNode: (kind: number) => any }} */ t) {
+function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kind: number) => d6, createBaseIdentifierNode: (kind: number) => xh, createBasePrivateIdentifierNode: (kind: number) => Th, createBaseTokenNode: (kind: number) => vh, createBaseNode: (kind: number) => Kf }} */ t) {
   let a = e & 8 ? xt : $b,
     s = kd(() => (e & 1 ? Vb : createParenthesizerRules(ge))),
     f = kd(() => (e & 2 ? nullNodeConverters : createNodeConverters(ge))),
@@ -19777,7 +19781,7 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function Ze(r, i) {
     return (r !== i && (r.exclamationToken = i.exclamationToken), J(r, i));
   }
-  function _t(r) {
+  /** @returns {Kf} */ function _t(/** @type {Kf | xh | vh | Th} */ r) {
     let i = ae(176);
     return (
       (i.body = r),
@@ -20227,7 +20231,7 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function Ql(r, i) {
     return r.elements !== i ? J(qr(i), r) : r;
   }
-  /** @returns {Kf} */ function pa(/** @type {vh | undefined} */ r, /** @type {xh | Kf | undefined} */ i, /** @type {xh | Kf | undefined} */ _, c) {
+  /** @returns {Kf} */ function pa(/** @type {vh | undefined} */ r, /** @type {xh | Kf | undefined} */ i, /** @type {xh | Kf | undefined} */ _, /** @type {Kf | xh | vh | Th | undefined} */ c) {
     /** @type {Kf} */ let d = ae(209);
     return (
       (d.dotDotDotToken = r),
@@ -20658,7 +20662,7 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
     /** @type {Kf} */ let d = ae(r);
     return ((d.text = i), (d.rawText = _), (d.templateFlags = c & 7176), (d.transformFlags = to(d.templateFlags)), d);
   }
-  /** @returns {any} */ function ai(r, /** @type {string | undefined} */ i, /** @type {string | undefined} */ _, /** @type {number | undefined} */ c) {
+  /** @returns {Kf | xh | vh | Th} */ function ai(r, /** @type {string | undefined} */ i, /** @type {string | undefined} */ _, /** @type {number | undefined} */ c) {
     return r === 15 ? ii(r, i, _, c) : iu(r, i, _, c);
   }
   function no(r, i, _) {
@@ -20673,7 +20677,7 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function au(r, i, _) {
     return ((r = Ii(16, r, i, _)), ii(15, r, i, _));
   }
-  /** @returns {InstanceType<typeof Kf>} */ function ms(r, /** @type {Kf | xh | undefined} */ i) {
+  /** @returns {InstanceType<typeof Kf>} */ function ms(/** @type {Kf | xh | vh | Th | undefined} */ r, /** @type {Kf | xh | undefined} */ i) {
     q.assert(!r || !!i, "A `YieldExpression` with an asteriskToken must have an expression.");
     /** @type {Kf} */ let _ = I(230);
     return (
@@ -20722,7 +20726,7 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       ? J(io(i, _, c, d, T), r)
       : r;
   }
-  function ys() {
+  /** @returns {Kf} */ function ys() {
     return I(233);
   }
   /** @returns {Kf} */ function ao(/** @type {Kf | xh | undefined} */ r, i) {
@@ -20952,7 +20956,7 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       ? J(So(i, _, c, d), r)
       : r;
   }
-  /** @returns {Kf} */ function wo(r) {
+  /** @returns {Kf} */ function wo(/** @type {Kf | xh | vh | Th | undefined} */ r) {
     /** @type {Kf} */ let i = I(252);
     return (
       (i.label = nt(r)),
@@ -20965,7 +20969,7 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function pu(r, i) {
     return r.label !== i ? J(wo(i), r) : r;
   }
-  /** @returns {InstanceType<typeof Kf>} */ function Ss(r) {
+  /** @returns {InstanceType<typeof Kf>} */ function Ss(/** @type {Kf | xh | vh | Th | undefined} */ r) {
     /** @type {Kf} */ let i = I(253);
     return (
       (i.label = nt(r)),
@@ -21369,7 +21373,7 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function xu(r, i) {
     return r.name !== i ? J(Ko(i), r) : r;
   }
-  function Zo(r) {
+  /** @returns {Kf} */ function Zo(/** @type {Kf | xh | vh | Th} */ r) {
     let i = ae(281);
     return ((i.name = r), (i.transformFlags |= z(i.name) | 32), (i.transformFlags &= -67108865), i);
   }
@@ -21814,7 +21818,7 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function Hu(r, i) {
     return r.properties !== i ? J(Bi(i), r) : r;
   }
-  function jc(r) {
+  /** @returns {Kf} */ function jc(/** @type {Kf | xh | vh | Th} */ r) {
     let i = I(294);
     return ((i.expression = r), (i.transformFlags |= z(i.expression) | 2), i);
   }
@@ -21833,7 +21837,7 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function Vs(r, i) {
     return r.expression !== i ? J(Jc(r.dotDotDotToken, i), r) : r;
   }
-  function _i(r, i) {
+  /** @returns {Kf} */ function _i(/** @type {Kf | xh | vh | Th} */ r, /** @type {Kf | xh | vh | Th} */ i) {
     let _ = I(296);
     return ((_.namespace = r), (_.name = i), (_.transformFlags |= z(_.namespace) | z(_.name) | 2), _);
   }
@@ -22578,13 +22582,13 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function Ie(r) {
     return r ? me(r) : void 0;
   }
-  /** @returns {any} */ function nt(/** @type {xh | Kf | Th | undefined} */ r) {
+  /** @returns {Kf | xh | vh | Th | undefined} */ function nt(/** @type {xh | Kf | Th | undefined} */ r) {
     return typeof r == "string" ? He(r) : r;
   }
-  /** @returns {any} */ function Cr(/** @type {any} */ r) {
+  /** @returns {Kf | xh | vh | Th} */ function Cr(/** @type {Kf | xh | vh | Th} */ r) {
     return typeof r == "string" ? mt(r) : typeof r == "number" ? V(r) : typeof r == "boolean" ? (r ? lt() : or()) : r;
   }
-  /** @returns {any} */ function Vi(/** @type {any} */ r) {
+  /** @returns {Kf | xh | vh | Th | undefined} */ function Vi(/** @type {Kf | xh | vh | Th | undefined} */ r) {
     return r && s().parenthesizeExpressionForDisallowedComma(r);
   }
   /** @returns {InstanceType<typeof vh>} */ function vp(/** @type {vh} */ r) {
@@ -22676,16 +22680,16 @@ function Gb(e, t) {
   }
   return s === void 0 || En.scan() !== 1 ? (En.setText(void 0), Xd) : (En.setText(void 0), s);
 }
-/** @returns {number} */ function Rn(/** @type {any} */ e) {
+/** @returns {number} */ function Rn(/** @type {Kf | xh | vh | Th | undefined} */ e) {
   return e && et(e) ? qa(e) : z(e);
 }
 /** @returns {number} */ function qa(/** @type {InstanceType<typeof xh>} */ e) {
   return z(e) & -67108865;
 }
-/** @returns {number} */ function Yb(/** @type {any} */ e, /** @type {number} */ t) {
+/** @returns {number} */ function Yb(/** @type {Kf | xh | vh | Th} */ e, /** @type {number} */ t) {
   return t | (e.transformFlags & 134234112);
 }
-/** @returns {number} */ function z(/** @type {any} */ e) {
+/** @returns {number} */ function z(/** @type {Kf | xh | vh | Th | undefined} */ e) {
   if (!e) return 0;
   let t = e.transformFlags & ~Hb(e.kind);
   return Ig(e) && c1(e.name) ? Yb(e.name, t) : t;
@@ -22827,13 +22831,13 @@ function Kb(e, t) {
   for (let a in e) t[a] = e[a];
   return t;
 }
-/** @returns {boolean} */ function sa(/** @type {any} */ e) {
+/** @returns {boolean} */ function sa(/** @type {Kf | xh | vh | Th} */ e) {
   return e.kind === 9;
 }
 function N1(e) {
   return e.kind === 10;
 }
-/** @returns {boolean} */ function Lr(/** @type {any} */ e) {
+/** @returns {boolean} */ function Lr(/** @type {Kf | xh | vh | Th} */ e) {
   return e.kind === 11;
 }
 /** @returns {boolean} */ function I1(/** @type {Kf} */ e) {
@@ -22848,10 +22852,10 @@ function Zb(e) {
 /** @returns {boolean} */ function Kd(/** @type {InstanceType<typeof vh>} */ e) {
   return e.kind === 58;
 }
-/** @returns {boolean} */ function et(/** @type {any} */ e) {
+/** @returns {boolean} */ function et(/** @type {Kf | xh | vh | Th} */ e) {
   return e.kind === 80;
 }
-/** @returns {boolean} */ function xi(/** @type {any} */ e) {
+/** @returns {boolean} */ function xi(/** @type {Kf | xh | vh | Th} */ e) {
   return e.kind === 81;
 }
 /** @returns {boolean} */ function ev(/** @type {Kf | vh} */ e) {
@@ -22860,10 +22864,10 @@ function Zb(e) {
 /** @returns {boolean} */ function ml(/** @type {vh | Kf} */ e) {
   return e.kind === 134;
 }
-/** @returns {boolean} */ function Ip(/** @type {any} */ e) {
+/** @returns {boolean} */ function Ip(/** @type {Kf | xh | vh | Th} */ e) {
   return e.kind === 108;
 }
-/** @returns {boolean} */ function tv(/** @type {any} */ e) {
+/** @returns {boolean} */ function tv(/** @type {Kf | xh | vh | Th} */ e) {
   return e.kind === 102;
 }
 /** @returns {boolean} */ function O1(/** @type {Kf} */ e) {
@@ -22980,7 +22984,7 @@ function pv(e) {
 /** @returns {boolean} */ function G1(/** @type {InstanceType<typeof xh> | InstanceType<typeof Kf>} */ e) {
   return e.kind === 209;
 }
-/** @returns {boolean} */ function Y1(/** @type {any} */ e) {
+/** @returns {boolean} */ function Y1(/** @type {Kf | xh | vh | Th} */ e) {
   return e.kind === 210;
 }
 /** @returns {boolean} */ function Rf(/** @type {Kf | xh} */ e) {
@@ -23022,7 +23026,7 @@ function $1(e) {
 /** @returns {boolean} */ function Cl(/** @type {InstanceType<typeof Kf> | InstanceType<typeof vh> | InstanceType<typeof xh>} */ e) {
   return e.kind === 232;
 }
-/** @returns {boolean} */ function Q1(/** @type {any} */ e) {
+/** @returns {boolean} */ function Q1(/** @type {Kf | xh | vh | Th} */ e) {
   return e.kind === 233;
 }
 /** @returns {boolean} */ function K1(/** @type {vh | xh | Kf} */ e) {
@@ -23121,7 +23125,7 @@ function sh(e) {
 function ch(e) {
   return e.kind === 321;
 }
-/** @returns {boolean} */ function bv(/** @type {any} */ e) {
+/** @returns {boolean} */ function bv(/** @type {d6 | Kf | xh | vh | Th} */ e) {
   return e.kind === 323;
 }
 /** @returns {boolean} */ function Jl(/** @type {Kf | d6} */ e) {
@@ -23364,7 +23368,7 @@ function Xp(e, t, a, s, f) {
 function yn(e, t) {
   return t ? vi(e, t.pos, t.end) : e;
 }
-/** @returns {boolean} */ function Rl(/** @type {any} */ e) {
+/** @returns {boolean} */ function Rl(/** @type {d6 | Kf | xh | vh | Th} */ e) {
   let t = e.kind;
   return (
     t === 169 ||
@@ -23411,10 +23415,10 @@ var im,
     createBaseNode: (e) => new (im || (im = Ct.getNodeConstructor()))(e, -1, -1),
   },
   nx = Pf(1, Bv);
-function S(e, /** @type {any} */ t) {
+function S(/** @type {TsNodeVisitor} */ e, /** @type {Kf | xh | vh | Th | undefined} */ t) {
   return t && e(t);
 }
-function ie(e, t, a) {
+function ie(/** @type {TsNodeVisitor} */ e, /** @type {TsNodesVisitor | undefined} */ t, a) {
   if (a) {
     if (t) return t(a);
     for (let s of a) {
@@ -23439,19 +23443,20 @@ function dh(e) {
   return Gv(e) ? e : $t(e, dh);
 }
 /** @returns {boolean} */ function Wv(/** @type {InstanceType<typeof Kf>} */ e, /** @type {number} */ t) {
-  return nn(e.modifiers, /** @returns {boolean} */ (a) => a.kind === t);
+  return nn(e.modifiers, /** @returns {boolean} */ (/** @type {Kf | vh} */ a) => a.kind === t);
 }
 function Gv(e) {
   return dv(e) && e.keywordToken === 102 && e.name.escapedText === "meta";
 }
+/** @type {Record<number, (node: any, cbNode: TsNodeVisitor, cbNodes: TsNodesVisitor | undefined) => unknown>} */
 var Yv = {
-  167: function (/** @type {Kf} */ t, a, s) {
+  167: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.left) || S(a, t.right);
   },
-  169: function (/** @type {Kf} */ t, a, s) {
+  169: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return ie(a, s, t.modifiers) || S(a, t.name) || S(a, t.constraint) || S(a, t.default) || S(a, t.expression);
   },
-  305: function (/** @type {Kf} */ t, a, s) {
+  305: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return (
       ie(a, s, t.modifiers) ||
       S(a, t.name) ||
@@ -23461,10 +23466,10 @@ var Yv = {
       S(a, t.objectAssignmentInitializer)
     );
   },
-  306: function (/** @type {Kf} */ t, a, s) {
+  306: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.expression);
   },
-  170: function (/** @type {Kf} */ t, a, s) {
+  170: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return (
       ie(a, s, t.modifiers) ||
       S(a, t.dotDotDotToken) ||
@@ -23474,7 +23479,7 @@ var Yv = {
       S(a, t.initializer)
     );
   },
-  173: function (/** @type {Kf} */ t, a, s) {
+  173: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return (
       ie(a, s, t.modifiers) ||
       S(a, t.name) ||
@@ -23484,32 +23489,32 @@ var Yv = {
       S(a, t.initializer)
     );
   },
-  172: function (/** @type {Kf} */ t, a, s) {
+  172: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return ie(a, s, t.modifiers) || S(a, t.name) || S(a, t.questionToken) || S(a, t.type) || S(a, t.initializer);
   },
-  304: function (/** @type {Kf} */ t, a, s) {
+  304: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return (
       ie(a, s, t.modifiers) || S(a, t.name) || S(a, t.questionToken) || S(a, t.exclamationToken) || S(a, t.initializer)
     );
   },
-  261: function (/** @type {Kf} */ t, a, s) {
+  261: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.name) || S(a, t.exclamationToken) || S(a, t.type) || S(a, t.initializer);
   },
-  209: function (/** @type {Kf} */ t, a, s) {
+  209: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.dotDotDotToken) || S(a, t.propertyName) || S(a, t.name) || S(a, t.initializer);
   },
-  182: function (/** @type {Kf} */ t, a, s) {
+  182: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return ie(a, s, t.modifiers) || ie(a, s, t.typeParameters) || ie(a, s, t.parameters) || S(a, t.type);
   },
-  186: function (/** @type {Kf} */ t, a, s) {
+  186: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return ie(a, s, t.modifiers) || ie(a, s, t.typeParameters) || ie(a, s, t.parameters) || S(a, t.type);
   },
-  185: function (/** @type {InstanceType<typeof Kf>} */ t, a, s) {
+  185: function (/** @type {InstanceType<typeof Kf>} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return ie(a, s, t.modifiers) || ie(a, s, t.typeParameters) || ie(a, s, t.parameters) || S(a, t.type);
   },
   180: cm,
   181: cm,
-  175: function (/** @type {Kf} */ t, a, s) {
+  175: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return (
       ie(a, s, t.modifiers) ||
       S(a, t.asteriskToken) ||
@@ -23522,7 +23527,7 @@ var Yv = {
       S(a, t.body)
     );
   },
-  174: function (/** @type {Kf} */ t, a, s) {
+  174: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return (
       ie(a, s, t.modifiers) ||
       S(a, t.name) ||
@@ -23532,7 +23537,7 @@ var Yv = {
       S(a, t.type)
     );
   },
-  177: function (/** @type {Kf} */ t, a, s) {
+  177: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return (
       ie(a, s, t.modifiers) ||
       S(a, t.name) ||
@@ -23542,7 +23547,7 @@ var Yv = {
       S(a, t.body)
     );
   },
-  178: function (/** @type {InstanceType<typeof Kf>} */ t, a, s) {
+  178: function (/** @type {InstanceType<typeof Kf>} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return (
       ie(a, s, t.modifiers) ||
       S(a, t.name) ||
@@ -23552,7 +23557,7 @@ var Yv = {
       S(a, t.body)
     );
   },
-  179: function (/** @type {Kf} */ t, a, s) {
+  179: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return (
       ie(a, s, t.modifiers) ||
       S(a, t.name) ||
@@ -23562,18 +23567,7 @@ var Yv = {
       S(a, t.body)
     );
   },
-  263: function (/** @type {Kf} */ t, a, s) {
-    return (
-      ie(a, s, t.modifiers) ||
-      S(a, t.asteriskToken) ||
-      S(a, t.name) ||
-      ie(a, s, t.typeParameters) ||
-      ie(a, s, t.parameters) ||
-      S(a, t.type) ||
-      S(a, t.body)
-    );
-  },
-  219: function (/** @type {Kf} */ t, a, s) {
+  263: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return (
       ie(a, s, t.modifiers) ||
       S(a, t.asteriskToken) ||
@@ -23584,7 +23578,18 @@ var Yv = {
       S(a, t.body)
     );
   },
-  220: function (/** @type {Kf} */ t, a, s) {
+  219: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+    return (
+      ie(a, s, t.modifiers) ||
+      S(a, t.asteriskToken) ||
+      S(a, t.name) ||
+      ie(a, s, t.typeParameters) ||
+      ie(a, s, t.parameters) ||
+      S(a, t.type) ||
+      S(a, t.body)
+    );
+  },
+  220: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return (
       ie(a, s, t.modifiers) ||
       ie(a, s, t.typeParameters) ||
@@ -23594,47 +23599,47 @@ var Yv = {
       S(a, t.body)
     );
   },
-  176: function (t, a, s) {
+  176: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return ie(a, s, t.modifiers) || S(a, t.body);
   },
-  184: function (/** @type {Kf} */ t, a, s) {
+  184: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.typeName) || ie(a, s, t.typeArguments);
   },
-  183: function (/** @type {Kf} */ t, a, s) {
+  183: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.assertsModifier) || S(a, t.parameterName) || S(a, t.type);
   },
-  187: function (/** @type {Kf} */ t, a, s) {
+  187: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.exprName) || ie(a, s, t.typeArguments);
   },
-  188: function (/** @type {Kf} */ t, a, s) {
+  188: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return ie(a, s, t.members);
   },
-  189: function (/** @type {Kf} */ t, a, s) {
+  189: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.elementType);
   },
-  190: function (/** @type {Kf} */ t, a, s) {
+  190: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return ie(a, s, t.elements);
   },
   193: lm,
   194: lm,
-  195: function (/** @type {Kf} */ t, a, s) {
+  195: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.checkType) || S(a, t.extendsType) || S(a, t.trueType) || S(a, t.falseType);
   },
-  196: function (t, a, s) {
+  196: function (t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.typeParameter);
   },
-  206: function (/** @type {Kf} */ t, a, s) {
+  206: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.argument) || S(a, t.attributes) || S(a, t.qualifier) || ie(a, s, t.typeArguments);
   },
-  303: function (t, a, s) {
+  303: function (t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.assertClause);
   },
   197: um,
   199: um,
-  200: function (/** @type {Kf} */ t, a, s) {
+  200: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.objectType) || S(a, t.indexType);
   },
-  201: function (/** @type {Kf} */ t, a, s) {
+  201: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return (
       S(a, t.readonlyToken) ||
       S(a, t.typeParameter) ||
@@ -23644,149 +23649,149 @@ var Yv = {
       ie(a, s, t.members)
     );
   },
-  202: function (/** @type {Kf} */ t, a, s) {
+  202: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.literal);
   },
-  203: function (/** @type {Kf} */ t, a, s) {
+  203: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.dotDotDotToken) || S(a, t.name) || S(a, t.questionToken) || S(a, t.type);
   },
   207: pm,
   208: pm,
-  210: function (/** @type {Kf} */ t, a, s) {
+  210: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return ie(a, s, t.elements);
   },
-  211: function (/** @type {Kf} */ t, a, s) {
+  211: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return ie(a, s, t.properties);
   },
-  212: function (/** @type {Kf} */ t, a, s) {
+  212: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.expression) || S(a, t.questionDotToken) || S(a, t.name);
   },
-  213: function (/** @type {Kf} */ t, a, s) {
+  213: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.expression) || S(a, t.questionDotToken) || S(a, t.argumentExpression);
   },
   214: fm,
   215: fm,
-  216: function (/** @type {Kf} */ t, a, s) {
+  216: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.tag) || S(a, t.questionDotToken) || ie(a, s, t.typeArguments) || S(a, t.template);
   },
-  217: function (/** @type {Kf} */ t, a, s) {
+  217: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.type) || S(a, t.expression);
   },
-  218: function (/** @type {Kf} */ t, a, s) {
+  218: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.expression);
   },
-  221: function (/** @type {InstanceType<typeof Kf>} */ t, a, s) {
+  221: function (/** @type {InstanceType<typeof Kf>} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.expression);
   },
-  222: function (/** @type {InstanceType<typeof Kf>} */ t, a, s) {
+  222: function (/** @type {InstanceType<typeof Kf>} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.expression);
   },
-  223: function (/** @type {Kf} */ t, a, s) {
+  223: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.expression);
   },
-  225: function (/** @type {InstanceType<typeof Kf>} */ t, a, s) {
+  225: function (/** @type {InstanceType<typeof Kf>} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.operand);
   },
-  230: function (/** @type {Kf} */ t, a, s) {
+  230: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.asteriskToken) || S(a, t.expression);
   },
-  224: function (/** @type {Kf} */ t, a, s) {
+  224: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.expression);
   },
-  226: function (/** @type {Kf} */ t, a, s) {
+  226: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.operand);
   },
-  227: function (/** @type {Kf} */ t, a, s) {
+  227: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.left) || S(a, t.operatorToken) || S(a, t.right);
   },
-  235: function (/** @type {Kf} */ t, a, s) {
+  235: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.expression) || S(a, t.type);
   },
-  236: function (/** @type {Kf} */ t, a, s) {
+  236: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.expression);
   },
-  239: function (/** @type {Kf} */ t, a, s) {
+  239: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.expression) || S(a, t.type);
   },
-  237: function (/** @type {Kf} */ t, a, s) {
+  237: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.name);
   },
-  228: function (/** @type {Kf} */ t, a, s) {
+  228: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.condition) || S(a, t.questionToken) || S(a, t.whenTrue) || S(a, t.colonToken) || S(a, t.whenFalse);
   },
-  231: function (/** @type {Kf} */ t, a, s) {
+  231: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.expression);
   },
   242: dm,
   269: dm,
-  308: function (/** @type {d6} */ t, a, s) {
+  308: function (/** @type {d6} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return ie(a, s, t.statements) || S(a, t.endOfFileToken);
   },
-  244: function (/** @type {Kf} */ t, a, s) {
+  244: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return ie(a, s, t.modifiers) || S(a, t.declarationList);
   },
-  262: function (/** @type {Kf} */ t, a, s) {
+  262: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return ie(a, s, t.declarations);
   },
-  245: function (/** @type {Kf} */ t, a, s) {
+  245: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.expression);
   },
-  246: function (/** @type {Kf} */ t, a, s) {
+  246: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.expression) || S(a, t.thenStatement) || S(a, t.elseStatement);
   },
-  247: function (/** @type {Kf} */ t, a, s) {
+  247: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.statement) || S(a, t.expression);
   },
-  248: function (/** @type {Kf} */ t, a, s) {
+  248: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.expression) || S(a, t.statement);
   },
-  249: function (/** @type {Kf} */ t, a, s) {
+  249: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.initializer) || S(a, t.condition) || S(a, t.incrementor) || S(a, t.statement);
   },
-  250: function (/** @type {Kf} */ t, a, s) {
+  250: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.initializer) || S(a, t.expression) || S(a, t.statement);
   },
-  251: function (/** @type {Kf} */ t, a, s) {
+  251: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.awaitModifier) || S(a, t.initializer) || S(a, t.expression) || S(a, t.statement);
   },
   252: mm,
   253: mm,
-  254: function (/** @type {Kf} */ t, a, s) {
+  254: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.expression);
   },
-  255: function (t, a, s) {
+  255: function (t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.expression) || S(a, t.statement);
   },
-  256: function (/** @type {Kf} */ t, a, s) {
+  256: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.expression) || S(a, t.caseBlock);
   },
-  270: function (/** @type {Kf} */ t, a, s) {
+  270: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return ie(a, s, t.clauses);
   },
-  297: function (/** @type {Kf} */ t, a, s) {
+  297: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.expression) || ie(a, s, t.statements);
   },
-  298: function (/** @type {Kf} */ t, a, s) {
+  298: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return ie(a, s, t.statements);
   },
-  257: function (/** @type {Kf} */ t, a, s) {
+  257: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.label) || S(a, t.statement);
   },
-  258: function (/** @type {Kf} */ t, a, s) {
+  258: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.expression);
   },
-  259: function (/** @type {Kf} */ t, a, s) {
+  259: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.tryBlock) || S(a, t.catchClause) || S(a, t.finallyBlock);
   },
-  300: function (/** @type {Kf} */ t, a, s) {
+  300: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.variableDeclaration) || S(a, t.block);
   },
-  171: function (/** @type {Kf} */ t, a, s) {
+  171: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.expression);
   },
   264: hm,
   232: hm,
-  265: function (/** @type {Kf} */ t, a, s) {
+  265: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return (
       ie(a, s, t.modifiers) ||
       S(a, t.name) ||
@@ -23795,106 +23800,106 @@ var Yv = {
       ie(a, s, t.members)
     );
   },
-  266: function (/** @type {Kf} */ t, a, s) {
+  266: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return ie(a, s, t.modifiers) || S(a, t.name) || ie(a, s, t.typeParameters) || S(a, t.type);
   },
-  267: function (/** @type {Kf} */ t, a, s) {
+  267: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return ie(a, s, t.modifiers) || S(a, t.name) || ie(a, s, t.members);
   },
-  307: function (/** @type {Kf} */ t, a, s) {
+  307: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.name) || S(a, t.initializer);
   },
-  268: function (/** @type {Kf} */ t, a, s) {
+  268: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return ie(a, s, t.modifiers) || S(a, t.name) || S(a, t.body);
   },
-  272: function (/** @type {Kf} */ t, a, s) {
+  272: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return ie(a, s, t.modifiers) || S(a, t.name) || S(a, t.moduleReference);
   },
-  273: function (/** @type {Kf} */ t, a, s) {
+  273: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return ie(a, s, t.modifiers) || S(a, t.importClause) || S(a, t.moduleSpecifier) || S(a, t.attributes);
   },
-  274: function (/** @type {Kf} */ t, a, s) {
+  274: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.name) || S(a, t.namedBindings);
   },
-  301: function (/** @type {Kf} */ t, a, s) {
+  301: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return ie(a, s, t.elements);
   },
-  302: function (/** @type {Kf} */ t, a, s) {
+  302: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.name) || S(a, t.value);
   },
-  271: function (t, a, s) {
+  271: function (t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return ie(a, s, t.modifiers) || S(a, t.name);
   },
-  275: function (/** @type {Kf} */ t, a, s) {
+  275: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.name);
   },
-  281: function (t, a, s) {
+  281: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.name);
   },
   276: ym,
   280: ym,
-  279: function (/** @type {Kf} */ t, a, s) {
+  279: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return ie(a, s, t.modifiers) || S(a, t.exportClause) || S(a, t.moduleSpecifier) || S(a, t.attributes);
   },
   277: gm,
   282: gm,
-  278: function (/** @type {Kf} */ t, a, s) {
+  278: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return ie(a, s, t.modifiers) || S(a, t.expression);
   },
-  229: function (/** @type {Kf} */ t, a, s) {
+  229: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.head) || ie(a, s, t.templateSpans);
   },
-  240: function (/** @type {Kf} */ t, a, s) {
+  240: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.expression) || S(a, t.literal);
   },
-  204: function (/** @type {Kf} */ t, a, s) {
+  204: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.head) || ie(a, s, t.templateSpans);
   },
-  205: function (/** @type {Kf} */ t, a, s) {
+  205: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.type) || S(a, t.literal);
   },
-  168: function (/** @type {Kf} */ t, a, s) {
+  168: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.expression);
   },
-  299: function (/** @type {Kf} */ t, a, s) {
+  299: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return ie(a, s, t.types);
   },
-  234: function (/** @type {Kf} */ t, a, s) {
+  234: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.expression) || ie(a, s, t.typeArguments);
   },
-  284: function (/** @type {Kf} */ t, a, s) {
+  284: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.expression);
   },
-  283: function (/** @type {Kf} */ t, a, s) {
+  283: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return ie(a, s, t.modifiers);
   },
-  357: function (t, a, s) {
+  357: function (t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return ie(a, s, t.elements);
   },
-  285: function (/** @type {Kf} */ t, a, s) {
+  285: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.openingElement) || ie(a, s, t.children) || S(a, t.closingElement);
   },
-  289: function (/** @type {Kf} */ t, a, s) {
+  289: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.openingFragment) || ie(a, s, t.children) || S(a, t.closingFragment);
   },
   286: bm,
   287: bm,
-  293: function (/** @type {Kf} */ t, a, s) {
+  293: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return ie(a, s, t.properties);
   },
-  292: function (/** @type {Kf} */ t, a, s) {
+  292: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.name) || S(a, t.initializer);
   },
-  294: function (t, a, s) {
+  294: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.expression);
   },
-  295: function (/** @type {Kf} */ t, a, s) {
+  295: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.dotDotDotToken) || S(a, t.expression);
   },
-  288: function (/** @type {Kf} */ t, a, s) {
+  288: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.tagName);
   },
-  296: function (t, a, s) {
+  296: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.namespace) || S(a, t.name);
   },
   191: Xi,
@@ -23904,33 +23909,33 @@ var Yv = {
   315: Xi,
   317: Xi,
   319: Xi,
-  318: function (t, a, s) {
+  318: function (t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return ie(a, s, t.parameters) || S(a, t.type);
   },
-  321: function (t, a, s) {
+  321: function (t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return (typeof t.comment == "string" ? void 0 : ie(a, s, t.comment)) || ie(a, s, t.tags);
   },
-  348: function (t, a, s) {
+  348: function (t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.tagName) || S(a, t.name) || (typeof t.comment == "string" ? void 0 : ie(a, s, t.comment));
   },
-  311: function (t, a, s) {
+  311: function (t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.name);
   },
-  312: function (t, a, s) {
+  312: function (t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.left) || S(a, t.right);
   },
   342: vm,
   349: vm,
-  331: function (t, a, s) {
+  331: function (t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.tagName) || (typeof t.comment == "string" ? void 0 : ie(a, s, t.comment));
   },
-  330: function (t, a, s) {
+  330: function (t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.tagName) || S(a, t.class) || (typeof t.comment == "string" ? void 0 : ie(a, s, t.comment));
   },
-  329: function (t, a, s) {
+  329: function (t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.tagName) || S(a, t.class) || (typeof t.comment == "string" ? void 0 : ie(a, s, t.comment));
   },
-  346: function (t, a, s) {
+  346: function (t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return (
       S(a, t.tagName) ||
       S(a, t.constraint) ||
@@ -23938,7 +23943,7 @@ var Yv = {
       (typeof t.comment == "string" ? void 0 : ie(a, s, t.comment))
     );
   },
-  347: function (t, a, s) {
+  347: function (t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return (
       S(a, t.tagName) ||
       (t.typeExpression && t.typeExpression.kind === 310
@@ -23946,7 +23951,7 @@ var Yv = {
         : S(a, t.fullName) || S(a, t.typeExpression) || (typeof t.comment == "string" ? void 0 : ie(a, s, t.comment)))
     );
   },
-  339: function (t, a, s) {
+  339: function (t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return (
       S(a, t.tagName) ||
       S(a, t.fullName) ||
@@ -23961,13 +23966,13 @@ var Yv = {
   351: $i,
   350: $i,
   340: $i,
-  324: function (t, a, s) {
+  324: function (t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return Bn(t.typeParameters, a) || Bn(t.parameters, a) || S(a, t.type);
   },
   325: Op,
   326: Op,
   327: Op,
-  323: function (t, a, s) {
+  323: function (t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return Bn(t.jsDocPropertyTags, a);
   },
   328: di,
@@ -23981,28 +23986,28 @@ var Yv = {
   352: Hv,
   356: Xv,
 };
-function cm(/** @type {Kf} */ e, t, a) {
+function cm(/** @type {Kf} */ e, /** @type {TsNodeVisitor} */ t, /** @type {TsNodesVisitor | undefined} */ a) {
   return ie(t, a, e.typeParameters) || ie(t, a, e.parameters) || S(t, e.type);
 }
-function lm(/** @type {Kf} */ e, t, a) {
+function lm(/** @type {Kf} */ e, /** @type {TsNodeVisitor} */ t, /** @type {TsNodesVisitor | undefined} */ a) {
   return ie(t, a, e.types);
 }
-function um(/** @type {Kf} */ e, t, a) {
+function um(/** @type {Kf} */ e, /** @type {TsNodeVisitor} */ t, /** @type {TsNodesVisitor | undefined} */ a) {
   return S(t, e.type);
 }
-function pm(/** @type {Kf} */ e, t, a) {
+function pm(/** @type {Kf} */ e, /** @type {TsNodeVisitor} */ t, /** @type {TsNodesVisitor | undefined} */ a) {
   return ie(t, a, e.elements);
 }
-function fm(/** @type {Kf} */ e, t, a) {
+function fm(/** @type {Kf} */ e, /** @type {TsNodeVisitor} */ t, /** @type {TsNodesVisitor | undefined} */ a) {
   return S(t, e.expression) || S(t, e.questionDotToken) || ie(t, a, e.typeArguments) || ie(t, a, e.arguments);
 }
-function dm(/** @type {Kf} */ e, t, a) {
+function dm(/** @type {Kf} */ e, /** @type {TsNodeVisitor} */ t, /** @type {TsNodesVisitor | undefined} */ a) {
   return ie(t, a, e.statements);
 }
-function mm(/** @type {Kf} */ e, t, a) {
+function mm(/** @type {Kf} */ e, /** @type {TsNodeVisitor} */ t, /** @type {TsNodesVisitor | undefined} */ a) {
   return S(t, e.label);
 }
-function hm(/** @type {Kf} */ e, t, a) {
+function hm(/** @type {Kf} */ e, /** @type {TsNodeVisitor} */ t, /** @type {TsNodesVisitor | undefined} */ a) {
   return (
     ie(t, a, e.modifiers) ||
     S(t, e.name) ||
@@ -24011,35 +24016,35 @@ function hm(/** @type {Kf} */ e, t, a) {
     ie(t, a, e.members)
   );
 }
-function ym(/** @type {Kf} */ e, t, a) {
+function ym(/** @type {Kf} */ e, /** @type {TsNodeVisitor} */ t, /** @type {TsNodesVisitor | undefined} */ a) {
   return ie(t, a, e.elements);
 }
-function gm(/** @type {Kf} */ e, t, a) {
+function gm(/** @type {Kf} */ e, /** @type {TsNodeVisitor} */ t, /** @type {TsNodesVisitor | undefined} */ a) {
   return S(t, e.propertyName) || S(t, e.name);
 }
-function bm(/** @type {Kf} */ e, t, a) {
+function bm(/** @type {Kf} */ e, /** @type {TsNodeVisitor} */ t, /** @type {TsNodesVisitor | undefined} */ a) {
   return S(t, e.tagName) || ie(t, a, e.typeArguments) || S(t, e.attributes);
 }
-function Xi(/** @type {Kf} */ e, t, a) {
+function Xi(/** @type {Kf} */ e, /** @type {TsNodeVisitor} */ t, /** @type {TsNodesVisitor | undefined} */ a) {
   return S(t, e.type);
 }
-function vm(e, t, a) {
+function vm(e, /** @type {TsNodeVisitor} */ t, /** @type {TsNodesVisitor | undefined} */ a) {
   return (
     S(t, e.tagName) ||
     (e.isNameFirst ? S(t, e.name) || S(t, e.typeExpression) : S(t, e.typeExpression) || S(t, e.name)) ||
     (typeof e.comment == "string" ? void 0 : ie(t, a, e.comment))
   );
 }
-function $i(e, t, a) {
+function $i(e, /** @type {TsNodeVisitor} */ t, /** @type {TsNodesVisitor | undefined} */ a) {
   return S(t, e.tagName) || S(t, e.typeExpression) || (typeof e.comment == "string" ? void 0 : ie(t, a, e.comment));
 }
-function Op(e, t, a) {
+function Op(e, /** @type {TsNodeVisitor} */ t, /** @type {TsNodesVisitor | undefined} */ a) {
   return S(t, e.name);
 }
-function di(e, t, a) {
+function di(e, /** @type {TsNodeVisitor} */ t, /** @type {TsNodesVisitor | undefined} */ a) {
   return S(t, e.tagName) || (typeof e.comment == "string" ? void 0 : ie(t, a, e.comment));
 }
-function Hv(e, t, a) {
+function Hv(e, /** @type {TsNodeVisitor} */ t, /** @type {TsNodesVisitor | undefined} */ a) {
   return (
     S(t, e.tagName) ||
     S(t, e.importClause) ||
@@ -24048,15 +24053,15 @@ function Hv(e, t, a) {
     (typeof e.comment == "string" ? void 0 : ie(t, a, e.comment))
   );
 }
-function Xv(e, t, a) {
+function Xv(e, /** @type {TsNodeVisitor} */ t, /** @type {TsNodesVisitor | undefined} */ a) {
   return S(t, e.expression);
 }
-function $t(/** @type {d6 | Kf} */ e, t, a) {
+function $t(/** @type {d6 | Kf} */ e, /** @type {TsNodeVisitor} */ t, /** @type {TsNodesVisitor | undefined} */ a) {
   if (e === void 0 || e.kind <= 166) return;
   let s = Yv[e.kind];
   return s === void 0 ? void 0 : s(e, t, a);
 }
-function xm(/** @type {InstanceType<typeof d6>} */ e, t, a) {
+function xm(/** @type {InstanceType<typeof d6>} */ e, /** @type {(node: any, parent: any) => any} */ t, /** @type {((nodes: any, parent: any) => any) | undefined} */ a) {
   let s = Tm(e),
     f = [];
   for (; f.length < s.length;) f.push(e);
@@ -24082,7 +24087,7 @@ function xm(/** @type {InstanceType<typeof d6>} */ e, t, a) {
     }
   }
 }
-/** @returns {any[]} */ function Tm(/** @type {any} */ e) {
+/** @returns {any[]} */ function Tm(/** @type {d6 | Kf | xh | vh | Th} */ e) {
   let t = [];
   return ($t(e, a, a), t);
   function a(s) {
@@ -24131,7 +24136,7 @@ var na;
   var G = {
       createBaseSourceFileNode: /** @returns {InstanceType<typeof d6>} */ (/** @type {number} */ o) => l(new v(o, 0, 0)),
       createBaseIdentifierNode: /** @returns {InstanceType<typeof xh>} */ (/** @type {number} */ o) => l(new h(o, 0, 0)),
-      createBasePrivateIdentifierNode: (/** @type {number} */ o) => l(new b(o, 0, 0)),
+      createBasePrivateIdentifierNode: /** @returns {InstanceType<typeof Th>} */ (/** @type {number} */ o) => l(new b(o, 0, 0)),
       createBaseTokenNode: /** @returns {InstanceType<typeof vh>} */ (/** @type {number} */ o) => l(new f(o, 0, 0)),
       createBaseNode: /** @returns {InstanceType<typeof Kf>} */ (/** @type {number} */ o) => l(new s(o, 0, 0)),
     },
@@ -24344,7 +24349,7 @@ var na;
     }
   }
   let Gn = !1;
-  /** @returns {any} */ function Pe(/** @type {Kf | vh} */ o, /** @type {boolean} */ p) {
+  /** @returns {Kf | xh | vh | Th} */ function Pe(/** @type {Kf | vh} */ o, /** @type {boolean} */ p) {
     if (!p) return o;
     q.assert(!o.jsDoc);
     let m = wy(E2(o, Ke), (g) => sl.parseJSDocComment(o, g.pos, g.end - g.pos));
@@ -24467,10 +24472,10 @@ var na;
   /** @returns {xh | Kf} */ function Rr(o) {
     return St(8192, o);
   }
-  /** @returns {any} */ function Tr(o) {
+  /** @returns {Kf | xh | vh | Th} */ function Tr(o) {
     return Pt(131072, o);
   }
-  /** @returns {any} */ function Mn(o) {
+  /** @returns {Kf | xh | vh | Th} */ function Mn(o) {
     return St(131072, o);
   }
   function Yn(o) {
@@ -24783,14 +24788,14 @@ var na;
   /** @returns {boolean} */ function L_() {
     return kt(u()) || u() === 11;
   }
-  /** @returns {any} */ function $l(/** @type {boolean} */ o) {
+  /** @returns {Kf | xh | vh | Th} */ function $l(/** @type {boolean} */ o) {
     if (u() === 11 || u() === 9 || u() === 10) {
       let p = $n();
       return ((p.text = Br(p.text)), p);
     }
     return o && u() === 23 ? Ql() : u() === 81 ? pa() : Ut();
   }
-  /** @returns {any} */ function qr() {
+  /** @returns {Kf | xh | vh | Th} */ function qr() {
     return $l(!0);
   }
   /** @returns {InstanceType<typeof Kf>} */ function Ql() {
@@ -25008,7 +25013,7 @@ var na;
     }
     return ((bt = m), Dt(g, x));
   }
-  /** @returns {any} */ function cs(/** @type {number} */ o, p) {
+  /** @returns {Kf | xh | vh | Th | undefined} */ function cs(/** @type {number} */ o, p) {
     let m = ma(o);
     return m ? F_(m) : p();
   }
@@ -25236,7 +25241,7 @@ var na;
     let o = Dt([], O());
     return ((o.isMissingList = !0), o);
   }
-  function $_(o) {
+  /** @returns {boolean} */ function $_(o) {
     return !!o.isMissingList;
   }
   function Fr(/** @type {number} */ o, p, /** @type {number} */ m, /** @type {number} */ g) {
@@ -25246,7 +25251,7 @@ var na;
     }
     return fr();
   }
-  /** @returns {any} */ function zr(/** @type {boolean} */ o, p) {
+  /** @returns {Kf | xh | vh | Th} */ function zr(/** @type {boolean} */ o, p) {
     let m = O(),
       g = o ? Ut(p) : vt(p);
     for (; Je(25) && u() !== 30;) g = D(y.createQualifiedName(g, ri(o, !1, !0)), m);
@@ -25298,7 +25303,7 @@ var na;
     let p = O();
     return D(y.createTemplateSpan(ut(At), Z_(o)), p);
   }
-  /** @returns {any} */ function $n() {
+  /** @returns {Kf | xh | vh | Th} */ function $n() {
     return ii(u());
   }
   /** @returns {InstanceType<typeof vh>} */ function Ii(/** @type {boolean} */ o) {
@@ -25315,7 +25320,7 @@ var na;
       m = t.getTokenText();
     return m.substring(1, m.length - (t.isUnterminated() ? 0 : p ? 1 : 2));
   }
-  /** @returns {any} */ function ii(/** @type {number} */ o) {
+  /** @returns {Kf | xh | vh | Th} */ function ii(/** @type {number} */ o) {
     let p = O(),
       m = Jd(o)
         ? y.createTemplateLiteralLikeNode(o, t.getTokenValue(), iu(o), t.getTokenFlags() & 7176)
@@ -25333,7 +25338,7 @@ var na;
       D(m, p)
     );
   }
-  /** @returns {any} */ function ai() {
+  /** @returns {Kf | xh | vh | Th} */ function ai() {
     return zr(!0, E.Type_expected);
   }
   function no() {
@@ -25449,7 +25454,7 @@ var na;
   /** @returns {boolean} */ function ba(/** @type {boolean} */ o) {
     return u() === 26 || Vs() || Xr(u()) || u() === 60 || si(!o);
   }
-  /** @returns {any} */ function _o(o) {
+  /** @returns {Kf | xh | vh | Th} */ function _o(o) {
     let p = _i(E.Private_identifiers_cannot_be_used_as_parameters);
     return (x2(p) === 0 && !nn(o) && Xr(u()) && B(), p);
   }
@@ -25478,7 +25483,7 @@ var na;
     let _e = Pe(D(y.createParameterDeclaration(x, Q, _o(x), ft(58), wr(), Er()), m), g);
     return ((Ft = P), _e);
   }
-  /** @returns {any} */ function Ln(/** @type {number} */ o, /** @type {boolean} */ p) {
+  /** @returns {Kf | xh | vh | Th | undefined} */ function Ln(/** @type {number} */ o, /** @type {boolean} */ p) {
     if (lo(o, p)) return Tr(Ta);
   }
   /** @returns {boolean} */ function lo(/** @type {number} */ o, /** @type {boolean} */ p) {
@@ -25607,7 +25612,7 @@ var na;
     let Q = Tn(4, Oi);
     return (j(20), D(y.createMappedTypeNode(p, m, g, x, P, Q), o));
   }
-  /** @returns {any} */ function To() {
+  /** @returns {Kf | xh | vh | Th} */ function To() {
     let o = O();
     if (Je(26)) return D(y.createRestTypeNode(ot()), o);
     let p = ot();
@@ -25623,7 +25628,7 @@ var na;
   /** @returns {boolean} */ function lu() {
     return u() === 26 ? kt(B()) && Ts() : kt(u()) && Ts();
   }
-  /** @returns {any} */ function So() {
+  /** @returns {Kf | xh | vh | Th} */ function So() {
     if (H(lu)) {
       let o = O(),
         p = qe(),
@@ -25708,7 +25713,7 @@ var na;
   /** @returns {boolean} */ function Eo() {
     return (B(), u() === 9 || u() === 10);
   }
-  /** @returns {any} */ function Es() {
+  /** @returns {Kf | xh | vh | Th} */ function Es() {
     switch (u()) {
       case 133:
       case 159:
@@ -25819,7 +25824,7 @@ var na;
   /** @returns {boolean} */ function Ao() {
     return (B(), u() === 22 || ba(!1) || si());
   }
-  /** @returns {any} */ function Co() {
+  /** @returns {Kf | xh | vh | Th} */ function Co() {
     let o = O(),
       p = Es();
     for (; !t.hasPrecedingLineBreak();)
@@ -25863,7 +25868,7 @@ var na;
     let o = O();
     return (j(140), D(y.createInferTypeNode(Po()), o));
   }
-  /** @returns {any} */ function No() {
+  /** @returns {Kf | xh | vh | Th} */ function No() {
     let o = u();
     switch (o) {
       case 143:
@@ -25892,7 +25897,7 @@ var na;
       );
     }
   }
-  /** @returns {any} */ function Io(/** @type {number} */ o, p, m) {
+  /** @returns {Kf | xh | vh | Th} */ function Io(/** @type {number} */ o, p, m) {
     let g = O(),
       x = o === 52,
       P = Je(o),
@@ -25904,10 +25909,10 @@ var na;
     }
     return Q;
   }
-  /** @returns {any} */ function As() {
+  /** @returns {Kf | xh | vh | Th} */ function As() {
     return Io(51, No, y.createIntersectionTypeNode);
   }
-  /** @returns {any} */ function hu() {
+  /** @returns {Kf | xh | vh | Th} */ function hu() {
     return Io(52, As, y.createUnionTypeNode);
   }
   /** @returns {boolean} */ function Oo() {
@@ -25934,7 +25939,7 @@ var na;
       )
     );
   }
-  /** @returns {any} */ function Ta() {
+  /** @returns {Kf | xh | vh | Th} */ function Ta() {
     let o = O(),
       p = Te() && le(Lo),
       m = ot();
@@ -25951,7 +25956,7 @@ var na;
       g = Je(142) ? ot() : void 0;
     return D(y.createTypePredicateNode(p, m, g), o);
   }
-  /** @returns {any} */ function ot() {
+  /** @returns {Kf | xh | vh | Th} */ function ot() {
     if (it & 81920) return Pt(81920, ot);
     if (Cs()) return Ss();
     let o = O(),
@@ -25966,7 +25971,7 @@ var na;
     }
     return p;
   }
-  /** @returns {any} */ function wr() {
+  /** @returns {Kf | xh | vh | Th | undefined} */ function wr() {
     return Je(59) ? ot() : void 0;
   }
   /** @returns {boolean} */ function Ds() {
@@ -26022,7 +26027,7 @@ var na;
   /** @returns {boolean} */ function Jo() {
     return u() !== 19 && u() !== 100 && u() !== 86 && u() !== 60 && kr();
   }
-  /** @returns {any} */ function At() {
+  /** @returns {Kf | xh | vh | Th} */ function At() {
     let o = tt();
     o && Ze(!1);
     let p = O(),
@@ -26031,10 +26036,10 @@ var na;
     for (; (g = ft(28));) m = Is(m, g, Vt(!0), p);
     return (o && Ze(!0), m);
   }
-  /** @returns {any} */ function Er() {
+  /** @returns {Kf | xh | vh | Th | undefined} */ function Er() {
     return Je(64) ? Vt(!0) : void 0;
   }
-  /** @returns {any} */ function Vt(/** @type {boolean} */ o) {
+  /** @returns {Kf | xh | vh | Th} */ function Vt(/** @type {boolean} */ o) {
     if (Ro()) return Uo();
     let p = bu(o) || Vo(o);
     if (p) return p;
@@ -26190,7 +26195,7 @@ var na;
     /** @type {Kf} */ let Ot = y.createArrowFunction(x, Q, _e, te, Ne, Xt);
     return Pe(D(Ot, m), g);
   }
-  /** @returns {any} */ function Ps(/** @type {boolean} */ o, /** @type {boolean} */ p) {
+  /** @returns {Kf | xh | vh | Th} */ function Ps(/** @type {boolean} */ o, /** @type {boolean} */ p) {
     if (u() === 19) return Aa(o ? 2 : 0);
     if (u() !== 27 && u() !== 100 && u() !== 86 && Cc() && !Jo()) return Aa(16 | (o ? 2 : 0));
     let m = Ee();
@@ -26200,7 +26205,7 @@ var na;
     let x = o ? U(/** @returns {Kf | xh | vh} */ () => Vt(p)) : K(/** @returns {Kf | xh | vh} */ () => Vt(p));
     return ((Ft = g), $e(m), x);
   }
-  /** @returns {any} */ function vu(/** @type {Kf | xh | vh} */ o, /** @type {number} */ p, /** @type {boolean} */ m) {
+  /** @returns {Kf | xh | vh | Th} */ function vu(/** @type {Kf | xh | vh} */ o, /** @type {number} */ p, /** @type {boolean} */ m) {
     /** @type {vh | undefined} */ let g = ft(58);
     if (!g) return o;
     /** @type {vh | undefined} */ let x;
@@ -26215,7 +26220,7 @@ var na;
       p,
     );
   }
-  /** @returns {any} */ function Mi(/** @type {number} */ o) {
+  /** @returns {Kf | xh | vh | Th} */ function Mi(/** @type {number} */ o) {
     let p = O(),
       m = tc();
     return Ns(o, m, p);
@@ -26223,7 +26228,7 @@ var na;
   /** @returns {boolean} */ function Yo(/** @type {number} */ o) {
     return o === 103 || o === 165;
   }
-  /** @returns {any} */ function Ns(/** @type {number} */ o, /** @type {Kf | xh | vh} */ p, m) {
+  /** @returns {Kf | xh | vh | Th} */ function Ns(/** @type {number} */ o, /** @type {Kf | xh | vh} */ p, m) {
     for (;;) {
       Ge();
       let g = Cp(u());
@@ -26273,7 +26278,7 @@ var na;
     let o = O();
     return D(y.createAwaitExpression(je(Ar)), o);
   }
-  /** @returns {any} */ function tc() {
+  /** @returns {Kf | xh | vh | Th} */ function tc() {
     if (Su()) {
       let m = O(),
         g = Sa();
@@ -26300,7 +26305,7 @@ var na;
     }
     return p;
   }
-  /** @returns {any} */ function Ar() {
+  /** @returns {Kf | xh | vh | Th} */ function Ar() {
     switch (u()) {
       case 40:
       case 41:
@@ -26338,7 +26343,7 @@ var na;
         return !0;
     }
   }
-  /** @returns {any} */ function Sa() {
+  /** @returns {Kf | xh | vh | Th} */ function Sa() {
     if (u() === 46 || u() === 47) {
       let p = O();
       return D(y.createPrefixUnaryExpression(u(), je(Li)), p);
@@ -26350,7 +26355,7 @@ var na;
     }
     return o;
   }
-  /** @returns {any} */ function Li() {
+  /** @returns {Kf | xh | vh | Th} */ function Li() {
     let o = O(),
       p;
     return (
@@ -26367,7 +26372,7 @@ var na;
       Js(o, p)
     );
   }
-  /** @returns {any} */ function wa() {
+  /** @returns {Kf | xh | vh | Th} */ function wa() {
     let o = O(),
       p = Rs();
     return on(o, p, !0);
@@ -26492,7 +26497,7 @@ var na;
       D(P, p)
     );
   }
-  /** @returns {any} */ function Ms() {
+  /** @returns {Kf | xh | vh | Th} */ function Ms() {
     let o = O(),
       p = Au();
     if (rh(p)) return p;
@@ -26574,7 +26579,7 @@ var na;
   /** @returns {boolean} */ function _c() {
     return u() === 29 && H(Nu);
   }
-  /** @returns {boolean} */ function js(/** @type {any} */ o) {
+  /** @returns {boolean} */ function js(/** @type {Kf | xh | vh | Th} */ o) {
     if (o.flags & 64) return !0;
     if (bl(o)) {
       let p = o.expression;
@@ -26610,7 +26615,7 @@ var na;
     /** @type {Kf} */ let x = m || js(p) ? oe(p, m, g) : V(p, g);
     return D(x, o);
   }
-  /** @returns {any} */ function on(/** @type {number} */ o, /** @type {vh | Kf | xh | undefined} */ p, m) {
+  /** @returns {Kf | xh | vh | Th} */ function on(/** @type {number} */ o, /** @type {vh | Kf | xh | undefined} */ p, m) {
     for (;;) {
       let g,
         x = !1;
@@ -26647,7 +26652,7 @@ var na;
     /** @type {Kf} */ let x = y.createTaggedTemplateExpression(p, g, u() === 15 ? (Nt(!0), $n()) : ya(!0));
     return ((m || p.flags & 64) && (x.flags |= 64), (x.questionDotToken = m), D(x, o));
   }
-  /** @returns {any} */ function Js(/** @type {number} */ o, /** @type {Kf | xh | vh} */ p) {
+  /** @returns {Kf | xh | vh | Th} */ function Js(/** @type {number} */ o, /** @type {Kf | xh | vh} */ p) {
     for (;;) {
       p = on(o, p, !0);
       let m,
@@ -26696,7 +26701,7 @@ var na;
     }
     return t.hasPrecedingLineBreak() || Ho() || !kr();
   }
-  /** @returns {any} */ function Rs() {
+  /** @returns {Kf | xh | vh | Th} */ function Rs() {
     switch (u()) {
       case 15:
         t.getTokenFlags() & 26656 && Nt(!1);
@@ -26751,10 +26756,10 @@ var na;
     let p = Vt(!0);
     return D(y.createSpreadElement(p), o);
   }
-  /** @returns {any} */ function uc() {
+  /** @returns {Kf | xh | vh | Th} */ function uc() {
     return u() === 26 ? lc() : u() === 28 ? D(y.createOmittedExpression(), O()) : Vt(!0);
   }
-  /** @returns {any} */ function pc() {
+  /** @returns {Kf | xh | vh | Th} */ function pc() {
     return Pt(a, uc);
   }
   /** @returns {InstanceType<typeof Kf>} */ function fc() {
@@ -27369,7 +27374,7 @@ var na;
   /** @returns {boolean} */ function Vs() {
     return u() === 19 || u() === 23 || u() === 81 || Ve();
   }
-  /** @returns {any} */ function _i(o) {
+  /** @returns {Kf | xh | vh | Th} */ function _i(o) {
     return u() === 23 ? Jc() : u() === 19 ? Xu() : as(o);
   }
   /** @returns {InstanceType<typeof Kf>} */ function $u() {
@@ -27520,13 +27525,13 @@ var na;
     }
     return !1;
   }
-  function Ku(o, p, m) {
+  function Ku(/** @type {number} */ o, /** @type {boolean} */ p, m) {
     Xn(126);
     let g = Zu(),
       x = Pe(D(y.createClassStaticBlockDeclaration(g), o), p);
     return ((x.modifiers = m), x);
   }
-  function Zu() {
+  /** @returns {Kf} */ function Zu() {
     let o = Ee(),
       p = Xe();
     ($e(!1), _t(!0));
@@ -27827,7 +27832,7 @@ var na;
       D(y.createImportClause(m, o, x), p)
     );
   }
-  /** @returns {any} */ function Fi() {
+  /** @returns {Kf | xh | vh | Th} */ function Fi() {
     return cp() ? hp() : zr(!1);
   }
   /** @returns {InstanceType<typeof Kf>} */ function hp() {
@@ -27894,7 +27899,7 @@ var na;
       return ((m = yi(u()) && !Te()), (g = t.getTokenStart()), (x = t.getTokenEnd()), Ut());
     }
   }
-  function bp(o) {
+  function bp(/** @type {number} */ o) {
     return D(y.createNamespaceExport(li(Ut)), o);
   }
   /** @returns {InstanceType<typeof Kf>} */ function rl(/** @type {number} */ o, /** @type {boolean} */ p, m) {
@@ -28953,7 +28958,7 @@ function r6(/** @type {d6} */ e, t) {
     (e.typeReferenceDirectives = []),
     (e.libReferenceDirectives = []),
     (e.amdDependencies = []),
-    e.pragmas.forEach((a, s) => {
+    e.pragmas.forEach((a, /** @type {string} */ s) => {
       switch (s) {
         case "reference": {
           let f = e.referencedFiles,
@@ -29085,10 +29090,52 @@ function o6(e, /** @type {string} */ t) {
           : e.name.escapedText === t.name.escapedText && mi(e.expression, t.expression);
 }
 var p_ = uf(w_.Latest, !0);
-/** @returns {any} */ function bh(/** @type {number} */ e, /** @type {number} */ t, /** @type {number} */ a, /** @type {any} */ s) {
+/** @returns {Kf | xh | vh | Th} */ function bh(/** @type {number} */ e, /** @type {number} */ t, /** @type {number} */ a, /** @type {d6 | Kf | xh | vh | Th} */ s) {
   /** @type {vh | Kf} */ let f = bf(e) ? new Kf(e, t, a) : e === 80 ? new xh(80, t, a) : e === 81 ? new Th(81, t, a) : new vh(e, t, a);
   return ((f.parent = s), (f.flags = s.flags & 101441536), f);
 }
+/**
+ * the parent that the parser gives each node, and the properties that it gives nodes of some kinds, which are
+ * other nodes
+ * @property {Kf} parent
+ * @sideProperty {Kf | xh | vh | Th} [name]
+ * @sideProperty {Kf | xh | vh | Th} [expression]
+ * @sideProperty {Kf | xh | vh | Th} [questionDotToken]
+ * @sideProperty {Kf | xh | vh | Th} [initializer]
+ * @sideProperty {Kf | xh | vh | Th} [type]
+ * @sideProperty {Kf | xh | vh | Th} [questionToken]
+ * @sideProperty {Kf | xh | vh | Th} [exclamationToken]
+ * @sideProperty {Kf | xh | vh | Th} [left]
+ * @sideProperty {Kf | xh | vh | Th} [right]
+ * @sideProperty {Kf | xh | vh | Th} [body]
+ * @sideProperty {Kf | xh | vh | Th} [declarationList]
+ * @sideProperty {Kf | xh | vh | Th} [operatorToken]
+ * @sideProperty {Kf | xh | vh | Th} [dotDotDotToken]
+ * @sideProperty {Kf | xh | vh | Th} [equalsGreaterThanToken]
+ * @sideProperty {Kf | xh | vh | Th} [typeName]
+ * @sideProperty {Kf | xh | vh | Th} [asteriskToken]
+ * @sideProperty {Kf | xh | vh | Th} [importClause]
+ * @sideProperty {Kf | xh | vh | Th} [propertyName]
+ * @sideProperty {Kf | xh | vh | Th} [literal]
+ * @sideProperty {Kf | xh | vh | Th} [moduleSpecifier]
+ * @sideProperty {Kf | xh | vh | Th} [namedBindings]
+ * @sideProperty {Kf | xh | vh | Th} [label]
+ * @sideProperty {Kf | xh | vh | Th} [statement]
+ * @sideProperty {Kf | xh | vh | Th} [thenStatement]
+ * @sideProperty {Kf | xh | vh | Th} [elseStatement]
+ * @sideProperty {Kf | xh | vh | Th} [condition]
+ * @sideProperty {Kf | xh | vh | Th} [whenTrue]
+ * @sideProperty {Kf | xh | vh | Th} [whenFalse]
+ * @sideProperty {Kf | xh | vh | Th} [operand]
+ * @sideProperty {Kf | xh | vh | Th} [argumentExpression]
+ * @sideProperty {Kf | xh | vh | Th} [tagName]
+ * @sideProperty {Kf | xh | vh | Th} [constraint]
+ * @sideProperty {Kf | xh | vh | Th} [elementType]
+ * @sideProperty {Kf | xh | vh | Th} [exprName]
+ * @sideProperty {Kf | xh | vh | Th} [objectType]
+ * @sideProperty {Kf | xh | vh | Th} [indexType]
+ * @sideProperty {Kf | xh | vh | Th} [endOfFileToken]
+ */
 var Kf = class {
   constructor(/** @type {number} */ e, /** @type {number} */ t, /** @type {number} */ a) {
     ((this.pos = t),
@@ -29126,10 +29173,10 @@ var Kf = class {
   getLeadingTriviaWidth(e) {
     return (this.assertHasRealPosition(), this.getStart(e) - this.pos);
   }
-  getFullText(e) {
+  getFullText(/** @type {d6 | undefined} */ e) {
     return (this.assertHasRealPosition(), (e || this.getSourceFile()).text.substring(this.pos, this.end));
   }
-  /** @returns {string} */ getText(e) {
+  /** @returns {string} */ getText(/** @type {d6 | undefined} */ e) {
     return (
       this.assertHasRealPosition(),
       e || (e = this.getSourceFile()),
@@ -29154,7 +29201,7 @@ var Kf = class {
     this.assertHasRealPosition();
     let t = this.getChildren(e);
     if (!t.length) return;
-    let a = Em(t, /** @returns {boolean} */ (s) => s.kind < 310 || s.kind > 352);
+    let a = Em(t, /** @returns {boolean} */ (/** @type {vh} */ s) => s.kind < 310 || s.kind > 352);
     return a.kind < 167 ? a : a.getFirstToken(e);
   }
   getLastToken(e) {
@@ -29163,7 +29210,7 @@ var Kf = class {
       a = Va(t);
     if (a) return a.kind < 167 ? a : a.getLastToken(e);
   }
-  forEachChild(e, t) {
+  forEachChild(/** @type {TsNodeVisitor} */ e, /** @type {TsNodesVisitor | undefined} */ t) {
     return $t(this, e, t);
   }
 };
@@ -29186,7 +29233,7 @@ function c6(/** @type {InstanceType<typeof d6> | InstanceType<typeof Kf>} */ e, 
     };
   return (Bn(e.jsDoc, f), (s = e.pos), e.forEachChild(f, h), f_(a, s, e.end, e), p_.setText(void 0), a);
 }
-function f_(e, /** @type {number} */ t, /** @type {number} */ a, /** @type {Kf | d6} */ s) {
+function f_(/** @type {any[]} */ e, /** @type {number} */ t, /** @type {number} */ a, /** @type {Kf | d6} */ s) {
   for (p_.resetTokenState(t); t < a;) {
     let f = p_.scan(),
       h = p_.getTokenEnd();
@@ -29207,6 +29254,9 @@ function l6(e, /** @type {Kf | d6} */ t) {
   for (let h of e) (f_(s, f, h.pos, t), s.push(h), (f = h.end));
   return (f_(s, f, e.end, t), (a._children = s), a);
 }
+/**
+ * @property {Kf} parent
+ */
 var Zf = class {
     constructor(/** @type {number} */ e, /** @type {number} */ t, /** @type {number} */ a) {
       ((this.pos = t),
@@ -29239,10 +29289,10 @@ var Zf = class {
     getLeadingTriviaWidth(e) {
       return this.getStart(e) - this.pos;
     }
-    getFullText(e) {
+    getFullText(/** @type {d6 | undefined} */ e) {
       return (e || this.getSourceFile()).text.substring(this.pos, this.end);
     }
-    /** @returns {string} */ getText(e) {
+    /** @returns {string} */ getText(/** @type {d6 | undefined} */ e) {
       return (e || (e = this.getSourceFile()), e.text.substring(this.getStart(e), this.getEnd()));
     }
     getChildCount() {
@@ -29542,6 +29592,10 @@ function wh(e, t, a) {
     return G ? a(G) : void 0;
   });
 }
+/**
+ * @property {string} [text]
+ * @property {any} [lineMap]
+ */
 var d6 = class extends Kf {
     constructor(/** @type {int} */ e, /** @type {number} */ t, /** @type {number} */ a) {
       super(e, t, a);
@@ -29549,7 +29603,7 @@ var d6 = class extends Kf {
     update(e, t) {
       return $v(this, e, t);
     }
-    getLineAndCharacterOfPosition(/** @type {number} */ e) {
+    /** @returns {TsLineAndCharacter} */ getLineAndCharacterOfPosition(/** @type {number} */ e) {
       return Ym(this, e);
     }
     getLineStarts() {
@@ -29662,7 +29716,7 @@ var d6 = class extends Kf {
     constructor(e, t, a) {
       ((this.fileName = e), (this.text = t), (this.skipTrivia = a || ((s) => s)));
     }
-    getLineAndCharacterOfPosition(e) {
+    /** @returns {TsLineAndCharacter} */ getLineAndCharacterOfPosition(/** @type {number} */ e) {
       return Ym(this, e);
     }
   };
@@ -29816,7 +29870,7 @@ var v6 = ts["5.0"],
   return e.kind !== ye.SemicolonClassElement;
 }
 /** @returns {boolean} */ function Fe(/** @type {number} */ e, /** @type {Kf} */ t) {
-  return rr(t)?.some(/** @returns {boolean} */ (s) => s.kind === e) === !0;
+  return rr(t)?.some(/** @returns {boolean} */ (/** @type {vh} */ s) => s.kind === e) === !0;
 }
 /** @returns {InstanceType<typeof vh> | null} */ function Ph(/** @type {InstanceType<typeof Kf>} */ e) {
   let t = rr(e);
@@ -29842,10 +29896,10 @@ function C_(/** @type {number} */ e, /** @type {InstanceType<typeof d6>} */ t) {
   return { column: a.character, line: a.line + 1 };
 }
 function Zr(e, /** @type {InstanceType<typeof d6>} */ t) {
-  let [a, s] = e.map((f) => C_(f, t));
+  let [a, s] = e.map((/** @type {number} */ f) => C_(f, t));
   return { end: s, start: a };
 }
-/** @returns {boolean} */ function Oh(/** @type {any} */ e) {
+/** @returns {boolean} */ function Oh(/** @type {d6 | Kf | xh | vh | Th} */ e) {
   if (e.kind === Ae.Block)
     switch (e.parent.kind) {
       case Ae.Constructor:
@@ -29917,7 +29971,7 @@ function _a(/** @type {InstanceType<typeof Kf> | InstanceType<typeof xh> | Insta
   return !!P6(e, Mh);
 }
 /** @returns {string} */ function ad(/** @type {string} */ e) {
-  return yr(0, e, /&(?:#\d+|#x[\da-fA-F]+|[0-9a-zA-Z]+);/g, (t) => {
+  return yr(0, e, /&(?:#\d+|#x[\da-fA-F]+|[0-9a-zA-Z]+);/g, /** @returns {string} */ (/** @type {string} */ t) => {
     let a = t.slice(1, -1);
     if (a[0] === "#") {
       let s = a[1] === "x" ? parseInt(a.slice(2), 16) : parseInt(a.slice(1), 10);
@@ -29926,7 +29980,7 @@ function _a(/** @type {InstanceType<typeof Kf> | InstanceType<typeof xh> | Insta
     return Eh[a] || t;
   });
 }
-/** @returns {boolean} */ function ca(/** @type {any} */ e) {
+/** @returns {boolean} */ function ca(/** @type {Kf | xh | vh | Th} */ e) {
   return e.kind === ye.ComputedPropertyName;
 }
 /** @returns {boolean} */ function sd(/** @type {InstanceType<typeof Kf>} */ e) {
@@ -30011,7 +30065,7 @@ var id = class extends Error {
     return this.location.start.column;
   }
 };
-/** @returns {id} */ function ue(e, /** @type {string} */ t, a) {
+/** @returns {id} */ function ue(e, /** @type {string} */ t, /** @type {d6 | undefined} */ a) {
   let s, f;
   if (
     (Array.isArray(e)
@@ -30031,7 +30085,7 @@ var id = class extends Error {
 /** @returns {boolean} */ function M6(/** @type {Kf | vh} */ e, /** @type {d6} */ t) {
   return e.kind === ye.EndOfFileToken ? !!e.jsDoc : e.getWidth(t) !== 0;
 }
-/** @returns {InstanceType<typeof vh>} */ function L6(e, t) {
+/** @returns {InstanceType<typeof vh>} */ function L6(/** @type {any[] | undefined} */ e, /** @type {(node: any, index: number) => any} */ t) {
   if (e !== void 0)
     for (let a = 0; a < e.length; a++) {
       let s = t(e[a], a);
@@ -30044,7 +30098,7 @@ var id = class extends Error {
 /** @returns {boolean} */ function od(/** @type {InstanceType<typeof Kf> | InstanceType<typeof Zf> | undefined} */ e) {
   return !!e && e.kind === ye.Identifier && j6(e);
 }
-/** @returns {boolean} */ function Jh(e) {
+/** @returns {boolean} */ function Jh(/** @type {Kf | xh | vh | Th} */ e) {
   if (!od(e)) return !1;
   for (; O1(e.parent) && e.parent.left === e;) e = e.parent;
   return e.parent.kind === ye.TypeQuery;
@@ -30271,7 +30325,7 @@ function Wh(/** @type {d6 | Kf | xh | vh | Th} */ e, /** @type {d6 | Kf | undefi
   let s = e;
   switch (s.kind) {
     case be.SwitchStatement:
-      if (s.caseBlock.clauses.filter(/** @returns {boolean} */ (f) => f.kind === be.DefaultClause).length > 1)
+      if (s.caseBlock.clauses.filter(/** @returns {boolean} */ (/** @type {Kf} */ f) => f.kind === be.DefaultClause).length > 1)
         throw ue(s, "A 'default' clause cannot appear more than once in a 'switch' statement.");
       break;
     case be.ThrowStatement:
@@ -30547,12 +30601,12 @@ var Fl = class {
   /** @type {boolean} */ allowPattern = !1;
   /** @type {d6} */ ast;
   esTreeNodeToTSNodeMap = new WeakMap();
-  options;
+  /** @type {{ allowInvalidAST?: boolean, errorOnUnknownASTType?: boolean, shouldPreserveNodeMaps?: boolean, suppressDeprecatedPropertyWarnings?: boolean }} */ options;
   tsNodeToESTreeNodeMap = new WeakMap();
   constructor(/** @type {d6} */ t, a) {
     ((this.ast = t), (this.options = { ...a }));
   }
-  #i(t, a) {
+  #i(/** @type {d6 | Kf | xh | vh | Th} */ t, /** @type {d6 | Kf | xh | vh | Th | undefined} */ a) {
     this.options.allowInvalidAST || Wh(t, a, this.allowPattern);
   }
   #r(t) {
@@ -30623,7 +30677,7 @@ var Fl = class {
   convertBodyExpressions(t, /** @type {d6 | Kf} */ a) {
     let s = Oh(a);
     return t
-      .map((f) => {
+      .map((/** @type {Kf} */ f) => {
         let h = this.convertChild(f);
         if (s) {
           if (h?.expression && Ll(f) && Lr(f.expression)) {
@@ -30658,8 +30712,8 @@ var Fl = class {
   convertChild(/** @type {Kf | xh | vh | Th | undefined} */ t, /** @type {Kf | undefined} */ a) {
     return this.converter(t, a, !1);
   }
-  convertChildren(t, /** @type {Kf | undefined} */ a) {
-    return t.map((s) => this.converter(s, a, !1));
+  convertChildren(/** @type {any[]} */ t, /** @type {Kf | undefined} */ a) {
+    return t.map((/** @type {Kf | xh | vh} */ s) => this.converter(s, a, !1));
   }
   convertPattern(/** @type {xh | Kf} */ t, a) {
     return this.converter(t, a, !0);
@@ -30692,7 +30746,7 @@ var Fl = class {
   }
   convertParameters(t) {
     return t?.length
-      ? t.map((a) => {
+      ? t.map((/** @type {Kf} */ a) => {
           let s = this.convertChild(a);
           return ((s.decorators = this.convertChildren(wi(a) ?? [])), s);
         })
@@ -30953,7 +31007,7 @@ var Fl = class {
           ? this.createNode(t, {
               type: A.ArrayPattern,
               decorators: [],
-              elements: t.elements.map((s) => this.convertPattern(s)),
+              elements: t.elements.map((/** @type {xh | Kf} */ s) => this.convertPattern(s)),
               optional: !1,
               typeAnnotation: void 0,
             })
@@ -30964,7 +31018,7 @@ var Fl = class {
               type: A.ObjectPattern,
               decorators: [],
               optional: !1,
-              properties: t.properties.map((s) => this.convertPattern(s)),
+              properties: t.properties.map((/** @type {Kf} */ s) => this.convertPattern(s)),
               typeAnnotation: void 0,
             })
           : this.createNode(t, { type: A.ObjectExpression, properties: this.convertChildren(t.properties) });
@@ -31164,7 +31218,7 @@ var Fl = class {
         return this.createNode(t, {
           type: A.ArrayPattern,
           decorators: [],
-          elements: t.elements.map((s) => this.convertPattern(s)),
+          elements: t.elements.map((/** @type {Kf} */ s) => this.convertPattern(s)),
           optional: !1,
           typeAnnotation: void 0,
         });
@@ -31175,7 +31229,7 @@ var Fl = class {
           type: A.ObjectPattern,
           decorators: [],
           optional: !1,
-          properties: t.elements.map((s) => this.convertPattern(s)),
+          properties: t.elements.map((/** @type {Kf} */ s) => this.convertPattern(s)),
           typeAnnotation: void 0,
         });
       case w.BindingElement: {
@@ -31272,7 +31326,7 @@ var Fl = class {
       case w.TemplateExpression: {
         let s = this.createNode(t, { type: A.TemplateLiteral, expressions: [], quasis: [this.convertChild(t.head)] });
         return (
-          t.templateSpans.forEach((f) => {
+          t.templateSpans.forEach((/** @type {Kf} */ f) => {
             (s.expressions.push(this.convertChild(f.expression)), s.quasis.push(this.convertChild(f.literal)));
           }),
           s
@@ -31361,8 +31415,8 @@ var Fl = class {
       case w.ClassDeclaration:
       case w.ClassExpression: {
         let s = t.kind === w.ClassDeclaration ? A.ClassDeclaration : A.ClassExpression,
-          f = t.heritageClauses?.find(/** @returns {boolean} */ (v) => v.token === w.ExtendsKeyword),
-          h = t.heritageClauses?.find(/** @returns {boolean} */ (v) => v.token === w.ImplementsKeyword),
+          f = t.heritageClauses?.find(/** @returns {boolean} */ (/** @type {Kf} */ v) => v.token === w.ExtendsKeyword),
+          h = t.heritageClauses?.find(/** @returns {boolean} */ (/** @type {Kf} */ v) => v.token === w.ImplementsKeyword),
           b = this.createNode(t, {
             type: s,
             abstract: Fe(w.AbstractKeyword, t),
@@ -31904,8 +31958,8 @@ var Fl = class {
       }
       case w.InterfaceDeclaration: {
         let s =
-            t.heritageClauses?.flatMap((h) =>
-              h.token === w.ExtendsKeyword ? h.types.map((b) => this.convertChild(b, t)) : [],
+            t.heritageClauses?.flatMap((/** @type {Kf} */ h) =>
+              h.token === w.ExtendsKeyword ? h.types.map((/** @type {Kf} */ b) => this.convertChild(b, t)) : [],
             ) ?? [],
           f = this.createNode(t, {
             type: A.TSInterfaceDeclaration,
@@ -32297,8 +32351,8 @@ var Fl = class {
       this.tsNodeToESTreeNodeMap.set(t, a);
   }
 };
-function* X6(e, t = e.getSourceFile()) {
-  let a = [];
+function* X6(/** @type {d6 | Kf | vh | xh | Th} */ e, /** @type {d6} */ t = e.getSourceFile()) {
+  /** @type {(d6 | Kf | vh | xh | Th)[]} */ let a = [];
   for (;;) {
     if (vf(e.kind)) yield e;
     else {
@@ -32313,7 +32367,7 @@ function* X6(e, t = e.getSourceFile()) {
     e = a.pop();
   }
 }
-function* Hh(/** @type {d6} */ e, t = e.getSourceFile()) {
+function* Hh(/** @type {d6} */ e, /** @type {d6} */ t = e.getSourceFile()) {
   let a = t.text,
     s = t.languageVariant !== Pl.JSX;
   for (let f of X6(e, t))
@@ -32346,10 +32400,10 @@ function* Hh(/** @type {d6} */ e, t = e.getSourceFile()) {
   }
   return !0;
 }
-function Yh(e, /** @type {string} */ t) {
+function Yh(/** @type {(cb: (pos: number, end: number, kind: number) => void) => void} */ e, /** @type {string} */ t) {
   let a = [];
   return (
-    e((s, f, h) => {
+    e((/** @type {number} */ s, /** @type {number} */ f, /** @type {number} */ h) => {
       let b = t.slice(s, f),
         v = b.slice(2, h === Ae.SingleLineCommentTrivia ? void 0 : -2);
       a.push({ end: f, kind: h, pos: s, text: b, value: v });
@@ -32662,7 +32716,7 @@ var R4 = 5,
   F4 = new Map([
     ["BreakStatement", d0(R4)],
     ["ContinueStatement", d0(U4)],
-    ["DebuggerStatement", (e) => Qt(e) + B4],
+    ["DebuggerStatement", /** @returns {number} */ (e) => Qt(e) + B4],
     ["VariableDeclaration", /** @returns {number} */ (e) => Kt(f0(0, e.declarations, -1))],
     ...m0.map((e) => [e, q4]),
   ]),
@@ -33186,7 +33240,7 @@ var M = [
   };
 var K4 = w0(k0),
   E0 = K4;
-function Wl(e, t) {
+function Wl(/** @type {any} */ e, /** @type {EstreeVisitor} */ t) {
   if (!S0(e)) return e;
   if (Array.isArray(e)) {
     for (let s = 0; s < e.length; s++) e[s] = Wl(e[s], t);
