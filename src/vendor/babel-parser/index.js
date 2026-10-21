@@ -554,7 +554,7 @@ const estree = superClass => class ESTreeParserMixin extends superClass {
     cloned.value = value;
     return cloned;
   }
-  initFunction(/** @type {Node} */ node, isAsync) {
+  initFunction(/** @type {Node} */ node, /** @type {boolean} */ isAsync) {
     super.initFunction(node, isAsync);
     node.expression = false;
   }
@@ -599,11 +599,11 @@ const estree = superClass => class ESTreeParserMixin extends superClass {
     delete node.extra;
     return node;
   }
-  parseFunctionBody(/** @type {Node} */ node, /** @type {boolean} */ allowExpression, isMethod = false) {
+  parseFunctionBody(/** @type {Node} */ node, /** @type {boolean} */ allowExpression, /** @type {boolean} */ isMethod = false) {
     super.parseFunctionBody(node, allowExpression, isMethod);
     node.expression = node.body.type !== "BlockStatement";
   }
-  parseMethod(/** @type {Node} */ node, isGenerator, isAsync, isConstructor, allowDirectSuper, /** @type {string | undefined} */ type, inClassScope = false) {
+  parseMethod(/** @type {Node} */ node, /** @type {boolean} */ isGenerator, /** @type {boolean} */ isAsync, /** @type {boolean} */ isConstructor, /** @type {boolean} */ allowDirectSuper, /** @type {string | undefined} */ type, /** @type {boolean} */ inClassScope = false) {
     let funcNode = this.startNode();
     funcNode.kind = node.kind;
     funcNode = super.parseMethod(funcNode, isGenerator, isAsync, isConstructor, allowDirectSuper, type, inClassScope);
@@ -686,13 +686,13 @@ const estree = superClass => class ESTreeParserMixin extends superClass {
   isValidLVal(/** @type {string} */ type, /** @type {boolean} */ disallowCallExpression, /** @type {boolean} */ isUnparenthesizedInAssign, /** @type {number} */ binding) {
     return type === "Property" ? "value" : super.isValidLVal(type, disallowCallExpression, isUnparenthesizedInAssign, binding);
   }
-  isAssignable(/** @type {Node} */ node, isBinding) {
+  isAssignable(/** @type {Node} */ node, /** @type {boolean | undefined} */ isBinding) {
     if (node != null && this.isObjectProperty(node)) {
       return this.isAssignable(node.value, isBinding);
     }
     return super.isAssignable(node, isBinding);
   }
-  toAssignable(/** @type {Node} */ node, isLHS = false) {
+  toAssignable(/** @type {Node} */ node, /** @type {boolean} */ isLHS = false) {
     if (node != null && this.isObjectProperty(node)) {
       const {
         key,
@@ -730,7 +730,7 @@ const estree = superClass => class ESTreeParserMixin extends superClass {
     }
     return node;
   }
-  parseExport(/** @type {Node} */ unfinished, decorators) {
+  parseExport(/** @type {Node} */ unfinished, /** @type {Node[] | null | undefined} */ decorators) {
     const exportStartLoc = this.state.lastTokStartLoc;
     const node = super.parseExport(unfinished, decorators);
     switch (node.type) {
@@ -763,7 +763,7 @@ const estree = superClass => class ESTreeParserMixin extends superClass {
     }
     return node;
   }
-  /** @returns {Node} */ parseMember(/** @type {Node} */ base, /** @type {Position} */ startLoc, state, /** @type {boolean} */ computed, /** @type {boolean} */ optional) {
+  /** @returns {Node} */ parseMember(/** @type {Node} */ base, /** @type {Position} */ startLoc, /** @type {any} */ state, /** @type {boolean} */ computed, /** @type {boolean} */ optional) {
     const node = super.parseMember(base, startLoc, state, computed, optional);
     if (node.type === "OptionalMemberExpression") {
       this.castNodeTo(node, "MemberExpression");
@@ -800,7 +800,7 @@ const estree = superClass => class ESTreeParserMixin extends superClass {
     this.fillOptionalPropertiesForTSESLint(cloned);
     return cloned;
   }
-  cloneStringLiteral(node) {
+  cloneStringLiteral(/** @type {Node} */ node) {
     if (node.type === "Literal") {
       return this.cloneEstreeStringLiteral(node);
     }
@@ -817,11 +817,11 @@ const estree = superClass => class ESTreeParserMixin extends superClass {
     this.fillOptionalPropertiesForTSESLint(result);
     return result;
   }
-  resetStartLocation(node, startLoc) {
+  resetStartLocation(/** @type {Node} */ node, /** @type {Position} */ startLoc) {
     super.resetStartLocation(node, startLoc);
     toESTreeLocation(node);
   }
-  resetEndLocation(/** @type {Node} */ node, endLoc = this.state.lastTokEndLoc) {
+  resetEndLocation(/** @type {Node} */ node, /** @type {Position} */ endLoc = this.state.lastTokEndLoc) {
     super.resetEndLocation(node, endLoc);
     toESTreeLocation(node);
   }
@@ -1427,8 +1427,8 @@ class Scope {
   }
 }
 class ScopeHandler {
-  parser;
-  scopeStack = [];
+  /** @type {Parser} */ parser;
+  /** @type {Scope[]} */ scopeStack = [];
   /** @type {boolean | undefined} */ inModule;
   undefinedExports = new Map();
   constructor(parser, /** @type {boolean} */ inModule) {
@@ -1492,7 +1492,7 @@ class ScopeHandler {
   /** @returns {boolean} */ treatFunctionsAsVarInScope(scope) {
     return !!(scope.flags & (2 | 128) || !this.parser.inModule && scope.flags & 1);
   }
-  declareName(name, bindingType, loc) {
+  declareName(/** @type {string} */ name, /** @type {int} */ bindingType, /** @type {number} */ loc) {
     let scope = this.currentScope();
     if (bindingType & 8 || bindingType & 16) {
       this.checkRedeclarationInScope(scope, name, bindingType, loc);
@@ -1534,7 +1534,7 @@ class ScopeHandler {
       });
     }
   }
-  isRedeclaredInScope(scope, name, bindingType) {
+  isRedeclaredInScope(/** @type {Scope} */ scope, /** @type {string} */ name, /** @type {int} */ bindingType) {
     if (!(bindingType & 1)) return false;
     if (bindingType & 8) {
       return scope.names.has(name);
@@ -1545,7 +1545,7 @@ class ScopeHandler {
     }
     return (type & 2) > 0 && !(scope.flags & 8 && scope.firstLexicalName === name) || !this.treatFunctionsAsVarInScope(scope) && (type & 4) > 0;
   }
-  checkLocalExport(id) {
+  checkLocalExport(/** @type {Node} */ id) {
     const {
       name
     } = id;
@@ -1585,7 +1585,7 @@ class FlowScopeHandler extends ScopeHandler {
   createScope(flags) {
     return new FlowScope(flags);
   }
-  declareName(name, bindingType, loc) {
+  declareName(/** @type {string} */ name, /** @type {int} */ bindingType, /** @type {number} */ loc) {
     const scope = this.currentScope();
     if (bindingType & 2048) {
       this.checkRedeclarationInScope(scope, name, bindingType, loc);
@@ -1595,7 +1595,7 @@ class FlowScopeHandler extends ScopeHandler {
     }
     super.declareName(name, bindingType, loc);
   }
-  isRedeclaredInScope(scope, name, bindingType) {
+  isRedeclaredInScope(/** @type {Scope} */ scope, /** @type {string} */ name, /** @type {int} */ bindingType) {
     if (super.isRedeclaredInScope(scope, name, bindingType)) return true;
     if (bindingType & 2048 && !scope.declareFunctions.has(name)) {
       const type = scope.names.get(name);
@@ -1603,7 +1603,7 @@ class FlowScopeHandler extends ScopeHandler {
     }
     return false;
   }
-  checkLocalExport(id) {
+  checkLocalExport(/** @type {Node} */ id) {
     if (!this.scopeStack[0].declareFunctions.has(id.name)) {
       super.checkLocalExport(id);
     }
@@ -1738,7 +1738,7 @@ const flow = superClass => class FlowParserMixin extends superClass {
     }
     super.finishToken(type, val);
   }
-  addComment(comment) {
+  addComment(/** @type {any} */ comment) {
     if (this.flowPragma === undefined) {
       const matches = FLOW_PRAGMA_REGEX.exec(comment.value);
       if (!matches) ;else if (matches[1] === "flow") {
@@ -2804,7 +2804,7 @@ const flow = superClass => class FlowParserMixin extends superClass {
     }
     return variance;
   }
-  parseFunctionBody(/** @type {Node} */ node, /** @type {boolean} */ allowExpressionBody, isMethod = false) {
+  parseFunctionBody(/** @type {Node} */ node, /** @type {boolean} */ allowExpressionBody, /** @type {boolean} */ isMethod = false) {
     if (allowExpressionBody) {
       this.forwardNoArrowParamsConversionAt(node, () => super.parseFunctionBody(node, true, isMethod));
       return;
@@ -2842,7 +2842,7 @@ const flow = superClass => class FlowParserMixin extends superClass {
     }
     return stmt;
   }
-  parseExpressionStatement(/** @type {Node} */ node, /** @type {Node} */ expr, decorators) {
+  parseExpressionStatement(/** @type {Node} */ node, /** @type {Node} */ expr, /** @type {Node[] | null | undefined} */ decorators) {
     if (expr.type === "Identifier") {
       if (expr.name === "declare") {
         if (this.match(76) || tokenIsIdentifier(this.state.type) || this.match(64) || this.match(70) || this.match(78)) {
@@ -3051,7 +3051,7 @@ const flow = superClass => class FlowParserMixin extends superClass {
     }
     return false;
   }
-  maybeParseExportNamespaceSpecifier(node) {
+  maybeParseExportNamespaceSpecifier(/** @type {Node} */ node) {
     const {
       startLoc
     } = this.state;
@@ -3061,7 +3061,7 @@ const flow = superClass => class FlowParserMixin extends superClass {
     }
     return hasNamespace;
   }
-  parseClassId(node, isStatement, optionalId) {
+  parseClassId(/** @type {Node} */ node, /** @type {boolean} */ isStatement, /** @type {boolean | undefined} */ optionalId) {
     if ((!isStatement || optionalId) && this.isContextual(109)) {
       node.id = null;
       return;
@@ -3071,7 +3071,7 @@ const flow = superClass => class FlowParserMixin extends superClass {
       node.typeParameters = this.flowParseTypeParameterDeclaration();
     }
   }
-  parseClassMember(/** @type {Node} */ classBody, /** @type {Node} */ member, state) {
+  parseClassMember(/** @type {Node} */ classBody, /** @type {Node} */ member, /** @type {any} */ state) {
     const {
       startLoc
     } = this.state;
@@ -3122,14 +3122,14 @@ const flow = superClass => class FlowParserMixin extends superClass {
       super.getTokenFromCode(code);
     }
   }
-  isAssignable(/** @type {Node} */ node, isBinding) {
+  isAssignable(/** @type {Node} */ node, /** @type {boolean | undefined} */ isBinding) {
     if (node.type === "TypeCastExpression") {
       return this.isAssignable(node.expression, isBinding);
     } else {
       return super.isAssignable(node, isBinding);
     }
   }
-  toAssignable(/** @type {Node} */ node, isLHS = false) {
+  toAssignable(/** @type {Node} */ node, /** @type {boolean} */ isLHS = false) {
     if (!isLHS && node.type === "AssignmentExpression" && node.left.type === "TypeCastExpression") {
       node.left = this.typeCastToParameter(node.left);
     }
@@ -3319,7 +3319,7 @@ const flow = superClass => class FlowParserMixin extends superClass {
       node.importKind = phase === "type" || phase === "typeof" ? phase : "value";
     }
   }
-  parseImportSpecifier(/** @type {Node | undefined} */ specifier, importedIsString, isInTypeOnlyImport, isMaybeTypeOnly, /** @type {number | undefined} */ bindingType) {
+  parseImportSpecifier(/** @type {Node | undefined} */ specifier, /** @type {boolean} */ importedIsString, /** @type {boolean} */ isInTypeOnlyImport, /** @type {boolean} */ isMaybeTypeOnly, /** @type {number | undefined} */ bindingType) {
     const firstIdent = specifier.imported;
     let specifierTypeKind = null;
     if (firstIdent.type === "Identifier") {
@@ -3407,7 +3407,7 @@ const flow = superClass => class FlowParserMixin extends superClass {
   shouldParseAsyncArrow() {
     return this.match(10) || super.shouldParseAsyncArrow();
   }
-  parseMaybeAssign(/** @type {ExpressionErrors | undefined | null} */ refExpressionErrors, afterLeftParse) {
+  parseMaybeAssign(/** @type {ExpressionErrors | undefined | null} */ refExpressionErrors, /** @type {any} */ afterLeftParse) {
     let state = null;
     let jsx;
     if (this.hasPlugin("jsx") && (this.match(138) || this.match(43))) {
@@ -3596,7 +3596,7 @@ const flow = superClass => class FlowParserMixin extends superClass {
     }
     super.readToken_pipe_amp(code);
   }
-  parseTopLevel(file, program) {
+  parseTopLevel(/** @type {Node} */ file, /** @type {Node} */ program) {
     const fileNode = super.parseTopLevel(file, program);
     if (this.state.hasFlowComment) {
       this.raise(FlowErrors.UnterminatedFlowComment, this.state.curPosition());
@@ -4664,7 +4664,7 @@ const jsx = superClass => class JSXParserMixin extends superClass {
     } = this.state;
     context[context.length - 1] = newContext;
   }
-  parseExprAtom(refExpressionErrors) {
+  parseExprAtom(/** @type {ExpressionErrors | undefined | null} */ refExpressionErrors) {
     if (this.match(138)) {
       return this.jsxParseElement();
     } else if (this.match(43) && this.input.charCodeAt(this.state.pos) !== 33) {
@@ -4768,7 +4768,7 @@ class TypeScriptScopeHandler extends ScopeHandler {
     }
     return false;
   }
-  declareName(name, bindingType, loc) {
+  declareName(/** @type {string} */ name, /** @type {int} */ bindingType, /** @type {number} */ loc) {
     if (bindingType & 4096) {
       if (this.hasImport(name, true)) {
         this.parser.raise(Errors.VarRedeclaration, loc, {
@@ -4804,7 +4804,7 @@ class TypeScriptScopeHandler extends ScopeHandler {
     }
     if (type) scope.tsNames.set(name, type);
   }
-  isRedeclaredInScope(scope, name, bindingType) {
+  isRedeclaredInScope(/** @type {Scope} */ scope, /** @type {string} */ name, /** @type {int} */ bindingType) {
     const type = scope.tsNames.get(name);
     if ((type & 2) > 0) {
       if (bindingType & 256) {
@@ -4826,7 +4826,7 @@ class TypeScriptScopeHandler extends ScopeHandler {
     }
     return super.isRedeclaredInScope(scope, name, bindingType);
   }
-  checkLocalExport(id) {
+  checkLocalExport(/** @type {Node} */ id) {
     const {
       name
     } = id;
@@ -4906,21 +4906,21 @@ function adjustInnerComments(/** @type {Node} */ node, elements, commentWS) {
   }
 }
 class CommentsParser extends BaseParser {
-  addComment(comment) {
+  addComment(/** @type {any} */ comment) {
     if (this.filename) comment.loc.filename = this.filename;
     const {
       commentsLen
-    } = this.state;
+    } = /** @type {Parser} */ (this).state;
     if (this.comments.length !== commentsLen) {
       this.comments.length = commentsLen;
     }
     this.comments.push(comment);
-    this.state.commentsLen++;
+    /** @type {Parser} */ (this).state.commentsLen++;
   }
   processComment(/** @type {Node} */ node) {
     const {
       commentStack
-    } = this.state;
+    } = /** @type {Parser} */ (this).state;
     const commentStackLength = commentStack.length;
     if (commentStackLength === 0) return;
     let i = commentStackLength - 1;
@@ -5009,16 +5009,16 @@ class CommentsParser extends BaseParser {
   finalizeRemainingComments() {
     const {
       commentStack
-    } = this.state;
+    } = /** @type {Parser} */ (this).state;
     for (let i = commentStack.length - 1; i >= 0; i--) {
       this.finalizeComment(commentStack[i]);
     }
-    this.state.commentStack = [];
+    /** @type {Parser} */ (this).state.commentStack = [];
   }
   resetPreviousNodeTrailingComments(/** @type {Node} */ node) {
     const {
       commentStack
-    } = this.state;
+    } = /** @type {Parser} */ (this).state;
     const {
       length
     } = commentStack;
@@ -5031,7 +5031,7 @@ class CommentsParser extends BaseParser {
   takeSurroundingComments(node, start, end) {
     const {
       commentStack
-    } = this.state;
+    } = /** @type {Parser} */ (this).state;
     const commentStackLength = commentStack.length;
     if (commentStackLength === 0) return;
     let i = commentStackLength - 1;
@@ -5536,7 +5536,7 @@ class Tokenizer extends CommentsParser {
   }
   next() {
     this.checkKeywordEscapes();
-    if (this.optionFlags & 512) {
+    if (/** @type {Parser} */ (this).optionFlags & 512) {
       this.pushToken(new Token(this.state));
     }
     this.state.lastTokEndLoc = this.state.endLoc;
@@ -5655,7 +5655,7 @@ class Tokenizer extends CommentsParser {
       end: this.sourceToOffsetPos(end + commentEnd.length),
       loc: new SourceLocation(startLoc, this.state.curPosition())
     };
-    if (this.optionFlags & 512) this.pushToken(comment);
+    if (/** @type {Parser} */ (this).optionFlags & 512) this.pushToken(comment);
     return comment;
   }
   skipLineComment(/** @type {int} */ startSkip) {
@@ -5678,12 +5678,12 @@ class Tokenizer extends CommentsParser {
       end: this.sourceToOffsetPos(end),
       loc: new SourceLocation(startLoc, this.state.curPosition())
     };
-    if (this.optionFlags & 512) this.pushToken(comment);
+    if (/** @type {Parser} */ (this).optionFlags & 512) this.pushToken(comment);
     return comment;
   }
   skipSpace() {
     const spaceStart = this.state.pos;
-    const comments = this.optionFlags & 8192 ? [] : null;
+    const comments = /** @type {Parser} */ (this).optionFlags & 8192 ? [] : null;
     loop: while (this.state.pos < this.length) {
       const ch = this.input.charCodeAt(this.state.pos);
       switch (ch) {
@@ -5730,7 +5730,7 @@ class Tokenizer extends CommentsParser {
         default:
           if (isWhitespace(ch)) {
             ++this.state.pos;
-          } else if (ch === 45 && !this.inModule && this.optionFlags & 16384) {
+          } else if (ch === 45 && !this.inModule && /** @type {Parser} */ (this).optionFlags & 16384) {
             const pos = this.state.pos;
             if (this.input.charCodeAt(pos + 1) === 45 && this.input.charCodeAt(pos + 2) === 62 && (spaceStart === 0 || this.state.lineStart > spaceStart)) {
               const comment = this.skipLineComment(3);
@@ -5741,7 +5741,7 @@ class Tokenizer extends CommentsParser {
             } else {
               break loop;
             }
-          } else if (ch === 60 && !this.inModule && this.optionFlags & 16384) {
+          } else if (ch === 60 && !this.inModule && /** @type {Parser} */ (this).optionFlags & 16384) {
             const pos = this.state.pos;
             if (this.input.charCodeAt(pos + 1) === 33 && this.input.charCodeAt(pos + 2) === 45 && this.input.charCodeAt(pos + 3) === 45) {
               const comment = this.skipLineComment(4);
@@ -6388,15 +6388,15 @@ class Tokenizer extends CommentsParser {
     }
   }
   raise(toParseError, at, details = {}) {
-    const loc = at instanceof Position ? at : typeof at === "number" ? this.getLoc(at) : this.optionFlags & 256 ? at.loc.start : this.getLoc(at.start);
+    const loc = at instanceof Position ? at : typeof at === "number" ? this.getLoc(at) : /** @type {Parser} */ (this).optionFlags & 256 ? at.loc.start : this.getLoc(at.start);
     const pos = at instanceof Position ? loc.index : typeof at === "number" ? at : at.start;
     const error = toParseError(loc, pos, details);
-    if (!(this.optionFlags & 4096)) throw error;
+    if (!(/** @type {Parser} */ (this).optionFlags & 4096)) throw error;
     if (!this.isLookahead) this.state.errors.push(error);
     return error;
   }
   raiseOverwrite(toParseError, at, details = {}) {
-    const loc = at instanceof Position ? at : this.optionFlags & 256 ? at.loc.start : this.getLoc(at.start);
+    const loc = at instanceof Position ? at : /** @type {Parser} */ (this).optionFlags & 256 ? at.loc.start : this.getLoc(at.start);
     const pos = at instanceof Position ? loc.index : at.start;
     const errors = this.state.errors;
     for (let i = errors.length - 1; i >= 0; i--) {
@@ -6436,7 +6436,7 @@ class Tokenizer extends CommentsParser {
   }
   errorHandlers_readInt = {
     invalidDigit: (pos, lineStart, curLine, radix) => {
-      if (!(this.optionFlags & 4096)) return false;
+      if (!(/** @type {Parser} */ (this).optionFlags & 4096)) return false;
       this.raise(Errors.InvalidDigit, buildPosition(pos, lineStart, curLine), {
         radix
       });
@@ -6473,8 +6473,8 @@ class ClassScope {
   undefinedPrivateNames = new Map();
 }
 class ClassScopeHandler {
-  parser;
-  stack = [];
+  /** @type {Parser} */ parser;
+  /** @type {ClassScope[]} */ stack = [];
   constructor(parser) {
     this.parser = parser;
   }
@@ -6568,8 +6568,8 @@ class ArrowHeadParsingScope extends ExpressionScope {
   }
 }
 class ExpressionScopeHandler {
-  parser;
-  stack = [new ExpressionScope()];
+  /** @type {Parser} */ parser;
+  /** @type {ExpressionScope[]} */ stack = [new ExpressionScope()];
   constructor(parser) {
     this.parser = parser;
   }
@@ -6858,13 +6858,13 @@ class UtilParser extends Tokenizer {
     this.inModule = inModule;
     const oldScope = this.scope;
     const ScopeHandler = this.getScopeHandler();
-    this.scope = new ScopeHandler(this, inModule);
+    /** @type {ScopeHandler | FlowScopeHandler | TypeScriptScopeHandler} */ this.scope = new ScopeHandler(this, inModule);
     const oldProdParam = this.prodParam;
-    this.prodParam = new ProductionParameterHandler();
+    /** @type {ProductionParameterHandler} */ this.prodParam = new ProductionParameterHandler();
     const oldClassScope = this.classScope;
-    this.classScope = new ClassScopeHandler(this);
+    /** @type {ClassScopeHandler} */ this.classScope = new ClassScopeHandler(this);
     const oldExpressionScope = this.expressionScope;
-    this.expressionScope = new ExpressionScopeHandler(this);
+    /** @type {ExpressionScopeHandler} */ this.expressionScope = new ExpressionScopeHandler(this);
     return () => {
       this.state.labels = oldLabels;
       this.exportedIdentifiers = oldExportedIdentifiers;
@@ -6877,22 +6877,22 @@ class UtilParser extends Tokenizer {
   }
   enterInitialScopes() {
     let paramFlags = 0;
-    if (this.inModule || this.optionFlags & 1) {
+    if (this.inModule || /** @type {Parser} */ (this).optionFlags & 1) {
       paramFlags |= 2;
     }
-    if (this.optionFlags & 32) {
+    if (/** @type {Parser} */ (this).optionFlags & 32) {
       paramFlags |= 1;
     }
     const isCommonJS = !this.inModule && this.options.sourceType === "commonjs";
-    if (isCommonJS || this.optionFlags & 2) {
+    if (isCommonJS || /** @type {Parser} */ (this).optionFlags & 2) {
       paramFlags |= 4;
     }
     this.prodParam.enter(paramFlags);
     let scopeFlags = isCommonJS ? 514 : 1;
-    if (this.optionFlags & 4) {
+    if (/** @type {Parser} */ (this).optionFlags & 4) {
       scopeFlags |= 512;
     }
-    if (this.optionFlags & 16) {
+    if (/** @type {Parser} */ (this).optionFlags & 16) {
       scopeFlags |= 16 | 32;
     }
     this.scope.enter(scopeFlags);
@@ -6928,6 +6928,131 @@ class ExpressionErrors {
  * @property {any} [prefix]
  * @property {any} [expressions]
  * @property {any} [quasis]
+ * @sideProperty {boolean} [abstract]
+ * @sideProperty {string | null} [accessibility]
+ * @sideProperty {Node | null} [alternate]
+ * @sideProperty {Node[]} [arguments]
+ * @sideProperty {boolean} [asserts]
+ * @sideProperty {boolean} [async]
+ * @sideProperty {Node[]} [attributes]
+ * @sideProperty {boolean} [await]
+ * @sideProperty {Node | null} [block]
+ * @sideProperty {Node | Node[]} [body]
+ * @sideProperty {Node | null} [bound]
+ * @sideProperty {Node | null} [callee]
+ * @sideProperty {Node[]} [callProperties]
+ * @sideProperty {Node[]} [cases]
+ * @sideProperty {Node | null} [checkType]
+ * @sideProperty {Node[]} [children]
+ * @sideProperty {Node | null} [closingElement]
+ * @sideProperty {Node | null} [closingFragment]
+ * @sideProperty {any[]} [comments]
+ * @sideProperty {Node | Node[]} [consequent]
+ * @sideProperty {boolean} [const]
+ * @sideProperty {Node | null} [constraint]
+ * @sideProperty {Node | null} [declaration]
+ * @sideProperty {Node[]} [declarations]
+ * @sideProperty {boolean} [declare]
+ * @sideProperty {Node[]} [decorators]
+ * @sideProperty {boolean | Node} [default]
+ * @sideProperty {boolean} [definite]
+ * @sideProperty {boolean} [delegate]
+ * @sideProperty {string | null} [directive]
+ * @sideProperty {Node | null} [discriminant]
+ * @sideProperty {Node | null} [elementType]
+ * @sideProperty {Node[]} [elementTypes]
+ * @sideProperty {any[]} [errors]
+ * @sideProperty {boolean} [exact]
+ * @sideProperty {string | null} [expectedNode]
+ * @sideProperty {boolean} [explicitType]
+ * @sideProperty {Node | null} [exported]
+ * @sideProperty {string | null} [exportKind]
+ * @sideProperty {Node | boolean} [expression]
+ * @sideProperty {Node | null} [exprName]
+ * @sideProperty {Node[]} [extends]
+ * @sideProperty {Node | null} [extendsType]
+ * @sideProperty {Node | null} [falseType]
+ * @sideProperty {Node | null} [finalizer]
+ * @sideProperty {string | null} [flags]
+ * @sideProperty {boolean} [generator]
+ * @sideProperty {boolean} [global]
+ * @sideProperty {Node | null} [handler]
+ * @sideProperty {boolean} [hasUnknownMembers]
+ * @sideProperty {Node | null} [id]
+ * @sideProperty {Node[]} [implements]
+ * @sideProperty {Node | null} [impltype]
+ * @sideProperty {Node | null} [imported]
+ * @sideProperty {string | null} [importKind]
+ * @sideProperty {boolean} [in]
+ * @sideProperty {Node[]} [indexers]
+ * @sideProperty {Node | null} [indexType]
+ * @sideProperty {boolean} [inexact]
+ * @sideProperty {Node | null} [init]
+ * @sideProperty {Node | null} [initializer]
+ * @sideProperty {any[]} [innerComments]
+ * @sideProperty {Node[]} [internalSlots]
+ * @sideProperty {Node | null} [interpreter]
+ * @sideProperty {string | null} [kind]
+ * @sideProperty {Node | null} [label]
+ * @sideProperty {any[]} [leadingComments]
+ * @sideProperty {Node | null} [left]
+ * @sideProperty {Node | null} [literal]
+ * @sideProperty {Node | null} [local]
+ * @sideProperty {Node[]} [members]
+ * @sideProperty {Node | null} [meta]
+ * @sideProperty {Node[]} [mixins]
+ * @sideProperty {Node | null} [moduleReference]
+ * @sideProperty {Node | null} [namespace]
+ * @sideProperty {Node | null} [nameType]
+ * @sideProperty {Node | null} [object]
+ * @sideProperty {Node | null} [objectType]
+ * @sideProperty {Node | null} [openingElement]
+ * @sideProperty {Node | null} [openingFragment]
+ * @sideProperty {boolean | string} [optional]
+ * @sideProperty {Node | null} [options]
+ * @sideProperty {boolean} [out]
+ * @sideProperty {boolean} [override]
+ * @sideProperty {Node | null} [param]
+ * @sideProperty {Node | null} [parameter]
+ * @sideProperty {Node | null} [parameterName]
+ * @sideProperty {Node[]} [parameters]
+ * @sideProperty {Node[]} [params]
+ * @sideProperty {string | null} [pattern]
+ * @sideProperty {string | null} [phase]
+ * @sideProperty {Node | null} [predicate]
+ * @sideProperty {Node | null} [property]
+ * @sideProperty {boolean} [proto]
+ * @sideProperty {Node | null} [qualification]
+ * @sideProperty {Node | null} [qualifier]
+ * @sideProperty {Node | null} [quasi]
+ * @sideProperty {string | null} [raw]
+ * @sideProperty {boolean | string} [readonly]
+ * @sideProperty {Node | null} [rest]
+ * @sideProperty {Node | null} [returnType]
+ * @sideProperty {Node | null} [right]
+ * @sideProperty {boolean} [selfClosing]
+ * @sideProperty {Node | null} [source]
+ * @sideProperty {string | null} [sourceType]
+ * @sideProperty {Node[]} [specifiers]
+ * @sideProperty {boolean} [static]
+ * @sideProperty {Node | null} [superClass]
+ * @sideProperty {Node | null} [supertype]
+ * @sideProperty {Node | null} [superTypeArguments]
+ * @sideProperty {Node | null} [tag]
+ * @sideProperty {boolean} [tail]
+ * @sideProperty {Node | null} [test]
+ * @sideProperty {Node | null} [this]
+ * @sideProperty {any[]} [tokens]
+ * @sideProperty {any[]} [trailingComments]
+ * @sideProperty {Node | null} [trueType]
+ * @sideProperty {Node | null} [typeAnnotation]
+ * @sideProperty {Node | null} [typeArguments]
+ * @sideProperty {Node | null} [typeName]
+ * @sideProperty {Node | null} [typeParameter]
+ * @sideProperty {Node | null} [typeParameters]
+ * @sideProperty {Node[]} [types]
+ * @sideProperty {Node | null} [update]
+ * @sideProperty {Node | null} [variance]
  */
 class Node {
   constructor(/** @type {int} */ optionFlags, /** @type {string | undefined} */ filename, /** @type {int} */ pos, /** @type {Position | undefined} */ loc) {
@@ -7005,7 +7130,7 @@ class NodeUtils extends UtilParser {
     if (optionFlags & 8192) this.processComment(node);
     return node;
   }
-  resetStartLocation(node, startLoc) {
+  resetStartLocation(/** @type {Node} */ node, /** @type {Position} */ startLoc) {
     node.start = startLoc.index;
     const {
       optionFlags
@@ -7015,7 +7140,7 @@ class NodeUtils extends UtilParser {
     }
     if (optionFlags & 128) node.range[0] = startLoc.index;
   }
-  resetEndLocation(/** @type {Node} */ node, endLoc = this.state.lastTokEndLoc) {
+  resetEndLocation(/** @type {Node} */ node, /** @type {Position} */ endLoc = this.state.lastTokEndLoc) {
     node.end = endLoc.index;
     const {
       optionFlags
@@ -7068,7 +7193,7 @@ class NodeUtils extends UtilParser {
     if (node.extra) cloned.extra = node.extra;
     return cloned;
   }
-  cloneStringLiteral(node) {
+  cloneStringLiteral(/** @type {Node} */ node) {
     const {
       type,
       start,
@@ -7092,7 +7217,7 @@ const unwrapParenthesizedExpression = /** @returns {Node} */ (/** @type {Node} *
   return node.type === "ParenthesizedExpression" ? unwrapParenthesizedExpression(node.expression) : node;
 };
 class LValParser extends NodeUtils {
-  toAssignable(/** @type {Node} */ node, isLHS = false) {
+  toAssignable(/** @type {Node} */ node, /** @type {boolean} */ isLHS = false) {
     let parenthesized = undefined;
     if (node.type === "ParenthesizedExpression" || node.extra?.parenthesized) {
       parenthesized = unwrapParenthesizedExpression(node);
@@ -7147,7 +7272,7 @@ class LValParser extends NodeUtils {
         break;
       case "AssignmentExpression":
         if (node.operator !== "=") {
-          this.raise(Errors.MissingEqInAssignment, this.optionFlags & 256 ? node.left.loc.end : node.left);
+          this.raise(Errors.MissingEqInAssignment, /** @type {Parser} */ (this).optionFlags & 256 ? node.left.loc.end : node.left);
         }
         this.castNodeTo(node, "AssignmentPattern");
         delete node.operator;
@@ -7202,7 +7327,7 @@ class LValParser extends NodeUtils {
       this.toAssignable(node, isLHS);
     }
   }
-  /** @returns {boolean} */ isAssignable(/** @type {Node} */ node, isBinding) {
+  /** @returns {boolean} */ isAssignable(/** @type {Node} */ node, /** @type {boolean | undefined} */ isBinding) {
     switch (node.type) {
       case "Identifier":
       case "ObjectPattern":
@@ -7386,7 +7511,7 @@ class LValParser extends NodeUtils {
       case "VoidPattern":
         return true;
       case "CallExpression":
-        if (!disallowCallExpression && !this.state.strict && this.optionFlags & 16384) {
+        if (!disallowCallExpression && !this.state.strict && /** @type {Parser} */ (this).optionFlags & 16384) {
           return true;
         }
     }
@@ -7545,7 +7670,7 @@ class ExpressionParser extends LValParser {
     this.finalizeRemainingComments();
     expr.comments = this.comments;
     expr.errors = this.state.errors;
-    if (this.optionFlags & 512) {
+    if (/** @type {Parser} */ (this).optionFlags & 512) {
       expr.tokens = createExportedTokens(this.tokens);
     }
     return expr;
@@ -7579,7 +7704,7 @@ class ExpressionParser extends LValParser {
   setOptionalParametersError(/** @type {ExpressionErrors} */ refExpressionErrors) {
     refExpressionErrors.optionalParametersLoc = this.state.startLoc;
   }
-  /** @returns {Node} */ parseMaybeAssign(/** @type {ExpressionErrors | undefined | null} */ refExpressionErrors, afterLeftParse) {
+  /** @returns {Node} */ parseMaybeAssign(/** @type {ExpressionErrors | undefined | null} */ refExpressionErrors, /** @type {any} */ afterLeftParse) {
     const startLoc = this.state.startLoc;
     const isYield = this.isContextual(104);
     if (isYield) {
@@ -7883,7 +8008,7 @@ class ExpressionParser extends LValParser {
     state.stop = true;
     return base;
   }
-  /** @returns {Node} */ parseMember(/** @type {Node} */ base, /** @type {Position} */ startLoc, state, /** @type {boolean} */ computed, /** @type {boolean} */ optional) {
+  /** @returns {Node} */ parseMember(/** @type {Node} */ base, /** @type {Position} */ startLoc, /** @type {any} */ state, /** @type {boolean} */ computed, /** @type {boolean} */ optional) {
     const node = this.startNodeAt(startLoc);
     node.object = base;
     node.computed = computed;
@@ -8021,7 +8146,7 @@ class ExpressionParser extends LValParser {
     const startLoc = this.state.startLoc;
     return this.parseSubscripts(this.parseExprAtom(), startLoc, true);
   }
-  parseExprAtom(refExpressionErrors) {
+  parseExprAtom(/** @type {ExpressionErrors | undefined | null} */ refExpressionErrors) {
     let node;
     let decorators = null;
     const {
@@ -8037,7 +8162,7 @@ class ExpressionParser extends LValParser {
           return this.parseImportMetaPropertyOrPhaseCall(node);
         }
         if (this.match(6)) {
-          if (this.optionFlags & 1024) {
+          if (/** @type {Parser} */ (this).optionFlags & 1024) {
             return this.parseImportCall(node);
           } else {
             return this.finishNode(node, "Import");
@@ -8431,7 +8556,7 @@ class ExpressionParser extends LValParser {
     return this.wrapParenthesis(startLoc, val);
   }
   /** @returns {Node} */ wrapParenthesis(/** @type {Position} */ startLoc, /** @type {Node} */ expression) {
-    if (!(this.optionFlags & 2048)) {
+    if (!(/** @type {Parser} */ (this).optionFlags & 2048)) {
       this.addExtra(expression, "parenthesized", true);
       this.addExtra(expression, "parenStart", startLoc.index);
       this.takeSurroundingComments(expression, startLoc.index, this.state.lastTokEndLoc.index);
@@ -8738,12 +8863,12 @@ class ExpressionParser extends LValParser {
       }
     }
   }
-  initFunction(/** @type {Node} */ node, isAsync) {
+  initFunction(/** @type {Node} */ node, /** @type {boolean} */ isAsync) {
     node.id = null;
     node.generator = false;
     node.async = isAsync;
   }
-  /** @returns {Node} */ parseMethod(/** @type {Node} */ node, isGenerator, isAsync, isConstructor, allowDirectSuper, /** @type {string | undefined} */ type, inClassScope = false) {
+  /** @returns {Node} */ parseMethod(/** @type {Node} */ node, /** @type {boolean} */ isGenerator, /** @type {boolean} */ isAsync, /** @type {boolean} */ isConstructor, /** @type {boolean} */ allowDirectSuper, /** @type {string | undefined} */ type, /** @type {boolean} */ inClassScope = false) {
     this.initFunction(node, isAsync);
     node.generator = isGenerator;
     this.scope.enter(514 | 16 | (inClassScope ? 576 : 0) | (allowDirectSuper ? 32 : 0));
@@ -8784,7 +8909,7 @@ class ExpressionParser extends LValParser {
     this.parseFunctionBody(node, false, isMethod);
     return this.finishNode(node, type);
   }
-  parseFunctionBody(/** @type {Node} */ node, /** @type {boolean} */ allowExpression, isMethod = false) {
+  parseFunctionBody(/** @type {Node} */ node, /** @type {boolean} */ allowExpression, /** @type {boolean} */ isMethod = false) {
     const isExpression = allowExpression && !this.match(2);
     this.expressionScope.enter(newExpressionScope());
     if (isExpression) {
@@ -8798,7 +8923,7 @@ class ExpressionParser extends LValParser {
       node.body = this.parseBlock(true, false, hasStrictModeDirective => {
         const nonSimple = !this.isSimpleParamList(node.params);
         if (hasStrictModeDirective && nonSimple) {
-          this.raise(Errors.IllegalLanguageModeDirective, (node.kind === "method" || node.kind === "constructor") && !!node.key ? this.optionFlags & 256 ? node.key.loc.end : node.key : node);
+          this.raise(Errors.IllegalLanguageModeDirective, (node.kind === "method" || node.kind === "constructor") && !!node.key ? /** @type {Parser} */ (this).optionFlags & 256 ? node.key.loc.end : node.key : node);
         }
         const strictModeChanged = !oldStrict && this.state.strict;
         this.checkParams(node, !this.state.strict && !allowExpression && !isMethod && !nonSimple, allowExpression, strictModeChanged);
@@ -8881,14 +9006,14 @@ class ExpressionParser extends LValParser {
   }
   /** @returns {Node} */ createIdentifier(/** @type {Node} */ node, /** @type {string} */ name) {
     node.name = name;
-    if (this.optionFlags & 256) {
+    if (/** @type {Parser} */ (this).optionFlags & 256) {
       node.loc.identifierName = name;
     }
     return this.finishNode(node, "Identifier");
   }
   /** @returns {Node} */ createIdentifierAt(/** @type {Node} */ node, /** @type {string} */ name, /** @type {Position} */ endLoc) {
     node.name = name;
-    if (this.optionFlags & 256) {
+    if (/** @type {Parser} */ (this).optionFlags & 256) {
       node.loc.identifierName = name;
     }
     return this.finishNodeAt(node, "Identifier", endLoc);
@@ -8971,7 +9096,7 @@ class ExpressionParser extends LValParser {
     if (this.eat(51)) {
       this.raise(Errors.ObsoleteAwaitStar, startLoc);
     }
-    if (!this.scope.inFunction && !(this.optionFlags & 1)) {
+    if (!this.scope.inFunction && !(/** @type {Parser} */ (this).optionFlags & 1)) {
       if (this.isAmbiguousPrefixOrIdentifier()) {
         this.ambiguousScriptDifferentAst = true;
       } else {
@@ -9157,10 +9282,10 @@ function createExportedTokens(tokens) {
   return tokens;
 }
 class StatementParser extends ExpressionParser {
-  parseTopLevel(file, program) {
+  parseTopLevel(/** @type {Node} */ file, /** @type {Node} */ program) {
     file.program = this.parseProgram(program, 135, this.options.sourceType === "module" ? "module" : "script");
     file.comments = this.comments;
-    if (this.optionFlags & 512) {
+    if (/** @type {Parser} */ (this).optionFlags & 512) {
       file.tokens = createExportedTokens(this.tokens);
     }
     return this.finishNode(file, "File");
@@ -9170,7 +9295,7 @@ class StatementParser extends ExpressionParser {
     program.interpreter = this.parseInterpreterDirective();
     this.parseBlockBody(program, true, true, end);
     if (this.inModule) {
-      if (!(this.optionFlags & 64) && this.scope.undefinedExports.size > 0) {
+      if (!(/** @type {Parser} */ (this).optionFlags & 64) && this.scope.undefinedExports.size > 0) {
         for (const [localName, at] of Array.from(this.scope.undefinedExports)) {
           this.raise(Errors.ModuleExportUndefined, at, {
             localName
@@ -9315,7 +9440,7 @@ class StatementParser extends ExpressionParser {
     }
     return this.parseStatementContent(flags, decorators);
   }
-  /** @returns {Node} */ parseStatementContent(/** @type {number} */ flags, decorators) {
+  /** @returns {Node} */ parseStatementContent(/** @type {number} */ flags, /** @type {Node[] | null | undefined} */ decorators) {
     const startType = this.state.type;
     const node = this.startNode();
     const allowDeclaration = !!(flags & 2);
@@ -9416,7 +9541,7 @@ class StatementParser extends ExpressionParser {
         }
       case 78:
         {
-          if (!(this.optionFlags & 8) && !topLevel) {
+          if (!(/** @type {Parser} */ (this).optionFlags & 8) && !topLevel) {
             this.raise(Errors.UnexpectedImportExport, this.state.startLoc);
           }
           this.next();
@@ -9449,7 +9574,7 @@ class StatementParser extends ExpressionParser {
     }
   }
   assertModuleNodeAllowed(/** @type {Node} */ node) {
-    if (!(this.optionFlags & 8) && !this.inModule) {
+    if (!(/** @type {Parser} */ (this).optionFlags & 8) && !this.inModule) {
       this.raise(Errors.ImportOutsideModule, node);
     }
   }
@@ -9820,7 +9945,7 @@ class StatementParser extends ExpressionParser {
     node.label = expr;
     return this.finishNode(node, "LabeledStatement");
   }
-  /** @returns {Node} */ parseExpressionStatement(/** @type {Node} */ node, /** @type {Node} */ expr, decorators) {
+  /** @returns {Node} */ parseExpressionStatement(/** @type {Node} */ node, /** @type {Node} */ expr, /** @type {Node[] | null | undefined} */ decorators) {
     node.expression = expr;
     this.semicolon();
     return this.finishNode(node, "ExpressionStatement");
@@ -10079,7 +10204,7 @@ class StatementParser extends ExpressionParser {
     this.resetPreviousNodeTrailingComments(key);
     return false;
   }
-  parseClassMember(/** @type {Node} */ classBody, /** @type {Node} */ member, state) {
+  parseClassMember(/** @type {Node} */ classBody, /** @type {Node} */ member, /** @type {any} */ state) {
     const isStatic = this.isContextual(102);
     if (isStatic) {
       if (this.parseClassMemberFromModifier(classBody, member)) {
@@ -10092,7 +10217,7 @@ class StatementParser extends ExpressionParser {
     }
     this.parseClassMemberWithIsStatic(classBody, member, state, isStatic);
   }
-  parseClassMemberWithIsStatic(/** @type {Node} */ classBody, /** @type {Node} */ member, state, /** @type {boolean} */ isStatic) {
+  parseClassMemberWithIsStatic(/** @type {Node} */ classBody, /** @type {Node} */ member, /** @type {any} */ state, /** @type {boolean} */ isStatic) {
     const publicMethod = member;
     const privateMethod = member;
     const publicProp = member;
@@ -10292,7 +10417,7 @@ class StatementParser extends ExpressionParser {
     this.prodParam.exit();
     this.scope.exit();
   }
-  parseClassId(/** @type {Node} */ node, /** @type {boolean} */ isStatement, /** @type {boolean | undefined} */ optionalId, bindingType = 8331) {
+  parseClassId(/** @type {Node} */ node, /** @type {boolean} */ isStatement, /** @type {boolean | undefined} */ optionalId, /** @type {number | undefined} */ bindingType = 8331) {
     if (tokenIsIdentifier(this.state.type)) {
       node.id = this.parseIdentifier();
       if (isStatement) {
@@ -10314,7 +10439,7 @@ class StatementParser extends ExpressionParser {
       node.superClass = null;
     }
   }
-  /** @returns {Node} */ parseExport(/** @type {Node} */ node, decorators) {
+  /** @returns {Node} */ parseExport(/** @type {Node} */ node, /** @type {Node[] | null | undefined} */ decorators) {
     const maybeDefaultIdentifier = this.parseMaybeImportPhase(node, true);
     const hasDefault = this.maybeParseExportDefaultSpecifier(node, maybeDefaultIdentifier);
     const parseAfterDefault = !hasDefault || this.eat(8);
@@ -10388,7 +10513,7 @@ class StatementParser extends ExpressionParser {
     }
     return false;
   }
-  maybeParseExportNamespaceSpecifier(node) {
+  maybeParseExportNamespaceSpecifier(/** @type {Node} */ node) {
     if (this.isContextual(89)) {
       node.specifiers ??= [];
       const specifier = this.startNodeAt(this.state.lastTokStartLoc);
@@ -10617,7 +10742,7 @@ class StatementParser extends ExpressionParser {
     }
     return nodes;
   }
-  /** @returns {Node} */ parseExportSpecifier(/** @type {Node} */ node, isString, isInTypeExport, isMaybeTypeOnly) {
+  /** @returns {Node} */ parseExportSpecifier(/** @type {Node} */ node, /** @type {boolean} */ isString, /** @type {boolean} */ isInTypeExport, /** @type {boolean} */ isMaybeTypeOnly) {
     if (this.eatContextual(89)) {
       node.exported = this.parseModuleExportName();
     } else if (isString) {
@@ -10823,7 +10948,7 @@ class StatementParser extends ExpressionParser {
       node.specifiers.push(importSpecifier);
     }
   }
-  /** @returns {Node} */ parseImportSpecifier(/** @type {Node | undefined} */ specifier, importedIsString, isInTypeOnlyImport, isMaybeTypeOnly, /** @type {number | undefined} */ bindingType) {
+  /** @returns {Node} */ parseImportSpecifier(/** @type {Node | undefined} */ specifier, /** @type {boolean} */ importedIsString, /** @type {boolean} */ isInTypeOnlyImport, /** @type {boolean} */ isMaybeTypeOnly, /** @type {number | undefined} */ bindingType) {
     if (this.eatContextual(89)) {
       specifier.local = this.parseIdentifier();
     } else {
@@ -12683,7 +12808,7 @@ const typescript = superClass => class TypeScriptParserMixin extends superClass 
     }
     return importNode;
   }
-  parseExport(/** @type {Node} */ node, decorators) {
+  parseExport(/** @type {Node} */ node, /** @type {Node[] | null | undefined} */ decorators) {
     if (this.match(79)) {
       const nodeImportEquals = this.startNode();
       this.next();
@@ -12766,7 +12891,7 @@ const typescript = superClass => class TypeScriptParserMixin extends superClass 
     }
     return declaration;
   }
-  parseStatementContent(/** @type {number} */ flags, decorators) {
+  parseStatementContent(/** @type {number} */ flags, /** @type {Node[] | null | undefined} */ decorators) {
     const allowDeclaration = !!(flags & 2);
     if (!this.state.containsEsc) {
       switch (this.state.type) {
@@ -12877,7 +13002,7 @@ const typescript = superClass => class TypeScriptParserMixin extends superClass 
   tsIsStartOfStaticBlocks() {
     return this.isContextual(102) && this.lookaheadCharCode() === 123;
   }
-  parseClassMember(/** @type {Node} */ classBody, /** @type {Node} */ member, state) {
+  parseClassMember(/** @type {Node} */ classBody, /** @type {Node} */ member, /** @type {any} */ state) {
     const modifiers = ["declare", "private", "public", "protected", "override", "abstract", "readonly", "static"];
     this.tsParseModifiers({
       allowedModifiers: modifiers,
@@ -12914,7 +13039,7 @@ const typescript = superClass => class TypeScriptParserMixin extends superClass 
       }
     }
   }
-  parseClassMemberWithIsStatic(/** @type {Node} */ classBody, /** @type {Node} */ member, state, /** @type {boolean} */ isStatic) {
+  parseClassMemberWithIsStatic(/** @type {Node} */ classBody, /** @type {Node} */ member, /** @type {any} */ state, /** @type {boolean} */ isStatic) {
     const idx = this.tsTryParseIndexSignature(member);
     if (idx) {
       classBody.body.push(idx);
@@ -13013,7 +13138,7 @@ const typescript = superClass => class TypeScriptParserMixin extends superClass 
     }
     return declaration;
   }
-  parseClassId(/** @type {Node} */ node, /** @type {boolean} */ isStatement, /** @type {boolean | undefined} */ optionalId, bindingType) {
+  parseClassId(/** @type {Node} */ node, /** @type {boolean} */ isStatement, /** @type {boolean | undefined} */ optionalId, /** @type {number | undefined} */ bindingType) {
     if ((!isStatement || optionalId) && this.isContextual(109)) {
       node.id = null;
       return;
@@ -13142,7 +13267,7 @@ const typescript = superClass => class TypeScriptParserMixin extends superClass 
     }
     return super.parseAsyncArrowFromCallExpression(node, call);
   }
-  parseMaybeAssign(/** @type {ExpressionErrors | undefined | null} */ refExpressionErrors, afterLeftParse) {
+  parseMaybeAssign(/** @type {ExpressionErrors | undefined | null} */ refExpressionErrors, /** @type {any} */ afterLeftParse) {
     let state;
     let jsx;
     let typeCast;
@@ -13242,7 +13367,7 @@ const typescript = superClass => class TypeScriptParserMixin extends superClass 
     this.resetEndLocation(param);
     return param;
   }
-  isAssignable(/** @type {Node} */ node, isBinding) {
+  isAssignable(/** @type {Node} */ node, /** @type {boolean | undefined} */ isBinding) {
     switch (node.type) {
       case "TSTypeCastExpression":
         return this.isAssignable(node.expression, isBinding);
@@ -13252,7 +13377,7 @@ const typescript = superClass => class TypeScriptParserMixin extends superClass 
         return super.isAssignable(node, isBinding);
     }
   }
-  toAssignable(/** @type {Node} */ node, isLHS = false) {
+  toAssignable(/** @type {Node} */ node, /** @type {boolean} */ isLHS = false) {
     switch (node.type) {
       case "ParenthesizedExpression":
         this.toAssignableParenthesizedExpression(node, isLHS);
@@ -13489,7 +13614,7 @@ const typescript = superClass => class TypeScriptParserMixin extends superClass 
     }
     throw this.unexpected(null, 76);
   }
-  parseMethod(/** @type {Node} */ node, isGenerator, isAsync, isConstructor, allowDirectSuper, /** @type {string | undefined} */ type, inClassScope) {
+  parseMethod(/** @type {Node} */ node, /** @type {boolean} */ isGenerator, /** @type {boolean} */ isAsync, /** @type {boolean} */ isConstructor, /** @type {boolean} */ allowDirectSuper, /** @type {string | undefined} */ type, /** @type {boolean} */ inClassScope) {
     const method = super.parseMethod(node, isGenerator, isAsync, isConstructor, allowDirectSuper, type, inClassScope);
     if (method.abstract || method.type === "TSAbstractMethodDefinition") {
       const hasEstreePlugin = this.hasPlugin("estree");
@@ -13523,7 +13648,7 @@ const typescript = superClass => class TypeScriptParserMixin extends superClass 
     }
     return super.getExpression();
   }
-  parseExportSpecifier(/** @type {Node} */ node, isString, isInTypeExport, isMaybeTypeOnly) {
+  parseExportSpecifier(/** @type {Node} */ node, /** @type {boolean} */ isString, /** @type {boolean} */ isInTypeExport, /** @type {boolean} */ isMaybeTypeOnly) {
     if (!isString && isMaybeTypeOnly) {
       this.parseTypeOnlyImportExportSpecifier(node, false, isInTypeExport);
       return this.finishNode(node, "ExportSpecifier");
@@ -13531,7 +13656,7 @@ const typescript = superClass => class TypeScriptParserMixin extends superClass 
     node.exportKind = "value";
     return super.parseExportSpecifier(node, isString, isInTypeExport, isMaybeTypeOnly);
   }
-  parseImportSpecifier(/** @type {Node | undefined} */ specifier, importedIsString, isInTypeOnlyImport, isMaybeTypeOnly, /** @type {number | undefined} */ bindingType) {
+  parseImportSpecifier(/** @type {Node | undefined} */ specifier, /** @type {boolean} */ importedIsString, /** @type {boolean} */ isInTypeOnlyImport, /** @type {boolean} */ isMaybeTypeOnly, /** @type {number | undefined} */ bindingType) {
     if (!importedIsString && isMaybeTypeOnly) {
       this.parseTypeOnlyImportExportSpecifier(specifier, true, isInTypeOnlyImport);
       return this.finishNode(specifier, "ImportSpecifier");
@@ -13829,7 +13954,7 @@ const placeholders = superClass => class PlaceholdersParserMixin extends superCl
       super.getTokenFromCode(code);
     }
   }
-  parseExprAtom(refExpressionErrors) {
+  parseExprAtom(/** @type {ExpressionErrors | undefined | null} */ refExpressionErrors) {
     return this.parsePlaceholder("Expression") || super.parseExprAtom(refExpressionErrors);
   }
   parseIdentifier(/** @type {boolean | undefined} */ liberal) {
@@ -13847,7 +13972,7 @@ const placeholders = superClass => class PlaceholdersParserMixin extends superCl
     }
     return cloned;
   }
-  cloneStringLiteral(node) {
+  cloneStringLiteral(/** @type {Node} */ node) {
     if (node.type === "Placeholder") {
       return this.cloneIdentifier(node);
     }
@@ -13859,7 +13984,7 @@ const placeholders = superClass => class PlaceholdersParserMixin extends superCl
   isValidLVal(/** @type {string} */ type, /** @type {boolean} */ disallowCallExpression, /** @type {boolean} */ isParenthesized, /** @type {number} */ binding) {
     return type === "Placeholder" || super.isValidLVal(type, disallowCallExpression, isParenthesized, binding);
   }
-  toAssignable(/** @type {Node} */ node, isLHS) {
+  toAssignable(/** @type {Node} */ node, /** @type {boolean} */ isLHS) {
     if (node && node.type === "Placeholder" && node.expectedNode === "Expression") {
       node.expectedNode = "Pattern";
     } else {
@@ -13880,7 +14005,7 @@ const placeholders = superClass => class PlaceholdersParserMixin extends superCl
     if (node.label?.type === "Placeholder") return;
     super.verifyBreakContinue(node, isBreak);
   }
-  parseExpressionStatement(node, expr) {
+  parseExpressionStatement(/** @type {Node} */ node, /** @type {Node} */ expr) {
     if (expr.type !== "Placeholder" || expr.extra?.parenthesized) {
       return super.parseExpressionStatement(node, expr);
     }
@@ -13924,7 +14049,7 @@ const placeholders = superClass => class PlaceholdersParserMixin extends superCl
     node.body = this.parsePlaceholder("ClassBody") || super.parseClassBody(!!node.superClass, oldStrict);
     return this.finishNode(node, type);
   }
-  parseExport(/** @type {Node} */ node, decorators) {
+  parseExport(/** @type {Node} */ node, /** @type {Node[] | null | undefined} */ decorators) {
     const placeholder = this.parsePlaceholder("Identifier");
     if (!placeholder) return super.parseExport(node, decorators);
     const node2 = node;
@@ -13957,7 +14082,7 @@ const placeholders = superClass => class PlaceholdersParserMixin extends superCl
     }
     return super.maybeParseExportDefaultSpecifier(node, maybeDefaultIdentifier);
   }
-  checkExport(node) {
+  checkExport(/** @type {Node} */ node) {
     const {
       specifiers
     } = node;
@@ -14014,7 +14139,7 @@ const v8intrinsic = superClass => class V8IntrinsicMixin extends superClass {
       this.unexpected(v8IntrinsicStartLoc);
     }
   }
-  parseExprAtom(refExpressionErrors) {
+  parseExprAtom(/** @type {ExpressionErrors | undefined | null} */ refExpressionErrors) {
     return this.parseV8Intrinsic() || super.parseExprAtom(refExpressionErrors);
   }
 };
