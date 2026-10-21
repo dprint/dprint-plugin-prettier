@@ -105,7 +105,7 @@ function printGraphqlComments(/** @type {any[]} */ lines) {
  * This intentionally excludes Relay Classic tags, as Prettier does not
  * support Relay Classic formatting.
  */
-/** @returns {boolean} */ function isEmbedGraphQL({ node, parent }) {
+/** @returns {boolean} */ function isEmbedGraphQL(/** @type {import("../../common/ast-path.js").default} */ { node, parent }) {
   return (
     hasLanguageComment({ node, parent }, "GraphQL") ||
     (parent &&

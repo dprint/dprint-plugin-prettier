@@ -46,7 +46,7 @@ function printFlowMapping(/** @type {AstPath} */ path, /** @type {YamlOptions} *
 
 function printChildren(/** @type {AstPath} */ path, /** @type {YamlOptions} */ options, /** @type {YamlPrint} */ print) {
   return path.map(
-    /** @returns {any[]} */ ({ isLast, node, next }) => [
+    /** @returns {any[]} */ (/** @type {AstPath & { node: YamlNode, next: YamlNode | null }} */ { isLast, node, next }) => [
       print(),
       isLast
         ? ""

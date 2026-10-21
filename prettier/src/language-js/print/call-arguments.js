@@ -77,7 +77,7 @@ function printCallArguments(/** @type {AstPath} */ path, options, /** @type {(a0
 
   /** @type {boolean} */ let anyArgEmptyLine = false;
   const printedArguments = [];
-  iterateCallArgumentsPath(path, ({ node: arg }, /** @type {number} */ index) => {
+  iterateCallArgumentsPath(path, (/** @type {AstPath} */ { node: arg }, /** @type {number} */ index) => {
     let argDoc = print();
 
     if (index === lastArgIndex) {

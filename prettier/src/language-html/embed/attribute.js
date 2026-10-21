@@ -17,6 +17,7 @@ import vueAttributePrinters from "./vue-attributes.js";
 @import AstPath from "../../common/ast-path.js"
 
 @typedef {(path: AstPath, options: any) => boolean} AttributeValuePredicate
+@typedef {AstPath & { node: import("../parse/ast.js").Node }} AttributePath
 @typedef {(textToDoc: any, print: any, path: AstPath, options: any) => Promise<Doc>} AsyncAttributeValuePrint
 @typedef {(textToDoc: any, print: any, path: AstPath, options: any) => Doc} SyncAttributeValuePrint
 @typedef {AsyncAttributeValuePrint | SyncAttributeValuePrint} AttributeValuePrint

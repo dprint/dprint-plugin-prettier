@@ -191,7 +191,7 @@ function printBetweenLine(/** @type {import("../parse/ast.js").Node} */ prevNode
   }
 
   const groupIds = node.children.map(() => Symbol(""));
-  return path.map(({ node: childNode, index: childIndex }) => {
+  return path.map((/** @type {AstPath & { node: import("../parse/ast.js").Node }} */ { node: childNode, index: childIndex }) => {
     if (isTextLikeNode(childNode)) {
       if (childNode.prev && isTextLikeNode(childNode.prev)) {
         const prevBetweenLine = printBetweenLine(childNode.prev, childNode);

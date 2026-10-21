@@ -3,11 +3,11 @@ import { getUnescapedAttributeValue } from "../utilities/index.js";
 import { printExpand } from "./utilities.js";
 
 /**
-@import {AttributeValuePredicate, AttributeValuePrint} from "./attribute.js"
+@import {AttributePath, AttributeValuePredicate, AttributeValuePrint} from "./attribute.js"
 */
 
 /** @type {AttributeValuePredicate} */
-const isStyle = /** @returns {boolean} */ ({ node }, options) =>
+const isStyle = /** @returns {boolean} */ (/** @type {AttributePath} */ { node }, options) =>
   node.fullName === "style" &&
   !options.parentParser &&
   !node.value.includes("{{");

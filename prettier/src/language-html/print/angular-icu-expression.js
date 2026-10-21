@@ -40,7 +40,7 @@ import { printClosingTagEnd, printOpeningTagStart } from "./tag.js";
     group([
       indent([
         softline,
-        path.map(({ node, isLast }) => {
+        path.map((/** @type {AstPath & { node: import("../parse/ast.js").Node }} */ { node, isLast }) => {
           const parts = [print()];
 
           if (node.kind === "text") {

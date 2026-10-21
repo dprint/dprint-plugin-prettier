@@ -5,11 +5,11 @@ import parsePermissionsPolicy from "./parse-permissions-policy.js";
 import { printExpand } from "./utilities.js";
 
 /**
-@import {AttributeValuePredicate, AttributeValuePrint} from "./attribute.js"
+@import {AttributePath, AttributeValuePredicate, AttributeValuePrint} from "./attribute.js"
 */
 
 /** @type {AttributeValuePredicate} */
-const isPermissionsPolicy = /** @returns {boolean} */ ({ node }, options) =>
+const isPermissionsPolicy = /** @returns {boolean} */ (/** @type {AttributePath} */ { node }, options) =>
   node.fullName === "allow" &&
   !options.parentParser &&
   node.parent.fullName === "iframe" &&

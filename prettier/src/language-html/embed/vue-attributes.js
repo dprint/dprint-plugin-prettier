@@ -14,7 +14,7 @@ import { printVueVForDirective } from "./vue-v-for-directive.js";
 /**
 @import {Doc} from "../../document/index.js"
 @import AstPath from "../../common/ast-path.js"
-@import {AttributeValuePrinter} from "./attribute.js"
+@import {AttributePath, AttributeValuePrinter} from "./attribute.js"
 */
 
 /** @type {AttributeValuePrinter[]} */
@@ -29,7 +29,7 @@ const printers = /** @type {AttributeValuePrinter[]} */ ([
     print: printVueScriptGenericAttributeValue,
   },
   {
-    test: /** @returns {boolean} */ ({ node }, options) =>
+    test: /** @returns {boolean} */ (/** @type {AttributePath} */ { node }, options) =>
       isVueSlotAttribute(node) || isVueSfcBindingsAttribute(node, options),
     print: printVueBindings,
   },

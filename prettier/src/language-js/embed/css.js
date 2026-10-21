@@ -113,7 +113,7 @@ function isStyledJsx(/** @type {import("../../../../prettier/src/common/ast-path
  * styled-components template literals
  * @returns {boolean}
  */
-function isStyledComponents({ parent }) {
+function isStyledComponents(/** @type {import("../../common/ast-path.js").default} */ { parent }) {
   if (!parent || parent.type !== "TaggedTemplateExpression") {
     return false;
   }
@@ -160,7 +160,7 @@ function isStyledComponents({ parent }) {
  * JSX element with CSS prop
  * @returns {boolean}
  */
-function isCssProp({ parent, grandparent }) {
+function isCssProp(/** @type {import("../../common/ast-path.js").default} */ { parent, grandparent }) {
   return (
     grandparent?.type === "JSXAttribute" &&
     parent.type === "JSXExpressionContainer" &&

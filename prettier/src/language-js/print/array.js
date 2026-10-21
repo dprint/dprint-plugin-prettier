@@ -157,7 +157,7 @@ import { printTypeAnnotationProperty } from "./type-annotation.js";
   );
 }
 
-/** @returns {boolean} */ function isLineAfterElementEmpty({ node }, { originalText: text }) {
+/** @returns {boolean} */ function isLineAfterElementEmpty(/** @type {AstPath} */ { node }, { originalText: text }) {
   let currentIdx = locEnd(node);
   if (currentIdx === locStart(node)) {
     return false;

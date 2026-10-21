@@ -41,7 +41,7 @@ async function printEmbedMarkdown(textToDoc, print, /** @type {AstPath} */ path 
  * markdown`...`
  * @returns {boolean}
  */
-function isEmbedMarkdown({ node, parent }) {
+function isEmbedMarkdown(/** @type {AstPath} */ { node, parent }) {
   return (
     parent?.type === "TaggedTemplateExpression" &&
     node.quasis.length === 1 &&

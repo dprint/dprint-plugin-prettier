@@ -98,7 +98,7 @@ function expressionNeedsAsiProtection(/** @type {import("../../../../prettier/sr
   );
 }
 
-const isSingleExpressionStatement = /** @returns {boolean} */ ({ node, parent }) =>
+const isSingleExpressionStatement = /** @returns {boolean} */ (/** @type {import("../../common/ast-path.js").default} */ { node, parent }) =>
   node.type === "ExpressionStatement" &&
   parent.type === "Program" &&
   parent.body.length === 1 &&

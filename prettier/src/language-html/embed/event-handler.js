@@ -4,13 +4,13 @@ import { getUnescapedAttributeValue } from "../utilities/index.js";
 import { formatAttributeValue } from "./utilities.js";
 
 /**
-@import {AttributeValuePredicate, AttributeValuePrint} from "./attribute.js"
+@import {AttributePath, AttributeValuePredicate, AttributeValuePrint} from "./attribute.js"
 */
 
 const htmlEventAttributes = new Set(htmlEventAttributesArray);
 
 /** @type {AttributeValuePredicate} */
-const isEventHandler = /** @returns {boolean} */ ({ node }, options) =>
+const isEventHandler = /** @returns {boolean} */ (/** @type {AttributePath} */ { node }, options) =>
   htmlEventAttributes.has(node.fullName) &&
   !options.parentParser &&
   !node.value.includes("{{");

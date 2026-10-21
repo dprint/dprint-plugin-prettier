@@ -85,7 +85,7 @@ function printAngular(/** @type {AstPath} */ path, options, /** @type {import(".
   }
 }
 
-/** @returns {boolean} */ function isNgForOf({ node, index }) {
+/** @returns {boolean} */ function isNgForOf(/** @type {AstPath} */ { node, index }) {
   return (
     node.type === "NGMicrosyntaxKeyedExpression" &&
     node.key.name === "of" &&

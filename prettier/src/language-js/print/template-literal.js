@@ -335,7 +335,7 @@ function printEmbeddedTemplateExpressions(/** @type {AstPath} */ path, options, 
  * Ref: https://github.com/facebook/jest/pull/6102
  */
 const jestEachTriggerRegex = /^[fx]?(?:describe|it|test)$/;
-/** @returns {boolean} */ function isJestEachTemplateLiteral({ node, parent }) {
+/** @returns {boolean} */ function isJestEachTemplateLiteral(/** @type {AstPath} */ { node, parent }) {
   return (
     node.type === "TemplateLiteral" &&
     parent.type === "TaggedTemplateExpression" &&

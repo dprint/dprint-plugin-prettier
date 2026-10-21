@@ -20,7 +20,7 @@ import { printTypeAnnotationProperty } from "./type-annotation.js";
  * @import {Doc} from "../../document/index.js"
  */
 
-const isMethodValue = /** @returns {boolean} */ ({ node, key, parent }) =>
+const isMethodValue = /** @returns {boolean} */ (/** @type {AstPath} */ { node, key, parent }) =>
   key === "value" &&
   node.type === "FunctionExpression" &&
   (parent.type === "ObjectMethod" ||

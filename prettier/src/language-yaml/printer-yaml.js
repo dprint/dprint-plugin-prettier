@@ -134,7 +134,7 @@ import {
         join(
           hardline,
           path.map(
-            /** @returns {any[]} */ ({ node }) => [
+            /** @returns {any[]} */ (/** @type {AstPath & { node: YamlNode }} */ { node }) => [
               isPreviousLineEmpty(options.originalText, locStart(node))
                 ? hardline
                 : "",
@@ -160,7 +160,7 @@ function printNode(/** @type {AstPath} */ path, /** @type {YamlOptions} */ optio
         lastDescendantNode.chomping === "keep"
       );
       const parts = [];
-      path.each(({ node: document, isFirst }) => {
+      path.each((/** @type {AstPath & { node: YamlNode }} */ { node: document, isFirst }) => {
         if (!isFirst) {
           parts.push(hardline);
         }
