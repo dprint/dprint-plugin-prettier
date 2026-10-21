@@ -34,21 +34,21 @@ var singleQuote = 39,
     /** @type {string} */ var css = input.css.valueOf();
 
     var /** @type {number | undefined} */ code = void 0,
-        /** @type {number | undefined} */ next = void 0,
+        /** @type {number} */ next = void 0,
         /** @type {string | undefined} */ quote = void 0,
         /** @type {string[] | undefined} */ lines = void 0,
-        /** @type {number | undefined} */ last = void 0,
+        /** @type {number} */ last = void 0,
         /** @type {string | undefined} */ content = void 0,
         /** @type {boolean | undefined} */ escape = void 0,
-        /** @type {number | undefined} */ nextLine = void 0,
-        /** @type {number | undefined} */ nextOffset = void 0,
+        /** @type {number} */ nextLine = void 0,
+        /** @type {number} */ nextOffset = void 0,
         /** @type {boolean | undefined} */ escaped = void 0,
-        /** @type {number | undefined} */ escapePos = void 0;
+        /** @type {number} */ escapePos = void 0;
 
     var length = css.length;
-    /** @type {number | undefined} */ var offset = -1;
-    /** @type {number | undefined} */ var line = 1;
-    /** @type {number | undefined} */ var pos = 0;
+    /** @type {number} */ var offset = -1;
+    /** @type {number} */ var line = 1;
+    /** @type {number} */ var pos = 0;
 
     var unclosed = function unclosed(/** @type {string} */ what, /** @type {string} */ end) {
         if (input.safe) {

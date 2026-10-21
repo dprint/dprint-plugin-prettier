@@ -6,11 +6,11 @@ let NestedDeclaration = require('./nested-declaration')
 let scssTokenizer = require('./scss-tokenize')
 
 class ScssParser extends Parser {
-  atrule(/** @type {any[]} */ token) {
+  atrule(/** @type {[string, string, number?, number?, string?]} */ token) {
     /** @type {string} */ let name = token[1]
-    /** @type {any[]} */ let prev = token
+    /** @type {[string, string, number?, number?, string?]} */ let prev = token
     while (!this.tokenizer.endOfFile()) {
-      /** @type {any[]} */ let next = this.tokenizer.nextToken()
+      /** @type {[string, string, number?, number?, string?]} */ let next = this.tokenizer.nextToken()
       if (next[0] === 'word' && next[2] === prev[3] + 1) {
         name += next[1]
         prev = next
@@ -23,7 +23,7 @@ class ScssParser extends Parser {
     super.atrule(['at-word', name, token[2], prev[3]])
   }
 
-  comment(/** @type {any[]} */ token) {
+  comment(/** @type {[string, string, number?, number?, string?]} */ token) {
     if (token[4] === 'inline') {
       let node = new Comment()
       this.init(node, token[2])
@@ -57,7 +57,7 @@ class ScssParser extends Parser {
     /** @type {import("postcss/lib/parser").Tokenizer} */ this.tokenizer = scssTokenizer(this.input)
   }
 
-  raw(/** @type {import("postcss/lib/node")} */ node, /** @type {string} */ prop, /** @type {any[][]} */ tokens, /** @type {boolean} */ customProperty) {
+  raw(/** @type {import("postcss/lib/node")} */ node, /** @type {string} */ prop, /** @type {[string, string, number?, number?, string?][]} */ tokens, /** @type {boolean} */ customProperty) {
     super.raw(node, prop, tokens, customProperty)
     if (node.raws[prop]) {
       let scss = node.raws[prop].raw
@@ -75,7 +75,7 @@ class ScssParser extends Parser {
     }
   }
 
-  rule(/** @type {any[][]} */ tokens) {
+  rule(/** @type {[string, string, number?, number?, string?][]} */ tokens) {
     /** @type {boolean} */ let withColon = false
     /** @type {number} */ let brackets = 0
     /** @type {string} */ let value = ''
@@ -102,7 +102,7 @@ class ScssParser extends Parser {
       let node = new NestedDeclaration()
       this.init(node, tokens[0][2])
 
-      /** @type {any[]} */ let last
+      /** @type {[string, string, number?, number?, string?]} */ let last
       for (let i = tokens.length - 1; i >= 0; i--) {
         if (tokens[i][0] !== 'space') {
           last = tokens[i]
@@ -149,7 +149,7 @@ class ScssParser extends Parser {
 
       node.raws.between = ''
 
-      /** @type {any[]} */ let token
+      /** @type {[string, string, number?, number?, string?]} */ let token
       while (tokens.length) {
         token = tokens.shift()
 
@@ -179,7 +179,7 @@ class ScssParser extends Parser {
           }
           break
         } else if (token[1] === 'important') {
-          /** @type {any[][]} */ let cache = tokens.slice(0)
+          /** @type {[string, string, number?, number?, string?][]} */ let cache = tokens.slice(0)
           /** @type {string} */ let str = ''
           for (let j = i; j > 0; j--) {
             let type = cache[j][0]

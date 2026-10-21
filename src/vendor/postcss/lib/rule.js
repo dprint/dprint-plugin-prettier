@@ -4,6 +4,11 @@
 let Container = require('./container')
 let list = require('./list')
 
+/**
+ * @property {boolean} [mixin] given by postcss-less
+ * @property {boolean} [extend] given by postcss-less and prettier
+ * @property {boolean} [isScssNestedProperty] given by prettier
+ */
 class Rule extends Container {
   get selectors() {
     return list.comma(this.selector)

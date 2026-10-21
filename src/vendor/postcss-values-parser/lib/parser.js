@@ -45,7 +45,7 @@ module.exports = class Parser {
     this.root.append(value);
 
     this.current = value;
-    /** @type {any[]} */ this.tokens = tokenize(input, this.options);
+    /** @type {[string, string, number, number, number, number, number][]} */ this.tokens = tokenize(input, this.options);
   }
 
   parse () {
@@ -53,7 +53,7 @@ module.exports = class Parser {
   }
 
   colon () {
-    let /** @type {any[]} */ token = this.currToken;
+    let /** @type {[string, string, number, number, number, number, number]} */ token = this.currToken;
 
     this.newNode(new Colon({
       value: token[1],
@@ -74,7 +74,7 @@ module.exports = class Parser {
   }
 
   comma () {
-    let /** @type {any[]} */ token = this.currToken;
+    let /** @type {[string, string, number, number, number, number, number]} */ token = this.currToken;
 
     this.newNode(new Comma({
       value: token[1],
@@ -124,7 +124,7 @@ module.exports = class Parser {
     this.position++;
   }
 
-  error (/** @type {string} */ message, /** @type {any[] | undefined} */ token) {
+  error (/** @type {string} */ message, /** @type {[string, string, number, number, number, number, number] | undefined} */ token) {
     throw new ParserError(message + ` at line: ${token[2]}, column ${token[3]}`);
   }
 
@@ -260,12 +260,12 @@ module.exports = class Parser {
   parenOpen () {
     let /** @type {number} */ unbalanced = 1,
       /** @type {number} */ pos = this.position + 1,
-      /** @type {any[]} */ token = this.currToken,
+      /** @type {[string, string, number, number, number, number, number]} */ token = this.currToken,
       /** @type {any} */ last;
 
     // check for balanced parens
     while (pos < this.tokens.length && unbalanced) {
-      let /** @type {any[]} */ tkn = this.tokens[pos];
+      let /** @type {[string, string, number, number, number, number, number]} */ tkn = this.tokens[pos];
 
       if (tkn[0] === '(') {
         unbalanced++;
@@ -314,7 +314,7 @@ module.exports = class Parser {
         this.current.value === 'url' && this.currToken[0] !== 'string' &&
         this.currToken[0] !== ')' && !this.options.loose) {
 
-      let /** @type {any[]} */ nextToken = this.nextToken,
+      let /** @type {[string, string, number, number, number, number, number]} */ nextToken = this.nextToken,
         /** @type {string} */ value = this.currToken[1],
         start = {
           line: this.currToken[2],
@@ -347,7 +347,7 @@ module.exports = class Parser {
   }
 
   parenClose () {
-    let /** @type {any[]} */ token = this.currToken;
+    let /** @type {[string, string, number, number, number, number, number]} */ token = this.currToken;
 
     this.newNode(new Paren({
       value: token[1],
@@ -416,7 +416,7 @@ module.exports = class Parser {
   }
 
   splitWord () {
-    let /** @type {any[]} */ nextToken = this.nextToken,
+    let /** @type {[string, string, number, number, number, number, number]} */ nextToken = this.nextToken,
       /** @type {string} */ word = this.currToken[1],
       rNumber = /^[\+\-]?((\d+(\.\d*)?)|(\.\d+))([eE][\+\-]?\d+)?/,
 
@@ -514,7 +514,7 @@ module.exports = class Parser {
   }
 
   string () {
-    let /** @type {any[]} */ token = this.currToken,
+    let /** @type {[string, string, number, number, number, number, number]} */ token = this.currToken,
       /** @type {string} */ value = this.currToken[1],
       rQuote = /^(\"|\')/,
       quoted = rQuote.test(value),
@@ -563,15 +563,15 @@ module.exports = class Parser {
     return this.current.append(node);
   }
 
-  /** @returns {any[]} */ get currToken () {
+  /** @returns {[string, string, number, number, number, number, number]} */ get currToken () {
     return this.tokens[this.position];
   }
 
-  /** @returns {any[] | undefined} */ get nextToken () {
+  /** @returns {[string, string, number, number, number, number, number] | undefined} */ get nextToken () {
     return this.tokens[this.position + 1];
   }
 
-  get prevToken () {
+  /** @returns {[string, string, number, number, number, number, number] | undefined} */ get prevToken () {
     return this.tokens[this.position - 1];
   }
 };

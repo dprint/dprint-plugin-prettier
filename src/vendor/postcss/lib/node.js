@@ -61,16 +61,44 @@ function sourceOffset(inputCSS, position) {
 }
 
 /**
- * @property {any} [source]
+ * what is kept of the text around a node; the parser writes records of the selector, value and params, which
+ * prettier writes over with texts
+ * @typedef {{
+ *   before?: string,
+ *   after?: string,
+ *   between?: string,
+ *   afterName?: string,
+ *   semicolon?: boolean,
+ *   ownSemicolon?: string,
+ *   important?: string,
+ *   identifier?: string,
+ *   inline?: boolean,
+ *   left?: string,
+ *   right?: string,
+ *   text?: string,
+ *   begin?: string,
+ *   scssDefault?: string,
+ *   scssGlobal?: string,
+ *   selector?: any,
+ *   value?: any,
+ *   params?: any,
+ * }} Raws
+ * where a node is, which prettier gives its offsets as well
+ * @typedef {{ input?: any, start?: Position, end?: Position, startOffset?: number, endOffset?: number | null }} Source
+ * @typedef {{ column: number, line: number, offset?: number }} Position
+ */
+
+/**
+ * @property {Source} [source]
  * @property {any} [parent]
  * @property {any} [nodes]
- * @property {any} [name]
+ * @property {string} [name]
  * @property {any} [params]
  * @property {any} [selector]
- * @property {any} [prop]
+ * @property {string} [prop]
  * @property {any} [value]
- * @property {any} [important]
- * @property {any} [text]
+ * @property {boolean} [important]
+ * @property {string} [text]
  * @property {any} [lastEach]
  * @property {any} [indexes]
  * @property {any} [proxyCache]
@@ -81,7 +109,7 @@ class Node {
   }
 
   constructor(defaults = {}) {
-    /** @type {any} */ this.raws = {}
+    /** @type {Raws} */ this.raws = {}
     this[isClean] = false
     this[my] = true
 

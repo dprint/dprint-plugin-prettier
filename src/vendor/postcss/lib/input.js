@@ -30,6 +30,9 @@ let lineToIndexCache = Symbol('lineToIndexCache')
   return lineToIndex
 }
 
+/**
+ * @property {string} [type] what prettier reads of every object of its tree, which an input never has
+ */
 class Input {
   get from() {
     return this.file || this.id
