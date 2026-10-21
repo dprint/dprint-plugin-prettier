@@ -26,7 +26,9 @@ but can be useful for heuristics based on doc introspection.
 function label(label, contents) {
   assertDoc(contents);
 
-  return label ? { type: DOC_TYPE_LABEL, label, contents } : contents;
+  return label
+    ? /** @type {Label} */ ({ type: DOC_TYPE_LABEL, label, contents })
+    : contents;
 }
 
 export { label };

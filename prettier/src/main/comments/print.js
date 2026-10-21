@@ -20,6 +20,7 @@ import skipNewline from "../../utilities/skip-newline.js";
 @typedef {{
   filter?: (comment) => boolean,
 }} CommentPrintOptions
+@typedef {{doc: Doc, isBlock: any, hasLineSuffix: boolean}} PrintedTrailingComment
 */
 
 const returnTrue = /** @returns {boolean} */ () => true;
@@ -67,7 +68,8 @@ function printComment(/** @type {AstPath} */ path, /** @type {import("../../../.
   return parts;
 }
 
-function printTrailingComment(/** @type {AstPath} */ path, /** @type {import("../../../../prettier/src/main/format-options.js").FormatOptions} */ options, previousComment) {
+/** @returns {PrintedTrailingComment} */
+function printTrailingComment(/** @type {AstPath} */ path, /** @type {import("../../../../prettier/src/main/format-options.js").FormatOptions} */ options, /** @type {PrintedTrailingComment | undefined} */ previousComment) {
   const comment = path.node;
   const printed = printComment(path, options);
 
@@ -123,7 +125,7 @@ function printTrailingComment(/** @type {AstPath} */ path, /** @type {import("..
  */
 function printDanglingComments(
   path,
-  options,
+  /** @type {import("../../../../prettier/src/main/format-options.js").FormatOptions} */ options,
   danglingCommentsPrintOptions = {},
 ) {
   const {
@@ -164,7 +166,8 @@ function printDanglingComments(
 @param {CommentPrintOptions} [printOptions]
 @returns {Doc}
 */
-function printLeadingComments(path, options, printOptions) {
+function printLeadingComments(path, /** @type {import("../../../../prettier/src/main/format-options.js").FormatOptions} */ options, printOptions) {
+  /** @type {Set<any> | undefined} */
   const printed = options[Symbol.for("printedComments")];
   const filter = printOptions?.filter ?? returnTrue;
   const leadingComments = new Set(
@@ -191,11 +194,13 @@ function printLeadingComments(path, options, printOptions) {
 @param {CommentPrintOptions} [printOptions]
 @returns {Doc}
 */
-function printTrailingComments(path, options, printOptions) {
+function printTrailingComments(path, /** @type {import("../../../../prettier/src/main/format-options.js").FormatOptions} */ options, printOptions) {
+  /** @type {any[] | undefined} */
   const comments = path.node?.comments;
   const trailingComments = new Set(
     comments?.filter(/** @returns {boolean} */ (comment) => comment.trailing),
   );
+  /** @type {Set<any> | undefined} */
   const printed = options[Symbol.for("printedComments")];
   const filter = printOptions?.filter ?? returnTrue;
   const commentsShouldPrint = new Set(
@@ -211,7 +216,9 @@ function printTrailingComments(path, options, printOptions) {
     return "";
   }
 
+  /** @type {Doc[]} */
   const docs = [];
+  /** @type {PrintedTrailingComment | undefined} */
   let printedTrailingComment;
   path.each(({ node: comment }) => {
     if (!trailingComments.has(comment)) {
@@ -236,7 +243,7 @@ function printTrailingComments(path, options, printOptions) {
 @param {CommentPrintOptions} [printOptions]
 @returns {{leading: Doc, trailing: Doc}}
 */
-function printCommentsSeparately(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, options, printOptions) {
+function printCommentsSeparately(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, /** @type {import("../../../../prettier/src/main/format-options.js").FormatOptions} */ options, printOptions) {
   return {
     leading: printLeadingComments(path, options, printOptions),
     trailing: printTrailingComments(path, options, printOptions),
@@ -247,15 +254,15 @@ function printCommentsSeparately(/** @type {import("../../../../prettier/src/com
 @param {CommentPrintOptions} [printOptions]
 @returns {Doc}
 */
-function printComments(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, doc, options, printOptions) {
+function printComments(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, /** @type {Doc} */ doc, /** @type {import("../../../../prettier/src/main/format-options.js").FormatOptions} */ options, printOptions) {
   const leading = printLeadingComments(path, options, printOptions);
   const trailing = printTrailingComments(path, options, printOptions);
   return leading || trailing
-    ? inheritLabel(doc, (doc) => [leading, doc, trailing])
+    ? inheritLabel(doc, (/** @type {Doc} */ doc) => [leading, doc, trailing])
     : doc;
 }
 
-function ensureAllCommentsPrinted(options) {
+function ensureAllCommentsPrinted(/** @type {import("../../../../prettier/src/main/format-options.js").FormatOptions} */ options) {
   const {
     [commentsPropertyInOptions]: comments,
     [Symbol.for("printedComments")]: printedComments,

@@ -20,21 +20,24 @@ import getDocType from "./get-doc-type.js";
 import InvalidDocError from "./invalid-doc-error.js";
 
 /**
-@import {Doc} from "../builders/index.js";
+@import {Doc, Align, Fill, Group, IfBreak, Indent, IndentIfBreak, Label, LineSuffix} from "../builders/index.js";
+@typedef {Indent | Align | IndentIfBreak | Label | LineSuffix} DocWithContents
 @typedef {(doc: Doc) => void | boolean} OnEnter
 @typedef {(doc: Doc) => void} OnExit
 */
 
 // Using a unique object to compare by reference.
+/** @type {any} */
 const traverseDocOnExitStackMarker = {};
 
 /**
-@param {any} doc
+@param {Doc} doc
 @param {OnEnter} [onEnter]
 @param {OnExit} [onExit]
 @param {boolean} [shouldTraverseConditionalGroups = false]
 */
 function traverseDoc(doc, onEnter, onExit, shouldTraverseConditionalGroups) {
+  /** @type {Doc[]} */
   const docsStack = [doc];
 
   while (docsStack.length > 0) {
@@ -67,7 +70,10 @@ function traverseDoc(doc, onEnter, onExit, shouldTraverseConditionalGroups) {
     switch (docType) {
       case DOC_TYPE_ARRAY:
       case DOC_TYPE_FILL: {
-        /** @type {any[]} */ const parts = docType === DOC_TYPE_ARRAY ? doc : doc.parts;
+        const parts =
+          docType === DOC_TYPE_ARRAY
+            ? /** @type {readonly Doc[]} */ (doc)
+            : /** @type {Fill} */ (doc).parts;
         for (let ic = parts.length, i = ic - 1; i >= 0; --i) {
           docsStack.push(parts[i]);
         }
@@ -75,16 +81,26 @@ function traverseDoc(doc, onEnter, onExit, shouldTraverseConditionalGroups) {
       }
 
       case DOC_TYPE_IF_BREAK:
-        docsStack.push(doc.flatContents, doc.breakContents);
+        docsStack.push(
+          /** @type {IfBreak} */ (doc).flatContents,
+          /** @type {IfBreak} */ (doc).breakContents,
+        );
         break;
 
       case DOC_TYPE_GROUP:
-        if (shouldTraverseConditionalGroups && doc.expandedStates) {
-          for (let ic = doc.expandedStates.length, i = ic - 1; i >= 0; --i) {
-            docsStack.push(doc.expandedStates[i]);
+        if (
+          shouldTraverseConditionalGroups &&
+          /** @type {Group} */ (doc).expandedStates
+        ) {
+          for (
+            let ic = /** @type {Group} */ (doc).expandedStates.length, i = ic - 1;
+            i >= 0;
+            --i
+          ) {
+            docsStack.push(/** @type {Group} */ (doc).expandedStates[i]);
           }
         } else {
-          docsStack.push(doc.contents);
+          docsStack.push(/** @type {Group} */ (doc).contents);
         }
         break;
 
@@ -93,7 +109,7 @@ function traverseDoc(doc, onEnter, onExit, shouldTraverseConditionalGroups) {
       case DOC_TYPE_INDENT_IF_BREAK:
       case DOC_TYPE_LABEL:
       case DOC_TYPE_LINE_SUFFIX:
-        docsStack.push(doc.contents);
+        docsStack.push(/** @type {DocWithContents} */ (doc).contents);
         break;
 
       case DOC_TYPE_STRING:

@@ -11,6 +11,8 @@ import {
 
 /**
  * @import AstPath from "../../common/ast-path.js"
+ * @import {DecoratedComment} from "../format-options.js"
+ * @typedef {{enclosingNode: any, precedingNode: any, followingNode: any}} CommentNodes
  */
 
 const childNodesCache = new WeakMap();
@@ -18,17 +20,19 @@ const childNodesCache = new WeakMap();
 // As efficiently as possible, decorate the comment object with
 // .precedingNode, .enclosingNode, and/or .followingNode properties, at
 // least one of which is guaranteed to be defined.
+/** @returns {CommentNodes} */
 function decorateComment(
   node,
   comment,
   /** @type {import("../../../../prettier/src/main/format-options.js").FormatOptions} */ options,
   enclosingNode,
-  ancestors = [],
+  /** @type {any[]} */ ancestors = [],
 ) {
   const { locStart, locEnd } = options;
   const commentStart = locStart(comment);
   const commentEnd = locEnd(comment);
 
+  /** @type {any[]} */
   const childNodes = getSortedChildNodes(node, ancestors, {
     cache: childNodesCache,
     locStart,
@@ -41,7 +45,7 @@ function decorateComment(
   let followingNode;
   // Time to dust off the old binary search robes and wizard hat.
   /** @type {number} */ let left = 0;
-  let right = childNodes.length;
+  /** @type {number} */ let right = childNodes.length;
   while (left < right) {
     /** @type {number} */ const middle = (left + right) >> 1;
     const child = childNodes[middle];
@@ -84,6 +88,7 @@ function decorateComment(
   // We don't want comments inside of different expressions inside of the same
   // template literal to move to another expression.
   if (enclosingNode?.type === "TemplateLiteral") {
+    /** @type {any[]} */
     const { quasis } = enclosingNode;
     /** @type {number} */ const commentIndex = findExpressionIndexForComment(
       quasis,
@@ -119,6 +124,7 @@ function attachComments(ast, /** @type {import("../../../../prettier/src/main/fo
     return;
   }
 
+  /** @type {DecoratedComment[]} */
   const tiesToBreak = [];
   const {
     printer: {
@@ -133,7 +139,8 @@ function attachComments(ast, /** @type {import("../../../../prettier/src/main/fo
     remaining: handleRemainingComment = returnFalse,
   } = handleComments;
 
-  const decoratedComments = comments.map((comment, index) => ({
+  /** @type {DecoratedComment[]} */
+  const decoratedComments = comments.map((comment, /** @type {number} */ index) => ({
     ...decorateComment(ast, comment, options),
     comment,
     text,
@@ -166,6 +173,7 @@ function attachComments(ast, /** @type {import("../../../../prettier/src/main/fo
         ? "endOfLine"
         : "remaining";
 
+    /** @type {any[]} */
     let args;
     if (avoidAstMutation) {
       context.placement = placement;
@@ -266,7 +274,7 @@ function attachComments(ast, /** @type {import("../../../../prettier/src/main/fo
 }
 
 const isAllEmptyAndNoLineBreak = /** @returns {boolean} */ (/** @type {string} */ text) => !/[\S\n\u2028\u2029]/.test(text);
-/** @returns {boolean} */ function isOwnLineComment(/** @type {string} */ text, /** @type {import("../../../../prettier/src/main/format-options.js").FormatOptions} */ options, decoratedComments, /** @type {number} */ commentIndex) {
+/** @returns {boolean} */ function isOwnLineComment(/** @type {string} */ text, /** @type {import("../../../../prettier/src/main/format-options.js").FormatOptions} */ options, /** @type {DecoratedComment[]} */ decoratedComments, /** @type {number} */ commentIndex) {
   const { comment, precedingNode } = decoratedComments[commentIndex];
   const { locStart, locEnd } = options;
   let start = locStart(comment);
@@ -289,7 +297,7 @@ const isAllEmptyAndNoLineBreak = /** @returns {boolean} */ (/** @type {string} *
   return hasNewline(text, start, { backwards: true });
 }
 
-/** @returns {boolean} */ function isEndOfLineComment(/** @type {string} */ text, /** @type {import("../../../../prettier/src/main/format-options.js").FormatOptions} */ options, decoratedComments, /** @type {number} */ commentIndex) {
+/** @returns {boolean} */ function isEndOfLineComment(/** @type {string} */ text, /** @type {import("../../../../prettier/src/main/format-options.js").FormatOptions} */ options, /** @type {DecoratedComment[]} */ decoratedComments, /** @type {number} */ commentIndex) {
   const { comment, followingNode } = decoratedComments[commentIndex];
   const { locStart, locEnd } = options;
   let end = locEnd(comment);
@@ -316,7 +324,7 @@ const isAllEmptyAndNoLineBreak = /** @returns {boolean} */ (/** @type {string} *
   return hasNewline(text, end);
 }
 
-function breakTies(tiesToBreak, /** @type {import("../../../../prettier/src/main/format-options.js").FormatOptions} */ options) {
+function breakTies(/** @type {DecoratedComment[]} */ tiesToBreak, /** @type {import("../../../../prettier/src/main/format-options.js").FormatOptions} */ options) {
   const tieCount = tiesToBreak.length;
   if (tieCount === 0) {
     return;
@@ -330,6 +338,7 @@ function breakTies(tiesToBreak, /** @type {import("../../../../prettier/src/main
   // followingNode by an unbroken series of gaps (or other comments). By
   // default, gaps should only contain whitespace or open parentheses.
   // printer.isGap can be used to define custom logic for checking gaps.
+  /** @type {number} */
   let indexOfFirstLeadingComment;
   for (
     indexOfFirstLeadingComment = tieCount;
@@ -372,7 +381,7 @@ function breakTies(tiesToBreak, /** @type {import("../../../../prettier/src/main
   tiesToBreak.length = 0;
 }
 
-/** @returns {number} */ function findExpressionIndexForComment(quasis, comment, /** @type {import("../../../../prettier/src/main/format-options.js").FormatOptions} */ options) {
+/** @returns {number} */ function findExpressionIndexForComment(/** @type {any[]} */ quasis, comment, /** @type {import("../../../../prettier/src/main/format-options.js").FormatOptions} */ options) {
   /** @type {number} */ const startPos = options.locStart(comment) - 1;
 
   for (let i = 1; i < quasis.length; ++i) {

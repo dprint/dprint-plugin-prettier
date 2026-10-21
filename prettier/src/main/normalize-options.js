@@ -76,7 +76,7 @@ function normalizeOptions(
   return normalized;
 }
 
-/** @returns {any[]} */ function optionInfosToSchemas(/** @type {any[]} */ optionInfos, { isCLI, FlagSchema }) {
+/** @returns {any[]} */ function optionInfosToSchemas(/** @type {NamedOptionInfo[]} */ optionInfos, /** @type {{isCLI: boolean, FlagSchema: any}} */ { isCLI, FlagSchema }) {
   const schemas = [];
 
   if (isCLI) {
@@ -107,15 +107,18 @@ function normalizeOptions(
 }
 
 /**
- * @param {any} optionInfo
- * @param {any} param1
- * @returns
+ * @param {NamedOptionInfo} optionInfo
+ * @param {{isCLI: boolean, optionInfos: NamedOptionInfo[], FlagSchema: any}} param1
+ * @returns {any}
  */
 function optionInfoToSchema(optionInfo, { isCLI, optionInfos, FlagSchema }) {
   const { name } = optionInfo;
 
+  /** @type {{name: string, preprocess?: any, choices?: any[], flags?: any[], validate?: any}} */
   const parameters = { name };
+  /** @type {any} */
   let SchemaConstructor;
+  /** @type {{redirect?: any, deprecated?: boolean}} */
   const handlers = {};
 
   switch (optionInfo.type) {

@@ -15,20 +15,25 @@ import { parseIeConditionalComment } from "./conditional-comment.js";
 /**
 @import {HtmlParseOptions, Ast, ParseTreeResult} from "angular-html-parser";
 @import {ParseOptions} from "./parse-options.js";
+@import {NormalizedParseOptions} from "./ast.js";
+@import {Attribute, Element, ExpansionCase} from "../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs";
+@import {ParseSourceSpan as SourceSpan, ParseLocation} from "../../../../src/vendor/angular-html-parser/dist/compiler/src/parse_util.mjs";
+@typedef {{parseOptions: NormalizedParseOptions}} VisitContext
+@typedef {{kind: string, sourceSpan: SourceSpan, children: any[]}} RawAst
 */
 
 class Visitor extends RecursiveVisitor {
   // Angular does not visit to the children of expansionCase
   // https://github.com/angular/angular/blob/e3a6bf9b6c3bef03df9bfc8f05b817bc875cbad6/packages/compiler/src/ml_parser/ast.ts#L161
-  visitExpansionCase(ast, context) {
+  visitExpansionCase(/** @type {ExpansionCase} */ ast, /** @type {VisitContext} */ context) {
     if (context.parseOptions.name === "angular") {
       // @ts-expect-error
-      this.visitChildren(context, (visit) => {
+      this.visitChildren(context, (/** @type {(children: any) => void} */ visit) => {
         visit(ast.expression);
       });
     }
   }
-  visit(/** @type {import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").Text | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").Element | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").Attribute | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").Comment | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").DocType | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").CDATA | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").Block | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").BlockParameter | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").LetDeclaration} */ node, { parseOptions }) {
+  visit(/** @type {import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").Text | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").Element | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").Attribute | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").Comment | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").DocType | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").CDATA | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").Block | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").BlockParameter | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").LetDeclaration} */ node, /** @type {VisitContext} */ { parseOptions }) {
     restoreNameAndValue(node);
     addTagDefinition(node, parseOptions);
     normalizeName(node, parseOptions);
@@ -36,7 +41,7 @@ class Visitor extends RecursiveVisitor {
   }
 }
 
-/** @returns {Node} */ function postprocess(rawAst, frontMatter, parseOptions, parseSubHtml) {
+/** @returns {Node} */ function postprocess(/** @type {RawAst} */ rawAst, frontMatter, /** @type {NormalizedParseOptions} */ parseOptions, /** @type {(subContent: string, startSpan: ParseLocation) => Node} */ parseSubHtml) {
   const isAngular = parseOptions.name === "angular";
 
   visitAll(new Visitor(), rawAst.children, { parseOptions });
@@ -126,13 +131,13 @@ function normalizeAngularIcuExpression(/** @type {Node} */ node) {
   }
 }
 
-/** @returns {string} */ function lowerCaseIf(/** @type {string} */ text, fn) {
+/** @returns {string} */ function lowerCaseIf(/** @type {string} */ text, /** @type {(text: string) => boolean} */ fn) {
   /** @type {string} */ const lowerCasedText = text.toLowerCase();
   return fn(lowerCasedText) ? lowerCasedText : text;
 }
 
 /**
- * @param {Ast.Attribute | Ast.Element} node
+ * @param {Attribute | Element} node
  */
 function restoreName(node) {
   /** @type {string | null} */ const namespace = node.name.startsWith(":")
@@ -153,13 +158,13 @@ function restoreName(node) {
 }
 
 /**
- * @param {Ast.Node} node
+ * @param {any} node
  */
 function restoreNameAndValue(node) {
   switch (node.kind) {
     case "element":
       restoreName(node);
-      for (const attr of node.attrs) {
+      for (const attr of /** @type {Element} */ (node).attrs) {
         restoreName(attr);
         if (!attr.valueSpan) {
           attr.value = null;
@@ -173,13 +178,13 @@ function restoreNameAndValue(node) {
       break;
 
     case "comment":
-      node.value = node.sourceSpan
+      node.value = /** @type {SourceSpan} */ (node.sourceSpan)
         .toString()
         .slice("<!--".length, -"-->".length);
       break;
 
     case "text":
-      node.value = node.sourceSpan.toString();
+      node.value = /** @type {SourceSpan} */ (node.sourceSpan).toString();
       break;
 
     // No default
@@ -187,26 +192,26 @@ function restoreNameAndValue(node) {
 }
 
 /**
- * @param {Ast.Node} node
- * @param {any} parseOptions
+ * @param {any} node
+ * @param {NormalizedParseOptions} parseOptions
  */
 function addTagDefinition(node, parseOptions) {
   if (node.kind === "element") {
     /** @type {import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/html_tags.mjs").HtmlTagDefinition} */ const tagDefinition = getHtmlTagDefinition(
-      parseOptions.isTagNameCaseSensitive ? node.name : node.name.toLowerCase(),
+      parseOptions.isTagNameCaseSensitive ? /** @type {Element} */ (node).name : /** @type {Element} */ (node).name.toLowerCase(),
     );
     if (
       // @ts-expect-error -- we add it
-      !node.namespace ||
+      !(/** @type {Element} */ (node).namespace) ||
       // @ts-expect-error -- we add it
-      node.namespace === tagDefinition.implicitNamespacePrefix ||
+      /** @type {Element} */ (node).namespace === tagDefinition.implicitNamespacePrefix ||
       isUnknownNamespace(node)
     ) {
       // @ts-expect-error -- expected
-      node.tagDefinition = tagDefinition;
+      /** @type {Element} */ (node).tagDefinition = tagDefinition;
     } else {
       // @ts-expect-error -- expected
-      node.tagDefinition = getHtmlTagDefinition(""); // the default one
+      /** @type {Element} */ (node).tagDefinition = getHtmlTagDefinition(""); // the default one
     }
   }
 }
@@ -220,28 +225,28 @@ function fixSourceSpan(/** @type {import("../../../../src/vendor/angular-html-pa
   }
 }
 
-function normalizeName(/** @type {import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").Text | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").Element | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").Attribute | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").Comment | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").DocType | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").CDATA | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").Block | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").BlockParameter | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").LetDeclaration} */ node, parseOptions) {
+function normalizeName(/** @type {import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").Text | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").Element | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").Attribute | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").Comment | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").DocType | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").CDATA | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").Block | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").BlockParameter | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").LetDeclaration} */ node, /** @type {NormalizedParseOptions} */ parseOptions) {
   if (node.kind === "element") {
     if (
       parseOptions.normalizeTagName &&
-      (!node.namespace ||
-        node.namespace === node.tagDefinition.implicitNamespacePrefix ||
+      (!(/** @type {Element} */ (node).namespace) ||
+        /** @type {Element} */ (node).namespace === /** @type {Element} */ (node).tagDefinition.implicitNamespacePrefix ||
         isUnknownNamespace(node))
     ) {
-      node.name = lowerCaseIf(node.name, /** @returns {boolean} */ (lowerCasedName) =>
+      /** @type {Element} */ (node).name = lowerCaseIf(/** @type {Element} */ (node).name, /** @returns {boolean} */ (/** @type {string} */ lowerCasedName) =>
         HTML_TAGS.has(lowerCasedName),
       );
     }
 
     if (parseOptions.normalizeAttributeName) {
-      for (const attr of node.attrs) {
+      for (const attr of /** @type {Element} */ (node).attrs) {
         if (!attr.namespace) {
           attr.name = lowerCaseIf(
             attr.name,
-            /** @returns {boolean} */ (lowerCasedAttrName) =>
+            /** @returns {boolean} */ (/** @type {string} */ lowerCasedAttrName) =>
               HTML_ELEMENT_ATTRIBUTES.has(node.name) &&
               (HTML_ELEMENT_ATTRIBUTES.get("*").has(lowerCasedAttrName) ||
-                HTML_ELEMENT_ATTRIBUTES.get(node.name).has(lowerCasedAttrName)),
+                HTML_ELEMENT_ATTRIBUTES.get(/** @type {Element} */ (node).name).has(lowerCasedAttrName)),
           );
         }
       }

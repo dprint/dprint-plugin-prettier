@@ -17,6 +17,7 @@
 }
 
 function addCommentHelper(node, comment) {
+  /** @type {any[]} */
   const comments = (node.comments ??= []);
   comments.push(comment);
   comment.printed = false;

@@ -25,10 +25,15 @@ import InvalidDocError from "./invalid-doc-error.js";
 import traverseDoc from "./traverse-doc.js";
 
 /**
-@import {Doc} from "../builders/index.js";
+@import {Doc, Align, Fill, Group, IfBreak, Indent, IndentIfBreak, Label, Line, LineSuffix} from "../builders/index.js";
+@typedef {Indent | Align | IndentIfBreak | Label | LineSuffix} DocWithContents
 */
 
-function mapDoc(doc, /** @type {(a0?: any) => any} */ cb) {
+/**
+@param {Doc} doc
+@param {(a0?: any) => any} cb
+*/
+function mapDoc(doc, cb) {
   // Avoid creating `Map`
   if (typeof doc === "string") {
     return cb(doc);
@@ -43,34 +48,49 @@ function mapDoc(doc, /** @type {(a0?: any) => any} */ cb) {
 
   return rec(doc);
 
+  /** @param {Doc} doc */
   function rec(doc) {
     return getOrInsertComputed(mapped, doc, process);
   }
 
+  /** @param {Doc} doc */
   function process(doc) {
     switch (getDocType(doc)) {
       case DOC_TYPE_ARRAY:
-        return cb(doc.map(rec));
+        return cb(/** @type {readonly Doc[]} */ (doc).map(rec));
 
       case DOC_TYPE_FILL:
-        return cb({ ...doc, parts: doc.parts.map(rec) });
+        return cb(
+          /** @type {Fill} */ ({
+            .../** @type {Fill} */ (doc),
+            parts: /** @type {Fill} */ (doc).parts.map(rec),
+          }),
+        );
 
       case DOC_TYPE_IF_BREAK:
-        return cb({
-          ...doc,
-          breakContents: rec(doc.breakContents),
-          flatContents: rec(doc.flatContents),
-        });
+        return cb(
+          /** @type {IfBreak} */ ({
+            .../** @type {IfBreak} */ (doc),
+            breakContents: rec(/** @type {IfBreak} */ (doc).breakContents),
+            flatContents: rec(/** @type {IfBreak} */ (doc).flatContents),
+          }),
+        );
 
       case DOC_TYPE_GROUP: {
-        let { expandedStates, contents } = doc;
+        let { expandedStates, contents } = /** @type {Group} */ (doc);
         if (expandedStates) {
           expandedStates = expandedStates.map(rec);
           contents = expandedStates[0];
         } else {
           contents = rec(contents);
         }
-        return cb({ ...doc, contents, expandedStates });
+        return cb(
+          /** @type {Group} */ ({
+            .../** @type {Group} */ (doc),
+            contents,
+            expandedStates,
+          }),
+        );
       }
 
       case DOC_TYPE_ALIGN:
@@ -78,7 +98,12 @@ function mapDoc(doc, /** @type {(a0?: any) => any} */ cb) {
       case DOC_TYPE_INDENT_IF_BREAK:
       case DOC_TYPE_LABEL:
       case DOC_TYPE_LINE_SUFFIX:
-        return cb({ ...doc, contents: rec(doc.contents) });
+        return cb(
+          /** @type {DocWithContents} */ ({
+            .../** @type {DocWithContents} */ (doc),
+            contents: rec(/** @type {DocWithContents} */ (doc).contents),
+          }),
+        );
 
       case DOC_TYPE_STRING:
       case DOC_TYPE_CURSOR:
@@ -95,7 +120,7 @@ function mapDoc(doc, /** @type {(a0?: any) => any} */ cb) {
   }
 }
 
-/** @returns {boolean} */ function findInDoc(doc, /** @type {(a0?: any) => any} */ fn, /** @type {boolean} */ defaultValue) {
+/** @returns {boolean} */ function findInDoc(/** @type {Doc} */ doc, /** @type {(a0?: any) => any} */ fn, /** @type {boolean} */ defaultValue) {
   let result = defaultValue;
   /** @type {boolean} */ let shouldSkipFurtherProcessing = false;
   /** @returns {boolean | undefined} */ function findInDocOnEnterFn(doc) {
@@ -114,10 +139,10 @@ function mapDoc(doc, /** @type {(a0?: any) => any} */ cb) {
 }
 
 /** @returns {boolean | undefined} */ function willBreakFn(doc) {
-  if (doc.type === DOC_TYPE_GROUP && doc.break) {
+  if (doc.type === DOC_TYPE_GROUP && /** @type {Group} */ (doc).break) {
     return true;
   }
-  if (doc.type === DOC_TYPE_LINE && doc.hard) {
+  if (doc.type === DOC_TYPE_LINE && /** @type {Line} */ (doc).hard) {
     return true;
   }
   if (doc.type === DOC_TYPE_BREAK_PARENT) {
@@ -125,11 +150,11 @@ function mapDoc(doc, /** @type {(a0?: any) => any} */ cb) {
   }
 }
 
-/** @returns {boolean} */ function willBreak(doc) {
+/** @returns {boolean} */ function willBreak(/** @type {Doc} */ doc) {
   return findInDoc(doc, willBreakFn, false);
 }
 
-function breakParentGroup(/** @type {any[]} */ groupStack) {
+function breakParentGroup(/** @type {Group[]} */ groupStack) {
   if (groupStack.length > 0) {
     const parentGroup = groupStack.at(-1);
     // Breaks are not propagated through conditional groups because
@@ -143,8 +168,10 @@ function breakParentGroup(/** @type {any[]} */ groupStack) {
   return null;
 }
 
-function propagateBreaks(doc) {
+function propagateBreaks(/** @type {Doc} */ doc) {
+  /** @type {Set<Group>} */
   const alreadyVisitedSet = new Set();
+  /** @type {Group[]} */
   const groupStack = [];
   /** @returns {boolean | undefined} */ function propagateBreaksOnEnterFn(doc) {
     if (doc.type === DOC_TYPE_BREAK_PARENT) {
@@ -179,18 +206,18 @@ function removeLinesFn(doc) {
   // lines into spaces (or soft lines into nothing). Hard lines
   // should still output because there's too great of a chance
   // of breaking existing assumptions otherwise.
-  if (doc.type === DOC_TYPE_LINE && !doc.hard) {
-    return doc.soft ? "" : " ";
+  if (doc.type === DOC_TYPE_LINE && !(/** @type {Line} */ (doc).hard)) {
+    return /** @type {Line} */ (doc).soft ? "" : " ";
   }
 
   if (doc.type === DOC_TYPE_IF_BREAK) {
-    return doc.flatContents;
+    return /** @type {IfBreak} */ (doc).flatContents;
   }
 
   return doc;
 }
 
-function removeLines(doc) {
+function removeLines(/** @type {Doc} */ doc) {
   return mapDoc(doc, removeLinesFn);
 }
 
@@ -213,6 +240,10 @@ function removeLines(doc) {
   return parts;
 }
 
+/**
+@param {Doc} doc
+@returns {Doc}
+*/
 function stripTrailingHardlineFromDoc(doc) {
   switch (getDocType(doc)) {
     case DOC_TYPE_INDENT:
@@ -220,25 +251,34 @@ function stripTrailingHardlineFromDoc(doc) {
     case DOC_TYPE_GROUP:
     case DOC_TYPE_LINE_SUFFIX:
     case DOC_TYPE_LABEL: {
-      const contents = stripTrailingHardlineFromDoc(doc.contents);
-      return { ...doc, contents };
+      const contents = stripTrailingHardlineFromDoc(
+        /** @type {DocWithContents | Group} */ (doc).contents,
+      );
+      return { .../** @type {DocWithContents | Group} */ (doc), contents };
     }
 
     case DOC_TYPE_IF_BREAK:
       return {
-        ...doc,
-        breakContents: stripTrailingHardlineFromDoc(doc.breakContents),
-        flatContents: stripTrailingHardlineFromDoc(doc.flatContents),
+        .../** @type {IfBreak} */ (doc),
+        breakContents: stripTrailingHardlineFromDoc(
+          /** @type {IfBreak} */ (doc).breakContents,
+        ),
+        flatContents: stripTrailingHardlineFromDoc(
+          /** @type {IfBreak} */ (doc).flatContents,
+        ),
       };
 
     case DOC_TYPE_FILL:
-      return { ...doc, parts: stripTrailingHardlineFromParts(doc.parts) };
+      return {
+        .../** @type {Fill} */ (doc),
+        parts: stripTrailingHardlineFromParts(/** @type {Fill} */ (doc).parts),
+      };
 
     case DOC_TYPE_ARRAY:
-      return stripTrailingHardlineFromParts(doc);
+      return stripTrailingHardlineFromParts(/** @type {any[]} */ (doc));
 
     case DOC_TYPE_STRING:
-      return trimNewlinesEnd(doc);
+      return trimNewlinesEnd(/** @type {string} */ (doc));
 
     case DOC_TYPE_ALIGN:
     case DOC_TYPE_CURSOR:
@@ -256,15 +296,16 @@ function stripTrailingHardlineFromDoc(doc) {
   return doc;
 }
 
-function stripTrailingHardline(doc) {
+function stripTrailingHardline(/** @type {Doc} */ doc) {
   // HACK remove ending hardline, original PR: #1984
   return stripTrailingHardlineFromDoc(cleanDoc(doc));
 }
 
+/** @param {Doc} doc */
 function cleanDocFn(doc) {
   switch (getDocType(doc)) {
     case DOC_TYPE_FILL: {
-      const { parts } = doc;
+      const { parts } = /** @type {Fill} */ (doc);
 
       if (parts.every(/** @returns {boolean} */ (part) => part === "")) {
         return "";
@@ -276,36 +317,49 @@ function cleanDocFn(doc) {
       break;
     }
     case DOC_TYPE_GROUP:
-      if (!doc.contents && !doc.id && !doc.break && !doc.expandedStates) {
+      if (
+        !(/** @type {Group} */ (doc).contents) &&
+        !(/** @type {Group} */ (doc).id) &&
+        !(/** @type {Group} */ (doc).break) &&
+        !(/** @type {Group} */ (doc).expandedStates)
+      ) {
         return "";
       }
       // Remove nested only group
       if (
-        doc.contents.type === DOC_TYPE_GROUP &&
-        doc.contents.id === doc.id &&
-        doc.contents.break === doc.break &&
-        doc.contents.expandedStates === doc.expandedStates
+        /** @type {any} */ (/** @type {Group} */ (doc).contents).type ===
+          DOC_TYPE_GROUP &&
+        /** @type {Group} */ (/** @type {Group} */ (doc).contents).id ===
+          /** @type {Group} */ (doc).id &&
+        /** @type {Group} */ (/** @type {Group} */ (doc).contents).break ===
+          /** @type {Group} */ (doc).break &&
+        /** @type {Group} */ (/** @type {Group} */ (doc).contents)
+          .expandedStates === /** @type {Group} */ (doc).expandedStates
       ) {
-        return doc.contents;
+        return /** @type {Group} */ (doc).contents;
       }
       break;
     case DOC_TYPE_ALIGN:
     case DOC_TYPE_INDENT:
     case DOC_TYPE_INDENT_IF_BREAK:
     case DOC_TYPE_LINE_SUFFIX:
-      if (!doc.contents) {
+      if (!(/** @type {DocWithContents} */ (doc).contents)) {
         return "";
       }
       break;
     case DOC_TYPE_IF_BREAK:
-      if (!doc.flatContents && !doc.breakContents) {
+      if (
+        !(/** @type {IfBreak} */ (doc).flatContents) &&
+        !(/** @type {IfBreak} */ (doc).breakContents)
+      ) {
         return "";
       }
       break;
     case DOC_TYPE_ARRAY: {
       // Flat array, concat strings
+      /** @type {any[]} */
       const parts = [];
-      for (const part of doc) {
+      for (const part of /** @type {readonly Doc[]} */ (doc)) {
         if (!part) {
           continue;
         }
@@ -352,8 +406,8 @@ function cleanDocFn(doc) {
 // - flat arrays except for parts of `fill`
 // - merge arrays of strings into single strings
 // - remove nested `group`s and empty `fill`/`align`/`indent`/`line-suffix`/`if-break` if possible
-function cleanDoc(doc) {
-  return mapDoc(doc, (currentDoc) => cleanDocFn(currentDoc));
+function cleanDoc(/** @type {Doc} */ doc) {
+  return mapDoc(doc, (/** @type {Doc} */ currentDoc) => cleanDocFn(currentDoc));
 }
 
 /**
@@ -362,7 +416,7 @@ function cleanDoc(doc) {
 @returns {Doc}
 */
 function replaceEndOfLine(doc, replacement = literalline) {
-  return mapDoc(doc, (currentDoc) =>
+  return mapDoc(doc, (/** @type {Doc} */ currentDoc) =>
     typeof currentDoc === "string"
       ? join(replacement, currentDoc.split("\n"))
       : currentDoc,
@@ -375,13 +429,16 @@ function replaceEndOfLine(doc, replacement = literalline) {
   }
 }
 
-/** @returns {boolean} */ function canBreak(doc) {
+/** @returns {boolean} */ function canBreak(/** @type {Doc} */ doc) {
   return findInDoc(doc, canBreakFn, false);
 }
 
 function inheritLabel(doc, /** @type {(a0?: any) => any} */ fn) {
   return doc.type === DOC_TYPE_LABEL
-    ? { ...doc, contents: fn(doc.contents) }
+    ? /** @type {Label} */ ({
+        .../** @type {Label} */ (doc),
+        contents: fn(/** @type {Label} */ (doc).contents),
+      })
     : fn(doc);
 }
 

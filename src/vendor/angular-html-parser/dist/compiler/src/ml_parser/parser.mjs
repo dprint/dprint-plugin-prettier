@@ -23,8 +23,8 @@ var TreeError = class TreeError extends ParseError {
 	}
 };
 var ParseTreeResult = class {
-	rootNodes;
-	errors;
+	/** @type {any[]} */ rootNodes;
+	/** @type {any[]} */ errors;
 	constructor(/** @type {any[]} */ rootNodes, /** @type {any[]} */ errors) {
 		this.rootNodes = rootNodes;
 		this.errors = errors;

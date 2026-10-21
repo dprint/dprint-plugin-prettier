@@ -77,6 +77,11 @@ var ExpansionCase = class {
 	}
 	kind = "expansionCase";
 };
+/**
+ * prettier gives attributes their namespace when it parses
+ * @property {string | null} [namespace]
+ * @property {boolean} [hasExplicitNamespace]
+ */
 var Attribute = class extends NodeWithI18n {
 	/** @type {string} */ name;
 	/** @type {string | null} */ value;
@@ -113,9 +118,15 @@ var StartTagComment = class {
 	}
 	kind = "startTagComment";
 };
+/**
+ * prettier gives elements their namespace and the definition of their tag when it parses
+ * @property {string | null} [namespace]
+ * @property {boolean} [hasExplicitNamespace]
+ * @property {import("./html_tags.mjs").HtmlTagDefinition} [tagDefinition]
+ */
 var Element = class extends NodeWithI18n {
 	/** @type {string} */ name;
-	attrs;
+	/** @type {Attribute[]} */ attrs;
 	directives;
 	children;
 	/** @type {boolean} */ isSelfClosing;
@@ -124,7 +135,7 @@ var Element = class extends NodeWithI18n {
 	/** @type {ParseSourceSpan | null} */ nameSpan;
 	/** @type {boolean} */ isVoid;
 	comments;
-	constructor(/** @type {string} */ name, /** @type {any[]} */ attrs, /** @type {any[]} */ directives, /** @type {any[]} */ children, /** @type {boolean} */ isSelfClosing, /** @type {import("../parse_util.mjs").ParseSourceSpan} */ sourceSpan, /** @type {import("../parse_util.mjs").ParseSourceSpan} */ startSourceSpan, endSourceSpan = null, nameSpan = null, /** @type {boolean} */ isVoid, i18n, comments = []) {
+	constructor(/** @type {string} */ name, /** @type {Attribute[]} */ attrs, /** @type {any[]} */ directives, /** @type {any[]} */ children, /** @type {boolean} */ isSelfClosing, /** @type {import("../parse_util.mjs").ParseSourceSpan} */ sourceSpan, /** @type {import("../parse_util.mjs").ParseSourceSpan} */ startSourceSpan, endSourceSpan = null, nameSpan = null, /** @type {boolean} */ isVoid, i18n, comments = []) {
 		super(sourceSpan, i18n);
 		this.name = name;
 		this.attrs = attrs;

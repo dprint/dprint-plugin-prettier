@@ -3,7 +3,28 @@ import coreOptions from "./core-options.evaluate.js";
 
 /**
  * @import {OptionInfo} from "./core-options.evaluate.js"
- * @typedef {{ name: string; pluginDefaults: Array<any> } & OptionInfo} NamedOptionInfo
+ * @typedef {{ name: string; pluginDefaults: Array<any> } & OptionInfo} NamedOptionInfoOfPlugins
+ *
+ * an option with its name, as the core reads it from the options of the plugins and its own
+ * @typedef {{
+ *   name: string,
+ *   pluginDefaults?: any,
+ *   category?: string,
+ *   type?: string,
+ *   array?: boolean,
+ *   default?: any,
+ *   range?: any,
+ *   description?: string,
+ *   oppositeDescription?: string,
+ *   deprecated?: any,
+ *   redirect?: any,
+ *   exception?: any,
+ *   choices?: any[],
+ *   alias?: string,
+ *   cliName?: string,
+ *   cliCategory?: string,
+ *   cliDescription?: string,
+ * }} NamedOptionInfo
  */
 
 /**
@@ -17,6 +38,7 @@ import coreOptions from "./core-options.evaluate.js";
 function getSupportInfo({ plugins = [], showDeprecated = false } = {}) {
   const languages = plugins.flatMap(/** @returns {any[]} */ (plugin) => plugin.languages ?? []);
 
+  /** @type {NamedOptionInfo[]} */
   const options = [];
   for (const option of normalizeOptionSettings(
     Object.assign({}, ...plugins.map(({ options }) => options), coreOptions),
@@ -27,7 +49,7 @@ function getSupportInfo({ plugins = [], showDeprecated = false } = {}) {
 
     if (Array.isArray(option.choices)) {
       if (!showDeprecated) {
-        option.choices = option.choices.filter((choice) => !choice.deprecated);
+        option.choices = option.choices.filter((/** @type {any} */ choice) => !choice.deprecated);
       }
 
       if (option.name === "parser") {
@@ -41,7 +63,7 @@ function getSupportInfo({ plugins = [], showDeprecated = false } = {}) {
     option.pluginDefaults = Object.fromEntries(
       plugins
         .filter(/** @returns {boolean} */ (plugin) => plugin.defaultOptions?.[option.name] !== undefined)
-        .map((plugin) => [plugin.name, plugin.defaultOptions[option.name]]),
+        .map((/** @type {any} */ plugin) => [plugin.name, plugin.defaultOptions[option.name]]),
     );
 
     options.push(option);
@@ -51,6 +73,7 @@ function getSupportInfo({ plugins = [], showDeprecated = false } = {}) {
 }
 
 function* collectParsersFromLanguages(/** @type {any[]} */ parserChoices, /** @type {any[]} */ languages, /** @type {any[]} */ plugins) {
+  /** @type {Set<string>} */
   const existingParsers = new Set(parserChoices.map(/** @returns {string} */ (choice) => choice.value));
 
   for (const language of languages) {
@@ -59,10 +82,11 @@ function* collectParsersFromLanguages(/** @type {any[]} */ parserChoices, /** @t
         if (!existingParsers.has(parserName)) {
           existingParsers.add(parserName);
           const plugin = plugins.find(
-            (plugin) =>
+            /** @returns {boolean} */ (plugin) =>
               plugin.parsers && Object.hasOwn(plugin.parsers, parserName),
           );
 
+          /** @type {string} */
           let description = language.name;
           if (plugin?.name) {
             description += ` (plugin: ${plugin.name})`;
@@ -74,9 +98,11 @@ function* collectParsersFromLanguages(/** @type {any[]} */ parserChoices, /** @t
   }
 }
 
-/** @returns {any[]} */ function normalizeOptionSettings(settings) {
+/** @returns {NamedOptionInfo[]} */ function normalizeOptionSettings(settings) {
+  /** @type {NamedOptionInfo[]} */
   const options = [];
   for (const [name, originalOption] of Object.entries(settings)) {
+    /** @type {NamedOptionInfo} */
     const option = { name, ...originalOption };
 
     // This work this way because we used support `[{value: [], since: '0.0.0'}]`

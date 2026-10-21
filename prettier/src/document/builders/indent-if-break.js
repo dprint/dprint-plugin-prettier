@@ -8,7 +8,7 @@ import { DOC_TYPE_INDENT_IF_BREAK } from "./types.js";
   readonly type: DOC_TYPE_INDENT_IF_BREAK,
   readonly contents: Doc,
   readonly groupId: GroupId,
-  readonly negate: boolean,
+  readonly negate?: boolean,
 }} IndentIfBreak
 @typedef {{groupId: GroupId, negate?: boolean}} IndentIfBreakOptions
 */

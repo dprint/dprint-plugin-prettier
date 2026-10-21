@@ -20,7 +20,7 @@ import { DOC_TYPE_ALIGN } from "./types.js";
 @template {Doc} [D = Doc]
 @param {any} alignType
 @param {any} contents
-@returns {any}
+@returns {Align}
 */
 function align(alignType, contents) {
   assertAlignType(alignType);
@@ -42,7 +42,7 @@ function dedentToRoot(contents) {
 @returns {any}
 */
 function markAsRoot(contents) {
-  return align({ type: "root" }, contents);
+  return align(/** @type {AlignTypeRoot} */ ({ type: "root" }), contents);
 }
 
 /**

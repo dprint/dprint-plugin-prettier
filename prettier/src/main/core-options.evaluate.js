@@ -13,7 +13,7 @@ import {
  * @property {string} category
  * @property {'int' | 'boolean' | 'choice' | 'path' | 'string' | 'flag'} type
  * @property {boolean} [array] - indicate it's an array of the specified type
- * @property {OptionValueInfo} [default]
+ * @property {any} [default]
  * @property {OptionRangeInfo} [range] - for type int
  * @property {string} description
  * @property {string} [deprecated] - deprecated since version
@@ -40,7 +40,7 @@ import {
  * @property {boolean | string} value - boolean for the option that is originally boolean type
  * @property {string} description
  * @property {string} [deprecated] - deprecated since version
- * @property {OptionValueInfo} [redirect] - redirect deprecated value
+ * @property {any} [redirect] - redirect deprecated value
  */
 
 /** @type {{ [name: string]: OptionInfo }} */

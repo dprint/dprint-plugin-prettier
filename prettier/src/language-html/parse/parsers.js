@@ -12,10 +12,11 @@ import { normalizeParseOptions } from "./parse-options.js";
  * @param {any} rawParseOptions
  */
 function createParser(rawParseOptions) {
+  /** @type {import("./ast.js").NormalizedParseOptions} */
   const parseOptions = normalizeParseOptions(rawParseOptions);
   const parser = parseOptions.name === "vue" ? parseVue : parseHtml;
   return {
-    parse: /** @returns {import("./ast.js").Node} */ (/** @type {string | undefined} */ text, options) => parse(text, parser, parseOptions, options),
+    parse: /** @returns {import("./ast.js").Node} */ (/** @type {string | undefined} */ text, /** @type {any} */ options) => parse(text, parser, parseOptions, options),
     hasPragma,
     hasIgnorePragma,
     astFormat: "html",
@@ -32,7 +33,7 @@ const MJML_RAW_TAGS = new Set(["mj-style", "mj-raw"]);
 const mjmlParser = createParser({
   ...HTML_PARSE_OPTIONS,
   name: "mjml",
-  shouldParseAsRawText: (tagName) => MJML_RAW_TAGS.has(tagName),
+  shouldParseAsRawText: (/** @type {string} */ tagName) => MJML_RAW_TAGS.has(tagName),
 });
 
 // Angular

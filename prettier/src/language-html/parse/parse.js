@@ -24,7 +24,7 @@ import { postprocess } from "./postprocess.js";
 
 /**
 @param {string} input
-@param {any} parseOptions
+@param {import("./ast.js").NormalizedParseOptions} parseOptions
 */
 function parseHtml(input, parseOptions) {
   const { rootNodes, errors } = angularHtmlParserParse(
@@ -41,7 +41,7 @@ function parseHtml(input, parseOptions) {
 
 /**
 @param {string} input
-@param {any} parseOptions
+@param {import("./ast.js").NormalizedParseOptions} parseOptions
 */
 function parseVue(input, parseOptions) {
   const angularHtmlParserParseOptions =
@@ -136,12 +136,12 @@ function throwParseError(/** @type {import("../../../../src/vendor/angular-html-
 }
 
 /** @returns {import("./ast.js").Node} */ function parseSubHtml(
-  parser,
+  /** @type {typeof parseHtml | typeof parseVue} */ parser,
   /** @type {string} */ text,
   /** @type {string} */ subContent,
   /** @type {import("../../../../src/vendor/angular-html-parser/dist/compiler/src/parse_util.mjs").ParseLocation} */ startSpan,
-  parseOptions,
-  options,
+  /** @type {import("./ast.js").NormalizedParseOptions} */ parseOptions,
+  /** @type {Options} */ options,
 ) {
   const { offset } = startSpan;
   const textToParse =
@@ -177,7 +177,7 @@ function throwParseError(/** @type {import("../../../../src/vendor/angular-html-
 /**
 @param {string} text
 @param {typeof parseHtml | typeof parseVue} parser
-@param {any} parseOptions
+@param {import("./ast.js").NormalizedParseOptions} parseOptions
 @param {Options} options
 * @returns {import("./ast.js").Node}
 */
@@ -239,7 +239,7 @@ function parse(text, parser, parseOptions, options = {}) {
   return ast;
 }
 
-/** @type {any} */
+/** @type {import("./ast.js").NormalizedParseOptions} */
 const HTML_PARSE_OPTIONS = normalizeParseOptions({
   name: "html",
   normalizeTagName: true,

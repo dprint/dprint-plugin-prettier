@@ -5,6 +5,8 @@ import { ParseSourceSpan } from "angular-html-parser";
 
 /**
 @import {Ast} from "angular-html-parser";
+@typedef {(data: string, startSpan: import("../../../../src/vendor/angular-html-parser/dist/compiler/src/parse_util.mjs").ParseLocation) => import("./ast.js").Node} ParseSubHtml
+@typedef {{kind: string, sourceSpan: any, condition?: string, complete?: boolean, children?: any[], startSourceSpan?: any, endSourceSpan?: any}} IeConditionalComment
 */
 
 const parseFunctions = [
@@ -28,11 +30,12 @@ const parseFunctions = [
 
 /**
 @param {Ast.Comment} node
+@returns {IeConditionalComment | null}
 */
-function parseIeConditionalComment(/** @type {import("./ast.js").Node} */ node, parseHtml) {
+function parseIeConditionalComment(/** @type {import("./ast.js").Node} */ node, /** @type {ParseSubHtml} */ parseHtml) {
   if (node.value) {
     for (const { regex, parse } of parseFunctions) {
-      const match = node.value.match(regex);
+      const match = /** @type {string} */ (node.value).match(regex);
       if (match) {
         return parse(node, match, parseHtml);
       }
@@ -43,6 +46,9 @@ function parseIeConditionalComment(/** @type {import("./ast.js").Node} */ node, 
 
 /**
 @param {import("./ast.js").Node} node
+@param {RegExpMatchArray} match
+@param {ParseSubHtml} parseHtml
+@returns {IeConditionalComment}
 */
 function parseIeConditionalStartEndComment(node, match, parseHtml) {
   const { openingTagSuffix, condition, data } = match.groups;
@@ -77,6 +83,8 @@ function parseIeConditionalStartEndComment(node, match, parseHtml) {
 
 /**
 @param {import("./ast.js").Node} node
+@param {RegExpMatchArray} match
+@returns {IeConditionalComment}
 */
 function parseIeConditionalStartComment(node, match /* , parseHtml */) {
   const { condition } = match.groups;
@@ -87,6 +95,7 @@ function parseIeConditionalStartComment(node, match /* , parseHtml */) {
   };
 }
 
+/** @returns {IeConditionalComment} */
 function parseIeConditionalEndComment(/** @type {import("./ast.js").Node} */ node /* , match, parseHtml */) {
   return {
     kind: "ieConditionalEndComment",

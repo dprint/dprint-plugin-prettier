@@ -35,7 +35,7 @@ const DEFAULT_PARSE_OPTIONS = {
 
 /**
 @param {any} rawParseOptions
-@returns {any}
+@returns {import("./ast.js").NormalizedParseOptions}
 */
 function normalizeParseOptions(rawParseOptions) {
   return {
@@ -45,7 +45,7 @@ function normalizeParseOptions(rawParseOptions) {
 }
 
 /**
-@param {any} parseOptions
+@param {import("./ast.js").NormalizedParseOptions} parseOptions
 @returns {HtmlParseOptions}
 */
 function toAngularHtmlParserParseOptions(parseOptions) {

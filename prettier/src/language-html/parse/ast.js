@@ -16,6 +16,33 @@ const NON_ENUMERABLE_PROPERTIES = new Set(["parent"]);
 /**
  * @typedef {import("../../../../src/vendor/angular-html-parser/dist/compiler/src/parse_util.mjs").ParseSourceSpan} ParseSourceSpan
  * @typedef {import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/html_tags.mjs").HtmlTagDefinition} HtmlTagDefinition
+ * @typedef {import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").BlockParameter} BlockParameter
+ * @typedef {import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").StartTagComment} StartTagComment
+ *
+ * the parameters of an Angular control flow block, which prettier writes out in place of the array of them
+ * @typedef {{kind: string, children: BlockParameter[], sourceSpan: ParseSourceSpan}} AngularControlFlowBlockParameters
+ *
+ * what an Angular let declaration is given, which prettier writes out
+ * @typedef {{kind: string, sourceSpan: ParseSourceSpan, value: string}} AngularLetDeclarationInitializer
+ *
+ * what the printer is given as a node: the nodes, the parameters of Angular blocks with what prettier writes out for
+ * them, the initializers of let declarations and the comments in start tags
+ * @typedef {Node | BlockParameter | StartTagComment | AngularControlFlowBlockParameters | AngularLetDeclarationInitializer} HtmlNode
+ *
+ * the options that a parser of HTML is created with, once the defaults are added
+ * @typedef {{
+ *   name: string,
+ *   canSelfClose?: boolean,
+ *   normalizeTagName?: boolean,
+ *   normalizeAttributeName?: boolean,
+ *   allowHtmComponentClosingTags?: boolean,
+ *   allowStartTagComments?: boolean,
+ *   isTagNameCaseSensitive?: boolean,
+ *   shouldParseFrontMatter?: boolean,
+ *   tokenizeAngularBlocks?: boolean,
+ *   tokenizeAngularLetDeclaration?: boolean,
+ *   shouldParseAsRawText?: any,
+ * }} NormalizedParseOptions
  */
 
 /**

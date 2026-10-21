@@ -34,10 +34,12 @@ import printIgnored from "./print-ignored.js";
 async function printAstToDoc(ast, /** @type {import("../../../prettier/src/main/format-options.js").FormatOptions} */ options) {
   ({ ast } = await prepareToPrint(ast, options));
 
+  /** @type {Map<any, any>} */
   const cache = new Map();
   const path = new AstPath(ast);
 
   const ensurePrintingNode = createPrintPreCheckFunction(options);
+  /** @type {Map<any, any>} */
   const embeds = new Map();
 
   await printEmbeddedLanguages(path, mainPrint, options, printAstToDoc, embeds);
@@ -102,10 +104,11 @@ async function printAstToDoc(ast, /** @type {import("../../../prettier/src/main/
   }
 }
 
-function callPluginPrintFunction(/** @type {AstPath} */ path, /** @type {import("../../../prettier/src/main/format-options.js").FormatOptions} */ options, printPath, args, embeds) {
+function callPluginPrintFunction(/** @type {AstPath} */ path, /** @type {import("../../../prettier/src/main/format-options.js").FormatOptions} */ options, /** @type {(selector?: any, args?: any) => any} */ printPath, args, /** @type {Map<any, any>} */ embeds) {
   const { node } = path;
   const { printer } = options;
 
+  /** @type {any} */
   let doc;
 
   // Escape hatch
@@ -119,13 +122,13 @@ function callPluginPrintFunction(/** @type {AstPath} */ path, /** @type {import(
 
   switch (node) {
     case options.cursorNode:
-      doc = inheritLabel(doc, (doc) => [cursor, doc, cursor]);
+      doc = inheritLabel(doc, (/** @type {any} */ doc) => [cursor, doc, cursor]);
       break;
     case options.nodeBeforeCursor:
-      doc = inheritLabel(doc, (doc) => [doc, cursor]);
+      doc = inheritLabel(doc, (/** @type {any} */ doc) => [doc, cursor]);
       break;
     case options.nodeAfterCursor:
-      doc = inheritLabel(doc, (doc) => [cursor, doc]);
+      doc = inheritLabel(doc, (/** @type {any} */ doc) => [cursor, doc]);
       break;
   }
 
@@ -144,7 +147,7 @@ function callPluginPrintFunction(/** @type {AstPath} */ path, /** @type {import(
   return doc;
 }
 
-async function prepareToPrint(ast, options) {
+async function prepareToPrint(ast, /** @type {import("../../../prettier/src/main/format-options.js").FormatOptions} */ options) {
   const comments = ast.comments ?? [];
   options[commentsPropertyInOptions] = comments;
   // For JS printer to ignore attached comments

@@ -8,7 +8,7 @@ import { DOC_TYPE_IF_BREAK } from "./types.js";
   readonly type: DOC_TYPE_IF_BREAK,
   readonly breakContents: Doc,
   readonly flatContents: Doc,
-  readonly groupId: GroupId,
+  readonly groupId?: GroupId,
 }} IfBreak
 @typedef {{groupId?: GroupId}} IfBreakOptions
 */

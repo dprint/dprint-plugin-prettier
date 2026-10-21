@@ -7,10 +7,10 @@ import parse from "./parse.js";
 
 async function printEmbeddedLanguages(
   /** @type {AstPath} */ path,
-  genericPrint,
+  /** @type {(selector?: any, args?: any) => any} */ genericPrint,
   /** @type {import("../../../prettier/src/main/format-options.js").FormatOptions} */ options,
-  printAstToDoc,
-  embeds,
+  /** @type {(a0?: any, a1?: any) => any} */ printAstToDoc,
+  /** @type {Map<any, any>} */ embeds,
 ) {
   if (options.embeddedLanguageFormatting !== "auto") {
     return;
@@ -32,6 +32,7 @@ async function printEmbeddedLanguages(
   const { hasPrettierIgnore } = printer;
   const { getVisitorKeys } = embed;
 
+  /** @type {{print: any, node: any, pathStack: any[]}[]} */
   const embedCallResults = [];
 
   recurse();
@@ -56,7 +57,7 @@ async function printEmbeddedLanguages(
 
   path.stack = originalPathStack;
 
-  function textToDocForEmbed(/** @type {string} */ text, partialNextOptions) {
+  function textToDocForEmbed(/** @type {string} */ text, /** @type {any} */ partialNextOptions) {
     return textToDoc(text, partialNextOptions, options, printAstToDoc);
   }
 
@@ -108,8 +109,8 @@ async function printEmbeddedLanguages(
 
 async function textToDoc(
   /** @type {string} */ text,
-  partialNextOptions,
-  parentOptions,
+  /** @type {any} */ partialNextOptions,
+  /** @type {any} */ parentOptions,
   /** @type {(a0?: any, a1?: any) => any} */ printAstToDoc,
 ) {
   const options = await normalizeFormatOptions(
