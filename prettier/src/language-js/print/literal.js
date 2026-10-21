@@ -9,7 +9,7 @@ import printString from "../../utilities/print-string.js";
 @import {Node} from "../types/estree.js";
 */
 
-function printLiteral(/** @type {AstPath} */ path, options /* , print*/) {
+function printLiteral(/** @type {AstPath} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options /* , print*/) {
   /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
 
   switch (node.type) {
@@ -68,7 +68,7 @@ function printLiteral(/** @type {AstPath} */ path, options /* , print*/) {
   return raw.toLowerCase();
 }
 
-/** @returns {string} */ function printRegex({ pattern, flags }) {
+/** @returns {string} */ function printRegex(/** @type {{ pattern: string, flags: string }} */ { pattern, flags }) {
   flags = [...flags].sort().join("");
   return `/${pattern}/${flags}`;
 }

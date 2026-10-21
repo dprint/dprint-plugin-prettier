@@ -105,7 +105,7 @@ function printCallExpression(/** @type {AstPath} */ path, /** @type {import("../
   return contents;
 }
 
-function printCallee(/** @type {AstPath} */ path, /** @type {(a0?: any) => any} */ print) {
+function printCallee(/** @type {AstPath} */ path, /** @type {import("../print-options.js").JsPrint} */ print) {
   /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
 
   if (node.type === "ImportExpression") {

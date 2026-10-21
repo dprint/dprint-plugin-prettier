@@ -31,13 +31,18 @@ const CommentCheckFlags = {
   Last: 1 << 8,
 };
 
+/**
+ * @param {number | ((comment: Comment) => boolean) | undefined} flags
+ * @param {((comment: Comment) => boolean) | undefined} fn
+ * @returns {((comment: Comment, index: number, comments: Comment[]) => boolean) | undefined}
+ */
 const getCommentTestFunction = (flags, fn) => {
   if (typeof flags === "function") {
     fn = flags;
     flags = 0;
   }
   if (flags || fn) {
-    return /** @returns {boolean} */ (/** @type {import("../types/estree.js").Comment} */ comment, /** @type {number} */ index, /** @type {any[]} */ comments) =>
+    return /** @returns {boolean} */ (/** @type {import("../types/estree.js").Comment} */ comment, /** @type {number} */ index, /** @type {Comment[]} */ comments) =>
       !(
         (flags & CommentCheckFlags.Leading && !comment.leading) ||
         (flags & CommentCheckFlags.Trailing && !comment.trailing) ||
@@ -64,7 +69,7 @@ function hasComment(node, flags, fn) {
     return false;
   }
   const test = getCommentTestFunction(flags, fn);
-  return test ? node.comments.some(test) : true;
+  return test ? /** @type {Comment[]} */ (node.comments).some(test) : true;
 }
 
 /**
@@ -78,7 +83,9 @@ function getComments(node, flags, fn) {
     return [];
   }
   const test = getCommentTestFunction(flags, fn);
-  return test ? node.comments.filter(test) : node.comments;
+  return test
+    ? /** @type {Comment[]} */ (node.comments).filter(test)
+    : /** @type {Comment[]} */ (node.comments);
 }
 
 export { CommentCheckFlags, getComments, hasComment };

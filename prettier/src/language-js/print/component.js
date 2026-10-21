@@ -13,7 +13,7 @@ import { printDeclareToken, printSemicolon } from "./miscellaneous.js";
 - `DeclareComponent` (Flow)
 - `ComponentTypeAnnotation` (Flow)
 */
-function printComponent(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
+function printComponent(/** @type {AstPath} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
 
   const parts = [
@@ -48,7 +48,7 @@ function printComponent(/** @type {AstPath} */ path, options, /** @type {import(
 /*
 - `ComponentParameter` (Flow)
 */
-function printComponentParameter(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
+function printComponentParameter(/** @type {AstPath} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   if (node.shorthand) {
     return print("local");
@@ -57,7 +57,7 @@ function printComponentParameter(/** @type {AstPath} */ path, options, /** @type
   return [print("name"), " as ", print("local")];
 }
 
-function printComponentTypeParameter(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
+function printComponentTypeParameter(/** @type {AstPath} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
 
   const printed = [];

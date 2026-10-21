@@ -3,7 +3,7 @@ import { printKey } from "./key.js";
 import { printDeclareToken } from "./miscellaneous.js";
 import { printObject } from "./object.js";
 
-function printFlowEnumBody(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
+function printFlowEnumBody(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   return [
     node.explicitType ? `of ${node.explicitType} ` : "",
@@ -11,7 +11,7 @@ function printFlowEnumBody(/** @type {import("../../../../prettier/src/common/as
   ];
 }
 
-function printLegacyFlowEnumBody(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
+function printLegacyFlowEnumBody(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   return [
     node.type === "EnumSymbolBody" || node.explicitType
@@ -36,7 +36,7 @@ function printLegacyFlowEnumBody(/** @type {import("../../../../prettier/src/com
 - `EnumDefaultedMember`(flow)
 - `TSEnumMember`(TypeScript)
 */
-function printEnumMember(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
+function printEnumMember(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   const isTsEnumMember = node.type === "TSEnumMember";
 

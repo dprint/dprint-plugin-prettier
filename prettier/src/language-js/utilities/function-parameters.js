@@ -2,7 +2,9 @@ import { getOrInsertComputed } from "../../utilities/get-or-insert.js";
 
 /** @import AstPath from "../../common/ast-path.js" */
 
+/** @returns {import("../types/estree.js").Node[]} */
 function getFunctionParametersWithoutCache(/** @type {import("../types/estree.js").Node} */ node) {
+  /** @type {import("../types/estree.js").Node[]} */
   const parameters = [];
   if (node.this) {
     parameters.push(node.this);
@@ -17,7 +19,7 @@ function getFunctionParametersWithoutCache(/** @type {import("../types/estree.js
 }
 
 const functionParametersCache = new WeakMap();
-/** @returns {any[]} */ function getFunctionParameters(/** @type {import("../types/estree.js").Node} */ node) {
+/** @returns {import("../types/estree.js").Node[]} */ function getFunctionParameters(/** @type {import("../types/estree.js").Node} */ node) {
   return getOrInsertComputed(
     functionParametersCache,
     node,
@@ -25,7 +27,7 @@ const functionParametersCache = new WeakMap();
   );
 }
 
-function iterateFunctionParametersPath(/** @type {AstPath} */ path, /** @type {(a0?: any, a1?: any) => void} */ iteratee) {
+function iterateFunctionParametersPath(/** @type {AstPath} */ path, /** @type {(path: AstPath, index: number) => void} */ iteratee) {
   /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   let index = 0;
   const callback = () => iteratee(path, index++);

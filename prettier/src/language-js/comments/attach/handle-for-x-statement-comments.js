@@ -3,7 +3,7 @@ import { addLeadingComment } from "../../../main/comments/utilities.js";
 import { locStart } from "../../location/index.js";
 import { stripComments } from "../../utilities/strip-comments.js";
 
-/** @returns {boolean} */ function handleForXStatementComments({
+/** @returns {boolean} */ function handleForXStatementComments(/** @type {import("../handle-comments.js").CommentContext} */ {
   comment,
   enclosingNode,
   followingNode,

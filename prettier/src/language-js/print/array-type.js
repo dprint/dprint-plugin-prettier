@@ -2,7 +2,7 @@
 - `TSArrayType`
 - `ArrayTypeAnnotation`
 */
-/** @returns {any[]} */ function printArrayType(/** @type {(a0?: any) => any} */ print) {
+/** @returns {any[]} */ function printArrayType(/** @type {import("../print-options.js").JsPrint} */ print) {
   return [print("elementType"), "[]"];
 }
 

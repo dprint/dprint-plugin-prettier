@@ -38,7 +38,7 @@ import { stripChainElementWrappers } from "../utilities/strip-chain-element-wrap
 - `TemplateLiteral`
 - `TSTemplateLiteralType` (TypeScript)
 */
-function printTemplateLiteral(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
+function printTemplateLiteral(/** @type {AstPath} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   if (isJestEachTemplateLiteral(path)) {
     const printed = printJestEachTemplateLiteral(path, options, print);
     if (printed) {
@@ -88,7 +88,7 @@ function printTaggedTemplateExpression(/** @type {AstPath} */ path, /** @type {i
   ]);
 }
 
-/** @returns {any[] | undefined} */ function printJestEachTemplateLiteral(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
+/** @returns {any[] | undefined} */ function printJestEachTemplateLiteral(/** @type {AstPath} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   /**
    * a    | b    | expected
    * ${1} | ${1} | ${2}
@@ -96,10 +96,10 @@ function printTaggedTemplateExpression(/** @type {AstPath} */ path, /** @type {i
    * ${2} | ${1} | ${3}
    */
   /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
-  const headerNames = node.quasis[0].value.raw.trim().split(/\s*\|\s*/);
+  /** @type {string[]} */ const headerNames = /** @type {string} */ (node.quasis[0].value.raw).trim().split(/\s*\|\s*/);
   if (
     headerNames.length > 1 ||
-    headerNames.some((headerName) => headerName.length > 0)
+    headerNames.some((/** @type {string} */ headerName) => headerName.length > 0)
   ) {
     options.__inJestEach = true;
     const expressions = printTemplateExpressions(path, options, print);
@@ -123,7 +123,7 @@ function printTaggedTemplateExpression(/** @type {AstPath} */ path, /** @type {i
         row.hasLineBreak = true;
       }
 
-      if (node.quasis[i].value.raw.includes("\n")) {
+      if (/** @type {string} */ (node.quasis[i].value.raw).includes("\n")) {
         tableBody.push({ hasLineBreak: false, cells: [] });
       }
     }
@@ -178,16 +178,18 @@ function printTaggedTemplateExpression(/** @type {AstPath} */ path, /** @type {i
 }
 
 const templateLiteralIndentCache = new WeakMap();
+/** @returns {{ indentSize: number, previousQuasiText: string }} */
 function getTemplateLiteralExpressionIndent(/** @type {AstPath} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options) {
-  /** @type {{ parent: import("../types/estree.js").Node, index: any }} */ const { parent: templateLiteral, index } = path;
+  /** @type {{ parent: import("../types/estree.js").Node, index: number | null }} */ const { parent: templateLiteral, index } = path;
+  /** @type {{ indentSize: number, previousQuasiText: string }[]} */
   const sizes = getOrInsertComputed(
     templateLiteralIndentCache,
     templateLiteral,
-    (templateLiteral) => {
+    (/** @type {import("../types/estree.js").Node} */ templateLiteral) => {
       const { tabWidth } = options;
       /** @type {number} */ let previousQuasiIndentSize = 0;
-      const sizes = templateLiteral.quasis.map((quasi) => {
-        const text = quasi.value.raw;
+      const sizes = /** @type {import("../types/estree.js").Node[]} */ (templateLiteral.quasis).map(/** @returns {{ indentSize: number, previousQuasiText: string }} */ (/** @type {import("../types/estree.js").Node} */ quasi) => {
+        /** @type {string} */ const text = quasi.value.raw;
         /** @type {number} */ const indentSize = text.includes("\n")
           ? getIndentSize(text, tabWidth)
           : previousQuasiIndentSize;
@@ -209,13 +211,14 @@ function printTemplateExpression(
   /** @type {AstPath} */ path,
   /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options,
   /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print,
-  shouldPreserveIndentation = true,
+  /** @type {boolean} */ shouldPreserveIndentation = true,
 ) {
-  /** @type {{ node: import("../types/estree.js").Node, index: any }} */ const { node, index } = path;
+  /** @type {{ node: import("../types/estree.js").Node, index: number | null }} */ const { node, index } = path;
+  /** @type {Doc} */
   let expressionDoc = print();
 
   /** @type {import("../types/estree.js").Node} */ const templateLiteral = path.parent;
-  const { quasis } = templateLiteral;
+  /** @type {{ quasis: import("../types/estree.js").Node[] }} */ const { quasis } = templateLiteral;
   const start = locEnd(quasis[index]);
   const end = locStart(quasis[index + 1]);
 
@@ -288,14 +291,14 @@ function printTemplateExpression(
   return group(["${", expressionDoc, lineSuffixBoundary, "}"]);
 }
 
-function printTemplateExpressions(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
+function printTemplateExpressions(/** @type {AstPath} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   return path.map(
     () => printTemplateExpression(path, options, print),
     path.node.type === "TSTemplateLiteralType" ? "types" : "expressions",
   );
 }
 
-function printEmbeddedTemplateExpressions(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
+function printEmbeddedTemplateExpressions(/** @type {AstPath} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   return path.map(
     () =>
       printTemplateExpression(
@@ -309,7 +312,7 @@ function printEmbeddedTemplateExpressions(/** @type {AstPath} */ path, options, 
 }
 
 /** @returns {any[]} */ function escapeTemplateCharacters(/** @type {any[]} */ doc, /** @type {boolean} */ raw) {
-  return mapDoc(doc, (currentDoc) => {
+  return mapDoc(doc, (/** @type {Doc} */ currentDoc) => {
     if (typeof currentDoc === "string") {
       return raw
         ? currentDoc.replaceAll(/(\\*)`/g, "$1$1\\`")
@@ -335,7 +338,7 @@ function printEmbeddedTemplateExpressions(/** @type {AstPath} */ path, options, 
  * Ref: https://github.com/facebook/jest/pull/6102
  */
 const jestEachTriggerRegex = /^[fx]?(?:describe|it|test)$/;
-/** @returns {boolean} */ function isJestEachTemplateLiteral(/** @type {AstPath} */ { node, parent }) {
+/** @returns {boolean} */ function isJestEachTemplateLiteral(/** @type {AstPath & { node: import("../types/estree.js").Node, parent: import("../types/estree.js").Node }} */ { node, parent }) {
   return (
     node.type === "TemplateLiteral" &&
     parent.type === "TaggedTemplateExpression" &&

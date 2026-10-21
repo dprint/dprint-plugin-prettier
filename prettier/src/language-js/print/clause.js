@@ -25,7 +25,7 @@ import {
   );
 }
 
-function printClause(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print, property = "body") {
+function printClause(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print, property = "body") {
   return path.call(({ node }) => {
     const doc = print();
 
@@ -52,9 +52,9 @@ function printClause(/** @type {import("../../../../prettier/src/common/ast-path
   }, property);
 }
 
-const printIfStatementConsequent = (/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) =>
+const printIfStatementConsequent = (/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) =>
   printClause(path, options, print, "consequent");
-const printIfStatementAlternate = (/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) =>
+const printIfStatementAlternate = (/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) =>
   printClause(path, options, print, "alternate");
 
 export {

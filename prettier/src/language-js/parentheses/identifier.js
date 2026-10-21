@@ -36,7 +36,7 @@ import { startsWithNoLookaheadToken } from "../utilities/starts-with-no-lookahea
   // `for ((let.a) in []);`
   if (node.name === "let") {
     const expression = path.findAncestor(
-      (node) =>
+      (/** @type {import("../types/estree.js").Node} */ node) =>
         node.type === "ForOfStatement" || node.type === "ForInStatement",
     )?.left;
     if (
@@ -58,8 +58,8 @@ import { startsWithNoLookaheadToken } from "../utilities/starts-with-no-lookahea
     parent.computed &&
     !parent.optional
   ) {
-    const statement = path.findAncestor(
-      (node) =>
+    /** @type {import("../types/estree.js").Node | undefined} */ const statement = path.findAncestor(
+      (/** @type {import("../types/estree.js").Node} */ node) =>
         node.type === "ExpressionStatement" ||
         node.type === "ForStatement" ||
         node.type === "ForInStatement",
@@ -95,7 +95,7 @@ import { startsWithNoLookaheadToken } from "../utilities/starts-with-no-lookahea
       case "hook":
       case "type": {
         const ancestorNeitherAsNorSatisfies = path.findAncestor(
-          /** @returns {boolean} */ (node) => !isBinaryCastExpression(node),
+          /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node) => !isBinaryCastExpression(node),
         );
         if (
           ancestorNeitherAsNorSatisfies !== parent &&

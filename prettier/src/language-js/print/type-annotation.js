@@ -30,7 +30,7 @@ Token *before* `(TS)TypeAnnotation.typeAnnotation` should be printed in `getType
 const typeAnnotationNodesCheckedLeadingComments = new WeakSet();
 function printTypeAnnotationProperty(
   /** @type {AstPath} */ path,
-  /** @type {(a0?: any) => any} */ print,
+  /** @type {import("../print-options.js").JsPrint} */ print,
   propertyName = "typeAnnotation",
 ) {
   /** @type {{ node: import("../types/estree.js").Node }} */ const {
@@ -69,8 +69,8 @@ const getTypeAnnotationFirstToken = /** @returns {string} */ (/** @type {AstPath
   if (
     // TypeScript
     path.match(
-      /** @returns {boolean} */ (node) => node.type === "TSTypeAnnotation",
-      /** @returns {boolean} */ (node, key) =>
+      /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node) => node.type === "TSTypeAnnotation",
+      /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node, key) =>
         (key === "returnType" || key === "typeAnnotation") &&
         (node.type === "TSFunctionType" || node.type === "TSConstructorType"),
     )
@@ -81,8 +81,8 @@ const getTypeAnnotationFirstToken = /** @returns {string} */ (/** @type {AstPath
   if (
     // TypeScript
     path.match(
-      /** @returns {boolean} */ (node) => node.type === "TSTypeAnnotation",
-      /** @returns {boolean} */ (node, key) =>
+      /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node) => node.type === "TSTypeAnnotation",
+      /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node, key) =>
         key === "typeAnnotation" &&
         (node.type === "TSJSDocNullableType" ||
           node.type === "TSJSDocNonNullableType" ||
@@ -97,9 +97,9 @@ const getTypeAnnotationFirstToken = /** @returns {string} */ (/** @type {AstPath
     ```
     */
     path.match(
-      /** @returns {boolean} */ (node) => node.type === "TypeAnnotation",
-      /** @returns {boolean} */ (node, key) => key === "typeAnnotation" && node.type === "Identifier",
-      /** @returns {boolean} */ (node, key) => key === "id" && node.type === "DeclareFunction",
+      /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node) => node.type === "TypeAnnotation",
+      /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node, key) => key === "typeAnnotation" && node.type === "Identifier",
+      /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node, key) => key === "id" && node.type === "DeclareFunction",
     ) ||
     /*
     Flow
@@ -109,9 +109,9 @@ const getTypeAnnotationFirstToken = /** @returns {string} */ (/** @type {AstPath
     ```
     */
     path.match(
-      /** @returns {boolean} */ (node) => node.type === "TypeAnnotation",
-      /** @returns {boolean} */ (node, key) => key === "typeAnnotation" && node.type === "Identifier",
-      /** @returns {boolean} */ (node, key) => key === "id" && node.type === "DeclareHook",
+      /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node) => node.type === "TypeAnnotation",
+      /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node, key) => key === "typeAnnotation" && node.type === "Identifier",
+      /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node, key) => key === "id" && node.type === "DeclareHook",
     ) ||
     /*
     Flow
@@ -122,8 +122,8 @@ const getTypeAnnotationFirstToken = /** @returns {string} */ (/** @type {AstPath
     ```
     */
     path.match(
-      /** @returns {boolean} */ (node) => node.type === "TypeAnnotation",
-      /** @returns {boolean | undefined} */ (node, key) =>
+      /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node) => node.type === "TypeAnnotation",
+      /** @returns {boolean | undefined} */ (/** @type {import("../types/estree.js").Node} */ node, key) =>
         key === "bound" &&
         node.type === "TypeParameter" &&
         node.usesExtendsBound,
@@ -139,7 +139,7 @@ const getTypeAnnotationFirstToken = /** @returns {string} */ (/** @type {AstPath
 - `TSTypeAnnotation` (TypeScript)
 - `TypeAnnotation` (Flow)
 */
-function printTypeAnnotation(/** @type {AstPath} */ path, options, /** @type {(a0?: any) => any} */ print) {
+function printTypeAnnotation(/** @type {AstPath} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../print-options.js").JsPrint} */ print) {
   // We need print space before leading comments,
   // `printTypeAnnotationProperty` is responsible for it.
   /* c8 ignore start */

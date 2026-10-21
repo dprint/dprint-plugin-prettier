@@ -21,6 +21,9 @@ import { stripChainElementWrappers } from "../utilities/strip-chain-element-wrap
 
 /**
 @param {AstPath} path
+@param {import("../print-options.js").JsPrintOptions} options
+@param {(path: AstPath, options: import("../print-options.js").JsPrintOptions) => boolean} needsParentheses
+@returns {boolean | undefined}
 */
 function parentNeedsParentheses(path, options, needsParentheses) {
   /** @type {{ node: import("../types/estree.js").Node, key: any, parent: import("../types/estree.js").Node }} */ const { node, key, parent } = path;
@@ -86,7 +89,7 @@ function parentNeedsParentheses(path, options, needsParentheses) {
         path.match(
           undefined,
           undefined,
-          (node, key) =>
+          (/** @type {import("../types/estree.js").Node} */ node, key) =>
             key === "returnType" && node.type === "ArrowFunctionExpression",
         ) &&
         !(
@@ -108,9 +111,9 @@ function parentNeedsParentheses(path, options, needsParentheses) {
         path.match(
           undefined,
           undefined,
-          /** @returns {boolean} */ (node, key) =>
+          /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node, key) =>
             key === "declarations" && node.type === "VariableDeclaration",
-          /** @returns {boolean} */ (node, key) => key === "left" && node.type === "ForInStatement",
+          /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node, key) => key === "left" && node.type === "ForInStatement",
         )
       ) {
         return true;
@@ -129,7 +132,7 @@ function parentNeedsParentheses(path, options, needsParentheses) {
   }
 }
 
-/** @returns {boolean} */ function willReturnOrThrowStatementBreak(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, options) {
+/** @returns {boolean} */ function willReturnOrThrowStatementBreak(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options) {
   /** @type {{ key: any, parent: import("../types/estree.js").Node }} */ const { key, parent } = path;
   if (!(key === "argument" && isReturnOrThrowStatement(parent))) {
     return false;
@@ -156,6 +159,8 @@ function parentNeedsParentheses(path, options, needsParentheses) {
 
 /**
  * @param {AstPath} path
+ * @param {import("../print-options.js").JsPrintOptions} options
+ * @param {(path: AstPath, options: import("../print-options.js").JsPrintOptions) => boolean} needsParentheses
  * @returns {boolean}
  */
 function shouldWrapFunctionForExportDefault(path, options, needsParentheses) {

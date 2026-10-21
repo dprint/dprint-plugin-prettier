@@ -48,7 +48,7 @@ function shouldPrintSemicolon(/** @type {AstPath} */ path, /** @type {import("..
   return true;
 }
 
-/** @returns {any[]} */ function printExpressionStatement(/** @type {AstPath} */ path, options, /** @type {(a0?: any) => any} */ print) {
+/** @returns {any[]} */ function printExpressionStatement(/** @type {AstPath} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../print-options.js").JsPrint} */ print) {
   /** @type {Doc[]} */
   const parts = [print("expression")];
 

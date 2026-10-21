@@ -44,7 +44,7 @@ import { stripChainElementWrappers } from "../utilities/strip-chain-element-wrap
 @import {Doc} from "../../document/index.js";
 */
 
-const isEmptyStringOrAnyLine = /** @returns {boolean} */ (doc) =>
+const isEmptyStringOrAnyLine = /** @returns {boolean} */ (/** @type {Doc} */ doc) =>
   doc === "" || doc === line || doc === hardline || doc === softline;
 
 // JSX expands children from the inside-out, instead of the outside-in.
@@ -90,7 +90,7 @@ function printJsxElementInternal(/** @type {AstPath} */ path, /** @type {import(
   // Convert `{" "}` to text nodes containing a space.
   // This makes it easy to turn them into `jsxWhitespace` which
   // can then print as either a space or `{" "}` when breaking.
-  node.children = node.children.map((child) => {
+  node.children = /** @type {import("../types/estree.js").Node[]} */ (node.children).map((/** @type {import("../types/estree.js").Node} */ child) => {
     if (isJsxWhitespaceExpression(child)) {
       return {
         type: "JSXText",
@@ -101,9 +101,9 @@ function printJsxElementInternal(/** @type {AstPath} */ path, /** @type {import(
     return child;
   });
 
-  const containsTag = node.children.some(isJsxElement);
+  const containsTag = /** @type {import("../types/estree.js").Node[]} */ (node.children).some(isJsxElement);
   /** @type {boolean} */ const containsMultipleExpressions =
-    node.children.filter(/** @returns {boolean} */ (child) => child.type === "JSXExpressionContainer")
+    /** @type {import("../types/estree.js").Node[]} */ (node.children).filter(/** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ child) => child.type === "JSXExpressionContainer")
       .length > 1;
   /** @type {boolean} */ const containsMultipleAttributes =
     node.type === "JSXElement" && node.openingElement.attributes.length > 1;
@@ -132,7 +132,7 @@ function printJsxElementInternal(/** @type {AstPath} */ path, /** @type {import(
     isFacebookTranslationTag,
   );
 
-  const containsText = node.children.some(/** @returns {boolean} */ (child) =>
+  const containsText = /** @type {import("../types/estree.js").Node[]} */ (node.children).some(/** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ child) =>
     isMeaningfulJsxText(child),
   );
 
@@ -264,17 +264,17 @@ function printJsxElementInternal(/** @type {AstPath} */ path, /** @type {import(
   */
   if (
     options.cursorNode?.type === "JSXText" &&
-    node.children.includes(options.cursorNode)
+    /** @type {import("../types/estree.js").Node[]} */ (node.children).includes(options.cursorNode)
   ) {
     content = [cursor, content, cursor];
   } else if (
     options.nodeBeforeCursor?.type === "JSXText" &&
-    node.children.includes(options.nodeBeforeCursor)
+    /** @type {import("../types/estree.js").Node[]} */ (node.children).includes(options.nodeBeforeCursor)
   ) {
     content = [cursor, content];
   } else if (
     options.nodeAfterCursor?.type === "JSXText" &&
-    node.children.includes(options.nodeAfterCursor)
+    /** @type {import("../types/estree.js").Node[]} */ (node.children).includes(options.nodeAfterCursor)
   ) {
     content = [content, cursor];
   }
@@ -490,7 +490,7 @@ const isNoWrapParent = createTypeCheckFunction([
   "JsExpressionRoot",
   "MatchExpressionCase",
 ]);
-function maybeWrapJsxElementInParens(/** @type {AstPath} */ path, elem, options) {
+function maybeWrapJsxElementInParens(/** @type {AstPath} */ path, /** @type {Doc} */ elem, /** @type {import("../print-options.js").JsPrintOptions} */ options) {
   /** @type {{ parent: import("../types/estree.js").Node }} */ const { parent } = path;
 
   if (isNoWrapParent(parent)) {
@@ -515,15 +515,15 @@ function maybeWrapJsxElementInParens(/** @type {AstPath} */ path, elem, options)
   return (
     path.match(
       undefined,
-      /** @returns {boolean} */ (node, key) => key === "body" && node.type === "ArrowFunctionExpression",
-      /** @returns {boolean} */ (node, key) => key === "arguments" && isCallExpression(node),
+      /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node, key) => key === "body" && node.type === "ArrowFunctionExpression",
+      /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node, key) => key === "arguments" && isCallExpression(node),
     ) &&
     // Babel
     (path.match(
       undefined,
       undefined,
       undefined,
-      /** @returns {boolean} */ (node, key) =>
+      /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node, key) =>
         key === "expression" && node.type === "JSXExpressionContainer",
     ) ||
       // Estree
@@ -531,19 +531,19 @@ function maybeWrapJsxElementInParens(/** @type {AstPath} */ path, elem, options)
         undefined,
         undefined,
         undefined,
-        /** @returns {boolean} */ (node, key) => key === "expression" && node.type === "ChainExpression",
-        (node, key) =>
+        /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node, key) => key === "expression" && node.type === "ChainExpression",
+        (/** @type {import("../types/estree.js").Node} */ node, key) =>
           key === "expression" && node.type === "JSXExpressionContainer",
       ))
   );
 }
 
-/** @returns {any[]} */ function printJsxAttribute(/** @type {AstPath} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options, /** @type {(a0?: any) => any} */ print) {
+/** @returns {any[]} */ function printJsxAttribute(/** @type {AstPath} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options, /** @type {import("../print-options.js").JsPrint} */ print) {
   /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   const parts = [print("name")];
 
   if (node.value) {
-    let res;
+    /** @type {Doc} */ let res;
     if (isStringLiteral(node.value)) {
       const raw = getRaw(node.value);
       // Remove enclosing quotes and unescape
@@ -571,7 +571,7 @@ function maybeWrapJsxElementInParens(/** @type {AstPath} */ path, elem, options)
   return parts;
 }
 
-function printJsxExpressionContainer(/** @type {AstPath} */ path, options, /** @type {(a0?: any) => any} */ print) {
+function printJsxExpressionContainer(/** @type {AstPath} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../print-options.js").JsPrint} */ print) {
   /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
 
   const shouldInline = /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node, /** @type {import("../types/estree.js").Node} */ parent) =>
@@ -619,7 +619,7 @@ function printJsxOpeningElement(/** @type {AstPath} */ path, /** @type {import("
   if (
     node.attributes?.length === 1 &&
     isStringLiteral(node.attributes[0].value) &&
-    !node.attributes[0].value.value.includes("\n") &&
+    !/** @type {string} */ (node.attributes[0].value.value).includes("\n") &&
     // We should break for the following cases:
     // <div
     //   // comment
@@ -644,8 +644,8 @@ function printJsxOpeningElement(/** @type {AstPath} */ path, /** @type {import("
 
   // We should print the opening element expanded if any prop value is a
   // string literal with newlines
-  const shouldBreak = node.attributes?.some(
-    /** @returns {boolean} */ (attr) => isStringLiteral(attr.value) && attr.value.value.includes("\n"),
+  const shouldBreak = /** @type {import("../types/estree.js").Node[]} */ (node.attributes)?.some(
+    /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ attr) => isStringLiteral(attr.value) && /** @type {string} */ (attr.value.value).includes("\n"),
   );
 
   const attributeLine =
@@ -677,7 +677,7 @@ function printJsxOpeningElement(/** @type {AstPath} */ path, /** @type {import("
   );
 }
 
-/** @returns {any[]} */ function printEndOfOpeningTag(/** @type {import("../types/estree.js").Node} */ node, options, /** @type {boolean} */ nameHasComments) {
+/** @returns {any[]} */ function printEndOfOpeningTag(/** @type {import("../types/estree.js").Node} */ node, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {boolean} */ nameHasComments) {
   if (node.selfClosing) {
     return [line, "/>"];
   }
@@ -695,7 +695,7 @@ function printJsxOpeningElement(/** @type {AstPath} */ path, /** @type {import("
 /** @returns {boolean | undefined} */ function shouldPrintBracketSameLine(/** @type {import("../types/estree.js").Node} */ node, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options, /** @type {boolean} */ nameHasComments) {
   /** @type {boolean} */ const lastAttrHasTrailingComments =
     node.attributes.length > 0 &&
-    hasComment(node.attributes.at(-1), CommentCheckFlags.Trailing);
+    hasComment(/** @type {import("../types/estree.js").Node[]} */ (node.attributes).at(-1), CommentCheckFlags.Trailing);
   return (
     // Simple tags (no attributes and no comment in tag name) should be
     // kept unbroken regardless of `bracketSameLine`.
@@ -715,7 +715,7 @@ function printJsxOpeningElement(/** @type {AstPath} */ path, /** @type {import("
   );
 }
 
-/** @returns {any[]} */ function printJsxClosingElement(/** @type {AstPath} */ path, options, /** @type {(a0?: any) => any} */ print) {
+/** @returns {any[]} */ function printJsxClosingElement(/** @type {AstPath} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../print-options.js").JsPrint} */ print) {
   /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   /** @type {Doc[]} */
   const parts = ["</"];
@@ -758,7 +758,7 @@ function printJsxOpeningClosingFragment(/** @type {AstPath} */ path, options /* 
   ];
 }
 
-function printJsxElement(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
+function printJsxElement(/** @type {AstPath} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   const elem = printComments(
     path,
     printJsxElementInternal(path, options, print),
@@ -778,7 +778,7 @@ function printJsxEmptyExpression(/** @type {AstPath} */ path, options /* , print
 }
 
 // `JSXSpreadAttribute` and `JSXSpreadChild`
-/** @returns {any[]} */ function printJsxSpreadAttributeOrChild(/** @type {AstPath} */ path, options, /** @type {() => any} */ print) {
+/** @returns {any[]} */ function printJsxSpreadAttributeOrChild(/** @type {AstPath} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../print-options.js").JsPrint} */ print) {
   /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   return [
     "{",
@@ -799,7 +799,7 @@ function printJsxEmptyExpression(/** @type {AstPath} */ path, options /* , print
   ];
 }
 
-function printJsx(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
+function printJsx(/** @type {AstPath} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
 
   // JSX nodes always starts with `JSX`

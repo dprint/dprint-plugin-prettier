@@ -53,7 +53,7 @@ function printDefiniteToken(path) {
   return path.node.definite ||
     path.match(
       undefined,
-      /** @returns {boolean | undefined} */ (node, name) =>
+      /** @returns {boolean | undefined} */ (/** @type {import("../types/estree.js").Node} */ node, name) =>
         name === "id" && node.type === "VariableDeclarator" && node.definite,
     )
     ? "!"
@@ -156,7 +156,7 @@ const isLogicalNot = /** @returns {boolean} */ (/** @type {import("../types/estr
   return node.type === "LogicalExpression";
 }
 
-function printIfOrWhileConditionOrWithStatementObject(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
+function printIfOrWhileConditionOrWithStatementObject(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   const property = node.type === "WithStatement" ? "object" : "test";
   const conditionDoc = print(property);
@@ -172,7 +172,7 @@ function printIfOrWhileConditionOrWithStatementObject(/** @type {import("../../.
 @param {(comment: Comment) => boolean} [filter]
 @returns {Doc}
 */
-function printDanglingCommentsInList(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, options, filter) {
+function printDanglingCommentsInList(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, filter) {
   /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
 
   return hasComment(node, CommentCheckFlags.Dangling, filter)

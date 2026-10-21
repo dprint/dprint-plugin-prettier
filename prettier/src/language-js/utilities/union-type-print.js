@@ -27,17 +27,17 @@ const isObjectLikeType = createTypeCheckFunction([
 }
 
 /** @returns {boolean} */ function shouldHugUnionType(/** @type {import("../types/estree.js").Node} */ node) {
-  const { types } = node;
-  if (types.some(/** @returns {boolean} */ (node) => hasComment(node))) {
+  /** @type {{ types: import("../types/estree.js").Node[] }} */ const { types } = node;
+  if (types.some(/** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node) => hasComment(node))) {
     return false;
   }
 
-  const objectType = types.find(/** @returns {boolean} */ (node) => isObjectLikeType(node));
+  const objectType = types.find(/** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node) => isObjectLikeType(node));
   if (!objectType) {
     return false;
   }
 
-  return types.every(/** @returns {boolean} */ (node) => node === objectType || isVoidType(node));
+  return types.every(/** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node) => node === objectType || isVoidType(node));
 }
 
 /** @returns {boolean} */ function shouldUnionTypePrintOwnComments(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path) {

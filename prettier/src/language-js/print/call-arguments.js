@@ -50,7 +50,7 @@ import {
 - `TSImportType` (TypeScript)
 - `TSExternalModuleReference` (TypeScript)
 */
-function printCallArguments(/** @type {AstPath} */ path, options, /** @type {(a0?: any, a1?: any) => any} */ print) {
+function printCallArguments(/** @type {AstPath} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../print-options.js").JsPrint} */ print) {
   /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
 
   const args = getCallArguments(node);
@@ -121,7 +121,7 @@ function printCallArguments(/** @type {AstPath} */ path, options, /** @type {(a0
     if (tailArgs.some(willBreak)) {
       return allArgsBrokenOut();
     }
-    let firstArg;
+    /** @type {import("../../document/index.js").Doc} */ let firstArg;
     try {
       firstArg = print(getCallArgumentSelector(node, 0), {
         expandFirstArg: true,
@@ -156,7 +156,7 @@ function printCallArguments(/** @type {AstPath} */ path, options, /** @type {(a0
     if (headArgs.some(willBreak)) {
       return allArgsBrokenOut();
     }
-    let lastArg;
+    /** @type {import("../../document/index.js").Doc} */ let lastArg;
     try {
       lastArg = print(getCallArgumentSelector(node, -1), {
         expandLastArg: true,
@@ -261,7 +261,7 @@ function printCallArguments(/** @type {AstPath} */ path, options, /** @type {(a0
   return false;
 }
 
-/** @returns {boolean} */ function shouldExpandLastArg(/** @type {any[]} */ args, /** @type {any[]} */ argDocs, options) {
+/** @returns {boolean} */ function shouldExpandLastArg(/** @type {import("../types/estree.js").Node[]} */ args, /** @type {any[]} */ argDocs, /** @type {import("../print-options.js").JsPrintOptions} */ options) {
   if (args.length === 1) {
     const lastArgDoc = argDocs.at(-1);
     if (lastArgDoc.label?.embed && lastArgDoc.label?.hug !== false) {
@@ -286,7 +286,7 @@ function printCallArguments(/** @type {AstPath} */ path, options, /** @type {(a0
   );
 }
 
-/** @returns {boolean} */ function shouldExpandFirstArg(/** @type {any[]} */ args) {
+/** @returns {boolean} */ function shouldExpandFirstArg(/** @type {import("../types/estree.js").Node[]} */ args) {
   if (args.length !== 2) {
     return false;
   }
@@ -324,7 +324,7 @@ function printCallArguments(/** @type {AstPath} */ path, options, /** @type {(a0
   }
 
   if (isBinaryCastExpression(node) || node.type === "TypeCastExpression") {
-    let { typeAnnotation } = node;
+    /** @type {{ typeAnnotation: import("../types/estree.js").Node }} */ let { typeAnnotation } = node;
     if (typeAnnotation.type === "TypeAnnotation") {
       typeAnnotation = typeAnnotation.typeAnnotation;
     }
@@ -370,7 +370,7 @@ function printCallArguments(/** @type {AstPath} */ path, options, /** @type {(a0
  * Checks if the arguments of a function are a call to a React Hook with a dependencies array.
  * @returns {boolean}
  */
-function isReactHookCallWithDepsArray(/** @type {any[]} */ args) {
+function isReactHookCallWithDepsArray(/** @type {import("../types/estree.js").Node[]} */ args) {
   if (args.length === 2) {
     /**
      * useEffect(() => {
@@ -393,7 +393,7 @@ function isReactHookCallWithDepsArray(/** @type {any[]} */ args) {
   return false;
 }
 
-/** @returns {boolean} */ function isValidHookCallbackAndDepsFormat(/** @type {any[]} */ args, /** @type {number} */ baseIndex) {
+/** @returns {boolean} */ function isValidHookCallbackAndDepsFormat(/** @type {import("../types/estree.js").Node[]} */ args, /** @type {number} */ baseIndex) {
   const maybeArrowFunction = args[baseIndex];
   const maybeDepsArray = args[baseIndex + 1];
   return (

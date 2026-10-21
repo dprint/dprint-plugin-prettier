@@ -49,8 +49,8 @@ function addBlockOrNotComment(node, /** @type {import("../../types/estree.js").C
  */
 function addBlockStatementFirstComment(node, /** @type {import("../../types/estree.js").Comment} */ comment) {
   // @ts-expect-error
-  const firstNonEmptyNode = (node.body || node.properties).find(
-    /** @returns {boolean} */ ({ type }) => type !== "EmptyStatement",
+  const firstNonEmptyNode = /** @type {import("../../types/estree.js").Node[]} */ (node.body || node.properties).find(
+    /** @returns {boolean} */ (/** @type {import("../../types/estree.js").Node} */ { type }) => type !== "EmptyStatement",
   );
   if (firstNonEmptyNode) {
     addLeadingComment(firstNonEmptyNode, comment);

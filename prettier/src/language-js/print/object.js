@@ -81,7 +81,7 @@ const isPrintingFlowEnumBody = createTypeCheckFunction([
     : isImportAttributes
       ? "attributes"
       : "properties";
-  const children = node[property];
+  const children = /** @type {import("../types/estree.js").Node[]} */ (node[property]);
 
   const shouldBreak =
     isEnumBody ||
@@ -94,8 +94,8 @@ const isPrintingFlowEnumBody = createTypeCheckFunction([
       parent.type !== "ClassPrivateMethod" &&
       parent.type !== "AssignmentPattern" &&
       parent.type !== "CatchClause" &&
-      node.properties.some(
-        /** @returns {boolean | undefined} */ (property) =>
+      /** @type {import("../types/estree.js").Node[]} */ (node.properties).some(
+        /** @returns {boolean | undefined} */ (/** @type {import("../types/estree.js").Node} */ property) =>
           property.value &&
           (property.value.type === "ObjectPattern" ||
             property.value.type === "ArrayPattern"),
@@ -117,6 +117,7 @@ const isPrintingFlowEnumBody = createTypeCheckFunction([
   }, property);
 
   if (hasUnknownMembers) {
+    /** @type {Doc[]} */
     let printed;
     if (hasComment(node, CommentCheckFlags.Dangling)) {
       /** @type {boolean} */ const hasLineComments = hasComment(node, CommentCheckFlags.Line);
@@ -139,6 +140,7 @@ const isPrintingFlowEnumBody = createTypeCheckFunction([
     hasUnknownMembers || children.at(-1)?.type === "RestElement"
   );
 
+  /** @type {Doc} */
   let content;
   if (parts.length === 0) {
     content = group([
@@ -166,20 +168,20 @@ const isPrintingFlowEnumBody = createTypeCheckFunction([
   // type
   if (
     path.match(
-      /** @returns {boolean} */ (node) =>
+      /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node) =>
         node.type === "ObjectPattern" && !isNonEmptyArray(node.decorators),
       shouldHugTheOnlyParameter,
     ) ||
     (isObjectType(node) &&
       (path.match(
         undefined,
-        /** @returns {boolean} */ (node, name) => name === "typeAnnotation",
-        /** @returns {boolean} */ (node, name) => name === "typeAnnotation",
+        /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node, name) => name === "typeAnnotation",
+        /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node, name) => name === "typeAnnotation",
         shouldHugTheOnlyParameter,
       ) ||
         path.match(
           undefined,
-          /** @returns {boolean} */ (node, name) =>
+          /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node, name) =>
             node.type === "FunctionTypeParam" && name === "typeAnnotation",
           shouldHugTheOnlyParameter,
         ))) ||
@@ -187,8 +189,8 @@ const isPrintingFlowEnumBody = createTypeCheckFunction([
     // for adding a group if needed
     (!shouldBreak &&
       path.match(
-        /** @returns {boolean} */ (node) => node.type === "ObjectPattern",
-        /** @returns {boolean} */ (node) =>
+        /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node) => node.type === "ObjectPattern",
+        /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node) =>
           node.type === "AssignmentExpression" ||
           node.type === "VariableDeclarator",
       ))

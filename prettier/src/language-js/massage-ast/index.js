@@ -89,8 +89,8 @@ function massageAstNode(original, cloned, parent) {
     original.type === "JSXElement" &&
     original.openingElement.name.type === "JSXIdentifier" &&
     original.openingElement.name.name === "style" &&
-    original.openingElement.attributes.some(
-      (attr) => attr.type === "JSXAttribute" && attr.name.name === "jsx",
+    /** @type {import("../types/estree.js").Node[]} */ (original.openingElement.attributes).some(
+      (/** @type {import("../types/estree.js").Node} */ attr) => attr.type === "JSXAttribute" && attr.name.name === "jsx",
     )
   ) {
     for (const { type, expression } of cloned.children) {

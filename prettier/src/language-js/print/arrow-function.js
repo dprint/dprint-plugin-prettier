@@ -45,7 +45,7 @@ const shouldAddParensIfNotBreakCache = new WeakMap();
   return getOrInsertComputed(
     shouldAddParensIfNotBreakCache,
     node,
-    /** @returns {boolean} */ (node) =>
+    /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node) =>
       node.type === "ConditionalExpression" &&
       !startsWithNoLookaheadToken(
         node,
@@ -71,6 +71,7 @@ function printArrowFunction(/** @type {AstPath} */ path, /** @type {import("../.
   let shouldBreakChain = false;
   /** @type {boolean} */ const shouldPrintAsChain =
     !args.expandLastArg && path.node.body.type === "ArrowFunctionExpression";
+  /** @type {import("../types/estree.js").Node} */
   let functionBody;
 
   (function rec() {
@@ -95,7 +96,7 @@ function printArrowFunction(/** @type {AstPath} */ path, /** @type {import("../.
         (node.returnType && getFunctionParameters(node).length > 0) ||
         node.typeParameters ||
         getFunctionParameters(node).some(
-          /** @returns {boolean} */ (param) => param.type !== "Identifier",
+          /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ param) => param.type !== "Identifier",
         );
     }
 
@@ -168,7 +169,7 @@ function printArrowFunction(/** @type {AstPath} */ path, /** @type {import("../.
   ]);
 }
 
-/** @returns {any[]} */ function printArrowFunctionSignature(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print, args) {
+/** @returns {any[]} */ function printArrowFunctionSignature(/** @type {AstPath} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print, args) {
   /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   const parts = [];
 

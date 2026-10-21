@@ -12,7 +12,7 @@ class WhitespaceUtilities {
       (this.#whitespaceCharacters.size === 0 ||
         Array.prototype.some.call(
           whitespaceCharacters,
-          /** @returns {boolean} */ (character) => !/^\s$/.test(character),
+          /** @returns {boolean} */ (/** @type {string} */ character) => !/^\s$/.test(character),
         ))
     ) {
       throw new TypeError(
@@ -93,7 +93,7 @@ class WhitespaceUtilities {
 
   /** @returns {boolean} */ hasWhitespaceCharacter(/** @type {string} */ text) {
     const whitespaceCharacters = this.#whitespaceCharacters;
-    return Array.prototype.some.call(text, /** @returns {boolean} */ (character) =>
+    return Array.prototype.some.call(text, /** @returns {boolean} */ (/** @type {string} */ character) =>
       whitespaceCharacters.has(character),
     );
   }
@@ -102,13 +102,13 @@ class WhitespaceUtilities {
     const whitespaceCharacters = this.#whitespaceCharacters;
     return Array.prototype.some.call(
       text,
-      /** @returns {boolean} */ (character) => !whitespaceCharacters.has(character),
+      /** @returns {boolean} */ (/** @type {string} */ character) => !whitespaceCharacters.has(character),
     );
   }
 
   /** @returns {boolean} */ isWhitespaceOnly(/** @type {string} */ text) {
     const whitespaceCharacters = this.#whitespaceCharacters;
-    return Array.prototype.every.call(text, /** @returns {boolean} */ (character) =>
+    return Array.prototype.every.call(text, /** @returns {boolean} */ (/** @type {string} */ character) =>
       whitespaceCharacters.has(character),
     );
   }
@@ -144,7 +144,7 @@ class WhitespaceUtilities {
       ? text
       : text
           .split("\n")
-          .map(/** @returns {string} */ (lineText) => lineText.slice(minIndent))
+          .map(/** @returns {string} */ (/** @type {string} */ lineText) => lineText.slice(minIndent))
           .join("\n");
   }
 }

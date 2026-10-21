@@ -46,7 +46,7 @@ const overrides =
     ["ContinueStatement", overrideBreakOrContinueEnd(CONTINUE_KEYWORD_LENGTH)],
     ["DebuggerStatement", (/** @type {import("../types/estree.js").Node} */ node) => locStart(node) + DEBUGGER_KEYWORD_LENGTH],
     // @ts-expect-error -- ignore
-    ["VariableDeclaration", /** @returns {number} */ (/** @type {import("../types/estree.js").Node} */ node) => locEnd(node.declarations.at(-1))],
+    ["VariableDeclaration", /** @returns {number} */ (/** @type {import("../types/estree.js").Node} */ node) => locEnd(/** @type {import("../types/estree.js").Node[]} */ (node.declarations).at(-1))],
     ...nodeTypesWithContentEnd.map((type) => [type, getContentEnd]),
   ]);
 

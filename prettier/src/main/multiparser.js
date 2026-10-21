@@ -30,7 +30,7 @@ async function printEmbeddedLanguages(
   }
 
   const { hasPrettierIgnore } = printer;
-  const { getVisitorKeys } = embed;
+  /** @type {{ getVisitorKeys: (node: any) => any[] }} */ const { getVisitorKeys } = embed;
 
   /** @type {{print: any, node: any, pathStack: any[]}[]} */
   const embedCallResults = [];

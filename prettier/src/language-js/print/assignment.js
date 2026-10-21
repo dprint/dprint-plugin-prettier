@@ -91,7 +91,7 @@ function printAssignment(
   }
 }
 
-function printAssignmentExpression(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
+function printAssignmentExpression(/** @type {AstPath} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   return printAssignment(
     path,
@@ -103,13 +103,13 @@ function printAssignmentExpression(/** @type {AstPath} */ path, options, /** @ty
   );
 }
 
-function printVariableDeclarator(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
+function printVariableDeclarator(/** @type {AstPath} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   return printAssignment(path, options, print, print("id"), " =", "init");
 }
 
 /** @returns {string} */ function chooseLayout(/** @type {AstPath} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print, leftDoc, /** @type {string | undefined} */ rightPropertyName) {
   /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
-  const rightNode = node[rightPropertyName];
+  /** @type {import("../types/estree.js").Node} */ const rightNode = node[rightPropertyName];
 
   if (!rightNode) {
     return "only-left";
@@ -123,7 +123,7 @@ function printVariableDeclarator(/** @type {AstPath} */ path, options, /** @type
   /** @type {boolean} */ const shouldUseChainFormatting = path.match(
     isAssignment,
     isAssignmentOrVariableDeclarator,
-    /** @returns {boolean} */ (node) =>
+    /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node) =>
       !isTail ||
       (node.type !== "ExpressionStatement" &&
         node.type !== "VariableDeclaration"),
@@ -271,12 +271,12 @@ function printVariableDeclarator(/** @type {AstPath} */ path, options, /** @type
 // if it includes default values or non-shorthand properties
 /** @returns {boolean} */ function isComplexDestructuring(/** @type {import("../types/estree.js").Node} */ node) {
   if (isAssignmentOrVariableDeclarator(node)) {
-    const leftNode = node.left || node.id;
+    /** @type {import("../types/estree.js").Node} */ const leftNode = node.left || node.id;
     return (
       leftNode.type === "ObjectPattern" &&
       leftNode.properties.length > 2 &&
-      leftNode.properties.some(
-        /** @returns {boolean} */ (property) =>
+      /** @type {import("../types/estree.js").Node[]} */ (leftNode.properties).some(
+        /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ property) =>
           isObjectProperty(property) &&
           (!property.shorthand || property.value?.type === "AssignmentPattern"),
       )
@@ -344,6 +344,7 @@ function printVariableDeclarator(/** @type {AstPath} */ path, options, /** @type
 }
 
 /** @returns {any[] | undefined} */ function getTypeParametersFromTypeReference(/** @type {import("../types/estree.js").Node} */ node) {
+  /** @type {any} */
   let typeArguments;
   switch (node.type) {
     case "GenericTypeAnnotation":
@@ -424,14 +425,14 @@ function isPoorlyBreakableMemberOrCallChain(
   );
 }
 
-/** @returns {boolean} */ function isCallExpressionWithComplexTypeArguments(/** @type {import("../types/estree.js").Node} */ node, /** @type {(a0?: any) => any} */ print) {
+/** @returns {boolean} */ function isCallExpressionWithComplexTypeArguments(/** @type {import("../types/estree.js").Node} */ node, /** @type {import("../print-options.js").JsPrint} */ print) {
   const typeArgs = node.typeArguments?.params;
   if (isNonEmptyArray(typeArgs)) {
     if (typeArgs.length > 1) {
       return true;
     }
     if (typeArgs.length === 1) {
-      const firstArg = typeArgs[0];
+      /** @type {import("../types/estree.js").Node} */ const firstArg = typeArgs[0];
       if (
         isUnionType(firstArg) ||
         isIntersectionType(firstArg) ||

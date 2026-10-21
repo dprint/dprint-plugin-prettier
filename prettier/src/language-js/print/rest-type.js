@@ -4,7 +4,7 @@
 - `TSRestType`(TypeScript)
 - `TupleTypeSpreadElement`(flow)
 */
-/** @returns {any[]} */ function printRestType(/** @type {AstPath} */ path, options, /** @type {(a0?: any) => any} */ print) {
+/** @returns {any[]} */ function printRestType(/** @type {AstPath} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../print-options.js").JsPrint} */ print) {
   /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
 
   return [

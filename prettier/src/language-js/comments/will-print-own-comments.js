@@ -23,6 +23,7 @@ const isClassOrInterface = createTypeCheckFunction([
 
 /**
  * @param {AstPath} path
+ * @param {import("../print-options.js").JsPrintOptions} options
  * @returns {boolean}
  */
 function willPrintOwnComments(path, options) {

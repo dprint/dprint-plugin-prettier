@@ -54,13 +54,13 @@ function shouldBreakClosingParen(/** @type {import("../types/estree.js").Node} *
 }
 
 /** @returns {boolean} */ function hasMultilineBlockComments(
-  testNodes,
-  consequentNode,
-  alternateNode,
+  /** @type {import("../types/estree.js").Node[]} */ testNodes,
+  /** @type {import("../types/estree.js").Node} */ consequentNode,
+  /** @type {import("../types/estree.js").Node} */ alternateNode,
   /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options,
 ) {
   const comments = [
-    ...testNodes.map((node) => getComments(node)),
+    ...testNodes.map((/** @type {import("../types/estree.js").Node} */ node) => getComments(node)),
     getComments(consequentNode),
     getComments(alternateNode),
   ].flat();
@@ -103,7 +103,7 @@ function shouldExtraIndentForConditionalExpression(/** @type {AstPath} */ path) 
     return false;
   }
 
-  let parent;
+  /** @type {import("../types/estree.js").Node} */ let parent;
   let child = node;
   for (let ancestorCount = 0; !parent; ancestorCount++) {
     /** @type {import("../types/estree.js").Node} */ const node = path.getParentNode(ancestorCount);
@@ -137,7 +137,7 @@ function shouldExtraIndentForConditionalExpression(/** @type {AstPath} */ path) 
   return parent[ancestorNameMap.get(parent.type)] === child;
 }
 
-const wrapInParens = (doc) => [
+const wrapInParens = /** @returns {Doc[]} */ (/** @type {Doc} */ doc) => [
   ifBreak("("),
   indent([softline, doc]),
   softline,
@@ -170,7 +170,7 @@ function printTernary(path, options, print, args) {
   const testNodePropertyNames = isConditionalExpression
     ? ["test"]
     : ["checkType", "extendsType"];
-  const consequentNode = node[consequentNodePropertyName];
+  /** @type {import("../types/estree.js").Node} */ const consequentNode = node[consequentNodePropertyName];
   const alternateNode = node[alternateNodePropertyName];
   const testNodes = testNodePropertyNames.map((prop) => node[prop]);
   /** @type {{ parent: import("../types/estree.js").Node }} */ const { parent } = path;
@@ -188,8 +188,8 @@ function printTernary(path, options, print, args) {
 
   // Find the outermost non-ConditionalExpression parent, and the outermost
   // ConditionalExpression parent.
-  let currentParent;
-  let previousParent;
+  /** @type {import("../types/estree.js").Node} */ let currentParent;
+  /** @type {import("../types/estree.js").Node} */ let previousParent;
   let i = 0;
   do {
     previousParent = currentParent || node;

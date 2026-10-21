@@ -21,11 +21,11 @@ async function printEmbedHtmlLike(/** @type {string} */ parser, /** @type {(a0?:
   /** @type {number} */ const counter = htmlTemplateLiteralCounter;
   htmlTemplateLiteralCounter = (htmlTemplateLiteralCounter + 1) >>> 0;
 
-  const composePlaceholder = /** @returns {string} */ (index) =>
+  const composePlaceholder = /** @returns {string} */ (/** @type {number | string} */ index) =>
     `PRETTIER_HTML_PLACEHOLDER_${index}_${counter}_IN_JS`;
 
   const text = node.quasis
-    .map(/** @returns {string} */ (quasi, /** @type {number} */ index, /** @type {any[]} */ quasis) =>
+    .map(/** @returns {string} */ (/** @type {import("../types/estree.js").Node} */ quasi, /** @type {number} */ index, /** @type {any[]} */ quasis) =>
       index === quasis.length - 1
         ? quasi.value.cooked
         : quasi.value.cooked + composePlaceholder(index),
@@ -113,8 +113,8 @@ function isEmbedHtml(/** @type {AstPath} */ path) {
   return (
     hasLanguageComment(path, "HTML") ||
     path.match(
-      /** @returns {boolean} */ (node) => node.type === "TemplateLiteral",
-      /** @returns {boolean} */ (node, name) =>
+      /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node) => node.type === "TemplateLiteral",
+      /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node, name) =>
         node.type === "TaggedTemplateExpression" &&
         node.tag.type === "Identifier" &&
         node.tag.name === "html" &&

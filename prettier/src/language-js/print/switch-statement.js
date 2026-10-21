@@ -10,7 +10,7 @@ import { CommentCheckFlags, hasComment } from "../utilities/comments.js";
 import { isNextLineEmpty } from "../utilities/is-next-line-empty.js";
 import { printStatementSequence } from "./statement-sequence.js";
 
-function printSwitchStatement(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
+function printSwitchStatement(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   return [
     group([
       "switch (",
@@ -39,7 +39,7 @@ function printSwitchStatement(/** @type {import("../../../../prettier/src/common
   ];
 }
 
-function printSwitchCase(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
+function printSwitchCase(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   const parts = [];
   if (node.test) {
@@ -52,8 +52,8 @@ function printSwitchCase(/** @type {import("../../../../prettier/src/common/ast-
     parts.push(" ", printDanglingComments(path, options));
   }
 
-  const consequent = node.consequent.filter(
-    /** @returns {boolean} */ (node) => node.type !== "EmptyStatement",
+  const consequent = /** @type {import("../types/estree.js").Node[]} */ (node.consequent).filter(
+    /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node) => node.type !== "EmptyStatement",
   );
 
   if (consequent.length > 0) {

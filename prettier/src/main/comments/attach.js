@@ -22,10 +22,10 @@ const childNodesCache = new WeakMap();
 // least one of which is guaranteed to be defined.
 /** @returns {CommentNodes} */
 function decorateComment(
-  node,
-  comment,
+  /** @type {any} */ node,
+  /** @type {any} */ comment,
   /** @type {import("../../../../prettier/src/main/format-options.js").FormatOptions} */ options,
-  enclosingNode,
+  /** @type {any} */ enclosingNode,
   /** @type {any[]} */ ancestors = [],
 ) {
   const { locStart, locEnd } = options;
@@ -41,7 +41,9 @@ function decorateComment(
     filter: options.printer.canAttachComment,
     getChildren: options.printer.getCommentChildNodes,
   });
+  /** @type {any} */
   let precedingNode;
+  /** @type {any} */
   let followingNode;
   // Time to dust off the old binary search robes and wizard hat.
   /** @type {number} */ let left = 0;
@@ -116,8 +118,8 @@ function decorateComment(
 }
 
 const returnFalse = /** @returns {boolean} */ () => false;
-function attachComments(ast, /** @type {import("../../../../prettier/src/main/format-options.js").FormatOptions} */ options) {
-  const { comments } = ast;
+function attachComments(/** @type {any} */ ast, /** @type {import("../../../../prettier/src/main/format-options.js").FormatOptions} */ options) {
+  /** @type {{ comments: any[] | undefined }} */ const { comments } = ast;
   delete ast.comments;
 
   if (!isNonEmptyArray(comments) || !options.printer.canAttachComment) {

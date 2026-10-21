@@ -15,11 +15,11 @@ import { isNextLineEmpty } from "../utilities/is-next-line-empty.js";
 - `SwitchCase` ("consequent")
 - `TSModuleBlock` (TypeScript)
 */
-function printStatementSequence(/** @type {AstPath} */ path, options, /** @type {() => any} */ print, /** @type {string} */ property) {
+function printStatementSequence(/** @type {AstPath} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../print-options.js").JsPrint} */ print, /** @type {string} */ property) {
   /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   const parts = [];
-  const lastStatement = node[property].findLast(
-    /** @returns {boolean} */ (statement) => statement.type !== "EmptyStatement",
+  const lastStatement = /** @type {import("../types/estree.js").Node[]} */ (node[property]).findLast(
+    /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ statement) => statement.type !== "EmptyStatement",
   );
 
   path.each(({ node }) => {

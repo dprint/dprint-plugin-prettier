@@ -59,7 +59,7 @@ function createTemplateLiteralPrint(print) {
   };
 }
 
-/** @returns {boolean} */ function hasInvalidCookedValue({ quasis }) {
+/** @returns {boolean} */ function hasInvalidCookedValue(/** @type {{ quasis: import("../types/estree.js").Node[] }} */ { quasis }) {
   return quasis.some(/** @returns {boolean} */ ({ value: { cooked } }) => cooked === null);
 }
 

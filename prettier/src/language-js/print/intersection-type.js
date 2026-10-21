@@ -5,7 +5,7 @@ import { isObjectType } from "../utilities/node-types.js";
 /** @import AstPath from "../../common/ast-path.js" */
 
 // `TSIntersectionType` and `IntersectionTypeAnnotation`
-function printIntersectionType(/** @type {AstPath} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options, /** @type {() => any} */ print) {
+function printIntersectionType(/** @type {AstPath} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options, /** @type {import("../print-options.js").JsPrint} */ print) {
   /** @type {boolean} */ let wasIndented = false;
   return group(
     path.map(({ isFirst, previous, node, index }) => {

@@ -6,7 +6,7 @@ import { isUnionType } from "../../utilities/node-types.js";
 import { stripComments } from "../../utilities/strip-comments.js";
 import { isSingleLineBlockComment } from "../attach/utilities.js";
 
-/** @returns {boolean} */ function shouldAttachToUnionTypeFirstElement(/** @type {import("../../types/estree.js").Node} */ node, { comment, text, options }) {
+/** @returns {boolean} */ function shouldAttachToUnionTypeFirstElement(/** @type {import("../../types/estree.js").Node} */ node, /** @type {import("../handle-comments.js").CommentContext} */ { comment, text, options }) {
   if (
     isUnionType(node) &&
     isSingleLineBlockComment(comment, text) &&

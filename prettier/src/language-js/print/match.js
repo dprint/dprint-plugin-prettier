@@ -22,7 +22,7 @@ import { isNextLineEmpty } from "../utilities/is-next-line-empty.js";
 - `MatchExpression` (Flow)
 - `MatchStatement` (Flow)
 */
-export function printMatch(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
+export function printMatch(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   return [
     group(["match (", indent([softline, print("argument")]), softline, ")"]),
@@ -51,7 +51,7 @@ export function printMatch(/** @type {import("../../../../prettier/src/common/as
 - `MatchExpressionCase` (Flow)
 - `MatchStatementCase` (Flow)
 */
-export function printMatchCase(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
+export function printMatchCase(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
 
   const comment = hasComment(node, CommentCheckFlags.Dangling)
@@ -84,7 +84,7 @@ export function printMatchCase(/** @type {import("../../../../prettier/src/commo
 - `MatchObjectPatternProperty` (Flow)
 - `MatchRestPattern` (Flow)
 */
-export function printMatchPattern(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
+export function printMatchPattern(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
 
   switch (node.type) {
@@ -143,7 +143,7 @@ export function printMatchPattern(/** @type {import("../../../../prettier/src/co
   }
 }
 
-function printMatchObjectPattern(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
+function printMatchObjectPattern(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   const properties = path.map(print, "properties");
   if (node.rest) {
@@ -166,20 +166,20 @@ const isSimpleMatchPattern = createTypeCheckFunction([
 ]);
 
 function shouldHugMatchOrPattern(/** @type {import("../types/estree.js").Node} */ node) {
-  const { patterns } = node;
-  if (patterns.some((node) => hasComment(node))) {
+  /** @type {{ patterns: import("../types/estree.js").Node[] }} */ const { patterns } = node;
+  if (patterns.some((/** @type {import("../types/estree.js").Node} */ node) => hasComment(node))) {
     return false;
   }
 
   const objectPattern = patterns.find(
-    (node) => node.type === "MatchObjectPattern",
+    (/** @type {import("../types/estree.js").Node} */ node) => node.type === "MatchObjectPattern",
   );
   if (!objectPattern) {
     return false;
   }
 
   return patterns.every(
-    (node) => node === objectPattern || isSimpleMatchPattern(node),
+    (/** @type {import("../types/estree.js").Node} */ node) => node === objectPattern || isSimpleMatchPattern(node),
   );
 }
 

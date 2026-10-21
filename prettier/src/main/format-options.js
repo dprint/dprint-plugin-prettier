@@ -38,7 +38,7 @@
  *   hasPrettierIgnore?: (path: AstPath) => any,
  *   printComment?: (path: AstPath, options: any) => any,
  *   printPrettierIgnored?: (path: AstPath, options: any, print: any, args?: any) => any,
- *   isBlockComment?: (comment: any) => any,
+ *   isBlockComment?: (comment: any) => boolean,
  *   willPrintOwnComments?: (path: AstPath, options: any) => any,
  *   canAttachComment?: (node: any, ancestors?: any[]) => any,
  *   getCommentChildNodes?: (node: any, options: any) => any,

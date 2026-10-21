@@ -18,7 +18,7 @@ async function printEmbedGraphQL(textToDoc, print, /** @type {import("../../../.
     const templateElement = node.quasis[i];
     /** @type {boolean} */ const isFirst = i === 0;
     /** @type {boolean} */ const isLast = i === numQuasis - 1;
-    const text = templateElement.value.cooked;
+    /** @type {string} */ const text = templateElement.value.cooked;
 
     const lines = text.split("\n");
     const numLines = lines.length;
@@ -39,7 +39,7 @@ async function printEmbedGraphQL(textToDoc, print, /** @type {import("../../../.
       /^\s*(?:#[^\n\r]*)?$/.test(line),
     );
 
-    let doc;
+    /** @type {any} */ let doc;
 
     if (commentsAndWhitespaceOnly) {
       doc = printGraphqlComments(lines);
@@ -105,7 +105,7 @@ function printGraphqlComments(/** @type {any[]} */ lines) {
  * This intentionally excludes Relay Classic tags, as Prettier does not
  * support Relay Classic formatting.
  */
-/** @returns {boolean} */ function isEmbedGraphQL(/** @type {import("../../common/ast-path.js").default} */ { node, parent }) {
+/** @returns {boolean} */ function isEmbedGraphQL(/** @type {import("../../common/ast-path.js").default & { node: import("../types/estree.js").Node, parent: import("../types/estree.js").Node }} */ { node, parent }) {
   return (
     hasLanguageComment({ node, parent }, "GraphQL") ||
     (parent &&

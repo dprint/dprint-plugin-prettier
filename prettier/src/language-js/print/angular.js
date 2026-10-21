@@ -7,7 +7,7 @@ import { printBinaryishExpression } from "./binaryish.js";
 
 /** @import AstPath from "../../common/ast-path.js" */
 
-function printAngular(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
+function printAngular(/** @type {AstPath} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
 
   // Angular nodes always starts with `NG`
@@ -85,7 +85,7 @@ function printAngular(/** @type {AstPath} */ path, options, /** @type {import(".
   }
 }
 
-/** @returns {boolean} */ function isNgForOf(/** @type {AstPath} */ { node, index }) {
+/** @returns {boolean} */ function isNgForOf(/** @type {AstPath & { node: import("../types/estree.js").Node }} */ { node, index }) {
   return (
     node.type === "NGMicrosyntaxKeyedExpression" &&
     node.key.name === "of" &&

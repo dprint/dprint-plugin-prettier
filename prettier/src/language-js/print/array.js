@@ -31,6 +31,8 @@ import {
 import { printTypeAnnotationProperty } from "./type-annotation.js";
 
 /** @import {Doc} from "../../document/index.js" */
+/** @import {Node} from "../types/estree.js" */
+/** @import {JsPrintOptions} from "../print-options.js" */
 
 /*
 - `ArrayExpression`
@@ -44,7 +46,7 @@ import { printTypeAnnotationProperty } from "./type-annotation.js";
   const parts = [];
 
   const elementsProperty = isTupleType(node) ? "elementTypes" : "elements";
-  const elements = node[elementsProperty];
+  const elements = /** @type {Node[]} */ (node[elementsProperty]);
   if (elements.length === 0 && !node.inexact) {
     parts.push(group(["[", printDanglingCommentsInList(path, options), "]"]));
   } else {
@@ -69,7 +71,7 @@ import { printTypeAnnotationProperty } from "./type-annotation.js";
     const shouldBreak =
       (!options.__inJestEach &&
         elements.length > 1 &&
-        elements.every(/** @returns {boolean} */ (element, /** @type {number} */ i, /** @type {any[]} */ elements) => {
+        elements.every(/** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ element, /** @type {number} */ i, /** @type {Node[]} */ elements) => {
           if (!isArrayExpression(element) && !isObjectExpression(element)) {
             return false;
           }
@@ -140,8 +142,8 @@ import { printTypeAnnotationProperty } from "./type-annotation.js";
   return (
     isArrayExpression(node) &&
     node.elements.length > 0 &&
-    node.elements.every(
-      /** @returns {boolean | null} */ (element) =>
+    /** @type {Node[]} */ (node.elements).every(
+      /** @returns {boolean | null} */ (/** @type {import("../types/estree.js").Node} */ element) =>
         element &&
         (isNumericLiteral(element) ||
           (isSignedNumericLiteral(element) && !hasComment(element.argument))) &&
@@ -157,7 +159,7 @@ import { printTypeAnnotationProperty } from "./type-annotation.js";
   );
 }
 
-/** @returns {boolean} */ function isLineAfterElementEmpty(/** @type {AstPath} */ { node }, { originalText: text }) {
+/** @returns {boolean} */ function isLineAfterElementEmpty(/** @type {AstPath & { node: Node }} */ { node }, /** @type {JsPrintOptions} */ { originalText: text }) {
   let currentIdx = locEnd(node);
   if (currentIdx === locStart(node)) {
     return false;
@@ -177,7 +179,8 @@ import { printTypeAnnotationProperty } from "./type-annotation.js";
   return isNextLineEmptyAfterIndex(text, currentIdx);
 }
 
-function printArrayElements(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print, /** @type {string} */ elementsProperty, inexact) {
+function printArrayElements(/** @type {AstPath} */ path, /** @type {JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print, /** @type {string} */ elementsProperty, /** @type {boolean | undefined} */ inexact) {
+  /** @type {Doc[]} */
   const parts = [];
 
   path.each(({ node, isLast }) => {
@@ -199,7 +202,8 @@ function printArrayElements(/** @type {AstPath} */ path, options, /** @type {imp
   return parts;
 }
 
-function printArrayElementsConcisely(/** @type {AstPath} */ path, options, /** @type {() => any} */ print, trailingComma) {
+function printArrayElementsConcisely(/** @type {AstPath} */ path, /** @type {JsPrintOptions} */ options, /** @type {import("../print-options.js").JsPrint} */ print, /** @type {Doc} */ trailingComma) {
+  /** @type {Doc[]} */
   const parts = [];
 
   path.each(({ isLast, next }) => {

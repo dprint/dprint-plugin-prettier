@@ -10,7 +10,7 @@ import { escapeTemplateCharacters } from "../print/template-literal.js";
 
 async function printEmbedMarkdown(textToDoc, print, /** @type {AstPath} */ path /* , options*/) {
   /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
-  let text = node.quasis[0].value.raw.replaceAll(
+  let text = /** @type {string} */ (node.quasis[0].value.raw).replaceAll(
     /((?:\\\\)*)\\`/g,
     /** @returns {string} */ (/** @type {string} */ _, /** @type {string} */ backslashes) => "\\".repeat(backslashes.length / 2) + "`",
   );
@@ -41,7 +41,7 @@ async function printEmbedMarkdown(textToDoc, print, /** @type {AstPath} */ path 
  * markdown`...`
  * @returns {boolean}
  */
-function isEmbedMarkdown(/** @type {AstPath} */ { node, parent }) {
+function isEmbedMarkdown(/** @type {AstPath & { node: import("../types/estree.js").Node, parent: import("../types/estree.js").Node }} */ { node, parent }) {
   return (
     parent?.type === "TaggedTemplateExpression" &&
     node.quasis.length === 1 &&

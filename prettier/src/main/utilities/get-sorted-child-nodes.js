@@ -22,11 +22,11 @@ import { getOrInsertComputed } from "../../utilities/get-or-insert.js";
   }
 
   /** @type {any[] | undefined} */ let childAncestors;
-  const childNodes = (
+  const childNodes = /** @type {any[]} */ (
     options.getChildren?.(node, options) ?? [
       ...getChildren(node, { getVisitorKeys: options.getVisitorKeys }),
     ]
-  ).flatMap((child) => {
+  ).flatMap(/** @returns {any[]} */ (/** @type {any} */ child) => {
     childAncestors ??= [node, ...ancestors];
     return filter(child, childAncestors)
       ? [child]
@@ -37,7 +37,7 @@ import { getOrInsertComputed } from "../../utilities/get-or-insert.js";
 
   // Sort by `start` location first, then `end` location
   childNodes.sort(
-    /** @returns {number} */ (nodeA, nodeB) =>
+    /** @returns {number} */ (/** @type {any} */ nodeA, /** @type {any} */ nodeB) =>
       locStart(nodeA) - locStart(nodeB) || locEnd(nodeA) - locEnd(nodeB),
   );
 
@@ -45,7 +45,7 @@ import { getOrInsertComputed } from "../../utilities/get-or-insert.js";
 }
 
 /** @returns {any[]} */ function getSortedChildNodes(node, /** @type {any[]} */ ancestors, /** @type {SortedChildNodesOptions} */ options) {
-  return getOrInsertComputed(options.cache, node, (node) =>
+  return getOrInsertComputed(options.cache, node, (/** @type {any} */ node) =>
     getSortedChildNodesWithoutCache(node, ancestors, options),
   );
 }

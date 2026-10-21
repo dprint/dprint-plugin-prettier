@@ -27,6 +27,7 @@ import { isJsxElement } from "./node-types.js";
 
   if (hasNakedLeftSide(node)) {
     let leftMost = node;
+    /** @type {import("../types/estree.js").Node} */
     let newLeftMost;
     while ((newLeftMost = getLeftSide(leftMost))) {
       leftMost = newLeftMost;
@@ -42,7 +43,7 @@ import { isJsxElement } from "./node-types.js";
 
 const cache = new WeakMap();
 /** @returns {boolean} */ function returnArgumentHasLeadingComment(/** @type {import("../types/estree.js").Node} */ node, options) {
-  return getOrInsertComputed(cache, node, /** @returns {boolean} */ (node) =>
+  return getOrInsertComputed(cache, node, /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node) =>
     returnArgumentHasLeadingCommentWithoutCache(node, options),
   );
 }

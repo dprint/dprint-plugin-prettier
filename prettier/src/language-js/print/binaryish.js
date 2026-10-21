@@ -194,6 +194,7 @@ function printBinaryishExpression(/** @type {AstPath} */ path, /** @type {import
 // precedence level and the AST is structured based on precedence
 // level, things are naturally broken up correctly, i.e. `&&` is
 // broken before `+`.
+/** @returns {Doc[]} */
 function printBinaryishExpressions(
   /** @type {AstPath} */ path,
   /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options,
@@ -298,6 +299,7 @@ function printBinaryishExpressions(
         )
       : print("right");
     if (options.experimentalOperatorPosition === "start") {
+      /** @type {Doc} */
       let comment = "";
       if (commentBeforeOperator) {
         switch (getDocType(rightContent)) {
@@ -391,7 +393,7 @@ const isBitwiseOrExpression = /** @returns {boolean} */ (/** @type {import("../t
       options.parser === "__vue_ts_expression") &&
     isBitwiseOrExpression(path.node) &&
     !path.hasAncestor(
-      /** @returns {boolean} */ (node) =>
+      /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node) =>
         !isBitwiseOrExpression(node) && node.type !== "JsExpressionRoot",
     )
   );

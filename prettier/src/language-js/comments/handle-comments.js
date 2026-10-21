@@ -918,7 +918,7 @@ function handleLastUnionElementInExpression({
       isIntersectionType(enclosingNode) ||
       isUnionType(enclosingNode))
   ) {
-    addTrailingComment(precedingNode.types.at(-1), comment);
+    addTrailingComment(/** @type {import("../types/estree.js").Node[]} */ (precedingNode.types).at(-1), comment);
     return true;
   }
   return false;
@@ -1132,7 +1132,7 @@ function handleArrowExpressionComments({
           enclosingNode.right === precedingNode))
     ) {
       addTrailingComment(
-        isSequence ? precedingNode.expressions.at(-1) : precedingNode.right,
+        isSequence ? /** @type {import("../types/estree.js").Node[]} */ (precedingNode.expressions).at(-1) : precedingNode.right,
         comment,
       );
       return true;

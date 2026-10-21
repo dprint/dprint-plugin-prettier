@@ -20,6 +20,7 @@ function hasJsxIgnoreComment(path) {
 
   // Lookup the previous sibling, ignoring any empty JSXText elements
   const { index, siblings } = path;
+  /** @type {Node | undefined} */
   let prevSibling;
   for (let i = index; i > 0; i--) {
     const candidate = siblings[i - 1];

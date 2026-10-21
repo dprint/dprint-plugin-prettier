@@ -41,7 +41,7 @@ function isAngularComponentStyles(/** @type {AstPath} */ path) {
   return (
     path.match(
       isTemplateLiteral,
-      /** @returns {boolean} */ (node, name) => isArrayExpression(node) && name === "elements",
+      /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node, name) => isArrayExpression(node) && name === "elements",
       isObjectPropertyNamedStyles,
       ...angularComponentObjectExpressionPredicates,
     ) ||
@@ -54,8 +54,8 @@ function isAngularComponentStyles(/** @type {AstPath} */ path) {
 }
 /** @returns {boolean} */ function isAngularComponentTemplate(/** @type {AstPath} */ path) {
   return path.match(
-    /** @returns {boolean} */ (node) => node.type === "TemplateLiteral",
-    /** @returns {boolean} */ (node, name) =>
+    /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node) => node.type === "TemplateLiteral",
+    /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node, name) =>
       isObjectProperty(node) &&
       !node.computed &&
       node.key.type === "Identifier" &&
@@ -77,7 +77,7 @@ function isAngularComponentStyles(/** @type {AstPath} */ path) {
     /** @returns {boolean} */ ({ value }) => value === ` ${languageName} `,
   );
 }
-/** @returns {boolean} */ function hasLanguageComment({ node, parent }, /** @type {string} */ languageName) {
+/** @returns {boolean} */ function hasLanguageComment(/** @type {{ node: import("../types/estree.js").Node, parent: import("../types/estree.js").Node }} */ { node, parent }, /** @type {string} */ languageName) {
   return (
     hasLeadingBlockCommentWithName(node, languageName) ||
     (isAsConstExpression(parent) &&

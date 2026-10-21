@@ -22,7 +22,7 @@ const isComputedKey = /** @returns {boolean} */ (/** @type {import("../types/est
 }
 
 // TODO[@fisker]: `__vue_ts_expression` and `__vue_ts_event_binding`
-const isTypeScript = /** @returns {boolean} */ ({ parser }) =>
+const isTypeScript = /** @returns {boolean} */ (/** @type {import("../print-options.js").JsPrintOptions} */ { parser }) =>
   parser === "typescript" ||
   parser === "babel-ts" ||
   parser === "oxc-ts" ||
@@ -30,6 +30,7 @@ const isTypeScript = /** @returns {boolean} */ ({ parser }) =>
 
 /**
 @param {import("../types/estree.js").Node} node
+@param {import("../print-options.js").JsPrintOptions} options
 @returns {boolean}
 */
 function isKeySafeToQuote(node, options) {
@@ -145,7 +146,7 @@ function isKeySafeToQuote(node, options) {
 /** @import AstPath from "../../common/ast-path.js" */
 
 const needQuoteKeysCache = new WeakMap();
-function hasSiblingsRequireQuoted(/** @type {AstPath} */ path, options) {
+function hasSiblingsRequireQuoted(/** @type {AstPath} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options) {
   return getOrInsertComputed(needQuoteKeysCache, path.parent, () =>
     path.siblings.some((sibling) => {
       if (isComputedKey(sibling)) {
@@ -201,7 +202,7 @@ function hasSiblingsRequireQuoted(/** @type {AstPath} */ path, options) {
 - `RecordDeclarationProperty` (Flow)
 - `RecordDeclarationStaticProperty` (Flow)
 */
-function printKey(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
+function printKey(/** @type {AstPath} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   const property = getKeyProperty(node);
 

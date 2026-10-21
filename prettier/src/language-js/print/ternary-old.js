@@ -100,7 +100,7 @@ function conditionalExpressionChainContainsJsx(/** @type {import("../types/estre
   return false;
 }
 
-function printTernaryTest(/** @type {AstPath} */ path, options, /** @type {(a0?: any) => any} */ print) {
+function printTernaryTest(/** @type {AstPath} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../print-options.js").JsPrint} */ print) {
   /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   /** @type {boolean} */ const isConditionalExpression = node.type === "ConditionalExpression";
   /** @type {string} */ const alternateNodePropertyName = isConditionalExpression
@@ -143,7 +143,7 @@ const ancestorNameMap = new Map([
     return false;
   }
 
-  let parent;
+  /** @type {import("../types/estree.js").Node} */ let parent;
   let child = node;
   for (let ancestorCount = 0; !parent; ancestorCount++) {
     /** @type {import("../types/estree.js").Node} */ const node = path.getParentNode(ancestorCount);
@@ -199,7 +199,7 @@ function printTernaryOld(path, options, print) {
   const testNodePropertyNames = isConditionalExpression
     ? ["test"]
     : ["checkType", "extendsType"];
-  const consequentNode = node[consequentNodePropertyName];
+  /** @type {import("../types/estree.js").Node} */ const consequentNode = node[consequentNodePropertyName];
   const alternateNode = node[alternateNodePropertyName];
   const parts = [];
 
@@ -215,8 +215,8 @@ function printTernaryOld(path, options, print) {
   // Find the outermost non-ConditionalExpression parent, and the outermost
   // ConditionalExpression parent. We'll use these to determine if we should
   // print in JSX mode.
-  let currentParent;
-  let previousParent;
+  /** @type {import("../types/estree.js").Node} */ let currentParent;
+  /** @type {import("../types/estree.js").Node} */ let previousParent;
   /** @type {number} */ let i = 0;
   do {
     previousParent = currentParent || node;
@@ -245,7 +245,7 @@ function printTernaryOld(path, options, print) {
     // Even though they don't need parens, we wrap (almost) everything in
     // parens when using ?: within JSX, because the parens are analogous to
     // curly braces in an if statement.
-    const wrap = /** @returns {any[]} */ (doc) => [
+    const wrap = /** @returns {any[]} */ (/** @type {Doc} */ doc) => [
       ifBreak("("),
       indent([softline, doc]),
       softline,

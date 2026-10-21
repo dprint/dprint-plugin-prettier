@@ -28,7 +28,7 @@ import {
 */
 
 // `TSUnionType` and `UnionTypeAnnotation`
-function printUnionType(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print, args) {
+function printUnionType(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print, args) {
   /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
 
   // {
@@ -110,10 +110,10 @@ function printUnionType(/** @type {import("../../../../prettier/src/common/ast-p
   if (
     path.match(
       undefined,
-      /** @returns {boolean} */ (node, key) =>
+      /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node, key) =>
         key === "typeAnnotation" && node.type === "FunctionTypeParam",
-      (node, key) => key === "params" && node.type === "FunctionTypeAnnotation",
-      (node, key) =>
+      (/** @type {import("../types/estree.js").Node} */ node, key) => key === "params" && node.type === "FunctionTypeAnnotation",
+      (/** @type {import("../types/estree.js").Node} */ node, key) =>
         key === "value" &&
         node.type === "ObjectTypeProperty" &&
         isFlowObjectTypePropertyAFunction(node),

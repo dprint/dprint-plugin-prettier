@@ -32,7 +32,7 @@ import { printSemicolon, printTrailingComma } from "./miscellaneous.js";
 - `ObjectTypeAnnotation` (Flow)
 - `RecordDeclarationBody` (Flow)
 */
-/** @returns {Doc} */ function printClassBody(/** @type {AstPath} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options, /** @type {() => any} */ print) {
+/** @returns {Doc} */ function printClassBody(/** @type {AstPath} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options, /** @type {import("../print-options.js").JsPrint} */ print) {
   /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   const parts = [];
   const isFlowTypeAnnotation = node.type === "ObjectTypeAnnotation";
@@ -44,7 +44,7 @@ import { printSemicolon, printTrailingComma } from "./miscellaneous.js";
   const [openingBrace, closingBrace] =
     isFlowTypeAnnotation && node.exact ? ["{|", "|}"] : "{}";
   let isEmpty = true;
-  let firstMember;
+  /** @type {import("../types/estree.js").Node} */ let firstMember;
 
   iterateClassMembersPath(path, ({ node, next, isLast }) => {
     firstMember ??= node;
@@ -90,7 +90,7 @@ import { printSemicolon, printTrailingComma } from "./miscellaneous.js";
   // TODO: this part can unify with the similar part in `printObject`
   if (node.type === "ObjectTypeAnnotation" && node.inexact) {
     isEmpty &&= false;
-    let printed;
+    /** @type {Doc[]} */ let printed;
     if (hasComment(node, CommentCheckFlags.Dangling)) {
       /** @type {boolean} */ const hasLineComments = hasComment(node, CommentCheckFlags.Line);
       printed = [
@@ -117,7 +117,7 @@ import { printSemicolon, printTrailingComma } from "./miscellaneous.js";
           locStart(firstMember),
         ));
 
-    let content;
+    /** @type {Doc} */ let content;
     if (parts.length === 0) {
       content = openingBrace + closingBrace;
     } else {
@@ -137,13 +137,13 @@ import { printSemicolon, printTrailingComma } from "./miscellaneous.js";
     if (
       path.match(
         undefined,
-        /** @returns {boolean} */ (node, name) => name === "typeAnnotation",
-        /** @returns {boolean} */ (node, name) => name === "typeAnnotation",
+        /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node, name) => name === "typeAnnotation",
+        /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node, name) => name === "typeAnnotation",
         shouldHugTheOnlyParameter,
       ) ||
       path.match(
         undefined,
-        /** @returns {boolean} */ (node, name) =>
+        /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node, name) =>
           node.type === "FunctionTypeParam" && name === "typeAnnotation",
         shouldHugTheOnlyParameter,
       )
@@ -237,7 +237,7 @@ const isKeywordProperty = (/** @type {import("../types/estree.js").Node} */ node
  * @returns {boolean}
  */
 function shouldPrintSemicolonAfterClassProperty(
-  /** @type {{ node: import("../types/estree.js").Node, next: any }} */ { node, next: nextNode },
+  /** @type {{ node: import("../types/estree.js").Node, next: import("../types/estree.js").Node }} */ { node, next: nextNode },
   /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options,
 ) {
   if (options.semi || !isClassProperty(node)) {

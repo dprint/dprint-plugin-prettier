@@ -20,7 +20,7 @@ import { printTypeAnnotationProperty } from "./type-annotation.js";
  * @import {Doc} from "../../document/index.js"
  */
 
-const isMethodValue = /** @returns {boolean} */ (/** @type {AstPath} */ { node, key, parent }) =>
+const isMethodValue = /** @returns {boolean} */ (/** @type {AstPath & { node: import("../types/estree.js").Node, parent: import("../types/estree.js").Node }} */ { node, key, parent }) =>
   key === "value" &&
   node.type === "FunctionExpression" &&
   (parent.type === "ObjectMethod" ||
@@ -37,7 +37,7 @@ const isMethodValue = /** @returns {boolean} */ (/** @type {AstPath} */ { node, 
 - `HookDeclaration` (Flow)
 - `TSDeclareFunction`(TypeScript)
 */
-function printFunction(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print, args) {
+function printFunction(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print, args) {
   if (isMethodValue(path)) {
     return printMethodValue(path, options, print);
   }
@@ -104,7 +104,7 @@ function printFunction(/** @type {import("../../../../prettier/src/common/ast-pa
 - `TSAbstractMethodDefinition` (TypeScript)
 - `TSDeclareMethod` (TypeScript)
 */
-/** @returns {any[]} */ function printMethod(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
+/** @returns {any[]} */ function printMethod(/** @type {AstPath} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   const { kind } = node;
   const value = node.value || node;
@@ -145,7 +145,7 @@ function printFunction(/** @type {import("../../../../prettier/src/common/ast-pa
 - `TSDeclareMethod` (TypeScript)
 - `TSEmptyBodyFunctionExpression` (TypeScript)
 */
-/** @returns {any[]} */ function printMethodValue(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
+/** @returns {any[]} */ function printMethodValue(/** @type {AstPath} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   const parametersDoc = printFunctionParameters(path, options, print);
   const returnTypeDoc = printReturnType(path, print);

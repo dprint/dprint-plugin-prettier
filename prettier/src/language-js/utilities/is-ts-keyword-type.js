@@ -1,7 +1,7 @@
 /**
  * @returns {boolean}
  */
-function isTsKeywordType({ type }) {
+function isTsKeywordType(/** @type {{ type: string }} */ { type }) {
   return type.startsWith("TS") && type.endsWith("Keyword");
 }
 

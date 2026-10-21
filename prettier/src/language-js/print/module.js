@@ -34,7 +34,7 @@ import { printObject } from "./object.js";
 /*
 - `ImportDeclaration`
 */
-function printImportDeclaration(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
+function printImportDeclaration(/** @type {AstPath} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   /** @type{Doc[]} */
   return [
@@ -59,7 +59,7 @@ const isDefaultExport = /** @returns {boolean} */ (/** @type {import("../types/e
 - `DeclareExportDeclaration`(flow)
 - `DeclareExportAllDeclaration`(flow)
 */
-/** @returns {any[]} */ function printExportDeclaration(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
+/** @returns {any[]} */ function printExportDeclaration(/** @type {AstPath} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
 
   /** @type{Doc[]} */
@@ -146,7 +146,7 @@ const shouldOmitSemicolon = createTypeCheckFunction([
   return printImportOrExportKind(node.exportKind);
 }
 
-function printModuleSource(/** @type {AstPath} */ path, options, /** @type {(a0?: any) => any} */ print) {
+function printModuleSource(/** @type {AstPath} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../print-options.js").JsPrint} */ print) {
   /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
 
   if (!node.source) {
@@ -160,7 +160,7 @@ function printModuleSource(/** @type {AstPath} */ path, options, /** @type {(a0?
   ];
 }
 
-function printModuleSpecifiers(/** @type {AstPath} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options, /** @type {() => any} */ print) {
+function printModuleSpecifiers(/** @type {AstPath} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options, /** @type {import("../print-options.js").JsPrint} */ print) {
   /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
 
   if (!shouldPrintSpecifiers(node, options)) {
@@ -204,7 +204,7 @@ function printModuleSpecifiers(/** @type {AstPath} */ path, /** @type {import(".
       const canBreak =
         groupedSpecifiers.length > 1 ||
         standaloneSpecifiers.length > 0 ||
-        node.specifiers.some(/** @returns {boolean} */ (node) => hasComment(node));
+        /** @type {import("../types/estree.js").Node[]} */ (node.specifiers).some(/** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node) => hasComment(node));
 
       if (canBreak) {
         parts.push(
@@ -299,7 +299,7 @@ const isSingleTypeImportAttributes = (/** @type {import("../types/estree.js").No
 - `DeclareExportDeclaration` (Flow)
 - `DeclareExportAllDeclaration` (Flow)
 */
-function printImportAttributes(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
+function printImportAttributes(/** @type {AstPath} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
 
   if (!node.source) {
@@ -319,7 +319,7 @@ function printImportAttributes(/** @type {AstPath} */ path, options, /** @type {
   return [` ${keyword} `, attributesDoc];
 }
 
-/** @returns {any[]} */ function printModuleSpecifier(/** @type {AstPath} */ path, options, /** @type {(a0?: any) => any} */ print) {
+/** @returns {any[]} */ function printModuleSpecifier(/** @type {AstPath} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../print-options.js").JsPrint} */ print) {
   /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   const { type } = node;
 
@@ -328,7 +328,9 @@ function printImportAttributes(/** @type {AstPath} */ path, options, /** @type {
   /** @type {string} */ const rightSideProperty = isImportSpecifier ? "local" : "exported";
   const leftSideNode = node[leftSideProperty];
   const rightSideNode = node[rightSideProperty];
+  /** @type {import("../../document/index.js").Doc} */
   let left = "";
+  /** @type {import("../../document/index.js").Doc} */
   let right = "";
   if (
     type === "ExportNamespaceSpecifier" ||

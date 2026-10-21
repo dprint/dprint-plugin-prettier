@@ -289,11 +289,11 @@ function printMemberChain(/** @type {AstPath} */ path, /** @type {import("../../
     return name.length <= options.tabWidth;
   }
 
-  /** @returns {boolean | undefined} */ function shouldNotWrap(/** @type {any[]} */ groups) {
+  /** @returns {boolean | undefined} */ function shouldNotWrap(/** @type {PrintedNode[][]} */ groups) {
     const hasComputed = groups[1][0]?.node.computed;
 
     if (groups[0].length === 1) {
-      const firstNode = groups[0][0].node;
+      /** @type {import("../types/estree.js").Node} */ const firstNode = groups[0][0].node;
       return (
         firstNode.type === "ThisExpression" ||
         (firstNode.type === "Identifier" &&
@@ -303,7 +303,7 @@ function printMemberChain(/** @type {AstPath} */ path, /** @type {import("../../
       );
     }
 
-    const lastNode = groups[0].at(-1).node;
+    /** @type {import("../types/estree.js").Node} */ const lastNode = groups[0].at(-1).node;
     return (
       isMemberExpression(lastNode) &&
       lastNode.property.type === "Identifier" &&
@@ -316,11 +316,11 @@ function printMemberChain(/** @type {AstPath} */ path, /** @type {import("../../
     !hasComment(groups[1][0].node) &&
     shouldNotWrap(groups);
 
-  /** @returns {any[]} */ function printGroup(/** @type {any[]} */ printedGroup) {
+  /** @returns {any[]} */ function printGroup(/** @type {PrintedNode[]} */ printedGroup) {
     return printedGroup.map((tuple) => tuple.printed);
   }
 
-  function printIndentedGroup(/** @type {any[]} */ groups) {
+  function printIndentedGroup(/** @type {PrintedNode[][]} */ groups) {
     /* c8 ignore next 3 */
     if (groups.length === 0) {
       return "";
@@ -349,7 +349,7 @@ function printMemberChain(/** @type {AstPath} */ path, /** @type {import("../../
   if (
     groups.length <= cutoff &&
     !nodeHasComment &&
-    groups.every(/** @returns {boolean} */ (g) => !g.at(-1).hasTrailingEmptyLine)
+    groups.every(/** @returns {boolean} */ (/** @type {PrintedNode[]} */ g) => !g.at(-1).hasTrailingEmptyLine)
   ) {
     if (isLongCurriedCallExpression(path)) {
       return oneLine;
@@ -383,10 +383,11 @@ function printMemberChain(/** @type {AstPath} */ path, /** @type {import("../../
       willBreak(lastGroupDoc) &&
       callExpressions
         .slice(0, -1)
-        .some(/** @returns {boolean} */ (node) => node.arguments.some(isFunctionOrArrowExpression))
+        .some(/** @returns {boolean} */ (node) => /** @type {import("../types/estree.js").Node[]} */ (node.arguments).some(isFunctionOrArrowExpression))
     );
   }
 
+  /** @type {Doc} */
   let result;
 
   // We don't want to print in one line if at least one of these conditions occurs:
@@ -399,7 +400,7 @@ function printMemberChain(/** @type {AstPath} */ path, /** @type {import("../../
     nodeHasComment ||
     (callExpressions.length > 2 &&
       callExpressions.some(/** @returns {boolean} */ (expr) =>
-        expr.arguments.some(/** @returns {boolean} */ (arg) => !isSimpleCallArgument(arg)),
+        /** @type {import("../types/estree.js").Node[]} */ (expr.arguments).some(/** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ arg) => !isSimpleCallArgument(arg)),
       )) ||
     printedGroups.slice(0, -1).some(willBreak) ||
     lastGroupWillBreakAndOtherCallsHaveFunctionArguments()

@@ -41,7 +41,7 @@ const cache = new WeakMap();
 */
 function stripComments(options) {
   const comments = options[commentsPropertyInOptions];
-  return getOrInsertComputed(cache, comments, /** @returns {string} */ (comments) =>
+  return getOrInsertComputed(cache, comments, /** @returns {string} */ (/** @type {any[]} */ comments) =>
     stripCommentsFromText(options.originalText, comments),
   );
 }

@@ -59,14 +59,14 @@ function isSimpleCallArgument(node, depth = 2) {
 
   if (node.type === "TemplateLiteral") {
     return (
-      node.quasis.every(/** @returns {boolean} */ (element) => !element.value.raw.includes("\n")) &&
-      node.expressions.every(isChildSimple)
+      /** @type {import("../types/estree.js").Node[]} */ (node.quasis).every(/** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ element) => !/** @type {string} */ (element.value.raw).includes("\n")) &&
+      /** @type {import("../types/estree.js").Node[]} */ (node.expressions).every(isChildSimple)
     );
   }
 
   if (isObjectExpression(node)) {
-    return node.properties.every(
-      /** @returns {boolean} */ (property) =>
+    return /** @type {import("../types/estree.js").Node[]} */ (node.properties).every(
+      /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ property) =>
         // @ts-expect-error -- FIXME
         !property.computed &&
         // @ts-expect-error -- FIXME
@@ -77,7 +77,7 @@ function isSimpleCallArgument(node, depth = 2) {
   }
 
   if (isArrayExpression(node)) {
-    return node.elements.every(/** @returns {boolean} */ (x) => x === null || isChildSimple(x));
+    return /** @type {import("../types/estree.js").Node[]} */ (node.elements).every(/** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ x) => x === null || isChildSimple(x));
   }
 
   if (isCallLikeExpression(node)) {

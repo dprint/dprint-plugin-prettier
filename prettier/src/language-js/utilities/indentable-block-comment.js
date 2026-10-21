@@ -2,6 +2,7 @@
 import { getOrInsertComputed } from "../../utilities/get-or-insert.js";
 import { isBlockComment } from "./comment-types.js";
 
+/** @returns {string[]} */
 function getIndentableBlockCommentLinesInternal(/** @type {import("../types/estree.js").Comment} */ comment) {
   /*
   In postprocess.js
@@ -24,6 +25,7 @@ function getIndentableBlockCommentLinesInternal(/** @type {import("../types/estr
     return [];
   }
 
+  /** @type {string[]} */
   const trimmedLines = [];
 
   for (let line of `*${comment.value}*`.split("\n")) {
@@ -41,6 +43,7 @@ function getIndentableBlockCommentLinesInternal(/** @type {import("../types/estr
 
 const cache = new WeakMap();
 
+/** @returns {string[]} */
 function getIndentableBlockCommentLines(/** @type {import("../types/estree.js").Comment} */ comment) {
   return getOrInsertComputed(
     cache,

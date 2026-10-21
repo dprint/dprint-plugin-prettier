@@ -11,7 +11,7 @@ import { startsWithNoLookaheadToken } from "../utilities/starts-with-no-lookahea
  * @import {Doc} from "../../document/index.js"
  */
 
-function printAwaitExpression(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
+function printAwaitExpression(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   /** @type{Doc[]} */
   let parts = ["await"];
@@ -25,7 +25,7 @@ function printAwaitExpression(/** @type {import("../../../../prettier/src/common
       parts = [indent([softline, ...parts]), softline];
       // avoid printing `await (await` on one line
       const parentAwaitOrBlock = path.findAncestor(
-        /** @returns {boolean} */ (node) =>
+        /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node) =>
           node.type === "AwaitExpression" || node.type === "BlockStatement",
       );
       if (

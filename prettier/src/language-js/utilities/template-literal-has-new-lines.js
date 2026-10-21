@@ -17,7 +17,7 @@
  * @returns {boolean}
  */
 function templateLiteralHasNewLines(template) {
-  return template.quasis.some(/** @returns {boolean} */ (quasi) => quasi.value.raw.includes("\n"));
+  return /** @type {import("../types/estree.js").Node[]} */ (template.quasis).some(/** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ quasi) => /** @type {string} */ (quasi.value.raw).includes("\n"));
 }
 
 export { templateLiteralHasNewLines };

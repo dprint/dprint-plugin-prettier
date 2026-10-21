@@ -9,7 +9,18 @@ import makeString from "./make-string.js";
 
 /** @import {Quote} from "./get-preferred-quote.js" @returns {string} */
 
-function printString(/** @type {string} */ raw, options) {
+/**
+ * what the languages that print strings give it of their options
+ *
+ * @typedef {{
+ *   parser: string,
+ *   quoteProps?: string,
+ *   singleQuote?: boolean,
+ *   __isInHtmlAttribute?: boolean,
+ * }} PrintStringOptions
+ */
+
+function printString(/** @type {string} */ raw, /** @type {PrintStringOptions} */ options) {
   assert.ok(/^(?<quote>["']).*\k<quote>$/s.test(raw));
 
   // `rawContent` is the string exactly like it appeared in the input source

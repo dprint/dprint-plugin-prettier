@@ -1,3 +1,4 @@
+// @nts-check
 import isPreviousLineEmptyBeforeIndex from "../../utilities/is-previous-line-empty.js";
 import { locStart } from "../location/index.js";
 
@@ -10,6 +11,7 @@ import { locStart } from "../location/index.js";
 
 /**
  * @param {Node | Comment} node
+ * @param {import("../print-options.js").JsPrintOptions} options
  * @returns {boolean}
  */
 const isPreviousLineEmpty = (node, { originalText }) =>

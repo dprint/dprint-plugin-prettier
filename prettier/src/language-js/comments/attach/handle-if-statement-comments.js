@@ -25,7 +25,7 @@ import { isSingleLineComment } from "./utilities.js";
 //     // comment
 //     ...
 //   }
-/** @returns {boolean} */ function handleIfStatementComments({
+/** @returns {boolean} */ function handleIfStatementComments(/** @type {import("../handle-comments.js").CommentContext} */ {
   comment,
   precedingNode,
   enclosingNode,
@@ -74,7 +74,8 @@ import { isSingleLineComment } from "./utilities.js";
   return false;
 }
 
-function handleCommentsBetween({
+/** @returns {boolean} */
+function handleCommentsBetween(/** @type {import("../handle-comments.js").CommentContext} */ {
   comment,
   precedingNode,
   enclosingNode,

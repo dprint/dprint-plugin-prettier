@@ -2,7 +2,7 @@ import { group, hardline, indent, line } from "../../document/index.js";
 import { hasComment } from "../utilities/comments.js";
 import { printDeclareToken, printSemicolon } from "./miscellaneous.js";
 
-function printVariableDeclaration(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
+function printVariableDeclaration(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   const printed = path.map(print, "declarations");
 
@@ -15,8 +15,9 @@ function printVariableDeclaration(/** @type {import("../../../../prettier/src/co
       (path.parent.type === "ForInStatement" ||
         path.parent.type === "ForOfStatement"));
 
-  const hasValue = node.declarations.some((declarator) => declarator.init);
+  const hasValue = /** @type {import("../types/estree.js").Node[]} */ (node.declarations).some((/** @type {import("../types/estree.js").Node} */ declarator) => declarator.init);
 
+  /** @type {import("../../document/index.js").Doc} */
   let firstVariable;
   if (printed.length === 1 && !hasComment(node.declarations[0])) {
     firstVariable = printed[0];

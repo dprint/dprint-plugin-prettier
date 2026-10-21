@@ -90,10 +90,14 @@ async function coreFormat(/** @type {string} */ originalText, /** @type {import(
     //
     // Steps 1 and 2 have already happened; now we implement step 3.
 
+    /** @type {number} */
     let oldCursorRegionStart;
+    /** @type {string} */
     let oldCursorRegionText;
 
+    /** @type {number} */
     let newCursorRegionStart;
+    /** @type {string} */
     let newCursorRegionText;
 
     if (

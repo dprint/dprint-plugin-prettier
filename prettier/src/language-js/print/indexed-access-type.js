@@ -7,7 +7,7 @@ import { printOptionalToken } from "./miscellaneous.js";
 - `IndexedAccessType`(flow)
 - `OptionalIndexedAccessType`(flow)
 */
-/** @returns {any[]} */ function printIndexedAccessType(/** @type {AstPath} */ path, options, /** @type {(a0?: any) => any} */ print) {
+/** @returns {any[]} */ function printIndexedAccessType(/** @type {AstPath} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../print-options.js").JsPrint} */ print) {
   return [
     print("objectType"),
     printOptionalToken(path),

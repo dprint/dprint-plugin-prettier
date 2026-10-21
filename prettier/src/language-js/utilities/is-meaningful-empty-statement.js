@@ -1,6 +1,6 @@
 // @nts-check
 /* The argument is a duck type of AstPath, so we can use it in comment attach and AST massage */
-/** @returns {boolean} */ function isMeaningfulEmptyStatement({ node, parent }) {
+/** @returns {boolean} */ function isMeaningfulEmptyStatement(/** @type {{ node: import("../types/estree.js").Node, parent: import("../types/estree.js").Node }} */ { node, parent }) {
   if (node?.type !== "EmptyStatement") {
     return false;
   }

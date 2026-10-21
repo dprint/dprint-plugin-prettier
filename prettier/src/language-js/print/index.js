@@ -20,7 +20,7 @@ import { printTypescript } from "./typescript.js";
  * @import {Doc} from "../../document/index.js"
  */
 
-function printWithoutParentheses(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print, args) {
+function printWithoutParentheses(/** @type {AstPath} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print, args) {
   for (const printer of [
     printAngular,
     printJsx,
@@ -90,14 +90,14 @@ function print(path, options, print, args) {
     return doc;
   }
 
-  return inheritLabel(doc, /** @returns {any[]} */ (doc) => [
+  return inheritLabel(doc, /** @returns {any[]} */ (/** @type {Doc} */ doc) => [
     needsParens ? "(" : "",
     decoratorsDoc ? group([decoratorsDoc, doc]) : doc,
     needsParens ? ")" : "",
   ]);
 }
 
-function printCommentsForFunction(/** @type {AstPath} */ path, options, doc) {
+function printCommentsForFunction(/** @type {AstPath} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {Doc} */ doc) {
   /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
 
   if (

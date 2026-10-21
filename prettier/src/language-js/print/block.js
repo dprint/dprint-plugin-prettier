@@ -16,7 +16,7 @@ import { printStatementSequence } from "./statement-sequence.js";
 - `StaticBlock`
 - `TSModuleBlock` (TypeScript)
 */
-function printBlock(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
+function printBlock(/** @type {AstPath} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   const bodyDoc = printBlockBody(path, options, print);
   /** @type {{ node: import("../types/estree.js").Node, parent: import("../types/estree.js").Node }} */ const { node, parent } = path;
 
@@ -70,11 +70,11 @@ function printBlock(/** @type {AstPath} */ path, options, /** @type {import("../
 - `StaticBlock`
 - `TSModuleBlock` (TypeScript)
 */
-function printBlockBody(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
+function printBlockBody(/** @type {AstPath} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
 
   /** @type {boolean} */ const hasDirectives = isNonEmptyArray(node.directives);
-  const hasBody = node.body.some(/** @returns {boolean} */ (node) => node.type !== "EmptyStatement");
+  const hasBody = /** @type {import("../types/estree.js").Node[]} */ (node.body).some(/** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node) => node.type !== "EmptyStatement");
   /** @type {boolean} */ const hasDanglingComments = hasComment(node, CommentCheckFlags.Dangling);
 
   if (!hasDirectives && !hasBody && !hasDanglingComments) {
@@ -88,7 +88,7 @@ function printBlockBody(/** @type {AstPath} */ path, options, /** @type {import(
 
     if (hasBody || hasDanglingComments) {
       parts.push(hardline);
-      if (isNextLineEmpty(node.directives.at(-1), options)) {
+      if (isNextLineEmpty(/** @type {import("../types/estree.js").Node[]} */ (node.directives).at(-1), options)) {
         parts.push(hardline);
       }
     }

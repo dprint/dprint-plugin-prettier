@@ -74,11 +74,11 @@ function printTypeParameters(path, /** @type {import("../../../../prettier/src/l
   /** @type {boolean} */ const isParameterInTestCall = isTestCall(path.grandparent);
 
   /** @type {boolean} */ const isArrowFunctionVariable = path.match(
-    /** @returns {boolean} */ (node) =>
+    /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node) =>
       !(node[paramsKey].length === 1 && isObjectType(node[paramsKey][0])),
     undefined,
-    /** @returns {boolean} */ (node, name) => name === "typeAnnotation",
-    /** @returns {boolean} */ (node) => node.type === "Identifier",
+    /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node, name) => name === "typeAnnotation",
+    /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node) => node.type === "Identifier",
     isArrowFunctionVariableDeclarator,
   );
 
@@ -128,7 +128,7 @@ function printTypeParameters(path, /** @type {import("../../../../prettier/src/l
   ]);
 }
 
-function printDanglingCommentsForInline(/** @type {AstPath} */ path, options) {
+function printDanglingCommentsForInline(/** @type {AstPath} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options) {
   /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   if (!hasComment(node, CommentCheckFlags.Dangling)) {
     return "";
@@ -144,7 +144,7 @@ function printDanglingCommentsForInline(/** @type {AstPath} */ path, options) {
 }
 
 // `TSTypeParameter` and `TypeParameter`
-function printTypeParameter(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
+function printTypeParameter(/** @type {AstPath} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
 
   /**

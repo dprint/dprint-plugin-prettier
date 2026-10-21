@@ -13,7 +13,7 @@ import { hasSameLocStart, locEnd } from "../location/index.js";
 import isIgnored from "../utilities/is-ignored.js";
 import { isExportDeclaration } from "../utilities/node-types.js";
 
-function printClassMemberDecorators(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
+function printClassMemberDecorators(/** @type {AstPath} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   return group([
     join(line, path.map(print, "decorators")),
@@ -21,7 +21,7 @@ function printClassMemberDecorators(/** @type {AstPath} */ path, options, /** @t
   ]);
 }
 
-function printDecoratorsBeforeExport(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
+function printDecoratorsBeforeExport(/** @type {AstPath} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   // Only print decorators here if they were written before the export,
   // otherwise they are printed by the node.declaration
   if (!hasDecoratorsBeforeExport(path.node)) {
@@ -36,7 +36,7 @@ function printDecoratorsBeforeExport(/** @type {AstPath} */ path, options, /** @
   ];
 }
 
-function printDecorators(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
+function printDecorators(/** @type {AstPath} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   /** @type {{ node: import("../types/estree.js").Node, parent: import("../types/estree.js").Node }} */ const { node, parent } = path;
   const { decorators } = node;
 
@@ -69,7 +69,7 @@ function printDecorators(/** @type {AstPath} */ path, options, /** @type {import
 }
 
 /** @returns {boolean} */ function hasNewlineBetweenOrAfterDecorators(/** @type {import("../types/estree.js").Node} */ node, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options) {
-  return node.decorators.some(/** @returns {boolean} */ (decorator) =>
+  return /** @type {import("../types/estree.js").Node[]} */ (node.decorators).some(/** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ decorator) =>
     hasNewline(options.originalText, locEnd(decorator)),
   );
 }

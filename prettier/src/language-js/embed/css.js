@@ -17,7 +17,7 @@ async function printEmbedCss(textToDoc, print, /** @type {import("../../../../pr
 
   // Get full template literal with expressions replaced by placeholders
   let text = "";
-  for (const [index, quasis] of node.quasis.entries()) {
+  for (const [index, quasis] of /** @type {import("../types/estree.js").Node[]} */ (node.quasis).entries()) {
     const { raw } = quasis.value;
 
     if (index > 0) {
@@ -77,22 +77,22 @@ function isStyledJsx(/** @type {import("../../../../prettier/src/common/ast-path
   return (
     path.match(
       undefined,
-      /** @returns {boolean} */ (node, key) =>
+      /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node, key) =>
         key === "quasi" &&
         node.type === "TaggedTemplateExpression" &&
         isNodeMatches(node.tag, ["css", "css.global", "css.resolve"]),
     ) ||
     path.match(
       undefined,
-      /** @returns {boolean} */ (node, key) =>
+      /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node, key) =>
         key === "expression" && node.type === "JSXExpressionContainer",
-      /** @returns {boolean} */ (node, key) =>
+      /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node, key) =>
         key === "children" &&
         node.type === "JSXElement" &&
         node.openingElement.name.type === "JSXIdentifier" &&
         node.openingElement.name.name === "style" &&
-        node.openingElement.attributes.some(
-          /** @returns {boolean} */ (attribute) =>
+        /** @type {import("../types/estree.js").Node[]} */ (node.openingElement.attributes).some(
+          /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ attribute) =>
             attribute.type === "JSXAttribute" &&
             attribute.name.type === "JSXIdentifier" &&
             attribute.name.name === "jsx",
@@ -113,7 +113,7 @@ function isStyledJsx(/** @type {import("../../../../prettier/src/common/ast-path
  * styled-components template literals
  * @returns {boolean}
  */
-function isStyledComponents(/** @type {import("../../common/ast-path.js").default} */ { parent }) {
+function isStyledComponents(/** @type {import("../../common/ast-path.js").default & { parent: import("../types/estree.js").Node }} */ { parent }) {
   if (!parent || parent.type !== "TaggedTemplateExpression") {
     return false;
   }
@@ -160,7 +160,7 @@ function isStyledComponents(/** @type {import("../../common/ast-path.js").defaul
  * JSX element with CSS prop
  * @returns {boolean}
  */
-function isCssProp(/** @type {import("../../common/ast-path.js").default} */ { parent, grandparent }) {
+function isCssProp(/** @type {import("../../common/ast-path.js").default & { parent: import("../types/estree.js").Node, grandparent: import("../types/estree.js").Node }} */ { parent, grandparent }) {
   return (
     grandparent?.type === "JSXAttribute" &&
     parent.type === "JSXExpressionContainer" &&

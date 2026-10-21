@@ -6,7 +6,7 @@ import { getOrInsertComputed } from "./get-or-insert.js";
  */
 function createGroupIdMapper(description) {
   const groupIds = new WeakMap();
-  return (node) =>
+  return (/** @type {any} */ node) =>
     getOrInsertComputed(groupIds, node, () => Symbol(description));
 }
 

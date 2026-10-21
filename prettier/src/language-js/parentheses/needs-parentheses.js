@@ -66,7 +66,7 @@ function needsParentheses(path, /** @type {import("../../../../prettier/src/lang
     node.type === "DoExpression"
   ) {
     const expression = path.findAncestor(
-      /** @returns {boolean} */ (node) => node.type === "ExpressionStatement",
+      /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node) => node.type === "ExpressionStatement",
     )?.expression;
     if (
       expression &&
@@ -81,7 +81,7 @@ function needsParentheses(path, /** @type {import("../../../../prettier/src/lang
 
   if (node.type === "ObjectExpression") {
     const arrowFunctionBody = path.findAncestor(
-      /** @returns {boolean} */ (node) => node.type === "ArrowFunctionExpression",
+      /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node) => node.type === "ArrowFunctionExpression",
     )?.body;
     if (
       arrowFunctionBody &&
@@ -354,10 +354,10 @@ function needsParentheses(path, /** @type {import("../../../../prettier/src/lang
     case "TSFunctionType":
       if (
         path.match(
-          /** @returns {boolean} */ (node) => node.type === "TSFunctionType",
-          /** @returns {boolean} */ (node, key) =>
+          /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node) => node.type === "TSFunctionType",
+          /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node, key) =>
             key === "typeAnnotation" && node.type === "TSTypeAnnotation",
-          /** @returns {boolean} */ (node, key) =>
+          /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node, key) =>
             key === "returnType" && node.type === "ArrowFunctionExpression",
         )
       ) {
@@ -445,7 +445,7 @@ function needsParentheses(path, /** @type {import("../../../../prettier/src/lang
         (key === "objectType" && parent.type === "TSIndexedAccessType") ||
         parent.type === "TSTypeOperator" ||
         (parent.type === "TSTypeAnnotation" &&
-          path.grandparent.type.startsWith("TSJSDoc"))
+          /** @type {string} */ (path.grandparent.type).startsWith("TSJSDoc"))
       );
     case "TSTypeQuery":
       return (
@@ -512,9 +512,9 @@ function needsParentheses(path, /** @type {import("../../../../prettier/src/lang
       if (
         path.match(
           undefined,
-          /** @returns {boolean} */ (node, key) =>
+          /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node, key) =>
             key === "typeAnnotation" && node.type === "TypeAnnotation",
-          /** @returns {boolean} */ (node, key) =>
+          /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node, key) =>
             key === "returnType" && node.type === "ArrowFunctionExpression",
         )
       ) {
@@ -526,11 +526,11 @@ function needsParentheses(path, /** @type {import("../../../../prettier/src/lang
       if (
         path.match(
           undefined,
-          (node, key) =>
+          (/** @type {import("../types/estree.js").Node} */ node, key) =>
             key === "typeAnnotation" && node.type === "NullableTypeAnnotation",
-          (node, key) =>
+          (/** @type {import("../types/estree.js").Node} */ node, key) =>
             key === "typeAnnotation" && node.type === "TypeAnnotation",
-          (node, key) =>
+          (/** @type {import("../types/estree.js").Node} */ node, key) =>
             key === "returnType" && node.type === "ArrowFunctionExpression",
         )
       ) {
@@ -550,18 +550,18 @@ function needsParentheses(path, /** @type {import("../../../../prettier/src/lang
       if (
         path.match(
           undefined,
-          /** @returns {boolean} */ (node, key) =>
+          /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node, key) =>
             key === "typeAnnotation" && node.type === "TypePredicate",
-          /** @returns {boolean} */ (node, key) =>
+          /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node, key) =>
             key === "typeAnnotation" && node.type === "TypeAnnotation",
-          /** @returns {boolean} */ (node, key) =>
+          /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node, key) =>
             key === "returnType" && node.type === "ArrowFunctionExpression",
         )
       ) {
         return true;
       }
 
-      const ancestor =
+      /** @type {import("../types/estree.js").Node} */ const ancestor =
         parent.type === "NullableTypeAnnotation" ? path.grandparent : parent;
 
       return (
@@ -644,7 +644,7 @@ function needsParentheses(path, /** @type {import("../../../../prettier/src/lang
         path.match(
           undefined,
           undefined,
-          /** @returns {boolean} */ (node, name) =>
+          /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node, name) =>
             (name === "init" || name === "update") &&
             node.type === "ForStatement",
         )
@@ -658,7 +658,7 @@ function needsParentheses(path, /** @type {import("../../../../prettier/src/lang
         path.match(
           undefined,
           undefined,
-          (node, name) =>
+          (/** @type {import("../types/estree.js").Node} */ node, name) =>
             name === "properties" && node.type === "ObjectPattern",
         )
       ) {

@@ -229,7 +229,7 @@ function printFunctionParameters(
 }
 
 function getReturnTypeNode(/** @type {import("../types/estree.js").Node} */ functionNode) {
-  let returnTypeNode;
+  /** @type {any} */ let returnTypeNode;
   if (functionNode.returnType) {
     returnTypeNode = functionNode.returnType;
     if (returnTypeNode.typeAnnotation) {
@@ -283,10 +283,10 @@ function getReturnTypeNode(/** @type {import("../types/estree.js").Node} */ func
  */
 function isDecoratedFunction(path) {
   return path.match(
-    /** @returns {boolean} */ (node) =>
+    /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node) =>
       node.type === "ArrowFunctionExpression" &&
       node.body.type === "BlockStatement",
-    /** @returns {boolean} */ (node, name) => {
+    /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node, name) => {
       if (
         node.type === "CallExpression" &&
         name === "arguments" &&
@@ -304,7 +304,7 @@ function isDecoratedFunction(path) {
       }
       return false;
     },
-    /** @returns {boolean} */ (node, name) =>
+    /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node, name) =>
       (node.type === "VariableDeclarator" && name === "init") ||
       (node.type === "ExportDefaultDeclaration" && name === "declaration") ||
       (node.type === "TSExportAssignment" && name === "expression") ||
@@ -315,7 +315,7 @@ function isDecoratedFunction(path) {
         node.left.object.name === "module" &&
         node.left.property.type === "Identifier" &&
         node.left.property.name === "exports"),
-    /** @returns {boolean} */ (node) =>
+    /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node) =>
       node.type !== "VariableDeclaration" ||
       (node.kind === "const" && node.declarations.length === 1),
   );

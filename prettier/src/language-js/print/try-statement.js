@@ -4,7 +4,7 @@ import { locEnd, locStart } from "../location/index.js";
 import { isBlockComment } from "../utilities/comment-types.js";
 import { hasComment } from "../utilities/comments.js";
 
-function printTryStatement(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
+function printTryStatement(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   return [
     "try ",

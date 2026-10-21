@@ -18,7 +18,7 @@ import skipNewline from "../../utilities/skip-newline.js";
 @import AstPath from "../../common/ast-path.js"
 @import {Doc, HardLine, Line} from "../../document/index.js"
 @typedef {{
-  filter?: (comment) => boolean,
+  filter?: (comment: any) => boolean,
 }} CommentPrintOptions
 @typedef {{doc: Doc, isBlock: any, hasLineSuffix: boolean}} PrintedTrailingComment
 */
@@ -36,6 +36,7 @@ function printComment(/** @type {AstPath} */ path, /** @type {import("../../../.
   const parts = [printComment(path, options)];
 
   const { printer, originalText, locStart, locEnd } = options;
+  /** @type {boolean | undefined} */
   const isBlock = printer.isBlockComment?.(comment);
 
   // Leading block comments should see if they need to stay on the
@@ -134,8 +135,8 @@ function printDanglingComments(
     filter = returnTrue,
   } = danglingCommentsPrintOptions;
   const danglingComments = new Set(
-    path.node?.comments?.filter(
-      /** @returns {boolean} */ (comment) =>
+    /** @type {any[] | undefined} */ (path.node?.comments)?.filter(
+      /** @returns {boolean} */ (/** @type {any} */ comment) =>
         !(
           comment.leading ||
           comment.trailing ||
@@ -171,8 +172,8 @@ function printLeadingComments(path, /** @type {import("../../../../prettier/src/
   const printed = options[Symbol.for("printedComments")];
   const filter = printOptions?.filter ?? returnTrue;
   const leadingComments = new Set(
-    path.node?.comments?.filter(
-      /** @returns {boolean} */ (comment) => !printed?.has(comment) && comment.leading && filter(comment),
+    /** @type {any[] | undefined} */ (path.node?.comments)?.filter(
+      /** @returns {boolean} */ (/** @type {any} */ comment) => !printed?.has(comment) && comment.leading && filter(comment),
     ),
   );
 

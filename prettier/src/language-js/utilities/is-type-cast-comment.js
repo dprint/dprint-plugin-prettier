@@ -16,7 +16,7 @@ function isTypeCastComment(comment) {
   return getOrInsertComputed(
     cache,
     comment,
-    /** @returns {boolean} */ (comment) =>
+    /** @returns {boolean} */ (/** @type {import("../types/estree.js").Comment} */ comment) =>
       isBlockComment(comment) &&
       comment.value[0] === "*" &&
       // TypeScript expects the type to be enclosed in curly brackets, however
