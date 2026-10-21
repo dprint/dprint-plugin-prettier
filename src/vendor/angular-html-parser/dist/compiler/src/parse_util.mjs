@@ -8,7 +8,7 @@
 * found in the LICENSE file at https://angular.dev/license
 */
 var ParseLocation = class ParseLocation {
-	/** @type {any} */ file;
+	/** @type {ParseSourceFile} */ file;
 	/** @type {number} */ offset;
 	/** @type {number} */ line;
 	/** @type {number} */ col;

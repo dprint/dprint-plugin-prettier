@@ -6,9 +6,9 @@ import { isVueScriptTag } from "./index.js";
 
 const cache = new WeakMap();
 /** @returns {boolean} */ function isVueSfcWithTypescriptScript(/** @type {AstPath} */ path, options) {
-  return getOrInsertComputed(cache, path.root, /** @returns {boolean} */ (root) =>
+  return getOrInsertComputed(cache, path.root, /** @returns {boolean} */ (/** @type {import("../parse/ast.js").Node} */ root) =>
     root.children.some(
-      /** @returns {boolean} */ (child) =>
+      /** @returns {boolean} */ (/** @type {import("../parse/ast.js").Node} */ child) =>
         isVueScriptTag(child, options) &&
         ["ts", "typescript"].includes(child.attrMap.lang),
     ),

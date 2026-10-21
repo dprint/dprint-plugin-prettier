@@ -64,7 +64,7 @@ const getLeadingAndTrailingHtmlWhitespace = (/** @type {string} */ string) => {
   if (
     isPreLikeNode(node) &&
     node.children.some(
-      /** @returns {boolean} */ (child) => child.kind !== "text" && child.kind !== "interpolation",
+      /** @returns {boolean} */ (/** @type {import("../parse/ast.js").Node} */ child) => child.kind !== "text" && child.kind !== "interpolation",
     )
   ) {
     return true;
@@ -336,7 +336,7 @@ function forceBreakChildren(/** @type {import("../parse/ast.js").Node} */ node) 
 }
 
 /** @returns {boolean | undefined} */ function hasNonTextChild(/** @type {import("../parse/ast.js").Node} */ node) {
-  return node.children?.some(/** @returns {boolean} */ (child) => child.kind !== "text");
+  return node.children?.some(/** @returns {boolean} */ (/** @type {import("../parse/ast.js").Node} */ child) => child.kind !== "text");
 }
 
 /** @returns {string | undefined} */ function inferParserByTypeAttribute(/** @type {string | undefined} */ type) {
@@ -461,7 +461,7 @@ function forceBreakChildren(/** @type {import("../parse/ast.js").Node} */ node) 
   return getNodeCssStyleWhiteSpace(node).startsWith("pre");
 }
 
-/** @returns {boolean} */ function hasParent(/** @type {import("../parse/ast.js").Node} */ node, /** @type {(a0?: any) => any} */ fn) {
+/** @returns {boolean} */ function hasParent(/** @type {import("../parse/ast.js").Node} */ node, /** @type {(node: import("../parse/ast.js").Node) => boolean} */ fn) {
   let current = node;
 
   while (current) {
@@ -491,7 +491,7 @@ function forceBreakChildren(/** @type {import("../parse/ast.js").Node} */ node) 
 
   /** @type {boolean} */ let isInSvgForeignObject = false;
   if (node.kind === "element" && node.namespace === "svg") {
-    if (hasParent(node, /** @returns {boolean} */ (parent) => parent.fullName === "svg:foreignObject")) {
+    if (hasParent(node, /** @returns {boolean} */ (/** @type {import("../parse/ast.js").Node} */ parent) => parent.fullName === "svg:foreignObject")) {
       isInSvgForeignObject = true;
     } else {
       return node.name === "svg" ? "inline-block" : "block";

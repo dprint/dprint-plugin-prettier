@@ -1,5 +1,26 @@
 // @nts-check
-/** @typedef {{ peek: number, offset: number, line: number, column: number }} CursorState */
+/**
+ * @import {CursorState, Token, TagAttribute} from "angular-html-parser-types"
+ */
+/**
+ * @typedef {(tagName: string, prefix: string, hasParent: boolean, attrs: TagAttribute[]) => number | undefined} GetTagContentType
+ * @typedef {{ endPos: number, startPos: number, startLine: number, startCol: number }} LexerRange
+ * @typedef {Readonly<{ start: string, end: string }>} InterpolationConfig
+ * @typedef {{
+ *   tokenizeExpansionForms?: boolean,
+ *   leadingTriviaChars?: string[],
+ *   canSelfClose?: boolean,
+ *   allowHtmComponentClosingTags?: boolean,
+ *   allowStartTagComments?: boolean,
+ *   range?: LexerRange,
+ *   escapedString?: boolean,
+ *   preserveLineEndings?: boolean,
+ *   i18nNormalizeLineEndingsInICUs?: boolean,
+ *   tokenizeBlocks?: boolean,
+ *   tokenizeLet?: boolean,
+ *   selectorlessEnabled?: boolean,
+ * }} TokenizeOptions
+ */
 import { mergeNsAndName } from "./tags.mjs";
 import { isAsciiHexDigit, isAsciiLetter, isDigit, isNewLine, isOctalDigit, isQuote, isWhitespace } from "../chars.mjs";
 import { ParseError, ParseLocation, ParseSourceFile, ParseSourceSpan } from "../parse_util.mjs";
@@ -13,16 +34,16 @@ import { NAMED_ENTITIES } from "./entities.mjs";
 * found in the LICENSE file at https://angular.dev/license
 */
 var TokenizeResult = class {
-	/** @type {any[]} */ tokens;
-	/** @type {any[]} */ errors;
-	/** @type {any[]} */ nonNormalizedIcuExpressions;
-	constructor(/** @type {any[]} */ tokens, /** @type {any[]} */ errors, /** @type {any[]} */ nonNormalizedIcuExpressions) {
+	/** @type {Token[]} */ tokens;
+	/** @type {ParseError[]} */ errors;
+	/** @type {Token[]} */ nonNormalizedIcuExpressions;
+	constructor(/** @type {Token[]} */ tokens, /** @type {ParseError[]} */ errors, /** @type {Token[]} */ nonNormalizedIcuExpressions) {
 		this.tokens = tokens;
 		this.errors = errors;
 		this.nonNormalizedIcuExpressions = nonNormalizedIcuExpressions;
 	}
 };
-/** @returns {TokenizeResult} */ function tokenize(/** @type {string | undefined} */ source, /** @type {string | undefined} */ url, getTagContentType, options = {}) {
+/** @returns {TokenizeResult} */ function tokenize(/** @type {string | undefined} */ source, /** @type {string | undefined} */ url, /** @type {GetTagContentType} */ getTagContentType, /** @type {TokenizeOptions} */ options = {}) {
 	/** @type {_Tokenizer} */ const tokenizer = new _Tokenizer(new ParseSourceFile(source, url), getTagContentType, options);
 	tokenizer.tokenize();
 	return new TokenizeResult(mergeTextTokens(tokenizer.tokens), tokenizer.errors, tokenizer.nonNormalizedIcuExpressions);
@@ -52,48 +73,48 @@ const SUPPORTED_BLOCKS = [
 	"@error",
 	"@content"
 ];
-const INTERPOLATION = {
+/** @type {InterpolationConfig} */ const INTERPOLATION = {
 	start: "{{",
 	end: "}}"
 };
 /** @type {RegExp} */ const DEFAULT_NEVER_PATTERN = /^default[^\S\r\n]+never/;
 /** @type {RegExp} */ const ELSE_IF_PATTERN = /^else[^\S\r\n]+if/;
 var _Tokenizer = class {
-	_getTagContentType;
+	/** @type {GetTagContentType} */ _getTagContentType;
 	/** @type {PlainCharacterCursor} */ _cursor;
 	/** @type {boolean} */ _tokenizeIcu;
-	_leadingTriviaCodePoints;
+	/** @type {number[] | undefined} */ _leadingTriviaCodePoints;
 	/** @type {boolean} */ _canSelfClose;
 	/** @type {boolean} */ _allowHtmComponentClosingTags;
 	/** @type {boolean} */ _allowStartTagComments;
 	/** @type {PlainCharacterCursor | null} */ _currentTokenStart = null;
 	/** @type {number | null} */ _currentTokenType = null;
-	_expansionCaseStack = [];
-	_openDirectiveCount = 0;
+	/** @type {number[]} */ _expansionCaseStack = [];
+	/** @type {number} */ _openDirectiveCount = 0;
 	/** @type {boolean} */ _inInterpolation = false;
 	/** @type {boolean} */ _preserveLineEndings;
 	/** @type {boolean} */ _i18nNormalizeLineEndingsInICUs;
-	_fullNameStack = [];
+	/** @type {string[]} */ _fullNameStack = [];
 	/** @type {boolean} */ _tokenizeBlocks;
 	/** @type {boolean} */ _tokenizeLet;
 	/** @type {boolean} */ _selectorlessEnabled;
-	tokens = [];
-	errors = [];
-	nonNormalizedIcuExpressions = [];
+	/** @type {Token[]} */ tokens = [];
+	/** @type {ParseError[]} */ errors = [];
+	/** @type {Token[]} */ nonNormalizedIcuExpressions = [];
 	/**
 	* @param _file The html source file being tokenized.
 	* @param _getTagContentType A function that will retrieve a tag content type for a given tag
 	*     name.
 	* @param options Configuration of the tokenization.
 	*/
-	constructor(/** @type {import("../parse_util.mjs").ParseSourceFile} */ _file, _getTagContentType, options) {
+	constructor(/** @type {import("../parse_util.mjs").ParseSourceFile} */ _file, /** @type {GetTagContentType} */ _getTagContentType, /** @type {TokenizeOptions} */ options) {
 		this._getTagContentType = _getTagContentType;
 		this._tokenizeIcu = options.tokenizeExpansionForms || false;
-		this._leadingTriviaCodePoints = options.leadingTriviaChars && options.leadingTriviaChars.map((c) => c.codePointAt(0) || 0);
+		this._leadingTriviaCodePoints = options.leadingTriviaChars && options.leadingTriviaChars.map(/** @returns {number} */ (/** @type {string} */ c) => c.codePointAt(0) || 0);
 		this._canSelfClose = options.canSelfClose || false;
 		this._allowHtmComponentClosingTags = options.allowHtmComponentClosingTags || false;
 		this._allowStartTagComments = options.allowStartTagComments ?? true;
-		const range = options.range || {
+		/** @type {LexerRange} */ const range = options.range || {
 			endPos: _file.content.length,
 			startPos: 0,
 			startLine: 0,
@@ -294,10 +315,10 @@ var _Tokenizer = class {
 		this._currentTokenStart = start;
 		this._currentTokenType = type;
 	}
-	_endToken(/** @type {any[]} */ parts, /** @type {PlainCharacterCursor | undefined} */ end) {
+	/** @returns {Token} */ _endToken(/** @type {string[]} */ parts, /** @type {PlainCharacterCursor | undefined} */ end) {
 		if (this._currentTokenStart === null) throw new ParseError(this._cursor.getSpan(end), "Programming error - attempted to end a token when there was no start to the token");
 		if (this._currentTokenType === null) throw new ParseError(this._cursor.getSpan(this._currentTokenStart), "Programming error - attempted to end a token which has no token type");
-		const token = {
+		/** @type {Token} */ const token = {
 			type: this._currentTokenType,
 			parts,
 			sourceSpan: (end ?? this._cursor).getSpan(this._currentTokenStart, this._leadingTriviaCodePoints)
@@ -355,14 +376,14 @@ var _Tokenizer = class {
 		const location = this._cursor.clone();
 		if (!this._attemptStr(chars)) throw this._createError(_unexpectedCharacterErrorMsg(this._cursor.peek()), this._cursor.getSpan(location));
 	}
-	_requireStrCaseInsensitive(chars) {
+	_requireStrCaseInsensitive(/** @type {string} */ chars) {
 		const location = this._cursor.clone();
 		if (!this._attemptStrCaseInsensitive(chars)) throw this._createError(_unexpectedCharacterErrorMsg(this._cursor.peek()), this._cursor.getSpan(location));
 	}
-	_attemptCharCodeUntilFn(predicate) {
+	_attemptCharCodeUntilFn(/** @type {(code: number) => boolean} */ predicate) {
 		while (!predicate(this._cursor.peek())) this._cursor.advance();
 	}
-	_requireCharCodeUntilFn(predicate, /** @type {number} */ len) {
+	_requireCharCodeUntilFn(/** @type {(code: number) => boolean} */ predicate, /** @type {number} */ len) {
 		const start = this._cursor.clone();
 		this._attemptCharCodeUntilFn(predicate);
 		if (this._cursor.diff(start) < len) throw this._createError(_unexpectedCharacterErrorMsg(this._cursor.peek()), this._cursor.getSpan(start));
@@ -370,7 +391,7 @@ var _Tokenizer = class {
 	_attemptUntilChar(/** @type {number} */ char) {
 		while (this._cursor.peek() !== char) this._cursor.advance();
 	}
-	_attemptUntilIgnoreQuotes(predicate) {
+	_attemptUntilIgnoreQuotes(/** @type {(code: number) => boolean} */ predicate) {
 		while (this._cursor.peek() !== 0) {
 			const char = this._cursor.peek();
 			if (predicate(char)) break;
@@ -445,9 +466,9 @@ var _Tokenizer = class {
 			}
 		}
 	}
-	_consumeRawText(/** @type {boolean} */ consumeEntities, endMarkerPredicate) {
+	_consumeRawText(/** @type {boolean} */ consumeEntities, /** @type {() => boolean} */ endMarkerPredicate) {
 		this._beginToken(consumeEntities ? 6 : 7);
-		const parts = [];
+		/** @type {string[]} */ const parts = [];
 		while (true) {
 			const tagCloseStart = this._cursor.clone();
 			const foundEndMarker = endMarkerPredicate();
@@ -494,21 +515,21 @@ var _Tokenizer = class {
 		this._cursor.advance();
 		this._endToken([]);
 	}
-	_consumeProcessingInstruction(start) {
+	_consumeProcessingInstruction(/** @type {PlainCharacterCursor} */ start) {
 		this._beginToken(43, start);
 		const contentStart = this._cursor.clone();
-		this._attemptUntilIgnoreQuotes((char) => char === 63 || char === 62);
+		this._attemptUntilIgnoreQuotes(/** @returns {boolean} */ (/** @type {number} */ char) => char === 63 || char === 62);
 		const endChar = this._cursor.peek();
 		const content = this._cursor.getChars(contentStart);
 		this._cursor.advance();
 		if (endChar === 63) this._requireCharCode(62);
 		this._endToken([content]);
 	}
-	/** @returns {any[]} */ _consumePrefixAndName(endPredicate) {
+	/** @returns {string[]} */ _consumePrefixAndName(/** @type {(code: number) => boolean} */ endPredicate) {
 		const nameOrPrefixStart = this._cursor.clone();
 		let prefix = "";
 		while (this._cursor.peek() !== 58 && !isPrefixEnd(this._cursor.peek())) this._cursor.advance();
-		let nameStart;
+		/** @type {PlainCharacterCursor} */ let nameStart;
 		if (this._cursor.peek() === 58) {
 			prefix = this._cursor.getChars(nameOrPrefixStart);
 			this._cursor.advance();
@@ -549,11 +570,11 @@ var _Tokenizer = class {
 		this._endToken([content, "multi"], spanEnd);
 	}
 	_consumeTagOpen(/** @type {PlainCharacterCursor} */ start) {
-		let tagName;
-		let prefix;
-		let closingTagName;
-		let openToken;
-		const attrs = [];
+		/** @type {string} */ let tagName;
+		/** @type {string} */ let prefix;
+		/** @type {string} */ let closingTagName;
+		/** @type {Token | undefined} */ let openToken;
+		/** @type {TagAttribute[]} */ const attrs = [];
 		try {
 			if (this._selectorlessEnabled && isSelectorlessNameStart(this._cursor.peek())) {
 				openToken = this._consumeComponentOpenStart(start);
@@ -610,7 +631,7 @@ var _Tokenizer = class {
 		if (contentTokenType === 0) this._consumeRawTextWithTagClose(prefix, openToken, closingTagName, false);
 		else if (contentTokenType === 1) this._consumeRawTextWithTagClose(prefix, openToken, closingTagName, true);
 	}
-	_consumeRawTextWithTagClose(/** @type {string} */ prefix, openToken, /** @type {string} */ tagName, consumeEntities) {
+	_consumeRawTextWithTagClose(/** @type {string} */ prefix, /** @type {Token} */ openToken, /** @type {string} */ tagName, /** @type {boolean} */ consumeEntities) {
 		this._consumeRawText(consumeEntities, /** @returns {boolean} */ () => {
 			if (!this._attemptCharCode(60)) return false;
 			if (!this._attemptCharCode(47)) return false;
@@ -625,17 +646,17 @@ var _Tokenizer = class {
 		this._endToken(openToken.parts);
 		this._handleFullNameStackForTagClose(prefix, tagName);
 	}
-	_consumeTagOpenStart(/** @type {PlainCharacterCursor} */ start) {
+	/** @returns {Token} */ _consumeTagOpenStart(/** @type {PlainCharacterCursor} */ start) {
 		this._beginToken(0, start);
 		const parts = this._consumePrefixAndName(isNameEnd);
 		return this._endToken(parts);
 	}
-	_consumeComponentOpenStart(start) {
+	/** @returns {Token} */ _consumeComponentOpenStart(/** @type {PlainCharacterCursor} */ start) {
 		this._beginToken(35, start);
 		const parts = this._consumeComponentName();
 		return this._endToken(parts);
 	}
-	_consumeComponentName() {
+	/** @returns {string[]} */ _consumeComponentName() {
 		const nameStart = this._cursor.clone();
 		while (isSelectorlessNameChar(this._cursor.peek())) this._cursor.advance();
 		const name = this._cursor.getChars(nameStart);
@@ -651,9 +672,9 @@ var _Tokenizer = class {
 			tagName
 		];
 	}
-	_consumeAttribute() {
+	/** @returns {TagAttribute} */ _consumeAttribute() {
 		const [prefix, name] = this._consumeAttributeName();
-		let value;
+		/** @type {string | undefined} */ let value;
 		this._attemptCharCodeUntilFn(isNotWhitespace);
 		if (this._attemptCharCode(61)) {
 			this._attemptCharCodeUntilFn(isNotWhitespace);
@@ -666,14 +687,14 @@ var _Tokenizer = class {
 			value
 		};
 	}
-	/** @returns {any[]} */ _consumeAttributeName() {
+	/** @returns {string[]} */ _consumeAttributeName() {
 		const attrNameStart = this._cursor.peek();
 		if (attrNameStart === 39 || attrNameStart === 34) throw this._createError(_unexpectedCharacterErrorMsg(attrNameStart), this._cursor.getSpan());
 		this._beginToken(15);
-		let nameEndPredicate;
+		/** @type {(code: number) => boolean} */ let nameEndPredicate;
 		if (this._openDirectiveCount > 0) {
 			let openParens = 0;
-			nameEndPredicate = (code) => {
+			nameEndPredicate = /** @returns {boolean} */ (/** @type {number} */ code) => {
 				if (this._openDirectiveCount > 0) {
 					if (code === 40) openParens++;
 					else if (code === 41) {
@@ -696,7 +717,7 @@ var _Tokenizer = class {
 		return prefixAndName;
 	}
 	/** @returns {string} */ _consumeAttributeValue() {
-		let value;
+		/** @type {string} */ let value;
 		if (this._cursor.peek() === 39 || this._cursor.peek() === 34) {
 			const quoteChar = this._cursor.peek();
 			this._consumeQuote(quoteChar);
@@ -813,9 +834,9 @@ var _Tokenizer = class {
 	*     interpolation expression - i.e. before we get to the normal interpolation closing marker.
 	* @returns {string}
 	*/
-	_consumeWithInterpolation(/** @type {number} */ textTokenType, /** @type {number} */ interpolationTokenType, endPredicate, endInterpolation) {
+	_consumeWithInterpolation(/** @type {number} */ textTokenType, /** @type {number} */ interpolationTokenType, /** @type {() => boolean} */ endPredicate, /** @type {(() => boolean) | null} */ endInterpolation) {
 		this._beginToken(textTokenType);
-		const parts = [];
+		/** @type {string[]} */ const parts = [];
 		while (!endPredicate()) {
 			const current = this._cursor.clone();
 			if (this._attemptStr(INTERPOLATION.start)) {
@@ -843,13 +864,13 @@ var _Tokenizer = class {
 	* @param prematureEndPredicate a function that should return true if the next characters indicate
 	*     an end to the interpolation before its normal closing marker.
 	*/
-	_consumeInterpolation(/** @type {number} */ interpolationTokenType, /** @type {PlainCharacterCursor} */ interpolationStart, prematureEndPredicate) {
-		const parts = [];
+	_consumeInterpolation(/** @type {number} */ interpolationTokenType, /** @type {PlainCharacterCursor} */ interpolationStart, /** @type {(() => boolean) | null} */ prematureEndPredicate) {
+		/** @type {string[]} */ const parts = [];
 		this._beginToken(interpolationTokenType, interpolationStart);
 		parts.push(INTERPOLATION.start);
 		const expressionStart = this._cursor.clone();
-		let inQuote = null;
-		let inComment = false;
+		/** @type {number | null} */ let inQuote = null;
+		/** @type {boolean} */ let inComment = false;
 		while (this._cursor.peek() !== 0 && (prematureEndPredicate === null || !prematureEndPredicate())) {
 			const current = this._cursor.clone();
 			if (this._isTagStart()) {
@@ -875,7 +896,7 @@ var _Tokenizer = class {
 		parts.push(this._getProcessedChars(expressionStart, this._cursor));
 		this._endToken(parts);
 	}
-	_consumeDirective(start, nameStart) {
+	_consumeDirective(/** @type {PlainCharacterCursor} */ start, /** @type {PlainCharacterCursor} */ nameStart) {
 		this._requireCharCode(64);
 		this._cursor.advance();
 		while (isSelectorlessNameChar(this._cursor.peek())) this._cursor.advance();
@@ -987,18 +1008,18 @@ var _Tokenizer = class {
 /** @returns {boolean} */ function isBlockParameterChar(/** @type {number} */ code) {
 	return code !== 59 && isNotWhitespace(code);
 }
-function isSelectorlessNameStart(code) {
+/** @returns {boolean} */ function isSelectorlessNameStart(/** @type {number} */ code) {
 	return code === 95 || code >= 65 && code <= 90;
 }
-function isSelectorlessNameChar(code) {
+/** @returns {boolean} */ function isSelectorlessNameChar(/** @type {number} */ code) {
 	return isAsciiLetter(code) || isDigit(code) || code === 95;
 }
 /** @returns {boolean} */ function isAttributeTerminator(/** @type {number} */ code) {
 	return code === 47 || code === 62 || code === 60 || code === 0;
 }
-/** @returns {any[]} */ function mergeTextTokens(/** @type {any[]} */ srcTokens) {
-	const dstTokens = [];
-	let lastDstToken = void 0;
+/** @returns {Token[]} */ function mergeTextTokens(/** @type {Token[]} */ srcTokens) {
+	/** @type {Token[]} */ const dstTokens = [];
+	/** @type {Token | undefined} */ let lastDstToken = void 0;
 	for (let i = 0; i < srcTokens.length; i++) {
 		const token = srcTokens[i];
 		if (lastDstToken && lastDstToken.type === 5 && token.type === 5 || lastDstToken && lastDstToken.type === 17 && token.type === 17) {
@@ -1016,7 +1037,7 @@ var PlainCharacterCursor = class PlainCharacterCursor {
 	/** @type {import("../parse_util.mjs").ParseSourceFile} */ file;
 	/** @type {string} */ input;
 	/** @type {number} */ end;
-	constructor(/** @type {PlainCharacterCursor | import("../parse_util.mjs").ParseSourceFile} */ fileOrCursor, range) {
+	constructor(/** @type {PlainCharacterCursor | import("../parse_util.mjs").ParseSourceFile} */ fileOrCursor, /** @type {LexerRange | undefined} */ range) {
 		if (fileOrCursor instanceof PlainCharacterCursor) {
 			this.file = fileOrCursor.file;
 			this.input = fileOrCursor.input;
@@ -1042,7 +1063,7 @@ var PlainCharacterCursor = class PlainCharacterCursor {
 			};
 		}
 	}
-	clone() {
+	/** @returns {PlainCharacterCursor} */ clone() {
 		return new PlainCharacterCursor(this);
 	}
 	/** @returns {number} */ peek() {
@@ -1060,7 +1081,7 @@ var PlainCharacterCursor = class PlainCharacterCursor {
 	init() {
 		this.updatePeek(this.state);
 	}
-	/** @returns {import("../parse_util.mjs").ParseSourceSpan} */ getSpan(/** @type {PlainCharacterCursor | undefined} */ start, leadingTriviaCodePoints) {
+	/** @returns {import("../parse_util.mjs").ParseSourceSpan} */ getSpan(/** @type {PlainCharacterCursor | undefined} */ start, /** @type {number[] | undefined} */ leadingTriviaCodePoints) {
 		start = start || this;
 		let fullStart = start;
 		if (leadingTriviaCodePoints) while (this.diff(start) > 0 && leadingTriviaCodePoints.indexOf(start.peek()) !== -1) {
@@ -1100,10 +1121,10 @@ var PlainCharacterCursor = class PlainCharacterCursor {
 };
 var EscapedCharacterCursor = class EscapedCharacterCursor extends PlainCharacterCursor {
 	/** @type {CursorState} */ internalState;
-	constructor(/** @type {PlainCharacterCursor | import("../parse_util.mjs").ParseSourceFile} */ fileOrCursor, range) {
+	constructor(/** @type {PlainCharacterCursor | import("../parse_util.mjs").ParseSourceFile} */ fileOrCursor, /** @type {LexerRange | undefined} */ range) {
 		if (fileOrCursor instanceof EscapedCharacterCursor) {
 			super(fileOrCursor);
-			this.internalState = { ...fileOrCursor.internalState };
+			this.internalState = /** @type {CursorState} */ ({ ...fileOrCursor.internalState });
 		} else {
 			super(fileOrCursor, range);
 			this.internalState = this.state;
@@ -1118,11 +1139,11 @@ var EscapedCharacterCursor = class EscapedCharacterCursor extends PlainCharacter
 		super.init();
 		this.processEscapeSequence();
 	}
-	clone() {
+	/** @returns {PlainCharacterCursor} */ clone() {
 		return new EscapedCharacterCursor(this);
 	}
 	/** @returns {string} */ getChars(/** @type {PlainCharacterCursor} */ start) {
-		const cursor = start.clone();
+		const cursor = /** @type {EscapedCharacterCursor} */ (start.clone());
 		let chars = "";
 		while (cursor.internalState.offset < this.internalState.offset) {
 			chars += String.fromCodePoint(cursor.peek());
@@ -1138,7 +1159,7 @@ var EscapedCharacterCursor = class EscapedCharacterCursor extends PlainCharacter
 	processEscapeSequence() {
 		const peek = () => this.internalState.peek;
 		if (peek() === 92) {
-			this.internalState = { ...this.state };
+			this.internalState = /** @type {CursorState} */ ({ ...this.state });
 			this.advanceState(this.internalState);
 			if (peek() === 110) this.state.peek = 10;
 			else if (peek() === 114) this.state.peek = 13;
@@ -1150,7 +1171,7 @@ var EscapedCharacterCursor = class EscapedCharacterCursor extends PlainCharacter
 				this.advanceState(this.internalState);
 				if (peek() === 123) {
 					this.advanceState(this.internalState);
-					const digitStart = this.clone();
+					const digitStart = /** @type {EscapedCharacterCursor} */ (this.clone());
 					let length = 0;
 					while (peek() !== 125) {
 						this.advanceState(this.internalState);
@@ -1158,7 +1179,7 @@ var EscapedCharacterCursor = class EscapedCharacterCursor extends PlainCharacter
 					}
 					this.state.peek = this.decodeHexDigits(digitStart, length);
 				} else {
-					const digitStart = this.clone();
+					const digitStart = /** @type {EscapedCharacterCursor} */ (this.clone());
 					this.advanceState(this.internalState);
 					this.advanceState(this.internalState);
 					this.advanceState(this.internalState);
@@ -1166,15 +1187,15 @@ var EscapedCharacterCursor = class EscapedCharacterCursor extends PlainCharacter
 				}
 			} else if (peek() === 120) {
 				this.advanceState(this.internalState);
-				const digitStart = this.clone();
+				const digitStart = /** @type {EscapedCharacterCursor} */ (this.clone());
 				this.advanceState(this.internalState);
 				this.state.peek = this.decodeHexDigits(digitStart, 2);
 			} else if (isOctalDigit(peek())) {
 				let octal = "";
 				let length = 0;
-				let previous = this.clone();
+				/** @type {EscapedCharacterCursor} */ let previous = /** @type {EscapedCharacterCursor} */ (this.clone());
 				while (isOctalDigit(peek()) && length < 3) {
-					previous = this.clone();
+					previous = /** @type {EscapedCharacterCursor} */ (this.clone());
 					octal += String.fromCodePoint(peek());
 					this.advanceState(this.internalState);
 					length++;
@@ -1187,7 +1208,7 @@ var EscapedCharacterCursor = class EscapedCharacterCursor extends PlainCharacter
 			} else this.state.peek = this.internalState.peek;
 		}
 	}
-	decodeHexDigits(start, length) {
+	/** @returns {number} */ decodeHexDigits(/** @type {EscapedCharacterCursor} */ start, /** @type {number} */ length) {
 		const hex = this.input.slice(start.internalState.offset, start.internalState.offset + length);
 		const charCode = parseInt(hex, 16);
 		if (!isNaN(charCode)) return charCode;

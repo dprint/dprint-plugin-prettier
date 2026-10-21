@@ -16,7 +16,7 @@ import { parseIeConditionalComment } from "./conditional-comment.js";
 @import {HtmlParseOptions, Ast, ParseTreeResult} from "angular-html-parser";
 @import {ParseOptions} from "./parse-options.js";
 @import {NormalizedParseOptions} from "./ast.js";
-@import {Attribute, Element, ExpansionCase} from "../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs";
+@import {Attribute, Element, ExpansionCase, Comment, Text, AstNode} from "../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs";
 @import {ParseSourceSpan as SourceSpan, ParseLocation} from "../../../../src/vendor/angular-html-parser/dist/compiler/src/parse_util.mjs";
 @typedef {{parseOptions: NormalizedParseOptions}} VisitContext
 @typedef {{kind: string, sourceSpan: SourceSpan, children: any[]}} RawAst
@@ -33,7 +33,7 @@ class Visitor extends RecursiveVisitor {
       });
     }
   }
-  visit(/** @type {import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").Text | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").Element | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").Attribute | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").Comment | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").DocType | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").CDATA | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").Block | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").BlockParameter | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").LetDeclaration} */ node, /** @type {VisitContext} */ { parseOptions }) {
+  visit(/** @type {AstNode} */ node, /** @type {VisitContext} */ { parseOptions }) {
     restoreNameAndValue(node);
     addTagDefinition(node, parseOptions);
     normalizeName(node, parseOptions);
@@ -158,12 +158,12 @@ function restoreName(node) {
 }
 
 /**
- * @param {any} node
+ * @param {AstNode} node
  */
 function restoreNameAndValue(node) {
   switch (node.kind) {
     case "element":
-      restoreName(node);
+      restoreName(/** @type {Element} */ (node));
       for (const attr of /** @type {Element} */ (node).attrs) {
         restoreName(attr);
         if (!attr.valueSpan) {
@@ -178,13 +178,13 @@ function restoreNameAndValue(node) {
       break;
 
     case "comment":
-      node.value = /** @type {SourceSpan} */ (node.sourceSpan)
+      /** @type {Comment} */ (node).value = /** @type {SourceSpan} */ (node.sourceSpan)
         .toString()
         .slice("<!--".length, -"-->".length);
       break;
 
     case "text":
-      node.value = /** @type {SourceSpan} */ (node.sourceSpan).toString();
+      /** @type {Text} */ (node).value = /** @type {SourceSpan} */ (node.sourceSpan).toString();
       break;
 
     // No default
@@ -192,7 +192,7 @@ function restoreNameAndValue(node) {
 }
 
 /**
- * @param {any} node
+ * @param {AstNode} node
  * @param {NormalizedParseOptions} parseOptions
  */
 function addTagDefinition(node, parseOptions) {
@@ -205,7 +205,7 @@ function addTagDefinition(node, parseOptions) {
       !(/** @type {Element} */ (node).namespace) ||
       // @ts-expect-error -- we add it
       /** @type {Element} */ (node).namespace === tagDefinition.implicitNamespacePrefix ||
-      isUnknownNamespace(node)
+      isUnknownNamespace(/** @type {Element} */ (node))
     ) {
       // @ts-expect-error -- expected
       /** @type {Element} */ (node).tagDefinition = tagDefinition;
@@ -216,7 +216,7 @@ function addTagDefinition(node, parseOptions) {
   }
 }
 
-function fixSourceSpan(/** @type {import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").Text | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").Element | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").Attribute | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").Comment | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").DocType | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").CDATA | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").Block | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").BlockParameter | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").LetDeclaration} */ node) {
+function fixSourceSpan(/** @type {AstNode} */ node) {
   if (node.sourceSpan && node.endSourceSpan) {
     node.sourceSpan = new ParseSourceSpan(
       node.sourceSpan.start,
@@ -225,7 +225,7 @@ function fixSourceSpan(/** @type {import("../../../../src/vendor/angular-html-pa
   }
 }
 
-function normalizeName(/** @type {import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").Text | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").Element | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").Attribute | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").Comment | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").DocType | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").CDATA | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").Block | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").BlockParameter | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").LetDeclaration} */ node, /** @type {NormalizedParseOptions} */ parseOptions) {
+function normalizeName(/** @type {AstNode} */ node, /** @type {NormalizedParseOptions} */ parseOptions) {
   if (node.kind === "element") {
     if (
       parseOptions.normalizeTagName &&

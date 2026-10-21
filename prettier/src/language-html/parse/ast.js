@@ -146,7 +146,7 @@ class Node {
     for (const NODES_KEY in NODES_KEYS) {
       const nodes = this[NODES_KEY];
       if (nodes) {
-        const mappedNodes = mapNodesIfChanged(nodes, (node) => node.map(fn));
+        const mappedNodes = mapNodesIfChanged(nodes, (/** @type {Node} */ node) => node.map(fn));
         if (newNode !== nodes) {
           newNode ??= new Node({ parent: this.parent });
           newNode.setProperty(NODES_KEY, mappedNodes);

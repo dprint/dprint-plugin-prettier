@@ -134,8 +134,8 @@ function mergeNodeIntoText(/** @type {import("./parse/ast.js").Node} */ ast, /**
 function mergeCdataIntoText(/** @type {import("./parse/ast.js").Node} */ ast /* , options */) {
   return mergeNodeIntoText(
     ast,
-    /** @returns {boolean} */ (node) => node.kind === "cdata",
-    /** @returns {string} */ (node) => `<![CDATA[${node.value}]]>`,
+    /** @returns {boolean} */ (/** @type {import("./parse/ast.js").Node} */ node) => node.kind === "cdata",
+    /** @returns {string} */ (/** @type {import("./parse/ast.js").Node} */ node) => `<![CDATA[${node.value}]]>`,
   );
 }
 

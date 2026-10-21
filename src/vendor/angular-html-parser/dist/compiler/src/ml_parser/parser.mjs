@@ -4,6 +4,12 @@ import { ParseError, ParseSourceSpan } from "../parse_util.mjs";
 import { Attribute, Block, BlockParameter, CDATA, Comment, Component, Directive, DocType, Element, Expansion, ExpansionCase, LetDeclaration, StartTagComment, Text } from "./ast.mjs";
 import { NAMED_ENTITIES } from "./entities.mjs";
 import { tokenize } from "./lexer.mjs";
+/**
+ * @import {Token} from "angular-html-parser-types"
+ * @typedef {import("./lexer.mjs").GetTagContentType} GetTagContentType
+ * @typedef {import("./html_tags.mjs").HtmlTagDefinition} HtmlTagDefinition
+ * @typedef {import("../parse_util.mjs").ParseLocation} ParseLocation
+ */
 //#region ../compiler/src/ml_parser/parser.ts
 /**
 * @license
@@ -14,7 +20,7 @@ import { tokenize } from "./lexer.mjs";
 */
 var TreeError = class TreeError extends ParseError {
 	/** @type {string | null} */ elementName;
-	static create(elementName, span, msg) {
+	/** @returns {TreeError} */ static create(/** @type {string | null} */ elementName, /** @type {ParseSourceSpan} */ span, /** @type {string} */ msg) {
 		return new TreeError(elementName, span, msg);
 	}
 	constructor(/** @type {string | null} */ elementName, /** @type {ParseSourceSpan} */ span, /** @type {string} */ msg) {
@@ -24,8 +30,8 @@ var TreeError = class TreeError extends ParseError {
 };
 var ParseTreeResult = class {
 	/** @type {any[]} */ rootNodes;
-	/** @type {any[]} */ errors;
-	constructor(/** @type {any[]} */ rootNodes, /** @type {any[]} */ errors) {
+	/** @type {ParseError[]} */ errors;
+	constructor(/** @type {any[]} */ rootNodes, /** @type {ParseError[]} */ errors) {
 		this.rootNodes = rootNodes;
 		this.errors = errors;
 	}
@@ -37,7 +43,7 @@ var Parser = class {
 	}
 	parse(source, url, options, isTagNameCaseSensitive = false, getTagContentType) {
 		const lowercasify = (fn) => /** @returns {import("./html_tags.mjs").HtmlTagDefinition} */ (/** @type {string} */ x, ...args) => fn(x.toLowerCase(), ...args);
-		const getTagDefinition = isTagNameCaseSensitive ? this.getTagDefinition : lowercasify(this.getTagDefinition);
+		/** @type {(tagName: string) => HtmlTagDefinition} */ const getTagDefinition = isTagNameCaseSensitive ? this.getTagDefinition : lowercasify(this.getTagDefinition);
 		const getDefaultTagContentType = /** @returns {number} */ (/** @type {string} */ tagName) => getTagDefinition(tagName).getContentType();
 		const getTagContentTypeWithProcessedTagName = isTagNameCaseSensitive ? getTagContentType : lowercasify(getTagContentType);
 		const tokenizeResult = tokenize(source, url, getTagContentType ? /** @returns {number} */ (/** @type {string} */ tagName, /** @type {string} */ prefix, /** @type {boolean} */ hasParent, /** @type {any[]} */ attrs) => {
@@ -52,17 +58,17 @@ var Parser = class {
 	}
 };
 var _TreeBuilder = class _TreeBuilder {
-	tokens;
-	tagDefinitionResolver;
+	/** @type {Token[]} */ tokens;
+	/** @type {(tagName: string) => HtmlTagDefinition} */ tagDefinitionResolver;
 	/** @type {boolean} */ canSelfClose;
 	/** @type {boolean} */ allowHtmComponentClosingTags;
 	/** @type {boolean} */ isTagNameCaseSensitive;
-	_index = -1;
-	_peek;
-	_containerStack = [];
-	rootNodes = [];
-	errors = [];
-	constructor(/** @type {any[]} */ tokens, tagDefinitionResolver, /** @type {boolean} */ canSelfClose, /** @type {boolean} */ allowHtmComponentClosingTags, /** @type {boolean} */ isTagNameCaseSensitive) {
+	/** @type {number} */ _index = -1;
+	/** @type {Token} */ _peek;
+	/** @type {(Element | Block)[]} */ _containerStack = [];
+	/** @type {any[]} */ rootNodes = [];
+	/** @type {ParseError[]} */ errors = [];
+	constructor(/** @type {Token[]} */ tokens, /** @type {(tagName: string) => HtmlTagDefinition} */ tagDefinitionResolver, /** @type {boolean} */ canSelfClose, /** @type {boolean} */ allowHtmComponentClosingTags, /** @type {boolean} */ isTagNameCaseSensitive) {
 		this.tokens = tokens;
 		this.tagDefinitionResolver = tagDefinitionResolver;
 		this.canSelfClose = canSelfClose;
@@ -106,40 +112,40 @@ var _TreeBuilder = class _TreeBuilder {
 		else this._advance();
 		for (const leftoverContainer of this._containerStack) if (leftoverContainer instanceof Block) this.errors.push(TreeError.create(leftoverContainer.name, leftoverContainer.sourceSpan, `Unclosed block "${leftoverContainer.name}"`));
 	}
-	_advance() {
+	/** @returns {Token} */ _advance() {
 		const prev = this._peek;
 		if (this._index < this.tokens.length - 1) this._index++;
 		this._peek = this.tokens[this._index];
 		return prev;
 	}
-	_advanceIf(/** @type {number} */ type) {
+	/** @returns {Token | null} */ _advanceIf(/** @type {number} */ type) {
 		if (this._peek.type === type) return this._advance();
 		return null;
 	}
-	_consumeCdata(startToken) {
+	_consumeCdata(/** @type {Token} */ startToken) {
 		const text = this._advance();
 		const value = this._getText(text);
 		const endToken = this._advanceIf(14);
 		this._addToParent(new CDATA(value, new ParseSourceSpan(startToken.sourceSpan.start, (endToken || text).sourceSpan.end), [text]));
 	}
-	_consumeComment(token) {
+	_consumeComment(/** @type {Token} */ token) {
 		const text = this._advanceIf(7);
 		const endToken = this._advanceIf(11);
 		const value = text != null ? text.parts[0].trim() : null;
 		const sourceSpan = endToken == null ? token.sourceSpan : new ParseSourceSpan(token.sourceSpan.start, endToken.sourceSpan.end, token.sourceSpan.fullStart);
 		this._addToParent(new Comment(value, sourceSpan));
 	}
-	_consumeDocType(startToken) {
+	_consumeDocType(/** @type {Token} */ startToken) {
 		const text = this._advanceIf(7);
 		const endToken = this._advanceIf(20);
 		const value = text != null ? text.parts[0].trim() : null;
 		const sourceSpan = new ParseSourceSpan(startToken.sourceSpan.start, (endToken || text || startToken).sourceSpan.end);
 		this._addToParent(new DocType(value, sourceSpan));
 	}
-	_consumeExpansion(token) {
+	_consumeExpansion(/** @type {Token} */ token) {
 		const switchValue = this._advance();
 		const type = this._advance();
-		const cases = [];
+		/** @type {ExpansionCase[]} */ const cases = [];
 		while (this._peek.type === 22) {
 			const expCase = this._parseExpansionCase();
 			if (!expCase) return;
@@ -178,9 +184,9 @@ var _TreeBuilder = class _TreeBuilder {
 		const expSourceSpan = new ParseSourceSpan(start.sourceSpan.start, end.sourceSpan.end, start.sourceSpan.fullStart);
 		return new ExpansionCase(value.parts[0], expansionCaseParser.rootNodes, sourceSpan, value.sourceSpan, expSourceSpan);
 	}
-	/** @returns {any[] | null} */ _collectExpansionExpTokens(start) {
-		const exp = [];
-		const expansionFormStack = [23];
+	/** @returns {Token[] | null} */ _collectExpansionExpTokens(/** @type {Token} */ start) {
+		/** @type {Token[]} */ const exp = [];
+		/** @type {number[]} */ const expansionFormStack = [23];
 		while (true) {
 			if (this._peek.type === 21 || this._peek.type === 23) expansionFormStack.push(this._peek.type);
 			if (this._peek.type === 24) {
@@ -206,21 +212,21 @@ var _TreeBuilder = class _TreeBuilder {
 			exp.push(this._advance());
 		}
 	}
-	/** @returns {string} */ _getText(token) {
+	/** @returns {string} */ _getText(/** @type {Token} */ token) {
 		let text = token.parts[0];
 		if (text.length > 0 && text[0] == "\n") {
-			var _this$_getTagDefiniti;
+			/** @type {HtmlTagDefinition | null} */ var _this$_getTagDefiniti;
 			const parent = this._getClosestElementLikeParent();
 			if (parent != null && parent.children.length == 0 && ((_this$_getTagDefiniti = this._getTagDefinition(parent)) === null || _this$_getTagDefiniti === void 0 ? void 0 : _this$_getTagDefiniti.ignoreFirstLf)) text = text.substring(1);
 		}
 		return text;
 	}
-	_consumeText(token) {
-		const tokens = [token];
+	_consumeText(/** @type {Token} */ token) {
+		/** @type {Token[]} */ const tokens = [token];
 		const startSpan = token.sourceSpan;
 		let text = token.parts[0];
 		if (text.length > 0 && text[0] === "\n") {
-			var _this$_getTagDefiniti2;
+			/** @type {HtmlTagDefinition | null} */ var _this$_getTagDefiniti2;
 			const parent = this._getContainer();
 			if (parent != null && parent.children.length === 0 && ((_this$_getTagDefiniti2 = this._getTagDefinition(parent)) === null || _this$_getTagDefiniti2 === void 0 ? void 0 : _this$_getTagDefiniti2.ignoreFirstLf)) {
 				text = text.substring(1);
@@ -244,15 +250,15 @@ var _TreeBuilder = class _TreeBuilder {
 		}
 	}
 	_closeVoidElement() {
-		var _this$_getTagDefiniti3;
+		/** @type {HtmlTagDefinition | null} */ var _this$_getTagDefiniti3;
 		const el = this._getContainer();
 		if (el !== null && ((_this$_getTagDefiniti3 = this._getTagDefinition(el)) === null || _this$_getTagDefiniti3 === void 0 ? void 0 : _this$_getTagDefiniti3.isVoid)) this._containerStack.pop();
 	}
-	_consumeElementStartTag(startTagToken) {
-		var _this$_getTagDefiniti4;
-		const attrs = [];
-		const directives = [];
-		const comments = [];
+	_consumeElementStartTag(/** @type {Token} */ startTagToken) {
+		/** @type {HtmlTagDefinition | null} */ var _this$_getTagDefiniti4;
+		/** @type {Attribute[]} */ const attrs = [];
+		/** @type {Directive[]} */ const directives = [];
+		/** @type {StartTagComment[]} */ const comments = [];
 		this._consumeAttributesAndDirectives(attrs, directives, comments);
 		const fullName = this._getElementFullName(startTagToken, this._getClosestElementLikeParent());
 		const tagDef = this._getTagDefinition(fullName);
@@ -280,12 +286,12 @@ var _TreeBuilder = class _TreeBuilder {
 			this.errors.push(TreeError.create(fullName, span, `Opening tag "${fullName}" not terminated.`));
 		}
 	}
-	_consumeComponentStartTag(startToken) {
-		var _this$_getTagDefiniti5;
+	_consumeComponentStartTag(/** @type {Token} */ startToken) {
+		/** @type {HtmlTagDefinition | null} */ var _this$_getTagDefiniti5;
 		const componentName = startToken.parts[0];
-		const attrs = [];
-		const directives = [];
-		const comments = [];
+		/** @type {Attribute[]} */ const attrs = [];
+		/** @type {Directive[]} */ const directives = [];
+		/** @type {StartTagComment[]} */ const comments = [];
 		this._consumeAttributesAndDirectives(attrs, directives, comments);
 		const closestElement = this._getClosestElementLikeParent();
 		const tagName = this._getComponentTagName(startToken, closestElement);
@@ -305,7 +311,7 @@ var _TreeBuilder = class _TreeBuilder {
 			this.errors.push(TreeError.create(fullName, span, `Opening tag "${fullName}" not terminated.`));
 		}
 	}
-	_consumeAttributesAndDirectives(/** @type {any[]} */ attributesResult, /** @type {any[]} */ directivesResult, /** @type {any[]} */ commentsResult) {
+	_consumeAttributesAndDirectives(/** @type {Attribute[]} */ attributesResult, /** @type {Directive[]} */ directivesResult, /** @type {StartTagComment[]} */ commentsResult) {
 		while (this._peek.type === 15 || this._peek.type === 40 || this._peek.type === 12) if (this._peek.type === 40) directivesResult.push(this._consumeDirective(this._peek));
 		else if (this._peek.type === 15) attributesResult.push(this._consumeAttr(this._advance()));
 		else {
@@ -313,18 +319,18 @@ var _TreeBuilder = class _TreeBuilder {
 			commentsResult.push(new StartTagComment(commentToken.parts[0], commentToken.parts[1], commentToken.sourceSpan));
 		}
 	}
-	_consumeComponentEndTag(endToken) {
+	_consumeComponentEndTag(/** @type {Token} */ endToken) {
 		const fullName = this._getComponentFullName(endToken, this._getClosestElementLikeParent());
 		if (!this._popContainer(fullName, Component, endToken.sourceSpan)) {
 			const container = this._containerStack[this._containerStack.length - 1];
-			let suffix;
+			/** @type {string} */ let suffix;
 			if (container instanceof Component && container.componentName === endToken.parts[0]) suffix = `, did you mean "${container.fullName}"?`;
 			else suffix = ". It may happen when the tag has already been closed by another tag.";
 			const errMsg = `Unexpected closing tag "${fullName}"${suffix}`;
 			this.errors.push(TreeError.create(fullName, endToken.sourceSpan, errMsg));
 		}
 	}
-	/** @returns {import("./html_tags.mjs").HtmlTagDefinition | null} */ _getTagDefinition(nodeOrName) {
+	/** @returns {import("./html_tags.mjs").HtmlTagDefinition | null} */ _getTagDefinition(/** @type {string | Element | Block | Component} */ nodeOrName) {
 		if (typeof nodeOrName === "string") return this.tagDefinitionResolver(nodeOrName);
 		else if (nodeOrName instanceof Element) return this.tagDefinitionResolver(nodeOrName.name);
 		else if (nodeOrName instanceof Component && nodeOrName.tagName !== null) return this.tagDefinitionResolver(nodeOrName.tagName);
@@ -335,8 +341,8 @@ var _TreeBuilder = class _TreeBuilder {
 		this._addToParent(node);
 		this._containerStack.push(node);
 	}
-	_consumeElementEndTag(endTagToken) {
-		var _this$_getTagDefiniti6;
+	_consumeElementEndTag(/** @type {Token} */ endTagToken) {
+		/** @type {HtmlTagDefinition | null} */ var _this$_getTagDefiniti6;
 		const fullName = this.allowHtmComponentClosingTags && endTagToken.parts.length === 0 ? null : this._getElementFullName(endTagToken, this._getClosestElementLikeParent());
 		if (fullName && ((_this$_getTagDefiniti6 = this._getTagDefinition(fullName)) === null || _this$_getTagDefiniti6 === void 0 ? void 0 : _this$_getTagDefiniti6.isVoid)) this.errors.push(TreeError.create(fullName, endTagToken.sourceSpan, `Void elements do not have end tags "${endTagToken.parts[1]}"`));
 		else if (!this._popContainer(fullName, Element, endTagToken.sourceSpan)) {
@@ -354,7 +360,7 @@ var _TreeBuilder = class _TreeBuilder {
 	_popContainer(/** @type {string | null} */ expectedName, expectedType, /** @type {ParseSourceSpan | null} */ endSourceSpan) {
 		let unexpectedCloseTagDetected = false;
 		for (let stackIndex = this._containerStack.length - 1; stackIndex >= 0; stackIndex--) {
-			var _this$_getTagDefiniti7;
+			/** @type {HtmlTagDefinition | null} */ var _this$_getTagDefiniti7;
 			const node = this._containerStack[stackIndex];
 			const nodeName = node instanceof Component ? node.fullName : node.name;
 			if (getNsPrefix(nodeName) ? nodeName === expectedName : (nodeName === expectedName || expectedName === null) && node instanceof expectedType) {
@@ -367,15 +373,15 @@ var _TreeBuilder = class _TreeBuilder {
 		}
 		return false;
 	}
-	/** @returns {Attribute} */ _consumeAttr(attrName) {
+	/** @returns {Attribute} */ _consumeAttr(/** @type {Token} */ attrName) {
 		const fullName = mergeNsAndName(attrName.parts[0], attrName.parts[1]);
-		let attrEnd = attrName.sourceSpan.end;
-		let startQuoteToken;
+		/** @type {ParseLocation} */ let attrEnd = attrName.sourceSpan.end;
+		/** @type {Token | undefined} */ let startQuoteToken;
 		if (this._peek.type === 16) startQuoteToken = this._advance();
 		let value = "";
-		const valueTokens = [];
-		let valueStartSpan = void 0;
-		let valueEnd = void 0;
+		/** @type {Token[]} */ const valueTokens = [];
+		/** @type {ParseSourceSpan | undefined} */ let valueStartSpan = void 0;
+		/** @type {ParseLocation | undefined} */ let valueEnd = void 0;
 		if (this._peek.type === 17) {
 			valueStartSpan = this._peek.sourceSpan;
 			valueEnd = this._peek.sourceSpan.end;
@@ -392,10 +398,10 @@ var _TreeBuilder = class _TreeBuilder {
 		const valueSpan = valueStartSpan && valueEnd && new ParseSourceSpan((startQuoteToken === null || startQuoteToken === void 0 ? void 0 : startQuoteToken.sourceSpan.start) ?? valueStartSpan.start, valueEnd, (startQuoteToken === null || startQuoteToken === void 0 ? void 0 : startQuoteToken.sourceSpan.fullStart) ?? valueStartSpan.fullStart);
 		return new Attribute(fullName, value, new ParseSourceSpan(attrName.sourceSpan.start, attrEnd, attrName.sourceSpan.fullStart), attrName.sourceSpan, valueSpan, valueTokens.length > 0 ? valueTokens : void 0, void 0);
 	}
-	_consumeDirective(nameToken) {
-		const attributes = [];
-		let startSourceSpanEnd = nameToken.sourceSpan.end;
-		let endSourceSpan = null;
+	_consumeDirective(/** @type {Token} */ nameToken) {
+		/** @type {Attribute[]} */ const attributes = [];
+		/** @type {ParseLocation} */ let startSourceSpanEnd = nameToken.sourceSpan.end;
+		/** @type {ParseSourceSpan | null} */ let endSourceSpan = null;
 		this._advance();
 		if (this._peek.type === 41) {
 			startSourceSpanEnd = this._peek.sourceSpan.end;
@@ -410,8 +416,8 @@ var _TreeBuilder = class _TreeBuilder {
 		const sourceSpan = new ParseSourceSpan(startSourceSpan.start, endSourceSpan === null ? nameToken.sourceSpan.end : endSourceSpan.end, startSourceSpan.fullStart);
 		return new Directive(nameToken.parts[0], attributes, sourceSpan, startSourceSpan, endSourceSpan);
 	}
-	_consumeBlockOpen(token) {
-		const parameters = [];
+	_consumeBlockOpen(/** @type {Token} */ token) {
+		/** @type {BlockParameter[]} */ const parameters = [];
 		while (this._peek.type === 29) {
 			const paramToken = this._advance();
 			parameters.push(new BlockParameter(paramToken.parts[0], paramToken.sourceSpan));
@@ -423,7 +429,7 @@ var _TreeBuilder = class _TreeBuilder {
 		const block = new Block(token.parts[0], parameters, [], span, token.sourceSpan, startSpan);
 		this._pushContainer(block, false);
 	}
-	_consumeBlockClose(token) {
+	_consumeBlockClose(/** @type {Token} */ token) {
 		const initialStackLength = this._containerStack.length;
 		const topNode = this._containerStack[initialStackLength - 1];
 		if (!this._popContainer(null, Block, token.sourceSpan)) {
@@ -435,8 +441,8 @@ var _TreeBuilder = class _TreeBuilder {
 			this.errors.push(TreeError.create(null, token.sourceSpan, "Unexpected closing block. The block may have been closed earlier. If you meant to write the `}` character, you should use the \"&#125;\" HTML entity instead."));
 		}
 	}
-	_consumeIncompleteBlock(token) {
-		const parameters = [];
+	_consumeIncompleteBlock(/** @type {Token} */ token) {
+		/** @type {BlockParameter[]} */ const parameters = [];
 		while (this._peek.type === 29) {
 			const paramToken = this._advance();
 			parameters.push(new BlockParameter(paramToken.parts[0], paramToken.sourceSpan));
@@ -449,10 +455,10 @@ var _TreeBuilder = class _TreeBuilder {
 		this._popContainer(null, Block, null);
 		this.errors.push(TreeError.create(token.parts[0], span, `Incomplete block "${token.parts[0]}". If you meant to write the @ character, you should use the "&#64;" HTML entity instead.`));
 	}
-	_consumeLet(startToken) {
+	_consumeLet(/** @type {Token} */ startToken) {
 		const name = startToken.parts[0];
-		let valueToken;
-		let endToken;
+		/** @type {Token} */ let valueToken;
+		/** @type {Token} */ let endToken;
 		if (this._peek.type !== 32) {
 			this.errors.push(TreeError.create(startToken.parts[0], startToken.sourceSpan, `Invalid @let declaration "${name}". Declaration must have a value.`));
 			return;
@@ -469,7 +475,7 @@ var _TreeBuilder = class _TreeBuilder {
 		const node = new LetDeclaration(name, valueToken.parts[0], span, nameSpan, valueToken.sourceSpan);
 		this._addToParent(node);
 	}
-	_consumeIncompleteLet(token) {
+	_consumeIncompleteLet(/** @type {Token} */ token) {
 		const name = token.parts[0] ?? "";
 		const nameString = name ? ` "${name}"` : "";
 		if (name.length > 0) {
@@ -497,27 +503,27 @@ var _TreeBuilder = class _TreeBuilder {
 		if (parent === null) this.rootNodes.push(node);
 		else parent.children.push(node);
 	}
-	/** @returns {string} */ _getElementFullName(token, /** @type {Element | null} */ parent) {
+	/** @returns {string} */ _getElementFullName(/** @type {Token} */ token, /** @type {Element | null} */ parent) {
 		const prefix = this._getPrefix(token, parent);
 		return mergeNsAndName(prefix, token.parts[1]);
 	}
-	_getComponentFullName(token, parent) {
+	/** @returns {string} */ _getComponentFullName(/** @type {Token} */ token, /** @type {Element | null} */ parent) {
 		const componentName = token.parts[0];
 		const tagName = this._getComponentTagName(token, parent);
 		if (tagName === null) return componentName;
 		return tagName.startsWith(":") ? componentName + tagName : `${componentName}:${tagName}`;
 	}
-	_getComponentTagName(token, parent) {
+	/** @returns {string | null} */ _getComponentTagName(/** @type {Token} */ token, /** @type {Element | null} */ parent) {
 		const prefix = this._getPrefix(token, parent);
 		const tagName = token.parts[2];
 		if (!prefix && !tagName) return null;
 		else if (!prefix && tagName) return tagName;
 		else return mergeNsAndName(prefix, tagName || "ng-component");
 	}
-	/** @returns {string | null} */ _getPrefix(token, /** @type {Element | null} */ parent) {
-		var _this$_getTagDefiniti8;
-		let prefix;
-		let tagName;
+	/** @returns {string | null} */ _getPrefix(/** @type {Token} */ token, /** @type {Element | null} */ parent) {
+		/** @type {HtmlTagDefinition | null} */ var _this$_getTagDefiniti8;
+		/** @type {string | null} */ let prefix;
+		/** @type {string} */ let tagName;
 		if (token.type === 35 || token.type === 39 || token.type === 38) {
 			prefix = token.parts[1];
 			tagName = token.parts[2];
@@ -537,7 +543,7 @@ var _TreeBuilder = class _TreeBuilder {
 		return prefix;
 	}
 };
-/** @returns {boolean} */ function lastOnStack(/** @type {any[]} */ stack, /** @type {number} */ element) {
+/** @returns {boolean} */ function lastOnStack(/** @type {number[]} */ stack, /** @type {number} */ element) {
 	return stack.length > 0 && stack[stack.length - 1] === element;
 }
 /**

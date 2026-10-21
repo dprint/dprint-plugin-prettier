@@ -276,7 +276,7 @@ function printAttributes(/** @type {AstPath} */ path, options, /** @type {() => 
     node.children.length === 0 &&
     startTagComments.length === 0;
   const shouldForceBreak = startTagComments.some(
-    (comment) => comment.type === "single",
+    (/** @type {import("../parse/ast.js").StartTagComment} */ comment) => comment.type === "single",
   );
   const shouldPrintAttributePerLine =
     shouldForceBreak ||

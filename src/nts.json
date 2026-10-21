@@ -85,6 +85,7 @@
     "glimmer-ast-types": "./types/glimmer-ast-types.ts",
     "handlebars-parser-types": "./types/handlebars-parser-types.ts",
     "glimmer-parser-types": "./types/glimmer-parser-types.ts",
+    "angular-html-parser-types": "./types/angular-html-parser-types.ts",
     "graphql-ast-types": "./types/graphql-ast-types.ts"
   },
   "replace": {

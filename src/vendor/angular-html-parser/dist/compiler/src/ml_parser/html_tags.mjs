@@ -10,7 +10,7 @@ import { DomElementSchemaRegistry } from "../schema/dom_element_schema_registry.
 * found in the LICENSE file at https://angular.dev/license
 */
 var HtmlTagDefinition = class {
-	closedByChildren = {};
+	/** @type {Record<string, boolean>} */ closedByChildren = {};
 	contentType;
 	/** @type {boolean} */ closedByParent = false;
 	/** @type {string | null} */ implicitNamespacePrefix;
@@ -37,7 +37,7 @@ var HtmlTagDefinition = class {
 	}
 };
 /** @type {HtmlTagDefinition | undefined} */ let DEFAULT_TAG_DEFINITION;
-let TAG_DEFINITIONS;
+/** @type {Record<string, HtmlTagDefinition> | undefined} */ let TAG_DEFINITIONS;
 /** @returns {HtmlTagDefinition} */ function getHtmlTagDefinition(/** @type {string} */ tagName) {
 	if (!TAG_DEFINITIONS) {
 		DEFAULT_TAG_DEFINITION = new HtmlTagDefinition({ canSelfClose: true });
