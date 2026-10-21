@@ -8,7 +8,7 @@ function transformFlowMap(flowMap, /** @type {import("./context.mjs").default} *
 	const srcToken = flowMap.srcToken;
 	// istanbul ignore if -- @preserve
 	if (!srcToken || srcToken.type !== "flow-collection") throw new Error("Expected flow-collection CST node for flow map");
-	const flowMappingItems = flowMap.items.map((/** @type {import("../../yaml/resolveSeq-67caf78a.js").P} */ pair, /** @type {number} */ index) => {
+	const flowMappingItems = flowMap.items.map((/** @type {import("../../yaml/browser/dist/nodes/Pair.js").Pair} */ pair, /** @type {number} */ index) => {
 		const srcItem = srcToken.items[index];
 		return transformPair(pair, srcItem, context, createFlowMappingItem);
 	});

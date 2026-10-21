@@ -10,7 +10,7 @@ function transformMap(map, /** @type {import("./context.mjs").default} */ contex
 	const srcToken = map.srcToken;
 	// istanbul ignore if -- @preserve
 	if (!srcToken || srcToken.type !== "block-map") throw new Error("Expected block mapping srcToken");
-	const mappingItems = map.items.map((/** @type {import("../../yaml/resolveSeq-67caf78a.js").P} */ pair, /** @type {number} */ index) => {
+	const mappingItems = map.items.map((/** @type {import("../../yaml/browser/dist/nodes/Pair.js").Pair} */ pair, /** @type {number} */ index) => {
 		const srcItem = srcToken.items[index];
 		return transformPair(pair, srcItem, context, createMappingItem);
 	});

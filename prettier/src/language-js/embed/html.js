@@ -41,7 +41,7 @@ async function printEmbedHtmlLike(/** @type {string} */ parser, /** @type {(a0?:
   let topLevelCount = 0;
   const doc = await textToDoc(text, {
     parser,
-    __onHtmlRoot(/** @type {import("../../language-html/ast.js").Node} */ root) {
+    __onHtmlRoot(/** @type {import("../../language-html/parse/ast.js").Node} */ root) {
       topLevelCount = root.children.length;
     },
   });
