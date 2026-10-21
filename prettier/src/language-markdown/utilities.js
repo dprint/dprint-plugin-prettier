@@ -263,7 +263,7 @@ function mapAst(ast, handler) {
 }
 
 /** @return {false | 'next' | 'start' | 'end'} */
-function isPrettierIgnore(/** @type {import("../ast.js").Node} */ node) {
+function isPrettierIgnore(/** @type {import("mdast").Nodes} */ node) {
   let match;
 
   if (node.type === "html") {

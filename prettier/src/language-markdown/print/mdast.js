@@ -1,5 +1,4 @@
 // @nts-check
-/** @import AstPath from "../common/ast-path.js" */
 import collapseWhiteSpace from "collapse-white-space";
 import escapeStringRegexp from "escape-string-regexp";
 import {

@@ -1,5 +1,6 @@
 {
   "paths": {
+    "micromark-util-types": "./types/micromark-util-types.ts",
     "#universal": "../prettier/src/universal/index.browser.js",
     "#universal/*": "../prettier/src/universal/*.browser.js",
     "emoji-regex": "./shims/emoji-regex.js",
