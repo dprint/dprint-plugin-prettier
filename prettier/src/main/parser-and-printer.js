@@ -146,7 +146,7 @@ function normalizePrinterWithoutCache(printer) {
   if (frontMatterSupport.print) {
     print = new Proxy(originalPrint, {
       apply(target, thisArgument, argumentsList) {
-        const [path] = argumentsList;
+        const [path] = /** @type {[import("../common/ast-path.js").default]} */ (argumentsList);
         if (isFrontMatter(path.node)) {
           return printFrontMatter(path);
         }

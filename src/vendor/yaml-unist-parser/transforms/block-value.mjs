@@ -2,7 +2,7 @@
 import { tokens } from "../cst.mjs";
 import { createBlockValue } from "../factories/block-value.mjs";
 //#region src/transforms/block-value.ts
-function transformAstBlockValue(/** @type {import("../../../../prettier/node_modules/yaml/browser/dist/nodes/Scalar.js").Scalar} */ blockValue, srcToken, /** @type {import("./context.mjs").default} */ context, props) {
+function transformAstBlockValue(/** @type {import("../../yaml/browser/dist/nodes/Scalar.js").Scalar} */ blockValue, srcToken, /** @type {import("./context.mjs").default} */ context, props) {
 	let blockScalarHeaderToken = null;
 	let indicatorComment = null;
 	for (const token of tokens(srcToken.props)) if (token.type === "comment") indicatorComment = context.transformComment(token);

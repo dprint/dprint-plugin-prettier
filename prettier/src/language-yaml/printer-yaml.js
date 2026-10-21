@@ -44,9 +44,11 @@ import {
 } from "./utilities.js";
 
 /** @import AstPath from "../common/ast-path.js" */
+/** @import { YamlNode } from "../../../src/vendor/yaml-unist-parser/transforms/context.mjs" */
+/** @import { YamlOptions } from "./utilities.js" */
 
-/** @returns {any[]} */ function genericPrint(/** @type {AstPath} */ path, options, print) {
-  const { node } = path;
+/** @returns {any[]} */ function genericPrint(/** @type {AstPath} */ path, /** @type {YamlOptions} */ options, print) {
+  /** @type {{ node: YamlNode }} */ const { node } = path;
 
   /** @type {Doc[]} */
   const parts = [];
@@ -148,8 +150,8 @@ import {
   return parts;
 }
 
-function printNode(/** @type {AstPath} */ path, options, print) {
-  const { node } = path;
+function printNode(/** @type {AstPath} */ path, /** @type {YamlOptions} */ options, print) {
+  /** @type {{ node: YamlNode }} */ const { node } = path;
   switch (node.type) {
     case "root": {
       const lastDescendantNode = getLastDescendantNode(node);
@@ -345,12 +347,12 @@ function printNode(/** @type {AstPath} */ path, options, print) {
   }
 }
 
-/** @returns {boolean} */ function shouldPrintDocumentBody(document) {
+/** @returns {boolean} */ function shouldPrintDocumentBody(/** @type {YamlNode} */ document) {
   return document.body.children.length > 0 || hasEndComments(document.body);
 }
 
-/** @returns {boolean} */ function shouldPrintDocumentEndMarker(path) {
-  const document = path.node;
+/** @returns {boolean} */ function shouldPrintDocumentEndMarker(/** @type {AstPath} */ path) {
+  /** @type {YamlNode} */ const document = path.node;
 
   if (document.documentEndMarker) {
     return true;
@@ -385,8 +387,8 @@ function printNode(/** @type {AstPath} */ path, options, print) {
   );
 }
 
-/** @returns {boolean | null} */ function shouldPrintDocumentHeadEndMarker(path) {
-  const document = path.node;
+/** @returns {boolean | null} */ function shouldPrintDocumentHeadEndMarker(/** @type {AstPath} */ path) {
+  /** @type {YamlNode} */ const document = path.node;
   return (
     /**
      * ---
@@ -410,7 +412,7 @@ function printNode(/** @type {AstPath} */ path, options, print) {
   );
 }
 
-/** @returns {any[]} */ function printFlowScalarContent(/** @type {string} */ nodeType, /** @type {string} */ content, options) {
+/** @returns {any[]} */ function printFlowScalarContent(/** @type {string} */ nodeType, /** @type {string} */ content, /** @type {YamlOptions} */ options) {
   const lineContents = getFlowScalarLineContents(nodeType, content, options);
   return join(
     hardline,

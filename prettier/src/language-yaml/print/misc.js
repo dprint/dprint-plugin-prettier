@@ -4,10 +4,11 @@ import { getOrInsertComputed } from "../../utilities/get-or-insert.js";
 import { hasEndComments, isNextLineEmpty, isNode } from "../utilities.js";
 
 /** @import AstPath from "../../common/ast-path.js" */
+/** @import { YamlNode } from "../../../../src/vendor/yaml-unist-parser/transforms/context.mjs" */
 
 const printedEmptyLineCache = new WeakMap();
 function printNextEmptyLine(/** @type {AstPath} */ path, /** @type {string} */ originalText) {
-  const { node, root } = path;
+  /** @type {{ node: YamlNode, root: any }} */ const { node, root } = path;
 
   const isNextEmptyLinePrintedSet = getOrInsertComputed(
     printedEmptyLineCache,
@@ -28,7 +29,7 @@ function printNextEmptyLine(/** @type {AstPath} */ path, /** @type {string} */ o
   return "";
 }
 
-/** @returns {boolean} */ function shouldPrintEndComments(node) {
+/** @returns {boolean} */ function shouldPrintEndComments(/** @type {YamlNode | null | undefined} */ node) {
   return (
     hasEndComments(node) &&
     !isNode(node, [

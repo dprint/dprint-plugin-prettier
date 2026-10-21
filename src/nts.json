@@ -176,7 +176,13 @@
     "../prettier/src/document/printer/indent.js",
     "../prettier/src/document/printer/trim-indentation.js",
     "../prettier/src/utilities/get-preferred-quote.js",
-    "../prettier/src/utilities/has-newline-in-range.js"
+    "../prettier/src/utilities/has-newline-in-range.js",
+    "../prettier/src/main",
+    "../prettier/src/document",
+    "../prettier/src/common",
+    "../prettier/src/utilities",
+    "../prettier/src/language-js",
+    "./vendor/vnopts"
   ],
   "mixins": {
     "./vendor/babel-parser/index.js": [

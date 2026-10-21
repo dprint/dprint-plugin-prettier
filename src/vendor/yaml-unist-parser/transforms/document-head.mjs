@@ -3,7 +3,7 @@ import { tokens } from "../cst.mjs";
 import { createDocumentHead } from "../factories/document-head.mjs";
 import { transformDirective } from "./directive.mjs";
 //#region src/transforms/document-head.ts
-function transformDocumentHead(/** @type {any[]} */ tokensBeforeBody, cstNode, /** @type {import("../../../../prettier/node_modules/yaml/browser/dist/doc/Document.js").Document} */ document, /** @type {import("./context.mjs").default} */ context) {
+function transformDocumentHead(/** @type {any[]} */ tokensBeforeBody, cstNode, /** @type {import("../../yaml/browser/dist/doc/Document.js").Document} */ document, /** @type {import("./context.mjs").default} */ context) {
 	const { directives, endCommentCandidates } = categorizeNodes(tokensBeforeBody, context);
 	let betweenTokens = [];
 	let docStart = null;
@@ -56,7 +56,7 @@ function categorizeNodes(/** @type {any[]} */ tokensBeforeBody, /** @type {impor
 		endCommentCandidates
 	};
 }
-function getPosition(/** @type {any[]} */ directives, /** @type {import("../../../../prettier/node_modules/yaml/browser/dist/doc/Document.js").Document | undefined} */ document, docStart, /** @type {import("./context.mjs").default | undefined} */ context) {
+function getPosition(/** @type {any[]} */ directives, /** @type {import("../../yaml/browser/dist/doc/Document.js").Document | undefined} */ document, docStart, /** @type {import("./context.mjs").default | undefined} */ context) {
 	const range = docStart ? [docStart.offset, docStart.offset + docStart.source.length] : document.contents ? [document.contents.range[0], document.contents.range[0]] : [document.range[0], document.range[0]];
 	if (directives.length !== 0) range[0] = directives[0].position.start.offset;
 	return context.transformRange(range);

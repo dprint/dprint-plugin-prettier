@@ -5290,7 +5290,7 @@ const isAllowedNumericSeparatorSibling = {
   }
   return ch === (type === "double" ? 34 : 39);
 }
-function readEscapedChar(/** @type {string} */ input, pos, lineStart, curLine, inTemplate, errors) {
+function readEscapedChar(/** @type {string} */ input, /** @type {int} */ pos, /** @type {int} */ lineStart, /** @type {int} */ curLine, /** @type {boolean} */ inTemplate, errors) {
   const throwOnInvalid = !inTemplate;
   pos++;
   const res = ch => ({
@@ -5372,7 +5372,7 @@ function readEscapedChar(/** @type {string} */ input, pos, lineStart, curLine, i
       return res(String.fromCharCode(ch));
   }
 }
-function readHexChar(/** @type {string} */ input, pos, lineStart, curLine, len, forceLen, throwOnInvalid, errors) {
+function readHexChar(/** @type {string} */ input, /** @type {int} */ pos, /** @type {int} */ lineStart, /** @type {int} */ curLine, /** @type {int} */ len, /** @type {boolean} */ forceLen, /** @type {boolean} */ throwOnInvalid, errors) {
   const initialPos = pos;
   let n;
   ({
@@ -5391,7 +5391,7 @@ function readHexChar(/** @type {string} */ input, pos, lineStart, curLine, len, 
     pos
   };
 }
-function readInt(/** @type {string} */ input, pos, lineStart, curLine, radix, /** @type {int | undefined} */ len, forceLen, allowNumSeparator, errors, bailOnError) {
+function readInt(/** @type {string} */ input, /** @type {int} */ pos, /** @type {int} */ lineStart, /** @type {int} */ curLine, /** @type {int} */ radix, /** @type {int | undefined} */ len, /** @type {boolean} */ forceLen, allowNumSeparator, errors, /** @type {boolean} */ bailOnError) {
   const start = pos;
   const forbiddenSiblings = radix === 16 ? forbiddenNumericSeparatorSiblings.hex : forbiddenNumericSeparatorSiblings.decBinOct;
   const isAllowedSibling = radix === 16 ? isAllowedNumericSeparatorSibling.hex : radix === 10 ? isAllowedNumericSeparatorSibling.dec : radix === 8 ? isAllowedNumericSeparatorSibling.oct : isAllowedNumericSeparatorSibling.bin;
@@ -5457,7 +5457,7 @@ function readInt(/** @type {string} */ input, pos, lineStart, curLine, radix, /*
     pos
   };
 }
-function readCodePoint(/** @type {string | undefined} */ input, pos, lineStart, curLine, throwOnInvalid, errors) {
+function readCodePoint(/** @type {string | undefined} */ input, /** @type {int} */ pos, /** @type {int} */ lineStart, /** @type {int} */ curLine, /** @type {boolean} */ throwOnInvalid, errors) {
   const ch = input.charCodeAt(pos);
   let code;
   if (ch === 123) {

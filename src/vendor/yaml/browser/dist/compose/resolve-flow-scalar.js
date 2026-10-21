@@ -2,7 +2,8 @@
 import { Scalar } from '../nodes/Scalar.js';
 import { resolveEnd } from './resolve-end.js';
 
-function resolveFlowScalar(scalar, /** @type {boolean} */ strict, onError) {
+/** @import { SourceToken } from "./resolve-props.js" */
+function resolveFlowScalar(/** @type {{ offset: number, type: string, source: string, end?: SourceToken[] }} */ scalar, /** @type {boolean} */ strict, onError) {
     const { offset, type, source, end } = scalar;
     let _type;
     let value;
@@ -80,7 +81,7 @@ function resolveFlowScalar(scalar, /** @type {boolean} */ strict, onError) {
      * The try-catch is for Safari, which doesn't support this yet:
      * https://caniuse.com/js-regexp-lookbehind
      */
-    let first, line;
+    /** @type {RegExp} */ let first, line;
     try {
         first = new RegExp('(.*?)(?<![ \t])[ \t]*\r?\n', 'sy');
         line = new RegExp('[ \t]*(.*?)(?:(?<![ \t])[ \t]*)?\r?\n', 'sy');
@@ -92,7 +93,7 @@ function resolveFlowScalar(scalar, /** @type {boolean} */ strict, onError) {
     let match = first.exec(source);
     if (!match)
         return source;
-    let res = match[1];
+    /** @type {string} */ let res = match[1];
     let sep = ' ';
     let pos = first.lastIndex;
     line.lastIndex = pos;

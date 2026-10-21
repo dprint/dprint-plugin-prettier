@@ -1,10 +1,12 @@
+// @nts-check
 import { defineShortcut, mapNode } from "./utilities.js";
+/** @import { YamlNode } from "../../../src/vendor/yaml-unist-parser/transforms/context.mjs" */
 
 function preprocess(ast) {
   return mapNode(ast, defineShortcuts);
 }
 
-function defineShortcuts(node) {
+/** @returns {YamlNode} */ function defineShortcuts(/** @type {YamlNode} */ node) {
   switch (node.type) {
     case "document":
       defineShortcut(node, "head", () => node.children[0]);

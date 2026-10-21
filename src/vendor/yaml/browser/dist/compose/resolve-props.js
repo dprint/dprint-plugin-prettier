@@ -1,5 +1,6 @@
 // @nts-check
-function resolveProps(/** @type {any[]} */ tokens, { flow, indicator, next, offset, onError, parentIndent, startOnNewline }) {
+/** @typedef {{ type: string, offset: number, indent: number, source: string }} SourceToken */
+function resolveProps(/** @type {SourceToken[]} */ tokens, { flow, indicator, next, offset, onError, parentIndent, startOnNewline }) {
     let spaceBefore = false;
     let atNewline = startOnNewline;
     let hasSpace = startOnNewline;

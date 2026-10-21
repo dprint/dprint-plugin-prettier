@@ -6,18 +6,18 @@
  */
 class LineCounter {
     constructor() {
-        this.lineStarts = [];
+        /** @type {number[]} */ this.lineStarts = [];
         /**
          * Should be called in ascending order. Otherwise, call
          * `lineCounter.lineStarts.sort()` before calling `linePos()`.
          */
-        this.addNewLine = /** @returns {number} */ (/** @type {number} */ offset) => this.lineStarts.push(offset);
+        /** @type {(offset: number) => number} */ this.addNewLine = /** @returns {number} */ (/** @type {number} */ offset) => this.lineStarts.push(offset);
         /**
          * Performs a binary search and returns the 1-indexed { line, col }
          * position of `offset`. If `line === 0`, `addNewLine` has never been
          * called or `offset` is before the first known newline.
          */
-        this.linePos = (/** @type {number} */ offset) => {
+        /** @type {(offset: number) => { line: number, col: number }} */ this.linePos = (/** @type {number} */ offset) => {
             let low = 0;
             let high = this.lineStarts.length;
             while (low < high) {

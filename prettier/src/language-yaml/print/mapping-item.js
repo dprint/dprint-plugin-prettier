@@ -18,10 +18,13 @@ import {
   isNode,
 } from "../utilities.js";
 import { alignWithSpaces } from "./misc.js";
+/** @import AstPath from "../../common/ast-path.js" */
+/** @import { YamlNode } from "../../../../src/vendor/yaml-unist-parser/transforms/context.mjs" */
+/** @import { YamlOptions } from "../utilities.js" */
 
-function printMappingItem(path, options, print) {
-  const { node, parent } = path;
-  const { key, value } = node;
+function printMappingItem(/** @type {AstPath} */ path, /** @type {YamlOptions} */ options, print) {
+  /** @type {{ node: YamlNode, parent: YamlNode }} */ const { node, parent } = path;
+  /** @type {{ key: YamlNode, value: YamlNode }} */ const { key, value } = node;
 
   /** @type {boolean} */ const isEmptyMappingKey = isEmptyNode(key);
   /** @type {boolean} */ const isEmptyMappingValue = isEmptyNode(value);
@@ -152,7 +155,7 @@ function printMappingItem(path, options, print) {
   ]);
 }
 
-/** @returns {boolean} */ function isAbsolutelyPrintedAsSingleLineNode(node, options) {
+/** @returns {boolean} */ function isAbsolutelyPrintedAsSingleLineNode(/** @type {YamlNode | null | undefined} */ node, /** @type {YamlOptions} */ options) {
   if (!node) {
     return true;
   }
@@ -196,11 +199,11 @@ function printMappingItem(path, options, print) {
   }
 }
 
-/** @returns {boolean} */ function needsSpaceInFrontOfMappingValue(node) {
+/** @returns {boolean} */ function needsSpaceInFrontOfMappingValue(/** @type {YamlNode} */ node) {
   return node.key.content?.type === "alias";
 }
 
-/** @returns {boolean} */ function isSingleLineNode(node) {
+/** @returns {boolean} */ function isSingleLineNode(/** @type {YamlNode | null | undefined} */ node) {
   /* c8 ignore next 3 */
   if (!node) {
     return true;

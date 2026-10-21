@@ -6,7 +6,7 @@ import { getLast } from "../utils/get-last.mjs";
 import { createDocumentBody } from "../factories/document-body.mjs";
 import { findCharIndex } from "../utils/find-char-index.mjs";
 //#region src/transforms/document-body.ts
-function transformDocumentBody(docStart, /** @type {any[]} */ tokensBeforeBody, cstNode, /** @type {import("../../../../prettier/node_modules/yaml/browser/dist/doc/Document.js").Document} */ document, /** @type {any[]} */ tokensAfterBody, docEnd, /** @type {import("./context.mjs").default} */ context) {
+function transformDocumentBody(docStart, /** @type {any[]} */ tokensBeforeBody, cstNode, /** @type {import("../../yaml/browser/dist/doc/Document.js").Document} */ document, /** @type {any[]} */ tokensAfterBody, docEnd, /** @type {import("./context.mjs").default} */ context) {
 	const { documentTrailingComment, endComments, propTokens } = categorizeNodes(tokensBeforeBody, cstNode, tokensAfterBody, docEnd, context);
 	const hasContent = document.contents && (document.contents.range[0] < document.contents.range[1] || propTokens.some(/** @returns {boolean} */ (token) => token.type === "tag" || token.type === "anchor"));
 	const content = hasContent ? context.transformNode(document.contents, { tokens: propTokens }) : null;
@@ -56,7 +56,7 @@ function categorizeNodes(/** @type {any[]} */ tokensBeforeBody, cstNode, /** @ty
 		documentTrailingComment: getLast(documentTrailingComments) || null
 	};
 }
-function getPosition(docStart, /** @type {import("../../../../prettier/node_modules/yaml/browser/dist/doc/Document.js").Document | undefined} */ document, content, docEnd, /** @type {import("./context.mjs").default | undefined} */ context) {
+function getPosition(docStart, /** @type {import("../../yaml/browser/dist/doc/Document.js").Document | undefined} */ document, content, docEnd, /** @type {import("./context.mjs").default | undefined} */ context) {
 	let origEnd = docEnd ? Math.max(0, docEnd.offset - 1) : findCharIndex(context.text, document.range[2], /\S/u) ?? context.text.length;
 	if (context.text[origEnd - 1] === "\r") origEnd--;
 	let origStart = content !== null ? content.position.start.offset : origEnd;

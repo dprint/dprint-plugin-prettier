@@ -1,5 +1,7 @@
+// @nts-check
+/** @import { YamlNode } from "../transforms/context.mjs" */
 //#region src/utils/define-parents.ts
-function defineParents(node, parent = null) {
+function defineParents(/** @type {YamlNode} */ node, /** @type {YamlNode | null} */ parent = null) {
 	if ("children" in node) node.children.forEach((child) => defineParents(child, node));
 	if ("anchor" in node && node.anchor) defineParents(node.anchor, node);
 	if ("tag" in node && node.tag) defineParents(node.tag, node);

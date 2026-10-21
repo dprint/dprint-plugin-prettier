@@ -4,15 +4,44 @@ import { transformComment } from "./comment.mjs";
 import { transformContentProperties } from "./content.mjs";
 import { transformNode } from "./transform.mjs";
 //#region src/transforms/context.ts
+/**
+ * @typedef {{ line: number, column: number, offset: number }} Point
+ * @typedef {{ start: Point, end: Point }} Position
+ * @typedef {{
+ *   type: string,
+ *   position: Position,
+ *   children?: any[],
+ *   leadingComments?: any[],
+ *   middleComments?: any[],
+ *   indicatorComment?: any,
+ *   trailingComment?: any,
+ *   endComments?: any[],
+ *   anchor?: any,
+ *   tag?: any,
+ *   _parent?: any,
+ *   comments?: any[],
+ *   content?: any,
+ *   head?: any,
+ *   body?: any,
+ *   key?: any,
+ *   value?: any,
+ *   indent?: any,
+ *   chomping?: string,
+ *   name?: string,
+ *   parameters?: any[],
+ *   documentEndMarker?: any,
+ *   directivesEndMarker?: any,
+ * }} YamlNode
+ */
 var Context = class {
 	/** @type {string} */ text;
-	comments = [];
-	#lineCounter;
-	constructor(/** @type {string} */ text, /** @type {import("../../../../prettier/node_modules/yaml/browser/dist/parse/line-counter.js").LineCounter} */ lineCounter) {
+	/** @type {any[]} */ comments = [];
+	/** @type {import("../../yaml/browser/dist/parse/line-counter.js").LineCounter} */ #lineCounter;
+	constructor(/** @type {string} */ text, /** @type {import("../../yaml/browser/dist/parse/line-counter.js").LineCounter} */ lineCounter) {
 		this.text = text;
 		this.#lineCounter = lineCounter;
 	}
-	transformOffset(/** @type {number} */ offset) {
+	/** @returns {Point} */ transformOffset(/** @type {number} */ offset) {
 		const { line, col } = this.#lineCounter.linePos(offset);
 		return {
 			line,
@@ -20,7 +49,7 @@ var Context = class {
 			offset
 		};
 	}
-	transformRange(/** @type {any[]} */ range) {
+	/** @returns {Position} */ transformRange(/** @type {any[]} */ range) {
 		const [start, end] = range.map((/** @type {number} */ position) => this.transformOffset(position));
 		return createPosition(start, end);
 	}

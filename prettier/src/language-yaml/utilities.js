@@ -2,17 +2,35 @@
 import isNonEmptyArray from "../utilities/is-non-empty-array.js";
 
 /** @import AstPath from "../common/ast-path.js" */
+/** @import { YamlNode } from "../../../src/vendor/yaml-unist-parser/transforms/context.mjs" */
+/**
+ * @typedef {{
+ *   originalText: string,
+ *   proseWrap: string,
+ *   tabWidth: number,
+ *   bracketSpacing: boolean,
+ *   singleQuote: boolean,
+ *   trailingComma?: string,
+ * }} YamlOptions
+ */
 
 /**
  * @param {any} value
- * @param {string[]=} types
+ * @param {string[]} types
  * @returns {boolean}
  */
 function isNode(value, types) {
-  return typeof value?.type === "string" && types.includes(value.type);
+  return (
+    typeof value?.type === "string" &&
+    types.includes(/** @type {string} */ (value.type))
+  );
 }
 
-function mapNode(node, callback, parent) {
+/** @returns {YamlNode} */ function mapNode(
+  /** @type {YamlNode} */ node,
+  /** @type {(node: YamlNode, parent: YamlNode | undefined) => YamlNode} */ callback,
+  /** @type {YamlNode | undefined} */ parent,
+) {
   return callback(
     "children" in node
       ? {
@@ -26,14 +44,14 @@ function mapNode(node, callback, parent) {
   );
 }
 
-function defineShortcut(x, /** @type {string} */ key, getter) {
+function defineShortcut(/** @type {YamlNode} */ x, /** @type {string} */ key, /** @type {() => any} */ getter) {
   Object.defineProperty(x, key, {
     get: getter,
     enumerable: false,
   });
 }
 
-/** @returns {boolean} */ function isNextLineEmpty(node, /** @type {string} */ text) {
+/** @returns {boolean} */ function isNextLineEmpty(/** @type {YamlNode} */ node, /** @type {string} */ text) {
   let newlineCount = 0;
   const textLength = text.length;
   for (let i = node.position.end.offset - 1; i < textLength; i++) {
@@ -56,7 +74,7 @@ function defineShortcut(x, /** @type {string} */ key, getter) {
 }
 
 /** @returns {boolean} */ function isLastDescendantNode(/** @type {AstPath} */ path) {
-  const { node } = path;
+  /** @type {{ node: YamlNode }} */ const { node } = path;
 
   switch (node.type) {
     case "tag":
@@ -83,18 +101,18 @@ function defineShortcut(x, /** @type {string} */ key, getter) {
   return true;
 }
 
-function getLastDescendantNode(node) {
+/** @returns {YamlNode} */ function getLastDescendantNode(/** @type {YamlNode} */ node) {
   return isNonEmptyArray(node.children)
     ? getLastDescendantNode(node.children.at(-1))
     : node;
 }
 
-/** @returns {boolean} */ function isPrettierIgnore(comment) {
+/** @returns {boolean} */ function isPrettierIgnore(/** @type {YamlNode} */ comment) {
   return comment.value.trim() === "prettier-ignore";
 }
 
 /** @returns {boolean} */ function hasPrettierIgnore(/** @type {AstPath} */ path) {
-  const { node } = path;
+  /** @type {{ node: YamlNode }} */ const { node } = path;
 
   if (node.type === "documentBody") {
     const documentHead = path.parent.head;
@@ -109,11 +127,11 @@ function getLastDescendantNode(node) {
   );
 }
 
-/** @returns {boolean} */ function isEmptyNode(node) {
+/** @returns {boolean} */ function isEmptyNode(/** @type {YamlNode} */ node) {
   return !isNonEmptyArray(node.children) && !hasComments(node);
 }
 
-function hasComments(node) {
+/** @returns {boolean} */ function hasComments(/** @type {YamlNode} */ node) {
   return (
     hasLeadingComments(node) ||
     hasMiddleComments(node) ||
@@ -123,23 +141,23 @@ function hasComments(node) {
   );
 }
 
-/** @returns {boolean} */ function hasLeadingComments(node) {
+/** @returns {boolean} */ function hasLeadingComments(/** @type {YamlNode | null | undefined} */ node) {
   return isNonEmptyArray(node?.leadingComments);
 }
 
-/** @returns {boolean} */ function hasMiddleComments(node) {
+/** @returns {boolean} */ function hasMiddleComments(/** @type {YamlNode | null | undefined} */ node) {
   return isNonEmptyArray(node?.middleComments);
 }
 
-function hasIndicatorComment(node) {
+function hasIndicatorComment(/** @type {YamlNode | null | undefined} */ node) {
   return node?.indicatorComment;
 }
 
-function hasTrailingComment(node) {
+function hasTrailingComment(/** @type {YamlNode | null | undefined} */ node) {
   return node?.trailingComment;
 }
 
-/** @returns {boolean} */ function hasEndComments(node) {
+/** @returns {boolean} */ function hasEndComments(/** @type {YamlNode | null | undefined} */ node) {
   return isNonEmptyArray(node?.endComments);
 }
 
@@ -156,10 +174,10 @@ function splitWithSingleSpace(text) {
 @param {string} nodeType
 @param {string} content
 */
-function getFlowScalarLineContents(nodeType, content, options) {
+function getFlowScalarLineContents(nodeType, content, /** @type {YamlOptions} */ options) {
   const rawLineContents = content
     .split("\n")
-    .map(/** @returns {string} */ (lineContent, index, lineContents) =>
+    .map(/** @returns {string} */ (/** @type {string} */ lineContent, /** @type {number} */ index, /** @type {string[]} */ lineContents) =>
       index === 0 && index === lineContents.length - 1
         ? lineContent
         : index !== 0 && index !== lineContents.length - 1
@@ -306,7 +324,7 @@ function getBlockValueLineContents(
   }
 }
 
-/** @returns {boolean} */ function isInlineNode(node) {
+/** @returns {boolean} */ function isInlineNode(/** @type {YamlNode | null | undefined} */ node) {
   /* c8 ignore next 3 */
   if (!node) {
     return true;

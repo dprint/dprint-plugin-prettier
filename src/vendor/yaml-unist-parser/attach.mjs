@@ -1,8 +1,9 @@
 // @nts-check
 import { defineParents } from "./utils/define-parents.mjs";
 import { getPointText } from "./utils/get-point-text.mjs";
+/** @import { YamlNode } from "./transforms/context.mjs" */
 //#region src/attach.ts
-function attachComments(root) {
+function attachComments(/** @type {YamlNode} */ root) {
 	defineParents(root);
 	const nodeTable = createNodeTable(root);
 	const restDocuments = root.children.slice();
@@ -11,13 +12,13 @@ function attachComments(root) {
 		attachComment(comment, nodeTable, restDocuments[0]);
 	});
 }
-/** @returns {any[]} */ function createNodeTable(root) {
+/** @returns {any[]} */ function createNodeTable(/** @type {YamlNode} */ root) {
 	const nodeTable = Array.from(new Array(root.position.end.line), () => ({}));
 	for (const comment of root.comments) nodeTable[comment.position.start.line - 1].comment = comment;
 	initNodeTable(nodeTable, root);
 	return nodeTable;
 }
-function initNodeTable(/** @type {any[]} */ nodeTable, node) {
+function initNodeTable(/** @type {any[]} */ nodeTable, /** @type {YamlNode} */ node) {
 	if (node.position.start.offset === node.position.end.offset) return;
 	if ("leadingComments" in node) {
 		const { start } = node.position;
@@ -41,7 +42,7 @@ function initNodeTable(/** @type {any[]} */ nodeTable, node) {
 		initNodeTable(nodeTable, child);
 	});
 }
-function attachComment(comment, /** @type {any[]} */ nodeTable, document) {
+function attachComment(/** @type {YamlNode} */ comment, /** @type {any[]} */ nodeTable, /** @type {YamlNode} */ document) {
 	const commentLine = comment.position.start.line;
 	const { trailingAttachableNode } = nodeTable[commentLine - 1];
 	if (trailingAttachableNode) {
@@ -97,7 +98,7 @@ function attachComment(comment, /** @type {any[]} */ nodeTable, document) {
 	defineParents(comment, documentBody);
 	documentBody.endComments.push(comment);
 }
-/** @returns {boolean} */ function shouldOwnEndComment(node, comment) {
+/** @returns {boolean} */ function shouldOwnEndComment(/** @type {YamlNode} */ node, /** @type {YamlNode} */ comment) {
 	if (node.position.start.offset < comment.position.start.offset && node.position.end.offset > comment.position.end.offset) switch (node.type) {
 		case "flowMapping":
 		case "flowSequence": return node.children.length === 0 || comment.position.start.line > node.children[node.children.length - 1].position.end.line;
@@ -110,7 +111,7 @@ function attachComment(comment, /** @type {any[]} */ nodeTable, document) {
 		default: return false;
 	}
 }
-/** @returns {boolean} */ function isExplicitMappingKey(node) {
+/** @returns {boolean} */ function isExplicitMappingKey(/** @type {YamlNode} */ node) {
 	return node.position.start !== node.position.end && (node.children.length === 0 || node.position.start.offset !== node.children[0].position.start.offset);
 }
 //#endregion

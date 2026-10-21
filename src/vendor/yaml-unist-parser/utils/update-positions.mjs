@@ -1,7 +1,9 @@
+// @nts-check
+/** @import { YamlNode, Position, Point } from "../transforms/context.mjs" */
 import { getLast } from "./get-last.mjs";
 import { createUpdater } from "./create-updater.mjs";
 //#region src/utils/update-positions.ts
-function updatePositions(node) {
+function updatePositions(/** @type {YamlNode | null} */ node) {
 	if (node === null || !("children" in node)) return;
 	const children = node.children;
 	children.forEach(updatePositions);
@@ -28,22 +30,22 @@ function updatePositions(node) {
 		if ("trailingComment" in lastChild && lastChild.trailingComment) updateEndPoint(lastChild.trailingComment.position.end);
 	}
 }
-function startPointGetter(position) {
+/** @returns {Point} */ function startPointGetter(/** @type {Position} */ position) {
 	return position.start;
 }
-function startPointSetter(position, point) {
+function startPointSetter(/** @type {Position} */ position, /** @type {Point} */ point) {
 	position.start = point;
 }
-function endPointGetter(position) {
+/** @returns {Point} */ function endPointGetter(/** @type {Position} */ position) {
 	return position.end;
 }
-function endPointSetter(position, point) {
+function endPointSetter(/** @type {Position} */ position, /** @type {Point} */ point) {
 	position.end = point;
 }
-/** @returns {boolean} */ function shouldUpdateStartPoint(reduced, value) {
+/** @returns {boolean} */ function shouldUpdateStartPoint(/** @type {Point} */ reduced, /** @type {Point} */ value) {
 	return value.offset < reduced.offset;
 }
-/** @returns {boolean} */ function shouldUpdateEndPoint(reduced, value) {
+/** @returns {boolean} */ function shouldUpdateEndPoint(/** @type {Point} */ reduced, /** @type {Point} */ value) {
 	return value.offset > reduced.offset;
 }
 //#endregion

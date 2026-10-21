@@ -6,7 +6,7 @@ import { createMappingKey } from "../factories/mapping-key.mjs";
 import { createMappingValue } from "../factories/mapping-value.mjs";
 import { isEmptyNode } from "./transform.mjs";
 //#region src/transforms/pair.ts
-function transformPair(/** @type {import("../../../../prettier/node_modules/yaml/browser/dist/nodes/Pair.js").Pair} */ pair, srcItem, /** @type {import("./context.mjs").default} */ context, createNode) {
+function transformPair(/** @type {import("../../yaml/browser/dist/nodes/Pair.js").Pair} */ pair, srcItem, /** @type {import("./context.mjs").default} */ context, createNode) {
 	var _srcItem$key;
 	const keyPropTokens = [];
 	let explicitKeyIndToken = null;
@@ -55,7 +55,7 @@ function transformPair(/** @type {import("../../../../prettier/node_modules/yaml
 		props: { tokens: valuePropTokens }
 	});
 }
-function transformAstPair(/** @type {import("../../../../prettier/node_modules/yaml/browser/dist/nodes/Pair.js").Pair} */ pair, /** @type {import("./context.mjs").default} */ context, createNode, additionalKeyData, additionalValueData) {
+function transformAstPair(/** @type {import("../../yaml/browser/dist/nodes/Pair.js").Pair} */ pair, /** @type {import("./context.mjs").default} */ context, createNode, additionalKeyData, additionalValueData) {
 	let keyContent = null;
 	if (!isEmptyNode(pair.key, additionalKeyData.props)) keyContent = context.transformNode(pair.key, additionalKeyData.props);
 	else extractComments(additionalKeyData.props.tokens, context);

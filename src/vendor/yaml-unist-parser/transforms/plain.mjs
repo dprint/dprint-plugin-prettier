@@ -3,7 +3,7 @@ import { extractComments } from "../utils/extract-comments.mjs";
 import { createPlain } from "../factories/plain.mjs";
 import { findLastCharIndex } from "../utils/find-last-char-index.mjs";
 //#region src/transforms/plain.ts
-function transformPlain(/** @type {import("../../../../prettier/node_modules/yaml/browser/dist/nodes/Scalar.js").Scalar} */ plain, /** @type {import("./context.mjs").default} */ context, props) {
+function transformPlain(/** @type {import("../../yaml/browser/dist/nodes/Scalar.js").Scalar} */ plain, /** @type {import("./context.mjs").default} */ context, props) {
 	if (plain.range[0] === plain.range[1]) {
 		const index = findLastCharIndex(context.text, plain.range[0] - 1, /\S/u) + 1;
 		return createPlain(context.transformRange([index, index]), context.transformContentProperties(plain, props.tokens), "");

@@ -9,9 +9,11 @@ import {
 } from "../../document/index.js";
 import { hasEndComments, isEmptyNode } from "../utilities.js";
 import { alignWithSpaces, printNextEmptyLine } from "./misc.js";
+/** @import { YamlNode } from "../../../../src/vendor/yaml-unist-parser/transforms/context.mjs" */
+/** @import { YamlOptions } from "../utilities.js" */
 
-function printFlowMapping(path, options, print) {
-  const { node } = path;
+function printFlowMapping(/** @type {AstPath} */ path, /** @type {YamlOptions} */ options, print) {
+  /** @type {{ node: YamlNode }} */ const { node } = path;
   /** @type {boolean} */ const isMapping = node.type === "flowMapping";
   /** @type {string} */ const openMarker = isMapping ? "{" : "[";
   /** @type {string} */ const closeMarker = isMapping ? "}" : "]";
@@ -42,7 +44,7 @@ function printFlowMapping(path, options, print) {
   ];
 }
 
-function printChildren(path, options, print) {
+function printChildren(/** @type {AstPath} */ path, /** @type {YamlOptions} */ options, print) {
   return path.map(
     /** @returns {any[]} */ ({ isLast, node, next }) => [
       print(),
