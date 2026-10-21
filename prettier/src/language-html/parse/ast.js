@@ -150,7 +150,7 @@ class Node {
     fn(this);
   }
 
-  /** @returns {Node} */ createChild(nodeOrProperties) {
+  /** @returns {Node} */ createChild(/** @type {import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").Text | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").Element | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").Attribute | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").Comment | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").DocType | object | Node | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").CDATA | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").Block | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").LetDeclaration} */ nodeOrProperties) {
     /** @type {Node} */ const node =
       nodeOrProperties instanceof Node
         ? nodeOrProperties.clone()

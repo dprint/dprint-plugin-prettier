@@ -121,7 +121,7 @@ function shouldParseVueRootNodeAsHtml(node) {
   return !language || language === "html";
 }
 
-function throwParseError(error) {
+function throwParseError(/** @type {import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/parser.mjs").TreeError | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/parse_util.mjs").ParseError} */ error) {
   const {
     msg,
     span: { start, end },

@@ -28,7 +28,7 @@ class Visitor extends RecursiveVisitor {
       });
     }
   }
-  visit(node, { parseOptions }) {
+  visit(/** @type {import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").Text | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").Element | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").Attribute | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").Comment | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").DocType | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").CDATA | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").Block | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").BlockParameter | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").LetDeclaration} */ node, { parseOptions }) {
     restoreNameAndValue(node);
     addTagDefinition(node, parseOptions);
     normalizeName(node, parseOptions);
@@ -211,7 +211,7 @@ function addTagDefinition(node, parseOptions) {
   }
 }
 
-function fixSourceSpan(node) {
+function fixSourceSpan(/** @type {import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").Text | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").Element | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").Attribute | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").Comment | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").DocType | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").CDATA | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").Block | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").BlockParameter | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").LetDeclaration} */ node) {
   if (node.sourceSpan && node.endSourceSpan) {
     node.sourceSpan = new ParseSourceSpan(
       node.sourceSpan.start,
@@ -220,7 +220,7 @@ function fixSourceSpan(node) {
   }
 }
 
-function normalizeName(node, parseOptions) {
+function normalizeName(/** @type {import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").Text | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").Element | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").Attribute | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").Comment | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").DocType | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").CDATA | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").Block | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").BlockParameter | import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/ast.mjs").LetDeclaration} */ node, parseOptions) {
   if (node.kind === "element") {
     if (
       parseOptions.normalizeTagName &&
