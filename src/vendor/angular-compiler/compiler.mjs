@@ -7,11 +7,11 @@
 
 const _SELECTOR_REGEXP = new RegExp('(\\:not\\()|' + '(([\\.\\#]?)[-\\w]+)|' + '(?:\\[([-.\\w*\\\\$]+)(?:=(["\']?)([^\\]"\']*)\\5)?\\])|' + '(\\))|' + '(\\s*,\\s*)', 'g');
 class CssSelector {
-  element = null;
-  classNames = [];
-  attrs = [];
-  notSelectors = [];
-  static parse(selector) {
+  /** @type {string | null} */ element = null;
+  /** @type {string[]} */ classNames = [];
+  /** @type {string[]} */ attrs = [];
+  /** @type {CssSelector[]} */ notSelectors = [];
+  /** @returns {CssSelector[]} */ static parse(/** @type {string} */ selector) {
     const results = [];
     const _addResult = (res, cssSel) => {
       if (cssSel.notSelectors.length > 0 && !cssSel.element && cssSel.classNames.length == 0 && cssSel.attrs.length == 0) {
@@ -63,7 +63,7 @@ class CssSelector {
     _addResult(results, cssSelector);
     return results;
   }
-  unescapeAttribute(attr) {
+  /** @returns {string} */ unescapeAttribute(/** @type {string} */ attr) {
     let result = '';
     let escaping = false;
     for (let i = 0; i < attr.length; i++) {
@@ -80,32 +80,32 @@ class CssSelector {
     }
     return result;
   }
-  escapeAttribute(attr) {
+  /** @returns {string} */ escapeAttribute(/** @type {string} */ attr) {
     return attr.replace(/\\/g, '\\\\').replace(/\$/g, '\\$');
   }
-  isElementSelector() {
+  /** @returns {boolean} */ isElementSelector() {
     return this.hasElementSelector() && this.classNames.length == 0 && this.attrs.length == 0 && this.notSelectors.length === 0;
   }
-  hasElementSelector() {
+  /** @returns {boolean} */ hasElementSelector() {
     return !!this.element;
   }
-  setElement(element = null) {
+  setElement(/** @type {string | null} */ element = null) {
     this.element = element;
   }
-  getAttrs() {
+  /** @returns {string[]} */ getAttrs() {
     const result = [];
     if (this.classNames.length > 0) {
       result.push('class', this.classNames.join(' '));
     }
     return result.concat(this.attrs);
   }
-  addAttribute(name, value = '') {
+  addAttribute(/** @type {string} */ name, /** @type {string} */ value = '') {
     this.attrs.push(name, value && value.toLowerCase() || '');
   }
-  addClassName(name) {
+  addClassName(/** @type {string} */ name) {
     this.classNames.push(name.toLowerCase());
   }
-  toString() {
+  /** @returns {string} */ toString() {
     let res = this.element || '';
     if (this.classNames) {
       this.classNames.forEach(klass => res += `.${klass}`);
@@ -122,7 +122,7 @@ class CssSelector {
   }
 }
 class SelectorMatcher {
-  static createNotMatcher(notSelectors) {
+  static createNotMatcher(/** @type {CssSelector[]} */ notSelectors) {
     const notMatcher = new SelectorMatcher();
     notMatcher.addSelectables(notSelectors, null);
     return notMatcher;
@@ -134,7 +134,7 @@ class SelectorMatcher {
   _attrValueMap = new Map();
   _attrValuePartialMap = new Map();
   _listContexts = [];
-  addSelectables(cssSelectors, callbackCtxt) {
+  addSelectables(/** @type {CssSelector[]} */ cssSelectors, callbackCtxt) {
     let listContext = null;
     if (cssSelectors.length > 1) {
       listContext = new SelectorListContext(cssSelectors);
@@ -210,7 +210,7 @@ class SelectorMatcher {
     }
     return matcher;
   }
-  match(cssSelector, matchedCallback) {
+  /** @returns {boolean} */ match(/** @type {CssSelector} */ cssSelector, matchedCallback) {
     let result = false;
     const element = cssSelector.element;
     const classNames = cssSelector.classNames;
@@ -277,24 +277,24 @@ class SelectorMatcher {
   }
 }
 class SelectorListContext {
-  selectors;
-  alreadyMatched = false;
-  constructor(selectors) {
+  /** @type {CssSelector[]} */ selectors;
+  /** @type {boolean} */ alreadyMatched = false;
+  constructor(/** @type {CssSelector[]} */ selectors) {
     this.selectors = selectors;
   }
 }
 class SelectorContext {
-  selector;
+  /** @type {CssSelector} */ selector;
   cbContext;
-  listContext;
-  notSelectors;
-  constructor(selector, cbContext, listContext) {
+  /** @type {SelectorListContext} */ listContext;
+  /** @type {CssSelector[]} */ notSelectors;
+  constructor(/** @type {CssSelector} */ selector, cbContext, /** @type {SelectorListContext} */ listContext) {
     this.selector = selector;
     this.cbContext = cbContext;
     this.listContext = listContext;
     this.notSelectors = selector.notSelectors;
   }
-  finalize(cssSelector, callback) {
+  /** @returns {boolean} */ finalize(/** @type {CssSelector} */ cssSelector, callback) {
     let result = true;
     if (this.notSelectors.length > 0 && (!this.listContext || !this.listContext.alreadyMatched)) {
       const notMatcher = SelectorMatcher.createNotMatcher(this.notSelectors);
@@ -314,7 +314,7 @@ class SelectorlessMatcher {
   constructor(registry) {
     this.registry = registry;
   }
-  match(name) {
+  /** @returns {any[]} */ match(/** @type {string} */ name) {
     return this.registry.has(name) ? this.registry.get(name) : [];
   }
 }
@@ -438,7 +438,7 @@ function parserSelectorToR3Selector(selector) {
   const negative = selector.notSelectors && selector.notSelectors.length ? selector.notSelectors.map(notSelector => parserSelectorToNegativeSelector(notSelector)) : [];
   return positive.concat(...negative);
 }
-function parseSelectorToR3Selector(selector) {
+/** @returns {any[][]} */ function parseSelectorToR3Selector(/** @type {string | null} */ selector) {
   return selector ? CssSelector.parse(selector).map(parserSelectorToR3Selector) : [];
 }
 
@@ -598,7 +598,7 @@ function fingerprint(str) {
   }
   return BigInt.asUintN(32, BigInt(hi)) << BigInt(32) | BigInt.asUintN(32, BigInt(lo));
 }
-function computeMsgId(msg, meaning = '') {
+/** @returns {string} */ function computeMsgId(/** @type {string} */ msg, /** @type {string} */ meaning = '') {
   let msgFingerprint = fingerprint(msg);
   if (meaning) {
     msgFingerprint = BigInt.asUintN(64, msgFingerprint << BigInt(1)) | msgFingerprint >> BigInt(63) & BigInt(1);
@@ -737,10 +737,10 @@ var TypeModifier;
 })(TypeModifier || (TypeModifier = {}));
 class Type {
   /** @type {number} */ modifiers;
-  constructor(modifiers = TypeModifier.None) {
+  constructor(/** @type {number} */ modifiers = TypeModifier.None) {
     this.modifiers = modifiers;
   }
-  hasModifier(modifier) {
+  /** @returns {boolean} */ hasModifier(/** @type {number} */ modifier) {
     return (this.modifiers & modifier) !== 0;
   }
 }
@@ -757,7 +757,7 @@ var BuiltinTypeName;
 })(BuiltinTypeName || (BuiltinTypeName = {}));
 class BuiltinType extends Type {
   /** @type {number} */ name;
-  constructor(/** @type {number} */ name, modifiers) {
+  constructor(/** @type {number} */ name, /** @type {number | undefined} */ modifiers) {
     super(modifiers);
     this.name = name;
   }
@@ -766,9 +766,9 @@ class BuiltinType extends Type {
   }
 }
 class ExpressionType extends Type {
-  value;
-  typeParams;
-  constructor(value, modifiers, typeParams = null) {
+  /** @type {Expression} */ value;
+  /** @type {Type[] | null} */ typeParams;
+  constructor(/** @type {Expression} */ value, /** @type {number | undefined} */ modifiers, /** @type {Type[] | null} */ typeParams = null) {
     super(modifiers);
     this.value = value;
     this.typeParams = typeParams;
@@ -778,8 +778,8 @@ class ExpressionType extends Type {
   }
 }
 class ArrayType extends Type {
-  of;
-  constructor(of, modifiers) {
+  /** @type {Type} */ of;
+  constructor(/** @type {Type} */ of, /** @type {number | undefined} */ modifiers) {
     super(modifiers);
     this.of = of;
   }
@@ -788,8 +788,8 @@ class ArrayType extends Type {
   }
 }
 class MapType extends Type {
-  valueType;
-  constructor(valueType, modifiers) {
+  /** @type {Type | null} */ valueType;
+  constructor(/** @type {Type | null | undefined} */ valueType, /** @type {number | undefined} */ modifiers) {
     super(modifiers);
     this.valueType = valueType || null;
   }
@@ -799,7 +799,7 @@ class MapType extends Type {
 }
 class TransplantedType extends Type {
   type;
-  constructor(type, modifiers) {
+  constructor(type, /** @type {number | undefined} */ modifiers) {
     super(modifiers);
     this.type = type;
   }
@@ -854,7 +854,7 @@ var BinaryOperator;
   BinaryOperator[BinaryOperator["OrAssignment"] = 29] = "OrAssignment";
   BinaryOperator[BinaryOperator["NullishCoalesceAssignment"] = 30] = "NullishCoalesceAssignment";
 })(BinaryOperator || (BinaryOperator = {}));
-function nullSafeIsEquivalent(base, other) {
+/** @returns {boolean} */ function nullSafeIsEquivalent(base, other) {
   if (base == null || other == null) {
     return base == other;
   }
@@ -872,167 +872,167 @@ function areAllEquivalentPredicate(base, other, equivalentPredicate) {
   }
   return true;
 }
-function areAllEquivalent(base, other) {
+/** @returns {boolean} */ function areAllEquivalent(/** @type {any[]} */ base, /** @type {any[]} */ other) {
   return areAllEquivalentPredicate(base, other, (baseElement, otherElement) => baseElement.isEquivalent(otherElement));
 }
 class Expression {
-  leadingComments;
-  /** @type {BuiltinType | null} */ type;
-  sourceSpan;
-  constructor(/** @type {BuiltinType | null} */ type, sourceSpan, leadingComments) {
+  /** @type {LeadingComment[] | undefined} */ leadingComments;
+  /** @type {Type | null} */ type;
+  /** @type {ParseSourceSpan | null} */ sourceSpan;
+  constructor(/** @type {Type | null | undefined} */ type, /** @type {ParseSourceSpan | null | undefined} */ sourceSpan, /** @type {LeadingComment[] | undefined} */ leadingComments) {
     this.leadingComments = leadingComments;
     this.type = type || null;
     this.sourceSpan = sourceSpan || null;
   }
-  prop(name, sourceSpan) {
+  /** @returns {ReadPropExpr} */ prop(/** @type {string} */ name, /** @type {ParseSourceSpan | null | undefined} */ sourceSpan) {
     return new ReadPropExpr(this, name, null, sourceSpan);
   }
-  key(index, type, sourceSpan) {
+  /** @returns {ReadKeyExpr} */ key(/** @type {Expression} */ index, /** @type {Type | null | undefined} */ type, /** @type {ParseSourceSpan | null | undefined} */ sourceSpan) {
     return new ReadKeyExpr(this, index, type, sourceSpan);
   }
-  callFn(params, sourceSpan, pure, leadingComments) {
+  /** @returns {InvokeFunctionExpr} */ callFn(/** @type {Expression[]} */ params, /** @type {ParseSourceSpan | null | undefined} */ sourceSpan, /** @type {boolean | undefined} */ pure, /** @type {LeadingComment[] | undefined} */ leadingComments) {
     return new InvokeFunctionExpr(this, params, null, sourceSpan, pure, leadingComments);
   }
-  instantiate(params, type, sourceSpan, leadingComments) {
+  /** @returns {InstantiateExpr} */ instantiate(/** @type {Expression[]} */ params, /** @type {Type | null | undefined} */ type, /** @type {ParseSourceSpan | null | undefined} */ sourceSpan, /** @type {LeadingComment[] | undefined} */ leadingComments) {
     return new InstantiateExpr(this, params, type, sourceSpan);
   }
-  conditional(trueCase, falseCase = null, sourceSpan, leadingComments) {
+  /** @returns {ConditionalExpr} */ conditional(/** @type {Expression} */ trueCase, /** @type {Expression | null} */ falseCase = null, /** @type {ParseSourceSpan | null | undefined} */ sourceSpan, /** @type {LeadingComment[] | undefined} */ leadingComments) {
     return new ConditionalExpr(this, trueCase, falseCase, null, sourceSpan);
   }
-  equals(rhs, sourceSpan) {
+  /** @returns {BinaryOperatorExpr} */ equals(/** @type {Expression} */ rhs, /** @type {ParseSourceSpan | null | undefined} */ sourceSpan) {
     return new BinaryOperatorExpr(BinaryOperator.Equals, this, rhs, null, sourceSpan);
   }
-  notEquals(rhs, sourceSpan) {
+  /** @returns {BinaryOperatorExpr} */ notEquals(/** @type {Expression} */ rhs, /** @type {ParseSourceSpan | null | undefined} */ sourceSpan) {
     return new BinaryOperatorExpr(BinaryOperator.NotEquals, this, rhs, null, sourceSpan);
   }
-  identical(rhs, sourceSpan) {
+  /** @returns {BinaryOperatorExpr} */ identical(/** @type {Expression} */ rhs, /** @type {ParseSourceSpan | null | undefined} */ sourceSpan) {
     return new BinaryOperatorExpr(BinaryOperator.Identical, this, rhs, null, sourceSpan);
   }
-  notIdentical(rhs, sourceSpan) {
+  /** @returns {BinaryOperatorExpr} */ notIdentical(/** @type {Expression} */ rhs, /** @type {ParseSourceSpan | null | undefined} */ sourceSpan) {
     return new BinaryOperatorExpr(BinaryOperator.NotIdentical, this, rhs, null, sourceSpan);
   }
-  minus(rhs, sourceSpan) {
+  /** @returns {BinaryOperatorExpr} */ minus(/** @type {Expression} */ rhs, /** @type {ParseSourceSpan | null | undefined} */ sourceSpan) {
     return new BinaryOperatorExpr(BinaryOperator.Minus, this, rhs, null, sourceSpan);
   }
-  plus(rhs, sourceSpan) {
+  /** @returns {BinaryOperatorExpr} */ plus(/** @type {Expression} */ rhs, /** @type {ParseSourceSpan | null | undefined} */ sourceSpan) {
     return new BinaryOperatorExpr(BinaryOperator.Plus, this, rhs, null, sourceSpan);
   }
-  divide(rhs, sourceSpan) {
+  /** @returns {BinaryOperatorExpr} */ divide(/** @type {Expression} */ rhs, /** @type {ParseSourceSpan | null | undefined} */ sourceSpan) {
     return new BinaryOperatorExpr(BinaryOperator.Divide, this, rhs, null, sourceSpan);
   }
-  multiply(rhs, sourceSpan) {
+  /** @returns {BinaryOperatorExpr} */ multiply(/** @type {Expression} */ rhs, /** @type {ParseSourceSpan | null | undefined} */ sourceSpan) {
     return new BinaryOperatorExpr(BinaryOperator.Multiply, this, rhs, null, sourceSpan);
   }
-  modulo(rhs, sourceSpan) {
+  /** @returns {BinaryOperatorExpr} */ modulo(/** @type {Expression} */ rhs, /** @type {ParseSourceSpan | null | undefined} */ sourceSpan) {
     return new BinaryOperatorExpr(BinaryOperator.Modulo, this, rhs, null, sourceSpan);
   }
-  power(rhs, sourceSpan) {
+  /** @returns {BinaryOperatorExpr} */ power(/** @type {Expression} */ rhs, /** @type {ParseSourceSpan | null | undefined} */ sourceSpan) {
     return new BinaryOperatorExpr(BinaryOperator.Exponentiation, this, rhs, null, sourceSpan);
   }
-  and(rhs, sourceSpan) {
+  /** @returns {BinaryOperatorExpr} */ and(/** @type {Expression} */ rhs, /** @type {ParseSourceSpan | null | undefined} */ sourceSpan) {
     return new BinaryOperatorExpr(BinaryOperator.And, this, rhs, null, sourceSpan);
   }
-  bitwiseOr(rhs, sourceSpan) {
+  /** @returns {BinaryOperatorExpr} */ bitwiseOr(/** @type {Expression} */ rhs, /** @type {ParseSourceSpan | null | undefined} */ sourceSpan) {
     return new BinaryOperatorExpr(BinaryOperator.BitwiseOr, this, rhs, null, sourceSpan);
   }
-  bitwiseAnd(rhs, sourceSpan) {
+  /** @returns {BinaryOperatorExpr} */ bitwiseAnd(/** @type {Expression} */ rhs, /** @type {ParseSourceSpan | null | undefined} */ sourceSpan) {
     return new BinaryOperatorExpr(BinaryOperator.BitwiseAnd, this, rhs, null, sourceSpan);
   }
-  or(rhs, sourceSpan) {
+  /** @returns {BinaryOperatorExpr} */ or(/** @type {Expression} */ rhs, /** @type {ParseSourceSpan | null | undefined} */ sourceSpan) {
     return new BinaryOperatorExpr(BinaryOperator.Or, this, rhs, null, sourceSpan);
   }
-  lower(rhs, sourceSpan) {
+  /** @returns {BinaryOperatorExpr} */ lower(/** @type {Expression} */ rhs, /** @type {ParseSourceSpan | null | undefined} */ sourceSpan) {
     return new BinaryOperatorExpr(BinaryOperator.Lower, this, rhs, null, sourceSpan);
   }
-  lowerEquals(rhs, sourceSpan) {
+  /** @returns {BinaryOperatorExpr} */ lowerEquals(/** @type {Expression} */ rhs, /** @type {ParseSourceSpan | null | undefined} */ sourceSpan) {
     return new BinaryOperatorExpr(BinaryOperator.LowerEquals, this, rhs, null, sourceSpan);
   }
-  bigger(rhs, sourceSpan) {
+  /** @returns {BinaryOperatorExpr} */ bigger(/** @type {Expression} */ rhs, /** @type {ParseSourceSpan | null | undefined} */ sourceSpan) {
     return new BinaryOperatorExpr(BinaryOperator.Bigger, this, rhs, null, sourceSpan);
   }
-  biggerEquals(rhs, sourceSpan) {
+  /** @returns {BinaryOperatorExpr} */ biggerEquals(/** @type {Expression} */ rhs, /** @type {ParseSourceSpan | null | undefined} */ sourceSpan) {
     return new BinaryOperatorExpr(BinaryOperator.BiggerEquals, this, rhs, null, sourceSpan);
   }
-  isBlank(sourceSpan) {
+  /** @returns {Expression} */ isBlank(/** @type {ParseSourceSpan | null | undefined} */ sourceSpan) {
     return this.equals(TYPED_NULL_EXPR, sourceSpan);
   }
-  nullishCoalesce(rhs, sourceSpan) {
+  /** @returns {BinaryOperatorExpr} */ nullishCoalesce(/** @type {Expression} */ rhs, /** @type {ParseSourceSpan | null | undefined} */ sourceSpan) {
     return new BinaryOperatorExpr(BinaryOperator.NullishCoalesce, this, rhs, null, sourceSpan);
   }
-  toStmt(leadingComments) {
+  /** @returns {Statement} */ toStmt(/** @type {LeadingComment[] | undefined} */ leadingComments) {
     return new ExpressionStatement(this, null, leadingComments);
   }
 }
 class ReadVarExpr extends Expression {
-  name;
-  constructor(name, type, sourceSpan, leadingComments) {
+  /** @type {string} */ name;
+  constructor(/** @type {string} */ name, /** @type {Type | null | undefined} */ type, /** @type {ParseSourceSpan | null | undefined} */ sourceSpan, /** @type {LeadingComment[] | undefined} */ leadingComments) {
     super(type, sourceSpan, leadingComments);
     this.name = name;
   }
-  isEquivalent(e) {
+  /** @returns {boolean} */ isEquivalent(/** @type {Expression} */ e) {
     return e instanceof ReadVarExpr && this.name === e.name;
   }
-  isConstant() {
+  /** @returns {boolean} */ isConstant() {
     return false;
   }
   visitExpression(visitor, context) {
     return visitor.visitReadVarExpr(this, context);
   }
-  clone() {
+  /** @returns {ReadVarExpr} */ clone() {
     return new ReadVarExpr(this.name, this.type, this.sourceSpan);
   }
-  set(value) {
+  /** @returns {BinaryOperatorExpr} */ set(/** @type {Expression} */ value) {
     return new BinaryOperatorExpr(BinaryOperator.Assign, this, value, null, this.sourceSpan);
   }
 }
 class TypeofExpr extends Expression {
-  expr;
-  constructor(expr, type, sourceSpan, leadingComments) {
+  /** @type {Expression} */ expr;
+  constructor(/** @type {Expression} */ expr, /** @type {Type | null | undefined} */ type, /** @type {ParseSourceSpan | null | undefined} */ sourceSpan, /** @type {LeadingComment[] | undefined} */ leadingComments) {
     super(type, sourceSpan, leadingComments);
     this.expr = expr;
   }
   visitExpression(visitor, context) {
     return visitor.visitTypeofExpr(this, context);
   }
-  isEquivalent(e) {
+  /** @returns {boolean} */ isEquivalent(/** @type {Expression} */ e) {
     return e instanceof TypeofExpr && e.expr.isEquivalent(this.expr);
   }
-  isConstant() {
+  /** @returns {boolean} */ isConstant() {
     return this.expr.isConstant();
   }
-  clone() {
+  /** @returns {TypeofExpr} */ clone() {
     return new TypeofExpr(this.expr.clone());
   }
 }
 class VoidExpr extends Expression {
-  expr;
-  constructor(expr, type, sourceSpan, leadingComments) {
+  /** @type {Expression} */ expr;
+  constructor(/** @type {Expression} */ expr, /** @type {Type | null | undefined} */ type, /** @type {ParseSourceSpan | null | undefined} */ sourceSpan, /** @type {LeadingComment[] | undefined} */ leadingComments) {
     super(type, sourceSpan, leadingComments);
     this.expr = expr;
   }
   visitExpression(visitor, context) {
     return visitor.visitVoidExpr(this, context);
   }
-  isEquivalent(e) {
+  /** @returns {boolean} */ isEquivalent(/** @type {Expression} */ e) {
     return e instanceof VoidExpr && e.expr.isEquivalent(this.expr);
   }
-  isConstant() {
+  /** @returns {boolean} */ isConstant() {
     return this.expr.isConstant();
   }
-  clone() {
+  /** @returns {VoidExpr} */ clone() {
     return new VoidExpr(this.expr.clone());
   }
 }
 class WrappedNodeExpr extends Expression {
   node;
-  constructor(node, type, sourceSpan, leadingComments) {
+  constructor(node, /** @type {Type | null | undefined} */ type, /** @type {ParseSourceSpan | null | undefined} */ sourceSpan, /** @type {LeadingComment[] | undefined} */ leadingComments) {
     super(type, sourceSpan, leadingComments);
     this.node = node;
   }
-  isEquivalent(e) {
+  /** @returns {boolean} */ isEquivalent(/** @type {Expression} */ e) {
     return e instanceof WrappedNodeExpr && this.node === e.node;
   }
-  isConstant() {
+  /** @returns {boolean} */ isConstant() {
     return false;
   }
   visitExpression(visitor, context) {
@@ -1043,140 +1043,140 @@ class WrappedNodeExpr extends Expression {
   }
 }
 class InvokeFunctionExpr extends Expression {
-  fn;
-  args;
-  pure;
-  isOptional;
-  constructor(fn, args, type, sourceSpan, pure = false, leadingComments, isOptional = false) {
+  /** @type {Expression} */ fn;
+  /** @type {Expression[]} */ args;
+  /** @type {boolean} */ pure;
+  /** @type {boolean} */ isOptional;
+  constructor(/** @type {Expression} */ fn, /** @type {Expression[]} */ args, /** @type {Type | null | undefined} */ type, /** @type {ParseSourceSpan | null | undefined} */ sourceSpan, /** @type {boolean} */ pure = false, /** @type {LeadingComment[] | undefined} */ leadingComments, /** @type {boolean} */ isOptional = false) {
     super(type, sourceSpan, leadingComments);
     this.fn = fn;
     this.args = args;
     this.pure = pure;
     this.isOptional = isOptional;
   }
-  get receiver() {
+  /** @returns {Expression} */ get receiver() {
     return this.fn;
   }
-  isEquivalent(e) {
+  /** @returns {boolean} */ isEquivalent(/** @type {Expression} */ e) {
     return e instanceof InvokeFunctionExpr && this.fn.isEquivalent(e.fn) && areAllEquivalent(this.args, e.args) && this.pure === e.pure;
   }
-  isConstant() {
+  /** @returns {boolean} */ isConstant() {
     return false;
   }
   visitExpression(visitor, context) {
     return visitor.visitInvokeFunctionExpr(this, context);
   }
-  clone() {
+  /** @returns {InvokeFunctionExpr} */ clone() {
     return new InvokeFunctionExpr(this.fn.clone(), this.args.map(arg => arg.clone()), this.type, this.sourceSpan, this.pure, [], this.isOptional);
   }
 }
 class TaggedTemplateLiteralExpr extends Expression {
-  tag;
-  template;
-  constructor(tag, template, type, sourceSpan, leadingComments) {
+  /** @type {Expression} */ tag;
+  /** @type {TemplateLiteralExpr} */ template;
+  constructor(/** @type {Expression} */ tag, /** @type {TemplateLiteralExpr} */ template, /** @type {Type | null | undefined} */ type, /** @type {ParseSourceSpan | null | undefined} */ sourceSpan, /** @type {LeadingComment[] | undefined} */ leadingComments) {
     super(type, sourceSpan, leadingComments);
     this.tag = tag;
     this.template = template;
   }
-  isEquivalent(e) {
+  /** @returns {boolean} */ isEquivalent(/** @type {Expression} */ e) {
     return e instanceof TaggedTemplateLiteralExpr && this.tag.isEquivalent(e.tag) && this.template.isEquivalent(e.template);
   }
-  isConstant() {
+  /** @returns {boolean} */ isConstant() {
     return false;
   }
   visitExpression(visitor, context) {
     return visitor.visitTaggedTemplateLiteralExpr(this, context);
   }
-  clone() {
+  /** @returns {TaggedTemplateLiteralExpr} */ clone() {
     return new TaggedTemplateLiteralExpr(this.tag.clone(), this.template.clone(), this.type, this.sourceSpan);
   }
 }
 class InstantiateExpr extends Expression {
-  classExpr;
-  args;
-  constructor(classExpr, args, type, sourceSpan, leadingComments) {
+  /** @type {Expression} */ classExpr;
+  /** @type {Expression[]} */ args;
+  constructor(/** @type {Expression} */ classExpr, /** @type {Expression[]} */ args, /** @type {Type | null | undefined} */ type, /** @type {ParseSourceSpan | null | undefined} */ sourceSpan, /** @type {LeadingComment[] | undefined} */ leadingComments) {
     super(type, sourceSpan, leadingComments);
     this.classExpr = classExpr;
     this.args = args;
   }
-  isEquivalent(e) {
+  /** @returns {boolean} */ isEquivalent(/** @type {Expression} */ e) {
     return e instanceof InstantiateExpr && this.classExpr.isEquivalent(e.classExpr) && areAllEquivalent(this.args, e.args);
   }
-  isConstant() {
+  /** @returns {boolean} */ isConstant() {
     return false;
   }
   visitExpression(visitor, context) {
     return visitor.visitInstantiateExpr(this, context);
   }
-  clone() {
+  /** @returns {InstantiateExpr} */ clone() {
     return new InstantiateExpr(this.classExpr.clone(), this.args.map(arg => arg.clone()), this.type, this.sourceSpan);
   }
 }
 class RegularExpressionLiteralExpr extends Expression {
-  body;
-  flags;
-  constructor(body, flags, sourceSpan, leadingComments) {
+  /** @type {string} */ body;
+  /** @type {string | null} */ flags;
+  constructor(/** @type {string} */ body, /** @type {string | null} */ flags, /** @type {ParseSourceSpan | null | undefined} */ sourceSpan, /** @type {LeadingComment[] | undefined} */ leadingComments) {
     super(null, sourceSpan, leadingComments);
     this.body = body;
     this.flags = flags;
   }
-  isEquivalent(e) {
+  /** @returns {boolean} */ isEquivalent(/** @type {Expression} */ e) {
     return e instanceof RegularExpressionLiteralExpr && this.body === e.body && this.flags === e.flags;
   }
-  isConstant() {
+  /** @returns {boolean} */ isConstant() {
     return true;
   }
   visitExpression(visitor, context) {
     return visitor.visitRegularExpressionLiteral(this, context);
   }
-  clone() {
+  /** @returns {RegularExpressionLiteralExpr} */ clone() {
     return new RegularExpressionLiteralExpr(this.body, this.flags, this.sourceSpan);
   }
 }
 class LiteralExpr extends Expression {
   value;
-  constructor(value, /** @type {BuiltinType | null} */ type, sourceSpan, leadingComments) {
+  constructor(value, /** @type {Type | null | undefined} */ type, /** @type {ParseSourceSpan | null | undefined} */ sourceSpan, /** @type {LeadingComment[] | undefined} */ leadingComments) {
     super(type, sourceSpan, leadingComments);
     this.value = value;
   }
-  isEquivalent(e) {
+  /** @returns {boolean} */ isEquivalent(/** @type {Expression} */ e) {
     return e instanceof LiteralExpr && this.value === e.value;
   }
-  isConstant() {
+  /** @returns {boolean} */ isConstant() {
     return true;
   }
   visitExpression(visitor, context) {
     return visitor.visitLiteralExpr(this, context);
   }
-  clone() {
+  /** @returns {LiteralExpr} */ clone() {
     return new LiteralExpr(this.value, this.type, this.sourceSpan);
   }
 }
 class TemplateLiteralExpr extends Expression {
-  elements;
-  expressions;
-  constructor(elements, expressions, sourceSpan, leadingComments) {
+  /** @type {TemplateLiteralElementExpr[]} */ elements;
+  /** @type {Expression[]} */ expressions;
+  constructor(/** @type {TemplateLiteralElementExpr[]} */ elements, /** @type {Expression[]} */ expressions, /** @type {ParseSourceSpan | null | undefined} */ sourceSpan, /** @type {LeadingComment[] | undefined} */ leadingComments) {
     super(null, sourceSpan, leadingComments);
     this.elements = elements;
     this.expressions = expressions;
   }
-  isEquivalent(e) {
+  /** @returns {boolean} */ isEquivalent(/** @type {Expression} */ e) {
     return e instanceof TemplateLiteralExpr && areAllEquivalentPredicate(this.elements, e.elements, (a, b) => a.text === b.text) && areAllEquivalent(this.expressions, e.expressions);
   }
-  isConstant() {
+  /** @returns {boolean} */ isConstant() {
     return false;
   }
   visitExpression(visitor, context) {
     return visitor.visitTemplateLiteralExpr(this, context);
   }
-  clone() {
+  /** @returns {TemplateLiteralExpr} */ clone() {
     return new TemplateLiteralExpr(this.elements.map(el => el.clone()), this.expressions.map(expr => expr.clone()));
   }
 }
 class TemplateLiteralElementExpr extends Expression {
-  text;
-  rawText;
-  constructor(text, sourceSpan, rawText, leadingComments) {
+  /** @type {string} */ text;
+  /** @type {string} */ rawText;
+  constructor(/** @type {string} */ text, /** @type {ParseSourceSpan | null | undefined} */ sourceSpan, /** @type {string | undefined} */ rawText, /** @type {LeadingComment[] | undefined} */ leadingComments) {
     super(STRING_TYPE, sourceSpan, leadingComments);
     this.text = text;
     this.rawText = rawText ?? escapeForTemplateLiteral(escapeSlashes(text));
@@ -1184,29 +1184,29 @@ class TemplateLiteralElementExpr extends Expression {
   visitExpression(visitor, context) {
     return visitor.visitTemplateLiteralElementExpr(this, context);
   }
-  isEquivalent(e) {
+  /** @returns {boolean} */ isEquivalent(/** @type {Expression} */ e) {
     return e instanceof TemplateLiteralElementExpr && e.text === this.text && e.rawText === this.rawText;
   }
-  isConstant() {
+  /** @returns {boolean} */ isConstant() {
     return true;
   }
-  clone() {
+  /** @returns {TemplateLiteralElementExpr} */ clone() {
     return new TemplateLiteralElementExpr(this.text, this.sourceSpan, this.rawText);
   }
 }
 class LiteralPiece {
-  text;
-  sourceSpan;
-  constructor(text, sourceSpan) {
+  /** @type {string} */ text;
+  /** @type {ParseSourceSpan} */ sourceSpan;
+  constructor(/** @type {string} */ text, /** @type {ParseSourceSpan} */ sourceSpan) {
     this.text = text;
     this.sourceSpan = sourceSpan;
   }
 }
 class PlaceholderPiece {
-  text;
-  sourceSpan;
-  associatedMessage;
-  constructor(text, sourceSpan, associatedMessage) {
+  /** @type {string} */ text;
+  /** @type {ParseSourceSpan} */ sourceSpan;
+  /** @type {Message | undefined} */ associatedMessage;
+  constructor(/** @type {string} */ text, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {Message | undefined} */ associatedMessage) {
     this.text = text;
     this.sourceSpan = sourceSpan;
     this.associatedMessage = associatedMessage;
@@ -1217,26 +1217,26 @@ const ID_SEPARATOR$1 = '@@';
 const LEGACY_ID_INDICATOR = '␟';
 class LocalizedString extends Expression {
   metaBlock;
-  messageParts;
-  placeHolderNames;
-  expressions;
-  constructor(metaBlock, messageParts, placeHolderNames, expressions, sourceSpan, leadingComments) {
+  /** @type {LiteralPiece[]} */ messageParts;
+  /** @type {PlaceholderPiece[]} */ placeHolderNames;
+  /** @type {Expression[]} */ expressions;
+  constructor(metaBlock, /** @type {LiteralPiece[]} */ messageParts, /** @type {PlaceholderPiece[]} */ placeHolderNames, /** @type {Expression[]} */ expressions, /** @type {ParseSourceSpan | null | undefined} */ sourceSpan, /** @type {LeadingComment[] | undefined} */ leadingComments) {
     super(STRING_TYPE, sourceSpan, leadingComments);
     this.metaBlock = metaBlock;
     this.messageParts = messageParts;
     this.placeHolderNames = placeHolderNames;
     this.expressions = expressions;
   }
-  isEquivalent(e) {
+  /** @returns {boolean} */ isEquivalent(/** @type {Expression} */ e) {
     return false;
   }
-  isConstant() {
+  /** @returns {boolean} */ isConstant() {
     return false;
   }
   visitExpression(visitor, context) {
     return visitor.visitLocalizedString(this, context);
   }
-  clone() {
+  /** @returns {LocalizedString} */ clone() {
     return new LocalizedString(this.metaBlock, this.messageParts, this.placeHolderNames, this.expressions.map(expr => expr.clone()), this.sourceSpan);
   }
   serializeI18nHead() {
@@ -1254,13 +1254,13 @@ class LocalizedString extends Expression {
     }
     return createCookedRawString(metaBlock, this.messageParts[0].text, this.getMessagePartSourceSpan(0));
   }
-  getMessagePartSourceSpan(i) {
+  /** @returns {ParseSourceSpan | null} */ getMessagePartSourceSpan(/** @type {number} */ i) {
     return this.messageParts[i]?.sourceSpan ?? this.sourceSpan;
   }
-  getPlaceholderSourceSpan(i) {
+  /** @returns {ParseSourceSpan} */ getPlaceholderSourceSpan(/** @type {number} */ i) {
     return this.placeHolderNames[i]?.sourceSpan ?? this.expressions[i]?.sourceSpan ?? this.sourceSpan;
   }
-  serializeI18nTemplatePart(partIndex) {
+  serializeI18nTemplatePart(/** @type {number} */ partIndex) {
     const placeholder = this.placeHolderNames[partIndex - 1];
     const messagePart = this.messageParts[partIndex];
     let metaBlock = placeholder.text;
@@ -1291,22 +1291,22 @@ function createCookedRawString(metaBlock, messagePart, range) {
 }
 class ExternalExpr extends Expression {
   value;
-  typeParams;
-  constructor(value, type, typeParams = null, sourceSpan, leadingComments) {
+  /** @type {Type[] | null} */ typeParams;
+  constructor(value, /** @type {Type | null | undefined} */ type, /** @type {Type[] | null} */ typeParams = null, /** @type {ParseSourceSpan | null | undefined} */ sourceSpan, /** @type {LeadingComment[] | undefined} */ leadingComments) {
     super(type, sourceSpan, leadingComments);
     this.value = value;
     this.typeParams = typeParams;
   }
-  isEquivalent(e) {
+  /** @returns {boolean} */ isEquivalent(/** @type {Expression} */ e) {
     return e instanceof ExternalExpr && this.value.name === e.value.name && this.value.moduleName === e.value.moduleName;
   }
-  isConstant() {
+  /** @returns {boolean} */ isConstant() {
     return false;
   }
   visitExpression(visitor, context) {
     return visitor.visitExternalExpr(this, context);
   }
-  clone() {
+  /** @returns {ExternalExpr} */ clone() {
     return new ExternalExpr(this.value, this.type, this.typeParams, this.sourceSpan);
   }
 }
@@ -1319,117 +1319,117 @@ class ExternalReference {
   }
 }
 class ConditionalExpr extends Expression {
-  condition;
-  falseCase;
-  trueCase;
-  constructor(condition, trueCase, falseCase = null, type, sourceSpan, leadingComments) {
+  /** @type {Expression} */ condition;
+  /** @type {Expression | null} */ falseCase;
+  /** @type {Expression} */ trueCase;
+  constructor(/** @type {Expression} */ condition, /** @type {Expression} */ trueCase, /** @type {Expression | null} */ falseCase = null, /** @type {Type | null | undefined} */ type, /** @type {ParseSourceSpan | null | undefined} */ sourceSpan, /** @type {LeadingComment[] | undefined} */ leadingComments) {
     super(type || trueCase.type, sourceSpan, leadingComments);
     this.condition = condition;
     this.falseCase = falseCase;
     this.trueCase = trueCase;
   }
-  isEquivalent(e) {
+  /** @returns {boolean} */ isEquivalent(/** @type {Expression} */ e) {
     return e instanceof ConditionalExpr && this.condition.isEquivalent(e.condition) && this.trueCase.isEquivalent(e.trueCase) && nullSafeIsEquivalent(this.falseCase, e.falseCase);
   }
-  isConstant() {
+  /** @returns {boolean} */ isConstant() {
     return false;
   }
   visitExpression(visitor, context) {
     return visitor.visitConditionalExpr(this, context);
   }
-  clone() {
+  /** @returns {ConditionalExpr} */ clone() {
     return new ConditionalExpr(this.condition.clone(), this.trueCase.clone(), this.falseCase?.clone(), this.type, this.sourceSpan);
   }
 }
 class DynamicImportExpr extends Expression {
   url;
-  urlComment;
-  constructor(url, sourceSpan, urlComment, leadingComments) {
+  /** @type {string | undefined} */ urlComment;
+  constructor(url, /** @type {ParseSourceSpan | null | undefined} */ sourceSpan, /** @type {string | undefined} */ urlComment, /** @type {LeadingComment[] | undefined} */ leadingComments) {
     super(null, sourceSpan, leadingComments);
     this.url = url;
     this.urlComment = urlComment;
   }
-  isEquivalent(e) {
+  /** @returns {boolean} */ isEquivalent(/** @type {Expression} */ e) {
     return e instanceof DynamicImportExpr && this.url === e.url && this.urlComment === e.urlComment;
   }
-  isConstant() {
+  /** @returns {boolean} */ isConstant() {
     return false;
   }
   visitExpression(visitor, context) {
     return visitor.visitDynamicImportExpr(this, context);
   }
-  clone() {
+  /** @returns {DynamicImportExpr} */ clone() {
     return new DynamicImportExpr(typeof this.url === 'string' ? this.url : this.url.clone(), this.sourceSpan, this.urlComment);
   }
 }
 class NotExpr extends Expression {
-  condition;
-  constructor(condition, sourceSpan, leadingComments) {
+  /** @type {Expression} */ condition;
+  constructor(/** @type {Expression} */ condition, /** @type {ParseSourceSpan | null | undefined} */ sourceSpan, /** @type {LeadingComment[] | undefined} */ leadingComments) {
     super(BOOL_TYPE, sourceSpan, leadingComments);
     this.condition = condition;
   }
-  isEquivalent(e) {
+  /** @returns {boolean} */ isEquivalent(/** @type {Expression} */ e) {
     return e instanceof NotExpr && this.condition.isEquivalent(e.condition);
   }
-  isConstant() {
+  /** @returns {boolean} */ isConstant() {
     return false;
   }
   visitExpression(visitor, context) {
     return visitor.visitNotExpr(this, context);
   }
-  clone() {
+  /** @returns {NotExpr} */ clone() {
     return new NotExpr(this.condition.clone(), this.sourceSpan);
   }
 }
 class FnParam {
-  name;
-  type;
-  constructor(name, type = null) {
+  /** @type {string} */ name;
+  /** @type {Type | null} */ type;
+  constructor(/** @type {string} */ name, /** @type {Type | null} */ type = null) {
     this.name = name;
     this.type = type;
   }
-  isEquivalent(param) {
+  /** @returns {boolean} */ isEquivalent(/** @type {FnParam} */ param) {
     return this.name === param.name;
   }
-  clone() {
+  /** @returns {FnParam} */ clone() {
     return new FnParam(this.name, this.type);
   }
 }
 class FunctionExpr extends Expression {
-  params;
-  statements;
-  name;
-  constructor(params, statements, type, sourceSpan, name, leadingComments) {
+  /** @type {FnParam[]} */ params;
+  /** @type {Statement[]} */ statements;
+  /** @type {string | null | undefined} */ name;
+  constructor(/** @type {FnParam[]} */ params, /** @type {Statement[]} */ statements, /** @type {Type | null | undefined} */ type, /** @type {ParseSourceSpan | null | undefined} */ sourceSpan, /** @type {string | null | undefined} */ name, /** @type {LeadingComment[] | undefined} */ leadingComments) {
     super(type, sourceSpan, leadingComments);
     this.params = params;
     this.statements = statements;
     this.name = name;
   }
-  isEquivalent(e) {
+  /** @returns {boolean} */ isEquivalent(e) {
     return (e instanceof FunctionExpr || e instanceof DeclareFunctionStmt) && areAllEquivalent(this.params, e.params) && areAllEquivalent(this.statements, e.statements);
   }
-  isConstant() {
+  /** @returns {boolean} */ isConstant() {
     return false;
   }
   visitExpression(visitor, context) {
     return visitor.visitFunctionExpr(this, context);
   }
-  toDeclStmt(name, modifiers) {
+  /** @returns {DeclareFunctionStmt} */ toDeclStmt(/** @type {string} */ name, /** @type {number | undefined} */ modifiers) {
     return new DeclareFunctionStmt(name, this.params, this.statements, this.type, modifiers, this.sourceSpan);
   }
-  clone() {
+  /** @returns {FunctionExpr} */ clone() {
     return new FunctionExpr(this.params.map(p => p.clone()), this.statements, this.type, this.sourceSpan, this.name);
   }
 }
 let ArrowFunctionExpr$1 = class ArrowFunctionExpr extends Expression {
-  params;
+  /** @type {FnParam[]} */ params;
   body;
-  constructor(params, body, type, sourceSpan, leadingComments) {
+  constructor(/** @type {FnParam[]} */ params, body, /** @type {Type | null | undefined} */ type, /** @type {ParseSourceSpan | null | undefined} */ sourceSpan, /** @type {LeadingComment[] | undefined} */ leadingComments) {
     super(type, sourceSpan, leadingComments);
     this.params = params;
     this.body = body;
   }
-  isEquivalent(e) {
+  /** @returns {boolean} */ isEquivalent(/** @type {Expression} */ e) {
     if (!(e instanceof ArrowFunctionExpr) || !areAllEquivalent(this.params, e.params)) {
       return false;
     }
@@ -1441,159 +1441,159 @@ let ArrowFunctionExpr$1 = class ArrowFunctionExpr extends Expression {
     }
     return false;
   }
-  isConstant() {
+  /** @returns {boolean} */ isConstant() {
     return false;
   }
   visitExpression(visitor, context) {
     return visitor.visitArrowFunctionExpr(this, context);
   }
-  clone() {
+  /** @returns {Expression} */ clone() {
     return new ArrowFunctionExpr(this.params.map(p => p.clone()), Array.isArray(this.body) ? this.body : this.body.clone(), this.type, this.sourceSpan);
   }
-  toDeclStmt(name, modifiers) {
+  /** @returns {DeclareVarStmt} */ toDeclStmt(/** @type {string} */ name, /** @type {number | undefined} */ modifiers) {
     return new DeclareVarStmt(name, this, INFERRED_TYPE, modifiers, this.sourceSpan);
   }
 };
 class UnaryOperatorExpr extends Expression {
-  operator;
-  expr;
-  parens;
-  constructor(operator, expr, type, sourceSpan, parens = true, leadingComments) {
+  /** @type {number} */ operator;
+  /** @type {Expression} */ expr;
+  /** @type {boolean} */ parens;
+  constructor(/** @type {number} */ operator, /** @type {Expression} */ expr, /** @type {Type | null | undefined} */ type, /** @type {ParseSourceSpan | null | undefined} */ sourceSpan, /** @type {boolean} */ parens = true, /** @type {LeadingComment[] | undefined} */ leadingComments) {
     super(type || NUMBER_TYPE, sourceSpan, leadingComments);
     this.operator = operator;
     this.expr = expr;
     this.parens = parens;
   }
-  isEquivalent(e) {
+  /** @returns {boolean} */ isEquivalent(/** @type {Expression} */ e) {
     return e instanceof UnaryOperatorExpr && this.operator === e.operator && this.expr.isEquivalent(e.expr);
   }
-  isConstant() {
+  /** @returns {boolean} */ isConstant() {
     return false;
   }
   visitExpression(visitor, context) {
     return visitor.visitUnaryOperatorExpr(this, context);
   }
-  clone() {
+  /** @returns {UnaryOperatorExpr} */ clone() {
     return new UnaryOperatorExpr(this.operator, this.expr.clone(), this.type, this.sourceSpan, this.parens);
   }
 }
 class ParenthesizedExpr extends Expression {
-  expr;
-  constructor(expr, type, sourceSpan, leadingComments) {
+  /** @type {Expression} */ expr;
+  constructor(/** @type {Expression} */ expr, /** @type {Type | null | undefined} */ type, /** @type {ParseSourceSpan | null | undefined} */ sourceSpan, /** @type {LeadingComment[] | undefined} */ leadingComments) {
     super(type, sourceSpan, leadingComments);
     this.expr = expr;
   }
   visitExpression(visitor, context) {
     return visitor.visitParenthesizedExpr(this, context);
   }
-  isEquivalent(e) {
+  /** @returns {boolean} */ isEquivalent(/** @type {Expression} */ e) {
     return e instanceof ParenthesizedExpr && e.expr.isEquivalent(this.expr);
   }
-  isConstant() {
+  /** @returns {boolean} */ isConstant() {
     return this.expr.isConstant();
   }
-  clone() {
+  /** @returns {ParenthesizedExpr} */ clone() {
     return new ParenthesizedExpr(this.expr.clone());
   }
 }
 class BinaryOperatorExpr extends Expression {
-  operator;
-  rhs;
-  lhs;
-  constructor(operator, lhs, rhs, type, sourceSpan, leadingComments) {
+  /** @type {number} */ operator;
+  /** @type {Expression} */ rhs;
+  /** @type {Expression} */ lhs;
+  constructor(/** @type {number} */ operator, /** @type {Expression} */ lhs, /** @type {Expression} */ rhs, /** @type {Type | null | undefined} */ type, /** @type {ParseSourceSpan | null | undefined} */ sourceSpan, /** @type {LeadingComment[] | undefined} */ leadingComments) {
     super(type || lhs.type, sourceSpan, leadingComments);
     this.operator = operator;
     this.rhs = rhs;
     this.lhs = lhs;
   }
-  isEquivalent(e) {
+  /** @returns {boolean} */ isEquivalent(/** @type {Expression} */ e) {
     return e instanceof BinaryOperatorExpr && this.operator === e.operator && this.lhs.isEquivalent(e.lhs) && this.rhs.isEquivalent(e.rhs);
   }
-  isConstant() {
+  /** @returns {boolean} */ isConstant() {
     return false;
   }
   visitExpression(visitor, context) {
     return visitor.visitBinaryOperatorExpr(this, context);
   }
-  clone() {
+  /** @returns {BinaryOperatorExpr} */ clone() {
     return new BinaryOperatorExpr(this.operator, this.lhs.clone(), this.rhs.clone(), this.type, this.sourceSpan);
   }
-  isAssignment() {
+  /** @returns {boolean} */ isAssignment() {
     const op = this.operator;
     return op === BinaryOperator.Assign || op === BinaryOperator.AdditionAssignment || op === BinaryOperator.SubtractionAssignment || op === BinaryOperator.MultiplicationAssignment || op === BinaryOperator.DivisionAssignment || op === BinaryOperator.RemainderAssignment || op === BinaryOperator.ExponentiationAssignment || op === BinaryOperator.AndAssignment || op === BinaryOperator.OrAssignment || op === BinaryOperator.NullishCoalesceAssignment;
   }
 }
 class ReadPropExpr extends Expression {
-  receiver;
-  name;
-  isOptional;
-  constructor(receiver, name, type, sourceSpan, leadingComments, isOptional = false) {
+  /** @type {Expression} */ receiver;
+  /** @type {string} */ name;
+  /** @type {boolean} */ isOptional;
+  constructor(/** @type {Expression} */ receiver, /** @type {string} */ name, /** @type {Type | null | undefined} */ type, /** @type {ParseSourceSpan | null | undefined} */ sourceSpan, /** @type {LeadingComment[] | undefined} */ leadingComments, /** @type {boolean} */ isOptional = false) {
     super(type, sourceSpan, leadingComments);
     this.receiver = receiver;
     this.name = name;
     this.isOptional = isOptional;
   }
-  get index() {
+  /** @returns {string} */ get index() {
     return this.name;
   }
-  isEquivalent(e) {
+  /** @returns {boolean} */ isEquivalent(/** @type {Expression} */ e) {
     return e instanceof ReadPropExpr && this.receiver.isEquivalent(e.receiver) && this.name === e.name && this.isOptional === e.isOptional;
   }
-  isConstant() {
+  /** @returns {boolean} */ isConstant() {
     return false;
   }
   visitExpression(visitor, context) {
     return visitor.visitReadPropExpr(this, context);
   }
-  set(value) {
+  /** @returns {BinaryOperatorExpr} */ set(/** @type {Expression} */ value) {
     return new BinaryOperatorExpr(BinaryOperator.Assign, this.receiver.prop(this.name), value, null, this.sourceSpan);
   }
-  clone() {
+  /** @returns {ReadPropExpr} */ clone() {
     return new ReadPropExpr(this.receiver.clone(), this.name, this.type, this.sourceSpan, [], this.isOptional);
   }
 }
 class ReadKeyExpr extends Expression {
-  receiver;
-  index;
-  isOptional;
-  constructor(receiver, index, type, sourceSpan, leadingComments, isOptional = false) {
+  /** @type {Expression} */ receiver;
+  /** @type {Expression} */ index;
+  /** @type {boolean} */ isOptional;
+  constructor(/** @type {Expression} */ receiver, /** @type {Expression} */ index, /** @type {Type | null | undefined} */ type, /** @type {ParseSourceSpan | null | undefined} */ sourceSpan, /** @type {LeadingComment[] | undefined} */ leadingComments, /** @type {boolean} */ isOptional = false) {
     super(type, sourceSpan, leadingComments);
     this.receiver = receiver;
     this.index = index;
     this.isOptional = isOptional;
   }
-  isEquivalent(e) {
+  /** @returns {boolean} */ isEquivalent(/** @type {Expression} */ e) {
     return e instanceof ReadKeyExpr && this.receiver.isEquivalent(e.receiver) && this.index.isEquivalent(e.index) && this.isOptional === e.isOptional;
   }
-  isConstant() {
+  /** @returns {boolean} */ isConstant() {
     return false;
   }
   visitExpression(visitor, context) {
     return visitor.visitReadKeyExpr(this, context);
   }
-  set(value) {
+  /** @returns {BinaryOperatorExpr} */ set(/** @type {Expression} */ value) {
     return new BinaryOperatorExpr(BinaryOperator.Assign, this.receiver.key(this.index), value, null, this.sourceSpan);
   }
-  clone() {
+  /** @returns {ReadKeyExpr} */ clone() {
     return new ReadKeyExpr(this.receiver.clone(), this.index.clone(), this.type, this.sourceSpan, [], this.isOptional);
   }
 }
 class LiteralArrayExpr extends Expression {
-  entries;
-  constructor(entries, type, sourceSpan, leadingComments) {
+  /** @type {Expression[]} */ entries;
+  constructor(/** @type {Expression[]} */ entries, /** @type {Type | null | undefined} */ type, /** @type {ParseSourceSpan | null | undefined} */ sourceSpan, /** @type {LeadingComment[] | undefined} */ leadingComments) {
     super(type, sourceSpan, leadingComments);
     this.entries = entries;
   }
-  isConstant() {
+  /** @returns {boolean} */ isConstant() {
     return this.entries.every(e => e.isConstant());
   }
-  isEquivalent(e) {
+  /** @returns {boolean} */ isEquivalent(/** @type {Expression} */ e) {
     return e instanceof LiteralArrayExpr && areAllEquivalent(this.entries, e.entries);
   }
   visitExpression(visitor, context) {
     return visitor.visitLiteralArrayExpr(this, context);
   }
-  clone() {
+  /** @returns {LiteralArrayExpr} */ clone() {
     return new LiteralArrayExpr(this.entries.map(e => e.clone()), this.type, this.sourceSpan);
   }
 }
@@ -1617,79 +1617,79 @@ class LiteralMapPropertyAssignment {
   }
 }
 class LiteralMapSpreadAssignment {
-  expression;
-  constructor(expression) {
+  /** @type {Expression} */ expression;
+  constructor(/** @type {Expression} */ expression) {
     this.expression = expression;
   }
-  isEquivalent(e) {
+  /** @returns {boolean} */ isEquivalent(/** @type {LiteralMapSpreadAssignment} */ e) {
     return e instanceof LiteralMapSpreadAssignment && this.expression.isEquivalent(e.expression);
   }
-  clone() {
+  /** @returns {LiteralMapSpreadAssignment} */ clone() {
     return new LiteralMapSpreadAssignment(this.expression.clone());
   }
-  isConstant() {
+  /** @returns {boolean} */ isConstant() {
     return this.expression.isConstant();
   }
 }
 class LiteralMapExpr extends Expression {
-  entries;
-  valueType = null;
-  constructor(entries, type, sourceSpan, leadingComments) {
+  /** @type {any[]} */ entries;
+  /** @type {Type | null} */ valueType = null;
+  constructor(/** @type {any[]} */ entries, type, /** @type {ParseSourceSpan | null | undefined} */ sourceSpan, /** @type {LeadingComment[] | undefined} */ leadingComments) {
     super(type, sourceSpan, leadingComments);
     this.entries = entries;
     if (type) {
       this.valueType = type.valueType;
     }
   }
-  isEquivalent(e) {
+  /** @returns {boolean} */ isEquivalent(/** @type {Expression} */ e) {
     return e instanceof LiteralMapExpr && areAllEquivalent(this.entries, e.entries);
   }
-  isConstant() {
+  /** @returns {boolean} */ isConstant() {
     return this.entries.every(e => e.isConstant());
   }
   visitExpression(visitor, context) {
     return visitor.visitLiteralMapExpr(this, context);
   }
-  clone() {
+  /** @returns {LiteralMapExpr} */ clone() {
     const entriesClone = this.entries.map(entry => entry.clone());
     return new LiteralMapExpr(entriesClone, this.type, this.sourceSpan);
   }
 }
 class CommaExpr extends Expression {
-  parts;
-  constructor(parts, sourceSpan, leadingComments) {
+  /** @type {Expression[]} */ parts;
+  constructor(/** @type {Expression[]} */ parts, /** @type {ParseSourceSpan | null | undefined} */ sourceSpan, /** @type {LeadingComment[] | undefined} */ leadingComments) {
     super(parts[parts.length - 1].type, sourceSpan, leadingComments);
     this.parts = parts;
   }
-  isEquivalent(e) {
+  /** @returns {boolean} */ isEquivalent(/** @type {Expression} */ e) {
     return e instanceof CommaExpr && areAllEquivalent(this.parts, e.parts);
   }
-  isConstant() {
+  /** @returns {boolean} */ isConstant() {
     return false;
   }
   visitExpression(visitor, context) {
     return visitor.visitCommaExpr(this, context);
   }
-  clone() {
+  /** @returns {CommaExpr} */ clone() {
     return new CommaExpr(this.parts.map(p => p.clone()));
   }
 }
 class SpreadElementExpr extends Expression {
-  expression;
-  constructor(expression, sourceSpan, leadingComments) {
+  /** @type {Expression} */ expression;
+  constructor(/** @type {Expression} */ expression, /** @type {ParseSourceSpan | null | undefined} */ sourceSpan, /** @type {LeadingComment[] | undefined} */ leadingComments) {
     super(null, sourceSpan, leadingComments);
     this.expression = expression;
   }
-  isEquivalent(e) {
+  /** @returns {boolean} */ isEquivalent(/** @type {Expression} */ e) {
     return e instanceof SpreadElementExpr && this.expression.isEquivalent(e.expression);
   }
-  isConstant() {
+  /** @returns {boolean} */ isConstant() {
     return this.expression.isConstant();
   }
   visitExpression(visitor, context) {
     return visitor.visitSpreadElementExpr(this, context);
   }
-  clone() {
+  /** @returns {SpreadElementExpr} */ clone() {
     return new SpreadElementExpr(this.expression.clone(), this.sourceSpan);
   }
 }
@@ -1704,56 +1704,56 @@ var StmtModifier;
   StmtModifier[StmtModifier["Static"] = 8] = "Static";
 })(StmtModifier || (StmtModifier = {}));
 class LeadingComment {
-  text;
-  multiline;
-  trailingNewline;
-  constructor(text, multiline, trailingNewline) {
+  /** @type {string} */ text;
+  /** @type {boolean} */ multiline;
+  /** @type {boolean} */ trailingNewline;
+  constructor(/** @type {string} */ text, /** @type {boolean} */ multiline, /** @type {boolean} */ trailingNewline) {
     this.text = text;
     this.multiline = multiline;
     this.trailingNewline = trailingNewline;
   }
-  toString() {
+  /** @returns {string} */ toString() {
     return this.multiline ? ` ${this.text} ` : this.text;
   }
 }
 class JSDocComment extends LeadingComment {
-  tags;
-  constructor(tags) {
+  /** @type {any[]} */ tags;
+  constructor(/** @type {any[]} */ tags) {
     super('', true, true);
     this.tags = tags;
   }
-  toString() {
+  /** @returns {string} */ toString() {
     return serializeTags(this.tags);
   }
 }
 class Statement {
-  modifiers;
-  sourceSpan;
-  leadingComments;
-  constructor(modifiers = StmtModifier.None, sourceSpan = null, leadingComments) {
+  /** @type {number} */ modifiers;
+  /** @type {ParseSourceSpan | null} */ sourceSpan;
+  /** @type {LeadingComment[] | undefined} */ leadingComments;
+  constructor(/** @type {number} */ modifiers = StmtModifier.None, /** @type {ParseSourceSpan | null} */ sourceSpan = null, /** @type {LeadingComment[] | undefined} */ leadingComments) {
     this.modifiers = modifiers;
     this.sourceSpan = sourceSpan;
     this.leadingComments = leadingComments;
   }
-  hasModifier(modifier) {
+  /** @returns {boolean} */ hasModifier(/** @type {number} */ modifier) {
     return (this.modifiers & modifier) !== 0;
   }
-  addLeadingComment(leadingComment) {
+  addLeadingComment(/** @type {LeadingComment} */ leadingComment) {
     this.leadingComments = this.leadingComments ?? [];
     this.leadingComments.push(leadingComment);
   }
 }
 class DeclareVarStmt extends Statement {
-  name;
-  value;
-  type;
-  constructor(name, value, type, modifiers, sourceSpan, leadingComments) {
+  /** @type {string} */ name;
+  /** @type {Expression | undefined} */ value;
+  /** @type {Type | null} */ type;
+  constructor(/** @type {string} */ name, /** @type {Expression | undefined} */ value, /** @type {Type | null | undefined} */ type, /** @type {number | undefined} */ modifiers, /** @type {ParseSourceSpan | null | undefined} */ sourceSpan, /** @type {LeadingComment[] | undefined} */ leadingComments) {
     super(modifiers, sourceSpan, leadingComments);
     this.name = name;
     this.value = value;
     this.type = type || value && value.type || null;
   }
-  isEquivalent(stmt) {
+  /** @returns {boolean} */ isEquivalent(/** @type {Statement} */ stmt) {
     return stmt instanceof DeclareVarStmt && this.name === stmt.name && (this.value ? !!stmt.value && this.value.isEquivalent(stmt.value) : !stmt.value);
   }
   visitStatement(visitor, context) {
@@ -1761,18 +1761,18 @@ class DeclareVarStmt extends Statement {
   }
 }
 class DeclareFunctionStmt extends Statement {
-  name;
-  params;
-  statements;
-  type;
-  constructor(name, params, statements, type, modifiers, sourceSpan, leadingComments) {
+  /** @type {string} */ name;
+  /** @type {FnParam[]} */ params;
+  /** @type {Statement[]} */ statements;
+  /** @type {Type | null} */ type;
+  constructor(/** @type {string} */ name, /** @type {FnParam[]} */ params, /** @type {Statement[]} */ statements, /** @type {Type | null | undefined} */ type, /** @type {number | undefined} */ modifiers, /** @type {ParseSourceSpan | null | undefined} */ sourceSpan, /** @type {LeadingComment[] | undefined} */ leadingComments) {
     super(modifiers, sourceSpan, leadingComments);
     this.name = name;
     this.params = params;
     this.statements = statements;
     this.type = type || null;
   }
-  isEquivalent(stmt) {
+  /** @returns {boolean} */ isEquivalent(/** @type {Statement} */ stmt) {
     return stmt instanceof DeclareFunctionStmt && areAllEquivalent(this.params, stmt.params) && areAllEquivalent(this.statements, stmt.statements);
   }
   visitStatement(visitor, context) {
@@ -1780,12 +1780,12 @@ class DeclareFunctionStmt extends Statement {
   }
 }
 class ExpressionStatement extends Statement {
-  expr;
-  constructor(expr, sourceSpan, leadingComments) {
+  /** @type {Expression} */ expr;
+  constructor(/** @type {Expression} */ expr, /** @type {ParseSourceSpan | null | undefined} */ sourceSpan, /** @type {LeadingComment[] | undefined} */ leadingComments) {
     super(StmtModifier.None, sourceSpan, leadingComments);
     this.expr = expr;
   }
-  isEquivalent(stmt) {
+  /** @returns {boolean} */ isEquivalent(/** @type {Statement} */ stmt) {
     return stmt instanceof ExpressionStatement && this.expr.isEquivalent(stmt.expr);
   }
   visitStatement(visitor, context) {
@@ -1793,12 +1793,12 @@ class ExpressionStatement extends Statement {
   }
 }
 class ReturnStatement extends Statement {
-  value;
-  constructor(value, sourceSpan = null, leadingComments) {
+  /** @type {Expression} */ value;
+  constructor(/** @type {Expression} */ value, /** @type {ParseSourceSpan | null} */ sourceSpan = null, /** @type {LeadingComment[] | undefined} */ leadingComments) {
     super(StmtModifier.None, sourceSpan, leadingComments);
     this.value = value;
   }
-  isEquivalent(stmt) {
+  /** @returns {boolean} */ isEquivalent(/** @type {Statement} */ stmt) {
     return stmt instanceof ReturnStatement && this.value.isEquivalent(stmt.value);
   }
   visitStatement(visitor, context) {
@@ -1806,16 +1806,16 @@ class ReturnStatement extends Statement {
   }
 }
 class IfStmt extends Statement {
-  condition;
-  trueCase;
-  falseCase;
-  constructor(condition, trueCase, falseCase = [], sourceSpan, leadingComments) {
+  /** @type {Expression} */ condition;
+  /** @type {Statement[]} */ trueCase;
+  /** @type {Statement[]} */ falseCase;
+  constructor(/** @type {Expression} */ condition, /** @type {Statement[]} */ trueCase, /** @type {Statement[]} */ falseCase = [], /** @type {ParseSourceSpan | null | undefined} */ sourceSpan, /** @type {LeadingComment[] | undefined} */ leadingComments) {
     super(StmtModifier.None, sourceSpan, leadingComments);
     this.condition = condition;
     this.trueCase = trueCase;
     this.falseCase = falseCase;
   }
-  isEquivalent(stmt) {
+  /** @returns {boolean} */ isEquivalent(/** @type {Statement} */ stmt) {
     return stmt instanceof IfStmt && this.condition.isEquivalent(stmt.condition) && areAllEquivalent(this.trueCase, stmt.trueCase) && areAllEquivalent(this.falseCase, stmt.falseCase);
   }
   visitStatement(visitor, context) {
@@ -1823,29 +1823,29 @@ class IfStmt extends Statement {
   }
 }
 let RecursiveAstVisitor$1 = class RecursiveAstVisitor {
-  visitType(ast, context) {
+  visitType(/** @type {Type} */ ast, context) {
     return ast;
   }
-  visitExpression(ast, context) {
+  visitExpression(/** @type {Expression} */ ast, context) {
     if (ast.type) {
       ast.type.visitType(this, context);
     }
     return ast;
   }
-  visitBuiltinType(type, context) {
+  visitBuiltinType(/** @type {BuiltinType} */ type, context) {
     return this.visitType(type, context);
   }
-  visitExpressionType(type, context) {
+  visitExpressionType(/** @type {ExpressionType} */ type, context) {
     type.value.visitExpression(this, context);
     if (type.typeParams !== null) {
       type.typeParams.forEach(param => this.visitType(param, context));
     }
     return this.visitType(type, context);
   }
-  visitArrayType(type, context) {
+  visitArrayType(/** @type {ArrayType} */ type, context) {
     return this.visitType(type, context);
   }
-  visitMapType(type, context) {
+  visitMapType(/** @type {MapType} */ type, context) {
     return this.visitType(type, context);
   }
   visitTransplantedType(type, context) {
@@ -1854,57 +1854,57 @@ let RecursiveAstVisitor$1 = class RecursiveAstVisitor {
   visitWrappedNodeExpr(ast, context) {
     return ast;
   }
-  visitReadVarExpr(ast, context) {
+  visitReadVarExpr(/** @type {ReadVarExpr} */ ast, context) {
     return this.visitExpression(ast, context);
   }
-  visitDynamicImportExpr(ast, context) {
+  visitDynamicImportExpr(/** @type {DynamicImportExpr} */ ast, context) {
     return this.visitExpression(ast, context);
   }
-  visitInvokeFunctionExpr(ast, context) {
+  visitInvokeFunctionExpr(/** @type {InvokeFunctionExpr} */ ast, context) {
     ast.fn.visitExpression(this, context);
     this.visitAllExpressions(ast.args, context);
     return this.visitExpression(ast, context);
   }
-  visitTaggedTemplateLiteralExpr(ast, context) {
+  visitTaggedTemplateLiteralExpr(/** @type {TaggedTemplateLiteralExpr} */ ast, context) {
     ast.tag.visitExpression(this, context);
     ast.template.visitExpression(this, context);
     return this.visitExpression(ast, context);
   }
-  visitInstantiateExpr(ast, context) {
+  visitInstantiateExpr(/** @type {InstantiateExpr} */ ast, context) {
     ast.classExpr.visitExpression(this, context);
     this.visitAllExpressions(ast.args, context);
     return this.visitExpression(ast, context);
   }
-  visitLiteralExpr(ast, context) {
+  visitLiteralExpr(/** @type {LiteralExpr} */ ast, context) {
     return this.visitExpression(ast, context);
   }
-  visitRegularExpressionLiteral(ast, context) {
+  visitRegularExpressionLiteral(/** @type {RegularExpressionLiteralExpr} */ ast, context) {
     return this.visitExpression(ast, context);
   }
-  visitLocalizedString(ast, context) {
+  visitLocalizedString(/** @type {LocalizedString} */ ast, context) {
     return this.visitExpression(ast, context);
   }
-  visitExternalExpr(ast, context) {
+  visitExternalExpr(/** @type {ExternalExpr} */ ast, context) {
     if (ast.typeParams) {
       ast.typeParams.forEach(type => type.visitType(this, context));
     }
     return this.visitExpression(ast, context);
   }
-  visitConditionalExpr(ast, context) {
+  visitConditionalExpr(/** @type {ConditionalExpr} */ ast, context) {
     ast.condition.visitExpression(this, context);
     ast.trueCase.visitExpression(this, context);
     ast.falseCase.visitExpression(this, context);
     return this.visitExpression(ast, context);
   }
-  visitNotExpr(ast, context) {
+  visitNotExpr(/** @type {NotExpr} */ ast, context) {
     ast.condition.visitExpression(this, context);
     return this.visitExpression(ast, context);
   }
-  visitFunctionExpr(ast, context) {
+  visitFunctionExpr(/** @type {FunctionExpr} */ ast, context) {
     this.visitAllStatements(ast.statements, context);
     return this.visitExpression(ast, context);
   }
-  visitArrowFunctionExpr(ast, context) {
+  visitArrowFunctionExpr(/** @type {ArrowFunctionExpr$1} */ ast, context) {
     if (Array.isArray(ast.body)) {
       this.visitAllStatements(ast.body, context);
     } else {
@@ -1912,37 +1912,37 @@ let RecursiveAstVisitor$1 = class RecursiveAstVisitor {
     }
     return this.visitExpression(ast, context);
   }
-  visitUnaryOperatorExpr(ast, context) {
+  visitUnaryOperatorExpr(/** @type {UnaryOperatorExpr} */ ast, context) {
     ast.expr.visitExpression(this, context);
     return this.visitExpression(ast, context);
   }
-  visitTypeofExpr(ast, context) {
+  visitTypeofExpr(/** @type {TypeofExpr} */ ast, context) {
     ast.expr.visitExpression(this, context);
     return this.visitExpression(ast, context);
   }
-  visitVoidExpr(ast, context) {
+  visitVoidExpr(/** @type {VoidExpr} */ ast, context) {
     ast.expr.visitExpression(this, context);
     return this.visitExpression(ast, context);
   }
-  visitBinaryOperatorExpr(ast, context) {
+  visitBinaryOperatorExpr(/** @type {BinaryOperatorExpr} */ ast, context) {
     ast.lhs.visitExpression(this, context);
     ast.rhs.visitExpression(this, context);
     return this.visitExpression(ast, context);
   }
-  visitReadPropExpr(ast, context) {
+  visitReadPropExpr(/** @type {ReadPropExpr} */ ast, context) {
     ast.receiver.visitExpression(this, context);
     return this.visitExpression(ast, context);
   }
-  visitReadKeyExpr(ast, context) {
+  visitReadKeyExpr(/** @type {ReadKeyExpr} */ ast, context) {
     ast.receiver.visitExpression(this, context);
     ast.index.visitExpression(this, context);
     return this.visitExpression(ast, context);
   }
-  visitLiteralArrayExpr(ast, context) {
+  visitLiteralArrayExpr(/** @type {LiteralArrayExpr} */ ast, context) {
     this.visitAllExpressions(ast.entries, context);
     return this.visitExpression(ast, context);
   }
-  visitLiteralMapExpr(ast, context) {
+  visitLiteralMapExpr(/** @type {LiteralMapExpr} */ ast, context) {
     ast.entries.forEach(entry => {
       if (entry instanceof LiteralMapSpreadAssignment) {
         entry.expression.visitExpression(this, context);
@@ -1952,30 +1952,30 @@ let RecursiveAstVisitor$1 = class RecursiveAstVisitor {
     });
     return this.visitExpression(ast, context);
   }
-  visitCommaExpr(ast, context) {
+  visitCommaExpr(/** @type {CommaExpr} */ ast, context) {
     this.visitAllExpressions(ast.parts, context);
     return this.visitExpression(ast, context);
   }
-  visitTemplateLiteralExpr(ast, context) {
+  visitTemplateLiteralExpr(/** @type {TemplateLiteralExpr} */ ast, context) {
     this.visitAllExpressions(ast.elements, context);
     this.visitAllExpressions(ast.expressions, context);
     return this.visitExpression(ast, context);
   }
-  visitTemplateLiteralElementExpr(ast, context) {
+  visitTemplateLiteralElementExpr(/** @type {TemplateLiteralElementExpr} */ ast, context) {
     return this.visitExpression(ast, context);
   }
-  visitParenthesizedExpr(ast, context) {
+  visitParenthesizedExpr(/** @type {ParenthesizedExpr} */ ast, context) {
     ast.expr.visitExpression(this, context);
     return this.visitExpression(ast, context);
   }
-  visitSpreadElementExpr(ast, context) {
+  visitSpreadElementExpr(/** @type {SpreadElementExpr} */ ast, context) {
     ast.expression.visitExpression(this, context);
     return this.visitExpression(ast, context);
   }
-  visitAllExpressions(exprs, context) {
+  visitAllExpressions(/** @type {Expression[]} */ exprs, context) {
     exprs.forEach(expr => expr.visitExpression(this, context));
   }
-  visitDeclareVarStmt(stmt, context) {
+  visitDeclareVarStmt(/** @type {DeclareVarStmt} */ stmt, context) {
     if (stmt.value) {
       stmt.value.visitExpression(this, context);
     }
@@ -1984,86 +1984,86 @@ let RecursiveAstVisitor$1 = class RecursiveAstVisitor {
     }
     return stmt;
   }
-  visitDeclareFunctionStmt(stmt, context) {
+  visitDeclareFunctionStmt(/** @type {DeclareFunctionStmt} */ stmt, context) {
     this.visitAllStatements(stmt.statements, context);
     if (stmt.type) {
       stmt.type.visitType(this, context);
     }
     return stmt;
   }
-  visitExpressionStmt(stmt, context) {
+  visitExpressionStmt(/** @type {ExpressionStatement} */ stmt, context) {
     stmt.expr.visitExpression(this, context);
     return stmt;
   }
-  visitReturnStmt(stmt, context) {
+  visitReturnStmt(/** @type {ReturnStatement} */ stmt, context) {
     stmt.value.visitExpression(this, context);
     return stmt;
   }
-  visitIfStmt(stmt, context) {
+  visitIfStmt(/** @type {IfStmt} */ stmt, context) {
     stmt.condition.visitExpression(this, context);
     this.visitAllStatements(stmt.trueCase, context);
     this.visitAllStatements(stmt.falseCase, context);
     return stmt;
   }
-  visitAllStatements(stmts, context) {
+  visitAllStatements(/** @type {Statement[]} */ stmts, context) {
     stmts.forEach(stmt => stmt.visitStatement(this, context));
   }
 };
-function leadingComment(text, multiline = false, trailingNewline = true) {
+/** @returns {LeadingComment} */ function leadingComment(/** @type {string} */ text, /** @type {boolean} */ multiline = false, /** @type {boolean} */ trailingNewline = true) {
   return new LeadingComment(text, multiline, trailingNewline);
 }
-function jsDocComment(tags = []) {
+/** @returns {JSDocComment} */ function jsDocComment(/** @type {any[]} */ tags = []) {
   return new JSDocComment(tags);
 }
-function variable(name, type, sourceSpan, leadingComments) {
+/** @returns {ReadVarExpr} */ function variable(/** @type {string} */ name, /** @type {Type | null | undefined} */ type, /** @type {ParseSourceSpan | null | undefined} */ sourceSpan, /** @type {LeadingComment[] | undefined} */ leadingComments) {
   return new ReadVarExpr(name, type, sourceSpan, leadingComments);
 }
-function importExpr(id, typeParams = null, sourceSpan) {
+/** @returns {ExternalExpr} */ function importExpr(id, /** @type {Type[] | null} */ typeParams = null, /** @type {ParseSourceSpan | null | undefined} */ sourceSpan) {
   return new ExternalExpr(id, null, typeParams, sourceSpan);
 }
-function importType(id, typeParams, typeModifiers) {
+/** @returns {ExpressionType | null} */ function importType(id, /** @type {Type[] | null | undefined} */ typeParams, /** @type {number | undefined} */ typeModifiers) {
   return id != null ? expressionType(importExpr(id, typeParams, null), typeModifiers) : null;
 }
-function expressionType(expr, typeModifiers, typeParams) {
+/** @returns {ExpressionType} */ function expressionType(/** @type {Expression} */ expr, /** @type {number | undefined} */ typeModifiers, /** @type {Type[] | null | undefined} */ typeParams) {
   return new ExpressionType(expr, typeModifiers, typeParams);
 }
-function transplantedType(type, typeModifiers) {
+function transplantedType(type, /** @type {number | undefined} */ typeModifiers) {
   return new TransplantedType(type, typeModifiers);
 }
-function typeofExpr(expr) {
+/** @returns {TypeofExpr} */ function typeofExpr(/** @type {Expression} */ expr) {
   return new TypeofExpr(expr);
 }
-function literalArr(values, type, sourceSpan) {
+/** @returns {LiteralArrayExpr} */ function literalArr(/** @type {Expression[]} */ values, /** @type {Type | null | undefined} */ type, /** @type {ParseSourceSpan | null | undefined} */ sourceSpan) {
   return new LiteralArrayExpr(values, type, sourceSpan);
 }
-function literalMap(values, type = null) {
+/** @returns {LiteralMapExpr} */ function literalMap(/** @type {any[]} */ values, /** @type {MapType | null} */ type = null) {
   return new LiteralMapExpr(values.map(e => new LiteralMapPropertyAssignment(e.key, e.value, e.quoted)), type, null);
 }
-function unary(operator, expr, type, sourceSpan) {
+/** @returns {UnaryOperatorExpr} */ function unary(/** @type {number} */ operator, /** @type {Expression} */ expr, /** @type {Type | undefined} */ type, /** @type {ParseSourceSpan | null | undefined} */ sourceSpan) {
   return new UnaryOperatorExpr(operator, expr, type, sourceSpan);
 }
-function not(expr, sourceSpan) {
+/** @returns {NotExpr} */ function not(/** @type {Expression} */ expr, /** @type {ParseSourceSpan | null | undefined} */ sourceSpan) {
   return new NotExpr(expr, sourceSpan);
 }
-function fn(params, body, type, sourceSpan, name) {
+/** @returns {FunctionExpr} */ function fn(/** @type {FnParam[]} */ params, /** @type {Statement[]} */ body, /** @type {Type | null | undefined} */ type, /** @type {ParseSourceSpan | null | undefined} */ sourceSpan, /** @type {string | null | undefined} */ name) {
   return new FunctionExpr(params, body, type, sourceSpan, name);
 }
-function arrowFn(params, body, type, sourceSpan) {
+/** @returns {ArrowFunctionExpr$1} */ function arrowFn(/** @type {FnParam[]} */ params, body, /** @type {Type | null | undefined} */ type, /** @type {ParseSourceSpan | null | undefined} */ sourceSpan) {
   return new ArrowFunctionExpr$1(params, body, type, sourceSpan);
 }
-function ifStmt(condition, thenClause, elseClause, sourceSpan, leadingComments) {
+/** @returns {IfStmt} */ function ifStmt(/** @type {Expression} */ condition, /** @type {Statement[]} */ thenClause, /** @type {Statement[] | undefined} */ elseClause, /** @type {ParseSourceSpan | undefined} */ sourceSpan, /** @type {LeadingComment[] | undefined} */ leadingComments) {
   return new IfStmt(condition, thenClause, elseClause, sourceSpan, leadingComments);
 }
-function taggedTemplate(tag, template, type, sourceSpan) {
+/** @returns {TaggedTemplateLiteralExpr} */ function taggedTemplate(/** @type {Expression} */ tag, /** @type {TemplateLiteralExpr} */ template, /** @type {Type | null | undefined} */ type, /** @type {ParseSourceSpan | null | undefined} */ sourceSpan) {
   return new TaggedTemplateLiteralExpr(tag, template, type, sourceSpan);
 }
-function literal(value, type, sourceSpan) {
+/** @returns {LiteralExpr} */ function literal(value, /** @type {Type | null | undefined} */ type, /** @type {ParseSourceSpan | null | undefined} */ sourceSpan) {
   return new LiteralExpr(value, type, sourceSpan);
 }
-function localizedString(metaBlock, messageParts, placeholderNames, expressions, sourceSpan) {
+/** @returns {LocalizedString} */ function localizedString(metaBlock, /** @type {LiteralPiece[]} */ messageParts, /** @type {PlaceholderPiece[]} */ placeholderNames, /** @type {Expression[]} */ expressions, /** @type {ParseSourceSpan | null | undefined} */ sourceSpan) {
   return new LocalizedString(metaBlock, messageParts, placeholderNames, expressions, sourceSpan);
 }
-function isNull(exp) {
+/** @returns {boolean} */ function isNull(/** @type {Expression} */ exp) {
   return exp instanceof LiteralExpr && exp.value === null;
 }
 function tagToString(tag) {
@@ -2218,16 +2218,16 @@ class FixupExpression extends Expression {
 }
 class ConstantPool {
   isClosureCompilerEnabled;
-  statements = [];
+  /** @type {Statement[]} */ statements = [];
   literals = new Map();
   literalFactories = new Map();
   sharedConstants = new Map();
   _claimedNames = new Map();
   nextNameIndex = 0;
-  constructor(isClosureCompilerEnabled = false) {
+  constructor(/** @type {boolean} */ isClosureCompilerEnabled = false) {
     this.isClosureCompilerEnabled = isClosureCompilerEnabled;
   }
-  getConstLiteral(literal, forceShared) {
+  /** @returns {Expression} */ getConstLiteral(/** @type {Expression} */ literal, /** @type {boolean | undefined} */ forceShared) {
     if (literal instanceof LiteralExpr && !isLongStringLiteral(literal) || literal instanceof FixupExpression) {
       return literal;
     }
@@ -2255,7 +2255,7 @@ class ConstantPool {
     }
     return fixup;
   }
-  getSharedConstant(def, expr) {
+  /** @returns {Expression} */ getSharedConstant(def, /** @type {Expression} */ expr) {
     const key = def.keyOf(expr);
     if (!this.sharedConstants.has(key)) {
       const id = this.freshName();
@@ -2264,7 +2264,7 @@ class ConstantPool {
     }
     return this.sharedConstants.get(key);
   }
-  getSharedFunctionReference(fn, prefix, useUniqueName = true) {
+  /** @returns {Expression} */ getSharedFunctionReference(/** @type {Expression} */ fn, /** @type {string} */ prefix, /** @type {boolean} */ useUniqueName = true) {
     const isArrow = fn instanceof ArrowFunctionExpr$1;
     for (const current of this.statements) {
       if (isArrow && current instanceof DeclareVarStmt && current.value?.isEquivalent(fn)) {
@@ -2278,7 +2278,7 @@ class ConstantPool {
     this.statements.push(fn instanceof FunctionExpr ? fn.toDeclStmt(name, StmtModifier.Final) : new DeclareVarStmt(name, fn, INFERRED_TYPE, StmtModifier.Final, fn.sourceSpan));
     return variable(name);
   }
-  uniqueName(name, alwaysIncludeSuffix = true) {
+  /** @returns {string} */ uniqueName(/** @type {string} */ name, /** @type {boolean} */ alwaysIncludeSuffix = true) {
     const count = this._claimedNames.get(name) ?? 0;
     const result = count === 0 && !alwaysIncludeSuffix ? `${name}` : `${name}${count}`;
     this._claimedNames.set(name, count + 1);
@@ -3208,7 +3208,7 @@ function _splitAt(input, character, defaultValues) {
 function noUndefined(val) {
   return val === undefined ? null : val;
 }
-function escapeRegExp(s) {
+/** @returns {string} */ function escapeRegExp(/** @type {string} */ s) {
   return s.replace(/([.*+?^=!:${}()|[\]\/\\])/g, '\\$1');
 }
 function utf8Encode(str) {
@@ -3291,10 +3291,10 @@ class SourceMapGenerator {
   lines = [];
   lastCol0 = 0;
   hasMappings = false;
-  constructor(file = null) {
+  constructor(/** @type {string | null} */ file = null) {
     this.file = file;
   }
-  addSource(url, content = null) {
+  addSource(/** @type {string} */ url, /** @type {string | null} */ content = null) {
     if (!this.sourcesContent.has(url)) {
       this.sourcesContent.set(url, content);
     }
@@ -3305,7 +3305,7 @@ class SourceMapGenerator {
     this.lastCol0 = 0;
     return this;
   }
-  addMapping(col0, sourceUrl, sourceLine0, sourceCol0) {
+  addMapping(/** @type {number} */ col0, /** @type {string | undefined} */ sourceUrl, /** @type {number | undefined} */ sourceLine0, /** @type {number | undefined} */ sourceCol0) {
     if (!this.currentLine) {
       throw new Error(`A line must be added before mappings can be added`);
     }
@@ -3378,7 +3378,7 @@ class SourceMapGenerator {
       'mappings': mappings
     };
   }
-  toJsComment() {
+  /** @returns {string} */ toJsComment() {
     return this.hasMappings ? '//' + JS_B64_PREFIX + toBase64String(JSON.stringify(this, null, 0)) : '';
   }
 }
@@ -3432,27 +3432,27 @@ class EmittedLine {
 const BINARY_OPERATORS$1 = new Map([[BinaryOperator.And, '&&'], [BinaryOperator.Bigger, '>'], [BinaryOperator.BiggerEquals, '>='], [BinaryOperator.BitwiseOr, '|'], [BinaryOperator.BitwiseAnd, '&'], [BinaryOperator.Divide, '/'], [BinaryOperator.Assign, '='], [BinaryOperator.Equals, '=='], [BinaryOperator.Identical, '==='], [BinaryOperator.Lower, '<'], [BinaryOperator.LowerEquals, '<='], [BinaryOperator.Minus, '-'], [BinaryOperator.Modulo, '%'], [BinaryOperator.Exponentiation, '**'], [BinaryOperator.Multiply, '*'], [BinaryOperator.NotEquals, '!='], [BinaryOperator.NotIdentical, '!=='], [BinaryOperator.NullishCoalesce, '??'], [BinaryOperator.Or, '||'], [BinaryOperator.Plus, '+'], [BinaryOperator.In, 'in'], [BinaryOperator.InstanceOf, 'instanceof'], [BinaryOperator.AdditionAssignment, '+='], [BinaryOperator.SubtractionAssignment, '-='], [BinaryOperator.MultiplicationAssignment, '*='], [BinaryOperator.DivisionAssignment, '/='], [BinaryOperator.RemainderAssignment, '%='], [BinaryOperator.ExponentiationAssignment, '**='], [BinaryOperator.AndAssignment, '&&='], [BinaryOperator.OrAssignment, '||='], [BinaryOperator.NullishCoalesceAssignment, '??=']]);
 class EmitterVisitorContext {
   _indent;
-  static createRoot() {
+  /** @returns {EmitterVisitorContext} */ static createRoot() {
     return new EmitterVisitorContext(0);
   }
   _lines;
-  constructor(_indent) {
+  constructor(/** @type {number} */ _indent) {
     this._indent = _indent;
     this._lines = [new EmittedLine(_indent)];
   }
   get _currentLine() {
     return this._lines[this._lines.length - 1];
   }
-  println(from, lastPart = '') {
+  println(from, /** @type {string} */ lastPart = '') {
     this.print(from || null, lastPart, true);
   }
-  lineIsEmpty() {
+  /** @returns {boolean} */ lineIsEmpty() {
     return this._currentLine.parts.length === 0;
   }
-  lineLength() {
+  /** @returns {number} */ lineLength() {
     return this._currentLine.indent * INDENT_WITH.length + this._currentLine.partsLength;
   }
-  print(from, part, newLine = false) {
+  print(from, /** @type {string} */ part, /** @type {boolean} */ newLine = false) {
     if (part.length > 0) {
       this._currentLine.parts.push(part);
       this._currentLine.partsLength += part.length;
@@ -3479,10 +3479,10 @@ class EmitterVisitorContext {
       this._currentLine.indent = this._indent;
     }
   }
-  toSource() {
+  /** @returns {string} */ toSource() {
     return this.sourceLines.map(l => l.parts.length > 0 ? INDENT_WITH.repeat(l.indent) + l.parts.join('') : '').join('\n');
   }
-  toSourceMapGenerator(genFilePath, startsAtLine = 0) {
+  /** @returns {SourceMapGenerator} */ toSourceMapGenerator(/** @type {string} */ genFilePath, /** @type {number} */ startsAtLine = 0) {
     const map = new SourceMapGenerator(genFilePath);
     let firstOffsetMapped = false;
     const mapFirstOffsetIfNeeded = () => {
@@ -3526,7 +3526,7 @@ class EmitterVisitorContext {
     });
     return map;
   }
-  spanOf(line, column) {
+  /** @returns {ParseSourceSpan | null} */ spanOf(/** @type {number} */ line, /** @type {number} */ column) {
     const emittedLine = this._lines[line];
     if (emittedLine) {
       let columnsLeft = column - INDENT_WITH.repeat(emittedLine.indent).length;
@@ -3548,25 +3548,25 @@ class EmitterVisitorContext {
   }
 }
 class AbstractEmitterVisitor {
-  printComments;
-  printTypes;
+  /** @type {boolean} */ printComments;
+  /** @type {boolean} */ printTypes;
   lastIfCondition = null;
-  constructor(printComments, printTypes) {
+  constructor(/** @type {boolean} */ printComments, /** @type {boolean} */ printTypes) {
     this.printComments = printComments;
     this.printTypes = printTypes;
   }
-  visitExpressionStmt(stmt, ctx) {
+  visitExpressionStmt(/** @type {ExpressionStatement} */ stmt, /** @type {EmitterVisitorContext} */ ctx) {
     this.printLeadingComments(stmt, ctx);
     stmt.expr.visitExpression(this, ctx);
     ctx.println(stmt, ';');
   }
-  visitReturnStmt(stmt, ctx) {
+  visitReturnStmt(/** @type {ReturnStatement} */ stmt, /** @type {EmitterVisitorContext} */ ctx) {
     this.printLeadingComments(stmt, ctx);
     ctx.print(stmt, `return `);
     stmt.value.visitExpression(this, ctx);
     ctx.println(stmt, ';');
   }
-  visitIfStmt(stmt, ctx) {
+  visitIfStmt(/** @type {IfStmt} */ stmt, /** @type {EmitterVisitorContext} */ ctx) {
     this.printLeadingComments(stmt, ctx);
     ctx.print(stmt, `if (`);
     this.lastIfCondition = stmt.condition;
@@ -3593,7 +3593,7 @@ class AbstractEmitterVisitor {
     }
     ctx.println(stmt, `}`);
   }
-  visitDeclareVarStmt(stmt, ctx) {
+  visitDeclareVarStmt(/** @type {DeclareVarStmt} */ stmt, /** @type {EmitterVisitorContext} */ ctx) {
     const varKind = stmt.hasModifier(StmtModifier.Final) ? 'const' : 'let';
     this.printLeadingComments(stmt, ctx);
     ctx.print(stmt, `${varKind} ${stmt.name}`);
@@ -3604,7 +3604,7 @@ class AbstractEmitterVisitor {
     }
     ctx.println(stmt, `;`);
   }
-  visitInvokeFunctionExpr(expr, ctx) {
+  visitInvokeFunctionExpr(/** @type {InvokeFunctionExpr} */ expr, /** @type {EmitterVisitorContext} */ ctx) {
     this.printLeadingComments(expr, ctx);
     const shouldParenthesize = this.shouldParenthesize(expr.fn, expr);
     if (shouldParenthesize) {
@@ -3618,12 +3618,12 @@ class AbstractEmitterVisitor {
     this.visitAllExpressions(expr.args, ctx, ',');
     ctx.print(expr, ')');
   }
-  visitTaggedTemplateLiteralExpr(expr, ctx) {
+  visitTaggedTemplateLiteralExpr(/** @type {TaggedTemplateLiteralExpr} */ expr, /** @type {EmitterVisitorContext} */ ctx) {
     this.printLeadingComments(expr, ctx);
     expr.tag.visitExpression(this, ctx);
     expr.template.visitExpression(this, ctx);
   }
-  visitTemplateLiteralExpr(expr, ctx) {
+  visitTemplateLiteralExpr(/** @type {TemplateLiteralExpr} */ expr, /** @type {EmitterVisitorContext} */ ctx) {
     this.printLeadingComments(expr, ctx);
     ctx.print(expr, '`');
     for (let i = 0; i < expr.elements.length; i++) {
@@ -3637,25 +3637,25 @@ class AbstractEmitterVisitor {
     }
     ctx.print(expr, '`');
   }
-  visitTemplateLiteralElementExpr(expr, ctx) {
+  visitTemplateLiteralElementExpr(/** @type {TemplateLiteralElementExpr} */ expr, /** @type {EmitterVisitorContext} */ ctx) {
     this.printLeadingComments(expr, ctx);
     ctx.print(expr, expr.rawText);
   }
-  visitTypeofExpr(expr, ctx) {
+  visitTypeofExpr(/** @type {TypeofExpr} */ expr, /** @type {EmitterVisitorContext} */ ctx) {
     this.printLeadingComments(expr, ctx);
     ctx.print(expr, 'typeof ');
     expr.expr.visitExpression(this, ctx);
   }
-  visitVoidExpr(expr, ctx) {
+  visitVoidExpr(/** @type {VoidExpr} */ expr, /** @type {EmitterVisitorContext} */ ctx) {
     this.printLeadingComments(expr, ctx);
     ctx.print(expr, 'void ');
     expr.expr.visitExpression(this, ctx);
   }
-  visitReadVarExpr(ast, ctx) {
+  visitReadVarExpr(/** @type {ReadVarExpr} */ ast, /** @type {EmitterVisitorContext} */ ctx) {
     this.printLeadingComments(ast, ctx);
     ctx.print(ast, ast.name);
   }
-  visitInstantiateExpr(ast, ctx) {
+  visitInstantiateExpr(/** @type {InstantiateExpr} */ ast, /** @type {EmitterVisitorContext} */ ctx) {
     this.printLeadingComments(ast, ctx);
     ctx.print(ast, `new `);
     ast.classExpr.visitExpression(this, ctx);
@@ -3663,7 +3663,7 @@ class AbstractEmitterVisitor {
     this.visitAllExpressions(ast.args, ctx, ',');
     ctx.print(ast, `)`);
   }
-  visitLiteralExpr(ast, ctx) {
+  visitLiteralExpr(/** @type {LiteralExpr} */ ast, /** @type {EmitterVisitorContext} */ ctx) {
     this.printLeadingComments(ast, ctx);
     const value = ast.value;
     if (typeof value === 'string') {
@@ -3672,11 +3672,11 @@ class AbstractEmitterVisitor {
       ctx.print(ast, `${value}`);
     }
   }
-  visitRegularExpressionLiteral(ast, ctx) {
+  visitRegularExpressionLiteral(/** @type {RegularExpressionLiteralExpr} */ ast, /** @type {EmitterVisitorContext} */ ctx) {
     this.printLeadingComments(ast, ctx);
     ctx.print(ast, `/${ast.body}/${ast.flags || ''}`);
   }
-  visitLocalizedString(ast, ctx) {
+  visitLocalizedString(/** @type {LocalizedString} */ ast, /** @type {EmitterVisitorContext} */ ctx) {
     this.printLeadingComments(ast, ctx);
     const head = ast.serializeI18nHead();
     ctx.print(ast, '$localize `' + head.raw);
@@ -3687,7 +3687,7 @@ class AbstractEmitterVisitor {
     }
     ctx.print(ast, '`');
   }
-  visitConditionalExpr(ast, ctx) {
+  visitConditionalExpr(/** @type {ConditionalExpr} */ ast, /** @type {EmitterVisitorContext} */ ctx) {
     this.printLeadingComments(ast, ctx);
     ctx.print(ast, `(`);
     ast.condition.visitExpression(this, ctx);
@@ -3697,7 +3697,7 @@ class AbstractEmitterVisitor {
     ast.falseCase?.visitExpression(this, ctx);
     ctx.print(ast, `)`);
   }
-  visitDynamicImportExpr(ast, ctx) {
+  visitDynamicImportExpr(/** @type {DynamicImportExpr} */ ast, /** @type {EmitterVisitorContext} */ ctx) {
     this.printLeadingComments(ast, ctx);
     ctx.print(ast, `import(`);
     if (typeof ast.url === 'string') {
@@ -3707,12 +3707,12 @@ class AbstractEmitterVisitor {
     }
     ctx.print(ast, `)`);
   }
-  visitNotExpr(ast, ctx) {
+  visitNotExpr(/** @type {NotExpr} */ ast, /** @type {EmitterVisitorContext} */ ctx) {
     this.printLeadingComments(ast, ctx);
     ctx.print(ast, '!');
     ast.condition.visitExpression(this, ctx);
   }
-  visitFunctionExpr(ast, ctx) {
+  visitFunctionExpr(/** @type {FunctionExpr} */ ast, /** @type {EmitterVisitorContext} */ ctx) {
     this.printLeadingComments(ast, ctx);
     ctx.print(ast, `function${ast.name ? ' ' + ast.name : ''}(`);
     this.visitParams(ast.params, ctx);
@@ -3725,7 +3725,7 @@ class AbstractEmitterVisitor {
     ctx.decIndent();
     ctx.println(ast, `}`);
   }
-  visitArrowFunctionExpr(ast, ctx) {
+  visitArrowFunctionExpr(/** @type {ArrowFunctionExpr$1} */ ast, /** @type {EmitterVisitorContext} */ ctx) {
     this.printLeadingComments(ast, ctx);
     ctx.print(ast, '(');
     this.visitParams(ast.params, ctx);
@@ -3750,7 +3750,7 @@ class AbstractEmitterVisitor {
       }
     }
   }
-  visitDeclareFunctionStmt(stmt, ctx) {
+  visitDeclareFunctionStmt(/** @type {DeclareFunctionStmt} */ stmt, /** @type {EmitterVisitorContext} */ ctx) {
     this.printLeadingComments(stmt, ctx);
     ctx.print(stmt, `function ${stmt.name}(`);
     this.visitParams(stmt.params, ctx);
@@ -3763,7 +3763,7 @@ class AbstractEmitterVisitor {
     ctx.decIndent();
     ctx.println(stmt, `}`);
   }
-  visitUnaryOperatorExpr(ast, ctx) {
+  visitUnaryOperatorExpr(/** @type {UnaryOperatorExpr} */ ast, /** @type {EmitterVisitorContext} */ ctx) {
     this.printLeadingComments(ast, ctx);
     let opStr;
     switch (ast.operator) {
@@ -3782,7 +3782,7 @@ class AbstractEmitterVisitor {
     ast.expr.visitExpression(this, ctx);
     if (parens) ctx.print(ast, `)`);
   }
-  visitBinaryOperatorExpr(ast, ctx) {
+  visitBinaryOperatorExpr(/** @type {BinaryOperatorExpr} */ ast, /** @type {EmitterVisitorContext} */ ctx) {
     this.printLeadingComments(ast, ctx);
     const operator = BINARY_OPERATORS$1.get(ast.operator);
     if (!operator) {
@@ -3795,26 +3795,26 @@ class AbstractEmitterVisitor {
     ast.rhs.visitExpression(this, ctx);
     if (parens) ctx.print(ast, `)`);
   }
-  visitReadPropExpr(ast, ctx) {
+  visitReadPropExpr(/** @type {ReadPropExpr} */ ast, /** @type {EmitterVisitorContext} */ ctx) {
     this.printLeadingComments(ast, ctx);
     ast.receiver.visitExpression(this, ctx);
     ctx.print(ast, ast.isOptional ? `?.` : `.`);
     ctx.print(ast, ast.name);
   }
-  visitReadKeyExpr(ast, ctx) {
+  visitReadKeyExpr(/** @type {ReadKeyExpr} */ ast, /** @type {EmitterVisitorContext} */ ctx) {
     this.printLeadingComments(ast, ctx);
     ast.receiver.visitExpression(this, ctx);
     ctx.print(ast, ast.isOptional ? `?.[` : `[`);
     ast.index.visitExpression(this, ctx);
     ctx.print(ast, `]`);
   }
-  visitLiteralArrayExpr(ast, ctx) {
+  visitLiteralArrayExpr(/** @type {LiteralArrayExpr} */ ast, /** @type {EmitterVisitorContext} */ ctx) {
     this.printLeadingComments(ast, ctx);
     ctx.print(ast, `[`);
     this.visitAllExpressions(ast.entries, ctx, ', ');
     ctx.print(ast, `]`);
   }
-  visitLiteralMapExpr(ast, ctx) {
+  visitLiteralMapExpr(/** @type {LiteralMapExpr} */ ast, /** @type {EmitterVisitorContext} */ ctx) {
     this.printLeadingComments(ast, ctx);
     ctx.print(ast, `{`);
     this.visitAllObjects(entry => {
@@ -3828,22 +3828,22 @@ class AbstractEmitterVisitor {
     }, ast.entries, ctx, ', ');
     ctx.print(ast, `}`);
   }
-  visitCommaExpr(ast, ctx) {
+  visitCommaExpr(/** @type {CommaExpr} */ ast, /** @type {EmitterVisitorContext} */ ctx) {
     this.printLeadingComments(ast, ctx);
     ctx.print(ast, '(');
     this.visitAllExpressions(ast.parts, ctx, ', ');
     ctx.print(ast, ')');
   }
-  visitParenthesizedExpr(ast, ctx) {
+  visitParenthesizedExpr(/** @type {ParenthesizedExpr} */ ast, /** @type {EmitterVisitorContext} */ ctx) {
     this.printLeadingComments(ast, ctx);
     ast.expr.visitExpression(this, ctx);
   }
-  visitSpreadElementExpr(ast, ctx) {
+  visitSpreadElementExpr(/** @type {SpreadElementExpr} */ ast, /** @type {EmitterVisitorContext} */ ctx) {
     this.printLeadingComments(ast, ctx);
     ctx.print(ast, '...');
     ast.expression.visitExpression(this, ctx);
   }
-  visitBuiltinType(type, ctx) {
+  visitBuiltinType(/** @type {BuiltinType} */ type, /** @type {EmitterVisitorContext} */ ctx) {
     if (!this.printTypes) {
       return;
     }
@@ -3874,7 +3874,7 @@ class AbstractEmitterVisitor {
         break;
     }
   }
-  visitExpressionType(type, ctx) {
+  visitExpressionType(/** @type {ExpressionType} */ type, /** @type {EmitterVisitorContext} */ ctx) {
     if (!this.printTypes) {
       return;
     }
@@ -3886,7 +3886,7 @@ class AbstractEmitterVisitor {
       ctx.print(null, '>');
     }
   }
-  visitArrayType(type, ctx) {
+  visitArrayType(/** @type {ArrayType} */ type, /** @type {EmitterVisitorContext} */ ctx) {
     if (!this.printTypes) {
       return;
     }
@@ -3894,7 +3894,7 @@ class AbstractEmitterVisitor {
     type.of.visitType(this, ctx);
     ctx.print(null, '[]');
   }
-  visitMapType(type, ctx) {
+  visitMapType(/** @type {MapType} */ type, /** @type {EmitterVisitorContext} */ ctx) {
     if (!this.printTypes) {
       return;
     }
@@ -3906,13 +3906,13 @@ class AbstractEmitterVisitor {
     }
     ctx.print(null, '}');
   }
-  visitTransplantedType(type, ctx) {
+  visitTransplantedType(type, /** @type {EmitterVisitorContext} */ ctx) {
     throw new Error('TransplantedType nodes are not supported');
   }
-  visitAllExpressions(expressions, ctx, separator) {
+  visitAllExpressions(/** @type {Expression[]} */ expressions, /** @type {EmitterVisitorContext} */ ctx, /** @type {string} */ separator) {
     this.visitAllObjects(expr => expr.visitExpression(this, ctx), expressions, ctx, separator);
   }
-  visitAllObjects(handler, expressions, ctx, separator) {
+  visitAllObjects(handler, /** @type {any[]} */ expressions, /** @type {EmitterVisitorContext} */ ctx, /** @type {string} */ separator) {
     for (let i = 0; i < expressions.length; i++) {
       if (i > 0) {
         ctx.print(null, separator, false);
@@ -3920,20 +3920,20 @@ class AbstractEmitterVisitor {
       handler(expressions[i]);
     }
   }
-  visitAllStatements(statements, ctx) {
+  visitAllStatements(/** @type {Statement[]} */ statements, /** @type {EmitterVisitorContext} */ ctx) {
     statements.forEach(stmt => stmt.visitStatement(this, ctx));
   }
-  visitParams(params, ctx) {
+  visitParams(/** @type {FnParam[]} */ params, /** @type {EmitterVisitorContext} */ ctx) {
     this.visitAllObjects(param => {
       ctx.print(null, param.name);
       param.type?.visitType(this, ctx);
     }, params, ctx, ', ');
   }
-  shouldParenthesize(expression, containingExpression) {
+  /** @returns {boolean} */ shouldParenthesize(/** @type {Expression} */ expression, /** @type {Expression} */ containingExpression) {
     return ((expression instanceof ArrowFunctionExpr$1 || expression instanceof FunctionExpr) && containingExpression instanceof InvokeFunctionExpr || expression instanceof LiteralMapExpr && containingExpression instanceof ArrowFunctionExpr$1
     );
   }
-  printLeadingComments(node, ctx) {
+  printLeadingComments(node, /** @type {EmitterVisitorContext} */ ctx) {
     if (!this.printComments || node.leadingComments === undefined) {
       return;
     }
@@ -3978,14 +3978,14 @@ function typeWithParameters(type, numParams) {
   }
   return expressionType(type, undefined, params);
 }
-function getSafePropertyAccessString(accessor, name) {
+/** @returns {string} */ function getSafePropertyAccessString(/** @type {string} */ accessor, /** @type {string} */ name) {
   const escapedName = escapeIdentifier(name, false);
   return escapedName !== name ? `${accessor}[${escapedName}]` : `${accessor}.${name}`;
 }
 function jitOnlyGuardedExpression(expr) {
   return guardedExpression('ngJitMode', expr);
 }
-function devOnlyGuardedExpression(expr) {
+/** @returns {Expression} */ function devOnlyGuardedExpression(/** @type {Expression} */ expr) {
   return guardedExpression('ngDevMode', expr);
 }
 function guardedExpression(guard, expr) {
@@ -4011,10 +4011,10 @@ function refsToArray(refs, shouldForwardDeclare) {
 function tsIgnoreComment() {
   return leadingComment('@ts-ignore', true, true);
 }
-function isUnsafeObjectKey(key) {
+/** @returns {boolean} */ function isUnsafeObjectKey(/** @type {string} */ key) {
   return UNSAFE_OBJECT_KEY_NAME_REGEXP.test(key);
 }
-function createMayBeForwardRefExpression(expression, forwardRef) {
+function createMayBeForwardRefExpression(expression, /** @type {number} */ forwardRef) {
   return {
     expression,
     forwardRef
@@ -4208,7 +4208,7 @@ class AST {
     this.span = span;
     this.sourceSpan = sourceSpan;
   }
-  toString() {
+  /** @returns {string} */ toString() {
     return 'AST';
   }
 }
@@ -4235,7 +4235,7 @@ class ThisReceiver extends AST {
   }
 }
 class Chain extends AST {
-  expressions;
+  /** @type {AST[]} */ expressions;
   constructor(/** @type {ParseSpan} */ span, /** @type {AbsoluteSourceSpan} */ sourceSpan, /** @type {any[]} */ expressions) {
     super(span, sourceSpan);
     this.expressions = expressions;
@@ -4245,10 +4245,10 @@ class Chain extends AST {
   }
 }
 class Conditional extends AST {
-  condition;
-  trueExp;
-  falseExp;
-  constructor(/** @type {ParseSpan} */ span, /** @type {AbsoluteSourceSpan} */ sourceSpan, condition, trueExp, falseExp) {
+  /** @type {AST} */ condition;
+  /** @type {AST} */ trueExp;
+  /** @type {AST} */ falseExp;
+  constructor(/** @type {ParseSpan} */ span, /** @type {AbsoluteSourceSpan} */ sourceSpan, /** @type {AST} */ condition, /** @type {AST} */ trueExp, /** @type {AST} */ falseExp) {
     super(span, sourceSpan);
     this.condition = condition;
     this.trueExp = trueExp;
@@ -4259,9 +4259,9 @@ class Conditional extends AST {
   }
 }
 class PropertyRead extends ASTWithName {
-  receiver;
+  /** @type {AST} */ receiver;
   /** @type {string} */ name;
-  constructor(/** @type {ParseSpan} */ span, /** @type {AbsoluteSourceSpan} */ sourceSpan, /** @type {AbsoluteSourceSpan} */ nameSpan, receiver, /** @type {string} */ name) {
+  constructor(/** @type {ParseSpan} */ span, /** @type {AbsoluteSourceSpan} */ sourceSpan, /** @type {AbsoluteSourceSpan} */ nameSpan, /** @type {AST} */ receiver, /** @type {string} */ name) {
     super(span, sourceSpan, nameSpan);
     this.receiver = receiver;
     this.name = name;
@@ -4271,9 +4271,9 @@ class PropertyRead extends ASTWithName {
   }
 }
 class SafePropertyRead extends ASTWithName {
-  receiver;
+  /** @type {AST} */ receiver;
   /** @type {string} */ name;
-  constructor(/** @type {ParseSpan} */ span, /** @type {AbsoluteSourceSpan} */ sourceSpan, /** @type {AbsoluteSourceSpan} */ nameSpan, receiver, /** @type {string} */ name) {
+  constructor(/** @type {ParseSpan} */ span, /** @type {AbsoluteSourceSpan} */ sourceSpan, /** @type {AbsoluteSourceSpan} */ nameSpan, /** @type {AST} */ receiver, /** @type {string} */ name) {
     super(span, sourceSpan, nameSpan);
     this.receiver = receiver;
     this.name = name;
@@ -4283,9 +4283,9 @@ class SafePropertyRead extends ASTWithName {
   }
 }
 class KeyedRead extends AST {
-  receiver;
-  key;
-  constructor(/** @type {ParseSpan} */ span, /** @type {AbsoluteSourceSpan} */ sourceSpan, receiver, key) {
+  /** @type {AST} */ receiver;
+  /** @type {AST} */ key;
+  constructor(/** @type {ParseSpan} */ span, /** @type {AbsoluteSourceSpan} */ sourceSpan, /** @type {AST} */ receiver, /** @type {AST} */ key) {
     super(span, sourceSpan);
     this.receiver = receiver;
     this.key = key;
@@ -4295,9 +4295,9 @@ class KeyedRead extends AST {
   }
 }
 class SafeKeyedRead extends AST {
-  /** @type {PropertyRead} */ receiver;
-  /** @type {PropertyRead} */ key;
-  constructor(/** @type {ParseSpan} */ span, /** @type {AbsoluteSourceSpan} */ sourceSpan, /** @type {PropertyRead} */ receiver, /** @type {PropertyRead} */ key) {
+  /** @type {AST} */ receiver;
+  /** @type {AST} */ key;
+  constructor(/** @type {ParseSpan} */ span, /** @type {AbsoluteSourceSpan} */ sourceSpan, /** @type {AST} */ receiver, /** @type {AST} */ key) {
     super(span, sourceSpan);
     this.receiver = receiver;
     this.key = key;
@@ -4312,11 +4312,11 @@ var BindingPipeType;
   BindingPipeType[BindingPipeType["ReferencedDirectly"] = 1] = "ReferencedDirectly";
 })(BindingPipeType || (BindingPipeType = {}));
 class BindingPipe extends ASTWithName {
-  exp;
+  /** @type {AST} */ exp;
   /** @type {string} */ name;
-  args;
+  /** @type {AST[]} */ args;
   /** @type {number} */ type;
-  constructor(/** @type {ParseSpan} */ span, /** @type {AbsoluteSourceSpan} */ sourceSpan, exp, /** @type {string} */ name, /** @type {any[]} */ args, /** @type {number} */ type, /** @type {AbsoluteSourceSpan} */ nameSpan) {
+  constructor(/** @type {ParseSpan} */ span, /** @type {AbsoluteSourceSpan} */ sourceSpan, /** @type {AST} */ exp, /** @type {string} */ name, /** @type {any[]} */ args, /** @type {number} */ type, /** @type {AbsoluteSourceSpan} */ nameSpan) {
     super(span, sourceSpan, nameSpan);
     this.exp = exp;
     this.name = name;
@@ -4338,7 +4338,7 @@ class LiteralPrimitive extends AST {
   }
 }
 class LiteralArray extends AST {
-  expressions;
+  /** @type {AST[]} */ expressions;
   constructor(/** @type {ParseSpan} */ span, /** @type {AbsoluteSourceSpan} */ sourceSpan, /** @type {any[]} */ expressions) {
     super(span, sourceSpan);
     this.expressions = expressions;
@@ -4348,8 +4348,8 @@ class LiteralArray extends AST {
   }
 }
 class SpreadElement extends AST {
-  /** @type {PropertyRead} */ expression;
-  constructor(/** @type {ParseSpan} */ span, /** @type {AbsoluteSourceSpan} */ sourceSpan, /** @type {PropertyRead} */ expression) {
+  /** @type {AST} */ expression;
+  constructor(/** @type {ParseSpan} */ span, /** @type {AbsoluteSourceSpan} */ sourceSpan, /** @type {AST} */ expression) {
     super(span, sourceSpan);
     this.expression = expression;
   }
@@ -4358,8 +4358,8 @@ class SpreadElement extends AST {
   }
 }
 class LiteralMap extends AST {
-  keys;
-  values;
+  /** @type {any[]} */ keys;
+  /** @type {AST[]} */ values;
   constructor(/** @type {ParseSpan} */ span, /** @type {AbsoluteSourceSpan} */ sourceSpan, /** @type {any[]} */ keys, /** @type {any[]} */ values) {
     super(span, sourceSpan);
     this.keys = keys;
@@ -4370,8 +4370,8 @@ class LiteralMap extends AST {
   }
 }
 let Interpolation$1 = class Interpolation extends AST {
-  strings;
-  expressions;
+  /** @type {string[]} */ strings;
+  /** @type {AST[]} */ expressions;
   constructor(/** @type {ParseSpan} */ span, /** @type {AbsoluteSourceSpan} */ sourceSpan, /** @type {any[]} */ strings, /** @type {any[]} */ expressions) {
     super(span, sourceSpan);
     this.strings = strings;
@@ -4383,9 +4383,9 @@ let Interpolation$1 = class Interpolation extends AST {
 };
 class Binary extends AST {
   /** @type {string} */ operation;
-  left;
-  right;
-  constructor(/** @type {ParseSpan} */ span, /** @type {AbsoluteSourceSpan} */ sourceSpan, /** @type {string} */ operation, left, right) {
+  /** @type {AST} */ left;
+  /** @type {AST} */ right;
+  constructor(/** @type {ParseSpan} */ span, /** @type {AbsoluteSourceSpan} */ sourceSpan, /** @type {string} */ operation, /** @type {AST} */ left, /** @type {AST} */ right) {
     super(span, sourceSpan);
     this.operation = operation;
     this.left = left;
@@ -4400,17 +4400,17 @@ class Binary extends AST {
 }
 class Unary extends Binary {
   /** @type {string} */ operator;
-  expr;
+  /** @type {AST} */ expr;
   left = null;
-  /** @type {LiteralPrimitive} */ right = null;
+  /** @type {AST} */ right = null;
   /** @type {string} */ operation = null;
-  /** @returns {Unary} */ static createMinus(/** @type {ParseSpan} */ span, /** @type {AbsoluteSourceSpan} */ sourceSpan, /** @type {LiteralPrimitive} */ expr) {
+  /** @returns {Unary} */ static createMinus(/** @type {ParseSpan} */ span, /** @type {AbsoluteSourceSpan} */ sourceSpan, /** @type {AST} */ expr) {
     return new Unary(span, sourceSpan, '-', expr, '-', new LiteralPrimitive(span, sourceSpan, 0), expr);
   }
-  /** @returns {Unary} */ static createPlus(/** @type {ParseSpan} */ span, /** @type {AbsoluteSourceSpan} */ sourceSpan, /** @type {PropertyRead} */ expr) {
+  /** @returns {Unary} */ static createPlus(/** @type {ParseSpan} */ span, /** @type {AbsoluteSourceSpan} */ sourceSpan, /** @type {AST} */ expr) {
     return new Unary(span, sourceSpan, '+', expr, '-', expr, new LiteralPrimitive(span, sourceSpan, 0));
   }
-  constructor(/** @type {ParseSpan} */ span, /** @type {AbsoluteSourceSpan} */ sourceSpan, /** @type {string} */ operator, expr, /** @type {string} */ binaryOp, binaryLeft, /** @type {LiteralPrimitive} */ binaryRight) {
+  constructor(/** @type {ParseSpan} */ span, /** @type {AbsoluteSourceSpan} */ sourceSpan, /** @type {string} */ operator, expr, /** @type {string} */ binaryOp, binaryLeft, /** @type {AST} */ binaryRight) {
     super(span, sourceSpan, binaryOp, binaryLeft, binaryRight);
     this.operator = operator;
     this.expr = expr;
@@ -4423,8 +4423,8 @@ class Unary extends Binary {
   }
 }
 class PrefixNot extends AST {
-  expression;
-  constructor(/** @type {ParseSpan} */ span, /** @type {AbsoluteSourceSpan} */ sourceSpan, expression) {
+  /** @type {AST} */ expression;
+  constructor(/** @type {ParseSpan} */ span, /** @type {AbsoluteSourceSpan} */ sourceSpan, /** @type {AST} */ expression) {
     super(span, sourceSpan);
     this.expression = expression;
   }
@@ -4433,8 +4433,8 @@ class PrefixNot extends AST {
   }
 }
 class TypeofExpression extends AST {
-  /** @type {PropertyRead} */ expression;
-  constructor(/** @type {ParseSpan} */ span, /** @type {AbsoluteSourceSpan} */ sourceSpan, /** @type {PropertyRead} */ expression) {
+  /** @type {AST} */ expression;
+  constructor(/** @type {ParseSpan} */ span, /** @type {AbsoluteSourceSpan} */ sourceSpan, /** @type {AST} */ expression) {
     super(span, sourceSpan);
     this.expression = expression;
   }
@@ -4443,8 +4443,8 @@ class TypeofExpression extends AST {
   }
 }
 class VoidExpression extends AST {
-  /** @type {ParenthesizedExpression} */ expression;
-  constructor(/** @type {ParseSpan} */ span, /** @type {AbsoluteSourceSpan} */ sourceSpan, /** @type {ParenthesizedExpression} */ expression) {
+  /** @type {AST} */ expression;
+  constructor(/** @type {ParseSpan} */ span, /** @type {AbsoluteSourceSpan} */ sourceSpan, /** @type {AST} */ expression) {
     super(span, sourceSpan);
     this.expression = expression;
   }
@@ -4453,8 +4453,8 @@ class VoidExpression extends AST {
   }
 }
 class NonNullAssert extends AST {
-  expression;
-  constructor(/** @type {ParseSpan} */ span, /** @type {AbsoluteSourceSpan} */ sourceSpan, expression) {
+  /** @type {AST} */ expression;
+  constructor(/** @type {ParseSpan} */ span, /** @type {AbsoluteSourceSpan} */ sourceSpan, /** @type {AST} */ expression) {
     super(span, sourceSpan);
     this.expression = expression;
   }
@@ -4463,10 +4463,10 @@ class NonNullAssert extends AST {
   }
 }
 class Call extends AST {
-  receiver;
-  args;
+  /** @type {AST} */ receiver;
+  /** @type {AST[]} */ args;
   /** @type {AbsoluteSourceSpan} */ argumentSpan;
-  constructor(/** @type {ParseSpan} */ span, /** @type {AbsoluteSourceSpan} */ sourceSpan, receiver, /** @type {any[]} */ args, argumentSpan) {
+  constructor(/** @type {ParseSpan} */ span, /** @type {AbsoluteSourceSpan} */ sourceSpan, /** @type {AST} */ receiver, /** @type {any[]} */ args, /** @type {AbsoluteSourceSpan} */ argumentSpan) {
     super(span, sourceSpan);
     this.receiver = receiver;
     this.args = args;
@@ -4477,10 +4477,10 @@ class Call extends AST {
   }
 }
 class SafeCall extends AST {
-  /** @type {PropertyRead} */ receiver;
-  args;
+  /** @type {AST} */ receiver;
+  /** @type {AST[]} */ args;
   /** @type {AbsoluteSourceSpan} */ argumentSpan;
-  constructor(/** @type {ParseSpan} */ span, /** @type {AbsoluteSourceSpan} */ sourceSpan, /** @type {PropertyRead} */ receiver, /** @type {any[]} */ args, /** @type {AbsoluteSourceSpan} */ argumentSpan) {
+  constructor(/** @type {ParseSpan} */ span, /** @type {AbsoluteSourceSpan} */ sourceSpan, /** @type {AST} */ receiver, /** @type {any[]} */ args, /** @type {AbsoluteSourceSpan} */ argumentSpan) {
     super(span, sourceSpan);
     this.receiver = receiver;
     this.args = args;
@@ -4491,9 +4491,9 @@ class SafeCall extends AST {
   }
 }
 class TaggedTemplateLiteral extends AST {
-  /** @type {PropertyRead} */ tag;
+  /** @type {AST} */ tag;
   /** @type {TemplateLiteral} */ template;
-  constructor(/** @type {ParseSpan} */ span, /** @type {AbsoluteSourceSpan} */ sourceSpan, /** @type {PropertyRead} */ tag, /** @type {TemplateLiteral} */ template) {
+  constructor(/** @type {ParseSpan} */ span, /** @type {AbsoluteSourceSpan} */ sourceSpan, /** @type {AST} */ tag, /** @type {TemplateLiteral} */ template) {
     super(span, sourceSpan);
     this.tag = tag;
     this.template = template;
@@ -4503,8 +4503,8 @@ class TaggedTemplateLiteral extends AST {
   }
 }
 class TemplateLiteral extends AST {
-  elements;
-  expressions;
+  /** @type {TemplateLiteralElement[]} */ elements;
+  /** @type {AST[]} */ expressions;
   constructor(/** @type {ParseSpan} */ span, /** @type {AbsoluteSourceSpan} */ sourceSpan, /** @type {any[]} */ elements, /** @type {any[]} */ expressions) {
     super(span, sourceSpan);
     this.elements = elements;
@@ -4525,8 +4525,8 @@ class TemplateLiteralElement extends AST {
   }
 }
 class ParenthesizedExpression extends AST {
-  expression;
-  constructor(/** @type {ParseSpan} */ span, /** @type {AbsoluteSourceSpan} */ sourceSpan, expression) {
+  /** @type {AST} */ expression;
+  constructor(/** @type {ParseSpan} */ span, /** @type {AbsoluteSourceSpan} */ sourceSpan, /** @type {AST} */ expression) {
     super(span, sourceSpan);
     this.expression = expression;
   }
@@ -4545,9 +4545,9 @@ class ArrowFunctionIdentifierParameter {
   }
 }
 class ArrowFunction extends AST {
-  parameters;
-  body;
-  constructor(/** @type {ParseSpan} */ span, /** @type {AbsoluteSourceSpan} */ sourceSpan, /** @type {any[]} */ parameters, body) {
+  /** @type {ArrowFunctionIdentifierParameter[]} */ parameters;
+  /** @type {AST} */ body;
+  constructor(/** @type {ParseSpan} */ span, /** @type {AbsoluteSourceSpan} */ sourceSpan, /** @type {any[]} */ parameters, /** @type {AST} */ body) {
     super(span, sourceSpan);
     this.parameters = parameters;
     this.body = body;
@@ -4580,7 +4580,7 @@ class ASTWithSource extends AST {
   ast;
   /** @type {string} */ source;
   /** @type {string} */ location;
-  errors;
+  /** @type {ParseError[]} */ errors;
   constructor(ast, /** @type {string} */ source, /** @type {string} */ location, /** @type {number} */ absoluteOffset, /** @type {any[]} */ errors) {
     super(new ParseSpan(0, source === null ? 0 : source.length), new AbsoluteSourceSpan(absoluteOffset, source === null ? absoluteOffset : absoluteOffset + source.length));
     this.ast = ast;
@@ -4594,7 +4594,7 @@ class ASTWithSource extends AST {
     }
     return this.ast.visit(visitor, context);
   }
-  toString() {
+  /** @returns {string} */ toString() {
     return `${this.source} in ${this.location}`;
   }
 }
@@ -4619,75 +4619,75 @@ class ExpressionBinding {
   }
 }
 class RecursiveAstVisitor {
-  visit(ast, context) {
+  visit(/** @type {AST} */ ast, context) {
     ast.visit(this, context);
   }
-  visitUnary(ast, context) {
+  visitUnary(/** @type {Unary} */ ast, context) {
     this.visit(ast.expr, context);
   }
-  visitBinary(ast, context) {
+  visitBinary(/** @type {Binary} */ ast, context) {
     this.visit(ast.left, context);
     this.visit(ast.right, context);
   }
-  visitChain(ast, context) {
+  visitChain(/** @type {Chain} */ ast, context) {
     this.visitAll(ast.expressions, context);
   }
-  visitConditional(ast, context) {
+  visitConditional(/** @type {Conditional} */ ast, context) {
     this.visit(ast.condition, context);
     this.visit(ast.trueExp, context);
     this.visit(ast.falseExp, context);
   }
-  visitPipe(ast, context) {
+  visitPipe(/** @type {BindingPipe} */ ast, context) {
     this.visit(ast.exp, context);
     this.visitAll(ast.args, context);
   }
-  visitImplicitReceiver(ast, context) {}
-  visitThisReceiver(ast, context) {}
-  visitInterpolation(ast, context) {
+  visitImplicitReceiver(/** @type {ThisReceiver} */ ast, context) {}
+  visitThisReceiver(/** @type {ThisReceiver} */ ast, context) {}
+  visitInterpolation(/** @type {Interpolation$1} */ ast, context) {
     this.visitAll(ast.expressions, context);
   }
-  visitKeyedRead(ast, context) {
+  visitKeyedRead(/** @type {KeyedRead} */ ast, context) {
     this.visit(ast.receiver, context);
     this.visit(ast.key, context);
   }
-  visitLiteralArray(ast, context) {
+  visitLiteralArray(/** @type {LiteralArray} */ ast, context) {
     this.visitAll(ast.expressions, context);
   }
-  visitLiteralMap(ast, context) {
+  visitLiteralMap(/** @type {LiteralMap} */ ast, context) {
     this.visitAll(ast.values, context);
   }
-  visitLiteralPrimitive(ast, context) {}
-  visitPrefixNot(ast, context) {
+  visitLiteralPrimitive(/** @type {LiteralPrimitive} */ ast, context) {}
+  visitPrefixNot(/** @type {PrefixNot} */ ast, context) {
     this.visit(ast.expression, context);
   }
-  visitTypeofExpression(ast, context) {
+  visitTypeofExpression(/** @type {TypeofExpression} */ ast, context) {
     this.visit(ast.expression, context);
   }
-  visitVoidExpression(ast, context) {
+  visitVoidExpression(/** @type {VoidExpression} */ ast, context) {
     this.visit(ast.expression, context);
   }
-  visitNonNullAssert(ast, context) {
+  visitNonNullAssert(/** @type {NonNullAssert} */ ast, context) {
     this.visit(ast.expression, context);
   }
-  visitPropertyRead(ast, context) {
+  visitPropertyRead(/** @type {PropertyRead} */ ast, context) {
     this.visit(ast.receiver, context);
   }
-  visitSafePropertyRead(ast, context) {
+  visitSafePropertyRead(/** @type {SafePropertyRead} */ ast, context) {
     this.visit(ast.receiver, context);
   }
-  visitSafeKeyedRead(ast, context) {
+  visitSafeKeyedRead(/** @type {SafeKeyedRead} */ ast, context) {
     this.visit(ast.receiver, context);
     this.visit(ast.key, context);
   }
-  visitCall(ast, context) {
+  visitCall(/** @type {Call} */ ast, context) {
     this.visit(ast.receiver, context);
     this.visitAll(ast.args, context);
   }
-  visitSafeCall(ast, context) {
+  visitSafeCall(/** @type {SafeCall} */ ast, context) {
     this.visit(ast.receiver, context);
     this.visitAll(ast.args, context);
   }
-  visitTemplateLiteral(ast, context) {
+  visitTemplateLiteral(/** @type {TemplateLiteral} */ ast, context) {
     for (let i = 0; i < ast.elements.length; i++) {
       this.visit(ast.elements[i], context);
       const expression = i < ast.expressions.length ? ast.expressions[i] : null;
@@ -4696,39 +4696,39 @@ class RecursiveAstVisitor {
       }
     }
   }
-  visitTemplateLiteralElement(ast, context) {}
-  visitTaggedTemplateLiteral(ast, context) {
+  visitTemplateLiteralElement(/** @type {TemplateLiteralElement} */ ast, context) {}
+  visitTaggedTemplateLiteral(/** @type {TaggedTemplateLiteral} */ ast, context) {
     this.visit(ast.tag, context);
     this.visit(ast.template, context);
   }
-  visitParenthesizedExpression(ast, context) {
+  visitParenthesizedExpression(/** @type {ParenthesizedExpression} */ ast, context) {
     this.visit(ast.expression, context);
   }
-  visitArrowFunction(ast, context) {
+  visitArrowFunction(/** @type {ArrowFunction} */ ast, context) {
     this.visit(ast.body, context);
   }
-  visitRegularExpressionLiteral(ast, context) {}
-  visitSpreadElement(ast, context) {
+  visitRegularExpressionLiteral(/** @type {RegularExpressionLiteral} */ ast, context) {}
+  visitSpreadElement(/** @type {SpreadElement} */ ast, context) {
     this.visit(ast.expression, context);
   }
-  visitEmptyExpr(ast, context) {}
-  visitAll(asts, context) {
+  visitEmptyExpr(/** @type {EmptyExpr$1} */ ast, context) {}
+  visitAll(/** @type {AST[]} */ asts, context) {
     for (const ast of asts) {
       this.visit(ast, context);
     }
   }
 }
 class ParsedProperty {
-  name;
-  expression;
-  type;
-  sourceSpan;
-  keySpan;
-  valueSpan;
-  isLiteral;
-  isLegacyAnimation;
-  isAnimation;
-  constructor(name, expression, type, sourceSpan, keySpan, valueSpan) {
+  /** @type {string} */ name;
+  /** @type {ASTWithSource} */ expression;
+  /** @type {number} */ type;
+  /** @type {ParseSourceSpan} */ sourceSpan;
+  /** @type {ParseSourceSpan} */ keySpan;
+  /** @type {ParseSourceSpan | undefined} */ valueSpan;
+  /** @type {boolean} */ isLiteral;
+  /** @type {boolean} */ isLegacyAnimation;
+  /** @type {boolean} */ isAnimation;
+  constructor(/** @type {string} */ name, /** @type {ASTWithSource} */ expression, /** @type {number} */ type, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {ParseSourceSpan} */ keySpan, /** @type {ParseSourceSpan | undefined} */ valueSpan) {
     this.name = name;
     this.expression = expression;
     this.type = type;
@@ -4756,13 +4756,13 @@ var ParsedEventType;
   ParsedEventType[ParsedEventType["Animation"] = 3] = "Animation";
 })(ParsedEventType || (ParsedEventType = {}));
 class ParsedEvent {
-  name;
-  targetOrPhase;
-  type;
-  handler;
-  sourceSpan;
-  handlerSpan;
-  keySpan;
+  /** @type {string} */ name;
+  /** @type {string | null} */ targetOrPhase;
+  /** @type {number} */ type;
+  /** @type {ASTWithSource} */ handler;
+  /** @type {ParseSourceSpan} */ sourceSpan;
+  /** @type {ParseSourceSpan} */ handlerSpan;
+  /** @type {ParseSourceSpan} */ keySpan;
   constructor(name, targetOrPhase, type, handler, sourceSpan, handlerSpan, keySpan) {
     this.name = name;
     this.targetOrPhase = targetOrPhase;
@@ -4774,12 +4774,12 @@ class ParsedEvent {
   }
 }
 class ParsedVariable {
-  name;
-  value;
-  sourceSpan;
-  keySpan;
-  valueSpan;
-  constructor(name, value, sourceSpan, keySpan, valueSpan) {
+  /** @type {string} */ name;
+  /** @type {string} */ value;
+  /** @type {ParseSourceSpan} */ sourceSpan;
+  /** @type {ParseSourceSpan} */ keySpan;
+  /** @type {ParseSourceSpan | undefined} */ valueSpan;
+  constructor(/** @type {string} */ name, /** @type {string} */ value, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {ParseSourceSpan} */ keySpan, /** @type {ParseSourceSpan | undefined} */ valueSpan) {
     this.name = name;
     this.value = value;
     this.sourceSpan = sourceSpan;
@@ -4798,15 +4798,15 @@ var BindingType;
   BindingType[BindingType["Animation"] = 6] = "Animation";
 })(BindingType || (BindingType = {}));
 class BoundElementProperty {
-  name;
-  type;
-  securityContext;
-  value;
-  unit;
-  sourceSpan;
-  keySpan;
-  valueSpan;
-  constructor(name, type, securityContext, value, unit, sourceSpan, keySpan, valueSpan) {
+  /** @type {string} */ name;
+  /** @type {number} */ type;
+  /** @type {number} */ securityContext;
+  /** @type {ASTWithSource} */ value;
+  /** @type {string | null} */ unit;
+  /** @type {ParseSourceSpan} */ sourceSpan;
+  /** @type {ParseSourceSpan | undefined} */ keySpan;
+  /** @type {ParseSourceSpan | undefined} */ valueSpan;
+  constructor(/** @type {string} */ name, /** @type {number} */ type, /** @type {number} */ securityContext, /** @type {ASTWithSource} */ value, /** @type {string | null} */ unit, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {ParseSourceSpan | undefined} */ keySpan, /** @type {ParseSourceSpan | undefined} */ valueSpan) {
     this.name = name;
     this.type = type;
     this.securityContext = securityContext;
@@ -4824,7 +4824,7 @@ var TagContentType;
   TagContentType[TagContentType["ESCAPABLE_RAW_TEXT"] = 1] = "ESCAPABLE_RAW_TEXT";
   TagContentType[TagContentType["PARSABLE_DATA"] = 2] = "PARSABLE_DATA";
 })(TagContentType || (TagContentType = {}));
-function splitNsName(elementName, fatal = true) {
+function splitNsName(/** @type {string} */ elementName, /** @type {boolean} */ fatal = true) {
   if (elementName[0] != ':') {
     return [null, elementName];
   }
@@ -4838,19 +4838,19 @@ function splitNsName(elementName, fatal = true) {
   }
   return [elementName.slice(1, colonIndex), elementName.slice(colonIndex + 1)];
 }
-function isNgContainer(tagName) {
+/** @returns {boolean} */ function isNgContainer(/** @type {string} */ tagName) {
   return splitNsName(tagName)[1] === 'ng-container';
 }
-function isNgContent(tagName) {
+/** @returns {boolean} */ function isNgContent(/** @type {string} */ tagName) {
   return splitNsName(tagName)[1] === 'ng-content';
 }
-function isNgTemplate(tagName) {
+/** @returns {boolean} */ function isNgTemplate(/** @type {string} */ tagName) {
   return splitNsName(tagName)[1] === 'ng-template';
 }
 function getNsPrefix(fullName) {
   return fullName === null ? null : splitNsName(fullName)[0];
 }
-function mergeNsAndName(prefix, localName) {
+/** @returns {string} */ function mergeNsAndName(/** @type {string} */ prefix, /** @type {string} */ localName) {
   return prefix ? `:${prefix}:${localName}` : localName;
 }
 
@@ -4877,10 +4877,10 @@ let Text$3 = class Text {
   }
 };
 class BoundText {
-  value;
-  sourceSpan;
+  /** @type {AST} */ value;
+  /** @type {ParseSourceSpan} */ sourceSpan;
   i18n;
-  constructor(value, sourceSpan, i18n) {
+  constructor(/** @type {AST} */ value, /** @type {ParseSourceSpan} */ sourceSpan, i18n) {
     this.value = value;
     this.sourceSpan = sourceSpan;
     this.i18n = i18n;
@@ -4890,13 +4890,13 @@ class BoundText {
   }
 }
 class TextAttribute {
-  name;
-  value;
-  sourceSpan;
-  keySpan;
-  valueSpan;
+  /** @type {string} */ name;
+  /** @type {string} */ value;
+  /** @type {ParseSourceSpan} */ sourceSpan;
+  /** @type {ParseSourceSpan | undefined} */ keySpan;
+  /** @type {ParseSourceSpan | undefined} */ valueSpan;
   i18n;
-  constructor(name, value, sourceSpan, keySpan, valueSpan, i18n) {
+  constructor(/** @type {string} */ name, /** @type {string} */ value, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {ParseSourceSpan | undefined} */ keySpan, /** @type {ParseSourceSpan | undefined} */ valueSpan, i18n) {
     this.name = name;
     this.value = value;
     this.sourceSpan = sourceSpan;
@@ -4909,16 +4909,16 @@ class TextAttribute {
   }
 }
 class BoundAttribute {
-  name;
-  type;
-  securityContext;
-  value;
-  unit;
-  sourceSpan;
-  keySpan;
-  valueSpan;
+  /** @type {string} */ name;
+  /** @type {number} */ type;
+  /** @type {number} */ securityContext;
+  /** @type {AST} */ value;
+  /** @type {string | null} */ unit;
+  /** @type {ParseSourceSpan} */ sourceSpan;
+  /** @type {ParseSourceSpan} */ keySpan;
+  /** @type {ParseSourceSpan | undefined} */ valueSpan;
   i18n;
-  constructor(name, type, securityContext, value, unit, sourceSpan, keySpan, valueSpan, i18n) {
+  constructor(/** @type {string} */ name, /** @type {number} */ type, /** @type {number} */ securityContext, /** @type {AST} */ value, /** @type {string | null} */ unit, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {ParseSourceSpan} */ keySpan, /** @type {ParseSourceSpan | undefined} */ valueSpan, i18n) {
     this.name = name;
     this.type = type;
     this.securityContext = securityContext;
@@ -4929,7 +4929,7 @@ class BoundAttribute {
     this.valueSpan = valueSpan;
     this.i18n = i18n;
   }
-  static fromBoundElementProperty(prop, i18n) {
+  /** @returns {BoundAttribute} */ static fromBoundElementProperty(/** @type {BoundElementProperty} */ prop, i18n) {
     if (prop.keySpan === undefined) {
       throw new Error(`Unexpected state: keySpan must be defined for bound attributes but was not for ${prop.name}: ${prop.sourceSpan}`);
     }
@@ -4940,15 +4940,15 @@ class BoundAttribute {
   }
 }
 class BoundEvent {
-  name;
-  type;
-  handler;
-  target;
-  phase;
-  sourceSpan;
-  handlerSpan;
-  keySpan;
-  constructor(name, type, handler, target, phase, sourceSpan, handlerSpan, keySpan) {
+  /** @type {string} */ name;
+  /** @type {number} */ type;
+  /** @type {AST} */ handler;
+  /** @type {string | null} */ target;
+  /** @type {string | null} */ phase;
+  /** @type {ParseSourceSpan} */ sourceSpan;
+  /** @type {ParseSourceSpan} */ handlerSpan;
+  /** @type {ParseSourceSpan} */ keySpan;
+  constructor(/** @type {string} */ name, /** @type {number} */ type, /** @type {AST} */ handler, /** @type {string | null} */ target, /** @type {string | null} */ phase, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {ParseSourceSpan} */ handlerSpan, /** @type {ParseSourceSpan} */ keySpan) {
     this.name = name;
     this.type = type;
     this.handler = handler;
@@ -4958,7 +4958,7 @@ class BoundEvent {
     this.handlerSpan = handlerSpan;
     this.keySpan = keySpan;
   }
-  static fromParsedEvent(event) {
+  /** @returns {BoundEvent} */ static fromParsedEvent(/** @type {ParsedEvent} */ event) {
     const target = event.type === ParsedEventType.Regular ? event.targetOrPhase : null;
     const phase = event.type === ParsedEventType.LegacyAnimation ? event.targetOrPhase : null;
     if (event.keySpan === undefined) {
@@ -4971,20 +4971,20 @@ class BoundEvent {
   }
 }
 let Element$1 = class Element {
-  name;
-  attributes;
-  inputs;
-  outputs;
-  directives;
-  children;
-  references;
-  isSelfClosing;
-  sourceSpan;
-  startSourceSpan;
-  endSourceSpan;
-  isVoid;
+  /** @type {string} */ name;
+  /** @type {TextAttribute[]} */ attributes;
+  /** @type {BoundAttribute[]} */ inputs;
+  /** @type {BoundEvent[]} */ outputs;
+  /** @type {Directive$1[]} */ directives;
+  /** @type {any[]} */ children;
+  /** @type {Reference[]} */ references;
+  /** @type {boolean} */ isSelfClosing;
+  /** @type {ParseSourceSpan} */ sourceSpan;
+  /** @type {ParseSourceSpan} */ startSourceSpan;
+  /** @type {ParseSourceSpan | null} */ endSourceSpan;
+  /** @type {boolean} */ isVoid;
   i18n;
-  constructor(name, attributes, inputs, outputs, directives, children, references, isSelfClosing, sourceSpan, startSourceSpan, endSourceSpan, isVoid, i18n) {
+  constructor(/** @type {string} */ name, /** @type {TextAttribute[]} */ attributes, /** @type {BoundAttribute[]} */ inputs, /** @type {BoundEvent[]} */ outputs, /** @type {Directive$1[]} */ directives, /** @type {any[]} */ children, /** @type {Reference[]} */ references, /** @type {boolean} */ isSelfClosing, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {ParseSourceSpan} */ startSourceSpan, /** @type {ParseSourceSpan | null} */ endSourceSpan, /** @type {boolean} */ isVoid, i18n) {
     this.name = name;
     this.attributes = attributes;
     this.inputs = inputs;
@@ -5004,12 +5004,12 @@ let Element$1 = class Element {
   }
 };
 class DeferredTrigger {
-  nameSpan;
-  sourceSpan;
-  prefetchSpan;
-  whenOrOnSourceSpan;
-  hydrateSpan;
-  constructor(nameSpan, sourceSpan, prefetchSpan, whenOrOnSourceSpan, hydrateSpan) {
+  /** @type {ParseSourceSpan | null} */ nameSpan;
+  /** @type {ParseSourceSpan} */ sourceSpan;
+  /** @type {ParseSourceSpan | null} */ prefetchSpan;
+  /** @type {ParseSourceSpan | null} */ whenOrOnSourceSpan;
+  /** @type {ParseSourceSpan | null} */ hydrateSpan;
+  constructor(/** @type {ParseSourceSpan | null} */ nameSpan, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {ParseSourceSpan | null} */ prefetchSpan, /** @type {ParseSourceSpan | null} */ whenOrOnSourceSpan, /** @type {ParseSourceSpan | null} */ hydrateSpan) {
     this.nameSpan = nameSpan;
     this.sourceSpan = sourceSpan;
     this.prefetchSpan = prefetchSpan;
@@ -5021,57 +5021,57 @@ class DeferredTrigger {
   }
 }
 class BoundDeferredTrigger extends DeferredTrigger {
-  value;
-  constructor(value, sourceSpan, prefetchSpan, whenSourceSpan, hydrateSpan) {
+  /** @type {AST} */ value;
+  constructor(/** @type {AST} */ value, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {ParseSourceSpan | null} */ prefetchSpan, /** @type {ParseSourceSpan} */ whenSourceSpan, /** @type {ParseSourceSpan | null} */ hydrateSpan) {
     super(null, sourceSpan, prefetchSpan, whenSourceSpan, hydrateSpan);
     this.value = value;
   }
 }
 class NeverDeferredTrigger extends DeferredTrigger {}
 class IdleDeferredTrigger extends DeferredTrigger {
-  timeout;
-  constructor(nameSpan, sourceSpan, prefetchSpan, onSourceSpan, hydrateSpan, timeout) {
+  /** @type {number | null} */ timeout;
+  constructor(/** @type {ParseSourceSpan} */ nameSpan, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {ParseSourceSpan | null} */ prefetchSpan, /** @type {ParseSourceSpan | null} */ onSourceSpan, /** @type {ParseSourceSpan | null} */ hydrateSpan, /** @type {number | null} */ timeout) {
     super(nameSpan, sourceSpan, prefetchSpan, onSourceSpan, hydrateSpan);
     this.timeout = timeout;
   }
 }
 class ImmediateDeferredTrigger extends DeferredTrigger {}
 class HoverDeferredTrigger extends DeferredTrigger {
-  reference;
-  constructor(reference, nameSpan, sourceSpan, prefetchSpan, onSourceSpan, hydrateSpan) {
+  /** @type {string | null} */ reference;
+  constructor(/** @type {string | null} */ reference, /** @type {ParseSourceSpan} */ nameSpan, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {ParseSourceSpan | null} */ prefetchSpan, /** @type {ParseSourceSpan | null} */ onSourceSpan, /** @type {ParseSourceSpan | null} */ hydrateSpan) {
     super(nameSpan, sourceSpan, prefetchSpan, onSourceSpan, hydrateSpan);
     this.reference = reference;
   }
 }
 class TimerDeferredTrigger extends DeferredTrigger {
-  delay;
-  constructor(delay, nameSpan, sourceSpan, prefetchSpan, onSourceSpan, hydrateSpan) {
+  /** @type {number} */ delay;
+  constructor(/** @type {number} */ delay, /** @type {ParseSourceSpan} */ nameSpan, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {ParseSourceSpan | null} */ prefetchSpan, /** @type {ParseSourceSpan | null} */ onSourceSpan, /** @type {ParseSourceSpan | null} */ hydrateSpan) {
     super(nameSpan, sourceSpan, prefetchSpan, onSourceSpan, hydrateSpan);
     this.delay = delay;
   }
 }
 class InteractionDeferredTrigger extends DeferredTrigger {
-  reference;
-  constructor(reference, nameSpan, sourceSpan, prefetchSpan, onSourceSpan, hydrateSpan) {
+  /** @type {string | null} */ reference;
+  constructor(/** @type {string | null} */ reference, /** @type {ParseSourceSpan} */ nameSpan, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {ParseSourceSpan | null} */ prefetchSpan, /** @type {ParseSourceSpan | null} */ onSourceSpan, /** @type {ParseSourceSpan | null} */ hydrateSpan) {
     super(nameSpan, sourceSpan, prefetchSpan, onSourceSpan, hydrateSpan);
     this.reference = reference;
   }
 }
 class ViewportDeferredTrigger extends DeferredTrigger {
-  reference;
-  options;
-  constructor(reference, options, nameSpan, sourceSpan, prefetchSpan, onSourceSpan, hydrateSpan) {
+  /** @type {string | null} */ reference;
+  /** @type {LiteralMap | null} */ options;
+  constructor(/** @type {string | null} */ reference, /** @type {LiteralMap | null} */ options, /** @type {ParseSourceSpan} */ nameSpan, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {ParseSourceSpan | null} */ prefetchSpan, /** @type {ParseSourceSpan | null} */ onSourceSpan, /** @type {ParseSourceSpan | null} */ hydrateSpan) {
     super(nameSpan, sourceSpan, prefetchSpan, onSourceSpan, hydrateSpan);
     this.reference = reference;
     this.options = options;
   }
 }
 class BlockNode {
-  nameSpan;
-  sourceSpan;
-  startSourceSpan;
-  endSourceSpan;
-  constructor(nameSpan, sourceSpan, startSourceSpan, endSourceSpan) {
+  /** @type {ParseSourceSpan} */ nameSpan;
+  /** @type {ParseSourceSpan} */ sourceSpan;
+  /** @type {ParseSourceSpan} */ startSourceSpan;
+  /** @type {ParseSourceSpan | null} */ endSourceSpan;
+  constructor(/** @type {ParseSourceSpan} */ nameSpan, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {ParseSourceSpan} */ startSourceSpan, /** @type {ParseSourceSpan | null} */ endSourceSpan) {
     this.nameSpan = nameSpan;
     this.sourceSpan = sourceSpan;
     this.startSourceSpan = startSourceSpan;
@@ -5079,10 +5079,10 @@ class BlockNode {
   }
 }
 class DeferredBlockPlaceholder extends BlockNode {
-  children;
-  minimumTime;
+  /** @type {any[]} */ children;
+  /** @type {number | null} */ minimumTime;
   i18n;
-  constructor(children, minimumTime, nameSpan, sourceSpan, startSourceSpan, endSourceSpan, i18n) {
+  constructor(/** @type {any[]} */ children, /** @type {number | null} */ minimumTime, /** @type {ParseSourceSpan} */ nameSpan, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {ParseSourceSpan} */ startSourceSpan, /** @type {ParseSourceSpan | null} */ endSourceSpan, i18n) {
     super(nameSpan, sourceSpan, startSourceSpan, endSourceSpan);
     this.children = children;
     this.minimumTime = minimumTime;
@@ -5093,11 +5093,11 @@ class DeferredBlockPlaceholder extends BlockNode {
   }
 }
 class DeferredBlockLoading extends BlockNode {
-  children;
-  afterTime;
-  minimumTime;
+  /** @type {any[]} */ children;
+  /** @type {number | null} */ afterTime;
+  /** @type {number | null} */ minimumTime;
   i18n;
-  constructor(children, afterTime, minimumTime, nameSpan, sourceSpan, startSourceSpan, endSourceSpan, i18n) {
+  constructor(/** @type {any[]} */ children, /** @type {number | null} */ afterTime, /** @type {number | null} */ minimumTime, /** @type {ParseSourceSpan} */ nameSpan, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {ParseSourceSpan} */ startSourceSpan, /** @type {ParseSourceSpan | null} */ endSourceSpan, i18n) {
     super(nameSpan, sourceSpan, startSourceSpan, endSourceSpan);
     this.children = children;
     this.afterTime = afterTime;
@@ -5109,9 +5109,9 @@ class DeferredBlockLoading extends BlockNode {
   }
 }
 class DeferredBlockError extends BlockNode {
-  children;
+  /** @type {any[]} */ children;
   i18n;
-  constructor(children, nameSpan, sourceSpan, startSourceSpan, endSourceSpan, i18n) {
+  constructor(/** @type {any[]} */ children, /** @type {ParseSourceSpan} */ nameSpan, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {ParseSourceSpan} */ startSourceSpan, /** @type {ParseSourceSpan | null} */ endSourceSpan, i18n) {
     super(nameSpan, sourceSpan, startSourceSpan, endSourceSpan);
     this.children = children;
     this.i18n = i18n;
@@ -5121,11 +5121,11 @@ class DeferredBlockError extends BlockNode {
   }
 }
 class DeferredBlock extends BlockNode {
-  children;
-  placeholder;
-  loading;
-  error;
-  mainBlockSpan;
+  /** @type {any[]} */ children;
+  /** @type {DeferredBlockPlaceholder | null} */ placeholder;
+  /** @type {DeferredBlockLoading | null} */ loading;
+  /** @type {DeferredBlockError | null} */ error;
+  /** @type {ParseSourceSpan} */ mainBlockSpan;
   i18n;
   triggers;
   prefetchTriggers;
@@ -5133,7 +5133,7 @@ class DeferredBlock extends BlockNode {
   definedTriggers;
   definedPrefetchTriggers;
   definedHydrateTriggers;
-  constructor(children, triggers, prefetchTriggers, hydrateTriggers, placeholder, loading, error, nameSpan, sourceSpan, mainBlockSpan, startSourceSpan, endSourceSpan, i18n) {
+  constructor(/** @type {any[]} */ children, triggers, prefetchTriggers, hydrateTriggers, /** @type {DeferredBlockPlaceholder | null} */ placeholder, /** @type {DeferredBlockLoading | null} */ loading, /** @type {DeferredBlockError | null} */ error, /** @type {ParseSourceSpan} */ nameSpan, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {ParseSourceSpan} */ mainBlockSpan, /** @type {ParseSourceSpan} */ startSourceSpan, /** @type {ParseSourceSpan | null} */ endSourceSpan, i18n) {
     super(nameSpan, sourceSpan, startSourceSpan, endSourceSpan);
     this.children = children;
     this.placeholder = placeholder;
@@ -5164,11 +5164,11 @@ class DeferredBlock extends BlockNode {
   }
 }
 class SwitchBlock extends BlockNode {
-  expression;
-  groups;
-  unknownBlocks;
-  exhaustiveCheck;
-  constructor(expression, groups, unknownBlocks, exhaustiveCheck, sourceSpan, startSourceSpan, endSourceSpan, nameSpan) {
+  /** @type {AST} */ expression;
+  /** @type {SwitchBlockCaseGroup[]} */ groups;
+  /** @type {UnknownBlock[]} */ unknownBlocks;
+  /** @type {SwitchExhaustiveCheck | null} */ exhaustiveCheck;
+  constructor(/** @type {AST} */ expression, /** @type {SwitchBlockCaseGroup[]} */ groups, /** @type {UnknownBlock[]} */ unknownBlocks, /** @type {SwitchExhaustiveCheck | null} */ exhaustiveCheck, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {ParseSourceSpan} */ startSourceSpan, /** @type {ParseSourceSpan | null} */ endSourceSpan, /** @type {ParseSourceSpan} */ nameSpan) {
     super(nameSpan, sourceSpan, startSourceSpan, endSourceSpan);
     this.expression = expression;
     this.groups = groups;
@@ -5180,8 +5180,8 @@ class SwitchBlock extends BlockNode {
   }
 }
 class SwitchBlockCase extends BlockNode {
-  expression;
-  constructor(expression, sourceSpan, startSourceSpan, endSourceSpan, nameSpan) {
+  /** @type {AST | null} */ expression;
+  constructor(/** @type {AST | null} */ expression, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {ParseSourceSpan} */ startSourceSpan, /** @type {ParseSourceSpan | null} */ endSourceSpan, /** @type {ParseSourceSpan} */ nameSpan) {
     super(nameSpan, sourceSpan, startSourceSpan, endSourceSpan);
     this.expression = expression;
   }
@@ -5190,10 +5190,10 @@ class SwitchBlockCase extends BlockNode {
   }
 }
 class SwitchBlockCaseGroup extends BlockNode {
-  cases;
-  children;
+  /** @type {SwitchBlockCase[]} */ cases;
+  /** @type {any[]} */ children;
   i18n;
-  constructor(cases, children, sourceSpan, startSourceSpan, endSourceSpan, nameSpan, i18n) {
+  constructor(/** @type {SwitchBlockCase[]} */ cases, /** @type {any[]} */ children, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {ParseSourceSpan} */ startSourceSpan, /** @type {ParseSourceSpan | null} */ endSourceSpan, /** @type {ParseSourceSpan} */ nameSpan, i18n) {
     super(nameSpan, sourceSpan, startSourceSpan, endSourceSpan);
     this.cases = cases;
     this.children = children;
@@ -5204,8 +5204,8 @@ class SwitchBlockCaseGroup extends BlockNode {
   }
 }
 class SwitchExhaustiveCheck extends BlockNode {
-  expression;
-  constructor(expression, sourceSpan, startSourceSpan, endSourceSpan, nameSpan) {
+  /** @type {AST | null} */ expression;
+  constructor(/** @type {AST | null} */ expression, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {ParseSourceSpan} */ startSourceSpan, /** @type {ParseSourceSpan | null} */ endSourceSpan, /** @type {ParseSourceSpan} */ nameSpan) {
     super(nameSpan, sourceSpan, startSourceSpan, endSourceSpan);
     this.expression = expression;
   }
@@ -5214,16 +5214,16 @@ class SwitchExhaustiveCheck extends BlockNode {
   }
 }
 class ForLoopBlock extends BlockNode {
-  item;
-  expression;
-  trackBy;
-  trackKeywordSpan;
-  contextVariables;
-  children;
-  empty;
-  mainBlockSpan;
+  /** @type {Variable} */ item;
+  /** @type {ASTWithSource} */ expression;
+  /** @type {ASTWithSource | null} */ trackBy;
+  /** @type {ParseSourceSpan | null} */ trackKeywordSpan;
+  /** @type {Variable[]} */ contextVariables;
+  /** @type {any[]} */ children;
+  /** @type {ForLoopBlockEmpty | null} */ empty;
+  /** @type {ParseSourceSpan} */ mainBlockSpan;
   i18n;
-  constructor(item, expression, trackBy, trackKeywordSpan, contextVariables, children, empty, sourceSpan, mainBlockSpan, startSourceSpan, endSourceSpan, nameSpan, i18n) {
+  constructor(/** @type {Variable} */ item, /** @type {ASTWithSource} */ expression, /** @type {ASTWithSource | null} */ trackBy, /** @type {ParseSourceSpan | null} */ trackKeywordSpan, /** @type {Variable[]} */ contextVariables, /** @type {any[]} */ children, /** @type {ForLoopBlockEmpty | null} */ empty, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {ParseSourceSpan} */ mainBlockSpan, /** @type {ParseSourceSpan} */ startSourceSpan, /** @type {ParseSourceSpan | null} */ endSourceSpan, /** @type {ParseSourceSpan} */ nameSpan, i18n) {
     super(nameSpan, sourceSpan, startSourceSpan, endSourceSpan);
     this.item = item;
     this.expression = expression;
@@ -5240,9 +5240,9 @@ class ForLoopBlock extends BlockNode {
   }
 }
 class ForLoopBlockEmpty extends BlockNode {
-  children;
+  /** @type {any[]} */ children;
   i18n;
-  constructor(children, sourceSpan, startSourceSpan, endSourceSpan, nameSpan, i18n) {
+  constructor(/** @type {any[]} */ children, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {ParseSourceSpan} */ startSourceSpan, /** @type {ParseSourceSpan | null} */ endSourceSpan, /** @type {ParseSourceSpan} */ nameSpan, i18n) {
     super(nameSpan, sourceSpan, startSourceSpan, endSourceSpan);
     this.children = children;
     this.i18n = i18n;
@@ -5252,8 +5252,8 @@ class ForLoopBlockEmpty extends BlockNode {
   }
 }
 class IfBlock extends BlockNode {
-  branches;
-  constructor(branches, sourceSpan, startSourceSpan, endSourceSpan, nameSpan) {
+  /** @type {IfBlockBranch[]} */ branches;
+  constructor(/** @type {IfBlockBranch[]} */ branches, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {ParseSourceSpan} */ startSourceSpan, /** @type {ParseSourceSpan | null} */ endSourceSpan, /** @type {ParseSourceSpan} */ nameSpan) {
     super(nameSpan, sourceSpan, startSourceSpan, endSourceSpan);
     this.branches = branches;
   }
@@ -5262,11 +5262,11 @@ class IfBlock extends BlockNode {
   }
 }
 class IfBlockBranch extends BlockNode {
-  expression;
-  children;
-  expressionAlias;
+  /** @type {AST | null} */ expression;
+  /** @type {any[]} */ children;
+  /** @type {Variable | null} */ expressionAlias;
   i18n;
-  constructor(expression, children, expressionAlias, sourceSpan, startSourceSpan, endSourceSpan, nameSpan, i18n) {
+  constructor(/** @type {AST | null} */ expression, /** @type {any[]} */ children, /** @type {Variable | null} */ expressionAlias, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {ParseSourceSpan} */ startSourceSpan, /** @type {ParseSourceSpan | null} */ endSourceSpan, /** @type {ParseSourceSpan} */ nameSpan, i18n) {
     super(nameSpan, sourceSpan, startSourceSpan, endSourceSpan);
     this.expression = expression;
     this.children = children;
@@ -5278,10 +5278,10 @@ class IfBlockBranch extends BlockNode {
   }
 }
 class UnknownBlock {
-  name;
-  sourceSpan;
-  nameSpan;
-  constructor(name, sourceSpan, nameSpan) {
+  /** @type {string} */ name;
+  /** @type {ParseSourceSpan} */ sourceSpan;
+  /** @type {ParseSourceSpan} */ nameSpan;
+  constructor(/** @type {string} */ name, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {ParseSourceSpan} */ nameSpan) {
     this.name = name;
     this.sourceSpan = sourceSpan;
     this.nameSpan = nameSpan;
@@ -5308,21 +5308,21 @@ let LetDeclaration$1 = class LetDeclaration {
   }
 };
 let Component$1 = class Component {
-  componentName;
-  tagName;
-  fullName;
-  attributes;
-  inputs;
-  outputs;
-  directives;
-  children;
-  references;
-  isSelfClosing;
-  sourceSpan;
-  startSourceSpan;
-  endSourceSpan;
+  /** @type {string} */ componentName;
+  /** @type {string | null} */ tagName;
+  /** @type {string} */ fullName;
+  /** @type {TextAttribute[]} */ attributes;
+  /** @type {BoundAttribute[]} */ inputs;
+  /** @type {BoundEvent[]} */ outputs;
+  /** @type {Directive$1[]} */ directives;
+  /** @type {any[]} */ children;
+  /** @type {Reference[]} */ references;
+  /** @type {boolean} */ isSelfClosing;
+  /** @type {ParseSourceSpan} */ sourceSpan;
+  /** @type {ParseSourceSpan} */ startSourceSpan;
+  /** @type {ParseSourceSpan | null} */ endSourceSpan;
   i18n;
-  constructor(componentName, tagName, fullName, attributes, inputs, outputs, directives, children, references, isSelfClosing, sourceSpan, startSourceSpan, endSourceSpan, i18n) {
+  constructor(/** @type {string} */ componentName, /** @type {string | null} */ tagName, /** @type {string} */ fullName, /** @type {TextAttribute[]} */ attributes, /** @type {BoundAttribute[]} */ inputs, /** @type {BoundEvent[]} */ outputs, /** @type {Directive$1[]} */ directives, /** @type {any[]} */ children, /** @type {Reference[]} */ references, /** @type {boolean} */ isSelfClosing, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {ParseSourceSpan} */ startSourceSpan, /** @type {ParseSourceSpan | null} */ endSourceSpan, i18n) {
     this.componentName = componentName;
     this.tagName = tagName;
     this.fullName = fullName;
@@ -5343,16 +5343,16 @@ let Component$1 = class Component {
   }
 };
 let Directive$1 = class Directive {
-  name;
-  attributes;
-  inputs;
-  outputs;
-  references;
-  sourceSpan;
-  startSourceSpan;
-  endSourceSpan;
+  /** @type {string} */ name;
+  /** @type {TextAttribute[]} */ attributes;
+  /** @type {BoundAttribute[]} */ inputs;
+  /** @type {BoundEvent[]} */ outputs;
+  /** @type {Reference[]} */ references;
+  /** @type {ParseSourceSpan} */ sourceSpan;
+  /** @type {ParseSourceSpan} */ startSourceSpan;
+  /** @type {ParseSourceSpan | null} */ endSourceSpan;
   i18n;
-  constructor(name, attributes, inputs, outputs, references, sourceSpan, startSourceSpan, endSourceSpan, i18n) {
+  constructor(/** @type {string} */ name, /** @type {TextAttribute[]} */ attributes, /** @type {BoundAttribute[]} */ inputs, /** @type {BoundEvent[]} */ outputs, /** @type {Reference[]} */ references, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {ParseSourceSpan} */ startSourceSpan, /** @type {ParseSourceSpan | null} */ endSourceSpan, i18n) {
     this.name = name;
     this.attributes = attributes;
     this.inputs = inputs;
@@ -5368,21 +5368,21 @@ let Directive$1 = class Directive {
   }
 };
 class Template {
-  tagName;
-  attributes;
-  inputs;
-  outputs;
-  directives;
-  templateAttrs;
-  children;
-  references;
-  variables;
-  isSelfClosing;
-  sourceSpan;
-  startSourceSpan;
-  endSourceSpan;
+  /** @type {string | null} */ tagName;
+  /** @type {TextAttribute[]} */ attributes;
+  /** @type {BoundAttribute[]} */ inputs;
+  /** @type {BoundEvent[]} */ outputs;
+  /** @type {Directive$1[]} */ directives;
+  /** @type {any[]} */ templateAttrs;
+  /** @type {any[]} */ children;
+  /** @type {Reference[]} */ references;
+  /** @type {Variable[]} */ variables;
+  /** @type {boolean} */ isSelfClosing;
+  /** @type {ParseSourceSpan} */ sourceSpan;
+  /** @type {ParseSourceSpan} */ startSourceSpan;
+  /** @type {ParseSourceSpan | null} */ endSourceSpan;
   i18n;
-  constructor(tagName, attributes, inputs, outputs, directives, templateAttrs, children, references, variables, isSelfClosing, sourceSpan, startSourceSpan, endSourceSpan, i18n) {
+  constructor(/** @type {string | null} */ tagName, /** @type {TextAttribute[]} */ attributes, /** @type {BoundAttribute[]} */ inputs, /** @type {BoundEvent[]} */ outputs, /** @type {Directive$1[]} */ directives, /** @type {any[]} */ templateAttrs, /** @type {any[]} */ children, /** @type {Reference[]} */ references, /** @type {Variable[]} */ variables, /** @type {boolean} */ isSelfClosing, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {ParseSourceSpan} */ startSourceSpan, /** @type {ParseSourceSpan | null} */ endSourceSpan, i18n) {
     this.tagName = tagName;
     this.attributes = attributes;
     this.inputs = inputs;
@@ -5403,16 +5403,16 @@ class Template {
   }
 }
 class Content {
-  selector;
-  attributes;
-  children;
-  isSelfClosing;
-  sourceSpan;
-  startSourceSpan;
-  endSourceSpan;
+  /** @type {string} */ selector;
+  /** @type {TextAttribute[]} */ attributes;
+  /** @type {any[]} */ children;
+  /** @type {boolean} */ isSelfClosing;
+  /** @type {ParseSourceSpan} */ sourceSpan;
+  /** @type {ParseSourceSpan} */ startSourceSpan;
+  /** @type {ParseSourceSpan | null} */ endSourceSpan;
   i18n;
   name = 'ng-content';
-  constructor(selector, attributes, children, isSelfClosing, sourceSpan, startSourceSpan, endSourceSpan, i18n) {
+  constructor(/** @type {string} */ selector, /** @type {TextAttribute[]} */ attributes, /** @type {any[]} */ children, /** @type {boolean} */ isSelfClosing, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {ParseSourceSpan} */ startSourceSpan, /** @type {ParseSourceSpan | null} */ endSourceSpan, i18n) {
     this.selector = selector;
     this.attributes = attributes;
     this.children = children;
@@ -5427,12 +5427,12 @@ class Content {
   }
 }
 class Variable {
-  name;
-  value;
-  sourceSpan;
-  keySpan;
-  valueSpan;
-  constructor(name, value, sourceSpan, keySpan, valueSpan) {
+  /** @type {string} */ name;
+  /** @type {string} */ value;
+  /** @type {ParseSourceSpan} */ sourceSpan;
+  /** @type {ParseSourceSpan} */ keySpan;
+  /** @type {ParseSourceSpan | undefined} */ valueSpan;
+  constructor(/** @type {string} */ name, /** @type {string} */ value, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {ParseSourceSpan} */ keySpan, /** @type {ParseSourceSpan | undefined} */ valueSpan) {
     this.name = name;
     this.value = value;
     this.sourceSpan = sourceSpan;
@@ -5444,12 +5444,12 @@ class Variable {
   }
 }
 class Reference {
-  name;
-  value;
-  sourceSpan;
-  keySpan;
-  valueSpan;
-  constructor(name, value, sourceSpan, keySpan, valueSpan) {
+  /** @type {string} */ name;
+  /** @type {string} */ value;
+  /** @type {ParseSourceSpan} */ sourceSpan;
+  /** @type {ParseSourceSpan} */ keySpan;
+  /** @type {ParseSourceSpan | undefined} */ valueSpan;
+  constructor(/** @type {string} */ name, /** @type {string} */ value, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {ParseSourceSpan} */ keySpan, /** @type {ParseSourceSpan | undefined} */ valueSpan) {
     this.name = name;
     this.value = value;
     this.sourceSpan = sourceSpan;
@@ -5463,9 +5463,9 @@ class Reference {
 let Icu$1 = class Icu {
   vars;
   placeholders;
-  sourceSpan;
+  /** @type {ParseSourceSpan} */ sourceSpan;
   i18n;
-  constructor(vars, placeholders, sourceSpan, i18n) {
+  constructor(vars, placeholders, /** @type {ParseSourceSpan} */ sourceSpan, i18n) {
     this.vars = vars;
     this.placeholders = placeholders;
     this.sourceSpan = sourceSpan;
@@ -5476,11 +5476,11 @@ let Icu$1 = class Icu {
   }
 };
 class HostElement {
-  tagNames;
-  bindings;
-  listeners;
-  sourceSpan;
-  constructor(tagNames, bindings, listeners, sourceSpan) {
+  /** @type {string[]} */ tagNames;
+  /** @type {BoundAttribute[]} */ bindings;
+  /** @type {BoundEvent[]} */ listeners;
+  /** @type {ParseSourceSpan} */ sourceSpan;
+  constructor(/** @type {string[]} */ tagNames, /** @type {BoundAttribute[]} */ bindings, /** @type {BoundEvent[]} */ listeners, /** @type {ParseSourceSpan} */ sourceSpan) {
     this.tagNames = tagNames;
     this.bindings = bindings;
     this.listeners = listeners;
@@ -5494,7 +5494,7 @@ class HostElement {
   }
 }
 let RecursiveVisitor$1 = class RecursiveVisitor {
-  visitElement(element) {
+  visitElement(/** @type {Element$1} */ element) {
     visitAll$1(this, element.attributes);
     visitAll$1(this, element.inputs);
     visitAll$1(this, element.outputs);
@@ -5502,7 +5502,7 @@ let RecursiveVisitor$1 = class RecursiveVisitor {
     visitAll$1(this, element.children);
     visitAll$1(this, element.references);
   }
-  visitTemplate(template) {
+  visitTemplate(/** @type {Template} */ template) {
     visitAll$1(this, template.attributes);
     visitAll$1(this, template.inputs);
     visitAll$1(this, template.outputs);
@@ -5511,46 +5511,46 @@ let RecursiveVisitor$1 = class RecursiveVisitor {
     visitAll$1(this, template.references);
     visitAll$1(this, template.variables);
   }
-  visitDeferredBlock(deferred) {
+  visitDeferredBlock(/** @type {DeferredBlock} */ deferred) {
     deferred.visitAll(this);
   }
-  visitDeferredBlockPlaceholder(block) {
+  visitDeferredBlockPlaceholder(/** @type {DeferredBlockPlaceholder} */ block) {
     visitAll$1(this, block.children);
   }
-  visitDeferredBlockError(block) {
+  visitDeferredBlockError(/** @type {DeferredBlockError} */ block) {
     visitAll$1(this, block.children);
   }
-  visitDeferredBlockLoading(block) {
+  visitDeferredBlockLoading(/** @type {DeferredBlockLoading} */ block) {
     visitAll$1(this, block.children);
   }
-  visitSwitchBlock(block) {
+  visitSwitchBlock(/** @type {SwitchBlock} */ block) {
     visitAll$1(this, block.groups);
   }
-  visitSwitchBlockCase(block) {}
-  visitSwitchBlockCaseGroup(block) {
+  visitSwitchBlockCase(/** @type {SwitchBlockCase} */ block) {}
+  visitSwitchBlockCaseGroup(/** @type {SwitchBlockCaseGroup} */ block) {
     visitAll$1(this, block.cases);
     visitAll$1(this, block.children);
   }
-  visitSwitchExhaustiveCheck(block) {}
-  visitForLoopBlock(block) {
+  visitSwitchExhaustiveCheck(/** @type {SwitchExhaustiveCheck} */ block) {}
+  visitForLoopBlock(/** @type {ForLoopBlock} */ block) {
     const blockItems = [block.item, ...block.contextVariables, ...block.children];
     block.empty && blockItems.push(block.empty);
     visitAll$1(this, blockItems);
   }
-  visitForLoopBlockEmpty(block) {
+  visitForLoopBlockEmpty(/** @type {ForLoopBlockEmpty} */ block) {
     visitAll$1(this, block.children);
   }
-  visitIfBlock(block) {
+  visitIfBlock(/** @type {IfBlock} */ block) {
     visitAll$1(this, block.branches);
   }
-  visitIfBlockBranch(block) {
+  visitIfBlockBranch(/** @type {IfBlockBranch} */ block) {
     visitAll$1(this, block.children);
     block.expressionAlias?.visit(this);
   }
-  visitContent(content) {
+  visitContent(/** @type {Content} */ content) {
     visitAll$1(this, content.children);
   }
-  visitComponent(component) {
+  visitComponent(/** @type {Component$1} */ component) {
     visitAll$1(this, component.attributes);
     visitAll$1(this, component.inputs);
     visitAll$1(this, component.outputs);
@@ -5558,25 +5558,25 @@ let RecursiveVisitor$1 = class RecursiveVisitor {
     visitAll$1(this, component.children);
     visitAll$1(this, component.references);
   }
-  visitDirective(directive) {
+  visitDirective(/** @type {Directive$1} */ directive) {
     visitAll$1(this, directive.attributes);
     visitAll$1(this, directive.inputs);
     visitAll$1(this, directive.outputs);
     visitAll$1(this, directive.references);
   }
-  visitVariable(variable) {}
-  visitReference(reference) {}
-  visitTextAttribute(attribute) {}
-  visitBoundAttribute(attribute) {}
-  visitBoundEvent(attribute) {}
+  visitVariable(/** @type {Variable} */ variable) {}
+  visitReference(/** @type {Reference} */ reference) {}
+  visitTextAttribute(/** @type {TextAttribute} */ attribute) {}
+  visitBoundAttribute(/** @type {BoundAttribute} */ attribute) {}
+  visitBoundEvent(/** @type {BoundEvent} */ attribute) {}
   visitText(text) {}
-  visitBoundText(text) {}
-  visitIcu(icu) {}
-  visitDeferredTrigger(trigger) {}
-  visitUnknownBlock(block) {}
+  visitBoundText(/** @type {BoundText} */ text) {}
+  visitIcu(/** @type {Icu$1} */ icu) {}
+  visitDeferredTrigger(/** @type {DeferredTrigger} */ trigger) {}
+  visitUnknownBlock(/** @type {UnknownBlock} */ block) {}
   visitLetDeclaration(decl) {}
 };
-function visitAll$1(visitor, nodes) {
+/** @returns {any[]} */ function visitAll$1(visitor, nodes) {
   const result = [];
   if (visitor.visit) {
     for (const node of nodes) {
@@ -5594,17 +5594,17 @@ function visitAll$1(visitor, nodes) {
 }
 
 class Message {
-  nodes;
+  /** @type {any[]} */ nodes;
   placeholders;
   placeholderToMessage;
-  meaning;
-  description;
-  customId;
-  sources;
-  id;
-  legacyIds = [];
-  messageString;
-  constructor(nodes, placeholders, placeholderToMessage, meaning, description, customId) {
+  /** @type {string} */ meaning;
+  /** @type {string} */ description;
+  /** @type {string} */ customId;
+  /** @type {any[]} */ sources;
+  /** @type {string} */ id;
+  /** @type {string[]} */ legacyIds = [];
+  /** @type {string} */ messageString;
+  constructor(/** @type {any[]} */ nodes, placeholders, placeholderToMessage, /** @type {string} */ meaning, /** @type {string} */ description, /** @type {string} */ customId) {
     this.nodes = nodes;
     this.placeholders = placeholders;
     this.placeholderToMessage = placeholderToMessage;
@@ -5638,9 +5638,9 @@ let Text$2 = class Text {
   }
 };
 class Container {
-  children;
-  sourceSpan;
-  constructor(children, sourceSpan) {
+  /** @type {any[]} */ children;
+  /** @type {ParseSourceSpan} */ sourceSpan;
+  constructor(/** @type {any[]} */ children, /** @type {ParseSourceSpan} */ sourceSpan) {
     this.children = children;
     this.sourceSpan = sourceSpan;
   }
@@ -5649,12 +5649,12 @@ class Container {
   }
 }
 class Icu {
-  expression;
-  type;
+  /** @type {string} */ expression;
+  /** @type {string} */ type;
   cases;
-  sourceSpan;
-  expressionPlaceholder;
-  constructor(expression, type, cases, sourceSpan, expressionPlaceholder) {
+  /** @type {ParseSourceSpan} */ sourceSpan;
+  /** @type {string | undefined} */ expressionPlaceholder;
+  constructor(/** @type {string} */ expression, /** @type {string} */ type, cases, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {string | undefined} */ expressionPlaceholder) {
     this.expression = expression;
     this.type = type;
     this.cases = cases;
@@ -5666,16 +5666,16 @@ class Icu {
   }
 }
 class TagPlaceholder {
-  tag;
+  /** @type {string} */ tag;
   attrs;
-  startName;
-  closeName;
-  children;
-  isVoid;
-  sourceSpan;
-  startSourceSpan;
-  endSourceSpan;
-  constructor(tag, attrs, startName, closeName, children, isVoid, sourceSpan, startSourceSpan, endSourceSpan) {
+  /** @type {string} */ startName;
+  /** @type {string} */ closeName;
+  /** @type {any[]} */ children;
+  /** @type {boolean} */ isVoid;
+  /** @type {ParseSourceSpan} */ sourceSpan;
+  /** @type {ParseSourceSpan | null} */ startSourceSpan;
+  /** @type {ParseSourceSpan | null} */ endSourceSpan;
+  constructor(/** @type {string} */ tag, attrs, /** @type {string} */ startName, /** @type {string} */ closeName, /** @type {any[]} */ children, /** @type {boolean} */ isVoid, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {ParseSourceSpan | null} */ startSourceSpan, /** @type {ParseSourceSpan | null} */ endSourceSpan) {
     this.tag = tag;
     this.attrs = attrs;
     this.startName = startName;
@@ -5691,10 +5691,10 @@ class TagPlaceholder {
   }
 }
 class Placeholder {
-  value;
-  name;
-  sourceSpan;
-  constructor(value, name, sourceSpan) {
+  /** @type {string} */ value;
+  /** @type {string} */ name;
+  /** @type {ParseSourceSpan} */ sourceSpan;
+  constructor(/** @type {string} */ value, /** @type {string} */ name, /** @type {ParseSourceSpan} */ sourceSpan) {
     this.value = value;
     this.name = name;
     this.sourceSpan = sourceSpan;
@@ -5704,11 +5704,11 @@ class Placeholder {
   }
 }
 class IcuPlaceholder {
-  value;
-  name;
-  sourceSpan;
-  previousMessage;
-  constructor(value, name, sourceSpan) {
+  /** @type {Icu} */ value;
+  /** @type {string} */ name;
+  /** @type {ParseSourceSpan} */ sourceSpan;
+  /** @type {Message | undefined} */ previousMessage;
+  constructor(/** @type {Icu} */ value, /** @type {string} */ name, /** @type {ParseSourceSpan} */ sourceSpan) {
     this.value = value;
     this.name = name;
     this.sourceSpan = sourceSpan;
@@ -5718,15 +5718,15 @@ class IcuPlaceholder {
   }
 }
 class BlockPlaceholder {
-  name;
-  parameters;
-  startName;
-  closeName;
-  children;
-  sourceSpan;
-  startSourceSpan;
-  endSourceSpan;
-  constructor(name, parameters, startName, closeName, children, sourceSpan, startSourceSpan, endSourceSpan) {
+  /** @type {string} */ name;
+  /** @type {string[]} */ parameters;
+  /** @type {string} */ startName;
+  /** @type {string} */ closeName;
+  /** @type {any[]} */ children;
+  /** @type {ParseSourceSpan} */ sourceSpan;
+  /** @type {ParseSourceSpan | null} */ startSourceSpan;
+  /** @type {ParseSourceSpan | null} */ endSourceSpan;
+  constructor(/** @type {string} */ name, /** @type {string[]} */ parameters, /** @type {string} */ startName, /** @type {string} */ closeName, /** @type {any[]} */ children, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {ParseSourceSpan | null} */ startSourceSpan, /** @type {ParseSourceSpan | null} */ endSourceSpan) {
     this.name = name;
     this.parameters = parameters;
     this.startName = startName;
@@ -5821,7 +5821,7 @@ class LocalizeMessageStringVisitor {
 }
 
 class Serializer {
-  createNameMapper(message) {
+  createNameMapper(/** @type {Message} */ message) {
     return null;
   }
 }
@@ -5986,7 +5986,7 @@ const _DOCTYPE = `<!ELEMENT messagebundle (msg)*>
 
 <!ELEMENT ex (#PCDATA)>`;
 class Xmb extends Serializer {
-  write(messages, locale) {
+  /** @returns {string} */ write(/** @type {Message[]} */ messages, /** @type {string | null} */ locale) {
     const exampleVisitor = new ExampleVisitor();
     const visitor = new _Visitor$1();
     const rootNode = new Tag(_MESSAGES_TAG);
@@ -6013,13 +6013,13 @@ class Xmb extends Serializer {
       encoding: 'UTF-8'
     }), new CR(), new Doctype(_MESSAGES_TAG, _DOCTYPE), new CR(), exampleVisitor.addDefaultExamples(rootNode), new CR()]);
   }
-  load(content, url) {
+  load(/** @type {string} */ content, /** @type {string} */ url) {
     throw new Error('Unsupported');
   }
-  digest(message) {
+  /** @returns {string} */ digest(/** @type {Message} */ message) {
     return digest(message);
   }
-  createNameMapper(message) {
+  createNameMapper(/** @type {Message} */ message) {
     return new SimplePlaceholderMapper(message, toPublicName);
   }
 }
@@ -6243,7 +6243,7 @@ class DefinitionMap {
     return literalMap(this.values);
   }
 }
-function createCssSelectorFromNode(node) {
+/** @returns {CssSelector} */ function createCssSelectorFromNode(node) {
   const elementName = node instanceof Element$1 ? node.name : 'ng-template';
   const attributes = getAttrsForDirectiveMatching(node);
   const cssSelector = new CssSelector();
@@ -6282,7 +6282,7 @@ function getAttrsForDirectiveMatching(elOrTpl) {
   return attributesMap;
 }
 
-function compileInjectable(meta, resolveForwardRefs) {
+function compileInjectable(meta, /** @type {boolean} */ resolveForwardRefs) {
   let result = null;
   const factoryMeta = {
     name: meta.name,
@@ -6356,10 +6356,10 @@ function compileInjectable(meta, resolveForwardRefs) {
     statements: result.statements
   };
 }
-function createInjectableType(type, typeArgumentCount) {
+/** @returns {ExpressionType} */ function createInjectableType(/** @type {Expression} */ type, /** @type {number} */ typeArgumentCount) {
   return new ExpressionType(importExpr(Identifiers.InjectableDeclaration, [typeWithParameters(type, typeArgumentCount)]));
 }
-function delegateToFactory(type, useType, unwrapForwardRefs) {
+/** @returns {Expression} */ function delegateToFactory(type, useType, /** @type {boolean} */ unwrapForwardRefs) {
   if (type.node === useType.node) {
     return useType.prop('ɵfac');
   }
@@ -6502,7 +6502,7 @@ class ParseLocation {
     }
     return new ParseLocation(this.file, offset, line, col);
   }
-  getContext(maxChars, maxLines) {
+  getContext(/** @type {number} */ maxChars, /** @type {number} */ maxLines) {
     const content = this.file.content;
     let startOffset = this.offset;
     if (startOffset != null) {
@@ -6552,14 +6552,14 @@ class ParseSourceSpan {
   /** @type {ParseLocation} */ start;
   /** @type {ParseLocation} */ end;
   /** @type {ParseLocation} */ fullStart;
-  details;
-  constructor(/** @type {ParseLocation} */ start, /** @type {ParseLocation} */ end, fullStart = start, details = null) {
+  /** @type {string | null} */ details;
+  constructor(/** @type {ParseLocation} */ start, /** @type {ParseLocation} */ end, /** @type {ParseLocation} */ fullStart = start, /** @type {string | null} */ details = null) {
     this.start = start;
     this.end = end;
     this.fullStart = fullStart;
     this.details = details;
   }
-  toString() {
+  /** @returns {string} */ toString() {
     return this.start.file.content.substring(this.start.offset, this.end.offset);
   }
 }
@@ -6573,7 +6573,7 @@ class ParseError extends Error {
   /** @type {string} */ msg;
   /** @type {number} */ level;
   relatedError;
-  constructor(/** @type {ParseSourceSpan} */ span, /** @type {string} */ msg, level = ParseErrorLevel.ERROR, relatedError) {
+  constructor(/** @type {ParseSourceSpan} */ span, /** @type {string} */ msg, /** @type {number} */ level = ParseErrorLevel.ERROR, relatedError) {
     super(msg);
     this.span = span;
     this.msg = msg;
@@ -6581,22 +6581,22 @@ class ParseError extends Error {
     this.relatedError = relatedError;
     Object.setPrototypeOf(this, new.target.prototype);
   }
-  contextualMessage() {
+  /** @returns {string} */ contextualMessage() {
     const ctx = this.span.start.getContext(100, 3);
     return ctx ? `${this.msg} ("${ctx.before}[${ParseErrorLevel[this.level]} ->]${ctx.after}")` : this.msg;
   }
-  toString() {
+  /** @returns {string} */ toString() {
     const details = this.span.details ? `, ${this.span.details}` : '';
     return `${this.contextualMessage()}: ${this.span.start}${details}`;
   }
 }
-function r3JitTypeSourceSpan(kind, typeName, sourceUrl) {
+/** @returns {ParseSourceSpan} */ function r3JitTypeSourceSpan(/** @type {string} */ kind, /** @type {string} */ typeName, /** @type {string} */ sourceUrl) {
   const sourceFileName = `in ${kind} ${typeName} in ${sourceUrl}`;
   const sourceFile = new ParseSourceFile('', sourceFileName);
   return new ParseSourceSpan(new ParseLocation(sourceFile, -1, -1, -1), new ParseLocation(sourceFile, -1, -1, -1));
 }
 let _anonymousTypeIndex = 0;
-function identifierName(compileIdentifier) {
+/** @returns {string | null} */ function identifierName(compileIdentifier) {
   if (!compileIdentifier || !compileIdentifier.reference) {
     return null;
   }
@@ -6616,7 +6616,7 @@ function identifierName(compileIdentifier) {
   }
   return identifier;
 }
-function sanitizeIdentifier(name) {
+/** @returns {string} */ function sanitizeIdentifier(/** @type {string} */ name) {
   return name.replace(/\W/g, '_');
 }
 
@@ -6716,7 +6716,7 @@ function newTrustedFunctionForJIT(...args) {
 }
 
 class JitEvaluator {
-  evaluateStatements(sourceUrl, statements, refResolver, createSourceMaps) {
+  evaluateStatements(/** @type {string} */ sourceUrl, /** @type {Statement[]} */ statements, refResolver, /** @type {boolean} */ createSourceMaps) {
     const converter = new JitEmitterVisitor(refResolver);
     const ctx = EmitterVisitorContext.createRoot();
     if (statements.length > 0 && !isUseStrictStatement(statements[0])) {
@@ -6726,7 +6726,7 @@ class JitEvaluator {
     converter.createReturnStmt(ctx);
     return this.evaluateCode(sourceUrl, ctx, converter.getArgs(), createSourceMaps);
   }
-  evaluateCode(sourceUrl, ctx, vars, createSourceMap) {
+  evaluateCode(/** @type {string} */ sourceUrl, /** @type {EmitterVisitorContext} */ ctx, vars, /** @type {boolean} */ createSourceMap) {
     let fnBody = `"use strict";${ctx.toSource()}\n//# sourceURL=${sourceUrl}`;
     const fnArgNames = [];
     const fnArgValues = [];
@@ -6742,7 +6742,7 @@ class JitEvaluator {
     const fn = newTrustedFunctionForJIT(...fnArgNames.concat(fnBody));
     return this.executeFunction(fn, fnArgValues);
   }
-  executeFunction(fn, args) {
+  executeFunction(fn, /** @type {any[]} */ args) {
     return fn(...args);
   }
 }
@@ -11366,17 +11366,17 @@ function serializeIcuNode(icu) {
 }
 
 class NodeWithI18n {
-  sourceSpan;
+  /** @type {ParseSourceSpan} */ sourceSpan;
   i18n;
-  constructor(sourceSpan, i18n) {
+  constructor(/** @type {ParseSourceSpan} */ sourceSpan, i18n) {
     this.sourceSpan = sourceSpan;
     this.i18n = i18n;
   }
 }
 class Text extends NodeWithI18n {
-  value;
-  tokens;
-  constructor(value, sourceSpan, tokens, i18n) {
+  /** @type {string} */ value;
+  /** @type {any[]} */ tokens;
+  constructor(/** @type {string} */ value, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {any[]} */ tokens, i18n) {
     super(sourceSpan, i18n);
     this.value = value;
     this.tokens = tokens;
@@ -11386,11 +11386,11 @@ class Text extends NodeWithI18n {
   }
 }
 class Expansion extends NodeWithI18n {
-  switchValue;
-  type;
-  cases;
-  switchValueSourceSpan;
-  constructor(switchValue, type, cases, sourceSpan, switchValueSourceSpan, i18n) {
+  /** @type {string} */ switchValue;
+  /** @type {string} */ type;
+  /** @type {ExpansionCase[]} */ cases;
+  /** @type {ParseSourceSpan} */ switchValueSourceSpan;
+  constructor(/** @type {string} */ switchValue, /** @type {string} */ type, /** @type {ExpansionCase[]} */ cases, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {ParseSourceSpan} */ switchValueSourceSpan, i18n) {
     super(sourceSpan, i18n);
     this.switchValue = switchValue;
     this.type = type;
@@ -11402,12 +11402,12 @@ class Expansion extends NodeWithI18n {
   }
 }
 class ExpansionCase {
-  value;
-  expression;
-  sourceSpan;
-  valueSourceSpan;
-  expSourceSpan;
-  constructor(value, expression, sourceSpan, valueSourceSpan, expSourceSpan) {
+  /** @type {string} */ value;
+  /** @type {any[]} */ expression;
+  /** @type {ParseSourceSpan} */ sourceSpan;
+  /** @type {ParseSourceSpan} */ valueSourceSpan;
+  /** @type {ParseSourceSpan} */ expSourceSpan;
+  constructor(/** @type {string} */ value, /** @type {any[]} */ expression, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {ParseSourceSpan} */ valueSourceSpan, /** @type {ParseSourceSpan} */ expSourceSpan) {
     this.value = value;
     this.expression = expression;
     this.sourceSpan = sourceSpan;
@@ -11419,12 +11419,12 @@ class ExpansionCase {
   }
 }
 class Attribute extends NodeWithI18n {
-  name;
-  value;
-  keySpan;
-  valueSpan;
-  valueTokens;
-  constructor(name, value, sourceSpan, keySpan, valueSpan, valueTokens, i18n) {
+  /** @type {string} */ name;
+  /** @type {string} */ value;
+  /** @type {ParseSourceSpan | undefined} */ keySpan;
+  /** @type {ParseSourceSpan | undefined} */ valueSpan;
+  /** @type {any[] | undefined} */ valueTokens;
+  constructor(/** @type {string} */ name, /** @type {string} */ value, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {ParseSourceSpan | undefined} */ keySpan, /** @type {ParseSourceSpan | undefined} */ valueSpan, /** @type {any[] | undefined} */ valueTokens, i18n) {
     super(sourceSpan, i18n);
     this.name = name;
     this.value = value;
@@ -11437,10 +11437,10 @@ class Attribute extends NodeWithI18n {
   }
 }
 class StartTagComment {
-  value;
-  type;
-  sourceSpan;
-  constructor(value, type, sourceSpan) {
+  /** @type {string} */ value;
+  /** @type {string} */ type;
+  /** @type {ParseSourceSpan} */ sourceSpan;
+  constructor(/** @type {string} */ value, /** @type {string} */ type, /** @type {ParseSourceSpan} */ sourceSpan) {
     this.value = value;
     this.type = type;
     this.sourceSpan = sourceSpan;
@@ -11450,16 +11450,16 @@ class StartTagComment {
   }
 }
 class Element extends NodeWithI18n {
-  name;
-  attrs;
-  directives;
-  children;
-  isSelfClosing;
-  startSourceSpan;
-  endSourceSpan;
-  isVoid;
-  comments;
-  constructor(name, attrs, directives, children, isSelfClosing, sourceSpan, startSourceSpan, endSourceSpan = null, isVoid, i18n, comments = []) {
+  /** @type {string} */ name;
+  /** @type {Attribute[]} */ attrs;
+  /** @type {Directive[]} */ directives;
+  /** @type {any[]} */ children;
+  /** @type {boolean} */ isSelfClosing;
+  /** @type {ParseSourceSpan} */ startSourceSpan;
+  /** @type {ParseSourceSpan | null} */ endSourceSpan;
+  /** @type {boolean} */ isVoid;
+  /** @type {StartTagComment[]} */ comments;
+  constructor(/** @type {string} */ name, /** @type {Attribute[]} */ attrs, /** @type {Directive[]} */ directives, /** @type {any[]} */ children, /** @type {boolean} */ isSelfClosing, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {ParseSourceSpan} */ startSourceSpan, /** @type {ParseSourceSpan | null | undefined} */ endSourceSpan = null, /** @type {boolean} */ isVoid, i18n, /** @type {StartTagComment[]} */ comments = []) {
     super(sourceSpan, i18n);
     this.name = name;
     this.attrs = attrs;
@@ -11487,13 +11487,13 @@ class Comment {
   }
 }
 class Block extends NodeWithI18n {
-  name;
-  parameters;
-  children;
-  nameSpan;
-  startSourceSpan;
-  endSourceSpan;
-  constructor(name, parameters, children, sourceSpan, nameSpan, startSourceSpan, endSourceSpan = null, i18n) {
+  /** @type {string} */ name;
+  /** @type {BlockParameter[]} */ parameters;
+  /** @type {any[]} */ children;
+  /** @type {ParseSourceSpan} */ nameSpan;
+  /** @type {ParseSourceSpan} */ startSourceSpan;
+  /** @type {ParseSourceSpan | null} */ endSourceSpan;
+  constructor(/** @type {string} */ name, /** @type {BlockParameter[]} */ parameters, /** @type {any[]} */ children, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {ParseSourceSpan} */ nameSpan, /** @type {ParseSourceSpan} */ startSourceSpan, /** @type {ParseSourceSpan | null} */ endSourceSpan = null, i18n) {
     super(sourceSpan, i18n);
     this.name = name;
     this.parameters = parameters;
@@ -11507,17 +11507,17 @@ class Block extends NodeWithI18n {
   }
 }
 class Component extends NodeWithI18n {
-  componentName;
-  tagName;
-  fullName;
-  attrs;
-  directives;
-  children;
-  isSelfClosing;
-  startSourceSpan;
-  endSourceSpan;
-  comments;
-  constructor(componentName, tagName, fullName, attrs, directives, children, isSelfClosing, sourceSpan, startSourceSpan, endSourceSpan = null, i18n, comments = []) {
+  /** @type {string} */ componentName;
+  /** @type {string | null} */ tagName;
+  /** @type {string} */ fullName;
+  /** @type {Attribute[]} */ attrs;
+  /** @type {Directive[]} */ directives;
+  /** @type {any[]} */ children;
+  /** @type {boolean} */ isSelfClosing;
+  /** @type {ParseSourceSpan} */ startSourceSpan;
+  /** @type {ParseSourceSpan | null} */ endSourceSpan;
+  /** @type {StartTagComment[]} */ comments;
+  constructor(/** @type {string} */ componentName, /** @type {string | null} */ tagName, /** @type {string} */ fullName, /** @type {Attribute[]} */ attrs, /** @type {Directive[]} */ directives, /** @type {any[]} */ children, /** @type {boolean} */ isSelfClosing, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {ParseSourceSpan} */ startSourceSpan, /** @type {ParseSourceSpan | null} */ endSourceSpan = null, i18n, /** @type {StartTagComment[]} */ comments = []) {
     super(sourceSpan, i18n);
     this.componentName = componentName;
     this.tagName = tagName;
@@ -11535,12 +11535,12 @@ class Component extends NodeWithI18n {
   }
 }
 class Directive {
-  name;
-  attrs;
-  sourceSpan;
-  startSourceSpan;
-  endSourceSpan;
-  constructor(name, attrs, sourceSpan, startSourceSpan, endSourceSpan = null) {
+  /** @type {string} */ name;
+  /** @type {Attribute[]} */ attrs;
+  /** @type {ParseSourceSpan} */ sourceSpan;
+  /** @type {ParseSourceSpan} */ startSourceSpan;
+  /** @type {ParseSourceSpan | null} */ endSourceSpan;
+  constructor(/** @type {string} */ name, /** @type {Attribute[]} */ attrs, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {ParseSourceSpan} */ startSourceSpan, /** @type {ParseSourceSpan | null} */ endSourceSpan = null) {
     this.name = name;
     this.attrs = attrs;
     this.sourceSpan = sourceSpan;
@@ -11552,9 +11552,9 @@ class Directive {
   }
 }
 class BlockParameter {
-  expression;
-  sourceSpan;
-  constructor(expression, sourceSpan) {
+  /** @type {string} */ expression;
+  /** @type {ParseSourceSpan} */ sourceSpan;
+  constructor(/** @type {string} */ expression, /** @type {ParseSourceSpan} */ sourceSpan) {
     this.expression = expression;
     this.sourceSpan = sourceSpan;
   }
@@ -11579,7 +11579,7 @@ class LetDeclaration {
     return visitor.visitLetDeclaration(this, context);
   }
 }
-function visitAll(visitor, nodes, context = null) {
+/** @returns {any[]} */ function visitAll(visitor, nodes, context = null) {
   const result = [];
   const visit = visitor.visit ? ast => visitor.visit(ast, context) || ast.visit(visitor, context) : ast => ast.visit(visitor, context);
   nodes.forEach(ast => {
@@ -11592,7 +11592,7 @@ function visitAll(visitor, nodes, context = null) {
 }
 class RecursiveVisitor {
   constructor() {}
-  visitElement(ast, context) {
+  visitElement(/** @type {Element} */ ast, context) {
     this.visitChildren(context, visit => {
       visit(ast.attrs);
       visit(ast.directives);
@@ -11600,32 +11600,32 @@ class RecursiveVisitor {
       visit(ast.children);
     });
   }
-  visitAttribute(ast, context) {}
-  visitStartTagComment(ast, context) {}
-  visitText(ast, context) {}
+  visitAttribute(/** @type {Attribute} */ ast, context) {}
+  visitStartTagComment(/** @type {StartTagComment} */ ast, context) {}
+  visitText(/** @type {Text} */ ast, context) {}
   visitComment(ast, context) {}
-  visitExpansion(ast, context) {
+  visitExpansion(/** @type {Expansion} */ ast, context) {
     return this.visitChildren(context, visit => {
       visit(ast.cases);
     });
   }
-  visitExpansionCase(ast, context) {}
-  visitBlock(block, context) {
+  visitExpansionCase(/** @type {ExpansionCase} */ ast, context) {}
+  visitBlock(/** @type {Block} */ block, context) {
     this.visitChildren(context, visit => {
       visit(block.parameters);
       visit(block.children);
     });
   }
-  visitBlockParameter(ast, context) {}
+  visitBlockParameter(/** @type {BlockParameter} */ ast, context) {}
   visitLetDeclaration(decl, context) {}
-  visitComponent(component, context) {
+  visitComponent(/** @type {Component} */ component, context) {
     this.visitChildren(context, visit => {
       visit(component.attrs);
       visit(component.comments);
       visit(component.children);
     });
   }
-  visitDirective(directive, context) {
+  visitDirective(/** @type {Directive} */ directive, context) {
     this.visitChildren(context, visit => {
       visit(directive.attrs);
     });
@@ -14992,19 +14992,19 @@ class CursorError extends Error {
 }
 
 class TreeError extends ParseError {
-  elementName;
-  static create(elementName, span, msg) {
+  /** @type {string | null} */ elementName;
+  /** @returns {TreeError} */ static create(/** @type {string | null} */ elementName, /** @type {ParseSourceSpan} */ span, /** @type {string} */ msg) {
     return new TreeError(elementName, span, msg);
   }
-  constructor(elementName, span, msg) {
+  constructor(/** @type {string | null} */ elementName, /** @type {ParseSourceSpan} */ span, /** @type {string} */ msg) {
     super(span, msg);
     this.elementName = elementName;
   }
 }
 class ParseTreeResult {
-  rootNodes;
-  errors;
-  constructor(rootNodes, errors) {
+  /** @type {any[]} */ rootNodes;
+  /** @type {ParseError[]} */ errors;
+  constructor(/** @type {any[]} */ rootNodes, /** @type {ParseError[]} */ errors) {
     this.rootNodes = rootNodes;
     this.errors = errors;
   }
@@ -15014,7 +15014,7 @@ let Parser$1 = class Parser {
   constructor(getTagDefinition) {
     this.getTagDefinition = getTagDefinition;
   }
-  parse(source, url, options) {
+  /** @returns {ParseTreeResult} */ parse(/** @type {string} */ source, /** @type {string} */ url, options) {
     const tokenizeResult = tokenize(source, url, this.getTagDefinition, options);
     const parser = new _TreeBuilder(tokenizeResult.tokens, this.getTagDefinition);
     parser.build();
@@ -16307,19 +16307,19 @@ function isExponentSign(code) {
 }
 
 class SplitInterpolation {
-  strings;
-  expressions;
-  offsets;
-  constructor(strings, expressions, offsets) {
+  /** @type {any[]} */ strings;
+  /** @type {any[]} */ expressions;
+  /** @type {number[]} */ offsets;
+  constructor(/** @type {any[]} */ strings, /** @type {any[]} */ expressions, /** @type {number[]} */ offsets) {
     this.strings = strings;
     this.expressions = expressions;
     this.offsets = offsets;
   }
 }
 class TemplateBindingParseResult {
-  templateBindings;
-  warnings;
-  errors;
+  /** @type {any[]} */ templateBindings;
+  /** @type {string[]} */ warnings;
+  /** @type {ParseError[]} */ errors;
   constructor(/** @type {any[]} */ templateBindings, /** @type {any[]} */ warnings, /** @type {any[]} */ errors) {
     this.templateBindings = templateBindings;
     this.warnings = warnings;
@@ -16332,7 +16332,7 @@ class TemplateBindingParseResult {
 class Parser {
   /** @type {Lexer} */ _lexer;
   /** @type {boolean} */ _supportsDirectPipeReferences;
-  constructor(/** @type {Lexer} */ _lexer, _supportsDirectPipeReferences = false) {
+  constructor(/** @type {Lexer} */ _lexer, /** @type {boolean} */ _supportsDirectPipeReferences = false) {
     this._lexer = _lexer;
     this._supportsDirectPipeReferences = _supportsDirectPipeReferences;
   }
@@ -16356,7 +16356,7 @@ class Parser {
     ast.visit(checker);
     return checker.errors;
   }
-  parseSimpleBinding(input, parseSourceSpan, absoluteOffset) {
+  /** @returns {ASTWithSource} */ parseSimpleBinding(/** @type {string} */ input, /** @type {ParseSourceSpan} */ parseSourceSpan, /** @type {number} */ absoluteOffset) {
     const errors = [];
     const ast = this._parseBindingAst(input, parseSourceSpan, absoluteOffset, errors);
     const simplExpressionErrors = this.checkSimpleExpression(ast);
@@ -16373,7 +16373,7 @@ class Parser {
     const tokens = this._lexer.tokenize(sourceToLex);
     return new _ParseAST(input, parseSourceSpan, absoluteOffset, tokens, 0, errors, 0, this._supportsDirectPipeReferences).parseChain();
   }
-  /** @returns {TemplateBindingParseResult} */ parseTemplateBindings(/** @type {string} */ templateKey, /** @type {string | undefined} */ templateValue, /** @type {ParseSourceSpan | undefined} */ parseSourceSpan, absoluteKeyOffset, absoluteValueOffset) {
+  /** @returns {TemplateBindingParseResult} */ parseTemplateBindings(/** @type {string} */ templateKey, /** @type {string | undefined} */ templateValue, /** @type {ParseSourceSpan | undefined} */ parseSourceSpan, /** @type {number} */ absoluteKeyOffset, /** @type {number} */ absoluteValueOffset) {
     const tokens = this._lexer.tokenize(templateValue);
     const errors = [];
     const parser = new _ParseAST(templateValue, parseSourceSpan, absoluteValueOffset, tokens, 0, errors, 0, this._supportsDirectPipeReferences);
@@ -16382,7 +16382,7 @@ class Parser {
       span: new AbsoluteSourceSpan(absoluteKeyOffset, absoluteKeyOffset + templateKey.length)
     });
   }
-  parseInterpolation(input, parseSourceSpan, absoluteOffset, interpolatedTokens) {
+  /** @returns {ASTWithSource | null} */ parseInterpolation(/** @type {string} */ input, /** @type {ParseSourceSpan} */ parseSourceSpan, /** @type {number} */ absoluteOffset, /** @type {any[] | null} */ interpolatedTokens) {
     const errors = [];
     const {
       strings,
@@ -16408,7 +16408,7 @@ class Parser {
     }
     return this.createInterpolationAst(strings.map(s => s.text), expressionNodes, input, getLocation(parseSourceSpan), absoluteOffset, errors);
   }
-  /** @returns {ASTWithSource} */ parseInterpolationExpression(/** @type {string} */ expression, /** @type {ParseSourceSpan} */ parseSourceSpan, absoluteOffset) {
+  /** @returns {ASTWithSource} */ parseInterpolationExpression(/** @type {string} */ expression, /** @type {ParseSourceSpan} */ parseSourceSpan, /** @type {number} */ absoluteOffset) {
     const {
       stripped: sourceToLex
     } = this._stripComments(expression);
@@ -16423,7 +16423,7 @@ class Parser {
     const interpolation = new Interpolation$1(span, span.toAbsolute(absoluteOffset), strings, expressions);
     return new ASTWithSource(interpolation, input, location, absoluteOffset, errors);
   }
-  splitInterpolation(input, parseSourceSpan, errors, interpolatedTokens) {
+  /** @returns {SplitInterpolation} */ splitInterpolation(/** @type {string} */ input, /** @type {ParseSourceSpan} */ parseSourceSpan, /** @type {ParseError[]} */ errors, /** @type {any[] | null} */ interpolatedTokens) {
     const strings = [];
     const expressions = [];
     const offsets = [];
@@ -16488,7 +16488,7 @@ class Parser {
     }
     return new SplitInterpolation(strings, expressions, offsets);
   }
-  wrapLiteralPrimitive(input, sourceSpanOrLocation, absoluteOffset) {
+  /** @returns {ASTWithSource} */ wrapLiteralPrimitive(/** @type {string | null} */ input, sourceSpanOrLocation, /** @type {number} */ absoluteOffset) {
     const span = new ParseSpan(0, input == null ? 0 : input.length);
     return new ASTWithSource(new LiteralPrimitive(span, span.toAbsolute(absoluteOffset), input), input, typeof sourceSpanOrLocation === 'string' ? sourceSpanOrLocation : getLocation(sourceSpanOrLocation), absoluteOffset, []);
   }
@@ -17737,7 +17737,7 @@ class DomElementSchemaRegistry extends ElementSchemaRegistry {
       });
     });
   }
-  hasProperty(tagName, propName, schemaMetas) {
+  /** @returns {boolean} */ hasProperty(/** @type {string} */ tagName, /** @type {string} */ propName, /** @type {any[]} */ schemaMetas) {
     if (schemaMetas.some(schema => schema.name === NO_ERRORS_SCHEMA.name)) {
       return true;
     }
@@ -17753,7 +17753,7 @@ class DomElementSchemaRegistry extends ElementSchemaRegistry {
     const elementProperties = this._schema.get(normalizedTag) || this._schema.get('unknown');
     return elementProperties.has(propName);
   }
-  hasElement(tagName, schemaMetas) {
+  /** @returns {boolean} */ hasElement(/** @type {string} */ tagName, /** @type {any[]} */ schemaMetas) {
     if (schemaMetas.some(schema => schema.name === NO_ERRORS_SCHEMA.name)) {
       return true;
     }
@@ -17768,20 +17768,20 @@ class DomElementSchemaRegistry extends ElementSchemaRegistry {
     }
     return this._schema.has(normalizedTag);
   }
-  securityContext(tagName, propName, isAttribute) {
+  /** @returns {number} */ securityContext(/** @type {string} */ tagName, /** @type {string} */ propName, /** @type {boolean} */ isAttribute) {
     if (isAttribute) {
       propName = this.getMappedPropName(propName);
     }
     const [ns, name] = splitNsName(tagName, false);
     return checkSecurityContext(name, propName, ns);
   }
-  getMappedPropName(propName) {
+  /** @returns {string} */ getMappedPropName(/** @type {string} */ propName) {
     return _ATTR_TO_PROP.get(propName) ?? propName;
   }
-  getDefaultComponentElementName() {
+  /** @returns {string} */ getDefaultComponentElementName() {
     return 'ng-component';
   }
-  validateProperty(name) {
+  validateProperty(/** @type {string} */ name) {
     if (name.toLowerCase().startsWith('on')) {
       const msg = `Binding to event property '${name}' is disallowed for security reasons, ` + `please use (${name.slice(2)})=...` + `\nIf '${name}' is a directive input, make sure the directive is imported by the` + ` current module.`;
       return {
@@ -17794,7 +17794,7 @@ class DomElementSchemaRegistry extends ElementSchemaRegistry {
       };
     }
   }
-  validateAttribute(name) {
+  validateAttribute(/** @type {string} */ name) {
     if (name.toLowerCase().startsWith('on')) {
       const msg = `Binding to event attribute '${name}' is disallowed for security reasons, ` + `please use (${name.slice(2)})=...`;
       return {
@@ -17807,22 +17807,22 @@ class DomElementSchemaRegistry extends ElementSchemaRegistry {
       };
     }
   }
-  allKnownElementNames() {
+  /** @returns {string[]} */ allKnownElementNames() {
     return Array.from(this._schema.keys());
   }
-  allKnownAttributesOfElement(tagName) {
+  /** @returns {string[]} */ allKnownAttributesOfElement(/** @type {string} */ tagName) {
     const normalizedTag = normalizeTagName(tagName);
     const elementProperties = this._schema.get(normalizedTag) || this._schema.get('unknown');
     return Array.from(elementProperties.keys()).map(prop => _PROP_TO_ATTR.get(prop) ?? prop);
   }
-  allKnownEventsOfElement(tagName) {
+  /** @returns {string[]} */ allKnownEventsOfElement(/** @type {string} */ tagName) {
     const normalizedTag = normalizeTagName(tagName);
     return Array.from(this._eventSchema.get(normalizedTag) ?? []);
   }
-  normalizeAnimationStyleProperty(propName) {
+  /** @returns {string} */ normalizeAnimationStyleProperty(/** @type {string} */ propName) {
     return dashCaseToCamelCase(propName);
   }
-  normalizeAnimationStyleValue(camelCaseProp, userProvidedProp, val) {
+  normalizeAnimationStyleValue(/** @type {string} */ camelCaseProp, /** @type {string} */ userProvidedProp, val) {
     let unit = '';
     const strVal = val.toString().trim();
     let errorMsg = null;
@@ -17881,12 +17881,12 @@ function _isPixelDimensionStyle(prop) {
 class HtmlTagDefinition {
   closedByChildren = {};
   contentType;
-  closedByParent = false;
-  implicitNamespacePrefix;
-  isVoid;
-  ignoreFirstLf;
-  canSelfClose;
-  preventNamespaceInheritance;
+  /** @type {boolean} */ closedByParent = false;
+  /** @type {string | null} */ implicitNamespacePrefix;
+  /** @type {boolean} */ isVoid;
+  /** @type {boolean} */ ignoreFirstLf;
+  /** @type {boolean} */ canSelfClose;
+  /** @type {boolean} */ preventNamespaceInheritance;
   constructor({
     closedByChildren,
     implicitNamespacePrefix,
@@ -17908,10 +17908,10 @@ class HtmlTagDefinition {
     this.preventNamespaceInheritance = preventNamespaceInheritance;
     this.canSelfClose = canSelfClose ?? isVoid;
   }
-  isClosedByChild(name) {
+  /** @returns {boolean} */ isClosedByChild(/** @type {string} */ name) {
     return this.isVoid || name.toLowerCase() in this.closedByChildren;
   }
-  getContentType(prefix) {
+  /** @returns {number} */ getContentType(/** @type {string | undefined} */ prefix) {
     if (typeof this.contentType === 'object') {
       const overrideType = prefix === undefined ? undefined : this.contentType[prefix];
       return overrideType ?? this.contentType.default;
@@ -17921,7 +17921,7 @@ class HtmlTagDefinition {
 }
 let DEFAULT_TAG_DEFINITION;
 let TAG_DEFINITIONS;
-function getHtmlTagDefinition(tagName) {
+/** @returns {HtmlTagDefinition} */ function getHtmlTagDefinition(/** @type {string} */ tagName) {
   if (!TAG_DEFINITIONS) {
     DEFAULT_TAG_DEFINITION = new HtmlTagDefinition({
       canSelfClose: true
@@ -23226,7 +23226,7 @@ function updateParameterReferences(root) {
 }
 
 let ENABLE_TEMPLATE_SOURCE_LOCATIONS = false;
-function setEnableTemplateSourceLocations(value) {
+function setEnableTemplateSourceLocations(/** @type {boolean} */ value) {
   ENABLE_TEMPLATE_SOURCE_LOCATIONS = value;
 }
 function getTemplateSourceLocationsEnabled() {
@@ -23366,7 +23366,7 @@ class HtmlParser extends Parser$1 {
   constructor() {
     super(getHtmlTagDefinition);
   }
-  parse(source, url, options) {
+  /** @returns {ParseTreeResult} */ parse(/** @type {string} */ source, /** @type {string} */ url, options) {
     return super.parse(source, url, options);
   }
 }
@@ -23381,13 +23381,13 @@ const LEGACY_ANIMATE_PROP_PREFIX = 'animate-';
 class BindingParser {
   _exprParser;
   _schemaRegistry;
-  errors;
-  constructor(_exprParser, _schemaRegistry, errors) {
+  /** @type {ParseError[]} */ errors;
+  constructor(/** @type {Parser} */ _exprParser, /** @type {ElementSchemaRegistry} */ _schemaRegistry, /** @type {ParseError[]} */ errors) {
     this._exprParser = _exprParser;
     this._schemaRegistry = _schemaRegistry;
     this.errors = errors;
   }
-  createBoundHostProperties(properties, sourceSpan) {
+  /** @returns {ParsedProperty[] | null} */ createBoundHostProperties(properties, /** @type {ParseSourceSpan} */ sourceSpan) {
     const boundProps = [];
     for (const propName of Object.keys(properties)) {
       const expression = properties[propName];
@@ -23399,7 +23399,7 @@ class BindingParser {
     }
     return boundProps;
   }
-  createDirectiveHostEventAsts(hostListeners, sourceSpan) {
+  /** @returns {ParsedEvent[] | null} */ createDirectiveHostEventAsts(hostListeners, /** @type {ParseSourceSpan} */ sourceSpan) {
     const targetEvents = [];
     for (const propName of Object.keys(hostListeners)) {
       const expression = hostListeners[propName];
@@ -23411,7 +23411,7 @@ class BindingParser {
     }
     return targetEvents;
   }
-  parseInterpolation(value, sourceSpan, interpolatedTokens) {
+  /** @returns {ASTWithSource} */ parseInterpolation(/** @type {string} */ value, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {any[] | null} */ interpolatedTokens) {
     const absoluteOffset = sourceSpan.fullStart.offset;
     try {
       const ast = this._exprParser.parseInterpolation(value, sourceSpan, absoluteOffset, interpolatedTokens);
@@ -23424,7 +23424,7 @@ class BindingParser {
       return this._exprParser.wrapLiteralPrimitive('ERROR', sourceSpan, absoluteOffset);
     }
   }
-  parseInterpolationExpression(expression, sourceSpan) {
+  /** @returns {ASTWithSource} */ parseInterpolationExpression(/** @type {string} */ expression, /** @type {ParseSourceSpan} */ sourceSpan) {
     const absoluteOffset = sourceSpan.start.offset;
     try {
       const ast = this._exprParser.parseInterpolationExpression(expression, sourceSpan, absoluteOffset);
@@ -23437,7 +23437,7 @@ class BindingParser {
       return this._exprParser.wrapLiteralPrimitive('ERROR', sourceSpan, absoluteOffset);
     }
   }
-  parseInlineTemplateBinding(tplKey, tplValue, sourceSpan, absoluteValueOffset, targetMatchableAttrs, targetProps, targetVars, isIvyAst) {
+  parseInlineTemplateBinding(/** @type {string} */ tplKey, /** @type {string} */ tplValue, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {number} */ absoluteValueOffset, /** @type {string[][]} */ targetMatchableAttrs, /** @type {ParsedProperty[]} */ targetProps, /** @type {ParsedVariable[]} */ targetVars, /** @type {boolean} */ isIvyAst) {
     const absoluteKeyOffset = sourceSpan.start.offset + TEMPLATE_ATTR_PREFIX$1.length;
     const bindings = this._parseTemplateBindings(tplKey, tplValue, sourceSpan, absoluteKeyOffset, absoluteValueOffset);
     for (const binding of bindings) {
@@ -23471,7 +23471,7 @@ class BindingParser {
       return [];
     }
   }
-  parseLiteralAttr(name, value, sourceSpan, absoluteOffset, valueSpan, targetMatchableAttrs, targetProps, keySpan) {
+  parseLiteralAttr(/** @type {string} */ name, /** @type {string | null} */ value, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {number} */ absoluteOffset, /** @type {ParseSourceSpan | undefined} */ valueSpan, /** @type {string[][]} */ targetMatchableAttrs, /** @type {ParsedProperty[]} */ targetProps, /** @type {ParseSourceSpan} */ keySpan) {
     if (isLegacyAnimationLabel(name)) {
       name = name.substring(1);
       if (keySpan !== undefined) {
@@ -23485,7 +23485,7 @@ class BindingParser {
       targetProps.push(new ParsedProperty(name, this._exprParser.wrapLiteralPrimitive(value, '', absoluteOffset), ParsedPropertyType.LITERAL_ATTR, sourceSpan, keySpan, valueSpan));
     }
   }
-  parsePropertyBinding(name, expression, isHost, isPartOfAssignmentBinding, sourceSpan, absoluteOffset, valueSpan, targetMatchableAttrs, targetProps, keySpan) {
+  parsePropertyBinding(/** @type {string} */ name, /** @type {string} */ expression, /** @type {boolean} */ isHost, /** @type {boolean} */ isPartOfAssignmentBinding, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {number} */ absoluteOffset, /** @type {ParseSourceSpan | undefined} */ valueSpan, /** @type {string[][]} */ targetMatchableAttrs, /** @type {ParsedProperty[]} */ targetProps, /** @type {ParseSourceSpan} */ keySpan) {
     if (name.length === 0) {
       this._reportError(`Property name is missing in binding`, sourceSpan);
     }
@@ -23511,7 +23511,7 @@ class BindingParser {
       this._parsePropertyAst(name, this.parseBinding(expression, isHost, valueSpan || sourceSpan, absoluteOffset), isPartOfAssignmentBinding, sourceSpan, keySpan, valueSpan, targetMatchableAttrs, targetProps);
     }
   }
-  parsePropertyInterpolation(name, value, sourceSpan, valueSpan, targetMatchableAttrs, targetProps, keySpan, interpolatedTokens) {
+  /** @returns {boolean} */ parsePropertyInterpolation(/** @type {string} */ name, /** @type {string} */ value, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {ParseSourceSpan | undefined} */ valueSpan, /** @type {string[][]} */ targetMatchableAttrs, /** @type {ParsedProperty[]} */ targetProps, /** @type {ParseSourceSpan} */ keySpan, /** @type {any[] | null} */ interpolatedTokens) {
     const expr = this.parseInterpolation(value, valueSpan || sourceSpan, interpolatedTokens);
     if (expr) {
       this._parsePropertyAst(name, expr, false, sourceSpan, keySpan, valueSpan, targetMatchableAttrs, targetProps);
@@ -23535,7 +23535,7 @@ class BindingParser {
     targetMatchableAttrs.push([name, ast.source]);
     targetProps.push(new ParsedProperty(name, ast, ParsedPropertyType.LEGACY_ANIMATION, sourceSpan, keySpan, valueSpan));
   }
-  parseBinding(value, isHostBinding, sourceSpan, absoluteOffset) {
+  /** @returns {ASTWithSource} */ parseBinding(/** @type {string} */ value, /** @type {boolean} */ isHostBinding, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {number} */ absoluteOffset) {
     try {
       const ast = isHostBinding ? this._exprParser.parseSimpleBinding(value, sourceSpan, absoluteOffset) : this._exprParser.parseBinding(value, sourceSpan, absoluteOffset);
       if (ast) {
@@ -23547,7 +23547,7 @@ class BindingParser {
       return this._exprParser.wrapLiteralPrimitive('ERROR', sourceSpan, absoluteOffset);
     }
   }
-  createBoundElementProperty(elementSelector, boundProp, skipValidation = false, mapPropertyName = true) {
+  /** @returns {BoundElementProperty} */ createBoundElementProperty(/** @type {string | null} */ elementSelector, /** @type {ParsedProperty} */ boundProp, /** @type {boolean} */ skipValidation = false, /** @type {boolean} */ mapPropertyName = true) {
     if (boundProp.isLegacyAnimation) {
       return new BoundElementProperty(boundProp.name, BindingType.LegacyAnimation, SecurityContext.NONE, boundProp.expression, null, boundProp.sourceSpan, boundProp.keySpan, boundProp.valueSpan);
     }
@@ -23596,7 +23596,7 @@ class BindingParser {
     }
     return new BoundElementProperty(boundPropertyName, bindingType, securityContexts[0], boundProp.expression, unit, boundProp.sourceSpan, boundProp.keySpan, boundProp.valueSpan);
   }
-  parseEvent(name, expression, isAssignmentEvent, sourceSpan, handlerSpan, targetMatchableAttrs, targetEvents, keySpan) {
+  parseEvent(/** @type {string} */ name, /** @type {string} */ expression, /** @type {boolean} */ isAssignmentEvent, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {ParseSourceSpan} */ handlerSpan, /** @type {string[][]} */ targetMatchableAttrs, /** @type {ParsedEvent[]} */ targetEvents, /** @type {ParseSourceSpan} */ keySpan) {
     if (name.length === 0) {
       this._reportError(`Event name is missing in binding`, sourceSpan);
     }
@@ -23610,18 +23610,18 @@ class BindingParser {
       this._parseRegularEvent(name, expression, isAssignmentEvent, sourceSpan, handlerSpan, targetMatchableAttrs, targetEvents, keySpan);
     }
   }
-  calcPossibleSecurityContexts(selector, propName, isAttribute) {
+  /** @returns {number[]} */ calcPossibleSecurityContexts(/** @type {string} */ selector, /** @type {string} */ propName, /** @type {boolean} */ isAttribute) {
     const prop = this._schemaRegistry.getMappedPropName(propName);
     return calcPossibleSecurityContexts(this._schemaRegistry, selector, prop, isAttribute);
   }
-  parseEventListenerName(rawName) {
+  parseEventListenerName(/** @type {string} */ rawName) {
     const [target, eventName] = splitAtColon(rawName, [null, rawName]);
     return {
       eventName: eventName,
       target
     };
   }
-  parseLegacyAnimationEventName(rawName) {
+  parseLegacyAnimationEventName(/** @type {string} */ rawName) {
     const matches = splitAtPeriod(rawName, [rawName, null]);
     return {
       eventName: matches[0],
@@ -25375,7 +25375,7 @@ function textContents(node) {
 }
 
 const LEADING_TRIVIA_CHARS = [' ', '\n', '\r', '\t'];
-function parseTemplate(template, templateUrl, options = {}) {
+function parseTemplate(/** @type {string} */ template, /** @type {string} */ templateUrl, options = {}) {
   const {
     preserveWhitespaces,
     enableI18nLegacyMessageIdFormat
@@ -25455,7 +25455,7 @@ function parseTemplate(template, templateUrl, options = {}) {
   return parsedTemplate;
 }
 const elementRegistry = new DomElementSchemaRegistry();
-function makeBindingParser(selectorlessEnabled = false) {
+/** @returns {BindingParser} */ function makeBindingParser(/** @type {boolean} */ selectorlessEnabled = false) {
   return new BindingParser(new Parser(new Lexer(), selectorlessEnabled), elementRegistry, []);
 }
 
@@ -25520,7 +25520,7 @@ function addFeatures(definitionMap, meta) {
     definitionMap.set('features', literalArr(features));
   }
 }
-function compileDirectiveFromMetadata(meta, constantPool, bindingParser) {
+function compileDirectiveFromMetadata(meta, /** @type {ConstantPool} */ constantPool, /** @type {BindingParser} */ bindingParser) {
   const definitionMap = baseDirectiveFields(meta, constantPool, bindingParser);
   addFeatures(definitionMap, meta);
   const expression = importExpr(Identifiers.defineDirective).callFn([definitionMap.toLiteralMap()], undefined, true);
@@ -25531,7 +25531,7 @@ function compileDirectiveFromMetadata(meta, constantPool, bindingParser) {
     statements: []
   };
 }
-function compileComponentFromMetadata(meta, constantPool, bindingParser) {
+function compileComponentFromMetadata(meta, /** @type {ConstantPool} */ constantPool, /** @type {BindingParser} */ bindingParser) {
   const definitionMap = baseDirectiveFields(meta, constantPool, bindingParser);
   addFeatures(definitionMap, meta);
   const templateTypeName = meta.name;
@@ -25764,7 +25764,7 @@ function parseHostBindings(host) {
     specialAttributes
   };
 }
-function verifyHostBindings(bindings, sourceSpan) {
+/** @returns {ParseError[]} */ function verifyHostBindings(bindings, /** @type {ParseSourceSpan} */ sourceSpan) {
   const bindingParser = makeBindingParser();
   bindingParser.createDirectiveHostEventAsts(bindings.listeners, sourceSpan);
   bindingParser.createBoundHostProperties(bindings.properties, sourceSpan);
@@ -25792,7 +25792,7 @@ function compileStyles(styles, selector, hostSelector) {
     return shadowCss.shimCssText(style, selector, hostSelector);
   });
 }
-function encapsulateStyle(style, componentIdentifier) {
+/** @returns {string} */ function encapsulateStyle(/** @type {string} */ style, /** @type {string | undefined} */ componentIdentifier) {
   const shadowCss = new ShadowCss();
   const selector = componentIdentifier ? CONTENT_ATTR.replace(COMPONENT_VARIABLE, componentIdentifier) : CONTENT_ATTR;
   const hostSelector = componentIdentifier ? HOST_ATTR.replace(COMPONENT_VARIABLE, componentIdentifier) : HOST_ATTR;
@@ -25865,7 +25865,7 @@ function createHostDirectivesMappingArray(mapping) {
   }
   return elements.length > 0 ? literalArr(elements) : null;
 }
-function compileDeferResolverFunction(meta) {
+/** @returns {ArrowFunctionExpr$1} */ function compileDeferResolverFunction(meta) {
   const depExpressions = [];
   if (meta.mode === 0) {
     for (const dep of meta.dependencies) {
@@ -25899,7 +25899,7 @@ class CombinedRecursiveAstVisitor extends RecursiveAstVisitor {
       node.visit(this);
     }
   }
-  visitElement(element) {
+  visitElement(/** @type {Element$1} */ element) {
     this.visitAllTemplateNodes(element.attributes);
     this.visitAllTemplateNodes(element.inputs);
     this.visitAllTemplateNodes(element.outputs);
@@ -25907,7 +25907,7 @@ class CombinedRecursiveAstVisitor extends RecursiveAstVisitor {
     this.visitAllTemplateNodes(element.references);
     this.visitAllTemplateNodes(element.children);
   }
-  visitTemplate(template) {
+  visitTemplate(/** @type {Template} */ template) {
     this.visitAllTemplateNodes(template.attributes);
     this.visitAllTemplateNodes(template.inputs);
     this.visitAllTemplateNodes(template.outputs);
@@ -25917,68 +25917,68 @@ class CombinedRecursiveAstVisitor extends RecursiveAstVisitor {
     this.visitAllTemplateNodes(template.references);
     this.visitAllTemplateNodes(template.children);
   }
-  visitContent(content) {
+  visitContent(/** @type {Content} */ content) {
     this.visitAllTemplateNodes(content.children);
   }
-  visitBoundAttribute(attribute) {
+  visitBoundAttribute(/** @type {BoundAttribute} */ attribute) {
     this.visit(attribute.value);
   }
-  visitBoundEvent(attribute) {
+  visitBoundEvent(/** @type {BoundEvent} */ attribute) {
     this.visit(attribute.handler);
   }
-  visitBoundText(text) {
+  visitBoundText(/** @type {BoundText} */ text) {
     this.visit(text.value);
   }
-  visitIcu(icu) {
+  visitIcu(/** @type {Icu$1} */ icu) {
     Object.keys(icu.vars).forEach(key => this.visit(icu.vars[key]));
     Object.keys(icu.placeholders).forEach(key => this.visit(icu.placeholders[key]));
   }
-  visitDeferredBlock(deferred) {
+  visitDeferredBlock(/** @type {DeferredBlock} */ deferred) {
     deferred.visitAll(this);
   }
-  visitDeferredTrigger(trigger) {
+  visitDeferredTrigger(/** @type {DeferredTrigger} */ trigger) {
     if (trigger instanceof BoundDeferredTrigger) {
       this.visit(trigger.value);
     } else if (trigger instanceof ViewportDeferredTrigger && trigger.options !== null) {
       this.visit(trigger.options);
     }
   }
-  visitDeferredBlockPlaceholder(block) {
+  visitDeferredBlockPlaceholder(/** @type {DeferredBlockPlaceholder} */ block) {
     this.visitAllTemplateNodes(block.children);
   }
-  visitDeferredBlockError(block) {
+  visitDeferredBlockError(/** @type {DeferredBlockError} */ block) {
     this.visitAllTemplateNodes(block.children);
   }
-  visitDeferredBlockLoading(block) {
+  visitDeferredBlockLoading(/** @type {DeferredBlockLoading} */ block) {
     this.visitAllTemplateNodes(block.children);
   }
-  visitSwitchBlock(block) {
+  visitSwitchBlock(/** @type {SwitchBlock} */ block) {
     this.visit(block.expression);
     this.visitAllTemplateNodes(block.groups);
     block.exhaustiveCheck?.visit(this);
   }
-  visitSwitchBlockCase(block) {
+  visitSwitchBlockCase(/** @type {SwitchBlockCase} */ block) {
     block.expression && this.visit(block.expression);
   }
-  visitSwitchBlockCaseGroup(block) {
+  visitSwitchBlockCaseGroup(/** @type {SwitchBlockCaseGroup} */ block) {
     this.visitAllTemplateNodes(block.cases);
     this.visitAllTemplateNodes(block.children);
   }
-  visitSwitchExhaustiveCheck(block) {}
-  visitForLoopBlock(block) {
+  visitSwitchExhaustiveCheck(/** @type {SwitchExhaustiveCheck} */ block) {}
+  visitForLoopBlock(/** @type {ForLoopBlock} */ block) {
     block.item.visit(this);
     this.visitAllTemplateNodes(block.contextVariables);
     this.visit(block.expression);
     this.visitAllTemplateNodes(block.children);
     block.empty?.visit(this);
   }
-  visitForLoopBlockEmpty(block) {
+  visitForLoopBlockEmpty(/** @type {ForLoopBlockEmpty} */ block) {
     this.visitAllTemplateNodes(block.children);
   }
-  visitIfBlock(block) {
+  visitIfBlock(/** @type {IfBlock} */ block) {
     this.visitAllTemplateNodes(block.branches);
   }
-  visitIfBlockBranch(block) {
+  visitIfBlockBranch(/** @type {IfBlockBranch} */ block) {
     block.expression && this.visit(block.expression);
     block.expressionAlias?.visit(this);
     this.visitAllTemplateNodes(block.children);
@@ -25986,7 +25986,7 @@ class CombinedRecursiveAstVisitor extends RecursiveAstVisitor {
   visitLetDeclaration(decl) {
     this.visit(decl.value);
   }
-  visitComponent(component) {
+  visitComponent(/** @type {Component$1} */ component) {
     this.visitAllTemplateNodes(component.attributes);
     this.visitAllTemplateNodes(component.inputs);
     this.visitAllTemplateNodes(component.outputs);
@@ -25994,18 +25994,18 @@ class CombinedRecursiveAstVisitor extends RecursiveAstVisitor {
     this.visitAllTemplateNodes(component.references);
     this.visitAllTemplateNodes(component.children);
   }
-  visitDirective(directive) {
+  visitDirective(/** @type {Directive$1} */ directive) {
     this.visitAllTemplateNodes(directive.attributes);
     this.visitAllTemplateNodes(directive.inputs);
     this.visitAllTemplateNodes(directive.outputs);
     this.visitAllTemplateNodes(directive.references);
   }
-  visitVariable(variable) {}
-  visitReference(reference) {}
-  visitTextAttribute(attribute) {}
+  visitVariable(/** @type {Variable} */ variable) {}
+  visitReference(/** @type {Reference} */ reference) {}
+  visitTextAttribute(/** @type {TextAttribute} */ attribute) {}
   visitText(text) {}
-  visitUnknownBlock(block) {}
-  visitAllTemplateNodes(nodes) {
+  visitUnknownBlock(/** @type {UnknownBlock} */ block) {}
+  visitAllTemplateNodes(/** @type {any[]} */ nodes) {
     for (const node of nodes) {
       this.visit(node);
     }
@@ -26053,19 +26053,19 @@ class ClassPropertyMapping {
     }
     return new ClassPropertyMapping(forwardMap);
   }
-  get classPropertyNames() {
+  /** @returns {string[]} */ get classPropertyNames() {
     return Array.from(this.forwardMap.keys());
   }
-  get propertyNames() {
+  /** @returns {string[]} */ get propertyNames() {
     return Array.from(this.reverseMap.keys());
   }
-  hasBindingPropertyName(propertyName) {
+  /** @returns {boolean} */ hasBindingPropertyName(/** @type {string} */ propertyName) {
     return this.reverseMap.has(propertyName);
   }
-  getByBindingPropertyName(propertyName) {
+  /** @returns {any[] | null} */ getByBindingPropertyName(/** @type {string} */ propertyName) {
     return this.reverseMap.has(propertyName) ? this.reverseMap.get(propertyName) : null;
   }
-  getByClassPropertyName(classPropertyName) {
+  getByClassPropertyName(/** @type {string} */ classPropertyName) {
     return this.forwardMap.has(classPropertyName) ? this.forwardMap.get(classPropertyName) : null;
   }
   toDirectMappedObject() {
@@ -26103,7 +26103,7 @@ function diff(fullList, itemsToExclude) {
   const exclude = new Set(itemsToExclude);
   return fullList.filter(item => !exclude.has(item));
 }
-function findMatchingDirectivesAndPipes(template, directiveSelectors) {
+function findMatchingDirectivesAndPipes(/** @type {string} */ template, /** @type {string[]} */ directiveSelectors) {
   const matcher = new SelectorMatcher();
   for (const selector of directiveSelectors) {
     const fakeDirective = {
@@ -26923,7 +26923,7 @@ function extractScopedNodeEntities(rootScope, templateEntities) {
 
 class ResourceLoader {}
 
-function compileService(meta, resolveForwardRefs) {
+function compileService(meta, /** @type {boolean} */ resolveForwardRefs) {
   const def = new DefinitionMap();
   def.set('token', meta.type.value);
   def.set('factory', meta.factory === undefined ? delegateToFactory(meta.type.value, meta.type.value, resolveForwardRefs) : arrowFn([], meta.factory.callFn([])));
@@ -26943,10 +26943,10 @@ class CompilerFacadeImpl {
   FactoryTarget = FactoryTarget;
   ResourceLoader = ResourceLoader;
   elementSchemaRegistry = new DomElementSchemaRegistry();
-  constructor(jitEvaluator = new JitEvaluator()) {
+  constructor(/** @type {JitEvaluator} */ jitEvaluator = new JitEvaluator()) {
     this.jitEvaluator = jitEvaluator;
   }
-  compilePipe(angularCoreEnv, sourceMapUrl, facade) {
+  compilePipe(angularCoreEnv, /** @type {string} */ sourceMapUrl, facade) {
     const metadata = {
       name: facade.name,
       type: wrapReference(facade.type),
@@ -26958,12 +26958,12 @@ class CompilerFacadeImpl {
     const res = compilePipeFromMetadata(metadata);
     return this.jitExpression(res.expression, angularCoreEnv, sourceMapUrl, []);
   }
-  compilePipeDeclaration(angularCoreEnv, sourceMapUrl, declaration) {
+  compilePipeDeclaration(angularCoreEnv, /** @type {string} */ sourceMapUrl, declaration) {
     const meta = convertDeclarePipeFacadeToMetadata(declaration);
     const res = compilePipeFromMetadata(meta);
     return this.jitExpression(res.expression, angularCoreEnv, sourceMapUrl, []);
   }
-  compileInjectable(angularCoreEnv, sourceMapUrl, facade) {
+  compileInjectable(angularCoreEnv, /** @type {string} */ sourceMapUrl, facade) {
     const {
       expression,
       statements
@@ -26980,7 +26980,7 @@ class CompilerFacadeImpl {
     }, true);
     return this.jitExpression(expression, angularCoreEnv, sourceMapUrl, statements);
   }
-  compileInjectableDeclaration(angularCoreEnv, sourceMapUrl, facade) {
+  compileInjectableDeclaration(angularCoreEnv, /** @type {string} */ sourceMapUrl, facade) {
     const {
       expression,
       statements
@@ -26997,7 +26997,7 @@ class CompilerFacadeImpl {
     }, true);
     return this.jitExpression(expression, angularCoreEnv, sourceMapUrl, statements);
   }
-  compileInjector(angularCoreEnv, sourceMapUrl, facade) {
+  compileInjector(angularCoreEnv, /** @type {string} */ sourceMapUrl, facade) {
     const meta = {
       type: wrapReference(facade.type),
       providers: facade.providers && facade.providers.length > 0 ? new WrappedNodeExpr(facade.providers) : null,
@@ -27006,12 +27006,12 @@ class CompilerFacadeImpl {
     const res = compileInjector(meta);
     return this.jitExpression(res.expression, angularCoreEnv, sourceMapUrl, []);
   }
-  compileInjectorDeclaration(angularCoreEnv, sourceMapUrl, declaration) {
+  compileInjectorDeclaration(angularCoreEnv, /** @type {string} */ sourceMapUrl, declaration) {
     const meta = convertDeclareInjectorFacadeToMetadata(declaration);
     const res = compileInjector(meta);
     return this.jitExpression(res.expression, angularCoreEnv, sourceMapUrl, []);
   }
-  compileNgModule(angularCoreEnv, sourceMapUrl, facade) {
+  compileNgModule(angularCoreEnv, /** @type {string} */ sourceMapUrl, facade) {
     const meta = {
       kind: R3NgModuleMetadataKind.Global,
       type: wrapReference(facade.type),
@@ -27029,20 +27029,20 @@ class CompilerFacadeImpl {
     const res = compileNgModule(meta);
     return this.jitExpression(res.expression, angularCoreEnv, sourceMapUrl, []);
   }
-  compileNgModuleDeclaration(angularCoreEnv, sourceMapUrl, declaration) {
+  compileNgModuleDeclaration(angularCoreEnv, /** @type {string} */ sourceMapUrl, declaration) {
     const expression = compileNgModuleDeclarationExpression(declaration);
     return this.jitExpression(expression, angularCoreEnv, sourceMapUrl, []);
   }
-  compileDirective(angularCoreEnv, sourceMapUrl, facade) {
+  compileDirective(angularCoreEnv, /** @type {string} */ sourceMapUrl, facade) {
     const meta = convertDirectiveFacadeToMetadata(facade);
     return this.compileDirectiveFromMeta(angularCoreEnv, sourceMapUrl, meta);
   }
-  compileDirectiveDeclaration(angularCoreEnv, sourceMapUrl, declaration) {
+  compileDirectiveDeclaration(angularCoreEnv, /** @type {string} */ sourceMapUrl, declaration) {
     const typeSourceSpan = this.createParseSourceSpan('Directive', declaration.type.name, sourceMapUrl);
     const meta = convertDeclareDirectiveFacadeToMetadata(declaration, typeSourceSpan);
     return this.compileDirectiveFromMeta(angularCoreEnv, sourceMapUrl, meta);
   }
-  compileService(angularCoreEnv, sourceMapUrl, facade) {
+  compileService(angularCoreEnv, /** @type {string} */ sourceMapUrl, facade) {
     const {
       expression,
       statements
@@ -27054,7 +27054,7 @@ class CompilerFacadeImpl {
     }, true);
     return this.jitExpression(expression, angularCoreEnv, sourceMapUrl, statements);
   }
-  compileServiceDeclaration(angularCoreEnv, sourceMapUrl, facade) {
+  compileServiceDeclaration(angularCoreEnv, /** @type {string} */ sourceMapUrl, facade) {
     const {
       expression,
       statements
@@ -27072,7 +27072,7 @@ class CompilerFacadeImpl {
     const res = compileDirectiveFromMetadata(meta, constantPool, bindingParser);
     return this.jitExpression(res.expression, angularCoreEnv, sourceMapUrl, constantPool.statements);
   }
-  compileComponent(angularCoreEnv, sourceMapUrl, facade) {
+  compileComponent(angularCoreEnv, /** @type {string} */ sourceMapUrl, facade) {
     const {
       template,
       defer
@@ -27097,7 +27097,7 @@ class CompilerFacadeImpl {
     const jitExpressionSourceMap = `ng:///${facade.name}.js`;
     return this.compileComponentFromMeta(angularCoreEnv, jitExpressionSourceMap, meta);
   }
-  compileComponentDeclaration(angularCoreEnv, sourceMapUrl, declaration) {
+  compileComponentDeclaration(angularCoreEnv, /** @type {string} */ sourceMapUrl, declaration) {
     const typeSourceSpan = this.createParseSourceSpan('Component', declaration.type.name, sourceMapUrl);
     const meta = convertDeclareComponentFacadeToMetadata(declaration, typeSourceSpan, sourceMapUrl);
     return this.compileComponentFromMeta(angularCoreEnv, sourceMapUrl, meta);
@@ -27108,7 +27108,7 @@ class CompilerFacadeImpl {
     const res = compileComponentFromMetadata(meta, constantPool, bindingParser);
     return this.jitExpression(res.expression, angularCoreEnv, sourceMapUrl, constantPool.statements);
   }
-  compileFactory(angularCoreEnv, sourceMapUrl, meta) {
+  compileFactory(angularCoreEnv, /** @type {string} */ sourceMapUrl, meta) {
     const factoryRes = compileFactoryFunction({
       name: meta.name,
       type: wrapReference(meta.type),
@@ -27118,7 +27118,7 @@ class CompilerFacadeImpl {
     });
     return this.jitExpression(factoryRes.expression, angularCoreEnv, sourceMapUrl, factoryRes.statements);
   }
-  compileFactoryDeclaration(angularCoreEnv, sourceMapUrl, meta) {
+  compileFactoryDeclaration(angularCoreEnv, /** @type {string} */ sourceMapUrl, meta) {
     const factoryRes = compileFactoryFunction({
       name: meta.type.name,
       type: wrapReference(meta.type),
@@ -27128,7 +27128,7 @@ class CompilerFacadeImpl {
     });
     return this.jitExpression(factoryRes.expression, angularCoreEnv, sourceMapUrl, factoryRes.statements);
   }
-  createParseSourceSpan(kind, typeName, sourceUrl) {
+  /** @returns {ParseSourceSpan} */ createParseSourceSpan(/** @type {string} */ kind, /** @type {string} */ typeName, /** @type {string} */ sourceUrl) {
     return r3JitTypeSourceSpan(kind, typeName, sourceUrl);
   }
   jitExpression(def, context, sourceUrl, preStatements) {
@@ -27565,9 +27565,9 @@ function publishFacade(global) {
 }
 
 class CompilerConfig {
-  defaultEncapsulation;
-  preserveWhitespaces;
-  strictInjectionParameters;
+  /** @type {number | null} */ defaultEncapsulation;
+  /** @type {boolean} */ preserveWhitespaces;
+  /** @type {boolean} */ strictInjectionParameters;
   constructor({
     defaultEncapsulation = ViewEncapsulation$1.Emulated,
     preserveWhitespaces,
@@ -27578,7 +27578,7 @@ class CompilerConfig {
     this.strictInjectionParameters = strictInjectionParameters === true;
   }
 }
-function preserveWhitespacesDefault(preserveWhitespacesOption, defaultSetting = false) {
+/** @returns {boolean} */ function preserveWhitespacesDefault(/** @type {boolean | null} */ preserveWhitespacesOption, /** @type {boolean} */ defaultSetting = false) {
   return preserveWhitespacesOption === null ? defaultSetting : preserveWhitespacesOption;
 }
 
@@ -27995,7 +27995,7 @@ class XmlParser extends Parser$1 {
   constructor() {
     super(getXmlTagDefinition);
   }
-  parse(source, url, options = {}) {
+  /** @returns {ParseTreeResult} */ parse(/** @type {string} */ source, /** @type {string} */ url, options = {}) {
     return super.parse(source, url, {
       ...options,
       tokenizeBlocks: false,
@@ -28019,7 +28019,7 @@ const _UNIT_TAG$1 = 'trans-unit';
 const _CONTEXT_GROUP_TAG = 'context-group';
 const _CONTEXT_TAG = 'context';
 class Xliff extends Serializer {
-  write(messages, locale) {
+  /** @returns {string} */ write(/** @type {Message[]} */ messages, /** @type {string | null} */ locale) {
     const visitor = new _WriteVisitor$1();
     const transUnits = [];
     messages.forEach(message => {
@@ -28070,7 +28070,7 @@ class Xliff extends Serializer {
       encoding: 'UTF-8'
     }), new CR(), xliff, new CR()]);
   }
-  load(content, url) {
+  load(/** @type {string} */ content, /** @type {string} */ url) {
     const xliffParser = new XliffParser();
     const {
       locale,
@@ -28095,7 +28095,7 @@ class Xliff extends Serializer {
       i18nNodesByMsgId
     };
   }
-  digest(message) {
+  /** @returns {string} */ digest(/** @type {Message} */ message) {
     return digest$1(message);
   }
 }
@@ -28323,7 +28323,7 @@ const _SOURCE_TAG = 'source';
 const _TARGET_TAG = 'target';
 const _UNIT_TAG = 'unit';
 class Xliff2 extends Serializer {
-  write(messages, locale) {
+  /** @returns {string} */ write(/** @type {Message[]} */ messages, /** @type {string | null} */ locale) {
     const visitor = new _WriteVisitor();
     const units = [];
     messages.forEach(message => {
@@ -28369,7 +28369,7 @@ class Xliff2 extends Serializer {
       encoding: 'UTF-8'
     }), new CR(), xliff, new CR()]);
   }
-  load(content, url) {
+  load(/** @type {string} */ content, /** @type {string} */ url) {
     const xliff2Parser = new Xliff2Parser();
     const {
       locale,
@@ -28394,7 +28394,7 @@ class Xliff2 extends Serializer {
       i18nNodesByMsgId
     };
   }
-  digest(message) {
+  /** @returns {string} */ digest(/** @type {Message} */ message) {
     return decimalDigest(message);
   }
 }
@@ -28656,10 +28656,10 @@ const _TRANSLATIONS_TAG = 'translationbundle';
 const _TRANSLATION_TAG = 'translation';
 const _PLACEHOLDER_TAG = 'ph';
 class Xtb extends Serializer {
-  write(messages, locale) {
+  /** @returns {string} */ write(/** @type {Message[]} */ messages, /** @type {string | null} */ locale) {
     throw new Error('Unsupported');
   }
-  load(content, url) {
+  load(/** @type {string} */ content, /** @type {string} */ url) {
     const xtbParser = new XtbParser();
     const {
       locale,
@@ -28689,10 +28689,10 @@ class Xtb extends Serializer {
       i18nNodesByMsgId
     };
   }
-  digest(message) {
+  /** @returns {string} */ digest(/** @type {Message} */ message) {
     return digest(message);
   }
-  createNameMapper(message) {
+  createNameMapper(/** @type {Message} */ message) {
     return new SimplePlaceholderMapper(message, toPublicName);
   }
 }
@@ -28980,7 +28980,7 @@ class I18NHtmlParser {
   _htmlParser;
   getTagDefinition;
   _translationBundle;
-  constructor(_htmlParser, translations, translationsFormat, missingTranslation = MissingTranslationStrategy.Warning, console) {
+  constructor(/** @type {HtmlParser} */ _htmlParser, /** @type {string | undefined} */ translations, /** @type {string | undefined} */ translationsFormat, /** @type {number} */ missingTranslation = MissingTranslationStrategy.Warning, console) {
     this._htmlParser = _htmlParser;
     if (translations) {
       const serializer = createSerializer(translationsFormat);
@@ -28989,7 +28989,7 @@ class I18NHtmlParser {
       this._translationBundle = new TranslationBundle({}, null, digest$1, undefined, missingTranslation, console);
     }
   }
-  parse(source, url, options = {}) {
+  /** @returns {ParseTreeResult} */ parse(/** @type {string} */ source, /** @type {string} */ url, options = {}) {
     const parseResult = this._htmlParser.parse(source, url, {
       ...options
     });
@@ -29023,14 +29023,14 @@ class MessageBundle {
   _locale;
   _preserveWhitespace;
   _messages = [];
-  constructor(_htmlParser, _implicitTags, _implicitAttrs, _locale = null, _preserveWhitespace = true) {
+  constructor(/** @type {HtmlParser} */ _htmlParser, /** @type {string[]} */ _implicitTags, _implicitAttrs, /** @type {string | null} */ _locale = null, /** @type {boolean} */ _preserveWhitespace = true) {
     this._htmlParser = _htmlParser;
     this._implicitTags = _implicitTags;
     this._implicitAttrs = _implicitAttrs;
     this._locale = _locale;
     this._preserveWhitespace = _preserveWhitespace;
   }
-  updateFromTemplate(source, url) {
+  /** @returns {ParseError[]} */ updateFromTemplate(/** @type {string} */ source, /** @type {string} */ url) {
     const htmlParserResult = this._htmlParser.parse(source, url, {
       tokenizeExpansionForms: true
     });
@@ -29045,10 +29045,10 @@ class MessageBundle {
     this._messages.push(...i18nParserResult.messages);
     return [];
   }
-  getMessages() {
+  /** @returns {Message[]} */ getMessages() {
     return this._messages;
   }
-  write(serializer, filterSources) {
+  /** @returns {string} */ write(/** @type {Serializer} */ serializer, filterSources) {
     const messages = {};
     const mapperVisitor = new MapPlaceholderNames();
     this._messages.forEach(message => {
@@ -29097,20 +29097,20 @@ class MapPlaceholderNames extends CloneVisitor {
   }
 }
 
-function compileClassMetadata(metadata) {
+/** @returns {InvokeFunctionExpr} */ function compileClassMetadata(metadata) {
   const fnCall = internalCompileClassMetadata(metadata);
   return arrowFn([], [devOnlyGuardedExpression(fnCall).toStmt()]).callFn([]);
 }
 function internalCompileClassMetadata(metadata) {
   return importExpr(Identifiers.setClassMetadata).callFn([metadata.type, metadata.decorators, metadata.ctorParameters ?? literal(null), metadata.propDecorators ?? literal(null)]);
 }
-function compileComponentClassMetadata(metadata, dependencies) {
+/** @returns {Expression} */ function compileComponentClassMetadata(metadata, /** @type {any[] | null} */ dependencies) {
   if (dependencies === null || dependencies.length === 0) {
     return compileClassMetadata(metadata);
   }
   return internalCompileSetClassMetadataAsync(metadata, dependencies.map(dep => new FnParam(dep.symbolName, DYNAMIC_TYPE)), compileComponentMetadataAsyncResolver(dependencies));
 }
-function compileOpaqueAsyncClassMetadata(metadata, deferResolver, deferredDependencyNames) {
+/** @returns {Expression} */ function compileOpaqueAsyncClassMetadata(metadata, /** @type {Expression} */ deferResolver, /** @type {string[]} */ deferredDependencyNames) {
   return internalCompileSetClassMetadataAsync(metadata, deferredDependencyNames.map(name => new FnParam(name, DYNAMIC_TYPE)), deferResolver);
 }
 function internalCompileSetClassMetadataAsync(metadata, wrapperParams, dependencyResolverFn) {
@@ -29133,7 +29133,7 @@ function compileComponentMetadataAsyncResolver(dependencies) {
 
 const MINIMUM_PARTIAL_LINKER_VERSION$6 = '12.0.0';
 const MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION = '18.0.0';
-function compileDeclareClassMetadata(metadata) {
+/** @returns {Expression} */ function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set('minVersion', literal(MINIMUM_PARTIAL_LINKER_VERSION$6));
   definitionMap.set('version', literal('22.0.6'));
@@ -29144,7 +29144,7 @@ function compileDeclareClassMetadata(metadata) {
   definitionMap.set('propDecorators', metadata.propDecorators);
   return importExpr(Identifiers.declareClassMetadata).callFn([definitionMap.toLiteralMap()]);
 }
-function compileComponentDeclareClassMetadata(metadata, dependencies) {
+/** @returns {Expression} */ function compileComponentDeclareClassMetadata(metadata, /** @type {any[] | null} */ dependencies) {
   if (dependencies === null || dependencies.length === 0) {
     return compileDeclareClassMetadata(metadata);
   }
@@ -29743,7 +29743,7 @@ function createPipeDefinitionMap(meta) {
   return definitionMap;
 }
 
-function compileClassDebugInfo(debugInfo) {
+/** @returns {Expression} */ function compileClassDebugInfo(debugInfo) {
   const debugInfoObject = {
     className: debugInfo.className
   };
@@ -29759,7 +29759,7 @@ function compileClassDebugInfo(debugInfo) {
   return iife.callFn([]);
 }
 
-function compileHmrInitializer(meta) {
+/** @returns {Expression} */ function compileHmrInitializer(meta) {
   const moduleName = 'm';
   const dataName = 'd';
   const timestampName = 't';
@@ -29782,7 +29782,7 @@ function compileHmrInitializer(meta) {
   const hotListener = hotRead.clone().prop('on').callFn([literal('angular:component-update'), updateCallback]);
   return arrowFn([], [new DeclareVarStmt(idName, literal(encodeURIComponent(`${meta.filePath}@${meta.className}`)), null, StmtModifier.Final), importCallback, devOnlyGuardedExpression(initialCall).toStmt(), devOnlyGuardedExpression(hotRead.and(hotListener)).toStmt()]).callFn([]);
 }
-function compileHmrUpdateCallback(definitions, constantStatements, meta) {
+/** @returns {DeclareFunctionStmt} */ function compileHmrUpdateCallback(/** @type {any[]} */ definitions, /** @type {Statement[]} */ constantStatements, meta) {
   const namespaces = 'ɵɵnamespaces';
   const params = [meta.className, namespaces].map(name => new FnParam(name, DYNAMIC_TYPE));
   const body = [];
@@ -29807,7 +29807,7 @@ function compileHmrUpdateCallback(definitions, constantStatements, meta) {
 const VERSION = new Version('22.0.6');
 
 const HOST_BINDING_GUARD_COMMENT_TEXT = 'hostBindingsBlockGuard';
-function createHostElement(type, selector, nameSpan, hostObjectLiteralBindings, hostBindingDecorators, hostListenerDecorators) {
+/** @returns {HostElement | null} */ function createHostElement(/** @type {string} */ type, /** @type {string | null} */ selector, /** @type {ParseSourceSpan} */ nameSpan, /** @type {any[]} */ hostObjectLiteralBindings, /** @type {any[]} */ hostBindingDecorators, /** @type {any[]} */ hostListenerDecorators) {
   const bindings = [];
   const listeners = [];
   let parser = null;
@@ -29839,7 +29839,7 @@ function createHostElement(type, selector, nameSpan, hostObjectLiteralBindings, 
   }
   return new HostElement(tagNames, bindings, listeners, nameSpan);
 }
-function createHostBindingsBlockGuard() {
+/** @returns {string} */ function createHostBindingsBlockGuard() {
   return `(true /*${HOST_BINDING_GUARD_COMMENT_TEXT}*/)`;
 }
 function createNodeFromHostLiteralProperty(binding, parser, bindings, listeners) {
@@ -30071,13 +30071,13 @@ class TcbExpr {
   spanComment = null;
   identifierComment = null;
   ignoreComment = null;
-  constructor(source) {
+  constructor(/** @type {string} */ source) {
     this.source = source;
   }
-  static quoteAndEscape(value) {
+  /** @returns {string} */ static quoteAndEscape(/** @type {string} */ value) {
     return JSON.stringify(value);
   }
-  print(ignoreComments = false) {
+  /** @returns {string} */ print(/** @type {boolean} */ ignoreComments = false) {
     if (ignoreComments) {
       return this.source;
     }
@@ -30105,7 +30105,7 @@ class TcbExpr {
     this.spanComment = this.identifierComment = this.ignoreComment = null;
     return this;
   }
-  addExpressionIdentifier(identifier, id) {
+  addExpressionIdentifier(/** @type {string} */ identifier, /** @type {number | undefined} */ id) {
     this.identifierComment = `${CommentTriviaType.EXPRESSION_TYPE_IDENTIFIER}:${identifier}${id !== undefined ? `:${id}` : ''}`;
     return this;
   }
@@ -32674,7 +32674,7 @@ class Scope {
   }
 }
 
-function generateTypeCheckBlock(env, component, name, meta, domSchemaChecker, oobRecorder) {
+/** @returns {string} */ function generateTypeCheckBlock(env, component, /** @type {string} */ name, meta, domSchemaChecker, oobRecorder) {
   const tcb = new Context(env, domSchemaChecker, oobRecorder, meta.id, meta.boundTarget, meta.pipes, meta.schemas, meta.isStandalone, meta.preserveWhitespaces);
   const ctxRawType = env.referenceTcbValue(component.ref);
   const {
