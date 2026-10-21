@@ -1,6 +1,7 @@
 // @nts-check
 import { Scalar } from '../../nodes/Scalar.js';
 
+/** @type {import("yaml-cst-types").SchemaTag} */
 const nullTag = {
     identify: value => value == null,
     createNode: () => new Scalar(null),

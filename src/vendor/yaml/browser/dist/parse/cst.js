@@ -12,9 +12,9 @@ export { visit } from './cst-visit.js';
 /** Next token is a scalar value */
 /** @type {string} */ const SCALAR = '\x1f'; // C0: Unit Separator
 /** @returns `true` if `token` is a flow or block collection */
-const isCollection = (token) => !!token && 'items' in token;
+const isCollection = /** @returns {boolean} */ (/** @type {import("yaml-cst-types").Token | null | undefined} */ token) => !!token && 'items' in token;
 /** @returns `true` if `token` is a flow or block scalar; not an alias */
-const isScalar = (token) => !!token &&
+const isScalar = /** @returns {boolean} */ (/** @type {import("yaml-cst-types").Token | null | undefined} */ token) => !!token &&
     (token.type === 'scalar' ||
         token.type === 'single-quoted-scalar' ||
         token.type === 'double-quoted-scalar' ||

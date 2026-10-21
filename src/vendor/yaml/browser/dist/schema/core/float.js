@@ -2,6 +2,7 @@
 import { Scalar } from '../../nodes/Scalar.js';
 import { stringifyNumber } from '../../stringify/stringifyNumber.js';
 
+/** @type {import("yaml-cst-types").SchemaTag} */
 const floatNaN = {
     identify: value => typeof value === 'number',
     default: true,
@@ -14,6 +15,7 @@ const floatNaN = {
             : Number.POSITIVE_INFINITY,
     stringify: stringifyNumber
 };
+/** @type {import("yaml-cst-types").SchemaTag} */
 const floatExp = {
     identify: value => typeof value === 'number',
     default: true,
@@ -26,6 +28,7 @@ const floatExp = {
         return isFinite(num) ? num.toExponential() : stringifyNumber(node);
     }
 };
+/** @type {import("yaml-cst-types").SchemaTag} */
 const float = {
     identify: value => typeof value === 'number',
     default: true,

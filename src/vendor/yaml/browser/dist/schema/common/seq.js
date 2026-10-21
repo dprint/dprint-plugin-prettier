@@ -1,6 +1,8 @@
+// @nts-check
 import { isSeq } from '../../nodes/identity.js';
 import { YAMLSeq } from '../../nodes/YAMLSeq.js';
 
+/** @type {import("yaml-cst-types").SchemaTag} */
 const seq = {
     collection: 'seq',
     default: true,

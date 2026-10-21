@@ -1,3 +1,4 @@
+// @nts-check
 import { Scalar } from '../../nodes/Scalar.js';
 import { map } from '../common/map.js';
 import { seq } from '../common/seq.js';
@@ -6,12 +7,13 @@ function intIdentify(value) {
     return typeof value === 'bigint' || Number.isInteger(value);
 }
 const stringifyJSON = ({ value }) => JSON.stringify(value);
+/** @type {import("yaml-cst-types").SchemaTag[]} */
 const jsonScalars = [
     {
         identify: value => typeof value === 'string',
         default: true,
         tag: 'tag:yaml.org,2002:str',
-        resolve: str => str,
+        resolve: (/** @type {string} */ str) => str,
         stringify: stringifyJSON
     },
     {
@@ -28,7 +30,7 @@ const jsonScalars = [
         default: true,
         tag: 'tag:yaml.org,2002:bool',
         test: /^true$|^false$/,
-        resolve: str => str === 'true',
+        resolve: (/** @type {string} */ str) => str === 'true',
         stringify: stringifyJSON
     },
     {
@@ -36,7 +38,7 @@ const jsonScalars = [
         default: true,
         tag: 'tag:yaml.org,2002:int',
         test: /^-?(?:0|[1-9][0-9]*)$/,
-        resolve: (str, _onError, { intAsBigInt }) => intAsBigInt ? BigInt(str) : parseInt(str, 10),
+        resolve: (/** @type {string} */ str, _onError, { intAsBigInt }) => intAsBigInt ? BigInt(str) : parseInt(str, 10),
         stringify: ({ value }) => intIdentify(value) ? value.toString() : JSON.stringify(value)
     },
     {
@@ -44,10 +46,11 @@ const jsonScalars = [
         default: true,
         tag: 'tag:yaml.org,2002:float',
         test: /^-?(?:0|[1-9][0-9]*)(?:\.[0-9]*)?(?:[eE][-+]?[0-9]+)?$/,
-        resolve: str => parseFloat(str),
+        resolve: (/** @type {string} */ str) => parseFloat(str),
         stringify: stringifyJSON
     }
 ];
+/** @type {import("yaml-cst-types").SchemaTag} */
 const jsonError = {
     default: true,
     tag: '',

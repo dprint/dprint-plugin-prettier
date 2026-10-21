@@ -9,8 +9,8 @@ import { containsNewline } from './util-contains-newline.js';
 import { mapIncludes } from './util-map-includes.js';
 
 /** @type {string} */ const blockMsg = 'Block collections are not allowed within flow collections';
-const isBlock = /** @returns {boolean | undefined | null} */ (token) => token && (token.type === 'block-map' || token.type === 'block-seq');
-/** @returns {YAMLSeq | YAMLMap | import("../schema/yaml-1.1/omap.js").YAMLOMap | import("../schema/yaml-1.1/set.js").YAMLSet} */ function resolveFlowCollection(/** @type {import("./compose-node.js").ComposeNodes} */ { composeNode, composeEmptyNode }, /** @type {import("yaml-cst-types").ComposeContext} */ ctx, /** @type {import("yaml-cst-types").Token} */ fc, /** @type {import("yaml-cst-types").ComposeErrorHandler} */ onError, tag) {
+const isBlock = /** @returns {boolean | undefined | null} */ (/** @type {import("yaml-cst-types").Token | null | undefined} */ token) => token && (token.type === 'block-map' || token.type === 'block-seq');
+/** @returns {YAMLSeq | YAMLMap | import("../schema/yaml-1.1/omap.js").YAMLOMap | import("../schema/yaml-1.1/set.js").YAMLSet} */ function resolveFlowCollection(/** @type {import("./compose-node.js").ComposeNodes} */ { composeNode, composeEmptyNode }, /** @type {import("yaml-cst-types").ComposeContext} */ ctx, /** @type {import("yaml-cst-types").Token} */ fc, /** @type {import("yaml-cst-types").ComposeErrorHandler} */ onError, /** @type {import("yaml-cst-types").SchemaTag | undefined} */ tag) {
     const isMap = fc.start.source === '{';
     const fcName = isMap ? 'flow map' : 'flow sequence';
     const NodeClass = (tag?.nodeClass ?? (isMap ? YAMLMap : YAMLSeq));

@@ -3,9 +3,9 @@ import { resolveFlowScalar } from '../compose/resolve-flow-scalar.js';
 import { YAMLParseError } from '../errors.js';
 import { stringifyString } from '../stringify/stringifyString.js';
 
-function resolveAsScalar(token, /** @type {undefined | boolean} */ strict = true, onError) {
+/** @returns {import("yaml-cst-types").ResolvedScalar | null} */ function resolveAsScalar(/** @type {import("yaml-cst-types").Token | null | undefined} */ token, /** @type {undefined | boolean} */ strict = true, /** @type {((offset: number, code: string, message: string) => void) | undefined} */ onError) {
     if (token) {
-        const _onError = (pos, code, message) => {
+        const _onError = (pos, /** @type {string} */ code, /** @type {string} */ message) => {
             const offset = typeof pos === 'number' ? pos : Array.isArray(pos) ? pos[0] : pos.offset;
             if (onError)
                 onError(offset, code, message);
@@ -37,7 +37,7 @@ function resolveAsScalar(token, /** @type {undefined | boolean} */ strict = true
  * @param context.offset The offset position of the token.
  * @param context.type The preferred type of the scalar token. If undefined, the previous type of the `token` will be used, defaulting to `'PLAIN'`.
  */
-function createScalarToken(/** @type {string} */ value, context) {
+/** @returns {import("yaml-cst-types").Token} */ function createScalarToken(/** @type {string} */ value, /** @type {{ end?: import("yaml-cst-types").Token[], implicitKey?: boolean, indent: number, inFlow?: boolean, offset?: number, type?: string }} */ context) {
     const { implicitKey = false, indent, inFlow = false, offset = -1, type = 'PLAIN' } = context;
     const source = stringifyString({ type, value }, {
         implicitKey,
@@ -54,7 +54,7 @@ function createScalarToken(/** @type {string} */ value, context) {
             const he = source.indexOf('\n');
             const head = source.substring(0, he);
             const body = source.substring(he + 1) + '\n';
-            const props = [
+            /** @type {import("yaml-cst-types").Token[]} */ const props = [
                 { type: 'block-scalar-header', offset, indent, source: head }
             ];
             if (!addEndtoBlockProps(props, end))
@@ -85,7 +85,7 @@ function createScalarToken(/** @type {string} */ value, context) {
  * @param context.inFlow Being within a flow collection may affect the resolved type of the token's value.
  * @param context.type The preferred type of the scalar token. If undefined, the previous type of the `token` will be used, defaulting to `'PLAIN'`.
  */
-function setScalarValue(token, /** @type {string} */ value, context = {}) {
+function setScalarValue(/** @type {import("yaml-cst-types").Token} */ token, /** @type {string} */ value, context = {}) {
     let { afterKey = false, implicitKey = false, inFlow = false, type } = context;
     let indent = 'indent' in token ? token.indent : null;
     if (afterKey && typeof indent === 'number')
@@ -129,7 +129,7 @@ function setScalarValue(token, /** @type {string} */ value, context = {}) {
             setFlowScalarValue(token, source, 'scalar');
     }
 }
-function setBlockScalarValue(token, source) {
+function setBlockScalarValue(/** @type {import("yaml-cst-types").Token} */ token, /** @type {string} */ source) {
     const he = source.indexOf('\n');
     const head = source.substring(0, he);
     const body = source.substring(he + 1) + '\n';
@@ -143,7 +143,7 @@ function setBlockScalarValue(token, source) {
     else {
         const { offset } = token;
         const indent = 'indent' in token ? token.indent : -1;
-        const props = [
+        /** @type {import("yaml-cst-types").Token[]} */ const props = [
             { type: 'block-scalar-header', offset, indent, source: head }
         ];
         if (!addEndtoBlockProps(props, 'end' in token ? token.end : undefined))
@@ -155,7 +155,7 @@ function setBlockScalarValue(token, source) {
     }
 }
 /** @returns `true` if last token is a newline */
-function addEndtoBlockProps(props, end) {
+/** @returns {boolean} */ function addEndtoBlockProps(/** @type {import("yaml-cst-types").Token[]} */ props, /** @type {import("yaml-cst-types").Token[] | undefined} */ end) {
     if (end)
         for (const st of end)
             switch (st.type) {
@@ -169,7 +169,7 @@ function addEndtoBlockProps(props, end) {
             }
     return false;
 }
-function setFlowScalarValue(token, source, type) {
+function setFlowScalarValue(/** @type {import("yaml-cst-types").Token} */ token, /** @type {string} */ source, /** @type {string} */ type) {
     switch (token.type) {
         case 'scalar':
         case 'double-quoted-scalar':

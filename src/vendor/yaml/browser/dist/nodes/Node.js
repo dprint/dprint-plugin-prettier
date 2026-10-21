@@ -27,7 +27,7 @@ class NodeBase {
     toJS(doc, { mapAsMap, maxAliasCount, onAnchor, reviver } = {}) {
         if (!isDocument(doc))
             throw new TypeError('A document argument is required');
-        const ctx = {
+        /** @type {import("yaml-cst-types").ToJSContext} */ const ctx = {
             anchors: new Map(),
             doc,
             keep: true,

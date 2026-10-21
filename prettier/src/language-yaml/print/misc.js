@@ -10,10 +10,10 @@ const printedEmptyLineCache = new WeakMap();
 function printNextEmptyLine(/** @type {AstPath} */ path, /** @type {string} */ originalText) {
   /** @type {{ node: YamlNode, root: any }} */ const { node, root } = path;
 
-  const isNextEmptyLinePrintedSet = getOrInsertComputed(
+  /** @type {Set<number>} */ const isNextEmptyLinePrintedSet = getOrInsertComputed(
     printedEmptyLineCache,
     root,
-    () => new Set(),
+    /** @returns {Set<number>} */ () => new Set(),
   );
 
   if (!isNextEmptyLinePrintedSet.has(node.position.end.offset)) {

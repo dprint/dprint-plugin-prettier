@@ -7,7 +7,7 @@ import { updatePositions } from "./utils/update-positions.mjs";
 import { YAMLSyntaxError } from "./yaml-syntax-error.mjs";
 import * as YAML from "yaml";
 //#region src/parse.ts
-function parse(/** @type {string | undefined} */ text, options) {
+/** @returns {import("yaml-unist-types").YamlNode} */ function parse(/** @type {string | undefined} */ text, /** @type {{ uniqueKeys?: boolean } | undefined} */ options) {
 	const lineCounter = new YAML.LineCounter();
 	/** @type {Context} */ const context = new Context(text, lineCounter);
 	const parser = new YAML.Parser(lineCounter.addNewLine);
@@ -17,7 +17,7 @@ function parse(/** @type {string | undefined} */ text, options) {
 		lineCounter,
 		merge: true
 	});
-	const parsedDocuments = [];
+	/** @type {import("../yaml/browser/dist/doc/Document.js").Document[]} */ const parsedDocuments = [];
 	const cstTokens = [...parser.parse(text)];
 	for (const parsedDocument of composer.compose(cstTokens, true, text.length)) {
 		const { errors } = parsedDocument;
@@ -25,7 +25,7 @@ function parse(/** @type {string | undefined} */ text, options) {
 		parsedDocuments.push(parsedDocument);
 	}
 	const documents = transformDocuments(parsedDocuments, cstTokens, context);
-	const comments = context.comments.sort(/** @returns {number} */ (commentA, commentB) => commentA.position.start.offset - commentB.position.end.offset);
+	const comments = context.comments.sort(/** @returns {number} */ (/** @type {import("yaml-unist-types").YamlNode} */ commentA, /** @type {import("yaml-unist-types").YamlNode} */ commentB) => commentA.position.start.offset - commentB.position.end.offset);
 	const root = createRoot(context.transformRange([0, text.length]), documents, comments);
 	attachComments(root);
 	updatePositions(root);

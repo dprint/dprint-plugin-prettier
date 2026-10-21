@@ -1,7 +1,8 @@
+// @nts-check
 import { stringifyNumber } from '../../stringify/stringifyNumber.js';
 
 /** Internal types handle bigint as number, because TS can't figure it out. */
-function parseSexagesimal(str, asBigInt) {
+function parseSexagesimal(/** @type {string} */ str, /** @type {boolean | undefined} */ asBigInt) {
     const sign = str[0];
     const parts = sign === '-' || sign === '+' ? str.substring(1) : str;
     const num = (n) => asBigInt ? BigInt(n) : Number(n);
@@ -48,24 +49,27 @@ function stringifySexagesimal(node) {
             .replace(/000000\d*$/, '') // % 60 may introduce error
     );
 }
+/** @type {import("yaml-cst-types").SchemaTag} */
 const intTime = {
     identify: value => typeof value === 'bigint' || Number.isInteger(value),
     default: true,
     tag: 'tag:yaml.org,2002:int',
     format: 'TIME',
     test: /^[-+]?[0-9][0-9_]*(?::[0-5]?[0-9])+$/,
-    resolve: (str, _onError, { intAsBigInt }) => parseSexagesimal(str, intAsBigInt),
+    resolve: (/** @type {string} */ str, _onError, { intAsBigInt }) => parseSexagesimal(str, intAsBigInt),
     stringify: stringifySexagesimal
 };
+/** @type {import("yaml-cst-types").SchemaTag} */
 const floatTime = {
     identify: value => typeof value === 'number',
     default: true,
     tag: 'tag:yaml.org,2002:float',
     format: 'TIME',
     test: /^[-+]?[0-9][0-9_]*(?::[0-5]?[0-9])+\.[0-9_]*$/,
-    resolve: str => parseSexagesimal(str, false),
+    resolve: (/** @type {string} */ str) => parseSexagesimal(str, false),
     stringify: stringifySexagesimal
 };
+/** @type {import("yaml-cst-types").SchemaTag} */
 const timestamp = {
     identify: value => value instanceof Date,
     default: true,

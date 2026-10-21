@@ -1,9 +1,10 @@
+// @nts-check
 import { anchorIsValid } from '../doc/anchors.js';
 import { isPair, isAlias, isNode, isScalar, isCollection } from '../nodes/identity.js';
 import { stringifyComment } from './stringifyComment.js';
 import { stringifyString } from './stringifyString.js';
 
-function createStringifyContext(doc, options) {
+/** @returns {import("yaml-cst-types").StringifyContext} */ function createStringifyContext(/** @type {import("../doc/Document.js").Document} */ doc, options) {
     const opt = Object.assign({
         blockQuote: true,
         commentString: stringifyComment,
@@ -24,7 +25,7 @@ function createStringifyContext(doc, options) {
         trueStr: 'true',
         verifyAliasOrder: true
     }, doc.schema.toStringOptions, options);
-    let inFlow;
+    /** @type {boolean | null} */ let inFlow;
     switch (opt.collectionStyle) {
         case 'block':
             inFlow = false;
@@ -45,13 +46,13 @@ function createStringifyContext(doc, options) {
         options: opt
     };
 }
-function getTagObject(tags, item) {
+/** @returns {import("yaml-cst-types").SchemaTag} */ function getTagObject(/** @type {import("yaml-cst-types").SchemaTag[]} */ tags, item) {
     if (item.tag) {
         const match = tags.filter(t => t.tag === item.tag);
         if (match.length > 0)
             return match.find(t => t.format === item.format) ?? match[0];
     }
-    let tagObj = undefined;
+    /** @type {import("yaml-cst-types").SchemaTag | undefined} */ let tagObj = undefined;
     let obj;
     if (isScalar(item)) {
         obj = item.value;
@@ -75,10 +76,10 @@ function getTagObject(tags, item) {
     return tagObj;
 }
 // needs to be called before value stringifier to allow for circular anchor refs
-function stringifyProps(node, tagObj, { anchors, doc }) {
+/** @returns {string} */ function stringifyProps(node, /** @type {import("yaml-cst-types").SchemaTag} */ tagObj, /** @type {import("yaml-cst-types").StringifyContext} */ { anchors, doc }) {
     if (!doc.directives)
         return '';
-    const props = [];
+    /** @type {string[]} */ const props = [];
     const anchor = (isScalar(node) || isCollection(node)) && node.anchor;
     if (anchor && anchorIsValid(anchor)) {
         anchors.add(anchor);
@@ -89,7 +90,7 @@ function stringifyProps(node, tagObj, { anchors, doc }) {
         props.push(doc.directives.tagString(tag));
     return props.join(' ');
 }
-function stringify(item, ctx, onComment, onChompKeep) {
+/** @returns {string} */ function stringify(item, /** @type {import("yaml-cst-types").StringifyContext} */ ctx, /** @type {(() => void) | undefined} */ onComment, /** @type {(() => void) | undefined} */ onChompKeep) {
     if (isPair(item))
         return item.toString(ctx, onComment, onChompKeep);
     if (isAlias(item)) {
@@ -106,7 +107,7 @@ function stringify(item, ctx, onComment, onChompKeep) {
             item = item.resolve(ctx.doc);
         }
     }
-    let tagObj = undefined;
+    /** @type {import("yaml-cst-types").SchemaTag | undefined} */ let tagObj = undefined;
     const node = isNode(item)
         ? item
         : ctx.doc.createNode(item, { onTagObj: o => (tagObj = o) });

@@ -40,7 +40,7 @@ class YAMLOMap extends YAMLSeq {
         }
         return map;
     }
-    /** @returns {YAMLOMap} */ static from(schema, iterable, ctx) {
+    /** @returns {YAMLOMap} */ static from(/** @type {import("../Schema.js").Schema} */ schema, iterable, /** @type {import("yaml-cst-types").CreateNodeContext} */ ctx) {
         const pairs = createPairs(schema, iterable, ctx);
         const omap = new this();
         omap.items = pairs.items;
@@ -48,6 +48,7 @@ class YAMLOMap extends YAMLSeq {
     }
 }
 YAMLOMap.tag = 'tag:yaml.org,2002:omap';
+/** @type {import("yaml-cst-types").SchemaTag} */
 const omap = {
     collection: 'seq',
     identify: value => value instanceof Map,

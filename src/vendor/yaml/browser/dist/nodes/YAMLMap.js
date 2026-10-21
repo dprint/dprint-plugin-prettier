@@ -30,7 +30,7 @@ class YAMLMap extends Collection {
      * A generic collection parsing method that can be extended
      * to other node classes that inherit from YAMLMap
      */
-    /** @returns {YAMLMap} */ static from(schema, obj, ctx) {
+    /** @returns {YAMLMap} */ static from(/** @type {import("../schema/Schema.js").Schema} */ schema, obj, /** @type {import("yaml-cst-types").CreateNodeContext} */ ctx) {
         const { keepUndefined, replacer } = ctx;
         const map = new this(schema);
         const add = (key, value) => {

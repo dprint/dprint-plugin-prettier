@@ -13,14 +13,14 @@ import * as YAML from "yaml";
 	const srcToken = flowSeq.srcToken;
 	// istanbul ignore if -- @preserve
 	if (!srcToken || srcToken.type !== "flow-collection") throw new Error("Expected flow-collection CST node for flow sequence");
-	const flowSequenceItems = flowSeq.items.map((item, /** @type {number} */ index) => {
+	const flowSequenceItems = flowSeq.items.map((/** @type {import("../../yaml/browser/dist/nodes/Scalar.js").Scalar | import("../../yaml/browser/dist/nodes/YAMLMap.js").YAMLMap | import("../../yaml/browser/dist/nodes/YAMLSeq.js").YAMLSeq | import("../../yaml/browser/dist/nodes/Pair.js").Pair | import("../../yaml/browser/dist/nodes/Alias.js").Alias} */ item, /** @type {number} */ index) => {
 		const srcItem = srcToken.items[index];
 		if (isBlockMappingOfImmediateChildOfFlowSequence(item, srcItem)) {
 			const pair = getLast(item.items);
 			return transformPair(pair, srcItem, context, createFlowMappingItem);
 		}
 		if (!YAML.isPair(item)) {
-			const propTokens = [];
+			/** @type {import("yaml-cst-types").Token[]} */ const propTokens = [];
 			for (const token of tokens(srcItem.start)) {
 				if (maybeContentPropertyToken(token)) {
 					propTokens.push(token);
@@ -73,7 +73,7 @@ import * as YAML from "yaml";
 * ```
 * @returns {boolean}
 */
-function isBlockMappingOfImmediateChildOfFlowSequence(/** @type {import("../../yaml/browser/dist/nodes/Scalar.js").Scalar | import("../../yaml/browser/dist/nodes/YAMLMap.js").YAMLMap | import("../../yaml/browser/dist/nodes/YAMLSeq.js").YAMLSeq | import("../../yaml/browser/dist/nodes/Pair.js").Pair | import("../../yaml/browser/dist/nodes/Alias.js").Alias} */ item, srcItem) {
+function isBlockMappingOfImmediateChildOfFlowSequence(/** @type {import("../../yaml/browser/dist/nodes/Scalar.js").Scalar | import("../../yaml/browser/dist/nodes/YAMLMap.js").YAMLMap | import("../../yaml/browser/dist/nodes/YAMLSeq.js").YAMLSeq | import("../../yaml/browser/dist/nodes/Pair.js").Pair | import("../../yaml/browser/dist/nodes/Alias.js").Alias} */ item, /** @type {import("yaml-cst-types").CollectionItem} */ srcItem) {
 	if (item.srcToken) return false;
 	// istanbul ignore if -- @preserve
 	if (!YAML.isMap(item)) return false;

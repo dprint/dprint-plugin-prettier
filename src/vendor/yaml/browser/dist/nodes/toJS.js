@@ -1,3 +1,4 @@
+// @nts-check
 import { hasAnchor } from './identity.js';
 
 /**
@@ -10,7 +11,7 @@ import { hasAnchor } from './identity.js';
  *   `{ keep: true }` is not set, output should be suitable for JSON
  *   stringification.
  */
-function toJS(value, /** @type {null | string} */ arg, ctx) {
+function toJS(value, /** @type {null | string} */ arg, /** @type {import("yaml-cst-types").ToJSContext | undefined} */ ctx) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     if (Array.isArray(value))
         return value.map((v, i) => toJS(v, String(i), ctx));
@@ -18,7 +19,7 @@ function toJS(value, /** @type {null | string} */ arg, ctx) {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call
         if (!ctx || !hasAnchor(value))
             return value.toJSON(arg, ctx);
-        const data = { aliasCount: 0, count: 1, res: undefined };
+        /** @type {import("yaml-cst-types").ToJSAnchor} */ const data = { aliasCount: 0, count: 1, res: undefined };
         ctx.anchors.set(value, data);
         ctx.onCreate = res => {
             data.res = res;

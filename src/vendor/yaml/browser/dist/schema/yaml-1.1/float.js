@@ -1,30 +1,34 @@
+// @nts-check
 import { Scalar } from '../../nodes/Scalar.js';
 import { stringifyNumber } from '../../stringify/stringifyNumber.js';
 
+/** @type {import("yaml-cst-types").SchemaTag} */
 const floatNaN = {
     identify: value => typeof value === 'number',
     default: true,
     tag: 'tag:yaml.org,2002:float',
     test: /^(?:[-+]?\.(?:inf|Inf|INF)|\.nan|\.NaN|\.NAN)$/,
-    resolve: (str) => str.slice(-3).toLowerCase() === 'nan'
+    resolve: (/** @type {string} */ str) => str.slice(-3).toLowerCase() === 'nan'
         ? NaN
         : str[0] === '-'
             ? Number.NEGATIVE_INFINITY
             : Number.POSITIVE_INFINITY,
     stringify: stringifyNumber
 };
+/** @type {import("yaml-cst-types").SchemaTag} */
 const floatExp = {
     identify: value => typeof value === 'number',
     default: true,
     tag: 'tag:yaml.org,2002:float',
     format: 'EXP',
     test: /^[-+]?(?:[0-9][0-9_]*)?(?:\.[0-9_]*)?[eE][-+]?[0-9]+$/,
-    resolve: (str) => parseFloat(str.replace(/_/g, '')),
+    resolve: (/** @type {string} */ str) => parseFloat(str.replace(/_/g, '')),
     stringify(node) {
         const num = Number(node.value);
         return isFinite(num) ? num.toExponential() : stringifyNumber(node);
     }
 };
+/** @type {import("yaml-cst-types").SchemaTag} */
 const float = {
     identify: value => typeof value === 'number',
     default: true,

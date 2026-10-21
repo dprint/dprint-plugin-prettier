@@ -4,7 +4,7 @@ import { stringifyPair } from '../stringify/stringifyPair.js';
 import { addPairToJSMap } from './addPairToJSMap.js';
 import { NODE_TYPE, PAIR, isNode } from './identity.js';
 
-/** @returns {Pair} */ function createPair(key, value, ctx) {
+/** @returns {Pair} */ function createPair(key, value, /** @type {import("yaml-cst-types").CreateNodeContext} */ ctx) {
     const k = createNode(key, undefined, ctx);
     const v = createNode(value, undefined, ctx);
     return new Pair(k, v);

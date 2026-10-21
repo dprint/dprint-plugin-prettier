@@ -3,10 +3,10 @@ import { Scalar } from '../nodes/Scalar.js';
 import { resolveEnd } from './resolve-end.js';
 
 /** @import { SourceToken } from "./resolve-props.js" */
-function resolveFlowScalar(/** @type {{ offset: number, type: string, source: string, end?: SourceToken[] }} */ scalar, /** @type {boolean} */ strict, /** @type {import("yaml-cst-types").ComposeErrorHandler} */ onError) {
+/** @returns {import("yaml-cst-types").ResolvedScalar} */ function resolveFlowScalar(/** @type {{ offset: number, type: string, source: string, end?: SourceToken[] }} */ scalar, /** @type {boolean} */ strict, /** @type {import("yaml-cst-types").ComposeErrorHandler} */ onError) {
     const { offset, type, source, end } = scalar;
-    let _type;
-    let value;
+    /** @type {string} */ let _type;
+    /** @type {string} */ let value;
     const _onError = (/** @type {number} */ rel, /** @type {string} */ code, /** @type {string} */ msg) => onError(offset + rel, code, msg);
     switch (type) {
         case 'scalar':

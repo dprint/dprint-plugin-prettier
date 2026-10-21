@@ -3,14 +3,24 @@ import { getPointText } from "../utils/get-point-text.mjs";
 import { tokens } from "../cst.mjs";
 import { transformDocument } from "./document.mjs";
 //#region src/transforms/documents.ts
-/** @returns {any[]} */ function transformDocuments(/** @type {any[]} */ parsedDocuments, /** @type {any[]} */ cstTokens, /** @type {import("./context.mjs").default} */ context) {
+/**
+ * what is gathered for each document before it is transformed
+ * @typedef {{
+ *   tokensBeforeBody: import("yaml-cst-types").Token[],
+ *   cstNode: import("yaml-cst-types").Token | null,
+ *   node: import("../../yaml/browser/dist/doc/Document.js").Document,
+ *   tokensAfterBody: import("yaml-cst-types").Token[],
+ *   documentEnd: import("yaml-cst-types").Token | null,
+ * }} DocumentData
+ */
+/** @returns {import("yaml-unist-types").YamlNode[]} */ function transformDocuments(/** @type {import("../../yaml/browser/dist/doc/Document.js").Document[]} */ parsedDocuments, /** @type {import("yaml-cst-types").Token[]} */ cstTokens, /** @type {import("./context.mjs").default} */ context) {
 	if (parsedDocuments.length === 0) return [];
-	const documents = [];
-	const bufferComments = [];
-	const tokensBeforeBody = [];
-	let currentDocumentData = null;
-	const createDocumentData = (cstNode) => {
-		const documentData = {
+	/** @type {DocumentData[]} */ const documents = [];
+	/** @type {import("yaml-cst-types").Token[]} */ const bufferComments = [];
+	/** @type {import("yaml-cst-types").Token[]} */ const tokensBeforeBody = [];
+	/** @type {DocumentData | null} */ let currentDocumentData = null;
+	const createDocumentData = /** @returns {DocumentData} */ (/** @type {import("yaml-cst-types").Token | null} */ cstNode) => {
+		/** @type {DocumentData} */ const documentData = {
 			tokensBeforeBody: [...tokensBeforeBody, ...bufferComments],
 			cstNode,
 			node: parsedDocuments[documents.length],

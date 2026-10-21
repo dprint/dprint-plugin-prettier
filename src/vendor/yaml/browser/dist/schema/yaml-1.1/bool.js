@@ -1,3 +1,4 @@
+// @nts-check
 import { Scalar } from '../../nodes/Scalar.js';
 
 function boolStringify({ value, source }, ctx) {
@@ -6,6 +7,7 @@ function boolStringify({ value, source }, ctx) {
         return source;
     return value ? ctx.options.trueStr : ctx.options.falseStr;
 }
+/** @type {import("yaml-cst-types").SchemaTag} */
 const trueTag = {
     identify: value => value === true,
     default: true,
@@ -14,6 +16,7 @@ const trueTag = {
     resolve: () => new Scalar(true),
     stringify: boolStringify
 };
+/** @type {import("yaml-cst-types").SchemaTag} */
 const falseTag = {
     identify: value => value === false,
     default: true,

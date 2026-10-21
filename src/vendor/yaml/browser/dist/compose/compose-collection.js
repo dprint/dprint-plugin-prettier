@@ -7,7 +7,7 @@ import { resolveBlockMap } from './resolve-block-map.js';
 import { resolveBlockSeq } from './resolve-block-seq.js';
 import { resolveFlowCollection } from './resolve-flow-collection.js';
 
-/** @returns {YAMLMap | YAMLSeq | import("../schema/yaml-1.1/omap.js").YAMLOMap | import("../schema/yaml-1.1/set.js").YAMLSet} */ function resolveCollection(/** @type {import("./compose-node.js").ComposeNodes} */ CN, /** @type {import("yaml-cst-types").ComposeContext} */ ctx, /** @type {import("yaml-cst-types").Token} */ token, /** @type {import("yaml-cst-types").ComposeErrorHandler} */ onError, /** @type {string | null} */ tagName, tag) {
+/** @returns {YAMLMap | YAMLSeq | import("../schema/yaml-1.1/omap.js").YAMLOMap | import("../schema/yaml-1.1/set.js").YAMLSet} */ function resolveCollection(/** @type {import("./compose-node.js").ComposeNodes} */ CN, /** @type {import("yaml-cst-types").ComposeContext} */ ctx, /** @type {import("yaml-cst-types").Token} */ token, /** @type {import("yaml-cst-types").ComposeErrorHandler} */ onError, /** @type {string | null} */ tagName, /** @type {import("yaml-cst-types").SchemaTag | undefined} */ tag) {
     const coll = token.type === 'block-map'
         ? resolveBlockMap(CN, ctx, token, onError, tag)
         : token.type === 'block-seq'
@@ -28,7 +28,7 @@ import { resolveFlowCollection } from './resolve-flow-collection.js';
     const tagToken = props.tag;
     const tagName = !tagToken
         ? null
-        : ctx.directives.tagName(tagToken.source, msg => onError(tagToken, 'TAG_RESOLVE_FAILED', msg));
+        : ctx.directives.tagName(tagToken.source, (/** @type {string} */ msg) => onError(tagToken, 'TAG_RESOLVE_FAILED', msg));
     if (token.type === 'block-seq') {
         const { anchor, newlineAfterProp: nl } = props;
         const lastProp = anchor && tagToken

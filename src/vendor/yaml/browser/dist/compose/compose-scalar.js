@@ -9,9 +9,9 @@ import { resolveFlowScalar } from './resolve-flow-scalar.js';
         ? resolveBlockScalar(ctx, token, onError)
         : resolveFlowScalar(token, ctx.options.strict, onError);
     const tagName = tagToken
-        ? ctx.directives.tagName(tagToken.source, msg => onError(tagToken, 'TAG_RESOLVE_FAILED', msg))
+        ? ctx.directives.tagName(tagToken.source, (/** @type {string} */ msg) => onError(tagToken, 'TAG_RESOLVE_FAILED', msg))
         : null;
-    let tag;
+    /** @type {import("yaml-cst-types").SchemaTag} */ let tag;
     if (ctx.options.stringKeys && ctx.atKey) {
         tag = ctx.schema[SCALAR];
     }
@@ -21,7 +21,7 @@ import { resolveFlowScalar } from './resolve-flow-scalar.js';
         tag = findScalarTagByTest(ctx, value, token, onError);
     else
         tag = ctx.schema[SCALAR];
-    let scalar;
+    /** @type {Scalar} */ let scalar;
     try {
         const res = tag.resolve(value, msg => onError(tagToken ?? token, 'TAG_RESOLVE_FAILED', msg), ctx.options);
         scalar = isScalar(res) ? res : new Scalar(res);
@@ -43,7 +43,7 @@ import { resolveFlowScalar } from './resolve-flow-scalar.js';
         scalar.comment = comment;
     return scalar;
 }
-function findScalarTagByName(/** @type {import("../schema/Schema.js").Schema} */ schema, /** @type {string} */ value, /** @type {string} */ tagName, /** @type {import("yaml-cst-types").Token} */ tagToken, /** @type {import("yaml-cst-types").ComposeErrorHandler} */ onError) {
+/** @returns {import("yaml-cst-types").SchemaTag} */ function findScalarTagByName(/** @type {import("../schema/Schema.js").Schema} */ schema, /** @type {string} */ value, /** @type {string} */ tagName, /** @type {import("yaml-cst-types").Token} */ tagToken, /** @type {import("yaml-cst-types").ComposeErrorHandler} */ onError) {
     if (tagName === '!')
         return schema[SCALAR]; // non-specific tag
     const matchWithTest = [];
@@ -68,7 +68,7 @@ function findScalarTagByName(/** @type {import("../schema/Schema.js").Schema} */
     onError(tagToken, 'TAG_RESOLVE_FAILED', `Unresolved tag: ${tagName}`, tagName !== 'tag:yaml.org,2002:str');
     return schema[SCALAR];
 }
-function findScalarTagByTest(/** @type {import("yaml-cst-types").ComposeContext} */ { atKey, directives, schema }, /** @type {string} */ value, /** @type {import("yaml-cst-types").Token} */ token, /** @type {import("yaml-cst-types").ComposeErrorHandler} */ onError) {
+/** @returns {import("yaml-cst-types").SchemaTag} */ function findScalarTagByTest(/** @type {import("yaml-cst-types").ComposeContext} */ { atKey, directives, schema }, /** @type {string} */ value, /** @type {import("yaml-cst-types").Token} */ token, /** @type {import("yaml-cst-types").ComposeErrorHandler} */ onError) {
     const tag = schema.tags.find(/** @returns {boolean | undefined} */ tag => (tag.default === true || (atKey && tag.default === 'key')) &&
         tag.test?.test(value)) || schema[SCALAR];
     if (schema.compat) {

@@ -58,7 +58,7 @@ class YAMLSet extends YAMLMap {
         else
             throw new Error('Set items must all have null values');
     }
-    /** @returns {YAMLSet} */ static from(schema, iterable, ctx) {
+    /** @returns {YAMLSet} */ static from(/** @type {import("../Schema.js").Schema} */ schema, iterable, /** @type {import("yaml-cst-types").CreateNodeContext} */ ctx) {
         const { replacer } = ctx;
         const set = new this(schema);
         if (iterable && Symbol.iterator in Object(iterable))
@@ -71,6 +71,7 @@ class YAMLSet extends YAMLMap {
     }
 }
 YAMLSet.tag = 'tag:yaml.org,2002:set';
+/** @type {import("yaml-cst-types").SchemaTag} */
 const set = {
     collection: 'map',
     identify: value => value instanceof Set,

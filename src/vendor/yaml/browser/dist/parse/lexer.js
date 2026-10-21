@@ -162,7 +162,7 @@ class Lexer {
     }
     /** @returns {boolean} */ atLineEnd() {
         let i = this.pos;
-        let ch = this.buffer[i];
+        /** @type {string | undefined} */ let ch = this.buffer[i];
         while (ch === ' ' || ch === '\t')
             ch = this.buffer[++i];
         if (!ch || ch === '#' || ch === '\n')
@@ -496,7 +496,7 @@ class Lexer {
     *parseBlockScalar() {
         let nl = this.pos - 1; // may be -1 if this.pos === 0
         let indent = 0;
-        let ch;
+        /** @type {string | undefined} */ let ch;
         loop: for (let i = this.pos; (ch = this.buffer[i]); ++i) {
             switch (ch) {
                 case ' ':
@@ -572,7 +572,7 @@ class Lexer {
         const inFlow = this.flowLevel > 0;
         let end = this.pos - 1;
         let i = this.pos - 1;
-        let ch;
+        /** @type {string | undefined} */ let ch;
         while ((ch = this.buffer[++i])) {
             if (ch === ':') {
                 const next = this.buffer[i + 1];
@@ -699,7 +699,7 @@ class Lexer {
     }
     *pushSpaces(/** @type {boolean} */ allowTabs) {
         let i = this.pos - 1;
-        let ch;
+        /** @type {string | undefined} */ let ch;
         do {
             ch = this.buffer[++i];
         } while (ch === ' ' || (allowTabs && ch === '\t'));
@@ -710,9 +710,9 @@ class Lexer {
         }
         return n;
     }
-    *pushUntil(test) {
+    *pushUntil(/** @type {(ch: string | undefined) => boolean} */ test) {
         let i = this.pos;
-        let ch = this.buffer[i];
+        /** @type {string | undefined} */ let ch = this.buffer[i];
         while (!test(ch))
             ch = this.buffer[++i];
         return yield* this.pushToIndex(i, false);

@@ -2,6 +2,8 @@
 //#region src/cst.ts
 /**
 * Generator to iterate over tokens, skipping space and newline tokens.
+* @param {...(import("yaml-cst-types").Token[] | null | undefined)} tokensArgs
+* @returns {Generator<import("yaml-cst-types").Token>}
 */
 function* tokens(...tokensArgs) {
 	for (const tokens of tokensArgs) {

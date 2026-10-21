@@ -4,7 +4,7 @@ var YAMLSyntaxError = class extends SyntaxError {
 	name = "YAMLSyntaxError";
 	/** @type {string} */ code;
 	/** @type {string} */ source;
-	position;
+	/** @type {import("yaml-unist-types").Position} */ position;
 	constructor(/** @type {import("./transforms/context.mjs").default} */ context, /** @type {import("../yaml/browser/dist/errors.js").YAMLParseError} */ error) {
 		super(error.message, { cause: error });
 		this.code = error.code;

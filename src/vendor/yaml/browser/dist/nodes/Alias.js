@@ -19,10 +19,10 @@ class Alias extends NodeBase {
      * Resolve the value of this alias within `doc`, finding the last
      * instance of the `source` anchor before this node.
      */
-    resolve(doc, ctx) {
+    resolve(/** @type {import("../doc/Document.js").Document} */ doc, /** @type {import("yaml-cst-types").ToJSContext | undefined} */ ctx) {
         if (ctx?.maxAliasCount === 0)
             throw new ReferenceError('Alias resolution is disabled');
-        let nodes;
+        /** @type {any[]} */ let nodes;
         if (ctx?.aliasResolveCache) {
             nodes = ctx.aliasResolveCache;
         }
@@ -46,7 +46,7 @@ class Alias extends NodeBase {
         }
         return found;
     }
-    toJSON(_arg, ctx) {
+    toJSON(_arg, /** @type {import("yaml-cst-types").ToJSContext | undefined} */ ctx) {
         if (!ctx)
             return { source: this.source };
         const { anchors, doc, maxAliasCount } = ctx;
@@ -55,7 +55,7 @@ class Alias extends NodeBase {
             const msg = `Unresolved alias (the anchor must be set before the alias): ${this.source}`;
             throw new ReferenceError(msg);
         }
-        let data = anchors.get(source);
+        /** @type {import("yaml-cst-types").ToJSAnchor | undefined} */ let data = anchors.get(source);
         if (!data) {
             // Resolve anchors for Node.prototype.toJS()
             toJS(source, null, ctx);
@@ -77,7 +77,7 @@ class Alias extends NodeBase {
         }
         return data.res;
     }
-    /** @returns {string} */ toString(ctx, _onComment, _onChompKeep) {
+    /** @returns {string} */ toString(/** @type {import("yaml-cst-types").StringifyContext | undefined} */ ctx, _onComment, _onChompKeep) {
         const src = `*${this.source}`;
         if (ctx) {
             anchorIsValid(this.source);
@@ -91,10 +91,10 @@ class Alias extends NodeBase {
         return src;
     }
 }
-function getAliasCount(doc, node, anchors) {
+/** @returns {number} */ function getAliasCount(/** @type {import("../doc/Document.js").Document} */ doc, node, /** @type {Map<any, any>} */ anchors) {
     if (isAlias(node)) {
         const source = node.resolve(doc);
-        const anchor = anchors && source && anchors.get(source);
+        /** @type {import("yaml-cst-types").ToJSAnchor | undefined} */ const anchor = anchors && source && anchors.get(source);
         return anchor ? anchor.count * anchor.aliasCount : 0;
     }
     else if (isCollection(node)) {

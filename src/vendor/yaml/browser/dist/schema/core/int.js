@@ -9,15 +9,17 @@ function intStringify(node, radix, prefix) {
         return prefix + value.toString(radix);
     return stringifyNumber(node);
 }
+/** @type {import("yaml-cst-types").SchemaTag} */
 const intOct = {
     identify: value => intIdentify(value) && value >= 0,
     default: true,
     tag: 'tag:yaml.org,2002:int',
     format: 'OCT',
     test: /^0o[0-7]+$/,
-    resolve: (str, _onError, opt) => intResolve(str, 2, 8, opt),
+    resolve: (/** @type {string} */ str, _onError, opt) => intResolve(str, 2, 8, opt),
     stringify: node => intStringify(node, 8, '0o')
 };
+/** @type {import("yaml-cst-types").SchemaTag} */
 const int = {
     identify: intIdentify,
     default: true,
@@ -26,6 +28,7 @@ const int = {
     resolve: /** @returns {number} */ (/** @type {string} */ str, _onError, opt) => intResolve(str, 0, 10, opt),
     stringify: stringifyNumber
 };
+/** @type {import("yaml-cst-types").SchemaTag} */
 const intHex = {
     identify: value => intIdentify(value) && value >= 0,
     default: true,

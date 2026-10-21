@@ -10,6 +10,7 @@ import { Scalar } from '../../nodes/Scalar.js';
 // Keys in mapping nodes earlier in the sequence override keys specified in
 // later mapping nodes. -- http://yaml.org/type/merge.html
 const MERGE_KEY = '<<';
+/** @type {import("yaml-cst-types").SchemaTag} */
 const merge = {
     identify: value => value === MERGE_KEY ||
         (typeof value === 'symbol' && value.description === MERGE_KEY),
@@ -21,12 +22,12 @@ const merge = {
     }),
     stringify: () => MERGE_KEY
 };
-const isMergeKey = (ctx, key) => (merge.identify(key) ||
+const isMergeKey = /** @returns {boolean | undefined} */ (/** @type {import("yaml-cst-types").ToJSContext | undefined} */ ctx, key) => (merge.identify(key) ||
     (isScalar(key) &&
         (!key.type || key.type === Scalar.PLAIN) &&
         merge.identify(key.value))) &&
     ctx?.doc.schema.tags.some(tag => tag.tag === merge.tag && tag.default);
-function addMergeToJSMap(ctx, map, value) {
+function addMergeToJSMap(/** @type {import("yaml-cst-types").ToJSContext | undefined} */ ctx, map, value) {
     const source = resolveAliasValue(ctx, value);
     if (isSeq(source))
         for (const it of source.items)
@@ -37,7 +38,7 @@ function addMergeToJSMap(ctx, map, value) {
     else
         mergeValue(ctx, map, source);
 }
-function mergeValue(ctx, map, value) {
+function mergeValue(/** @type {import("yaml-cst-types").ToJSContext | undefined} */ ctx, map, value) {
     const source = resolveAliasValue(ctx, value);
     if (!isMap(source))
         throw new Error('Merge sources must be maps or map aliases');
@@ -61,7 +62,7 @@ function mergeValue(ctx, map, value) {
     }
     return map;
 }
-function resolveAliasValue(ctx, value) {
+function resolveAliasValue(/** @type {import("yaml-cst-types").ToJSContext | undefined} */ ctx, value) {
     return ctx && isAlias(value) ? value.resolve(ctx.doc, ctx) : value;
 }
 

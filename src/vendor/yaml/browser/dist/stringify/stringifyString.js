@@ -2,15 +2,15 @@
 import { Scalar } from '../nodes/Scalar.js';
 import { foldFlowLines, FOLD_FLOW, FOLD_QUOTED, FOLD_BLOCK } from './foldFlowLines.js';
 
-const getFoldOptions = (ctx, isBlock) => ({
+const getFoldOptions = (/** @type {import("yaml-cst-types").StringifyContext} */ ctx, /** @type {boolean} */ isBlock) => ({
     indentAtStart: isBlock ? ctx.indent.length : ctx.indentAtStart,
     lineWidth: ctx.options.lineWidth,
     minContentWidth: ctx.options.minContentWidth
 });
 // Also checks for lines starting with %, as parsing the output as YAML 1.1 will
 // presume that's starting a new document.
-const containsDocumentMarker = (str) => /^(%|---|\.\.\.)/m.test(str);
-function lineLengthOverLimit(str, lineWidth, indentLength) {
+const containsDocumentMarker = /** @returns {boolean} */ (/** @type {string} */ str) => /^(%|---|\.\.\.)/m.test(str);
+/** @returns {boolean} */ function lineLengthOverLimit(/** @type {string} */ str, /** @type {number | undefined} */ lineWidth, /** @type {number} */ indentLength) {
     if (!lineWidth || lineWidth < 0)
         return false;
     const limit = lineWidth - indentLength;
@@ -28,7 +28,7 @@ function lineLengthOverLimit(str, lineWidth, indentLength) {
     }
     return true;
 }
-function doubleQuotedString(value, ctx) {
+/** @returns {string} */ function doubleQuotedString(/** @type {string} */ value, /** @type {import("yaml-cst-types").StringifyContext} */ ctx) {
     const json = JSON.stringify(value);
     if (ctx.options.doubleQuotedAsJSON)
         return json;
@@ -118,7 +118,7 @@ function doubleQuotedString(value, ctx) {
         ? str
         : foldFlowLines(str, indent, FOLD_QUOTED, getFoldOptions(ctx, false));
 }
-function singleQuotedString(value, ctx) {
+/** @returns {string} */ function singleQuotedString(/** @type {string} */ value, /** @type {import("yaml-cst-types").StringifyContext} */ ctx) {
     if (ctx.options.singleQuote === false ||
         (ctx.implicitKey && value.includes('\n')) ||
         /[ \t]\n|\n[ \t]/.test(value) // single quoted string can't have leading or trailing whitespace around newline
@@ -130,9 +130,9 @@ function singleQuotedString(value, ctx) {
         ? res
         : foldFlowLines(res, indent, FOLD_FLOW, getFoldOptions(ctx, false));
 }
-function quotedString(value, ctx) {
+/** @returns {string} */ function quotedString(/** @type {string} */ value, /** @type {import("yaml-cst-types").StringifyContext} */ ctx) {
     const { singleQuote } = ctx.options;
-    let qs;
+    /** @type {(value: string, ctx: import("yaml-cst-types").StringifyContext) => string} */ let qs;
     if (singleQuote === false)
         qs = doubleQuotedString;
     else {
@@ -156,7 +156,7 @@ try {
 catch {
     blockEndNewlines = /\n+(?!\n|$)/g;
 }
-function blockString({ comment, type, value }, ctx, onComment, onChompKeep) {
+/** @returns {string} */ function blockString({ comment, type, value }, /** @type {import("yaml-cst-types").StringifyContext} */ ctx, /** @type {(() => void) | undefined} */ onComment, /** @type {(() => void) | undefined} */ onChompKeep) {
     const { blockQuote, commentString, lineWidth } = ctx.options;
     // 1. Block can't end in whitespace unless the last line is non-empty.
     // 2. Strings consisting of only whitespace are best rendered explicitly.
@@ -247,7 +247,7 @@ function blockString({ comment, type, value }, ctx, onComment, onChompKeep) {
     value = value.replace(/\n+/g, `$&${indent}`);
     return `|${header}\n${indent}${start}${value}${end}`;
 }
-function plainString(item, ctx, onComment, onChompKeep) {
+/** @returns {string} */ function plainString(item, /** @type {import("yaml-cst-types").StringifyContext} */ ctx, /** @type {(() => void) | undefined} */ onComment, /** @type {(() => void) | undefined} */ onChompKeep) {
     const { type, value } = item;
     const { actualString, implicitKey, indent, indentStep, inFlow } = ctx;
     if ((implicitKey && value.includes('\n')) ||
@@ -295,7 +295,7 @@ function plainString(item, ctx, onComment, onChompKeep) {
         ? str
         : foldFlowLines(str, indent, FOLD_FLOW, getFoldOptions(ctx, false));
 }
-/** @returns {string} */ function stringifyString(item, ctx, onComment, onChompKeep) {
+/** @returns {string} */ function stringifyString(item, /** @type {import("yaml-cst-types").StringifyContext} */ ctx, /** @type {(() => void) | undefined} */ onComment, /** @type {(() => void) | undefined} */ onChompKeep) {
     const { implicitKey, inFlow } = ctx;
     const ss = typeof item.value === 'string'
         ? item

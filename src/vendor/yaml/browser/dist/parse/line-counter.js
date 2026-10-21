@@ -4,6 +4,10 @@
  * determining the one-indexed `{ line, col }` position for any offset
  * within the input.
  */
+/**
+ * a one-indexed line and column, which is only read where it is given, so that it is a struct
+ * @typedef {Readonly<{ line: number, col: number }>} LinePos
+ */
 class LineCounter {
     constructor() {
         /** @type {number[]} */ this.lineStarts = [];
@@ -17,7 +21,7 @@ class LineCounter {
          * position of `offset`. If `line === 0`, `addNewLine` has never been
          * called or `offset` is before the first known newline.
          */
-        /** @type {(offset: number) => { line: number, col: number }} */ this.linePos = (/** @type {number} */ offset) => {
+        /** @type {(offset: number) => LinePos} */ this.linePos = (/** @type {number} */ offset) => {
             /** @type {number} */ let low = 0;
             /** @type {number} */ let high = this.lineStarts.length;
             while (low < high) {

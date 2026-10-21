@@ -2,6 +2,7 @@
 import { Scalar } from '../../nodes/Scalar.js';
 import { stringifyString } from '../../stringify/stringifyString.js';
 
+/** @type {import("yaml-cst-types").SchemaTag} */
 const binary = {
     identify: value => value instanceof Uint8Array, // Buffer inherits from Uint8Array
     default: false,

@@ -2,8 +2,8 @@ import { isNode } from '../nodes/identity.js';
 import { createStringifyContext, stringify } from './stringify.js';
 import { indentComment, lineComment } from './stringifyComment.js';
 
-/** @returns {string} */ function stringifyDocument(doc, options) {
-    const lines = [];
+/** @returns {string} */ function stringifyDocument(/** @type {import("../doc/Document.js").Document} */ doc, /** @type {import("yaml-cst-types").StringifyOptions} */ options) {
+    /** @type {string[]} */ const lines = [];
     let hasDirectives = options.directives === true;
     if (options.directives !== false && doc.directives) {
         const dir = doc.directives.toString(doc);
@@ -25,7 +25,7 @@ import { indentComment, lineComment } from './stringifyComment.js';
         lines.unshift(indentComment(cs, ''));
     }
     let chompKeep = false;
-    let contentComment = null;
+    /** @type {string | null | undefined} */ let contentComment = null;
     if (doc.contents) {
         if (isNode(doc.contents)) {
             if (doc.contents.spaceBefore && hasDirectives)

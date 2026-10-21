@@ -1,6 +1,7 @@
 // @nts-check
 import { stringifyString } from '../../stringify/stringifyString.js';
 
+/** @type {import("yaml-cst-types").SchemaTag} */
 const string = {
     identify: value => typeof value === 'string',
     default: true,

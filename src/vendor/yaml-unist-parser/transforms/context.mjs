@@ -11,7 +11,7 @@ import { transformNode } from "./transform.mjs";
  */
 var Context = class {
 	/** @type {string} */ text;
-	/** @type {any[]} */ comments = [];
+	/** @type {YamlNode[]} */ comments = [];
 	/** @type {import("../../yaml/browser/dist/parse/line-counter.js").LineCounter} */ #lineCounter;
 	constructor(/** @type {string} */ text, /** @type {import("../../yaml/browser/dist/parse/line-counter.js").LineCounter} */ lineCounter) {
 		this.text = text;
@@ -37,7 +37,7 @@ var Context = class {
 		this.comments.push(comment);
 		return comment;
 	}
-	transformContentProperties(/** @type {import("../../yaml/browser/dist/nodes/Scalar.js").Scalar | import("../../yaml/browser/dist/nodes/YAMLMap.js").YAMLMap | import("../../yaml/browser/dist/nodes/YAMLSeq.js").YAMLSeq | import("../../yaml/browser/dist/nodes/Alias.js").Alias | import("../../yaml/browser/dist/schema/yaml-1.1/omap.js").YAMLOMap | import("../../yaml/browser/dist/schema/yaml-1.1/set.js").YAMLSet} */ node, /** @type {any[]} */ tokens) {
+	/** @returns {import("yaml-unist-types").Content} */ transformContentProperties(/** @type {import("../../yaml/browser/dist/nodes/Scalar.js").Scalar | import("../../yaml/browser/dist/nodes/YAMLMap.js").YAMLMap | import("../../yaml/browser/dist/nodes/YAMLSeq.js").YAMLSeq | import("../../yaml/browser/dist/nodes/Alias.js").Alias | import("../../yaml/browser/dist/schema/yaml-1.1/omap.js").YAMLOMap | import("../../yaml/browser/dist/schema/yaml-1.1/set.js").YAMLSet} */ node, /** @type {import("yaml-cst-types").Token[]} */ tokens) {
 		return transformContentProperties(node, tokens, this);
 	}
 };

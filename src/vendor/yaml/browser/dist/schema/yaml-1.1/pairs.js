@@ -33,7 +33,7 @@ import { YAMLSeq } from '../../nodes/YAMLSeq.js';
         onError('Expected a sequence for this tag');
     return seq;
 }
-/** @returns {YAMLSeq} */ function createPairs(schema, iterable, ctx) {
+/** @returns {YAMLSeq} */ function createPairs(/** @type {import("../Schema.js").Schema} */ schema, iterable, /** @type {import("yaml-cst-types").CreateNodeContext} */ ctx) {
     const { replacer } = ctx;
     const pairs = new YAMLSeq(schema);
     pairs.tag = 'tag:yaml.org,2002:pairs';
@@ -68,6 +68,7 @@ import { YAMLSeq } from '../../nodes/YAMLSeq.js';
         }
     return pairs;
 }
+/** @type {import("yaml-cst-types").SchemaTag} */
 const pairs = {
     collection: 'seq',
     default: false,

@@ -110,7 +110,7 @@ function defineShortcut(/** @type {YamlNode} */ x, /** @type {string} */ key, /*
 }
 
 /** @returns {boolean} */ function isPrettierIgnore(/** @type {YamlNode} */ comment) {
-  return comment.value.trim() === "prettier-ignore";
+  return /** @type {string} */ (comment.value).trim() === "prettier-ignore";
 }
 
 /** @returns {boolean} */ function hasPrettierIgnore(/** @type {AstPath} */ path) {

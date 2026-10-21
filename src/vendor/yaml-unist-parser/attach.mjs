@@ -62,7 +62,7 @@ function attachComment(/** @type {YamlNode} */ comment, /** @type {NodeTableEntr
 	}
 	for (let line = commentLine; line >= document.position.start.line; line--) {
 		const { trailingNode } = nodeTable[line - 1];
-		let currentNode;
+		/** @type {YamlNode} */ let currentNode;
 		if (!trailingNode) {
 			/**
 			* a:

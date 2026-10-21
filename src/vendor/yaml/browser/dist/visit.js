@@ -1,3 +1,4 @@
+// @nts-check
 import { isDocument, isNode, isPair, isCollection, isMap, isSeq, isScalar, isAlias } from './nodes/identity.js';
 
 const BREAK = Symbol('break visit');

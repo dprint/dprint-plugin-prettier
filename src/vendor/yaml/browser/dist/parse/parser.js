@@ -2,13 +2,13 @@
 import { tokenType } from './cst.js';
 import { Lexer } from './lexer.js';
 
-/** @returns {boolean} */ function includesToken(/** @type {any[]} */ list, /** @type {string} */ type) {
+/** @returns {boolean} */ function includesToken(/** @type {import("yaml-cst-types").Token[]} */ list, /** @type {string} */ type) {
     for (let i = 0; i < list.length; ++i)
         if (list[i].type === type)
             return true;
     return false;
 }
-/** @returns {number} */ function findNonEmptyIndex(/** @type {any[]} */ list) {
+/** @returns {number} */ function findNonEmptyIndex(/** @type {import("yaml-cst-types").Token[]} */ list) {
     for (let i = 0; i < list.length; ++i) {
         switch (list[i].type) {
             case 'space':
@@ -21,7 +21,7 @@ import { Lexer } from './lexer.js';
     }
     return -1;
 }
-/** @returns {boolean} */ function isFlowToken(token) {
+/** @returns {boolean} */ function isFlowToken(/** @type {import("yaml-cst-types").Token | null | undefined} */ token) {
     switch (token?.type) {
         case 'alias':
         case 'scalar':
@@ -33,7 +33,7 @@ import { Lexer } from './lexer.js';
             return false;
     }
 }
-/** @returns {any[]} */ function getPrevProps(parent) {
+/** @returns {import("yaml-cst-types").Token[]} */ function getPrevProps(/** @type {import("yaml-cst-types").Token} */ parent) {
     switch (parent.type) {
         case 'document':
             return parent.start;
@@ -48,8 +48,8 @@ import { Lexer } from './lexer.js';
             return [];
     }
 }
-/** Note: May modify input array @returns {any[]} */
-function getFirstKeyStartProps(/** @type {any[]} */ prev) {
+/** Note: May modify input array @returns {import("yaml-cst-types").Token[]} */
+function getFirstKeyStartProps(/** @type {import("yaml-cst-types").Token[]} */ prev) {
     if (prev.length === 0)
         return [];
     /** @type {number} */ let i = prev.length;
@@ -131,7 +131,7 @@ class Parser {
      * @param onNewLine - If defined, called separately with the start position of
      *   each new line (in `parse()`, including the start of input).
      */
-    constructor(onNewLine) {
+    constructor(/** @type {((offset: number) => number) | undefined} */ onNewLine) {
         /** If true, space and sequence indicators count as indentation */
         /** @type {boolean} */ this.atNewLine = true;
         /** If true, next token is a scalar value */
@@ -143,14 +143,14 @@ class Parser {
         /** On the same line with a block map key */
         /** @type {boolean} */ this.onKeyLine = false;
         /** Top indicates the node that's currently being built */
-        this.stack = [];
+        /** @type {import("yaml-cst-types").Token[]} */ this.stack = [];
         /** The source of the current token, set in parse() */
         /** @type {string} */ this.source = '';
         /** The type of the current token, set in parse() */
         /** @type {string} */ this.type = '';
         // Must be defined after `next()`
         /** @type {Lexer} */ this.lexer = new Lexer();
-        this.onNewLine = onNewLine;
+        /** @type {((offset: number) => number) | undefined} */ this.onNewLine = onNewLine;
     }
     /**
      * Parse `source` as a YAML stream.
@@ -160,7 +160,7 @@ class Parser {
      *
      * @returns A generator of tokens representing each directive, document, and other structure.
      */
-    *parse(/** @type {string} */ source, /** @type {undefined | boolean} */ incomplete = false) {
+    /** @returns {Generator<import("yaml-cst-types").Token>} */ *parse(/** @type {string} */ source, /** @type {undefined | boolean} */ incomplete = false) {
         if (this.onNewLine && this.offset === 0)
             this.onNewLine(0);
         for (const lexeme of this.lexer.lex(source, incomplete))
@@ -171,7 +171,7 @@ class Parser {
     /**
      * Advance the parser by the `source` of one lexical token.
      */
-    *next(/** @type {string | undefined} */ source) {
+    /** @returns {Generator<import("yaml-cst-types").Token>} */ *next(/** @type {string | undefined} */ source) {
         this.source = source;
         if (this.atScalar) {
             this.atScalar = false;
@@ -220,11 +220,11 @@ class Parser {
         }
     }
     /** Call at end of input to push out any remaining constructions */
-    *end() {
+    /** @returns {Generator<import("yaml-cst-types").Token>} */ *end() {
         while (this.stack.length > 0)
             yield* this.pop();
     }
-    get sourceToken() {
+    /** @returns {import("yaml-cst-types").Token} */ get sourceToken() {
         const st = {
             type: this.type,
             offset: this.offset,
@@ -233,7 +233,7 @@ class Parser {
         };
         return st;
     }
-    *step() {
+    /** @returns {Generator<import("yaml-cst-types").Token>} */ *step() {
         const top = this.peek(1);
         if (this.type === 'doc-end' && top?.type !== 'doc-end') {
             while (this.stack.length > 0)
@@ -272,7 +272,7 @@ class Parser {
     /** @returns {import("yaml-cst-types").Token | undefined} */ peek(/** @type {number} */ n) {
         return this.stack[this.stack.length - n];
     }
-    *pop(/** @type {import("yaml-cst-types").Token | undefined} */ error) {
+    /** @returns {Generator<import("yaml-cst-types").Token>} */ *pop(/** @type {import("yaml-cst-types").Token | undefined} */ error) {
         const token = error ?? this.stack.pop();
         /* istanbul ignore if should not happen */
         if (!token) {
@@ -362,7 +362,7 @@ class Parser {
             }
         }
     }
-    *stream() {
+    /** @returns {Generator<import("yaml-cst-types").Token>} */ *stream() {
         switch (this.type) {
             case 'directive-line':
                 yield { type: 'directive', offset: this.offset, source: this.source };
@@ -393,7 +393,7 @@ class Parser {
             source: this.source
         };
     }
-    *document(/** @type {import("yaml-cst-types").Token} */ doc) {
+    /** @returns {Generator<import("yaml-cst-types").Token>} */ *document(/** @type {import("yaml-cst-types").Token} */ doc) {
         if (doc.value)
             return yield* this.lineEnd(doc);
         switch (this.type) {
@@ -426,11 +426,11 @@ class Parser {
             };
         }
     }
-    *scalar(/** @type {import("yaml-cst-types").Token} */ scalar) {
+    /** @returns {Generator<import("yaml-cst-types").Token>} */ *scalar(/** @type {import("yaml-cst-types").Token} */ scalar) {
         if (this.type === 'map-value-ind') {
             const prev = getPrevProps(this.peek(2));
             const start = getFirstKeyStartProps(prev);
-            let sep;
+            /** @type {import("yaml-cst-types").Token[]} */ let sep;
             if (scalar.end) {
                 sep = scalar.end;
                 sep.push(this.sourceToken);
@@ -450,7 +450,7 @@ class Parser {
         else
             yield* this.lineEnd(scalar);
     }
-    *blockScalar(/** @type {import("yaml-cst-types").Token} */ scalar) {
+    /** @returns {Generator<import("yaml-cst-types").Token>} */ *blockScalar(/** @type {import("yaml-cst-types").Token} */ scalar) {
         switch (this.type) {
             case 'space':
             case 'comment':
@@ -477,7 +477,7 @@ class Parser {
                 yield* this.step();
         }
     }
-    *blockMap(/** @type {import("yaml-cst-types").Token} */ map) {
+    /** @returns {Generator<import("yaml-cst-types").Token>} */ *blockMap(/** @type {import("yaml-cst-types").Token} */ map) {
         /** @type {import("yaml-cst-types").CollectionItem | undefined} */ const it = map.items[map.items.length - 1];
         // it.sep is true-ish if pair already has key or : separator
         switch (this.type) {
@@ -702,7 +702,7 @@ class Parser {
         yield* this.pop();
         yield* this.step();
     }
-    *blockSequence(/** @type {import("yaml-cst-types").Token} */ seq) {
+    /** @returns {Generator<import("yaml-cst-types").Token>} */ *blockSequence(/** @type {import("yaml-cst-types").Token} */ seq) {
         /** @type {import("yaml-cst-types").CollectionItem | undefined} */ const it = seq.items[seq.items.length - 1];
         switch (this.type) {
             case 'newline':
@@ -760,10 +760,10 @@ class Parser {
         yield* this.pop();
         yield* this.step();
     }
-    *flowCollection(/** @type {import("yaml-cst-types").Token} */ fc) {
+    /** @returns {Generator<import("yaml-cst-types").Token>} */ *flowCollection(/** @type {import("yaml-cst-types").Token} */ fc) {
         /** @type {import("yaml-cst-types").CollectionItem | undefined} */ const it = fc.items[fc.items.length - 1];
         if (this.type === 'flow-error-end') {
-            let top;
+            /** @type {import("yaml-cst-types").Token | undefined} */ let top;
             do {
                 yield* this.pop();
                 top = this.peek(1);
@@ -855,7 +855,7 @@ class Parser {
             }
         }
     }
-    flowScalar(/** @type {string} */ type) {
+    /** @returns {import("yaml-cst-types").Token} */ flowScalar(/** @type {string} */ type) {
         if (this.onNewLine) {
             let nl = this.source.indexOf('\n') + 1;
             while (nl !== 0) {
@@ -870,7 +870,7 @@ class Parser {
             source: this.source
         };
     }
-    startBlockValue(/** @type {import("yaml-cst-types").Token} */ parent) {
+    /** @returns {import("yaml-cst-types").Token | null} */ startBlockValue(/** @type {import("yaml-cst-types").Token} */ parent) {
         switch (this.type) {
             case 'alias':
             case 'scalar':
@@ -928,14 +928,14 @@ class Parser {
         }
         return null;
     }
-    /** @returns {boolean} */ atIndentedComment(/** @type {any[]} */ start, /** @type {number} */ indent) {
+    /** @returns {boolean} */ atIndentedComment(/** @type {import("yaml-cst-types").Token[]} */ start, /** @type {number} */ indent) {
         if (this.type !== 'comment')
             return false;
         if (this.indent <= indent)
             return false;
         return start.every(/** @returns {boolean} */ st => st.type === 'newline' || st.type === 'space');
     }
-    *documentEnd(/** @type {import("yaml-cst-types").Token} */ docEnd) {
+    /** @returns {Generator<import("yaml-cst-types").Token>} */ *documentEnd(/** @type {import("yaml-cst-types").Token} */ docEnd) {
         if (this.type !== 'doc-mode') {
             if (docEnd.end)
                 docEnd.end.push(this.sourceToken);
@@ -945,7 +945,7 @@ class Parser {
                 yield* this.pop();
         }
     }
-    *lineEnd(/** @type {import("yaml-cst-types").Token} */ token) {
+    /** @returns {Generator<import("yaml-cst-types").Token>} */ *lineEnd(/** @type {import("yaml-cst-types").Token} */ token) {
         switch (this.type) {
             case 'comma':
             case 'doc-start':

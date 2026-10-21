@@ -1,20 +1,21 @@
+// @nts-check
 import { isNode, isPair } from '../nodes/identity.js';
 import { stringify } from './stringify.js';
 import { lineComment, indentComment } from './stringifyComment.js';
 
-/** @returns {string} */ function stringifyCollection(collection, ctx, options) {
+/** @returns {string} */ function stringifyCollection(/** @type {import("../nodes/Collection.js").Collection} */ collection, /** @type {import("yaml-cst-types").StringifyContext} */ ctx, /** @type {{ blockItemPrefix?: string, flowChars: { start: string, end: string }, itemIndent: string, onChompKeep?: () => void, onComment?: () => void }} */ options) {
     const flow = ctx.inFlow ?? collection.flow;
     const stringify = flow ? stringifyFlowCollection : stringifyBlockCollection;
     return stringify(collection, ctx, options);
 }
-function stringifyBlockCollection({ comment, items }, ctx, { blockItemPrefix, flowChars, itemIndent, onChompKeep, onComment }) {
+/** @returns {string} */ function stringifyBlockCollection(/** @type {import("../nodes/Collection.js").Collection} */ { comment, items }, /** @type {import("yaml-cst-types").StringifyContext} */ ctx, /** @type {{ blockItemPrefix?: string, flowChars: { start: string, end: string }, itemIndent: string, onChompKeep?: () => void, onComment?: () => void }} */ { blockItemPrefix, flowChars, itemIndent, onChompKeep, onComment }) {
     const { indent, options: { commentString } } = ctx;
     const itemCtx = Object.assign({}, ctx, { indent: itemIndent, type: null });
     let chompKeep = false; // flag for the preceding node's status
-    const lines = [];
+    /** @type {string[]} */ const lines = [];
     for (let i = 0; i < items.length; ++i) {
         const item = items[i];
-        let comment = null;
+        /** @type {string | null} */ let comment = null;
         if (isNode(item)) {
             if (!chompKeep && item.spaceBefore)
                 lines.push('');
@@ -38,7 +39,7 @@ function stringifyBlockCollection({ comment, items }, ctx, { blockItemPrefix, fl
             chompKeep = false;
         lines.push(blockItemPrefix + str);
     }
-    let str;
+    /** @type {string} */ let str;
     if (lines.length === 0) {
         str = flowChars.start + flowChars.end;
     }
@@ -58,7 +59,7 @@ function stringifyBlockCollection({ comment, items }, ctx, { blockItemPrefix, fl
         onChompKeep();
     return str;
 }
-function stringifyFlowCollection({ items }, ctx, { flowChars, itemIndent }) {
+/** @returns {string} */ function stringifyFlowCollection(/** @type {import("../nodes/Collection.js").Collection} */ { items }, /** @type {import("yaml-cst-types").StringifyContext} */ ctx, /** @type {{ blockItemPrefix?: string, flowChars: { start: string, end: string }, itemIndent: string, onChompKeep?: () => void, onComment?: () => void }} */ { flowChars, itemIndent }) {
     const { indent, indentStep, flowCollectionPadding: fcPadding, options: { commentString } } = ctx;
     itemIndent += indentStep;
     const itemCtx = Object.assign({}, ctx, {
@@ -68,10 +69,10 @@ function stringifyFlowCollection({ items }, ctx, { flowChars, itemIndent }) {
     });
     let reqNewline = false;
     let linesAtValue = 0;
-    const lines = [];
+    /** @type {string[]} */ const lines = [];
     for (let i = 0; i < items.length; ++i) {
         const item = items[i];
-        let comment = null;
+        /** @type {string | null} */ let comment = null;
         if (isNode(item)) {
             if (item.spaceBefore)
                 lines.push('');
@@ -141,7 +142,7 @@ function stringifyFlowCollection({ items }, ctx, { flowChars, itemIndent }) {
         }
     }
 }
-function addCommentBefore({ indent, options: { commentString } }, lines, comment, chompKeep) {
+function addCommentBefore(/** @type {import("yaml-cst-types").StringifyContext} */ { indent, options: { commentString } }, /** @type {string[]} */ lines, /** @type {string | null | undefined} */ comment, /** @type {boolean} */ chompKeep) {
     if (comment && chompKeep)
         comment = comment.replace(/^\n+/, '');
     if (comment) {

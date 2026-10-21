@@ -1,7 +1,8 @@
+// @nts-check
 import { stringifyNumber } from '../../stringify/stringifyNumber.js';
 
 const intIdentify = (value) => typeof value === 'bigint' || Number.isInteger(value);
-function intResolve(str, offset, radix, { intAsBigInt }) {
+function intResolve(/** @type {string} */ str, /** @type {number} */ offset, /** @type {number} */ radix, /** @type {import("yaml-cst-types").DocumentOptions} */ { intAsBigInt }) {
     const sign = str[0];
     if (sign === '-' || sign === '+')
         offset += 1;
@@ -32,39 +33,43 @@ function intStringify(node, radix, prefix) {
     }
     return stringifyNumber(node);
 }
+/** @type {import("yaml-cst-types").SchemaTag} */
 const intBin = {
     identify: intIdentify,
     default: true,
     tag: 'tag:yaml.org,2002:int',
     format: 'BIN',
     test: /^[-+]?0b[0-1_]+$/,
-    resolve: (str, _onError, opt) => intResolve(str, 2, 2, opt),
+    resolve: (/** @type {string} */ str, _onError, opt) => intResolve(str, 2, 2, opt),
     stringify: node => intStringify(node, 2, '0b')
 };
+/** @type {import("yaml-cst-types").SchemaTag} */
 const intOct = {
     identify: intIdentify,
     default: true,
     tag: 'tag:yaml.org,2002:int',
     format: 'OCT',
     test: /^[-+]?0[0-7_]+$/,
-    resolve: (str, _onError, opt) => intResolve(str, 1, 8, opt),
+    resolve: (/** @type {string} */ str, _onError, opt) => intResolve(str, 1, 8, opt),
     stringify: node => intStringify(node, 8, '0')
 };
+/** @type {import("yaml-cst-types").SchemaTag} */
 const int = {
     identify: intIdentify,
     default: true,
     tag: 'tag:yaml.org,2002:int',
     test: /^[-+]?[0-9][0-9_]*$/,
-    resolve: (str, _onError, opt) => intResolve(str, 0, 10, opt),
+    resolve: (/** @type {string} */ str, _onError, opt) => intResolve(str, 0, 10, opt),
     stringify: stringifyNumber
 };
+/** @type {import("yaml-cst-types").SchemaTag} */
 const intHex = {
     identify: intIdentify,
     default: true,
     tag: 'tag:yaml.org,2002:int',
     format: 'HEX',
     test: /^[-+]?0x[0-9a-fA-F_]+$/,
-    resolve: (str, _onError, opt) => intResolve(str, 2, 16, opt),
+    resolve: (/** @type {string} */ str, _onError, opt) => intResolve(str, 2, 16, opt),
     stringify: node => intStringify(node, 16, '0x')
 };
 

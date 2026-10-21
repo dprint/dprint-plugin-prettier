@@ -1,6 +1,8 @@
+// @nts-check
 import { isMap } from '../../nodes/identity.js';
 import { YAMLMap } from '../../nodes/YAMLMap.js';
 
+/** @type {import("yaml-cst-types").SchemaTag} */
 const map = {
     collection: 'map',
     default: true,

@@ -11,6 +11,10 @@ import { applyReviver } from './applyReviver.js';
 import { createNode } from './createNode.js';
 import { Directives } from './directives.js';
 
+/**
+ * what composing gives a document (yaml/dist/doc/Document.d.ts)
+ * @property {number[]} [range]
+ */
 class Document {
     constructor(value, replacer, options) {
         /** A comment before this Document */
@@ -18,9 +22,9 @@ class Document {
         /** A comment immediately after this Document */
         /** @type {string | null} */ this.comment = null;
         /** Errors encountered during parsing. */
-        this.errors = [];
+        /** @type {import("../errors.js").YAMLParseError[]} */ this.errors = [];
         /** Warnings encountered during parsing. */
-        this.warnings = [];
+        /** @type {import("../errors.js").YAMLWarning[]} */ this.warnings = [];
         Object.defineProperty(this, NODE_TYPE, { value: DOC });
         let _replacer = null;
         if (typeof replacer === 'function' || Array.isArray(replacer)) {
@@ -40,10 +44,10 @@ class Document {
             uniqueKeys: true,
             version: '1.2'
         }, options);
-        this.options = opt;
+        /** @type {import("yaml-cst-types").DocumentOptions} */ this.options = opt;
         let { version } = opt;
         if (options?._directives) {
-            this.directives = options._directives.atDocument();
+            /** @type {Directives | undefined} */ this.directives = options._directives.atDocument();
             if (this.directives.yaml.explicit)
                 version = this.directives.yaml.version;
         }
@@ -128,7 +132,7 @@ class Document {
         const { onAnchor, setAnchors, sourceObjects } = createNodeAnchors(this, 
         // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
         anchorPrefix || 'a');
-        const ctx = {
+        /** @type {import("yaml-cst-types").CreateNodeContext} */ const ctx = {
             aliasDuplicateObjects: aliasDuplicateObjects ?? true,
             keepUndefined: keepUndefined ?? false,
             onAnchor,
@@ -282,7 +286,7 @@ class Document {
         }
         // Not using `instanceof Schema` to allow for duck typing
         if (options.schema instanceof Object)
-            this.schema = options.schema;
+            /** @type {Schema} */ this.schema = options.schema;
         else if (opt)
             this.schema = new Schema(Object.assign(opt, options));
         else
@@ -290,7 +294,7 @@ class Document {
     }
     // json & jsonArg are only used from toJSON()
     toJS({ json, jsonArg, mapAsMap, maxAliasCount, onAnchor, reviver } = {}) {
-        const ctx = {
+        /** @type {import("yaml-cst-types").ToJSContext} */ const ctx = {
             anchors: new Map(),
             doc: this,
             keep: !json,

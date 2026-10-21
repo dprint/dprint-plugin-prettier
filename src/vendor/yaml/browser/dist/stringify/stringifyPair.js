@@ -3,7 +3,7 @@ import { Scalar } from '../nodes/Scalar.js';
 import { stringify } from './stringify.js';
 import { lineComment, indentComment } from './stringifyComment.js';
 
-/** @returns {string} */ function stringifyPair({ key, value }, ctx, onComment, onChompKeep) {
+/** @returns {string} */ function stringifyPair(/** @type {import("../nodes/Pair.js").Pair} */ { key, value }, /** @type {import("yaml-cst-types").StringifyContext} */ ctx, /** @type {(() => void) | undefined} */ onComment, /** @type {(() => void) | undefined} */ onChompKeep) {
     const { allNullValues, doc, indent, indentStep, options: { commentString, indentSeq, simpleKeys } } = ctx;
     let keyComment = (isNode(key) && key.comment) || null;
     if (simpleKeys) {

@@ -4,7 +4,7 @@ import { isNode, isPair, MAP, SEQ, isDocument } from '../nodes/identity.js';
 import { Scalar } from '../nodes/Scalar.js';
 
 /** @type {string} */ const defaultTagPrefix = 'tag:yaml.org,2002:';
-function findTagObject(value, tagName, tags) {
+/** @returns {import("yaml-cst-types").SchemaTag | undefined} */ function findTagObject(value, /** @type {string | undefined} */ tagName, /** @type {import("yaml-cst-types").SchemaTag[]} */ tags) {
     if (tagName) {
         const match = tags.filter(t => t.tag === tagName);
         const tagObj = match.find(t => !t.format) ?? match[0];
@@ -14,7 +14,7 @@ function findTagObject(value, tagName, tags) {
     }
     return tags.find(t => t.identify?.(value) && !t.format);
 }
-function createNode(value, /** @type {undefined | string} */ tagName, ctx) {
+function createNode(value, /** @type {undefined | string} */ tagName, /** @type {import("yaml-cst-types").CreateNodeContext} */ ctx) {
     if (isDocument(value))
         value = value.contents;
     if (isNode(value))
@@ -35,7 +35,7 @@ function createNode(value, /** @type {undefined | string} */ tagName, ctx) {
     const { aliasDuplicateObjects, onAnchor, onTagObj, schema, sourceObjects } = ctx;
     // Detect duplicate references to the same object & use Alias nodes for all
     // after first. The `ref` wrapper allows for circular references to resolve.
-    let ref = undefined;
+    /** @type {{ anchor: string | null, node: any } | undefined} */ let ref = undefined;
     if (aliasDuplicateObjects && value && typeof value === 'object') {
         ref = sourceObjects.get(value);
         if (ref) {
@@ -49,7 +49,7 @@ function createNode(value, /** @type {undefined | string} */ tagName, ctx) {
     }
     if (tagName?.startsWith('!!'))
         tagName = defaultTagPrefix + tagName.slice(2);
-    let tagObj = findTagObject(value, tagName, schema.tags);
+    /** @type {import("yaml-cst-types").SchemaTag | undefined} */ let tagObj = findTagObject(value, tagName, schema.tags);
     if (!tagObj) {
         if (value && typeof value.toJSON === 'function') {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-call

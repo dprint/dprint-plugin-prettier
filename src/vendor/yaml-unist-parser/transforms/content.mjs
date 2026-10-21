@@ -3,11 +3,11 @@ import { createAnchor } from "../factories/anchor.mjs";
 import { createContent } from "../factories/content.mjs";
 import { createTag } from "../factories/tag.mjs";
 //#region src/transforms/content.ts
-function transformContentProperties(/** @type {import("../../yaml/browser/dist/nodes/Scalar.js").Scalar | import("../../yaml/browser/dist/nodes/YAMLMap.js").YAMLMap | import("../../yaml/browser/dist/nodes/YAMLSeq.js").YAMLSeq | import("../../yaml/browser/dist/nodes/Alias.js").Alias | import("../../yaml/browser/dist/schema/yaml-1.1/omap.js").YAMLOMap | import("../../yaml/browser/dist/schema/yaml-1.1/set.js").YAMLSet} */ node, /** @type {any[]} */ tokens, /** @type {import("./context.mjs").default | undefined} */ context) {
+/** @returns {import("yaml-unist-types").Content} */ function transformContentProperties(/** @type {import("../../yaml/browser/dist/nodes/Scalar.js").Scalar | import("../../yaml/browser/dist/nodes/YAMLMap.js").YAMLMap | import("../../yaml/browser/dist/nodes/YAMLSeq.js").YAMLSeq | import("../../yaml/browser/dist/nodes/Alias.js").Alias | import("../../yaml/browser/dist/schema/yaml-1.1/omap.js").YAMLOMap | import("../../yaml/browser/dist/schema/yaml-1.1/set.js").YAMLSet} */ node, /** @type {import("yaml-cst-types").Token[]} */ tokens, /** @type {import("./context.mjs").default | undefined} */ context) {
 	const middleComments = [];
-	let firstTagOrAnchorRange = null;
-	let tag = null;
-	let anchor = null;
+	/** @type {number[] | null} */ let firstTagOrAnchorRange = null;
+	/** @type {import("yaml-unist-types").YamlNode | null} */ let tag = null;
+	/** @type {import("yaml-unist-types").YamlNode | null} */ let anchor = null;
 	for (const token of tokens) {
 		const tokenRange = [token.offset, token.offset + token.source.length];
 		switch (token.type) {

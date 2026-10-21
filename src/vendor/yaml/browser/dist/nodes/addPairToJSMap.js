@@ -1,10 +1,11 @@
+// @nts-check
 import { warn } from '../log.js';
 import { isMergeKey, addMergeToJSMap } from '../schema/yaml-1.1/merge.js';
 import { createStringifyContext } from '../stringify/stringify.js';
 import { isNode } from './identity.js';
 import { toJS } from './toJS.js';
 
-function addPairToJSMap(ctx, map, { key, value }) {
+function addPairToJSMap(/** @type {import("yaml-cst-types").ToJSContext | undefined} */ ctx, map, { key, value }) {
     if (isNode(key) && key.addToJSMap)
         key.addToJSMap(ctx, map, value);
     // TODO: Should drop this special case for bare << handling
@@ -34,7 +35,7 @@ function addPairToJSMap(ctx, map, { key, value }) {
     }
     return map;
 }
-function stringifyKey(key, jsKey, ctx) {
+/** @returns {string} */ function stringifyKey(key, jsKey, /** @type {import("yaml-cst-types").ToJSContext | undefined} */ ctx) {
     if (jsKey === null)
         return '';
     // eslint-disable-next-line @typescript-eslint/no-base-to-string

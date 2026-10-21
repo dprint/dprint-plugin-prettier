@@ -15,9 +15,9 @@ import * as YAML from "yaml";
 	const srcToken = seq.srcToken;
 	// istanbul ignore if -- @preserve
 	if (!srcToken || srcToken.type !== "block-seq") throw new Error("Expected block sequence srcToken");
-	const sequenceItems = seq.items.map((itemNode, /** @type {number} */ index) => {
+	const sequenceItems = seq.items.map((/** @type {import("../../yaml/browser/dist/nodes/YAMLMap.js").YAMLMap | import("../../yaml/browser/dist/nodes/Scalar.js").Scalar | import("../../yaml/browser/dist/nodes/YAMLSeq.js").YAMLSeq | import("../../yaml/browser/dist/nodes/Alias.js").Alias | import("../../yaml/browser/dist/nodes/Pair.js").Pair} */ itemNode, /** @type {number} */ index) => {
 		const srcItem = srcToken.items[index];
-		const propTokens = [];
+		/** @type {import("yaml-cst-types").Token[]} */ const propTokens = [];
 		/** @type {import("yaml-cst-types").Token | null} */ let seqItemIndToken = null;
 		for (const token of tokens(srcItem.start)) {
 			if (maybeContentPropertyToken(token)) {

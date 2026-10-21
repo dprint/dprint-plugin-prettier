@@ -1,6 +1,7 @@
 // @nts-check
 import { Scalar } from '../../nodes/Scalar.js';
 
+/** @type {import("yaml-cst-types").SchemaTag} */
 const boolTag = {
     identify: value => typeof value === 'boolean',
     default: true,

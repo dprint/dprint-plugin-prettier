@@ -3,7 +3,7 @@ import { YAMLSeq } from '../nodes/YAMLSeq.js';
 import { resolveProps } from './resolve-props.js';
 import { flowIndentCheck } from './util-flow-indent-check.js';
 
-/** @returns {YAMLSeq | import("../schema/yaml-1.1/omap.js").YAMLOMap} */ function resolveBlockSeq(/** @type {import("./compose-node.js").ComposeNodes} */ { composeNode, composeEmptyNode }, /** @type {import("yaml-cst-types").ComposeContext} */ ctx, /** @type {import("yaml-cst-types").Token} */ bs, /** @type {import("yaml-cst-types").ComposeErrorHandler} */ onError, tag) {
+/** @returns {YAMLSeq | import("../schema/yaml-1.1/omap.js").YAMLOMap} */ function resolveBlockSeq(/** @type {import("./compose-node.js").ComposeNodes} */ { composeNode, composeEmptyNode }, /** @type {import("yaml-cst-types").ComposeContext} */ ctx, /** @type {import("yaml-cst-types").Token} */ bs, /** @type {import("yaml-cst-types").ComposeErrorHandler} */ onError, /** @type {import("yaml-cst-types").SchemaTag | undefined} */ tag) {
     const NodeClass = tag?.nodeClass ?? YAMLSeq;
     /** @type {YAMLSeq} */ const seq = new NodeClass(ctx.schema);
     if (ctx.atRoot)

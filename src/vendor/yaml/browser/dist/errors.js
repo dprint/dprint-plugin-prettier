@@ -1,4 +1,8 @@
 // @nts-check
+/**
+ * where the error is, which prettifyError gives it
+ * @property {import("./parse/line-counter.js").LinePos[]} [linePos]
+ */
 class YAMLError extends Error {
     constructor(/** @type {string} */ name, /** @type {any[]} */ pos, /** @type {string} */ code, /** @type {string} */ message) {
         super();
@@ -18,7 +22,7 @@ class YAMLWarning extends YAMLError {
         super('YAMLWarning', pos, code, message);
     }
 }
-const prettifyError = (src, lc) => (error) => {
+const prettifyError = (/** @type {string} */ src, /** @type {import("./parse/line-counter.js").LineCounter} */ lc) => (/** @type {YAMLError} */ error) => {
     if (error.pos[0] === -1)
         return;
     error.linePos = error.pos.map(pos => lc.linePos(pos));

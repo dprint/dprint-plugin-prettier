@@ -4,7 +4,7 @@ import { createBlockValue } from "../factories/block-value.mjs";
 //#region src/transforms/block-value.ts
 /** @returns {import("yaml-unist-types").YamlNode} */ function transformAstBlockValue(/** @type {import("../../yaml/browser/dist/nodes/Scalar.js").Scalar} */ blockValue, /** @type {import("yaml-cst-types").Token} */ srcToken, /** @type {import("./context.mjs").default} */ context, /** @type {import("yaml-unist-types").TransformProps} */ props) {
 	/** @type {import("yaml-cst-types").Token | null} */ let blockScalarHeaderToken = null;
-	let indicatorComment = null;
+	/** @type {import("yaml-unist-types").YamlNode | null} */ let indicatorComment = null;
 	for (const token of tokens(srcToken.props)) if (token.type === "comment") indicatorComment = context.transformComment(token);
 	else if (token.type === "block-scalar-header") blockScalarHeaderToken = token;
 	else
@@ -19,7 +19,7 @@ import { createBlockValue } from "../factories/block-value.mjs";
 /**
 * Parse the block scalar header to extract indentation and chomping information.
 */
-function parseHeader(/** @type {string} */ header) {
+/** @returns {{ chomping: string, indent: number | null }} */ function parseHeader(/** @type {string} */ header) {
 	const parsed = /([+-]?)(\d*)([+-]?)$/u.exec(header);
 	/** @type {number | null} */ let indent = null;
 	/** @type {string} */ let chomping = "clip";

@@ -1,6 +1,11 @@
 // @nts-check
 //#region src/utils/get-last.ts
-/** @returns {object | import("../../yaml/browser/dist/nodes/Pair.js").Pair | undefined} */ function getLast(/** @type {any[]} */ array) {
+/**
+ * @template T
+ * @param {T[]} array
+ * @returns {T}
+ */
+function getLast(array) {
 	return array[array.length - 1];
 }
 //#endregion

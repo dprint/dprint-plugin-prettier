@@ -86,7 +86,7 @@ class YAMLSeq extends Collection {
             onComment
         });
     }
-    /** @returns {YAMLSeq} */ static from(schema, obj, ctx) {
+    /** @returns {YAMLSeq} */ static from(/** @type {import("../schema/Schema.js").Schema} */ schema, obj, /** @type {import("yaml-cst-types").CreateNodeContext} */ ctx) {
         const { replacer } = ctx;
         const seq = new this(schema);
         if (obj && Symbol.iterator in Object(obj)) {

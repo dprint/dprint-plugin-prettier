@@ -1,5 +1,10 @@
 // @nts-check
-/** @returns {import("yaml-cst-types").ResolvedEnd} */ function resolveEnd(/** @type {import("yaml-cst-types").Token[] | undefined} */ end, /** @type {number} */ offset, /** @type {boolean} */ reqSpace, /** @type {import("yaml-cst-types").ComposeErrorHandler} */ onError) {
+/**
+ * what resolving the end of a node gives (yaml/dist/compose/resolve-end.d.ts), written out as an object that is only
+ * read where it is given, so that it is a struct
+ * @typedef {Readonly<{ comment: string, offset: number }>} ResolvedEnd
+ */
+/** @returns {ResolvedEnd} */ function resolveEnd(/** @type {import("yaml-cst-types").Token[] | undefined} */ end, /** @type {number} */ offset, /** @type {boolean} */ reqSpace, /** @type {import("yaml-cst-types").ComposeErrorHandler} */ onError) {
     let comment = '';
     if (end) {
         /** @type {boolean} */ let hasSpace = false;

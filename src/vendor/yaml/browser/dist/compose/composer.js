@@ -57,10 +57,10 @@ class Composer {
     constructor(options = {}) {
         /** @type {Document | null} */ this.doc = null;
         /** @type {boolean} */ this.atDirectives = false;
-        this.prelude = [];
-        this.errors = [];
-        this.warnings = [];
-        this.onError = (source, /** @type {string} */ code, /** @type {string} */ message, /** @type {boolean | undefined} */ warning) => {
+        /** @type {string[]} */ this.prelude = [];
+        /** @type {YAMLParseError[]} */ this.errors = [];
+        /** @type {YAMLWarning[]} */ this.warnings = [];
+        /** @type {import("yaml-cst-types").ComposeErrorHandler} */ this.onError = (source, /** @type {string} */ code, /** @type {string} */ message, /** @type {boolean | undefined} */ warning) => {
             const pos = getErrorPos(source);
             if (warning)
                 this.warnings.push(new YAMLWarning(pos, code, message));
@@ -69,7 +69,7 @@ class Composer {
         };
         // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
         /** @type {Directives} */ this.directives = new Directives({ version: options.version || '1.2' });
-        this.options = options;
+        /** @type {Record<string, any>} */ this.options = options;
     }
     decorate(/** @type {Document} */ doc, /** @type {boolean} */ afterDoc) {
         const { comment, afterEmptyLine } = parsePrelude(this.prelude);
@@ -127,16 +127,16 @@ class Composer {
      * @param forceDoc - If the stream contains no document, still emit a final document including any comments and directives that would be applied to a subsequent document.
      * @param endOffset - Should be set if `forceDoc` is also set, to set the document range end and to indicate errors correctly.
      */
-    *compose(tokens, /** @type {undefined | boolean} */ forceDoc = false, /** @type {undefined | number} */ endOffset = -1) {
+    /** @returns {Generator<Document>} */ *compose(tokens, /** @type {undefined | boolean} */ forceDoc = false, /** @type {undefined | number} */ endOffset = -1) {
         for (const token of tokens)
             yield* this.next(token);
         yield* this.end(forceDoc, endOffset);
     }
     /** Advance the composer by one CST token. */
-    *next(/** @type {import("yaml-cst-types").Token} */ token) {
+    /** @returns {Generator<Document>} */ *next(/** @type {import("yaml-cst-types").Token} */ token) {
         switch (token.type) {
             case 'directive':
-                this.directives.add(token.source, (/** @type {number} */ offset, /** @type {string} */ message, /** @type {boolean} */ warning) => {
+                this.directives.add(token.source, (/** @type {number} */ offset, /** @type {string} */ message, /** @type {boolean | undefined} */ warning) => {
                     const pos = getErrorPos(token);
                     pos[0] += offset;
                     this.onError(pos, 'BAD_DIRECTIVE', message, warning);
@@ -199,7 +199,7 @@ class Composer {
      * @param forceDoc - If the stream contains no document, still emit a final document including any comments and directives that would be applied to a subsequent document.
      * @param endOffset - Should be set if `forceDoc` is also set, to set the document range end and to indicate errors correctly.
      */
-    *end(/** @type {undefined | boolean} */ forceDoc = false, /** @type {undefined | number} */ endOffset = -1) {
+    /** @returns {Generator<Document>} */ *end(/** @type {undefined | boolean} */ forceDoc = false, /** @type {undefined | number} */ endOffset = -1) {
         if (this.doc) {
             this.decorate(this.doc, true);
             yield this.doc;

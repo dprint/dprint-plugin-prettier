@@ -20,8 +20,8 @@ class Directives {
         /** @type {boolean | null} */ this.docStart = null;
         /** The doc-end marker `...`.  */
         /** @type {boolean} */ this.docEnd = false;
-        this.yaml = Object.assign({}, Directives.defaultYaml, yaml);
-        this.tags = Object.assign({}, Directives.defaultTags, tags);
+        /** @type {{ explicit: boolean, version: string }} */ this.yaml = Object.assign({}, Directives.defaultYaml, yaml);
+        /** @type {Record<string, string>} */ this.tags = Object.assign({}, Directives.defaultTags, tags);
     }
     /** @returns {Directives} */ clone() {
         const copy = new Directives(this.yaml, this.tags);
@@ -55,7 +55,7 @@ class Directives {
      * @returns {boolean}
      * @returns {boolean}
      */
-    add(/** @type {string} */ line, onError) {
+    add(/** @type {string} */ line, /** @type {(offset: number, message: string, warning?: boolean) => void} */ onError) {
         if (this.atNextDocument) {
             this.yaml = { explicit: Directives.defaultYaml.explicit, version: '1.1' };
             this.tags = Object.assign({}, Directives.defaultTags);
@@ -104,7 +104,7 @@ class Directives {
      * @returns {string | null}
      * @returns {string | null}
      */
-    tagName(/** @type {string} */ source, onError) {
+    tagName(/** @type {string} */ source, /** @type {(message: string) => void} */ onError) {
         if (source === '!')
             return '!'; // non-specific tag
         if (source[0] !== '!') {

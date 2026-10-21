@@ -7,7 +7,7 @@ import { flowIndentCheck } from './util-flow-indent-check.js';
 import { mapIncludes } from './util-map-includes.js';
 
 const startColMsg = 'All mapping items must start at the same column';
-/** @returns {YAMLMap | import("../schema/yaml-1.1/set.js").YAMLSet} */ function resolveBlockMap(/** @type {import("./compose-node.js").ComposeNodes} */ { composeNode, composeEmptyNode }, /** @type {import("yaml-cst-types").ComposeContext} */ ctx, /** @type {import("yaml-cst-types").Token} */ bm, /** @type {import("yaml-cst-types").ComposeErrorHandler} */ onError, tag) {
+/** @returns {YAMLMap | import("../schema/yaml-1.1/set.js").YAMLSet} */ function resolveBlockMap(/** @type {import("./compose-node.js").ComposeNodes} */ { composeNode, composeEmptyNode }, /** @type {import("yaml-cst-types").ComposeContext} */ ctx, /** @type {import("yaml-cst-types").Token} */ bm, /** @type {import("yaml-cst-types").ComposeErrorHandler} */ onError, /** @type {import("yaml-cst-types").SchemaTag | undefined} */ tag) {
     const NodeClass = tag?.nodeClass ?? YAMLMap;
     /** @type {YAMLMap} */ const map = new NodeClass(ctx.schema);
     if (ctx.atRoot)
