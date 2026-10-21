@@ -1,11 +1,12 @@
 import { Schema } from '../schema.js';
 import { comparePrimitive, mapFromArray } from '../utils.js';
+/** @import {VnoptsUtils} from '../normalize.js' */
 export class ChoiceSchema extends Schema {
     constructor(parameters) {
         super(parameters);
         this._choices = mapFromArray(parameters.choices.map(choice => choice && typeof choice === 'object' ? choice : { value: choice }), 'value');
     }
-    expected({ descriptor }) {
+    expected(/** @type {VnoptsUtils} */ { descriptor }) {
         const choiceDescriptions = Array.from(this._choices.keys())
             .map(value => this._choices.get(value))
             .filter(({ hidden }) => !hidden)

@@ -9,7 +9,7 @@ escape.locator = locate
 /** @type {string} */ var lineFeed = '\n'
 /** @type {string} */ var backslash = '\\'
 
-function escape(/** @type {(a0?: any) => any} */ eat, /** @type {StringView} */ value, silent) {
+/** @this {import("../parser.js").RemarkParser} */ function escape(/** @type {(a0?: any) => any} */ eat, /** @type {StringView} */ value, silent) {
   var self = this
   /** @type {string | undefined} */ var character
   var node

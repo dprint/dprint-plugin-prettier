@@ -11,7 +11,7 @@ module.exports = blockquote
 /** @type {string} */ var space = ' '
 /** @type {string} */ var greaterThan = '>'
 
-function blockquote(eat, /** @type {StringView} */ value, /** @type {boolean | undefined} */ silent) {
+/** @this {import("../parser.js").RemarkParser} */ function blockquote(eat, /** @type {StringView} */ value, /** @type {boolean | undefined} */ silent) {
   var self = this
   var offsets = self.offset
   var tokenizers = self.blockTokenizers

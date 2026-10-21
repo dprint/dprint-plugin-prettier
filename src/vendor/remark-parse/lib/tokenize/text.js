@@ -3,7 +3,7 @@
 
 module.exports = text
 
-function text(eat, /** @type {StringView} */ value, silent) {
+/** @this {import("../parser.js").RemarkParser} */ function text(eat, /** @type {StringView} */ value, silent) {
   var self = this
   var methods
   var tokenizers

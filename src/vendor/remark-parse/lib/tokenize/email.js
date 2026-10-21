@@ -16,7 +16,7 @@ email.notInLink = true
 /** @type {number} */ var atSign = 64 // '@'
 /** @type {number} */ var underscore = 95 // '_'
 
-function email(eat, /** @type {StringView} */ value, silent) {
+/** @this {import("../parser.js").RemarkParser} */ function email(eat, /** @type {StringView} */ value, silent) {
   var self = this
   /** @type {boolean} */ var gfm = self.options.gfm
   var tokenizers = self.inlineTokenizers

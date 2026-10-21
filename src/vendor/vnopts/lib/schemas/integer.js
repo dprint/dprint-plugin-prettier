@@ -4,7 +4,7 @@ export class IntegerSchema extends NumberSchema {
     expected() {
         return 'an integer';
     }
-    validate(value, utils) {
+    validate(value, /** @type {import("../normalize.js").VnoptsUtils} */ utils) {
         return (utils.normalizeValidateResult(super.validate(value, utils), value) ===
             true && isInt(value));
     }

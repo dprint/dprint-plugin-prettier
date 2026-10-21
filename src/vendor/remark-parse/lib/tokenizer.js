@@ -8,7 +8,7 @@ function factory(/** @type {string} */ type) {
   return tokenize
 
   // Tokenizer for a bound `type`.
-  /** @returns {any[]} */ function tokenize(/** @type {StringView} */ value, location) {
+  /** @returns {any[]} */ /** @this {import("./parser.js").RemarkParser} */ function tokenize(/** @type {StringView} */ value, location) {
     var self = this
     var offset = self.offset
     var tokens = []
@@ -308,7 +308,7 @@ function mergeText(previous, node) {
 }
 
 // Merge two blockquotes: `node` into `prev`, unless in CommonMark or gfm modes.
-function mergeBlockquote(previous, node) {
+/** @this {import("./parser.js").RemarkParser} */ function mergeBlockquote(previous, node) {
   if (this.options.commonmark || this.options.gfm) {
     return node
   }

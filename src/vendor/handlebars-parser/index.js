@@ -59,24 +59,83 @@ function Exception(message, node) {
 Exception.prototype = /* @__PURE__ */ new Error();
 //#endregion
 //#region lib/visitor.js
+/**
+ * What a visitor is to its methods: the nodes it is inside of, the one it is at, whether it puts back what its
+ * methods give, and what whitespace control is told and has seen; the methods are found by the names of node types
+ * @typedef {{
+ *   parents: any[],
+ *   current: any,
+ *   mutating: boolean,
+ *   options: any,
+ *   isRootSeen: boolean,
+ *   accept: (this: HbsVisitor, object: any) => any,
+ *   acceptKey: (this: HbsVisitor, node: any, name: string | number) => void,
+ *   acceptRequired: (this: HbsVisitor, node: any, name: string) => void,
+ *   acceptArray: (this: HbsVisitor, array: any[]) => void,
+ * }} HbsVisitor
+ * A node of the tree that the parser's actions and helpers write out, as the visitors read it
+ * @typedef {{
+ *   type: string,
+ *   body?: any[],
+ *   blockParams?: any[],
+ *   params?: any[],
+ *   hash?: any,
+ *   path?: any,
+ *   program?: any,
+ *   inverse?: any,
+ *   name?: any,
+ *   original?: any,
+ *   pairs?: any[],
+ *   key?: string,
+ *   value?: any,
+ *   parts?: any[],
+ *   strip?: any,
+ *   openStrip?: any,
+ *   closeStrip?: any,
+ *   inverseStrip?: any,
+ *   chained?: boolean,
+ *   escaped?: any,
+ *   indent?: string,
+ *   loc?: any,
+ *   data?: boolean,
+ *   head?: any,
+ *   tail?: any[],
+ *   items?: any[],
+ *   open?: string,
+ *   chain?: boolean,
+ *   this?: boolean,
+ *   depth?: number,
+ *   partial?: boolean,
+ *   decorator?: boolean,
+ * }} HbsNode
+ * A part of a path that the parser gives the helper that makes paths
+ * @typedef {{ part: string, original: string, separator?: string }} HbsPathPart
+ * What the printer of trees is to its methods: how far it indents
+ * @typedef {{
+ *   padding: number,
+ *   pad: (this: HbsPrintVisitor, string: string) => string,
+ *   accept: (this: HbsPrintVisitor, object: any) => string,
+ *   callBody: (this: HbsPrintVisitor, mustache: HbsNode) => string,
+ * }} HbsPrintVisitor
+ */
 function Visitor() {
 	this.parents = [];
 }
 Visitor.prototype = {
 	constructor: Visitor,
 	mutating: false,
-	acceptKey: function(node, name) {
+	acceptKey: /** @this {HbsVisitor} */ function(/** @type {any} */ node, /** @type {string | number} */ name) {
 		let value = this.accept(node[name]);
 		if (this.mutating) {
 			if (value && !Visitor.prototype[value.type]) throw new Exception("Unexpected node type \"" + value.type + "\" found when accepting " + name + " on " + node.type);
 			node[name] = value;
 		}
 	},
-	acceptRequired: function(node, name) {
+	acceptRequired: /** @this {HbsVisitor} */ function(/** @type {HbsNode} */ node, /** @type {string} */ name) {
 		this.acceptKey(node, name);
 		if (!node[name]) throw new Exception(node.type + " requires " + name);
 	},
-	acceptArray: function(array) {
+	acceptArray: /** @this {HbsVisitor} */ function(/** @type {any[]} */ array) {
 		for (let i = 0, l = array.length; i < l; i++) {
 			this.acceptKey(array, i);
 			if (!array[i]) {
@@ -86,7 +145,7 @@ Visitor.prototype = {
 			}
 		}
 	},
-	accept: function(object) {
+	accept: /** @this {HbsVisitor} */ function(/** @type {HbsNode | undefined} */ object) {
 		if (!object) return;
 		/* istanbul ignore next: Sanity code */
 		if (!this[object.type]) throw new Exception("Unknown type: " + object.type, object);
@@ -97,7 +156,7 @@ Visitor.prototype = {
 		if (!this.mutating || ret) return ret;
 		else if (ret !== false) return object;
 	},
-	Program: function(program) {
+	Program: /** @this {HbsVisitor} */ function(/** @type {HbsNode} */ program) {
 		this.acceptArray(program.body);
 	},
 	MustacheStatement: visitSubExpression,
@@ -105,37 +164,37 @@ Visitor.prototype = {
 	BlockStatement: visitBlock,
 	DecoratorBlock: visitBlock,
 	PartialStatement: visitPartial,
-	PartialBlockStatement: function(partial) {
+	PartialBlockStatement: /** @this {HbsVisitor} */ function(/** @type {HbsNode} */ partial) {
 		visitPartial.call(this, partial);
 		this.acceptKey(partial, "program");
 	},
-	ContentStatement: function() {},
-	CommentStatement: function() {},
+	ContentStatement: /** @this {HbsVisitor} */ function() {},
+	CommentStatement: /** @this {HbsVisitor} */ function() {},
 	SubExpression: visitSubExpression,
-	PathExpression: function() {},
-	StringLiteral: function() {},
-	NumberLiteral: function() {},
-	BooleanLiteral: function() {},
-	UndefinedLiteral: function() {},
-	NullLiteral: function() {},
-	Hash: function(hash) {
+	PathExpression: /** @this {HbsVisitor} */ function() {},
+	StringLiteral: /** @this {HbsVisitor} */ function() {},
+	NumberLiteral: /** @this {HbsVisitor} */ function() {},
+	BooleanLiteral: /** @this {HbsVisitor} */ function() {},
+	UndefinedLiteral: /** @this {HbsVisitor} */ function() {},
+	NullLiteral: /** @this {HbsVisitor} */ function() {},
+	Hash: /** @this {HbsVisitor} */ function(/** @type {HbsNode} */ hash) {
 		this.acceptArray(hash.pairs);
 	},
-	HashPair: function(pair) {
+	HashPair: /** @this {HbsVisitor} */ function(/** @type {HbsNode} */ pair) {
 		this.acceptRequired(pair, "value");
 	}
 };
-function visitSubExpression(mustache) {
+/** @this {HbsVisitor} */ function visitSubExpression(mustache) {
 	this.acceptRequired(mustache, "path");
 	this.acceptArray(mustache.params);
 	this.acceptKey(mustache, "hash");
 }
-function visitBlock(block) {
+/** @this {HbsVisitor} */ function visitBlock(block) {
 	visitSubExpression.call(this, block);
 	this.acceptKey(block, "program");
 	this.acceptKey(block, "inverse");
 }
-function visitPartial(partial) {
+/** @this {HbsVisitor} */ function visitPartial(partial) {
 	this.acceptRequired(partial, "name");
 	this.acceptArray(partial.params);
 	this.acceptKey(partial, "hash");
@@ -146,7 +205,7 @@ function WhitespaceControl(options = {}) {
 	this.options = options;
 }
 WhitespaceControl.prototype = new Visitor();
-WhitespaceControl.prototype.Program = function(program) {
+WhitespaceControl.prototype.Program = /** @this {HbsVisitor} */ function(/** @type {HbsNode} */ program) {
 	const doStandalone = !this.options.ignoreStandalone;
 	let isRoot = !this.isRootSeen;
 	this.isRootSeen = true;
@@ -182,7 +241,7 @@ WhitespaceControl.prototype.Program = function(program) {
 	}
 	return program;
 };
-WhitespaceControl.prototype.BlockStatement = WhitespaceControl.prototype.DecoratorBlock = WhitespaceControl.prototype.PartialBlockStatement = function(block) {
+WhitespaceControl.prototype.BlockStatement = WhitespaceControl.prototype.DecoratorBlock = WhitespaceControl.prototype.PartialBlockStatement = /** @this {HbsVisitor} */ function(/** @type {HbsNode} */ block) {
 	this.accept(block.program);
 	this.accept(block.inverse);
 	let program = block.program || block.inverse, inverse = block.program && block.inverse, firstInverse = inverse, lastInverse = inverse;
@@ -209,10 +268,10 @@ WhitespaceControl.prototype.BlockStatement = WhitespaceControl.prototype.Decorat
 	} else if (block.closeStrip.open) omitLeft(program.body, null, true);
 	return strip;
 };
-WhitespaceControl.prototype.Decorator = WhitespaceControl.prototype.MustacheStatement = function(mustache) {
+WhitespaceControl.prototype.Decorator = WhitespaceControl.prototype.MustacheStatement = /** @this {HbsVisitor} */ function(/** @type {HbsNode} */ mustache) {
 	return mustache.strip;
 };
-WhitespaceControl.prototype.PartialStatement = WhitespaceControl.prototype.CommentStatement = function(node) {
+WhitespaceControl.prototype.PartialStatement = WhitespaceControl.prototype.CommentStatement = /** @this {HbsVisitor} */ function(/** @type {HbsNode} */ node) {
 	/* istanbul ignore next */
 	let strip = node.strip || {};
 	return {
@@ -250,6 +309,87 @@ function omitLeft(body, i, multiple) {
 }
 //#endregion
 //#region lib/parser.js
+/**
+ * Where a token or a rule's match is, which jison works out as it goes
+ * @typedef {{ first_line: number, last_line: number, first_column: number, last_column: number, range?: any[] }} JisonLocation
+ * What a rule gives and where it is, which the parser's action is called on
+ * @typedef {{ $: any, _$: JisonLocation }} JisonValue
+ * What the parser's actions are given: handlebars' helpers, the location maker and the syntax of literals; the helpers
+ * that use `this` say so, and are called on it
+ * @typedef {{
+ *   locInfo: (locInfo: JisonLocation) => any,
+ *   stripFlags: typeof stripFlags,
+ *   stripComment: typeof stripComment,
+ *   id: typeof id,
+ *   preparePath: typeof preparePath,
+ *   prepareBlock: typeof prepareBlock,
+ *   prepareProgram: typeof prepareProgram,
+ *   prepareMustache: typeof prepareMustache,
+ *   prepareRawBlock: typeof prepareRawBlock,
+ *   preparePartialBlock: typeof preparePartialBlock,
+ *   syntax: { square: ((array: any, loc: any) => any) | string, hash: (hash: any, loc: any) => any },
+ *   parseError?: any,
+ *   lexer?: any,
+ *   parser?: any,
+ * }} JisonShared
+ * The parser, whose tables say what each state does with each symbol (an array for an action, a number for the state
+ * to go to), and whose methods jison writes into it
+ * @typedef {{
+ *   trace: (this: JisonParser, ...args: any[]) => void,
+ *   yy: any,
+ *   symbols_: Record<string, any>,
+ *   terminals_: Record<string, any>,
+ *   productions_: any[],
+ *   table: Record<string, any>[],
+ *   defaultActions: Record<string, any>,
+ *   performAction: any,
+ *   parseError: (this: JisonParser, str: string, hash: any) => void,
+ *   parse: (this: JisonParser, input: string | undefined) => any,
+ *   lexer: any,
+ * }} JisonParser
+ * The lexer, which the parser makes one of for each input from this one
+ * @typedef {{
+ *   EOF: number,
+ *   last_line?: any,
+ *   yy: any,
+ *   yytext: string,
+ *   yyleng: number,
+ *   yylineno: number,
+ *   yylloc: JisonLocation,
+ *   match: string,
+ *   matched: string,
+ *   matches: any,
+ *   offset: number,
+ *   done: boolean,
+ *   _input: string,
+ *   _more: boolean,
+ *   _backtrack: boolean,
+ *   conditionStack: any[],
+ *   conditions: Record<string, any>,
+ *   rules: any[],
+ *   options: any,
+ *   parseError: (this: JisonLexer, str: string, hash: any) => any,
+ *   setInput: (this: JisonLexer, input: string, yy: any) => JisonLexer,
+ *   input: (this: JisonLexer) => string,
+ *   unput: (this: JisonLexer, ch: string) => JisonLexer,
+ *   more: (this: JisonLexer) => JisonLexer,
+ *   reject: (this: JisonLexer) => any,
+ *   less: (this: JisonLexer, n: number) => void,
+ *   pastInput: (this: JisonLexer) => string,
+ *   upcomingInput: (this: JisonLexer) => string,
+ *   showPosition: (this: JisonLexer) => string,
+ *   test_match: (this: JisonLexer, match: RegExpMatchArray, indexed_rule: number) => any,
+ *   next: (this: JisonLexer) => any,
+ *   lex: (this: JisonLexer) => any,
+ *   begin: (this: JisonLexer, condition: string) => void,
+ *   popState: (this: JisonLexer) => string,
+ *   _currentRules: (this: JisonLexer) => any,
+ *   topState: (this: JisonLexer, n?: number) => string,
+ *   pushState: (this: JisonLexer, condition: string) => void,
+ *   stateStackSize: (this: JisonLexer) => number,
+ *   performAction: any,
+ * }} JisonLexer
+ */
 var parser = (function() {
 	var o = function(/** @type {any[] | undefined} */ k, /** @type {any[] | undefined} */ v, o, l) {
 		for (o = o || {}, l = k.length; l--; o[k[l]] = v);
@@ -660,7 +800,7 @@ var parser = (function() {
 			[80, 1],
 			[80, 2]
 		],
-		performAction: function anonymous(/** @type {string} */ yytext, /** @type {number} */ yyleng, /** @type {number} */ yylineno, yy, /** @type {number} */ yystate, /** @type {any[]} */ $$, /** @type {any[]} */ _$) {
+		performAction: /** @this {JisonValue} */ function anonymous(/** @type {string} */ yytext, /** @type {number} */ yyleng, /** @type {number} */ yylineno, /** @type {JisonShared} */ yy, /** @type {number} */ yystate, /** @type {any[]} */ $$, /** @type {any[]} */ _$) {
 			/** @type {number} */ var $0 = $$.length - 1;
 			switch (yystate) {
 				case 1: return $$[$0 - 1];
@@ -1700,7 +1840,7 @@ var parser = (function() {
 			148: [2, 81],
 			149: [2, 37]
 		},
-		parseError: function parseError(/** @type {string} */ str, hash) {
+		parseError: /** @this {JisonParser} */ function parseError(/** @type {string} */ str, hash) {
 			if (hash.recoverable) this.trace(str);
 			else {
 				var error = new Error(str);
@@ -1708,10 +1848,10 @@ var parser = (function() {
 				throw error;
 			}
 		},
-		parse: function parse(/** @type {string | undefined} */ input) {
+		parse: /** @this {JisonParser} */ function parse(/** @type {string | undefined} */ input) {
 			var self = this, stack = [0], vstack = [null], lstack = [], table = this.table, yytext = "", yylineno = 0, yyleng = 0, recovering = 0, TERROR = 2, EOF = 1;
 			var args = lstack.slice.call(arguments, 1);
-			var lexer = Object.create(this.lexer);
+			var lexer = /** @type {JisonLexer} */ (Object.create(this.lexer));
 			var sharedState = { yy: {} };
 			for (var k in this.yy) if (Object.prototype.hasOwnProperty.call(this.yy, k)) sharedState.yy[k] = this.yy[k];
 			lexer.setInput(input, sharedState.yy);
@@ -1728,7 +1868,7 @@ var parser = (function() {
 				if (typeof token !== "number") token = self.symbols_[token] || token;
 				return token;
 			};
-			var symbol, preErrorSymbol, state, action, r, yyval = {}, p, len, newState, expected;
+			var symbol, preErrorSymbol, state, action, r, yyval = /** @type {JisonValue} */ ({}), p, len, newState, expected;
 			while (true) {
 				state = stack[stack.length - 1];
 				if (this.defaultActions[state]) action = this.defaultActions[state];
@@ -1809,11 +1949,11 @@ var parser = (function() {
 	parser.lexer = (function() {
 		return {
 			EOF: 1,
-			parseError: function parseError(str, hash) {
+			parseError: /** @this {JisonLexer} */ function parseError(str, hash) {
 				if (this.yy.parser) this.yy.parser.parseError(str, hash);
 				else throw new Error(str);
 			},
-			setInput: function(/** @type {string} */ input, yy) {
+			setInput: /** @this {JisonLexer} */ function(/** @type {string} */ input, yy) {
 				this.yy = yy || this.yy || {};
 				this._input = input;
 				this._more = this._backtrack = this.done = false;
@@ -1830,7 +1970,7 @@ var parser = (function() {
 				this.offset = 0;
 				return this;
 			},
-			input: function() {
+			input: /** @this {JisonLexer} */ function() {
 				var ch = this._input[0];
 				this.yytext += ch;
 				this.yyleng++;
@@ -1845,7 +1985,7 @@ var parser = (function() {
 				this._input = this._input.slice(1);
 				return ch;
 			},
-			unput: function(/** @type {string} */ ch) {
+			unput: /** @this {JisonLexer} */ function(/** @type {string} */ ch) {
 				/** @type {number} */ var len = ch.length;
 				var lines = ch.split(/(?:\r\n?|\n)/g);
 				this._input = ch + this._input;
@@ -1866,11 +2006,11 @@ var parser = (function() {
 				this.yyleng = this.yytext.length;
 				return this;
 			},
-			more: function() {
+			more: /** @this {JisonLexer} */ function() {
 				this._more = true;
 				return this;
 			},
-			reject: function() {
+			reject: /** @this {JisonLexer} */ function() {
 				if (this.options.backtrack_lexer) this._backtrack = true;
 				else return this.parseError("Lexical error on line " + (this.yylineno + 1) + ". You can only invoke reject() in the lexer when the lexer is of the backtracking persuasion (options.backtrack_lexer = true).\n" + this.showPosition(), {
 					text: "",
@@ -1879,24 +2019,24 @@ var parser = (function() {
 				});
 				return this;
 			},
-			less: function(n) {
+			less: /** @this {JisonLexer} */ function(n) {
 				this.unput(this.match.slice(n));
 			},
-			pastInput: /** @returns {string} */ function() {
+			pastInput: /** @returns {string} */ /** @this {JisonLexer} */ function() {
 				var past = this.matched.substr(0, this.matched.length - this.match.length);
 				return (past.length > 20 ? "..." : "") + past.substr(-20).replace(/\n/g, "");
 			},
-			upcomingInput: /** @returns {string} */ function() {
+			upcomingInput: /** @returns {string} */ /** @this {JisonLexer} */ function() {
 				var next = this.match;
 				if (next.length < 20) next += this._input.substr(0, 20 - next.length);
 				return (next.substr(0, 20) + (next.length > 20 ? "..." : "")).replace(/\n/g, "");
 			},
-			showPosition: /** @returns {string} */ function() {
+			showPosition: /** @returns {string} */ /** @this {JisonLexer} */ function() {
 				/** @type {string} */ var pre = this.pastInput();
 				/** @type {string} */ var c = new Array(pre.length + 1).join("-");
 				return pre + this.upcomingInput() + "\n" + c + "^";
 			},
-			test_match: function(/** @type {any[]} */ match, /** @type {number} */ indexed_rule) {
+			test_match: /** @this {JisonLexer} */ function(/** @type {RegExpMatchArray} */ match, /** @type {number} */ indexed_rule) {
 				var token, lines, backup;
 				if (this.options.backtrack_lexer) {
 					backup = {
@@ -1947,7 +2087,7 @@ var parser = (function() {
 				}
 				return false;
 			},
-			next: function() {
+			next: /** @this {JisonLexer} */ function() {
 				if (this.done) return this.EOF;
 				if (!this._input) this.done = true;
 				var token, match, tempMatch, index;
@@ -1957,7 +2097,7 @@ var parser = (function() {
 				}
 				var rules = this._currentRules();
 				for (var i = 0; i < rules.length; i++) {
-					tempMatch = this._input.match(this.rules[rules[i]]);
+					tempMatch = this._input.match(/** @type {RegExp} */ (this.rules[rules[i]]));
 					if (tempMatch && (!match || tempMatch[0].length > match[0].length)) {
 						match = tempMatch;
 						index = i;
@@ -1983,35 +2123,35 @@ var parser = (function() {
 					line: this.yylineno
 				});
 			},
-			lex: function lex() {
+			lex: /** @this {JisonLexer} */ function lex() {
 				var r = this.next();
 				if (r) return r;
 				else return this.lex();
 			},
-			begin: function begin(/** @type {string} */ condition) {
+			begin: /** @this {JisonLexer} */ function begin(/** @type {string} */ condition) {
 				this.conditionStack.push(condition);
 			},
-			popState: /** @returns {string} */ function popState() {
+			popState: /** @returns {string} */ /** @this {JisonLexer} */ function popState() {
 				if (this.conditionStack.length - 1 > 0) return this.conditionStack.pop();
 				else return this.conditionStack[0];
 			},
-			_currentRules: /** @returns {any[]} */ function _currentRules() {
+			_currentRules: /** @returns {any[]} */ /** @this {JisonLexer} */ function _currentRules() {
 				if (this.conditionStack.length && this.conditionStack[this.conditionStack.length - 1]) return this.conditions[this.conditionStack[this.conditionStack.length - 1]].rules;
 				else return this.conditions["INITIAL"].rules;
 			},
-			topState: function topState(n) {
+			topState: /** @this {JisonLexer} */ function topState(n) {
 				n = this.conditionStack.length - 1 - Math.abs(n || 0);
 				if (n >= 0) return this.conditionStack[n];
 				else return "INITIAL";
 			},
-			pushState: function pushState(condition) {
+			pushState: /** @this {JisonLexer} */ function pushState(condition) {
 				this.begin(condition);
 			},
-			stateStackSize: function stateStackSize() {
+			stateStackSize: /** @this {JisonLexer} */ function stateStackSize() {
 				return this.conditionStack.length;
 			},
 			options: {},
-			performAction: function anonymous(yy, yy_, /** @type {number} */ $avoiding_name_collisions, /** @type {string} */ YY_START) {
+			performAction: /** @this {JisonLexer} */ function anonymous(yy, /** @type {JisonLexer} */ yy_, /** @type {number} */ $avoiding_name_collisions, /** @type {string} */ YY_START) {
 				/** @returns {string} */ function strip(/** @type {number} */ start, /** @type {number} */ end) {
 					return yy_.yytext = yy_.yytext.substring(start, yy_.yyleng - end + start);
 				}
@@ -2259,13 +2399,13 @@ function PrintVisitor() {
 	this.padding = 0;
 }
 PrintVisitor.prototype = new Visitor();
-PrintVisitor.prototype.pad = function(string) {
+PrintVisitor.prototype.pad = /** @this {HbsPrintVisitor} */ function(/** @type {string} */ string) {
 	let out = "";
 	for (let i = 0, l = this.padding; i < l; i++) out += "  ";
 	out += string + "\n";
 	return out;
 };
-PrintVisitor.prototype.Program = function(program) {
+PrintVisitor.prototype.Program = /** @this {HbsPrintVisitor} */ function(/** @type {HbsNode} */ program) {
 	let out = "", body = program.body, i, l;
 	if (program.blockParams) {
 		let blockParams = "BLOCK PARAMS: [";
@@ -2277,14 +2417,14 @@ PrintVisitor.prototype.Program = function(program) {
 	this.padding--;
 	return out;
 };
-PrintVisitor.prototype.MustacheStatement = function(mustache) {
+PrintVisitor.prototype.MustacheStatement = /** @this {HbsPrintVisitor} */ function(/** @type {HbsNode} */ mustache) {
 	if (mustache.params.length > 0 || mustache.hash) return this.pad("{{ " + this.callBody(mustache) + " }}");
 	else return this.pad("{{ " + this.accept(mustache.path) + " }}");
 };
-PrintVisitor.prototype.Decorator = function(mustache) {
+PrintVisitor.prototype.Decorator = /** @this {HbsPrintVisitor} */ function(/** @type {HbsNode} */ mustache) {
 	return this.pad("{{ DIRECTIVE " + this.callBody(mustache) + " }}");
 };
-PrintVisitor.prototype.BlockStatement = PrintVisitor.prototype.DecoratorBlock = function(block) {
+PrintVisitor.prototype.BlockStatement = PrintVisitor.prototype.DecoratorBlock = /** @this {HbsPrintVisitor} */ function(/** @type {HbsNode} */ block) {
 	let out = "";
 	out += this.pad((block.type === "DecoratorBlock" ? "DIRECTIVE " : "") + "BLOCK:");
 	this.padding++;
@@ -2306,13 +2446,13 @@ PrintVisitor.prototype.BlockStatement = PrintVisitor.prototype.DecoratorBlock = 
 	this.padding--;
 	return out;
 };
-PrintVisitor.prototype.PartialStatement = function(partial) {
+PrintVisitor.prototype.PartialStatement = /** @this {HbsPrintVisitor} */ function(/** @type {HbsNode} */ partial) {
 	let content = "PARTIAL:" + partial.name.original;
 	if (partial.params[0]) content += " " + this.accept(partial.params[0]);
 	if (partial.hash) content += " " + this.accept(partial.hash);
 	return this.pad("{{> " + content + " }}");
 };
-PrintVisitor.prototype.PartialBlockStatement = function(partial) {
+PrintVisitor.prototype.PartialBlockStatement = /** @this {HbsPrintVisitor} */ function(/** @type {HbsNode} */ partial) {
 	let content = "PARTIAL BLOCK:" + partial.name.original;
 	if (partial.params[0]) content += " " + this.accept(partial.params[0]);
 	if (partial.hash) content += " " + this.accept(partial.hash);
@@ -2322,23 +2462,23 @@ PrintVisitor.prototype.PartialBlockStatement = function(partial) {
 	this.padding--;
 	return this.pad("{{> " + content + " }}");
 };
-PrintVisitor.prototype.ContentStatement = function(content) {
+PrintVisitor.prototype.ContentStatement = /** @this {HbsPrintVisitor} */ function(/** @type {HbsNode} */ content) {
 	return this.pad("CONTENT[ '" + content.value + "' ]");
 };
-PrintVisitor.prototype.CommentStatement = function(comment) {
+PrintVisitor.prototype.CommentStatement = /** @this {HbsPrintVisitor} */ function(/** @type {HbsNode} */ comment) {
 	return this.pad("{{! '" + comment.value + "' }}");
 };
-PrintVisitor.prototype.SubExpression = function(sexpr) {
+PrintVisitor.prototype.SubExpression = /** @this {HbsPrintVisitor} */ function(/** @type {HbsNode} */ sexpr) {
 	return `(${this.callBody(sexpr)})`;
 };
-PrintVisitor.prototype.callBody = function(callExpr) {
+PrintVisitor.prototype.callBody = /** @this {HbsPrintVisitor} */ function(callExpr) {
 	let params = callExpr.params, paramStrings = [], hash;
 	for (let i = 0, l = params.length; i < l; i++) paramStrings.push(this.accept(params[i]));
 	params = paramStrings.length === 0 ? "" : " [" + paramStrings.join(", ") + "]";
 	hash = callExpr.hash ? " " + this.accept(callExpr.hash) : "";
 	return this.accept(callExpr.path) + params + hash;
 };
-PrintVisitor.prototype.PathExpression = function(id) {
+PrintVisitor.prototype.PathExpression = /** @this {HbsPrintVisitor} */ function(/** @type {HbsNode} */ id) {
 	let path = [typeof id.head === "string" ? id.head : `[${this.accept(id.head)}]`, ...id.tail].join("/");
 	return "p%" + prefix(id) + path;
 };
@@ -2347,36 +2487,36 @@ function prefix(path) {
 	else if (path.this) return "this.";
 	else return "";
 }
-PrintVisitor.prototype.StringLiteral = function(string) {
+PrintVisitor.prototype.StringLiteral = /** @this {HbsPrintVisitor} */ function(/** @type {HbsNode} */ string) {
 	return "\"" + string.value + "\"";
 };
-PrintVisitor.prototype.NumberLiteral = function(number) {
+PrintVisitor.prototype.NumberLiteral = /** @this {HbsPrintVisitor} */ function(/** @type {HbsNode} */ number) {
 	return "n%" + number.value;
 };
-PrintVisitor.prototype.BooleanLiteral = function(bool) {
+PrintVisitor.prototype.BooleanLiteral = /** @this {HbsPrintVisitor} */ function(/** @type {HbsNode} */ bool) {
 	return "b%" + bool.value;
 };
-PrintVisitor.prototype.UndefinedLiteral = function() {
+PrintVisitor.prototype.UndefinedLiteral = /** @this {HbsPrintVisitor} */ function() {
 	return "UNDEFINED";
 };
-PrintVisitor.prototype.NullLiteral = function() {
+PrintVisitor.prototype.NullLiteral = /** @this {HbsPrintVisitor} */ function() {
 	return "NULL";
 };
-PrintVisitor.prototype.ArrayLiteral = function(array) {
+PrintVisitor.prototype.ArrayLiteral = /** @this {HbsPrintVisitor} */ function(array) {
 	return `Array[${array.items.map((item) => this.accept(item)).join(", ")}]`;
 };
-PrintVisitor.prototype.HashLiteral = function(hash) {
+PrintVisitor.prototype.HashLiteral = /** @this {HbsPrintVisitor} */ function(/** @type {HbsNode} */ hash) {
 	return `Hash{${this.hashPairs(hash)}}`;
 };
-PrintVisitor.prototype.Hash = function(hash) {
+PrintVisitor.prototype.Hash = /** @this {HbsPrintVisitor} */ function(/** @type {HbsNode} */ hash) {
 	return `HASH{${this.hashPairs(hash)}}`;
 };
-PrintVisitor.prototype.hashPairs = function(hash) {
+PrintVisitor.prototype.hashPairs = /** @this {HbsPrintVisitor} */ function(/** @type {HbsNode} */ hash) {
 	let pairs = hash.pairs, joinedPairs = [];
 	for (let i = 0, l = pairs.length; i < l; i++) joinedPairs.push(this.HashPair(pairs[i]));
 	return joinedPairs.join(" ");
 };
-PrintVisitor.prototype.HashPair = function(pair) {
+PrintVisitor.prototype.HashPair = /** @this {HbsPrintVisitor} */ function(/** @type {HbsNode} */ pair) {
 	return pair.key + "=" + this.accept(pair.value);
 };
 //#endregion
@@ -2393,14 +2533,14 @@ var helpers_exports = /* @__PURE__ */ __exportAll({
 	stripComment: () => stripComment,
 	stripFlags: () => stripFlags
 });
-function validateClose(open, close) {
+function validateClose(/** @type {HbsNode} */ open, close) {
 	close = close.path ? close.path.original : close;
 	if (open.path.original !== close) {
 		let errorNode = { loc: open.path.loc };
 		throw new Exception(open.path.original + " doesn't match " + close, errorNode);
 	}
 }
-function SourceLocation(source, locInfo) {
+function SourceLocation(/** @type {string | undefined} */ source, /** @type {JisonLocation} */ locInfo) {
 	this.source = source;
 	this.start = {
 		line: locInfo.first_line,
@@ -2411,7 +2551,7 @@ function SourceLocation(source, locInfo) {
 		column: locInfo.last_column
 	};
 }
-function id(token) {
+/** @returns {string | string[]} */ function id(/** @type {string | string[]} */ token) {
 	if (/^\[.*\]$/.test(token)) return token.substring(1, token.length - 1);
 	else return token;
 }
@@ -2424,7 +2564,7 @@ function stripFlags(/** @type {string} */ open, /** @type {string} */ close) {
 /** @returns {string} */ function stripComment(/** @type {string} */ comment) {
 	return comment.replace(/^\{\{~?!-?-?/, "").replace(/-?-?~?\}\}$/, "");
 }
-function preparePath(/** @type {boolean} */ data, sexpr, /** @type {any[]} */ parts, loc) {
+/** @this {JisonShared} */ function preparePath(/** @type {boolean} */ data, sexpr, /** @type {HbsPathPart[]} */ parts, loc) {
 	loc = this.locInfo(loc);
 	let original;
 	if (data) original = "@";
@@ -2456,7 +2596,7 @@ function preparePath(/** @type {boolean} */ data, sexpr, /** @type {any[]} */ pa
 		loc
 	};
 }
-function prepareMustache(path, /** @type {any[]} */ params, hash, /** @type {string} */ open, strip, locInfo) {
+/** @this {JisonShared} */ function prepareMustache(/** @type {HbsNode} */ path, /** @type {any[]} */ params, hash, /** @type {string} */ open, strip, locInfo) {
 	let escapeFlag = open.charAt(3) || open.charAt(2), escaped = escapeFlag !== "{" && escapeFlag !== "&";
 	return {
 		type: /\*/.test(open) ? "Decorator" : "MustacheStatement",
@@ -2468,7 +2608,7 @@ function prepareMustache(path, /** @type {any[]} */ params, hash, /** @type {str
 		loc: this.locInfo(locInfo)
 	};
 }
-function prepareRawBlock(openRawBlock, contents, close, locInfo) {
+/** @this {JisonShared} */ function prepareRawBlock(/** @type {HbsNode} */ openRawBlock, /** @type {any[]} */ contents, close, locInfo) {
 	validateClose(openRawBlock, close);
 	locInfo = this.locInfo(locInfo);
 	let program = {
@@ -2489,7 +2629,7 @@ function prepareRawBlock(openRawBlock, contents, close, locInfo) {
 		loc: locInfo
 	};
 }
-function prepareBlock(openBlock, program, inverseAndProgram, close, /** @type {boolean} */ inverted, locInfo) {
+/** @this {JisonShared} */ function prepareBlock(/** @type {HbsNode} */ openBlock, program, inverseAndProgram, close, inverted, locInfo) {
 	if (close && close.path) validateClose(openBlock, close);
 	let decorator = /\*/.test(openBlock.open);
 	program.blockParams = openBlock.blockParams;
@@ -2548,7 +2688,7 @@ function prepareProgram(/** @type {any[]} */ statements, loc) {
 		loc
 	};
 }
-function preparePartialBlock(open, program, close, locInfo) {
+/** @this {JisonShared} */ function preparePartialBlock(/** @type {HbsNode} */ open, /** @type {HbsNode} */ program, close, locInfo) {
 	validateClose(open, close);
 	return {
 		type: "PartialBlockStatement",

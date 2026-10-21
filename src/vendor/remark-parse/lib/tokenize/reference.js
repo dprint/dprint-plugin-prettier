@@ -18,7 +18,7 @@ reference.locator = locate
 /** @type {string} */ var backslash = '\\'
 /** @type {string} */ var rightSquareBracket = ']'
 
-function reference(eat, /** @type {StringView} */ value, silent) {
+/** @this {import("../parser.js").RemarkParser} */ function reference(eat, /** @type {StringView} */ value, silent) {
   var self = this
   /** @type {boolean} */ var commonmark = self.options.commonmark
   /** @type {string} */ var character = value.charAt(0)

@@ -1,10 +1,11 @@
 import { Schema } from '../schema.js';
+/** @import {VnoptsSchema, VnoptsUtils} from '../normalize.js' */
 export class ArraySchema extends Schema {
     constructor({ valueSchema, name = valueSchema.name, ...handlers }) {
         super({ ...handlers, name });
-        this._valueSchema = valueSchema;
+        /** @type {VnoptsSchema} */ this._valueSchema = valueSchema;
     }
-    expected(utils) {
+    expected(/** @type {VnoptsUtils} */ utils) {
         const { text, list } = utils.normalizeExpectedResult(this._valueSchema.expected(utils));
         return {
             text: text && `an array of ${text}`,
@@ -14,7 +15,7 @@ export class ArraySchema extends Schema {
             },
         };
     }
-    validate(value, utils) {
+    validate(value, /** @type {VnoptsUtils} */ utils) {
         if (!Array.isArray(value)) {
             return false;
         }
@@ -27,7 +28,7 @@ export class ArraySchema extends Schema {
         }
         return invalidValues.length === 0 ? true : { value: invalidValues };
     }
-    deprecated(value, utils) {
+    deprecated(value, /** @type {VnoptsUtils} */ utils) {
         const deprecatedResult = [];
         for (const subValue of value) {
             const subDeprecatedResult = utils.normalizeDeprecatedResult(this._valueSchema.deprecated(subValue, utils), subValue);
@@ -39,7 +40,7 @@ export class ArraySchema extends Schema {
         }
         return deprecatedResult;
     }
-    forward(value, utils) {
+    forward(value, /** @type {VnoptsUtils} */ utils) {
         const forwardResult = [];
         for (const subValue of value) {
             const subForwardResult = utils.normalizeForwardResult(this._valueSchema.forward(subValue, utils), subValue);
@@ -47,7 +48,7 @@ export class ArraySchema extends Schema {
         }
         return forwardResult;
     }
-    redirect(value, utils) {
+    redirect(value, /** @type {VnoptsUtils} */ utils) {
         const remain = [];
         const redirect = [];
         for (const subValue of value) {
@@ -63,6 +64,6 @@ export class ArraySchema extends Schema {
         return currentValue.concat(newValue);
     }
 }
-function wrapTransferResult({ from, to }) {
+function wrapTransferResult(/** @type {{ from: any, to: any }} */ { from, to }) {
     return { from: [from], to };
 }

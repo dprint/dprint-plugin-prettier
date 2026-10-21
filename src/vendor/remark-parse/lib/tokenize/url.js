@@ -29,7 +29,7 @@ url.notInLink = true
 /** @type {string} */ var leftParenthesisCharacter = '('
 /** @type {string} */ var rightParenthesisCharacter = ')'
 
-function url(eat, /** @type {StringView} */ value, silent) {
+/** @this {import("../parser.js").RemarkParser} */ function url(eat, /** @type {StringView} */ value, silent) {
   var self = this
   /** @type {boolean} */ var gfm = self.options.gfm
   var tokenizers = self.inlineTokenizers

@@ -20,7 +20,7 @@ link.locator = locate
 /** @type {string} */ var rightSquareBracket = ']'
 /** @type {string} */ var graveAccent = '`'
 
-function link(eat, /** @type {StringView} */ value, silent) {
+/** @this {import("../parser.js").RemarkParser} */ function link(eat, /** @type {StringView} */ value, silent) {
   var self = this
   /** @type {string} */ var subvalue = ''
   /** @type {number} */ var index = 0

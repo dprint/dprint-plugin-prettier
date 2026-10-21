@@ -10,7 +10,7 @@ module.exports = parse
 /** @type {RegExp} */ var lineBreaksExpression = /\r\n|\r/g
 
 // Parse the bound file.
-function parse() {
+/** @this {import("./parser.js").RemarkParser} */ function parse() {
   var self = this
   /** @type {string} */ var value = String(self.file)
   var start = {line: 1, column: 1, offset: 0}

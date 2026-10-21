@@ -12,7 +12,7 @@ strong.locator = locate
 /** @type {string} */ var asterisk = '*'
 /** @type {string} */ var underscore = '_'
 
-function strong(eat, /** @type {StringView} */ value, silent) {
+/** @this {import("../parser.js").RemarkParser} */ function strong(eat, /** @type {StringView} */ value, silent) {
   var self = this
   /** @type {number} */ var index = 0
   /** @type {string} */ var character = value.charAt(index)

@@ -3,7 +3,7 @@ export class NumberSchema extends Schema {
     expected() {
         return 'a number';
     }
-    validate(value, _utils) {
+    validate(value, /** @type {import("../normalize.js").VnoptsUtils} */ _utils) {
         return typeof value === 'number';
     }
 }

@@ -1,5 +1,6 @@
 import picocolors from 'picocolors';
-export const commonDeprecatedHandler = (keyOrPair, redirectTo, { descriptor }) => {
+/** @import {VnoptsUtils} from '../../normalize.js' */
+export const commonDeprecatedHandler = /** @returns {string} */ (/** @type {string | { key: string, value: any }} */ keyOrPair, /** @type {string | { key: string, value: any } | undefined} */ redirectTo, /** @type {VnoptsUtils} */ { descriptor }) => {
     const messages = [
         `${picocolors.yellow(typeof keyOrPair === 'string'
             ? descriptor.key(keyOrPair)

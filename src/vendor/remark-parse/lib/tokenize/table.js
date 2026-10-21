@@ -20,7 +20,7 @@ module.exports = table
 /** @type {string} */ var center = 'center'
 /** @type {string} */ var right = 'right'
 
-function table(eat, /** @type {StringView} */ value, /** @type {boolean | undefined} */ silent) {
+/** @this {import("../parser.js").RemarkParser} */ function table(eat, /** @type {StringView} */ value, /** @type {boolean | undefined} */ silent) {
   var self = this
   /** @type {number} */ var index
   var alignments

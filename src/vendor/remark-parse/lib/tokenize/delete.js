@@ -10,7 +10,7 @@ strikethrough.locator = locate
 /** @type {string} */ var tilde = '~'
 /** @type {string} */ var fence = '~~'
 
-function strikethrough(eat, /** @type {StringView} */ value, silent) {
+/** @this {import("../parser.js").RemarkParser} */ function strikethrough(eat, /** @type {StringView} */ value, silent) {
   var self = this
   /** @type {string} */ var character = ''
   /** @type {string} */ var previous = ''

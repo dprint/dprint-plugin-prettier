@@ -16,7 +16,7 @@ autoLink.notInLink = true
 /** @type {string} */ var mailto = 'mailto:'
 /** @type {number} */ var mailtoLength = mailto.length
 
-function autoLink(eat, /** @type {StringView} */ value, silent) {
+/** @this {import("../parser.js").RemarkParser} */ function autoLink(eat, /** @type {StringView} */ value, silent) {
   var self = this
   /** @type {string} */ var subvalue = ''
   /** @type {number} */ var length = value.length

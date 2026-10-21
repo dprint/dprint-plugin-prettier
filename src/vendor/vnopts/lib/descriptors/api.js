@@ -1,6 +1,8 @@
+/** @import {VnoptsDescriptor} from '../normalize.js' */
+/** @type {VnoptsDescriptor} */
 export const apiDescriptor = {
-    key: key => /^[$_a-zA-Z][$_a-zA-Z0-9]*$/.test(key) ? key : JSON.stringify(key),
-    value(value) {
+    key: (/** @type {string} */ key) => /^[$_a-zA-Z][$_a-zA-Z0-9]*$/.test(key) ? key : JSON.stringify(key),
+    value(/** @type {any} */ value) {
         if (value === null || typeof value !== 'object') {
             return JSON.stringify(value);
         }
@@ -16,5 +18,5 @@ export const apiDescriptor = {
                 .map(key => `${apiDescriptor.key(key)}: ${apiDescriptor.value(value[key])}`)
                 .join(', ')} }`;
     },
-    pair: ({ key, value }) => apiDescriptor.value({ [key]: value }),
+    pair: (/** @type {{ key: string, value: any }} */ { key, value }) => apiDescriptor.value({ [key]: value }),
 };

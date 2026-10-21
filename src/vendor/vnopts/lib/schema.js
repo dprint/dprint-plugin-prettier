@@ -1,5 +1,6 @@
 // @nts-check
 import { VALUE_UNCHANGED } from './constants.js';
+/** @import {VnoptsUtils} from './normalize.js' */
 const HANDLER_KEYS = [
     'default',
     'expected',
@@ -30,37 +31,37 @@ export class Schema {
     constructor(parameters) {
         /** @type {string} */ this.name = parameters.name;
     }
-    default(_utils) {
+    default(/** @type {VnoptsUtils} */ _utils) {
         return undefined;
     }
     // this is actually an abstract method but we need a placeholder to get `function.length`
     /* c8 ignore start */
-    expected(_utils) {
+    expected(/** @type {VnoptsUtils} */ _utils) {
         return 'nothing';
     }
     /* c8 ignore stop */
     // this is actually an abstract method but we need a placeholder to get `function.length`
     /* c8 ignore start */
-    validate(_value, _utils) {
+    validate(_value, /** @type {VnoptsUtils} */ _utils) {
         return false;
     }
     /* c8 ignore stop */
-    deprecated(_value, _utils) {
+    deprecated(_value, /** @type {VnoptsUtils} */ _utils) {
         return false;
     }
-    forward(_value, _utils) {
+    forward(_value, /** @type {VnoptsUtils} */ _utils) {
         return undefined;
     }
-    redirect(_value, _utils) {
+    redirect(_value, /** @type {VnoptsUtils} */ _utils) {
         return undefined;
     }
-    overlap(currentValue, _newValue, _utils) {
+    overlap(currentValue, _newValue, /** @type {VnoptsUtils} */ _utils) {
         return currentValue;
     }
-    preprocess(value, _utils) {
+    preprocess(value, /** @type {VnoptsUtils} */ _utils) {
         return value;
     }
-    postprocess(_value, _utils) {
+    postprocess(_value, /** @type {VnoptsUtils} */ _utils) {
         return VALUE_UNCHANGED;
     }
 }

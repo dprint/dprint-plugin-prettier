@@ -1,10 +1,14 @@
 // @nts-check
 import picocolors from 'picocolors';
 import { VALUE_NOT_EXIST } from '../../constants.js';
+/**
+ * @import {VnoptsDescriptor, VnoptsUtils} from '../../normalize.js'
+ * @import {VnoptsExpected} from '../../utils.js'
+ */
 /** @type {string} */ const INDENTATION = ' '.repeat(2);
-export const commonInvalidHandler = (key, value, utils) => {
+export const commonInvalidHandler = (/** @type {string} */ key, value, /** @type {VnoptsUtils} */ utils) => {
     const { text, list } = utils.normalizeExpectedResult(utils.schemas[key].expected(utils));
-    const descriptions = [];
+    /** @type {string[]} */ const descriptions = [];
     if (text) {
         descriptions.push(getDescription(key, value, text, utils.descriptor));
     }
@@ -15,7 +19,7 @@ export const commonInvalidHandler = (key, value, utils) => {
     }
     return chooseDescription(descriptions, utils.loggerPrintWidth);
 };
-function getDescription(key, value, expected, descriptor) {
+/** @returns {string} */ function getDescription(/** @type {string} */ key, value, /** @type {string} */ expected, /** @type {VnoptsDescriptor} */ descriptor) {
     return [
         `Invalid ${picocolors.red(descriptor.key(key))} value.`,
         `Expected ${picocolors.blue(expected)},`,
@@ -24,8 +28,8 @@ function getDescription(key, value, expected, descriptor) {
             : picocolors.red(descriptor.value(value))}.`,
     ].join(' ');
 }
-function getListDescription({ text, list }, printWidth) {
-    const descriptions = [];
+/** @returns {string} */ function getListDescription(/** @type {VnoptsExpected} */ { text, list }, /** @type {number} */ printWidth) {
+    /** @type {string[]} */ const descriptions = [];
     if (text) {
         descriptions.push(`- ${picocolors.blue(text)}`);
     }
@@ -36,7 +40,7 @@ function getListDescription({ text, list }, printWidth) {
     }
     return chooseDescription(descriptions, printWidth);
 }
-function chooseDescription(descriptions, printWidth) {
+/** @returns {string} */ function chooseDescription(/** @type {string[]} */ descriptions, /** @type {number} */ printWidth) {
     if (descriptions.length === 1) {
         return descriptions[0];
     }

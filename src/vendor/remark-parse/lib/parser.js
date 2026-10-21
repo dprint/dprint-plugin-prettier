@@ -10,6 +10,42 @@ var tokenizer = require('./tokenizer')
 
 module.exports = Parser
 
+/**
+ * What the tokenizers are called on: the file that is parsed, the indentation of the lines in nodes that are
+ * indented, the options, where in the document the tokenizers are, and what tokenizes, decodes and unescapes
+ * @typedef {{
+ *   file: any,
+ *   offset: Record<string, number>,
+ *   options: RemarkOptions,
+ *   escape: any[],
+ *   inList: boolean,
+ *   inBlock: boolean,
+ *   inLink: boolean,
+ *   atStart: boolean,
+ *   eof?: any,
+ *   toOffset: (position: any) => number,
+ *   unescape: (value: string) => string,
+ *   decode: any,
+ *   setOptions(options: any): RemarkParser,
+ *   parse(): any,
+ *   exitStart(): () => void,
+ *   enterList(): () => void,
+ *   enterLink(): () => void,
+ *   enterBlock(): () => void,
+ *   interruptParagraph: any[],
+ *   interruptList: any[],
+ *   interruptBlockquote: any[],
+ *   blockTokenizers: Record<string, any>,
+ *   inlineTokenizers: Record<string, any>,
+ *   blockMethods: any[],
+ *   inlineMethods: any[],
+ *   tokenizeBlock(value: string, location: any): any[],
+ *   tokenizeInline(value: string, location: any): any[],
+ *   tokenizeFactory: typeof tokenizer,
+ * }} RemarkParser
+ * The options of the parser, which are booleans apart from the names of the elements of HTML blocks
+ * @typedef {{ position: boolean, gfm: boolean, commonmark: boolean, pedantic: boolean, blocks: any[] }} RemarkOptions
+ */
 function Parser(/** @type {string} */ doc, file) {
   this.file = file
   this.offset = {}

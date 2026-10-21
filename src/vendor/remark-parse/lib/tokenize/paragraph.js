@@ -14,7 +14,7 @@ module.exports = paragraph
 /** @type {number} */ var tabSize = 4
 
 // Tokenise paragraph.
-function paragraph(eat, /** @type {StringView} */ value, silent) {
+/** @this {import("../parser.js").RemarkParser} */ function paragraph(eat, /** @type {StringView} */ value, silent) {
   var self = this
   var settings = self.options
   /** @type {boolean} */ var commonmark = settings.commonmark

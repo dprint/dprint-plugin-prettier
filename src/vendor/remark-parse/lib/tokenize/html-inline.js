@@ -16,7 +16,7 @@ inlineHTML.locator = locate
 /** @type {RegExp} */ var htmlLinkOpenExpression = /^<a /i
 /** @type {RegExp} */ var htmlLinkCloseExpression = /^<\/a>/i
 
-function inlineHTML(/** @type {(a0?: any) => any} */ eat, /** @type {StringView} */ value, silent) {
+/** @this {import("../parser.js").RemarkParser} */ function inlineHTML(/** @type {(a0?: any) => any} */ eat, /** @type {StringView} */ value, silent) {
   var self = this
   /** @type {number} */ var length = value.length
   /** @type {string} */ var character

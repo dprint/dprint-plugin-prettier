@@ -1,6 +1,6 @@
 // @nts-check
-export function recordFromArray(array, mainKey) {
-    const record = Object.create(null);
+/** @returns {Record<string, any>} */ export function recordFromArray(/** @type {any[]} */ array, /** @type {string} */ mainKey) {
+    /** @type {Record<string, any>} */ const record = Object.create(null);
     for (const value of array) {
         const key = value[mainKey];
         /* c8 ignore start */
@@ -26,9 +26,9 @@ export function mapFromArray(/** @type {any[]} */ array, /** @type {string} */ m
     }
     return map;
 }
-export function createAutoChecklist() {
-    const map = Object.create(null);
-    return (id) => {
+/** @returns {(id: any) => boolean} */ export function createAutoChecklist() {
+    /** @type {Record<string, any>} */ const map = Object.create(null);
+    return /** @returns {boolean} */ (id) => {
         const idString = JSON.stringify(id);
         if (map[idString]) {
             return true;
@@ -53,7 +53,7 @@ export function createAutoChecklist() {
 /** @returns {boolean} */ export function isInt(/** @type {number} */ value) {
     return value === Math.floor(value);
 }
-export function comparePrimitive(a, b) {
+/** @returns {number} */ export function comparePrimitive(a, b) {
     if (a === b) {
         return 0;
     }
@@ -74,7 +74,7 @@ export function comparePrimitive(a, b) {
     }
     return a.localeCompare(b);
 }
-export function normalizeInvalidHandler(invalidHandler) {
+export function normalizeInvalidHandler(/** @type {(...args: any[]) => any} */ invalidHandler) {
     return (...args) => {
         const errorMessageOrError = invalidHandler(...args);
         return typeof errorMessageOrError === 'string'
@@ -85,7 +85,13 @@ export function normalizeInvalidHandler(invalidHandler) {
 export function normalizeDefaultResult(result) {
     return result === undefined ? {} : result;
 }
-export function normalizeExpectedResult(result) {
+/**
+ * What a schema expects, as the handler of invalid options reads it
+ * @typedef {{ text?: string, list?: { title: string, values: VnoptsExpected[] } }} VnoptsExpected
+ * What a schema says it expects, where it may write what it expects or the values of a list as text alone
+ * @typedef {string | { text?: string, list?: { title: string, values: VnoptsExpectedResult[] } }} VnoptsExpectedResult
+ */
+/** @returns {VnoptsExpected} */ export function normalizeExpectedResult(/** @type {VnoptsExpectedResult} */ result) {
     if (typeof result === 'string') {
         return { text: result };
     }
@@ -102,10 +108,10 @@ export function normalizeExpectedResult(result) {
         },
     };
 }
-export function normalizeValidateResult(/** @type {boolean} */ result, value) {
+/** @returns {true | { value: any }} */ export function normalizeValidateResult(/** @type {boolean | { value: any }} */ result, value) {
     return result === true ? true : result === false ? { value } : result;
 }
-export function normalizeDeprecatedResult(result, value, doNotNormalizeTrue = false) {
+/** @returns {boolean | any[]} */ export function normalizeDeprecatedResult(result, value, doNotNormalizeTrue = false) {
     return result === false
         ? false
         : result === true
@@ -118,7 +124,7 @@ export function normalizeDeprecatedResult(result, value, doNotNormalizeTrue = fa
                     ? false
                     : result;
 }
-export function normalizeTransferResult(result, value) {
+/** @returns {{ from: any, to: any }} */ export function normalizeTransferResult(result, value) {
     return typeof result === 'string' || 'key' in result
         ? { from: value, to: result }
         : 'from' in result
@@ -132,7 +138,7 @@ export function normalizeTransferResult(result, value) {
             ? result.map(transferResult => normalizeTransferResult(transferResult, value))
             : [normalizeTransferResult(result, value)];
 }
-export function normalizeRedirectResult(result, value) {
+/** @returns {{ remain?: any, redirect: any[] }} */ export function normalizeRedirectResult(result, value) {
     const redirect = normalizeForwardResult(typeof result === 'object' && 'redirect' in result
         ? result.redirect
         : result, value);
@@ -142,7 +148,7 @@ export function normalizeRedirectResult(result, value) {
             ? { remain: result.remain, redirect }
             : { redirect };
 }
-export function assert(isValid, message) {
+export function assert(isValid, /** @type {string} */ message) {
     /* c8 ignore start */
     if (!isValid) {
         throw new Error(message);

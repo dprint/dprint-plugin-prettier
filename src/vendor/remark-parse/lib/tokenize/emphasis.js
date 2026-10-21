@@ -13,7 +13,7 @@ emphasis.locator = locate
 /** @type {string} */ var underscore = '_'
 /** @type {string} */ var backslash = '\\'
 
-function emphasis(eat, /** @type {StringView} */ value, silent) {
+/** @this {import("../parser.js").RemarkParser} */ function emphasis(eat, /** @type {StringView} */ value, silent) {
   var self = this
   /** @type {number} */ var index = 0
   /** @type {string} */ var character = value.charAt(index)

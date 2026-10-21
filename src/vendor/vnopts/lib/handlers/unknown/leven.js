@@ -1,6 +1,7 @@
 import picocolors from 'picocolors';
 import { closestMatch } from 'leven';
-export const levenUnknownHandler = (key, value, { descriptor, logger, schemas }) => {
+/** @import {VnoptsUtils} from '../../normalize.js' */
+export const levenUnknownHandler = (/** @type {string} */ key, value, /** @type {VnoptsUtils} */ { descriptor, logger, schemas }) => {
     const messages = [
         `Ignored unknown option ${picocolors.yellow(descriptor.pair({ key, value }))}.`,
     ];

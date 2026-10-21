@@ -2,13 +2,61 @@
 import { VALUE_NOT_EXIST, VALUE_UNCHANGED } from './constants.js';
 import { defaultDeprecatedHandler, defaultDescriptor, defaultInvalidHandler, defaultUnknownHandler, } from './defaults.js';
 import { createAutoChecklist, normalizeDefaultResult, normalizeDeprecatedResult, normalizeExpectedResult, normalizeForwardResult, normalizeInvalidHandler, normalizeRedirectResult, normalizeValidateResult, partition, recordFromArray, } from './utils.js';
+/**
+ * A schema as normalizing reads it: an object over an instance of a schema class, with the handlers it was created
+ * with as its own properties, so the methods are called on it
+ * @typedef {{
+ *   name: string,
+ *   default(utils: VnoptsUtils): any,
+ *   expected(utils: VnoptsUtils): any,
+ *   validate(value: any, utils: VnoptsUtils): any,
+ *   deprecated(value: any, utils: VnoptsUtils): any,
+ *   forward(value: any, utils: VnoptsUtils): any,
+ *   redirect(value: any, utils: VnoptsUtils): any,
+ *   overlap(currentValue: any, newValue: any, utils: VnoptsUtils): any,
+ *   preprocess(value: any, utils: VnoptsUtils): any,
+ *   postprocess(value: any, utils: VnoptsUtils): any,
+ * }} VnoptsSchema
+ * How keys, values and pairs of options are written in messages
+ * @typedef {{
+ *   key: (key: string) => string,
+ *   value: (value: any) => string,
+ *   pair: (pair: { key: string, value: any }) => string,
+ * }} VnoptsDescriptor
+ * What the handlers of schemas and of unknown, invalid and deprecated options are given
+ * @typedef {{
+ *   descriptor: VnoptsDescriptor,
+ *   logger: any,
+ *   loggerPrintWidth: number,
+ *   schemas: Record<string, VnoptsSchema>,
+ *   normalizeDefaultResult: typeof normalizeDefaultResult,
+ *   normalizeExpectedResult: typeof normalizeExpectedResult,
+ *   normalizeDeprecatedResult: typeof normalizeDeprecatedResult,
+ *   normalizeForwardResult: typeof normalizeForwardResult,
+ *   normalizeRedirectResult: typeof normalizeRedirectResult,
+ *   normalizeValidateResult: typeof normalizeValidateResult,
+ * }} VnoptsUtils
+ * What a normalizer is told to do instead of what it does by default
+ * @typedef {{
+ *   logger?: any,
+ *   loggerPrintWidth?: number,
+ *   descriptor?: VnoptsDescriptor,
+ *   unknown?: (key: string, value: any, utils: VnoptsUtils) => any,
+ *   invalid?: (key: string, value: any, utils: VnoptsUtils) => any,
+ *   deprecated?: (keyOrPair: any, redirectTo: any, utils: VnoptsUtils) => string,
+ *   missing?: (key: string, options: any) => boolean,
+ *   required?: (key: string) => boolean,
+ *   preprocess?: (options: any, utils: VnoptsUtils) => any,
+ *   postprocess?: (options: any, utils: VnoptsUtils) => any,
+ * }} VnoptsNormalizerOptions
+ */
 export const normalize = (options, schemas, opts) => new Normalizer(schemas, opts).normalize(options);
 export class Normalizer {
-    constructor(/** @type {any[]} */ schemas, opts) {
+    constructor(/** @type {any[]} */ schemas, /** @type {VnoptsNormalizerOptions | undefined} */ opts) {
         /* c8 ignore start */
         const { logger = console, loggerPrintWidth = 80, descriptor = defaultDescriptor, unknown = defaultUnknownHandler, invalid = defaultInvalidHandler, deprecated = defaultDeprecatedHandler, missing = /** @returns {boolean} */ () => false, required = /** @returns {boolean} */ () => false, preprocess = (x) => x, postprocess = () => VALUE_UNCHANGED, } = opts || {};
         /* c8 ignore stop */
-        this._utils = {
+        /** @type {VnoptsUtils} */ this._utils = {
             descriptor,
             logger: /* c8 ignore next */ logger || { warn: () => { } },
             loggerPrintWidth,
@@ -20,20 +68,20 @@ export class Normalizer {
             normalizeRedirectResult,
             normalizeValidateResult,
         };
-        this._unknownHandler = unknown;
-        this._invalidHandler = normalizeInvalidHandler(invalid);
-        this._deprecatedHandler = deprecated;
-        this._identifyMissing = /** @returns {boolean} */ (/** @type {string} */ k, o) => !(k in o) || missing(k, o);
-        this._identifyRequired = required;
-        this._preprocess = preprocess;
-        this._postprocess = postprocess;
+        /** @type {(key: string, value: any, utils: VnoptsUtils) => any} */ this._unknownHandler = unknown;
+        /** @type {(key: string, value: any, utils: VnoptsUtils) => any} */ this._invalidHandler = normalizeInvalidHandler(invalid);
+        /** @type {(keyOrPair: any, redirectTo: any, utils: VnoptsUtils) => string} */ this._deprecatedHandler = deprecated;
+        /** @type {(key: string, options: any) => boolean} */ this._identifyMissing = /** @returns {boolean} */ (/** @type {string} */ k, o) => !(k in o) || missing(k, o);
+        /** @type {(key: string) => boolean} */ this._identifyRequired = required;
+        /** @type {(options: any, utils: VnoptsUtils) => any} */ this._preprocess = preprocess;
+        /** @type {(options: any, utils: VnoptsUtils) => any} */ this._postprocess = postprocess;
         this.cleanHistory();
     }
     cleanHistory() {
-        this._hasDeprecationWarned = createAutoChecklist();
+        /** @type {(id: any) => boolean} */ this._hasDeprecationWarned = createAutoChecklist();
     }
-    normalize(options) {
-        const newOptions = {};
+    /** @returns {Record<string, any>} */ normalize(options) {
+        /** @type {Record<string, any>} */ const newOptions = {};
         const preprocessed = this._preprocess(options, this._utils);
         const restOptionsArray = [preprocessed];
         const applyNormalization = () => {
@@ -71,17 +119,17 @@ export class Normalizer {
         this._applyRequiredCheck(newOptions);
         return newOptions;
     }
-    /** @returns {any[]} */ _applyNormalization(options, newOptions) {
+    /** @returns {any[]} */ _applyNormalization(/** @type {Record<string, any>} */ options, /** @type {Record<string, any>} */ newOptions) {
         const transferredOptionsArray = [];
         const { knownKeys, unknownKeys } = this._partitionOptionKeys(options);
         for (const key of knownKeys) {
             const schema = this._utils.schemas[key];
             const value = schema.preprocess(options[key], this._utils);
             this._applyValidation(value, key, schema);
-            const appendTransferredOptions = ({ from, to }) => {
+            const appendTransferredOptions = (/** @type {{ from: any, to: string | { key: string, value: any } }} */ { from, to }) => {
                 transferredOptionsArray.push(typeof to === 'string' ? { [to]: from } : { [to.key]: to.value });
             };
-            const warnDeprecated = ({ value: currentValue, redirectTo, }) => {
+            const warnDeprecated = (/** @type {{ value: any, redirectTo?: any }} */ { value: currentValue, redirectTo, }) => {
                 const deprecatedResult = normalizeDeprecatedResult(schema.deprecated(currentValue, this._utils), value, 
                 /* doNotNormalizeTrue */ true);
                 if (deprecatedResult === false) {
@@ -128,7 +176,7 @@ export class Normalizer {
         }
         return transferredOptionsArray;
     }
-    _applyRequiredCheck(options) {
+    _applyRequiredCheck(/** @type {Record<string, any>} */ options) {
         for (const key of Object.keys(this._utils.schemas)) {
             if (this._identifyMissing(key, options)) {
                 if (this._identifyRequired(key)) {
@@ -137,17 +185,17 @@ export class Normalizer {
             }
         }
     }
-    _partitionOptionKeys(options) {
+    _partitionOptionKeys(/** @type {Record<string, any>} */ options) {
         const [knownKeys, unknownKeys] = partition(Object.keys(options).filter(/** @returns {boolean} */ key => !this._identifyMissing(key, options)), /** @returns {boolean} */ key => key in this._utils.schemas);
         return { knownKeys, unknownKeys };
     }
-    _applyValidation(value, /** @type {string} */ key, schema) {
+    _applyValidation(value, /** @type {string} */ key, /** @type {VnoptsSchema} */ schema) {
         const validateResult = normalizeValidateResult(schema.validate(value, this._utils), value);
         if (validateResult !== true) {
             throw this._invalidHandler(key, validateResult.value, this._utils);
         }
     }
-    _applyUnknownHandler(/** @type {string} */ key, value, newOptions, /** @type {(a0?: any, a1?: any) => any} */ knownResultHandler) {
+    _applyUnknownHandler(/** @type {string} */ key, value, /** @type {Record<string, any>} */ newOptions, /** @type {(a0?: any, a1?: any) => any} */ knownResultHandler) {
         const unknownResult = this._unknownHandler(key, value, this._utils);
         if (!unknownResult) {
             return;
@@ -165,7 +213,7 @@ export class Normalizer {
             }
         }
     }
-    _applyPostprocess(options) {
+    _applyPostprocess(/** @type {Record<string, any>} */ options) {
         const postprocessed = this._postprocess(options, this._utils);
         if (postprocessed === VALUE_UNCHANGED) {
             return;

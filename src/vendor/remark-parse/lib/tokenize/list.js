@@ -28,7 +28,7 @@ module.exports = list
 /** @type {RegExp} */ var pedanticBulletExpression = /^([ \t]*)([*+-]|\d+[.)])([ \t]+)/
 /** @type {RegExp} */ var initialIndentExpression = /^( {1,4}|\t)?/gm
 
-function list(eat, /** @type {StringView} */ value, /** @type {boolean | undefined} */ silent) {
+/** @this {import("../parser.js").RemarkParser} */ function list(eat, /** @type {StringView} */ value, /** @type {boolean | undefined} */ silent) {
   var self = this
   /** @type {boolean} */ var commonmark = self.options.commonmark
   /** @type {boolean} */ var pedantic = self.options.pedantic

@@ -12,7 +12,7 @@ module.exports = fencedCode
 /** @type {number} */ var minFenceCount = 3
 /** @type {number} */ var tabSize = 4
 
-function fencedCode(eat, /** @type {StringView} */ value, /** @type {boolean | undefined} */ silent) {
+/** @this {import("../parser.js").RemarkParser} */ function fencedCode(eat, /** @type {StringView} */ value, /** @type {boolean | undefined} */ silent) {
   var self = this
   /** @type {boolean} */ var gfm = self.options.gfm
   /** @type {number} */ var length = value.length + 1
