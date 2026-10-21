@@ -2037,7 +2037,9 @@ var parser = (/** @returns {JisonParser} */ function() {
 			next: /** @this {JisonLexer} */ function() {
 				if (this.done) return this.EOF;
 				if (!this._input) this.done = true;
-				var token, match, tempMatch, index;
+				var token, match;
+				/** @type {RegExpMatchArray | null} */ var tempMatch;
+				/** @type {number} */ var index;
 				if (!this._more) {
 					this.yytext = "";
 					this.match = "";

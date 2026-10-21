@@ -81,7 +81,8 @@ import { resolveEnd } from './resolve-end.js';
      * The try-catch is for Safari, which doesn't support this yet:
      * https://caniuse.com/js-regexp-lookbehind
      */
-    /** @type {RegExp} */ let first, line;
+    /** @type {RegExp} */ let first;
+    /** @type {RegExp} */ let line;
     try {
         first = new RegExp('(.*?)(?<![ \t])[ \t]*\r?\n', 'sy');
         line = new RegExp('[ \t]*(.*?)(?:(?<![ \t])[ \t]*)?\r?\n', 'sy');

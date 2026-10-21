@@ -91,7 +91,7 @@ messages[numericProhibited] =
 /** @returns {string} */ function parseEntities(/** @type {string} */ value, options) {
   var settings = {}
   var option
-  var key
+  /** @type {string} */ var key
 
   if (!options) {
     options = {}

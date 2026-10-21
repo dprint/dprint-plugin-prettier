@@ -357,7 +357,8 @@ class Lexer {
         }
     }
     *parseFlowCollection() {
-        let nl, sp;
+        /** @type {number} */ let nl;
+        /** @type {number} */ let sp;
         let indent = -1;
         do {
             nl = yield* this.pushNewline();
