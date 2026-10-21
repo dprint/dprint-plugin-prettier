@@ -17081,7 +17081,7 @@ function Xg(e) {
 function jd(e) {
   return Uf(e) && !!(e.flags & 64);
 }
-/** @returns {boolean} */ function yf(/** @type {xh | Kf} */ e) {
+/** @returns {boolean} */ function yf(/** @type {Kf | vh | xh | Th} */ e) {
   let t = e.kind;
   return !!(e.flags & 64) && (t === 212 || t === 213 || t === 214 || t === 236);
 }
@@ -17147,14 +17147,14 @@ function Kg(e) {
 /** @returns {boolean} */ function e2(/** @type {number} */ e) {
   return Zg(e) || e === 126 || e === 164 || e === 129;
 }
-/** @returns {boolean} */ function t2(/** @type {vh | Kf} */ e) {
+/** @returns {boolean} */ function t2(/** @type {Kf | vh | xh | Th} */ e) {
   return Xr(e.kind);
 }
 /** @returns {boolean} */ function c1(/** @type {Kf | xh | vh | Th} */ e) {
   let t = e.kind;
   return t === 80 || t === 81 || t === 11 || t === 9 || t === 168;
 }
-/** @returns {boolean} */ function xf(/** @type {Kf} */ e) {
+/** @returns {boolean} */ function xf(/** @type {Kf | vh | xh | Th} */ e) {
   return !!e && r2(e.kind);
 }
 /** @returns {boolean} */ function n2(/** @type {number} */ e) {
@@ -17267,7 +17267,7 @@ function o2(e) {
       return !1;
   }
 }
-/** @returns {boolean} */ function c2(/** @type {xh | Kf | vh} */ e) {
+/** @returns {boolean} */ function c2(/** @type {Kf | vh | xh | Th} */ e) {
   return p1(gf(e).kind);
 }
 /** @returns {boolean} */ function p1(/** @type {number} */ e) {
@@ -17919,10 +17919,10 @@ function Ba(e) {
   }
   return -1;
 }
-/** @returns {boolean} */ function Dp(/** @type {vh | Kf} */ e) {
+/** @returns {boolean} */ function Dp(/** @type {Kf | vh | xh | Th} */ e) {
   return !!((e.templateFlags || 0) & 2048);
 }
-/** @returns {boolean} */ function Z2(/** @type {Kf} */ e) {
+/** @returns {boolean} */ function Z2(/** @type {Kf | vh | xh | Th} */ e) {
   return e && !!(I1(e) ? Dp(e) : Dp(e.head) || nn(e.templateSpans, /** @returns {boolean} */ (/** @type {Kf} */ t) => Dp(t.literal)));
 }
 var C3 = new Map(
@@ -19356,7 +19356,7 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
     return t.createBaseNode(r);
   }
   /** @returns {InstanceType<typeof Kf>} */ function ae(/** @type {number} */ r) {
-    /** @type {Kf} */ let i = I(r);
+    /** @type {Kf | vh | xh | Th} */ let i = I(r);
     return ((i.symbol = void 0), (i.localSymbol = void 0), i);
   }
   function Le(r, i) {
@@ -19368,19 +19368,19 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       _.charCodeAt(0) !== 45,
       "Negative numbers should be created in combination with createPrefixUnaryExpression",
     );
-    /** @type {Kf} */ let c = ae(9);
+    /** @type {Kf | vh | xh | Th} */ let c = ae(9);
     return ((c.text = _), (c.numericLiteralFlags = i), i & 384 && (c.transformFlags |= 1024), c);
   }
   /** @returns {vh} */ function oe(r) {
-    /** @type {vh} */ let i = Zt(10);
+    /** @type {Kf | vh | xh | Th} */ let i = Zt(10);
     return ((i.text = typeof r == "string" ? r : jb(r) + "n"), (i.transformFlags |= 32), i);
   }
   /** @returns {Kf} */ function Y(/** @type {string} */ r, i) {
-    /** @type {Kf} */ let _ = ae(11);
+    /** @type {Kf | vh | xh | Th} */ let _ = ae(11);
     return ((_.text = r), (_.singleQuote = i), _);
   }
   /** @returns {Kf} */ function mt(/** @type {string | undefined} */ r, i, _) {
-    /** @type {Kf} */ let c = Y(r, i);
+    /** @type {Kf | vh | xh | Th} */ let c = Y(r, i);
     return ((c.hasExtendedUnicodeEscape = _), _ && (c.transformFlags |= 1024), c);
   }
   function ar(r) {
@@ -19388,7 +19388,7 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
     return ((i.textSourceNode = r), i);
   }
   /** @returns {InstanceType<typeof vh>} */ function gn(/** @type {string} */ r) {
-    /** @type {vh} */ let i = Zt(14);
+    /** @type {Kf | vh | xh | Th} */ let i = Zt(14);
     return ((i.text = r), i);
   }
   function sr(r, /** @type {string | undefined} */ i) {
@@ -19419,7 +19419,7 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   }
   /** @returns {xh} */ function He(r, i, _) {
     (i === void 0 && r && (i = Wm(r)), i === 80 && (i = void 0));
-    /** @type {xh} */ let c = bn(Ua(r));
+    /** @type {Kf | vh | xh | Th} */ let c = bn(Ua(r));
     return (
       _ && (c.flags |= 256),
       c.escapedText === "await" && (c.transformFlags |= 67108864),
@@ -19569,15 +19569,15 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       i.length ? i : void 0
     );
   }
-  /** @returns {Kf} */ function bt(/** @type {xh | Kf} */ r, /** @type {xh} */ i) {
-    /** @type {Kf} */ let _ = I(167);
+  /** @returns {Kf} */ function bt(/** @type {Kf | vh | xh | Th} */ r, /** @type {Kf | vh | xh | Th} */ i) {
+    /** @type {Kf | vh | xh | Th} */ let _ = I(167);
     return ((_.left = r), (_.right = nt(i)), (_.transformFlags |= z(_.left) | qa(_.right)), (_.flowNode = void 0), _);
   }
   function ln(r, i, _) {
     return r.left !== i || r.right !== _ ? J(bt(i, _), r) : r;
   }
-  /** @returns {Kf} */ function it(/** @type {Kf | xh} */ r) {
-    /** @type {Kf} */ let i = I(168);
+  /** @returns {Kf} */ function it(/** @type {Kf | vh | xh | Th} */ r) {
+    /** @type {Kf | vh | xh | Th} */ let i = I(168);
     return (
       (i.expression = s().parenthesizeExpressionOfComputedPropertyName(r)),
       (i.transformFlags |= z(i.expression) | 1024 | 131072),
@@ -19587,8 +19587,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function Ft(r, i) {
     return r.expression !== i ? J(it(i), r) : r;
   }
-  /** @returns {Kf} */ function sn(r, /** @type {xh} */ i, /** @type {Kf | vh | undefined} */ _, /** @type {vh | Kf | undefined} */ c) {
-    /** @type {Kf} */ let d = ae(169);
+  /** @returns {Kf} */ function sn(r, /** @type {Kf | vh | xh | Th} */ i, /** @type {Kf | vh | xh | Th | undefined} */ _, /** @type {Kf | vh | xh | Th | undefined} */ c) {
+    /** @type {Kf | vh | xh | Th} */ let d = ae(169);
     return (
       (d.modifiers = Ie(r)),
       (d.name = nt(i)),
@@ -19603,8 +19603,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function cr(r, i, _, c, d) {
     return r.modifiers !== i || r.name !== _ || r.constraint !== c || r.default !== d ? J(sn(i, _, c, d), r) : r;
   }
-  /** @returns {Kf} */ function br(r, /** @type {vh | undefined} */ i, /** @type {xh | Kf | undefined} */ _, /** @type {vh | undefined} */ c, /** @type {vh | Kf | undefined} */ d, /** @type {Kf | vh | xh | undefined} */ T) {
-    /** @type {Kf} */ let F = ae(170);
+  /** @returns {Kf} */ function br(r, /** @type {Kf | vh | xh | Th | undefined} */ i, /** @type {Kf | vh | xh | Th | undefined} */ _, /** @type {Kf | vh | xh | Th | undefined} */ c, /** @type {Kf | vh | xh | Th | undefined} */ d, /** @type {Kf | vh | xh | Th | undefined} */ T) {
+    /** @type {Kf | vh | xh | Th} */ let F = ae(170);
     return (
       (F.modifiers = Ie(r)),
       (F.dotDotDotToken = i),
@@ -19637,8 +19637,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       ? J(br(i, _, c, d, T, F), r)
       : r;
   }
-  /** @returns {Kf} */ function Vn(/** @type {Kf | xh} */ r) {
-    /** @type {Kf} */ let i = I(171);
+  /** @returns {Kf} */ function Vn(/** @type {Kf | vh | xh | Th} */ r) {
+    /** @type {Kf | vh | xh | Th} */ let i = I(171);
     return (
       (i.expression = s().parenthesizeLeftSideOfAccess(r, !1)),
       (i.transformFlags |= z(i.expression) | 1 | 8192 | 33554432),
@@ -19648,8 +19648,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function Wn(r, i) {
     return r.expression !== i ? J(Vn(i), r) : r;
   }
-  /** @returns {Kf} */ function Jr(r, /** @type {xh | Kf} */ i, /** @type {vh | undefined} */ _, /** @type {vh | Kf | undefined} */ c) {
-    /** @type {Kf} */ let d = ae(172);
+  /** @returns {Kf} */ function Jr(r, /** @type {Kf | vh | xh | Th} */ i, /** @type {Kf | vh | xh | Th | undefined} */ _, /** @type {Kf | vh | xh | Th | undefined} */ c) {
+    /** @type {Kf | vh | xh | Th} */ let d = ae(172);
     return (
       (d.modifiers = Ie(r)),
       (d.name = nt(i)),
@@ -19667,8 +19667,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function Pe(r, i) {
     return (r !== i && (r.initializer = i.initializer), J(r, i));
   }
-  /** @returns {Kf} */ function xr(r, /** @type {xh | Kf | Th | undefined} */ i, /** @type {vh | undefined} */ _, /** @type {vh | Kf | undefined} */ c, /** @type {Kf | vh | xh | undefined} */ d) {
-    /** @type {Kf} */ let T = ae(173);
+  /** @returns {Kf} */ function xr(r, /** @type {Kf | vh | xh | Th | undefined} */ i, /** @type {Kf | vh | xh | Th | undefined} */ _, /** @type {Kf | vh | xh | Th | undefined} */ c, /** @type {Kf | vh | xh | Th | undefined} */ d) {
+    /** @type {Kf | vh | xh | Th} */ let T = ae(173);
     ((T.modifiers = Ie(r)),
       (T.name = nt(i)),
       (T.questionToken = _ && Kd(_) ? _ : void 0),
@@ -19698,8 +19698,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       ? J(xr(i, _, c, d, T), r)
       : r;
   }
-  /** @returns {Kf} */ function se(r, /** @type {xh | undefined} */ i, _, c, d, /** @type {Kf | vh | undefined} */ T) {
-    /** @type {Kf} */ let F = ae(174);
+  /** @returns {Kf} */ function se(r, /** @type {Kf | vh | xh | Th | undefined} */ i, _, c, d, /** @type {Kf | vh | xh | Th | undefined} */ T) {
+    /** @type {Kf | vh | xh | Th} */ let F = ae(174);
     return (
       (F.modifiers = Ie(r)),
       (F.name = nt(i)),
@@ -19725,8 +19725,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       ? Le(se(i, _, c, d, T, F), r)
       : r;
   }
-  /** @returns {Kf} */ function Se(r, /** @type {vh | undefined} */ i, /** @type {xh | Kf | undefined} */ _, c, d, T, /** @type {vh | Kf | undefined} */ F, /** @type {Kf | undefined} */ fe) {
-    /** @type {Kf} */ let We = ae(175);
+  /** @returns {Kf} */ function Se(r, /** @type {Kf | vh | xh | Th | undefined} */ i, /** @type {Kf | vh | xh | Th | undefined} */ _, c, d, T, /** @type {Kf | vh | xh | Th | undefined} */ F, /** @type {Kf | vh | xh | Th | undefined} */ fe) {
+    /** @type {Kf | vh | xh | Th} */ let We = ae(175);
     if (
       ((We.modifiers = Ie(r)),
       (We.asteriskToken = i),
@@ -19803,8 +19803,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function St(r, i) {
     return (r !== i && (r.modifiers = i.modifiers), J(r, i));
   }
-  /** @returns {Kf} */ function ut(r, i, /** @type {Kf | undefined} */ _) {
-    /** @type {Kf} */ let c = ae(177);
+  /** @returns {Kf} */ function ut(r, i, /** @type {Kf | vh | xh | Th | undefined} */ _) {
+    /** @type {Kf | vh | xh | Th} */ let c = ae(177);
     return (
       (c.modifiers = Ie(r)),
       (c.parameters = me(i)),
@@ -19829,8 +19829,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function Tr(r, i) {
     return (r !== i && ((r.typeParameters = i.typeParameters), (r.type = i.type)), Le(r, i));
   }
-  /** @returns {Kf} */ function Mn(r, /** @type {xh | Kf | undefined} */ i, _, /** @type {vh | undefined} */ c, /** @type {Kf | undefined} */ d) {
-    /** @type {Kf} */ let T = ae(178);
+  /** @returns {Kf} */ function Mn(r, /** @type {Kf | vh | xh | Th | undefined} */ i, _, /** @type {Kf | vh | xh | Th | undefined} */ c, /** @type {Kf | vh | xh | Th | undefined} */ d) {
+    /** @type {Kf | vh | xh | Th} */ let T = ae(178);
     return (
       (T.modifiers = Ie(r)),
       (T.name = nt(i)),
@@ -19860,8 +19860,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function Ei(r, i) {
     return (r !== i && (r.typeParameters = i.typeParameters), Le(r, i));
   }
-  /** @returns {Kf} */ function U(r, /** @type {xh | undefined} */ i, _, /** @type {Kf | undefined} */ c) {
-    /** @type {Kf} */ let d = ae(179);
+  /** @returns {Kf} */ function U(r, /** @type {Kf | vh | xh | Th | undefined} */ i, _, /** @type {Kf | vh | xh | Th | undefined} */ c) {
+    /** @type {Kf | vh | xh | Th} */ let d = ae(179);
     return (
       (d.modifiers = Ie(r)),
       (d.name = nt(i)),
@@ -19889,8 +19889,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function Z(r, i) {
     return (r !== i && ((r.typeParameters = i.typeParameters), (r.type = i.type)), Le(r, i));
   }
-  /** @returns {Kf} */ function we(r, i, /** @type {vh | Kf | undefined} */ _) {
-    /** @type {Kf} */ let c = ae(180);
+  /** @returns {Kf} */ function we(r, i, /** @type {Kf | vh | xh | Th | undefined} */ _) {
+    /** @type {Kf | vh | xh | Th} */ let c = ae(180);
     return (
       (c.typeParameters = Ie(r)),
       (c.parameters = Ie(i)),
@@ -19906,8 +19906,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function ke(r, i, _, c) {
     return r.typeParameters !== i || r.parameters !== _ || r.type !== c ? Le(we(i, _, c), r) : r;
   }
-  /** @returns {Kf} */ function Ee(r, i, /** @type {Kf | vh | undefined} */ _) {
-    /** @type {Kf} */ let c = ae(181);
+  /** @returns {Kf} */ function Ee(r, i, /** @type {Kf | vh | xh | Th | undefined} */ _) {
+    /** @type {Kf | vh | xh | Th} */ let c = ae(181);
     return (
       (c.typeParameters = Ie(r)),
       (c.parameters = Ie(i)),
@@ -19923,8 +19923,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function he(r, i, _, c) {
     return r.typeParameters !== i || r.parameters !== _ || r.type !== c ? Le(Ee(i, _, c), r) : r;
   }
-  /** @returns {Kf} */ function Ye(r, i, /** @type {Kf | vh | undefined} */ _) {
-    /** @type {Kf} */ let c = ae(182);
+  /** @returns {Kf} */ function Ye(r, i, /** @type {Kf | vh | xh | Th | undefined} */ _) {
+    /** @type {Kf | vh | xh | Th} */ let c = ae(182);
     return (
       (c.modifiers = Ie(r)),
       (c.parameters = Ie(i)),
@@ -19940,8 +19940,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function tt(r, i, _, c) {
     return r.parameters !== _ || r.type !== c || r.modifiers !== i ? Le(Ye(i, _, c), r) : r;
   }
-  /** @returns {Kf} */ function Xe(/** @type {Kf | vh | undefined} */ r, /** @type {vh | undefined} */ i) {
-    /** @type {Kf} */ let _ = I(205);
+  /** @returns {Kf} */ function Xe(/** @type {Kf | vh | xh | Th | undefined} */ r, /** @type {Kf | vh | xh | Th | undefined} */ i) {
+    /** @type {Kf | vh | xh | Th} */ let _ = I(205);
     return ((_.type = r), (_.literal = i), (_.transformFlags = 1), _);
   }
   function De(r, i, _) {
@@ -19950,15 +19950,15 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function xn(r) {
     return ct(r);
   }
-  /** @returns {Kf} */ function at(/** @type {vh | undefined} */ r, /** @type {xh | undefined} */ i, /** @type {Kf | vh | undefined} */ _) {
-    /** @type {Kf} */ let c = I(183);
+  /** @returns {Kf} */ function at(/** @type {Kf | vh | xh | Th | undefined} */ r, /** @type {Kf | vh | xh | Th | undefined} */ i, /** @type {Kf | vh | xh | Th | undefined} */ _) {
+    /** @type {Kf | vh | xh | Th} */ let c = I(183);
     return ((c.assertsModifier = r), (c.parameterName = nt(i)), (c.type = _), (c.transformFlags = 1), c);
   }
   function un(r, i, _, c) {
     return r.assertsModifier !== i || r.parameterName !== _ || r.type !== c ? J(at(i, _, c), r) : r;
   }
-  /** @returns {Kf} */ function ei(/** @type {xh | Kf} */ r, i) {
-    /** @type {Kf} */ let _ = I(184);
+  /** @returns {Kf} */ function ei(/** @type {Kf | vh | xh | Th} */ r, i) {
+    /** @type {Kf | vh | xh | Th} */ let _ = I(184);
     return (
       (_.typeName = nt(r)),
       (_.typeArguments = i && s().parenthesizeTypeArguments(me(i))),
@@ -19969,8 +19969,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function O(r, i, _) {
     return r.typeName !== i || r.typeArguments !== _ ? J(ei(i, _), r) : r;
   }
-  /** @returns {Kf} */ function qe(r, i, /** @type {vh | Kf | undefined} */ _) {
-    /** @type {Kf} */ let c = ae(185);
+  /** @returns {Kf} */ function qe(r, i, /** @type {Kf | vh | xh | Th | undefined} */ _) {
+    /** @type {Kf | vh | xh | Th} */ let c = ae(185);
     return (
       (c.typeParameters = Ie(r)),
       (c.parameters = Ie(i)),
@@ -19993,8 +19993,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function je(...r) {
     return r.length === 4 ? B(...r) : r.length === 3 ? ze(...r) : q.fail("Incorrect number of arguments specified.");
   }
-  /** @returns {Kf} */ function B(r, i, _, /** @type {vh | undefined} */ c) {
-    /** @type {Kf} */ let d = ae(186);
+  /** @returns {Kf} */ function B(r, i, _, /** @type {Kf | vh | xh | Th | undefined} */ c) {
+    /** @type {Kf | vh | xh | Th} */ let d = ae(186);
     return (
       (d.modifiers = Ie(r)),
       (d.typeParameters = Ie(i)),
@@ -20022,36 +20022,36 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function Qe(r, i, _, c) {
     return Ge(r, r.modifiers, i, _, c);
   }
-  /** @returns {Kf} */ function Nt(/** @type {xh | Kf | undefined} */ r, i) {
-    /** @type {Kf} */ let _ = I(187);
+  /** @returns {Kf} */ function Nt(/** @type {Kf | vh | xh | Th | undefined} */ r, i) {
+    /** @type {Kf | vh | xh | Th} */ let _ = I(187);
     return ((_.exprName = r), (_.typeArguments = i && s().parenthesizeTypeArguments(i)), (_.transformFlags = 1), _);
   }
   function Et(r, i, _) {
     return r.exprName !== i || r.typeArguments !== _ ? J(Nt(i, _), r) : r;
   }
   /** @returns {Kf} */ function It(r) {
-    /** @type {Kf} */ let i = ae(188);
+    /** @type {Kf | vh | xh | Th} */ let i = ae(188);
     return ((i.members = me(r)), (i.transformFlags = 1), i);
   }
   function zt(r, i) {
     return r.members !== i ? J(It(i), r) : r;
   }
-  /** @returns {Kf} */ function Hn(/** @type {Kf | vh | undefined} */ r) {
-    /** @type {Kf} */ let i = I(189);
+  /** @returns {Kf} */ function Hn(/** @type {Kf | vh | xh | Th | undefined} */ r) {
+    /** @type {Kf | vh | xh | Th} */ let i = I(189);
     return ((i.elementType = s().parenthesizeNonArrayTypeOfPostfixType(r)), (i.transformFlags = 1), i);
   }
   function Ai(r, i) {
     return r.elementType !== i ? J(Hn(i), r) : r;
   }
   /** @returns {Kf} */ function pn(r) {
-    /** @type {Kf} */ let i = I(190);
+    /** @type {Kf | vh | xh | Th} */ let i = I(190);
     return ((i.elements = me(s().parenthesizeElementTypesOfTupleType(r))), (i.transformFlags = 1), i);
   }
   function H(r, i) {
     return r.elements !== i ? J(pn(i), r) : r;
   }
-  /** @returns {Kf} */ function le(r, /** @type {xh | undefined} */ i, _, /** @type {Kf | undefined} */ c) {
-    /** @type {Kf} */ let d = ae(203);
+  /** @returns {Kf} */ function le(r, /** @type {Kf | vh | xh | Th | undefined} */ i, _, /** @type {Kf | vh | xh | Th | undefined} */ c) {
+    /** @type {Kf | vh | xh | Th} */ let d = ae(203);
     return (
       (d.dotDotDotToken = r),
       (d.name = i),
@@ -20072,15 +20072,15 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function j(r, i) {
     return r.type !== i ? J(Te(i), r) : r;
   }
-  /** @returns {Kf} */ function yt(/** @type {Kf} */ r) {
-    /** @type {Kf} */ let i = I(192);
+  /** @returns {Kf} */ function yt(/** @type {Kf | vh | xh | Th} */ r) {
+    /** @type {Kf | vh | xh | Th} */ let i = I(192);
     return ((i.type = r), (i.transformFlags = 1), i);
   }
   function wt(r, i) {
     return r.type !== i ? J(yt(i), r) : r;
   }
   /** @returns {InstanceType<typeof Kf>} */ function Rt(/** @type {number} */ r, i, _) {
-    /** @type {Kf} */ let c = I(r);
+    /** @type {Kf | vh | xh | Th} */ let c = I(r);
     return ((c.types = ge.createNodeArray(_(i))), (c.transformFlags = 1), c);
   }
   function fn(r, i, _) {
@@ -20098,8 +20098,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function Je(r, i) {
     return fn(r, i, s().parenthesizeConstituentTypesOfIntersectionType);
   }
-  /** @returns {Kf} */ function ft(/** @type {Kf} */ r, /** @type {vh | undefined} */ i, /** @type {Kf | vh | undefined} */ _, /** @type {Kf | undefined} */ c) {
-    /** @type {Kf} */ let d = I(195);
+  /** @returns {Kf} */ function ft(/** @type {Kf | vh | xh | Th} */ r, /** @type {Kf | vh | xh | Th | undefined} */ i, /** @type {Kf | vh | xh | Th | undefined} */ _, /** @type {Kf | vh | xh | Th | undefined} */ c) {
+    /** @type {Kf | vh | xh | Th} */ let d = I(195);
     return (
       (d.checkType = s().parenthesizeCheckTypeOfConditionalType(r)),
       (d.extendsType = s().parenthesizeExtendsTypeOfConditionalType(i)),
@@ -20121,15 +20121,15 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function Hl(r, i) {
     return r.typeParameter !== i ? J(Xn(i), r) : r;
   }
-  /** @returns {Kf} */ function Gt(/** @type {vh | undefined} */ r, i) {
-    /** @type {Kf} */ let _ = I(204);
+  /** @returns {Kf} */ function Gt(/** @type {Kf | vh | xh | Th | undefined} */ r, i) {
+    /** @type {Kf | vh | xh | Th} */ let _ = I(204);
     return ((_.head = r), (_.templateSpans = me(i)), (_.transformFlags = 1), _);
   }
   function Xl(r, i, _) {
     return r.head !== i || r.templateSpans !== _ ? J(Gt(i, _), r) : r;
   }
-  /** @returns {Kf} */ function lr(/** @type {Kf | undefined} */ r, i, /** @type {Kf | xh | undefined} */ _, c, d = !1) {
-    /** @type {Kf} */ let T = I(206);
+  /** @returns {Kf} */ function lr(/** @type {Kf | vh | xh | Th | undefined} */ r, i, /** @type {Kf | vh | xh | Th | undefined} */ _, c, d = !1) {
+    /** @type {Kf | vh | xh | Th} */ let T = I(206);
     return (
       (T.argument = r),
       (T.attributes = i),
@@ -20146,19 +20146,19 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       ? J(lr(i, _, c, d, T), r)
       : r;
   }
-  /** @returns {Kf} */ function en(/** @type {Kf | undefined} */ r) {
-    /** @type {Kf} */ let i = I(197);
+  /** @returns {Kf} */ function en(/** @type {Kf | vh | xh | Th | undefined} */ r) {
+    /** @type {Kf | vh | xh | Th} */ let i = I(197);
     return ((i.type = r), (i.transformFlags = 1), i);
   }
   function Dt(r, i) {
     return r.type !== i ? J(en(i), r) : r;
   }
   /** @returns {Kf} */ function D() {
-    /** @type {Kf} */ let r = I(198);
+    /** @type {Kf | vh | xh | Th} */ let r = I(198);
     return ((r.transformFlags = 1), r);
   }
-  /** @returns {Kf} */ function Yt(r, /** @type {Kf} */ i) {
-    /** @type {Kf} */ let _ = I(199);
+  /** @returns {Kf} */ function Yt(r, /** @type {Kf | vh | xh | Th} */ i) {
+    /** @type {Kf | vh | xh | Th} */ let _ = I(199);
     return (
       (_.operator = r),
       (_.type =
@@ -20170,8 +20170,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function Br(r, i) {
     return r.type !== i ? J(Yt(r.operator, i), r) : r;
   }
-  /** @returns {Kf} */ function ur(/** @type {Kf} */ r, /** @type {Kf | undefined} */ i) {
-    /** @type {Kf} */ let _ = I(200);
+  /** @returns {Kf} */ function ur(/** @type {Kf | vh | xh | Th} */ r, /** @type {Kf | vh | xh | Th | undefined} */ i) {
+    /** @type {Kf | vh | xh | Th} */ let _ = I(200);
     return (
       (_.objectType = s().parenthesizeNonArrayTypeOfPostfixType(r)),
       (_.indexType = i),
@@ -20182,8 +20182,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function as(r, i, _) {
     return r.objectType !== i || r.indexType !== _ ? J(ur(i, _), r) : r;
   }
-  /** @returns {Kf} */ function vt(/** @type {vh | undefined} */ r, /** @type {Kf | undefined} */ i, /** @type {Kf | undefined} */ _, /** @type {vh | undefined} */ c, /** @type {Kf | vh | undefined} */ d, T) {
-    /** @type {Kf} */ let F = ae(201);
+  /** @returns {Kf} */ function vt(/** @type {Kf | vh | xh | Th | undefined} */ r, /** @type {Kf | vh | xh | Th | undefined} */ i, /** @type {Kf | vh | xh | Th | undefined} */ _, /** @type {Kf | vh | xh | Th | undefined} */ c, /** @type {Kf | vh | xh | Th | undefined} */ d, T) {
+    /** @type {Kf | vh | xh | Th} */ let F = ae(201);
     return (
       (F.readonlyToken = r),
       (F.typeParameter = i),
@@ -20207,15 +20207,15 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       ? J(vt(i, _, c, d, T, F), r)
       : r;
   }
-  /** @returns {Kf} */ function ti(/** @type {vh | Kf | undefined} */ r) {
-    /** @type {Kf} */ let i = I(202);
+  /** @returns {Kf} */ function ti(/** @type {Kf | vh | xh | Th | undefined} */ r) {
+    /** @type {Kf | vh | xh | Th} */ let i = I(202);
     return ((i.literal = r), (i.transformFlags = 1), i);
   }
   function Sr(r, i) {
     return r.literal !== i ? J(ti(i), r) : r;
   }
   /** @returns {Kf} */ function L_(r) {
-    /** @type {Kf} */ let i = I(207);
+    /** @type {Kf | vh | xh | Th} */ let i = I(207);
     return (
       (i.elements = me(r)),
       (i.transformFlags |= Ce(i.elements) | 1024 | 524288),
@@ -20227,14 +20227,14 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
     return r.elements !== i ? J(L_(i), r) : r;
   }
   /** @returns {Kf} */ function qr(r) {
-    /** @type {Kf} */ let i = I(208);
+    /** @type {Kf | vh | xh | Th} */ let i = I(208);
     return ((i.elements = me(r)), (i.transformFlags |= Ce(i.elements) | 1024 | 524288), i);
   }
   function Ql(r, i) {
     return r.elements !== i ? J(qr(i), r) : r;
   }
-  /** @returns {Kf} */ function pa(/** @type {vh | undefined} */ r, /** @type {xh | Kf | undefined} */ i, /** @type {xh | Kf | undefined} */ _, /** @type {Kf | xh | vh | Th | undefined} */ c) {
-    /** @type {Kf} */ let d = ae(209);
+  /** @returns {Kf} */ function pa(/** @type {Kf | vh | xh | Th | undefined} */ r, /** @type {Kf | vh | xh | Th | undefined} */ i, /** @type {Kf | vh | xh | Th | undefined} */ _, /** @type {Kf | xh | vh | Th | undefined} */ c) {
+    /** @type {Kf | vh | xh | Th} */ let d = ae(209);
     return (
       (d.dotDotDotToken = r),
       (d.propertyName = nt(i)),
@@ -20271,14 +20271,14 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
     return r.elements !== i ? J(ss(i, r.multiLine), r) : r;
   }
   /** @returns {Kf} */ function Ci(r, i) {
-    /** @type {Kf} */ let _ = ae(211);
+    /** @type {Kf | vh | xh | Th} */ let _ = ae(211);
     return ((_.properties = me(r)), (_.multiLine = i), (_.transformFlags |= Ce(_.properties)), (_.jsDoc = void 0), _);
   }
   function Kl(r, i) {
     return r.properties !== i ? J(Ci(i, r.multiLine), r) : r;
   }
-  /** @returns {Kf} */ function J_(/** @type {vh | xh | Kf | undefined} */ r, /** @type {vh | undefined} */ i, /** @type {xh | Th | undefined} */ _) {
-    /** @type {Kf} */ let c = ae(212);
+  /** @returns {Kf} */ function J_(/** @type {Kf | vh | xh | Th | undefined} */ r, /** @type {Kf | vh | xh | Th | undefined} */ i, /** @type {Kf | vh | xh | Th | undefined} */ _) {
+    /** @type {Kf | vh | xh | Th} */ let c = ae(212);
     return (
       (c.expression = r),
       (c.questionDotToken = i),
@@ -20289,15 +20289,15 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       c
     );
   }
-  /** @returns {InstanceType<typeof Kf>} */ function pr(/** @type {vh | xh | Kf | undefined} */ r, /** @type {xh | Th | undefined} */ i) {
-    /** @type {Kf} */ let _ = J_(s().parenthesizeLeftSideOfAccess(r, !1), void 0, nt(i));
+  /** @returns {InstanceType<typeof Kf>} */ function pr(/** @type {Kf | vh | xh | Th | undefined} */ r, /** @type {Kf | vh | xh | Th | undefined} */ i) {
+    /** @type {Kf | vh | xh | Th} */ let _ = J_(s().parenthesizeLeftSideOfAccess(r, !1), void 0, nt(i));
     return (Ip(r) && (_.transformFlags |= 384), _);
   }
   function Zl(r, i, _) {
     return Hg(r) ? fa(r, i, r.questionDotToken, Pr(_, et)) : r.expression !== i || r.name !== _ ? J(pr(i, _), r) : r;
   }
-  /** @returns {InstanceType<typeof Kf>} */ function Di(/** @type {xh | Kf | undefined} */ r, /** @type {vh | undefined} */ i, /** @type {xh | undefined} */ _) {
-    /** @type {Kf} */ let c = J_(s().parenthesizeLeftSideOfAccess(r, !0), i, nt(_));
+  /** @returns {InstanceType<typeof Kf>} */ function Di(/** @type {Kf | vh | xh | Th | undefined} */ r, /** @type {Kf | vh | xh | Th | undefined} */ i, /** @type {Kf | vh | xh | Th | undefined} */ _) {
+    /** @type {Kf | vh | xh | Th} */ let c = J_(s().parenthesizeLeftSideOfAccess(r, !0), i, nt(_));
     return ((c.flags |= 64), (c.transformFlags |= 32), c);
   }
   function fa(r, i, _, c) {
@@ -20309,8 +20309,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       r.expression !== i || r.questionDotToken !== _ || r.name !== c ? J(Di(i, _, c), r) : r
     );
   }
-  /** @returns {Kf} */ function R_(/** @type {xh | Kf} */ r, /** @type {vh | undefined} */ i, /** @type {Kf | xh} */ _) {
-    /** @type {Kf} */ let c = ae(213);
+  /** @returns {Kf} */ function R_(/** @type {Kf | vh | xh | Th} */ r, /** @type {Kf | vh | xh | Th | undefined} */ i, /** @type {Kf | vh | xh | Th} */ _) {
+    /** @type {Kf | vh | xh | Th} */ let c = ae(213);
     return (
       (c.expression = r),
       (c.questionDotToken = i),
@@ -20321,8 +20321,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       c
     );
   }
-  /** @returns {Kf} */ function Pi(/** @type {xh | Kf | undefined} */ r, /** @type {Kf | xh | undefined} */ i) {
-    /** @type {Kf} */ let _ = R_(s().parenthesizeLeftSideOfAccess(r, !1), void 0, Cr(i));
+  /** @returns {Kf} */ function Pi(/** @type {Kf | vh | xh | Th | undefined} */ r, /** @type {Kf | vh | xh | Th | undefined} */ i) {
+    /** @type {Kf | vh | xh | Th} */ let _ = R_(s().parenthesizeLeftSideOfAccess(r, !1), void 0, Cr(i));
     return (Ip(r) && (_.transformFlags |= 384), _);
   }
   function eu(r, i, _) {
@@ -20332,8 +20332,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
         ? J(Pi(i, _), r)
         : r;
   }
-  /** @returns {InstanceType<typeof Kf>} */ function U_(/** @type {xh} */ r, /** @type {vh} */ i, /** @type {Kf | xh} */ _) {
-    /** @type {Kf} */ let c = R_(s().parenthesizeLeftSideOfAccess(r, !0), i, Cr(_));
+  /** @returns {InstanceType<typeof Kf>} */ function U_(/** @type {Kf | vh | xh | Th} */ r, /** @type {Kf | vh | xh | Th} */ i, /** @type {Kf | vh | xh | Th} */ _) {
+    /** @type {Kf | vh | xh | Th} */ let c = R_(s().parenthesizeLeftSideOfAccess(r, !0), i, Cr(_));
     return ((c.flags |= 64), (c.transformFlags |= 32), c);
   }
   function _s(r, i, _, c) {
@@ -20345,8 +20345,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       r.expression !== i || r.questionDotToken !== _ || r.argumentExpression !== c ? J(U_(i, _, c), r) : r
     );
   }
-  /** @returns {Kf} */ function B_(/** @type {xh | vh | Kf} */ r, /** @type {vh | undefined} */ i, _, c) {
-    /** @type {Kf} */ let d = ae(214);
+  /** @returns {Kf} */ function B_(/** @type {Kf | vh | xh | Th} */ r, /** @type {Kf | vh | xh | Th | undefined} */ i, _, c) {
+    /** @type {Kf | vh | xh | Th} */ let d = ae(214);
     return (
       (d.expression = r),
       (d.questionDotToken = i),
@@ -20358,8 +20358,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       d
     );
   }
-  /** @returns {InstanceType<typeof Kf>} */ function Ni(/** @type {xh | vh | Kf} */ r, i, _) {
-    /** @type {Kf} */ let c = B_(
+  /** @returns {InstanceType<typeof Kf>} */ function Ni(/** @type {Kf | vh | xh | Th} */ r, i, _) {
+    /** @type {Kf | vh | xh | Th} */ let c = B_(
       s().parenthesizeLeftSideOfAccess(r, !1),
       void 0,
       Ie(i),
@@ -20374,8 +20374,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
         ? J(Ni(i, _, c), r)
         : r;
   }
-  /** @returns {Kf} */ function os(/** @type {Kf | undefined} */ r, /** @type {vh | undefined} */ i, _, c) {
-    /** @type {Kf} */ let d = B_(
+  /** @returns {Kf} */ function os(/** @type {Kf | vh | xh | Th | undefined} */ r, /** @type {Kf | vh | xh | Th | undefined} */ i, _, c) {
+    /** @type {Kf | vh | xh | Th} */ let d = B_(
       s().parenthesizeLeftSideOfAccess(r, !0),
       i,
       Ie(_),
@@ -20391,8 +20391,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
         : r
     );
   }
-  /** @returns {Kf} */ function Tn(/** @type {xh | Kf} */ r, i, _) {
-    /** @type {Kf} */ let c = ae(215);
+  /** @returns {Kf} */ function Tn(/** @type {Kf | vh | xh | Th} */ r, i, _) {
+    /** @type {Kf | vh | xh | Th} */ let c = ae(215);
     return (
       (c.expression = s().parenthesizeExpressionOfNew(r)),
       (c.typeArguments = Ie(i)),
@@ -20405,8 +20405,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function cs(r, i, _, c) {
     return r.expression !== i || r.typeArguments !== _ || r.arguments !== c ? J(Tn(i, _, c), r) : r;
   }
-  /** @returns {Kf} */ function ma(/** @type {xh | Kf} */ r, i, /** @type {Kf | undefined} */ _) {
-    /** @type {Kf} */ let c = I(216);
+  /** @returns {Kf} */ function ma(/** @type {Kf | vh | xh | Th} */ r, i, /** @type {Kf | vh | xh | Th | undefined} */ _) {
+    /** @type {Kf | vh | xh | Th} */ let c = I(216);
     return (
       (c.tag = s().parenthesizeLeftSideOfAccess(r, !1)),
       (c.typeArguments = Ie(i)),
@@ -20420,8 +20420,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function F_(r, i, _, c) {
     return r.tag !== i || r.typeArguments !== _ || r.template !== c ? J(ma(i, _, c), r) : r;
   }
-  /** @returns {Kf} */ function z_(/** @type {Kf | vh} */ r, /** @type {Kf | xh | vh | undefined} */ i) {
-    /** @type {Kf} */ let _ = I(217);
+  /** @returns {Kf} */ function z_(/** @type {Kf | vh | xh | Th} */ r, /** @type {Kf | vh | xh | Th | undefined} */ i) {
+    /** @type {Kf | vh | xh | Th} */ let _ = I(217);
     return (
       (_.expression = s().parenthesizeOperandOfPrefixUnary(i)),
       (_.type = r),
@@ -20432,15 +20432,15 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function V_(r, i, _) {
     return r.type !== i || r.expression !== _ ? J(z_(i, _), r) : r;
   }
-  /** @returns {Kf} */ function ls(/** @type {Kf | xh} */ r) {
-    /** @type {Kf} */ let i = I(218);
+  /** @returns {Kf} */ function ls(/** @type {Kf | vh | xh | Th} */ r) {
+    /** @type {Kf | vh | xh | Th} */ let i = I(218);
     return ((i.expression = r), (i.transformFlags = z(i.expression)), (i.jsDoc = void 0), i);
   }
   function W_(r, i) {
     return r.expression !== i ? J(ls(i), r) : r;
   }
-  /** @returns {Kf} */ function us(r, /** @type {vh | undefined} */ i, /** @type {xh | undefined} */ _, c, d, /** @type {vh | Kf | undefined} */ T, /** @type {Kf | undefined} */ F) {
-    /** @type {Kf} */ let fe = ae(219);
+  /** @returns {Kf} */ function us(r, /** @type {Kf | vh | xh | Th | undefined} */ i, /** @type {Kf | vh | xh | Th | undefined} */ _, c, d, /** @type {Kf | vh | xh | Th | undefined} */ T, /** @type {Kf | vh | xh | Th | undefined} */ F) {
+    /** @type {Kf | vh | xh | Th} */ let fe = ae(219);
     ((fe.modifiers = Ie(r)),
       (fe.asteriskToken = i),
       (fe.name = nt(_)),
@@ -20484,8 +20484,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       ? Le(us(i, _, c, d, T, F, fe), r)
       : r;
   }
-  /** @returns {Kf} */ function ps(r, i, _, /** @type {Kf | vh | undefined} */ c, /** @type {vh | undefined} */ d, /** @type {Kf | xh | vh | undefined} */ T) {
-    /** @type {Kf} */ let F = ae(220);
+  /** @returns {Kf} */ function ps(r, i, _, /** @type {Kf | vh | xh | Th | undefined} */ c, /** @type {Kf | vh | xh | Th | undefined} */ d, /** @type {Kf | vh | xh | Th | undefined} */ T) {
+    /** @type {Kf | vh | xh | Th} */ let F = ae(220);
     ((F.modifiers = Ie(r)),
       (F.typeParameters = Ie(i)),
       (F.parameters = me(_)),
@@ -20524,29 +20524,29 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       ? Le(ps(i, _, c, d, T, F), r)
       : r;
   }
-  /** @returns {Kf} */ function H_(/** @type {Kf} */ r) {
-    /** @type {Kf} */ let i = I(221);
+  /** @returns {Kf} */ function H_(/** @type {Kf | vh | xh | Th} */ r) {
+    /** @type {Kf | vh | xh | Th} */ let i = I(221);
     return ((i.expression = s().parenthesizeOperandOfPrefixUnary(r)), (i.transformFlags |= z(i.expression)), i);
   }
   function X_(r, i) {
     return r.expression !== i ? J(H_(i), r) : r;
   }
-  /** @returns {InstanceType<typeof Kf>} */ function ha(/** @type {xh | Kf | vh} */ r) {
-    /** @type {Kf} */ let i = I(222);
+  /** @returns {InstanceType<typeof Kf>} */ function ha(/** @type {Kf | vh | xh | Th} */ r) {
+    /** @type {Kf | vh | xh | Th} */ let i = I(222);
     return ((i.expression = s().parenthesizeOperandOfPrefixUnary(r)), (i.transformFlags |= z(i.expression)), i);
   }
   function dn(r, i) {
     return r.expression !== i ? J(ha(i), r) : r;
   }
-  /** @returns {InstanceType<typeof Kf>} */ function fs(/** @type {Kf | xh} */ r) {
-    /** @type {Kf} */ let i = I(223);
+  /** @returns {InstanceType<typeof Kf>} */ function fs(/** @type {Kf | vh | xh | Th} */ r) {
+    /** @type {Kf | vh | xh | Th} */ let i = I(223);
     return ((i.expression = s().parenthesizeOperandOfPrefixUnary(r)), (i.transformFlags |= z(i.expression)), i);
   }
   function fr(r, i) {
     return r.expression !== i ? J(fs(i), r) : r;
   }
-  /** @returns {Kf} */ function $_(/** @type {Kf | xh} */ r) {
-    /** @type {Kf} */ let i = I(224);
+  /** @returns {Kf} */ function $_(/** @type {Kf | vh | xh | Th} */ r) {
+    /** @type {Kf | vh | xh | Th} */ let i = I(224);
     return (
       (i.expression = s().parenthesizeOperandOfPrefixUnary(r)),
       (i.transformFlags |= z(i.expression) | 256 | 128 | 2097152),
@@ -20556,8 +20556,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function Fr(r, i) {
     return r.expression !== i ? J($_(i), r) : r;
   }
-  /** @returns {Kf} */ function zr(r, /** @type {xh | Kf | vh | undefined} */ i) {
-    /** @type {Kf} */ let _ = I(225);
+  /** @returns {Kf} */ function zr(r, /** @type {Kf | vh | xh | Th | undefined} */ i) {
+    /** @type {Kf | vh | xh | Th} */ let _ = I(225);
     return (
       (_.operator = r),
       (_.operand = s().parenthesizeOperandOfPrefixUnary(i)),
@@ -20569,8 +20569,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function tu(r, i) {
     return r.operand !== i ? J(zr(r.operator, i), r) : r;
   }
-  /** @returns {Kf} */ function ri(/** @type {Kf | xh} */ r, i) {
-    /** @type {Kf} */ let _ = I(226);
+  /** @returns {Kf} */ function ri(/** @type {Kf | vh | xh | Th} */ r, i) {
+    /** @type {Kf | vh | xh | Th} */ let _ = I(226);
     return (
       (_.operator = i),
       (_.operand = s().parenthesizeOperandOfPostfixUnary(r)),
@@ -20582,7 +20582,7 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function nu(r, i) {
     return r.operand !== i ? J(ri(i, r.operator), r) : r;
   }
-  /** @returns {Kf} */ function ya(/** @type {xh | Kf | vh} */ r, /** @type {vh | undefined} */ i, /** @type {Kf | xh | vh | undefined} */ _) {
+  /** @returns {Kf} */ function ya(/** @type {Kf | vh | xh | Th} */ r, /** @type {Kf | vh | xh | Th | undefined} */ i, /** @type {Kf | vh | xh | Th | undefined} */ _) {
     let c = ae(227),
       d = vp(i),
       T = d.kind;
@@ -20605,14 +20605,14 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       c
     );
   }
-  /** @returns {number} */ function Q_(/** @type {Kf | undefined} */ r) {
+  /** @returns {number} */ function Q_(/** @type {Kf | vh | xh | Th | undefined} */ r) {
     return fh(r) ? 65536 : 0;
   }
   function ru(r, i, _, c) {
     return r.left !== i || r.operatorToken !== _ || r.right !== c ? J(ya(i, _, c), r) : r;
   }
-  /** @returns {Kf} */ function K_(/** @type {Kf | xh | vh | undefined} */ r, /** @type {vh | undefined} */ i, /** @type {Kf | xh | vh | undefined} */ _, /** @type {vh | undefined} */ c, /** @type {Kf | xh | vh | undefined} */ d) {
-    /** @type {Kf} */ let T = I(228);
+  /** @returns {Kf} */ function K_(/** @type {Kf | vh | xh | Th | undefined} */ r, /** @type {Kf | vh | xh | Th | undefined} */ i, /** @type {Kf | vh | xh | Th | undefined} */ _, /** @type {Kf | vh | xh | Th | undefined} */ c, /** @type {Kf | vh | xh | Th | undefined} */ d) {
+    /** @type {Kf | vh | xh | Th} */ let T = I(228);
     return (
       (T.condition = s().parenthesizeConditionOfConditionalExpression(r)),
       (T.questionToken = i ?? ct(58)),
@@ -20630,8 +20630,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       ? J(K_(i, _, c, d, T), r)
       : r;
   }
-  /** @returns {Kf} */ function eo(/** @type {vh} */ r, i) {
-    /** @type {Kf} */ let _ = I(229);
+  /** @returns {Kf} */ function eo(/** @type {Kf | vh | xh | Th} */ r, i) {
+    /** @type {Kf | vh | xh | Th} */ let _ = I(229);
     return ((_.head = r), (_.templateSpans = me(i)), (_.transformFlags |= z(_.head) | Ce(_.templateSpans) | 1024), _);
   }
   function $n(r, i, _) {
@@ -20657,11 +20657,11 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
     return (r && (i |= 128), i);
   }
   /** @returns {InstanceType<typeof vh>} */ function iu(/** @type {number} */ r, /** @type {string | undefined} */ i, /** @type {string | undefined} */ _, /** @type {number | undefined} */ c) {
-    /** @type {vh} */ let d = Zt(r);
+    /** @type {Kf | vh | xh | Th} */ let d = Zt(r);
     return ((d.text = i), (d.rawText = _), (d.templateFlags = c & 7176), (d.transformFlags = to(d.templateFlags)), d);
   }
   /** @returns {InstanceType<typeof Kf>} */ function ii(/** @type {number} */ r, /** @type {string | undefined} */ i, /** @type {string | undefined} */ _, c) {
-    /** @type {Kf} */ let d = ae(r);
+    /** @type {Kf | vh | xh | Th} */ let d = ae(r);
     return ((d.text = i), (d.rawText = _), (d.templateFlags = c & 7176), (d.transformFlags = to(d.templateFlags)), d);
   }
   /** @returns {Kf | xh | vh | Th} */ function ai(r, /** @type {string | undefined} */ i, /** @type {string | undefined} */ _, /** @type {number | undefined} */ c) {
@@ -20679,9 +20679,9 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function au(r, i, _) {
     return ((r = Ii(16, r, i, _)), ii(15, r, i, _));
   }
-  /** @returns {InstanceType<typeof Kf>} */ function ms(/** @type {Kf | xh | vh | Th | undefined} */ r, /** @type {Kf | xh | undefined} */ i) {
+  /** @returns {InstanceType<typeof Kf>} */ function ms(/** @type {Kf | xh | vh | Th | undefined} */ r, /** @type {Kf | vh | xh | Th | undefined} */ i) {
     q.assert(!r || !!i, "A `YieldExpression` with an asteriskToken must have an expression.");
-    /** @type {Kf} */ let _ = I(230);
+    /** @type {Kf | vh | xh | Th} */ let _ = I(230);
     return (
       (_.expression = i && s().parenthesizeExpressionForDisallowedComma(i)),
       (_.asteriskToken = r),
@@ -20692,8 +20692,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function su(r, i, _) {
     return r.expression !== _ || r.asteriskToken !== i ? J(ms(i, _), r) : r;
   }
-  /** @returns {Kf} */ function ro(/** @type {xh | Kf | undefined} */ r) {
-    /** @type {Kf} */ let i = I(231);
+  /** @returns {Kf} */ function ro(/** @type {Kf | vh | xh | Th | undefined} */ r) {
+    /** @type {Kf | vh | xh | Th} */ let i = I(231);
     return (
       (i.expression = s().parenthesizeExpressionForDisallowedComma(r)),
       (i.transformFlags |= z(i.expression) | 1024 | 32768),
@@ -20703,8 +20703,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function _u(r, i) {
     return r.expression !== i ? J(ro(i), r) : r;
   }
-  /** @returns {Kf} */ function io(r, /** @type {xh | undefined} */ i, _, c, d) {
-    /** @type {Kf} */ let T = ae(232);
+  /** @returns {Kf} */ function io(r, /** @type {Kf | vh | xh | Th | undefined} */ i, _, c, d) {
+    /** @type {Kf | vh | xh | Th} */ let T = ae(232);
     return (
       (T.modifiers = Ie(r)),
       (T.name = nt(i)),
@@ -20731,8 +20731,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   /** @returns {Kf} */ function ys() {
     return I(233);
   }
-  /** @returns {Kf} */ function ao(/** @type {Kf | xh | undefined} */ r, i) {
-    /** @type {Kf} */ let _ = I(234);
+  /** @returns {Kf} */ function ao(/** @type {Kf | vh | xh | Th | undefined} */ r, i) {
+    /** @type {Kf | vh | xh | Th} */ let _ = I(234);
     return (
       (_.expression = s().parenthesizeLeftSideOfAccess(r, !1)),
       (_.typeArguments = i && s().parenthesizeTypeArguments(i)),
@@ -20743,22 +20743,22 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function so(r, i, _) {
     return r.expression !== i || r.typeArguments !== _ ? J(ao(i, _), r) : r;
   }
-  /** @returns {Kf} */ function mn(/** @type {Kf | xh | vh | undefined} */ r, /** @type {Kf | vh | undefined} */ i) {
-    /** @type {Kf} */ let _ = I(235);
+  /** @returns {Kf} */ function mn(/** @type {Kf | vh | xh | Th | undefined} */ r, /** @type {Kf | vh | xh | Th | undefined} */ i) {
+    /** @type {Kf | vh | xh | Th} */ let _ = I(235);
     return ((_.expression = r), (_.type = i), (_.transformFlags |= z(_.expression) | z(_.type) | 1), _);
   }
   function ba(r, i, _) {
     return r.expression !== i || r.type !== _ ? J(mn(i, _), r) : r;
   }
-  /** @returns {Kf} */ function _o(/** @type {xh | Kf | vh} */ r) {
-    /** @type {Kf} */ let i = I(236);
+  /** @returns {Kf} */ function _o(/** @type {Kf | vh | xh | Th} */ r) {
+    /** @type {Kf | vh | xh | Th} */ let i = I(236);
     return ((i.expression = s().parenthesizeLeftSideOfAccess(r, !1)), (i.transformFlags |= z(i.expression) | 1), i);
   }
   function oo(r, i) {
     return $g(r) ? Ln(r, i) : r.expression !== i ? J(_o(i), r) : r;
   }
-  /** @returns {Kf} */ function gs(/** @type {Kf} */ r, /** @type {Kf | undefined} */ i) {
-    /** @type {Kf} */ let _ = I(239);
+  /** @returns {Kf} */ function gs(/** @type {Kf | vh | xh | Th} */ r, /** @type {Kf | vh | xh | Th | undefined} */ i) {
+    /** @type {Kf | vh | xh | Th} */ let _ = I(239);
     return ((_.expression = r), (_.type = i), (_.transformFlags |= z(_.expression) | z(_.type) | 1), _);
   }
   function co(r, i, _) {
@@ -20782,8 +20782,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       r.expression !== i ? J(bs(i), r) : r
     );
   }
-  function lo(r, /** @type {xh} */ i) {
-    /** @type {Kf} */ let _ = I(237);
+  function lo(r, /** @type {Kf | vh | xh | Th} */ i) {
+    /** @type {Kf | vh | xh | Th} */ let _ = I(237);
     switch (((_.keywordToken = r), (_.name = i), (_.transformFlags |= z(_.name)), r)) {
       case 105:
         _.transformFlags |= 1024;
@@ -20799,8 +20799,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function vs(r, i) {
     return r.name !== i ? J(lo(r.keywordToken, i), r) : r;
   }
-  /** @returns {Kf} */ function Qn(/** @type {Kf | xh | vh} */ r, /** @type {vh | undefined} */ i) {
-    /** @type {Kf} */ let _ = I(240);
+  /** @returns {Kf} */ function Qn(/** @type {Kf | vh | xh | Th} */ r, /** @type {Kf | vh | xh | Th | undefined} */ i) {
+    /** @type {Kf | vh | xh | Th} */ let _ = I(240);
     return ((_.expression = r), (_.literal = i), (_.transformFlags |= z(_.expression) | z(_.literal) | 1024), _);
   }
   function va(r, i, _) {
@@ -20811,7 +20811,7 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
     return ((r.transformFlags |= 1024), r);
   }
   /** @returns {Kf} */ function Vr(r, i) {
-    /** @type {Kf} */ let _ = I(242);
+    /** @type {Kf | vh | xh | Th} */ let _ = I(242);
     return (
       (_.statements = me(r)),
       (_.multiLine = i),
@@ -20825,8 +20825,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function ou(r, i) {
     return r.statements !== i ? J(Vr(i, r.multiLine), r) : r;
   }
-  /** @returns {Kf} */ function xs(r, /** @type {Kf} */ i) {
-    /** @type {Kf} */ let _ = I(244);
+  /** @returns {Kf} */ function xs(r, /** @type {Kf | vh | xh | Th} */ i) {
+    /** @type {Kf | vh | xh | Th} */ let _ = I(244);
     return (
       (_.modifiers = Ie(r)),
       (_.declarationList = Kr(i) ? As(i) : i),
@@ -20841,11 +20841,11 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
     return r.modifiers !== i || r.declarationList !== _ ? J(xs(i, _), r) : r;
   }
   /** @returns {Kf} */ function fo() {
-    /** @type {Kf} */ let r = I(243);
+    /** @type {Kf | vh | xh | Th} */ let r = I(243);
     return ((r.jsDoc = void 0), r);
   }
-  /** @returns {Kf} */ function Oi(/** @type {Kf | xh | vh} */ r) {
-    /** @type {Kf} */ let i = I(245);
+  /** @returns {Kf} */ function Oi(/** @type {Kf | vh | xh | Th} */ r) {
+    /** @type {Kf | vh | xh | Th} */ let i = I(245);
     return (
       (i.expression = s().parenthesizeExpressionOfExpressionStatement(r)),
       (i.transformFlags |= z(i.expression)),
@@ -20857,8 +20857,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function mo(r, i) {
     return r.expression !== i ? J(Oi(i), r) : r;
   }
-  /** @returns {Kf} */ function ho(/** @type {Kf | xh | vh} */ r, /** @type {Kf} */ i, /** @type {Kf | undefined} */ _) {
-    /** @type {Kf} */ let c = I(246);
+  /** @returns {Kf} */ function ho(/** @type {Kf | vh | xh | Th} */ r, /** @type {Kf | vh | xh | Th} */ i, /** @type {Kf | vh | xh | Th | undefined} */ _) {
+    /** @type {Kf | vh | xh | Th} */ let c = I(246);
     return (
       (c.expression = r),
       (c.thenStatement = Kn(i)),
@@ -20872,8 +20872,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function yo(r, i, _, c) {
     return r.expression !== i || r.thenStatement !== _ || r.elseStatement !== c ? J(ho(i, _, c), r) : r;
   }
-  /** @returns {Kf} */ function go(/** @type {Kf | undefined} */ r, /** @type {Kf | vh | undefined} */ i) {
-    /** @type {Kf} */ let _ = I(247);
+  /** @returns {Kf} */ function go(/** @type {Kf | vh | xh | Th | undefined} */ r, /** @type {Kf | vh | xh | Th | undefined} */ i) {
+    /** @type {Kf | vh | xh | Th} */ let _ = I(247);
     return (
       (_.statement = Kn(r)),
       (_.expression = i),
@@ -20886,8 +20886,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function bo(r, i, _) {
     return r.statement !== i || r.expression !== _ ? J(go(i, _), r) : r;
   }
-  /** @returns {Kf} */ function vo(/** @type {Kf | vh | xh} */ r, /** @type {Kf} */ i) {
-    /** @type {Kf} */ let _ = I(248);
+  /** @returns {Kf} */ function vo(/** @type {Kf | vh | xh | Th} */ r, /** @type {Kf | vh | xh | Th} */ i) {
+    /** @type {Kf | vh | xh | Th} */ let _ = I(248);
     return (
       (_.expression = r),
       (_.statement = Kn(i)),
@@ -20900,8 +20900,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function cu(r, i, _) {
     return r.expression !== i || r.statement !== _ ? J(vo(i, _), r) : r;
   }
-  /** @returns {Kf} */ function xo(/** @type {Kf | undefined} */ r, /** @type {Kf | vh | undefined} */ i, /** @type {Kf | undefined} */ _, /** @type {Kf | undefined} */ c) {
-    /** @type {Kf} */ let d = I(249);
+  /** @returns {Kf} */ function xo(/** @type {Kf | vh | xh | Th | undefined} */ r, /** @type {Kf | vh | xh | Th | undefined} */ i, /** @type {Kf | vh | xh | Th | undefined} */ _, /** @type {Kf | vh | xh | Th | undefined} */ c) {
+    /** @type {Kf | vh | xh | Th} */ let d = I(249);
     return (
       (d.initializer = r),
       (d.condition = i),
@@ -20920,8 +20920,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       ? J(xo(i, _, c, d), r)
       : r;
   }
-  /** @returns {Kf} */ function Ts(/** @type {Kf | undefined} */ r, /** @type {xh | undefined} */ i, /** @type {Kf | undefined} */ _) {
-    /** @type {Kf} */ let c = I(250);
+  /** @returns {Kf} */ function Ts(/** @type {Kf | vh | xh | Th | undefined} */ r, /** @type {Kf | vh | xh | Th | undefined} */ i, /** @type {Kf | vh | xh | Th | undefined} */ _) {
+    /** @type {Kf | vh | xh | Th} */ let c = I(250);
     return (
       (c.initializer = r),
       (c.expression = i),
@@ -20937,8 +20937,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function lu(r, i, _, c) {
     return r.initializer !== i || r.expression !== _ || r.statement !== c ? J(Ts(i, _, c), r) : r;
   }
-  /** @returns {Kf} */ function So(/** @type {vh | undefined} */ r, /** @type {Kf | xh} */ i, /** @type {xh | Kf} */ _, /** @type {Kf} */ c) {
-    /** @type {Kf} */ let d = I(251);
+  /** @returns {Kf} */ function So(/** @type {Kf | vh | xh | Th | undefined} */ r, /** @type {Kf | vh | xh | Th} */ i, /** @type {Kf | vh | xh | Th} */ _, /** @type {Kf | vh | xh | Th} */ c) {
+    /** @type {Kf | vh | xh | Th} */ let d = I(251);
     return (
       (d.awaitModifier = r),
       (d.initializer = i),
@@ -20959,7 +20959,7 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       : r;
   }
   /** @returns {Kf} */ function wo(/** @type {Kf | xh | vh | Th | undefined} */ r) {
-    /** @type {Kf} */ let i = I(252);
+    /** @type {Kf | vh | xh | Th} */ let i = I(252);
     return (
       (i.label = nt(r)),
       (i.transformFlags |= z(i.label) | 4194304),
@@ -20972,7 +20972,7 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
     return r.label !== i ? J(wo(i), r) : r;
   }
   /** @returns {InstanceType<typeof Kf>} */ function Ss(/** @type {Kf | xh | vh | Th | undefined} */ r) {
-    /** @type {Kf} */ let i = I(253);
+    /** @type {Kf | vh | xh | Th} */ let i = I(253);
     return (
       (i.label = nt(r)),
       (i.transformFlags |= z(i.label) | 4194304),
@@ -20984,8 +20984,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function ko(r, i) {
     return r.label !== i ? J(Ss(i), r) : r;
   }
-  /** @returns {Kf} */ function ws(/** @type {Kf | xh | vh | undefined} */ r) {
-    /** @type {Kf} */ let i = I(254);
+  /** @returns {Kf} */ function ws(/** @type {Kf | vh | xh | Th | undefined} */ r) {
+    /** @type {Kf | vh | xh | Th} */ let i = I(254);
     return (
       (i.expression = r),
       (i.transformFlags |= z(i.expression) | 128 | 4194304),
@@ -21011,8 +21011,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function Eo(r, i, _) {
     return r.expression !== i || r.statement !== _ ? J(ks(i, _), r) : r;
   }
-  /** @returns {Kf} */ function Es(/** @type {xh | Kf | undefined} */ r, /** @type {Kf | undefined} */ i) {
-    /** @type {Kf} */ let _ = I(256);
+  /** @returns {Kf} */ function Es(/** @type {Kf | vh | xh | Th | undefined} */ r, /** @type {Kf | vh | xh | Th | undefined} */ i) {
+    /** @type {Kf | vh | xh | Th} */ let _ = I(256);
     return (
       (_.expression = s().parenthesizeExpressionForDisallowedComma(r)),
       (_.caseBlock = i),
@@ -21026,8 +21026,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function si(r, i, _) {
     return r.expression !== i || r.caseBlock !== _ ? J(Es(i, _), r) : r;
   }
-  /** @returns {Kf} */ function Ao(/** @type {xh} */ r, /** @type {Kf} */ i) {
-    /** @type {Kf} */ let _ = I(257);
+  /** @returns {Kf} */ function Ao(/** @type {Kf | vh | xh | Th} */ r, /** @type {Kf | vh | xh | Th} */ i) {
+    /** @type {Kf | vh | xh | Th} */ let _ = I(257);
     return (
       (_.label = nt(r)),
       (_.statement = Kn(i)),
@@ -21040,15 +21040,15 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function Co(r, i, _) {
     return r.label !== i || r.statement !== _ ? J(Ao(i, _), r) : r;
   }
-  /** @returns {Kf} */ function Do(/** @type {Kf | xh | vh} */ r) {
-    /** @type {Kf} */ let i = I(258);
+  /** @returns {Kf} */ function Do(/** @type {Kf | vh | xh | Th} */ r) {
+    /** @type {Kf | vh | xh | Th} */ let i = I(258);
     return ((i.expression = r), (i.transformFlags |= z(i.expression)), (i.jsDoc = void 0), (i.flowNode = void 0), i);
   }
   function du(r, i) {
     return r.expression !== i ? J(Do(i), r) : r;
   }
-  /** @returns {Kf} */ function Po(/** @type {Kf | undefined} */ r, /** @type {Kf | undefined} */ i, /** @type {Kf | undefined} */ _) {
-    /** @type {Kf} */ let c = I(259);
+  /** @returns {Kf} */ function Po(/** @type {Kf | vh | xh | Th | undefined} */ r, /** @type {Kf | vh | xh | Th | undefined} */ i, /** @type {Kf | vh | xh | Th | undefined} */ _) {
+    /** @type {Kf | vh | xh | Th} */ let c = I(259);
     return (
       (c.tryBlock = r),
       (c.catchClause = i),
@@ -21063,11 +21063,11 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
     return r.tryBlock !== i || r.catchClause !== _ || r.finallyBlock !== c ? J(Po(i, _, c), r) : r;
   }
   /** @returns {Kf} */ function No() {
-    /** @type {Kf} */ let r = I(260);
+    /** @type {Kf | vh | xh | Th} */ let r = I(260);
     return ((r.jsDoc = void 0), (r.flowNode = void 0), r);
   }
-  /** @returns {Kf} */ function xa(/** @type {xh | Kf} */ r, /** @type {vh | undefined} */ i, /** @type {Kf | vh | undefined} */ _, /** @type {Kf | vh | xh | undefined} */ c) {
-    /** @type {Kf} */ let d = ae(261);
+  /** @returns {Kf} */ function xa(/** @type {Kf | vh | xh | Th} */ r, /** @type {Kf | vh | xh | Th | undefined} */ i, /** @type {Kf | vh | xh | Th | undefined} */ _, /** @type {Kf | vh | xh | Th | undefined} */ c) {
+    /** @type {Kf | vh | xh | Th} */ let d = ae(261);
     return (
       (d.name = nt(r)),
       (d.exclamationToken = i),
@@ -21082,7 +21082,7 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
     return r.name !== i || r.type !== c || r.exclamationToken !== _ || r.initializer !== d ? J(xa(i, _, c, d), r) : r;
   }
   /** @returns {Kf} */ function As(r, i = 0) {
-    /** @type {Kf} */ let _ = I(262);
+    /** @type {Kf | vh | xh | Th} */ let _ = I(262);
     return (
       (_.flags |= i & 7),
       (_.declarations = me(r)),
@@ -21095,8 +21095,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function hu(r, i) {
     return r.declarations !== i ? J(As(i, r.flags), r) : r;
   }
-  /** @returns {Kf} */ function Oo(r, /** @type {vh | undefined} */ i, /** @type {xh | undefined} */ _, c, d, /** @type {Kf | vh | undefined} */ T, /** @type {Kf | undefined} */ F) {
-    /** @type {Kf} */ let fe = ae(263);
+  /** @returns {Kf} */ function Oo(r, /** @type {Kf | vh | xh | Th | undefined} */ i, /** @type {Kf | vh | xh | Th | undefined} */ _, c, d, /** @type {Kf | vh | xh | Th | undefined} */ T, /** @type {Kf | vh | xh | Th | undefined} */ F) {
+    /** @type {Kf | vh | xh | Th} */ let fe = ae(263);
     if (
       ((fe.modifiers = Ie(r)),
       (fe.asteriskToken = i),
@@ -21148,8 +21148,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function yu(r, i) {
     return (r !== i && r.modifiers === i.modifiers && (r.modifiers = i.modifiers), Le(r, i));
   }
-  /** @returns {Kf} */ function Mo(r, /** @type {xh} */ i, _, c, d) {
-    /** @type {Kf} */ let T = ae(264);
+  /** @returns {Kf} */ function Mo(r, /** @type {Kf | vh | xh | Th} */ i, _, c, d) {
+    /** @type {Kf | vh | xh | Th} */ let T = ae(264);
     return (
       (T.modifiers = Ie(r)),
       (T.name = nt(i)),
@@ -21176,8 +21176,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       ? J(Mo(i, _, c, d, T), r)
       : r;
   }
-  /** @returns {Kf} */ function Lo(r, /** @type {xh} */ i, _, c, d) {
-    /** @type {Kf} */ let T = ae(265);
+  /** @returns {Kf} */ function Lo(r, /** @type {Kf | vh | xh | Th} */ i, _, c, d) {
+    /** @type {Kf | vh | xh | Th} */ let T = ae(265);
     return (
       (T.modifiers = Ie(r)),
       (T.name = nt(i)),
@@ -21194,8 +21194,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       ? J(Lo(i, _, c, d, T), r)
       : r;
   }
-  /** @returns {Kf} */ function ot(r, /** @type {xh | undefined} */ i, _, /** @type {Kf | vh | undefined} */ c) {
-    /** @type {Kf} */ let d = ae(266);
+  /** @returns {Kf} */ function ot(r, /** @type {Kf | vh | xh | Th | undefined} */ i, _, /** @type {Kf | vh | xh | Th | undefined} */ c) {
+    /** @type {Kf | vh | xh | Th} */ let d = ae(266);
     return (
       (d.modifiers = Ie(r)),
       (d.name = nt(i)),
@@ -21211,8 +21211,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function wr(r, i, _, c, d) {
     return r.modifiers !== i || r.name !== _ || r.typeParameters !== c || r.type !== d ? J(ot(i, _, c, d), r) : r;
   }
-  /** @returns {Kf} */ function Ds(r, /** @type {xh | undefined} */ i, _) {
-    /** @type {Kf} */ let c = ae(267);
+  /** @returns {Kf} */ function Ds(r, /** @type {Kf | vh | xh | Th | undefined} */ i, _) {
+    /** @type {Kf | vh | xh | Th} */ let c = ae(267);
     return (
       (c.modifiers = Ie(r)),
       (c.name = nt(i)),
@@ -21226,8 +21226,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function kr(r, i, _, c) {
     return r.modifiers !== i || r.name !== _ || r.members !== c ? J(Ds(i, _, c), r) : r;
   }
-  /** @returns {Kf} */ function Jo(r, /** @type {Kf | xh | undefined} */ i, /** @type {Kf | undefined} */ _, c = 0) {
-    /** @type {Kf} */ let d = ae(268);
+  /** @returns {Kf} */ function Jo(r, /** @type {Kf | vh | xh | Th | undefined} */ i, /** @type {Kf | vh | xh | Th | undefined} */ _, c = 0) {
+    /** @type {Kf | vh | xh | Th} */ let d = ae(268);
     return (
       (d.modifiers = Ie(r)),
       (d.flags |= c & 2088),
@@ -21247,14 +21247,14 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
     return r.modifiers !== i || r.name !== _ || r.body !== c ? J(Jo(i, _, c, r.flags), r) : r;
   }
   /** @returns {Kf} */ function Er(r) {
-    /** @type {Kf} */ let i = I(269);
+    /** @type {Kf | vh | xh | Th} */ let i = I(269);
     return ((i.statements = me(r)), (i.transformFlags |= Ce(i.statements)), (i.jsDoc = void 0), i);
   }
   function Vt(r, i) {
     return r.statements !== i ? J(Er(i), r) : r;
   }
   /** @returns {Kf} */ function Ro(r) {
-    /** @type {Kf} */ let i = I(270);
+    /** @type {Kf | vh | xh | Th} */ let i = I(270);
     return (
       (i.clauses = me(r)),
       (i.transformFlags |= Ce(i.clauses)),
@@ -21276,8 +21276,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function bu(r, i) {
     return (r !== i && (r.modifiers = i.modifiers), J(r, i));
   }
-  /** @returns {Kf} */ function qo(r, i, /** @type {xh | undefined} */ _, /** @type {Kf | undefined} */ c) {
-    /** @type {Kf} */ let d = ae(272);
+  /** @returns {Kf} */ function qo(r, i, /** @type {Kf | vh | xh | Th | undefined} */ _, /** @type {Kf | vh | xh | Th | undefined} */ c) {
+    /** @type {Kf | vh | xh | Th} */ let d = ae(272);
     return (
       (d.modifiers = Ie(r)),
       (d.name = nt(_)),
@@ -21295,8 +21295,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       ? J(qo(i, _, c, d), r)
       : r;
   }
-  /** @returns {Kf} */ function zo(r, /** @type {Kf | undefined} */ i, /** @type {Kf | undefined} */ _, /** @type {Kf | undefined} */ c) {
-    /** @type {Kf} */ let d = I(273);
+  /** @returns {Kf} */ function zo(r, /** @type {Kf | vh | xh | Th | undefined} */ i, /** @type {Kf | vh | xh | Th | undefined} */ _, /** @type {Kf | vh | xh | Th | undefined} */ c) {
+    /** @type {Kf | vh | xh | Th} */ let d = I(273);
     return (
       (d.modifiers = Ie(r)),
       (d.importClause = i),
@@ -21313,8 +21313,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       ? J(zo(i, _, c, d), r)
       : r;
   }
-  /** @returns {Kf} */ function Wo(r, /** @type {xh | undefined} */ i, /** @type {Kf | undefined} */ _) {
-    /** @type {Kf} */ let c = ae(274);
+  /** @returns {Kf} */ function Wo(r, /** @type {Kf | vh | xh | Th | undefined} */ i, /** @type {Kf | vh | xh | Th | undefined} */ _) {
+    /** @type {Kf | vh | xh | Th} */ let c = ae(274);
     return (
       typeof r == "boolean" && (r = r ? 156 : void 0),
       (c.isTypeOnly = r === 156),
@@ -21355,21 +21355,21 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
     return r.assertClause !== i || r.multiLine !== _ ? J(Ns(i, _), r) : r;
   }
   /** @returns {Kf} */ function Xo(r, i, _) {
-    /** @type {Kf} */ let c = I(301);
+    /** @type {Kf | vh | xh | Th} */ let c = I(301);
     return ((c.token = _ ?? 118), (c.elements = me(r)), (c.multiLine = i), (c.transformFlags |= 4), c);
   }
   function Is(r, i, _) {
     return r.elements !== i || r.multiLine !== _ ? J(Xo(i, _, r.token), r) : r;
   }
-  /** @returns {Kf} */ function $o(/** @type {xh} */ r, /** @type {Kf} */ i) {
-    /** @type {Kf} */ let _ = I(302);
+  /** @returns {Kf} */ function $o(/** @type {Kf | vh | xh | Th} */ r, /** @type {Kf | vh | xh | Th} */ i) {
+    /** @type {Kf | vh | xh | Th} */ let _ = I(302);
     return ((_.name = r), (_.value = i), (_.transformFlags |= 4), _);
   }
   function Qo(r, i, _) {
     return r.name !== i || r.value !== _ ? J($o(i, _), r) : r;
   }
-  /** @returns {Kf} */ function Ko(/** @type {xh | undefined} */ r) {
-    /** @type {Kf} */ let i = ae(275);
+  /** @returns {Kf} */ function Ko(/** @type {Kf | vh | xh | Th | undefined} */ r) {
+    /** @type {Kf | vh | xh | Th} */ let i = ae(275);
     return ((i.name = r), (i.transformFlags |= z(i.name)), (i.transformFlags &= -67108865), i);
   }
   function xu(r, i) {
@@ -21383,14 +21383,14 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
     return r.name !== i ? J(Zo(i), r) : r;
   }
   /** @returns {Kf} */ function ec(r) {
-    /** @type {Kf} */ let i = I(276);
+    /** @type {Kf | vh | xh | Th} */ let i = I(276);
     return ((i.elements = me(r)), (i.transformFlags |= Ce(i.elements)), (i.transformFlags &= -67108865), i);
   }
   function tc(r, i) {
     return r.elements !== i ? J(ec(i), r) : r;
   }
-  /** @returns {Kf} */ function Ar(r, /** @type {xh | undefined} */ i, /** @type {xh | undefined} */ _) {
-    /** @type {Kf} */ let c = ae(277);
+  /** @returns {Kf} */ function Ar(r, /** @type {Kf | vh | xh | Th | undefined} */ i, /** @type {Kf | vh | xh | Th | undefined} */ _) {
+    /** @type {Kf | vh | xh | Th} */ let c = ae(277);
     return (
       (c.isTypeOnly = r),
       (c.propertyName = i),
@@ -21403,8 +21403,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function Su(r, i, _, c) {
     return r.isTypeOnly !== i || r.propertyName !== _ || r.name !== c ? J(Ar(i, _, c), r) : r;
   }
-  /** @returns {Kf} */ function Sa(r, i, /** @type {Kf | xh | undefined} */ _) {
-    /** @type {Kf} */ let c = ae(278);
+  /** @returns {Kf} */ function Sa(r, i, /** @type {Kf | vh | xh | Th | undefined} */ _) {
+    /** @type {Kf | vh | xh | Th} */ let c = ae(278);
     return (
       (c.modifiers = Ie(r)),
       (c.isExportEquals = i),
@@ -21420,8 +21420,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function Li(r, i, _) {
     return r.modifiers !== i || r.expression !== _ ? J(Sa(i, r.isExportEquals, _), r) : r;
   }
-  /** @returns {Kf} */ function wa(r, i, /** @type {Kf | undefined} */ _, /** @type {Kf | undefined} */ c, d) {
-    /** @type {Kf} */ let T = ae(279);
+  /** @returns {Kf} */ function wa(r, i, /** @type {Kf | vh | xh | Th | undefined} */ _, /** @type {Kf | vh | xh | Th | undefined} */ c, d) {
+    /** @type {Kf | vh | xh | Th} */ let T = ae(279);
     return (
       (T.modifiers = Ie(r)),
       (T.isTypeOnly = i),
@@ -21447,14 +21447,14 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
     return (r !== i && r.modifiers === i.modifiers && (r.modifiers = i.modifiers), J(r, i));
   }
   /** @returns {Kf} */ function Os(r) {
-    /** @type {Kf} */ let i = I(280);
+    /** @type {Kf | vh | xh | Th} */ let i = I(280);
     return ((i.elements = me(r)), (i.transformFlags |= Ce(i.elements)), (i.transformFlags &= -67108865), i);
   }
   function wu(r, i) {
     return r.elements !== i ? J(Os(i), r) : r;
   }
-  /** @returns {Kf} */ function ka(r, /** @type {xh | undefined} */ i, /** @type {xh | undefined} */ _) {
-    /** @type {Kf} */ let c = I(282);
+  /** @returns {Kf} */ function ka(r, /** @type {Kf | vh | xh | Th | undefined} */ i, /** @type {Kf | vh | xh | Th | undefined} */ _) {
+    /** @type {Kf | vh | xh | Th} */ let c = I(282);
     return (
       (c.isTypeOnly = r),
       (c.propertyName = nt(i)),
@@ -21469,11 +21469,11 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
     return r.isTypeOnly !== i || r.propertyName !== _ || r.name !== c ? J(ka(i, _, c), r) : r;
   }
   /** @returns {Kf} */ function Eu() {
-    /** @type {Kf} */ let r = ae(283);
+    /** @type {Kf | vh | xh | Th} */ let r = ae(283);
     return ((r.jsDoc = void 0), r);
   }
-  /** @returns {Kf} */ function Ms(/** @type {Kf | undefined} */ r) {
-    /** @type {Kf} */ let i = I(284);
+  /** @returns {Kf} */ function Ms(/** @type {Kf | vh | xh | Th | undefined} */ r) {
+    /** @type {Kf | vh | xh | Th} */ let i = I(284);
     return ((i.expression = r), (i.transformFlags |= z(i.expression)), (i.transformFlags &= -67108865), i);
   }
   function Au(r, i) {
@@ -21730,8 +21730,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function Cc(r, i, _) {
     return r.comment !== i || r.tags !== _ ? J(Ri(i, _), r) : r;
   }
-  /** @returns {Kf} */ function Dc(/** @type {Kf} */ r, i, /** @type {Kf} */ _) {
-    /** @type {Kf} */ let c = I(285);
+  /** @returns {Kf} */ function Dc(/** @type {Kf | vh | xh | Th} */ r, i, /** @type {Kf | vh | xh | Th} */ _) {
+    /** @type {Kf | vh | xh | Th} */ let c = I(285);
     return (
       (c.openingElement = r),
       (c.children = me(i)),
@@ -21743,8 +21743,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function Vu(r, i, _, c) {
     return r.openingElement !== i || r.children !== _ || r.closingElement !== c ? J(Dc(i, _, c), r) : r;
   }
-  /** @returns {Kf} */ function Pc(/** @type {xh} */ r, i, /** @type {Kf} */ _) {
-    /** @type {Kf} */ let c = I(286);
+  /** @returns {Kf} */ function Pc(/** @type {Kf | vh | xh | Th} */ r, i, /** @type {Kf | vh | xh | Th} */ _) {
+    /** @type {Kf | vh | xh | Th} */ let c = I(286);
     return (
       (c.tagName = r),
       (c.typeArguments = Ie(i)),
@@ -21757,8 +21757,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function Wu(r, i, _, c) {
     return r.tagName !== i || r.typeArguments !== _ || r.attributes !== c ? J(Pc(i, _, c), r) : r;
   }
-  /** @returns {Kf} */ function Ca(/** @type {xh} */ r, i, /** @type {Kf | undefined} */ _) {
-    /** @type {Kf} */ let c = I(287);
+  /** @returns {Kf} */ function Ca(/** @type {Kf | vh | xh | Th} */ r, i, /** @type {Kf | vh | xh | Th | undefined} */ _) {
+    /** @type {Kf | vh | xh | Th} */ let c = I(287);
     return (
       (c.tagName = r),
       (c.typeArguments = Ie(i)),
@@ -21771,15 +21771,15 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function Nc(r, i, _, c) {
     return r.tagName !== i || r.typeArguments !== _ || r.attributes !== c ? J(Ca(i, _, c), r) : r;
   }
-  /** @returns {Kf} */ function zs(/** @type {xh} */ r) {
-    /** @type {Kf} */ let i = I(288);
+  /** @returns {Kf} */ function zs(/** @type {Kf | vh | xh | Th} */ r) {
+    /** @type {Kf | vh | xh | Th} */ let i = I(288);
     return ((i.tagName = r), (i.transformFlags |= z(i.tagName) | 2), i);
   }
   function Da(r, i) {
     return r.tagName !== i ? J(zs(i), r) : r;
   }
-  /** @returns {Kf} */ function Ht(/** @type {Kf | undefined} */ r, i, /** @type {Kf | undefined} */ _) {
-    /** @type {Kf} */ let c = I(289);
+  /** @returns {Kf} */ function Ht(/** @type {Kf | vh | xh | Th | undefined} */ r, i, /** @type {Kf | vh | xh | Th | undefined} */ _) {
+    /** @type {Kf | vh | xh | Th} */ let c = I(289);
     return (
       (c.openingFragment = r),
       (c.children = me(i)),
@@ -21792,29 +21792,29 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
     return r.openingFragment !== i || r.children !== _ || r.closingFragment !== c ? J(Ht(i, _, c), r) : r;
   }
   /** @returns {Kf} */ function Ui(/** @type {string} */ r, i) {
-    /** @type {Kf} */ let _ = I(12);
+    /** @type {Kf | vh | xh | Th} */ let _ = I(12);
     return ((_.text = r), (_.containsOnlyTriviaWhiteSpaces = !!i), (_.transformFlags |= 2), _);
   }
   function Gu(r, i, _) {
     return r.text !== i || r.containsOnlyTriviaWhiteSpaces !== _ ? J(Ui(i, _), r) : r;
   }
   /** @returns {Kf} */ function Oc() {
-    /** @type {Kf} */ let r = I(290);
+    /** @type {Kf | vh | xh | Th} */ let r = I(290);
     return ((r.transformFlags |= 2), r);
   }
   /** @returns {Kf} */ function Mc() {
-    /** @type {Kf} */ let r = I(291);
+    /** @type {Kf | vh | xh | Th} */ let r = I(291);
     return ((r.transformFlags |= 2), r);
   }
-  /** @returns {Kf} */ function Lc(/** @type {xh} */ r, /** @type {Kf | undefined} */ i) {
-    /** @type {Kf} */ let _ = ae(292);
+  /** @returns {Kf} */ function Lc(/** @type {Kf | vh | xh | Th} */ r, /** @type {Kf | vh | xh | Th | undefined} */ i) {
+    /** @type {Kf | vh | xh | Th} */ let _ = ae(292);
     return ((_.name = r), (_.initializer = i), (_.transformFlags |= z(_.name) | z(_.initializer) | 2), _);
   }
   function Yu(r, i, _) {
     return r.name !== i || r.initializer !== _ ? J(Lc(i, _), r) : r;
   }
   /** @returns {Kf} */ function Bi(r) {
-    /** @type {Kf} */ let i = ae(293);
+    /** @type {Kf | vh | xh | Th} */ let i = ae(293);
     return ((i.properties = me(r)), (i.transformFlags |= Ce(i.properties) | 2), i);
   }
   function Hu(r, i) {
@@ -21827,8 +21827,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function Xu(r, i) {
     return r.expression !== i ? J(jc(i), r) : r;
   }
-  /** @returns {Kf} */ function Jc(r, /** @type {Kf | xh | undefined} */ i) {
-    /** @type {Kf} */ let _ = I(295);
+  /** @returns {Kf} */ function Jc(r, /** @type {Kf | vh | xh | Th | undefined} */ i) {
+    /** @type {Kf | vh | xh | Th} */ let _ = I(295);
     return (
       (_.dotDotDotToken = r),
       (_.expression = i),
@@ -21846,8 +21846,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function $u(r, i, _) {
     return r.namespace !== i || r.name !== _ ? J(_i(i, _), r) : r;
   }
-  /** @returns {Kf} */ function Pa(/** @type {Kf | undefined} */ r, i) {
-    /** @type {Kf} */ let _ = I(297);
+  /** @returns {Kf} */ function Pa(/** @type {Kf | vh | xh | Th | undefined} */ r, i) {
+    /** @type {Kf | vh | xh | Th} */ let _ = I(297);
     return (
       (_.expression = s().parenthesizeExpressionForDisallowedComma(r)),
       (_.statements = me(i)),
@@ -21860,14 +21860,14 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
     return r.expression !== i || r.statements !== _ ? J(Pa(i, _), r) : r;
   }
   /** @returns {Kf} */ function Uc(r) {
-    /** @type {Kf} */ let i = I(298);
+    /** @type {Kf | vh | xh | Th} */ let i = I(298);
     return ((i.statements = me(r)), (i.transformFlags = Ce(i.statements)), i);
   }
   function oi(r, i) {
     return r.statements !== i ? J(Uc(i), r) : r;
   }
   function Ws(r, i) {
-    /** @type {Kf} */ let _ = I(299);
+    /** @type {Kf | vh | xh | Th} */ let _ = I(299);
     switch (((_.token = r), (_.types = me(i)), (_.transformFlags |= Ce(_.types)), r)) {
       case 96:
         _.transformFlags |= 1024;
@@ -21883,8 +21883,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function Qu(r, i) {
     return r.types !== i ? J(Ws(r.token, i), r) : r;
   }
-  /** @returns {Kf} */ function Bc(/** @type {Kf | undefined} */ r, /** @type {Kf} */ i) {
-    /** @type {Kf} */ let _ = I(300);
+  /** @returns {Kf} */ function Bc(/** @type {Kf | vh | xh | Th | undefined} */ r, /** @type {Kf | vh | xh | Th} */ i) {
+    /** @type {Kf | vh | xh | Th} */ let _ = I(300);
     return (
       (_.variableDeclaration = wn(r)),
       (_.block = i),
@@ -21897,8 +21897,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function qc(r, i, _) {
     return r.variableDeclaration !== i || r.block !== _ ? J(Bc(i, _), r) : r;
   }
-  /** @returns {Kf} */ function Na(/** @type {xh | Kf} */ r, /** @type {Kf | vh | xh} */ i) {
-    /** @type {Kf} */ let _ = ae(304);
+  /** @returns {Kf} */ function Na(/** @type {Kf | vh | xh | Th} */ r, /** @type {Kf | vh | xh | Th} */ i) {
+    /** @type {Kf | vh | xh | Th} */ let _ = ae(304);
     return (
       (_.name = nt(r)),
       (_.initializer = s().parenthesizeExpressionForDisallowedComma(i)),
@@ -21920,8 +21920,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       J(r, i)
     );
   }
-  /** @returns {Kf} */ function Fc(/** @type {xh} */ r, i) {
-    /** @type {Kf} */ let _ = ae(305);
+  /** @returns {Kf} */ function Fc(/** @type {Kf | vh | xh | Th} */ r, i) {
+    /** @type {Kf | vh | xh | Th} */ let _ = ae(305);
     return (
       (_.name = nt(r)),
       (_.objectAssignmentInitializer = i && s().parenthesizeExpressionForDisallowedComma(i)),
@@ -21947,8 +21947,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       J(r, i)
     );
   }
-  /** @returns {Kf} */ function zc(/** @type {Kf | xh} */ r) {
-    /** @type {Kf} */ let i = ae(306);
+  /** @returns {Kf} */ function zc(/** @type {Kf | vh | xh | Th} */ r) {
+    /** @type {Kf | vh | xh | Th} */ let i = ae(306);
     return (
       (i.expression = s().parenthesizeExpressionForDisallowedComma(r)),
       (i.transformFlags |= z(i.expression) | 128 | 65536),
@@ -21959,8 +21959,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function Vc(r, i) {
     return r.expression !== i ? J(zc(i), r) : r;
   }
-  /** @returns {Kf} */ function Ys(/** @type {xh} */ r, /** @type {Kf | xh | undefined} */ i) {
-    /** @type {Kf} */ let _ = ae(307);
+  /** @returns {Kf} */ function Ys(/** @type {Kf | vh | xh | Th} */ r, /** @type {Kf | vh | xh | Th | undefined} */ i) {
+    /** @type {Kf | vh | xh | Th} */ let _ = ae(307);
     return (
       (_.name = nt(r)),
       (_.initializer = i && s().parenthesizeExpressionForDisallowedComma(i)),
@@ -21972,7 +21972,7 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function jn(r, i, _) {
     return r.name !== i || r.initializer !== _ ? J(Ys(i, _), r) : r;
   }
-  function Wc(r, /** @type {vh | undefined} */ i, _) {
+  function Wc(r, /** @type {Kf | vh | xh | Th | undefined} */ i, _) {
     let c = t.createBaseSourceFileNode(308);
     return (
       (c.statements = me(r)),
@@ -22584,7 +22584,7 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function Ie(r) {
     return r ? me(r) : void 0;
   }
-  /** @returns {Kf | xh | vh | Th | undefined} */ function nt(/** @type {xh | Kf | Th | undefined} */ r) {
+  /** @returns {Kf | xh | vh | Th | undefined} */ function nt(/** @type {Kf | vh | xh | Th | undefined} */ r) {
     return typeof r == "string" ? He(r) : r;
   }
   /** @returns {Kf | xh | vh | Th} */ function Cr(/** @type {Kf | xh | vh | Th} */ r) {
@@ -22593,7 +22593,7 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   /** @returns {Kf | xh | vh | Th | undefined} */ function Vi(/** @type {Kf | xh | vh | Th | undefined} */ r) {
     return r && s().parenthesizeExpressionForDisallowedComma(r);
   }
-  /** @returns {InstanceType<typeof vh>} */ function vp(/** @type {vh} */ r) {
+  /** @returns {InstanceType<typeof vh>} */ function vp(/** @type {Kf | vh | xh | Th} */ r) {
     return typeof r == "number" ? ct(r) : r;
   }
   /** @returns {InstanceType<typeof Kf> | undefined} */ function Kn(/** @type {InstanceType<typeof Kf> | undefined} */ r) {
@@ -22842,7 +22842,7 @@ function N1(e) {
 /** @returns {boolean} */ function Lr(/** @type {Kf | xh | vh | Th} */ e) {
   return e.kind === 11;
 }
-/** @returns {boolean} */ function I1(/** @type {Kf} */ e) {
+/** @returns {boolean} */ function I1(/** @type {Kf | vh | xh | Th} */ e) {
   return e.kind === 15;
 }
 function Zb(e) {
@@ -22860,10 +22860,10 @@ function Zb(e) {
 /** @returns {boolean} */ function xi(/** @type {Kf | xh | vh | Th} */ e) {
   return e.kind === 81;
 }
-/** @returns {boolean} */ function ev(/** @type {Kf | vh} */ e) {
+/** @returns {boolean} */ function ev(/** @type {Kf | vh | xh | Th} */ e) {
   return e.kind === 95;
 }
-/** @returns {boolean} */ function ml(/** @type {vh | Kf} */ e) {
+/** @returns {boolean} */ function ml(/** @type {Kf | vh | xh | Th} */ e) {
   return e.kind === 134;
 }
 /** @returns {boolean} */ function Ip(/** @type {Kf | xh | vh | Th} */ e) {
@@ -22872,10 +22872,10 @@ function Zb(e) {
 /** @returns {boolean} */ function tv(/** @type {Kf | xh | vh | Th} */ e) {
   return e.kind === 102;
 }
-/** @returns {boolean} */ function O1(/** @type {Kf} */ e) {
+/** @returns {boolean} */ function O1(/** @type {Kf | vh | xh | Th} */ e) {
   return e.kind === 167;
 }
-/** @returns {boolean} */ function Nf(/** @type {xh | Kf | Th} */ e) {
+/** @returns {boolean} */ function Nf(/** @type {Kf | vh | xh | Th} */ e) {
   return e.kind === 168;
 }
 function If(e) {
@@ -22884,13 +22884,13 @@ function If(e) {
 /** @returns {boolean} */ function x_(e) {
   return e.kind === 170;
 }
-/** @returns {boolean} */ function Ka(/** @type {Kf | vh} */ e) {
+/** @returns {boolean} */ function Ka(/** @type {Kf | vh | xh | Th} */ e) {
   return e.kind === 171;
 }
 function M1(e) {
   return e.kind === 172;
 }
-/** @returns {boolean} */ function Xa(/** @type {Kf} */ e) {
+/** @returns {boolean} */ function Xa(/** @type {Kf | vh | xh | Th} */ e) {
   return e.kind === 173;
 }
 function L1(e) {
@@ -22905,7 +22905,7 @@ function Of(e) {
 /** @returns {boolean} */ function Al(/** @type {InstanceType<typeof Kf>} */ e) {
   return e.kind === 178;
 }
-/** @returns {boolean} */ function S_(/** @type {Kf} */ e) {
+/** @returns {boolean} */ function S_(/** @type {Kf | vh | xh | Th} */ e) {
   return e.kind === 179;
 }
 function j1(e) {
@@ -22989,10 +22989,10 @@ function pv(e) {
 /** @returns {boolean} */ function Y1(/** @type {Kf | xh | vh | Th} */ e) {
   return e.kind === 210;
 }
-/** @returns {boolean} */ function Rf(/** @type {Kf | xh} */ e) {
+/** @returns {boolean} */ function Rf(/** @type {Kf | vh | xh | Th} */ e) {
   return e.kind === 211;
 }
-/** @returns {boolean} */ function gr(/** @type {Kf} */ e) {
+/** @returns {boolean} */ function gr(/** @type {Kf | vh | xh | Th} */ e) {
   return e.kind === 212;
 }
 function Za(e) {
@@ -23001,7 +23001,7 @@ function Za(e) {
 function Uf(e) {
   return e.kind === 214;
 }
-/** @returns {boolean} */ function H1(/** @type {xh | Kf | vh} */ e) {
+/** @returns {boolean} */ function H1(/** @type {Kf | vh | xh | Th} */ e) {
   return e.kind === 216;
 }
 function Ml(e) {
@@ -23031,10 +23031,10 @@ function $1(e) {
 /** @returns {boolean} */ function Q1(/** @type {Kf | xh | vh | Th} */ e) {
   return e.kind === 233;
 }
-/** @returns {boolean} */ function K1(/** @type {vh | xh | Kf} */ e) {
+/** @returns {boolean} */ function K1(/** @type {Kf | vh | xh | Th} */ e) {
   return e.kind === 234;
 }
-/** @returns {boolean} */ function bl(/** @type {vh | xh | Kf} */ e) {
+/** @returns {boolean} */ function bl(/** @type {Kf | vh | xh | Th} */ e) {
   return e.kind === 236;
 }
 function dv(e) {
@@ -23046,22 +23046,22 @@ function mv(e) {
 /** @returns {boolean} */ function es(/** @type {InstanceType<typeof Kf>} */ e) {
   return e.kind === 244;
 }
-/** @returns {boolean} */ function Ll(/** @type {Kf} */ e) {
+/** @returns {boolean} */ function Ll(/** @type {Kf | vh | xh | Th} */ e) {
   return e.kind === 245;
 }
 function Z1(e) {
   return e.kind === 257;
 }
-/** @returns {boolean} */ function Ff(/** @type {Kf} */ e) {
+/** @returns {boolean} */ function Ff(/** @type {Kf | vh | xh | Th} */ e) {
   return e.kind === 261;
 }
-/** @returns {boolean} */ function eh(/** @type {Kf | xh} */ e) {
+/** @returns {boolean} */ function eh(/** @type {Kf | vh | xh | Th} */ e) {
   return e.kind === 262;
 }
 function zf(e) {
   return e.kind === 263;
 }
-/** @returns {boolean} */ function $a(/** @type {Kf} */ e) {
+/** @returns {boolean} */ function $a(/** @type {Kf | vh | xh | Th} */ e) {
   return e.kind === 264;
 }
 function A_(e) {
@@ -23079,31 +23079,31 @@ function jl(e) {
 /** @returns {boolean} */ function Vf(/** @type {InstanceType<typeof Kf>} */ e) {
   return e.kind === 272;
 }
-/** @returns {boolean} */ function Wf(/** @type {Kf} */ e) {
+/** @returns {boolean} */ function Wf(/** @type {Kf | vh | xh | Th} */ e) {
   return e.kind === 273;
 }
-/** @returns {boolean} */ function Gf(/** @type {Kf} */ e) {
+/** @returns {boolean} */ function Gf(/** @type {Kf | vh | xh | Th} */ e) {
   return e.kind === 278;
 }
-/** @returns {boolean} */ function Yf(/** @type {Kf} */ e) {
+/** @returns {boolean} */ function Yf(/** @type {Kf | vh | xh | Th} */ e) {
   return e.kind === 279;
 }
 function nh(e) {
   return e.kind === 280;
 }
-/** @returns {boolean} */ function hv(/** @type {Kf} */ e) {
+/** @returns {boolean} */ function hv(/** @type {Kf | vh | xh | Th} */ e) {
   return e.kind === 354;
 }
-/** @returns {boolean} */ function Hf(/** @type {Kf} */ e) {
+/** @returns {boolean} */ function Hf(/** @type {Kf | vh | xh | Th} */ e) {
   return e.kind === 284;
 }
-/** @returns {boolean} */ function Yp(/** @type {Kf} */ e) {
+/** @returns {boolean} */ function Yp(/** @type {Kf | vh | xh | Th} */ e) {
   return e.kind === 287;
 }
 function yv(e) {
   return e.kind === 290;
 }
-/** @returns {boolean} */ function rh(/** @type {xh} */ e) {
+/** @returns {boolean} */ function rh(/** @type {Kf | vh | xh | Th} */ e) {
   return e.kind === 296;
 }
 function gv(e) {
@@ -23118,10 +23118,10 @@ function ah(e) {
 function sh(e) {
   return e.kind === 310;
 }
-/** @returns {boolean} */ function _h(/** @type {Kf | vh} */ e) {
+/** @returns {boolean} */ function _h(/** @type {Kf | vh | xh | Th} */ e) {
   return e.kind === 315;
 }
-/** @returns {boolean} */ function oh(/** @type {Kf | vh} */ e) {
+/** @returns {boolean} */ function oh(/** @type {Kf | vh | xh | Th} */ e) {
   return e.kind === 318;
 }
 function ch(e) {
@@ -23358,7 +23358,7 @@ function Uv(e, t) {
 function Xp(e, t, a, s, f) {
   return ((t = rm(t, f)), (s = rm(s, f)), (a = Rv(a, f)), `${e ? "#" : ""}${t}${a}${s}`);
 }
-/** @returns {boolean} */ function fh(/** @type {Kf} */ e) {
+/** @returns {boolean} */ function fh(/** @type {Kf | vh | xh | Th} */ e) {
   if (e.transformFlags & 65536) return !0;
   if (e.transformFlags & 128)
     for (let t of Jv(e)) {
@@ -26248,7 +26248,7 @@ var na;
   /** @returns {boolean} */ function Ho() {
     return he() && u() === 103 ? !1 : Cp(u()) > 0;
   }
-  /** @returns {InstanceType<typeof Kf>} */ function Xo(/** @type {Kf} */ o, /** @type {Kf} */ p) {
+  /** @returns {InstanceType<typeof Kf>} */ function Xo(/** @type {Kf | vh | xh | Th} */ o, /** @type {Kf | vh | xh | Th} */ p) {
     return D(y.createSatisfiesExpression(o, p), o.pos);
   }
   /** @returns {InstanceType<typeof Kf>} */ function Is(/** @type {xh | Kf | vh} */ o, /** @type {vh} */ p, /** @type {Kf | xh | vh} */ m, /** @type {number} */ g) {
@@ -29868,7 +29868,7 @@ var v6 = ts["5.0"],
 /** @returns {string} */ function qn(/** @type {number} */ e) {
   return rt(e);
 }
-/** @returns {boolean} */ function Dh(/** @type {Kf} */ e) {
+/** @returns {boolean} */ function Dh(/** @type {Kf | vh | xh | Th} */ e) {
   return e.kind !== ye.SemicolonClassElement;
 }
 /** @returns {boolean} */ function Fe(/** @type {number} */ e, /** @type {Kf} */ t) {
@@ -30105,7 +30105,7 @@ var id = class extends Error {
   for (; O1(e.parent) && e.parent.left === e;) e = e.parent;
   return e.parent.kind === ye.TypeQuery;
 }
-/** @returns {boolean} */ function Bl(/** @type {Kf | xh} */ e) {
+/** @returns {boolean} */ function Bl(/** @type {Kf | vh | xh | Th} */ e) {
   switch (e.kind) {
     case ye.Identifier:
       return !0;
@@ -30135,14 +30135,14 @@ function Rh(/** @type {Kf} */ e) {
 function Uh(e) {
   return e.getSourceFile().text.slice(e.pos, e.end).trimStart() || "(Missing)";
 }
-/** @returns {boolean} */ function J6(/** @type {Kf} */ e) {
+/** @returns {boolean} */ function J6(/** @type {Kf | vh | xh | Th} */ e) {
   return gr(e) && et(e.name) && ql(e.expression);
 }
-/** @returns {boolean} */ function ql(/** @type {xh | Kf} */ e) {
+/** @returns {boolean} */ function ql(/** @type {Kf | vh | xh | Th} */ e) {
   return e.kind === ye.Identifier || J6(e);
 }
 var ve = Ae;
-/** @returns {boolean} */ function R6(/** @type {Kf} */ e) {
+/** @returns {boolean} */ function R6(/** @type {Kf | vh | xh | Th} */ e) {
   return e == null ? !0 : e.pos === e.end && e.pos >= 0 && e.kind !== ve.EndOfFileToken;
 }
 /** @returns {boolean} */ function Bh(/** @type {InstanceType<typeof Kf>} */ e) {
@@ -30164,7 +30164,7 @@ function q6(e) {
 function F6(/** @type {Kf} */ e) {
   return ff(e.parent, xf);
 }
-/** @returns {boolean} */ function z6(/** @type {Kf} */ e) {
+/** @returns {boolean} */ function z6(/** @type {Kf | vh | xh | Th} */ e) {
   switch (e.kind) {
     case ve.ClassDeclaration:
       return !0;
@@ -32383,7 +32383,7 @@ function* Hh(/** @type {d6} */ e, /** @type {d6} */ t = e.getSourceFile()) {
           Km(a, f.end, h);
         }, a)));
 }
-/** @returns {boolean} */ function $6(/** @type {vh | xh | Kf} */ e) {
+/** @returns {boolean} */ function $6(/** @type {Kf | vh | xh | Th} */ e) {
   switch (e.kind) {
     case Ae.CloseBraceToken:
       return e.parent.kind !== Ae.JsxExpression || !ld(e.parent.parent);
@@ -32413,7 +32413,7 @@ function Yh(/** @type {(cb: (pos: number, end: number, kind: number) => void) =>
     a
   );
 }
-/** @returns {boolean} */ function ld(/** @type {Kf} */ e) {
+/** @returns {boolean} */ function ld(/** @type {Kf | vh | xh | Th} */ e) {
   return e.kind === Ae.JsxElement || e.kind === Ae.JsxFragment;
 }
 var [CT, DT] = km.split(".").map(/** @returns {number} */ (e) => Number.parseInt(e, 10));
@@ -33472,7 +33472,7 @@ var p3 = {
   suppressDeprecatedPropertyWarnings: !0,
   onUnsupportedTypeScriptVersion: "ignore",
 };
-function f3(/** @type {id} */ e) {
+function f3(e) {
   let { message: t, location: a } = e;
   if (!a) return e;
   let { start: s, end: f } = a;
