@@ -22,7 +22,7 @@ import { printTypeAnnotationProperty } from "./type-annotation.js";
 - `TSConstructSignatureDeclaration` (TypeScript)
 - `FunctionTypeAnnotation` (Flow)
 */
-function printFunctionType(/** @type {AstPath} */ path, options, print) {
+function printFunctionType(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   const { node } = path;
   /** @type {Doc[]} */
   const parts = [

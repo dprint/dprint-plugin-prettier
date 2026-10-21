@@ -16,7 +16,7 @@ import { hasLanguageComment, isAngularComponentTemplate } from "./utilities.js";
 
 // The counter is needed to distinguish nested embeds.
 /** @type {number} */ let htmlTemplateLiteralCounter = 0;
-async function printEmbedHtmlLike(/** @type {string} */ parser, /** @type {(a0?: any, a1?: any) => any} */ textToDoc, print, /** @type {AstPath} */ path, options) {
+async function printEmbedHtmlLike(/** @type {string} */ parser, /** @type {(a0?: any, a1?: any) => any} */ textToDoc, print, /** @type {AstPath} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options) {
   const { node } = path;
   /** @type {number} */ const counter = htmlTemplateLiteralCounter;
   htmlTemplateLiteralCounter = (htmlTemplateLiteralCounter + 1) >>> 0;

@@ -33,7 +33,7 @@ import { parentNeedsParentheses } from "./parent-needs-parentheses.js";
  * @param {AstPath} path
  * @returns {boolean}
  */
-function needsParentheses(path, options) {
+function needsParentheses(path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options) {
   if (path.isRoot) {
     return false;
   }

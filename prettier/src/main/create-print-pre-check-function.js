@@ -3,7 +3,7 @@ import noop from "../utilities/noop.js";
 
 /** @import AstPath from "../common/ast-path.js" */
 
-function createPrintPreCheckFunction(options) {
+function createPrintPreCheckFunction(/** @type {import("../../../prettier/src/main/format-options.js").FormatOptions} */ options) {
   // All core plugins have full list of keys for possible child nodes
   // Ensure we only pass node to `print`
   const { getVisitorKeys } = options;

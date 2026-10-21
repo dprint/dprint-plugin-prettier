@@ -9,7 +9,7 @@ import {
   hasComment,
 } from "../utilities/comments.js";
 
-/** @returns {boolean} */ function shouldPrintLeadingHardline(node, options) {
+/** @returns {boolean} */ function shouldPrintLeadingHardline(node, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options) {
   const leadingComments = getComments(node, CommentCheckFlags.Leading);
   if (leadingComments.length === 0) {
     return false;
@@ -25,7 +25,7 @@ import {
   );
 }
 
-function printClause(path, options, print, property = "body") {
+function printClause(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print, property = "body") {
   return path.call(({ node }) => {
     const doc = print();
 
@@ -52,9 +52,9 @@ function printClause(path, options, print, property = "body") {
   }, property);
 }
 
-const printIfStatementConsequent = (path, options, print) =>
+const printIfStatementConsequent = (/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) =>
   printClause(path, options, print, "consequent");
-const printIfStatementAlternate = (path, options, print) =>
+const printIfStatementAlternate = (/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) =>
   printClause(path, options, print, "alternate");
 
 export {

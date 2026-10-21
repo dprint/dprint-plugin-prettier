@@ -60,7 +60,7 @@ const isInterface = createTypeCheckFunction([
 - `RecordDeclaration`(flow)
 - `TSInterfaceDeclaration`(TypeScript)
 */
-/** @returns {any[]} */ function printClass(/** @type {AstPath} */ path, options, print) {
+/** @returns {any[]} */ function printClass(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   const doc = printClassWithoutDecorators(path, options, print);
 
   const { node } = path;
@@ -75,7 +75,7 @@ const isInterface = createTypeCheckFunction([
   return doc;
 }
 
-function printClassWithoutDecorators(/** @type {AstPath} */ path, options, print) {
+function printClassWithoutDecorators(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   const { node } = path;
   const isPrintingInterface = isInterface(node);
   const isPrintingRecord = node.type === "RecordDeclaration";
@@ -229,7 +229,7 @@ const shouldPrintClassInGroupModeCache = new WeakMap();
   );
 }
 
-function printHeritageClauses(/** @type {AstPath} */ path, options, print, /** @type {string} */ listName) {
+function printHeritageClauses(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print, /** @type {string} */ listName) {
   const { node } = path;
   if (!isNonEmptyArray(node[listName])) {
     return "";
@@ -274,7 +274,7 @@ function printSuperClass(/** @type {AstPath} */ path, options, /** @type {(a0?: 
   return printed;
 }
 
-/** @returns {any[]} */ function printClassMethod(/** @type {AstPath} */ path, options, print) {
+/** @returns {any[]} */ function printClassMethod(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   const { node } = path;
   const parts = [];
 
@@ -308,7 +308,7 @@ function printSuperClass(/** @type {AstPath} */ path, options, /** @type {(a0?: 
 - `TSAbstractAccessorProperty` (TypeScript)
 - `TSAbstractPropertyDefinition` (TypeScript)
 */
-/** @returns {any[]} */ function printClassProperty(/** @type {AstPath} */ path, options, print) {
+/** @returns {any[]} */ function printClassProperty(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   const { node } = path;
   const parts = [];
 

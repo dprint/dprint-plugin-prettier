@@ -21,7 +21,7 @@ const childNodesCache = new WeakMap();
 function decorateComment(
   node,
   comment,
-  options,
+  /** @type {import("../../../../prettier/src/main/format-options.js").FormatOptions} */ options,
   enclosingNode,
   ancestors = [],
 ) {
@@ -111,7 +111,7 @@ function decorateComment(
 }
 
 const returnFalse = /** @returns {boolean} */ () => false;
-function attachComments(ast, options) {
+function attachComments(ast, /** @type {import("../../../../prettier/src/main/format-options.js").FormatOptions} */ options) {
   const { comments } = ast;
   delete ast.comments;
 
@@ -266,7 +266,7 @@ function attachComments(ast, options) {
 }
 
 const isAllEmptyAndNoLineBreak = /** @returns {boolean} */ (/** @type {string} */ text) => !/[\S\n\u2028\u2029]/.test(text);
-/** @returns {boolean} */ function isOwnLineComment(/** @type {string} */ text, options, decoratedComments, /** @type {number} */ commentIndex) {
+/** @returns {boolean} */ function isOwnLineComment(/** @type {string} */ text, /** @type {import("../../../../prettier/src/main/format-options.js").FormatOptions} */ options, decoratedComments, /** @type {number} */ commentIndex) {
   const { comment, precedingNode } = decoratedComments[commentIndex];
   const { locStart, locEnd } = options;
   let start = locStart(comment);
@@ -289,7 +289,7 @@ const isAllEmptyAndNoLineBreak = /** @returns {boolean} */ (/** @type {string} *
   return hasNewline(text, start, { backwards: true });
 }
 
-/** @returns {boolean} */ function isEndOfLineComment(/** @type {string} */ text, options, decoratedComments, /** @type {number} */ commentIndex) {
+/** @returns {boolean} */ function isEndOfLineComment(/** @type {string} */ text, /** @type {import("../../../../prettier/src/main/format-options.js").FormatOptions} */ options, decoratedComments, /** @type {number} */ commentIndex) {
   const { comment, followingNode } = decoratedComments[commentIndex];
   const { locStart, locEnd } = options;
   let end = locEnd(comment);
@@ -316,7 +316,7 @@ const isAllEmptyAndNoLineBreak = /** @returns {boolean} */ (/** @type {string} *
   return hasNewline(text, end);
 }
 
-function breakTies(tiesToBreak, options) {
+function breakTies(tiesToBreak, /** @type {import("../../../../prettier/src/main/format-options.js").FormatOptions} */ options) {
   const tieCount = tiesToBreak.length;
   if (tieCount === 0) {
     return;
@@ -372,7 +372,7 @@ function breakTies(tiesToBreak, options) {
   tiesToBreak.length = 0;
 }
 
-/** @returns {number} */ function findExpressionIndexForComment(quasis, comment, options) {
+/** @returns {number} */ function findExpressionIndexForComment(quasis, comment, /** @type {import("../../../../prettier/src/main/format-options.js").FormatOptions} */ options) {
   /** @type {number} */ const startPos = options.locStart(comment) - 1;
 
   for (let i = 1; i < quasis.length; ++i) {

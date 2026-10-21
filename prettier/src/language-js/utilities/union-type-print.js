@@ -18,7 +18,7 @@ const isObjectLikeType = createTypeCheckFunction([
   "TSTypeReference",
 ]);
 
-/** @returns {boolean} */ function isMultipleTupleTypeElement(path) {
+/** @returns {boolean} */ function isMultipleTupleTypeElement(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path) {
   return (
     path.key === "elementTypes" &&
     isTupleType(path.parent) &&
@@ -40,7 +40,7 @@ const isObjectLikeType = createTypeCheckFunction([
   return types.every(/** @returns {boolean} */ (node) => node === objectType || isVoidType(node));
 }
 
-/** @returns {boolean} */ function shouldUnionTypePrintOwnComments(path) {
+/** @returns {boolean} */ function shouldUnionTypePrintOwnComments(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path) {
   const { key, node, parent } = path;
   if (
     shouldHugUnionType(node) ||

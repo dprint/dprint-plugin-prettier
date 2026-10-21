@@ -15,7 +15,7 @@ import { printSemicolon } from "./miscellaneous.js";
 @import {Doc} from "../../document/index.js";
 */
 
-/** @returns {Doc} */ function printReturnOrThrowArgument(/** @type {AstPath} */ path, options, /** @type {(a0?: any) => any} */ print) {
+/** @returns {Doc} */ function printReturnOrThrowArgument(/** @type {AstPath} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options, /** @type {(a0?: any) => any} */ print) {
   const { node } = path;
   const argumentDoc = print();
 
@@ -42,7 +42,7 @@ import { printSemicolon } from "./miscellaneous.js";
 }
 
 // `ReturnStatement` and `ThrowStatement`
-function printReturnOrThrowStatement(path, options, print) {
+function printReturnOrThrowStatement(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   const { node } = path;
   return [
     node.type === "ThrowStatement" ? "throw" : "return",

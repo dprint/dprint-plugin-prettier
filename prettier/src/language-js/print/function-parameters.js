@@ -65,8 +65,8 @@ const functionParameterDanglingCommentFilter = (comment) =>
 */
 function printFunctionParameters(
   /** @type {AstPath} */ path,
-  options,
-  print,
+  /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options,
+  /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print,
   /** @type {boolean | undefined} */ shouldExpandParameters,
   /** @type {boolean | undefined} */ shouldPrintTypeParameters,
 ) {

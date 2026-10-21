@@ -8,7 +8,7 @@ import parse from "./parse.js";
 async function printEmbeddedLanguages(
   /** @type {AstPath} */ path,
   genericPrint,
-  options,
+  /** @type {import("../../../prettier/src/main/format-options.js").FormatOptions} */ options,
   printAstToDoc,
   embeds,
 ) {

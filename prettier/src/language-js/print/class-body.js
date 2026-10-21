@@ -32,7 +32,7 @@ import { printSemicolon, printTrailingComma } from "./miscellaneous.js";
 - `ObjectTypeAnnotation` (Flow)
 - `RecordDeclarationBody` (Flow)
 */
-/** @returns {Doc} */ function printClassBody(/** @type {AstPath} */ path, options, /** @type {() => any} */ print) {
+/** @returns {Doc} */ function printClassBody(/** @type {AstPath} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options, /** @type {() => any} */ print) {
   const { node } = path;
   const parts = [];
   const isFlowTypeAnnotation = node.type === "ObjectTypeAnnotation";
@@ -161,7 +161,7 @@ import { printSemicolon, printTrailingComma } from "./miscellaneous.js";
   ];
 }
 
-/** @returns {boolean} */ function isClassBody(path) {
+/** @returns {boolean} */ function isClassBody(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path) {
   const { node } = path;
 
   if (node.type === "ObjectTypeAnnotation") {
@@ -181,7 +181,7 @@ import { printSemicolon, printTrailingComma } from "./miscellaneous.js";
   );
 }
 
-function printClassMemberSemicolon(path, options) {
+function printClassMemberSemicolon(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options) {
   const { parent } = path;
 
   if (path.callParent(isClassBody)) {
@@ -238,7 +238,7 @@ const isKeywordProperty = (node) => {
  */
 function shouldPrintSemicolonAfterClassProperty(
   { node, next: nextNode },
-  options,
+  /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options,
 ) {
   if (options.semi || !isClassProperty(node)) {
     return false;
@@ -315,7 +315,7 @@ function shouldPrintSemicolonAfterClassProperty(
 const isInterfaceProperty = createTypeCheckFunction(["TSPropertySignature"]);
 /** @returns {boolean} */ function shouldPrintSemicolonAfterInterfaceProperty(
   { node, next: nextNode },
-  options,
+  /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options,
 ) {
   if (options.semi || !isInterfaceProperty(node)) {
     return false;

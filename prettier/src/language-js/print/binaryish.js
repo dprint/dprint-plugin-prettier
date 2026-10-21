@@ -40,7 +40,7 @@ import { shouldFlatten } from "../utilities/should-flatten.js";
 - `LogicalExpression`
 - `NGPipeExpression`(Angular)
 */
-function printBinaryishExpression(/** @type {AstPath} */ path, options, print) {
+function printBinaryishExpression(/** @type {AstPath} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   const { node, parent, grandparent, key } = path;
   /** @type {boolean} */ const isInsideParenthesis =
     key !== "body" &&
@@ -196,8 +196,8 @@ function printBinaryishExpression(/** @type {AstPath} */ path, options, print) {
 // broken before `+`.
 function printBinaryishExpressions(
   /** @type {AstPath} */ path,
-  options,
-  print,
+  /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options,
+  /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print,
   /** @type {boolean} */ isNested,
   /** @type {boolean} */ isInsideParenthesis,
 ) {
@@ -385,7 +385,7 @@ function printBinaryishExpressions(
 const isBitwiseOrExpression = /** @returns {boolean} */ (node) =>
   node.type === "BinaryExpression" && node.operator === "|";
 
-/** @returns {boolean} */ function isVueFilterSequenceExpression(/** @type {AstPath} */ path, options) {
+/** @returns {boolean} */ function isVueFilterSequenceExpression(/** @type {AstPath} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options) {
   return (
     (options.parser === "__vue_expression" ||
       options.parser === "__vue_ts_expression") &&

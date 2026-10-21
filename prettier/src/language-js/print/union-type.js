@@ -28,7 +28,7 @@ import {
 */
 
 // `TSUnionType` and `UnionTypeAnnotation`
-function printUnionType(path, options, print, args) {
+function printUnionType(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print, args) {
   const { node } = path;
 
   // {
@@ -91,7 +91,7 @@ function printUnionType(path, options, print, args) {
   return group(indent([softline, printed]));
 }
 
-/** @returns {boolean} */ function shouldIndentUnionType(path) {
+/** @returns {boolean} */ function shouldIndentUnionType(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path) {
   const { key, parent } = path;
   if (
     (key === "typeAnnotation" && parent.type === "TSTypeAssertion") ||

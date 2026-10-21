@@ -2,7 +2,7 @@ import { group, hardline, indent, line } from "../../document/index.js";
 import { hasComment } from "../utilities/comments.js";
 import { printDeclareToken, printSemicolon } from "./miscellaneous.js";
 
-function printVariableDeclaration(path, options, print) {
+function printVariableDeclaration(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   const { node } = path;
   const printed = path.map(print, "declarations");
 

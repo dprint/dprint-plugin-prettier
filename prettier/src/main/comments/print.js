@@ -24,13 +24,13 @@ import skipNewline from "../../utilities/skip-newline.js";
 
 const returnTrue = /** @returns {boolean} */ () => true;
 
-function printComment(/** @type {AstPath} */ path, options) {
+function printComment(/** @type {AstPath} */ path, /** @type {import("../../../../prettier/src/main/format-options.js").FormatOptions} */ options) {
   const comment = path.node;
   comment.printed = true;
   return options.printer.printComment(path, options);
 }
 
-/** @returns {any[]} */ function printLeadingComment(/** @type {AstPath} */ path, options) {
+/** @returns {any[]} */ function printLeadingComment(/** @type {AstPath} */ path, /** @type {import("../../../../prettier/src/main/format-options.js").FormatOptions} */ options) {
   const comment = path.node;
   const parts = [printComment(path, options)];
 
@@ -67,7 +67,7 @@ function printComment(/** @type {AstPath} */ path, options) {
   return parts;
 }
 
-function printTrailingComment(/** @type {AstPath} */ path, options, previousComment) {
+function printTrailingComment(/** @type {AstPath} */ path, /** @type {import("../../../../prettier/src/main/format-options.js").FormatOptions} */ options, previousComment) {
   const comment = path.node;
   const printed = printComment(path, options);
 
@@ -236,7 +236,7 @@ function printTrailingComments(path, options, printOptions) {
 @param {CommentPrintOptions} [printOptions]
 @returns {{leading: Doc, trailing: Doc}}
 */
-function printCommentsSeparately(path, options, printOptions) {
+function printCommentsSeparately(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, options, printOptions) {
   return {
     leading: printLeadingComments(path, options, printOptions),
     trailing: printTrailingComments(path, options, printOptions),
@@ -247,7 +247,7 @@ function printCommentsSeparately(path, options, printOptions) {
 @param {CommentPrintOptions} [printOptions]
 @returns {Doc}
 */
-function printComments(path, doc, options, printOptions) {
+function printComments(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, doc, options, printOptions) {
   const leading = printLeadingComments(path, options, printOptions);
   const trailing = printTrailingComments(path, options, printOptions);
   return leading || trailing

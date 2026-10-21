@@ -2,7 +2,7 @@
 import { isBinaryCastExpression } from "../utilities/node-types.js";
 import { startsWithNoLookaheadToken } from "../utilities/starts-with-no-lookahead-token.js";
 
-/** @returns {boolean} */ function shouldAddParenthesesToIdentifier(path) {
+/** @returns {boolean} */ function shouldAddParenthesesToIdentifier(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path) {
   const { node } = path;
 
   // Identifiers never need parentheses.

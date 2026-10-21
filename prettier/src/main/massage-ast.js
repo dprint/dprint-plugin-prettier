@@ -1,6 +1,6 @@
 import isObject from "../utilities/is-object.js";
 
-function massageAst(ast, options) {
+function massageAst(ast, /** @type {import("../../../prettier/src/main/format-options.js").FormatOptions} */ options) {
   const { printer } = options;
   const clean = printer.massageAstNode;
 

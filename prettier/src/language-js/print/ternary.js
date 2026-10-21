@@ -57,7 +57,7 @@ function shouldBreakClosingParen(node, parent) {
   testNodes,
   consequentNode,
   alternateNode,
-  options,
+  /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options,
 ) {
   const comments = [
     ...testNodes.map((node) => getComments(node)),
@@ -149,8 +149,8 @@ const wrapInParens = (doc) => [
  * ternary operators, namely ConditionalExpression,
  * ConditionalTypeAnnotation and TSConditionalType
  * @param {AstPath} path - The path to the ConditionalExpression/TSConditionalType node.
- * @param {Options} options - Prettier options
- * @param {Function} print - Print function to call recursively
+ * @param {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} options - Prettier options
+ * @param {import("../../../../prettier/src/language-js/print-options.js").JsPrint} print - Print function to call recursively
  * @returns {Doc}
  */
 function printTernary(path, options, print, args) {

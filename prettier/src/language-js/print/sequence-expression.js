@@ -10,7 +10,7 @@ import {
 import needsParentheses from "../parentheses/needs-parentheses.js";
 import { isReturnOrThrowStatement } from "../utilities/node-types.js";
 
-/** @returns {boolean} */ function shouldIndentSequenceExpression(path, options) {
+/** @returns {boolean} */ function shouldIndentSequenceExpression(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, options) {
   const { key, parent } = path;
   if (
     key === "argument" &&
@@ -27,7 +27,7 @@ import { isReturnOrThrowStatement } from "../utilities/node-types.js";
   return false;
 }
 
-function printSequenceExpression(path, options, print) {
+function printSequenceExpression(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   const { parent } = path;
   if (parent.type === "ExpressionStatement" || parent.type === "ForStatement") {
     // For ExpressionStatements and for-loop heads, which are among

@@ -11,7 +11,7 @@ import { startsWithNoLookaheadToken } from "../utilities/starts-with-no-lookahea
  * @import {Doc} from "../../document/index.js"
  */
 
-function printAwaitExpression(path, options, print) {
+function printAwaitExpression(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   const { node } = path;
   /** @type{Doc[]} */
   let parts = ["await"];

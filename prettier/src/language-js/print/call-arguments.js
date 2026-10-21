@@ -65,7 +65,7 @@ function printCallArguments(/** @type {AstPath} */ path, options, /** @type {(a0
   // useImperativeHandle(ref, () => { ... }, [foo, bar, baz])
   if (isReactHookCallWithDepsArray(args)) {
     const parts = ["("];
-    iterateCallArgumentsPath(path, (path, /** @type {number} */ index) => {
+    iterateCallArgumentsPath(path, (/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, /** @type {number} */ index) => {
       parts.push(print());
       if (index !== lastArgIndex) {
         parts.push(", ");

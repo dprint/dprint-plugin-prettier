@@ -7,7 +7,7 @@ import {
 } from "../location/index.js";
 import { shouldExpressionStatementPrintLeadingSemicolon } from "../semicolon/semicolon.js";
 
-function printIgnored(path, options /* , print*/) {
+function printIgnored(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options /* , print*/) {
   const { node } = path;
   let text = options.originalText.slice(locStart(node), locEnd(node));
 

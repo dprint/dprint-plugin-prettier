@@ -3,7 +3,7 @@ import { printClassMemberSemicolon } from "./class.js";
 import { printTrailingComma } from "./miscellaneous.js";
 import { printTypeAnnotationProperty } from "./type-annotation.js";
 
-function printIndexSignature(path, options, print) {
+function printIndexSignature(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   const { node } = path;
   // The TypeScript parser accepts multiple parameters here. If you're
   // using them, it makes sense to have a trailing comma. But if you

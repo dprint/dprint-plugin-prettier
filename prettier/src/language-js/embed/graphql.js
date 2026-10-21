@@ -6,7 +6,7 @@ import {
 } from "../print/template-literal.js";
 import { hasLanguageComment } from "./utilities.js";
 
-async function printEmbedGraphQL(textToDoc, print, path, options) {
+async function printEmbedGraphQL(textToDoc, print, /** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, options) {
   const { node } = path;
 
   const numQuasis = node.quasis.length;

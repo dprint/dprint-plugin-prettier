@@ -61,7 +61,7 @@ const shouldAlwaysAddParens = /** @returns {boolean} */ (node) => node.type === 
 /*
 - `ArrowFunctionExpression`
 */
-function printArrowFunction(/** @type {AstPath} */ path, options, print, args = {}) {
+function printArrowFunction(/** @type {AstPath} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print, args = {}) {
   /** @type {Doc[]} */
   const signatureDocs = [];
   /** @type {Doc} */
@@ -168,7 +168,7 @@ function printArrowFunction(/** @type {AstPath} */ path, options, print, args = 
   ]);
 }
 
-/** @returns {any[]} */ function printArrowFunctionSignature(/** @type {AstPath} */ path, options, print, args) {
+/** @returns {any[]} */ function printArrowFunctionSignature(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print, args) {
   const { node } = path;
   const parts = [];
 
@@ -214,7 +214,7 @@ function printArrowFunction(/** @type {AstPath} */ path, options, print, args = 
  *
  * @param {*} functionBody
  * @param {*} bodyDoc
- * @param {*} options
+ * @param {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} options
  * @returns {boolean}
  */
 function mayBreakAfterShortPrefix(functionBody, bodyDoc, options) {
@@ -276,7 +276,7 @@ function printArrowFunctionSignatures(
 
 /**
  * @param {AstPath} path
- * @param {*} options
+ * @param {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} options
  * @param {*} args
  * @param {Object} arrowFunctionBodyPrintOptions
  * @param {Doc} arrowFunctionBodyPrintOptions.bodyDoc

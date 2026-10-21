@@ -1,7 +1,7 @@
 // @nts-check
 import { commentsPropertyInOptions } from "../constants.js";
 
-function printIgnored(path, options, printPath, args) {
+function printIgnored(/** @type {import("../../../prettier/src/common/ast-path.js").default} */ path, options, printPath, args) {
   const {
     originalText,
     [commentsPropertyInOptions]: comments,

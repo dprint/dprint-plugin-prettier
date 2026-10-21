@@ -16,7 +16,7 @@ import { isLiteral, isStringLiteral } from "./node-types.js";
  * @param {Node} node
  * @returns {boolean}
  */
-/** @returns {boolean} */ function isLoneShortArgument(node, options) {
+/** @returns {boolean} */ function isLoneShortArgument(node, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options) {
   const { printWidth } = options;
 
   if (hasComment(node)) {

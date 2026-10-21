@@ -20,7 +20,7 @@ import { printTypescript } from "./typescript.js";
  * @import {Doc} from "../../document/index.js"
  */
 
-function printWithoutParentheses(/** @type {AstPath} */ path, options, print, args) {
+function printWithoutParentheses(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print, args) {
   for (const printer of [
     printAngular,
     printJsx,
@@ -53,8 +53,8 @@ const shouldPrintDirectly = createTypeCheckFunction([
 
 /**
  * @param {AstPath} path
- * @param {*} options
- * @param {*} print
+ * @param {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} options
+ * @param {import("../../../../prettier/src/language-js/print-options.js").JsPrint} print
  * @param {*} [args]
  * @returns {Doc}
  */

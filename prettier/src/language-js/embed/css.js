@@ -12,7 +12,7 @@ import { printEmbeddedTemplateExpressions } from "../print/template-literal.js";
 import { isNodeMatches } from "../utilities/is-node-matches.js";
 import { isAngularComponentStyles } from "./utilities.js";
 
-async function printEmbedCss(textToDoc, print, path, options) {
+async function printEmbedCss(textToDoc, print, /** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, options) {
   const { node } = path;
 
   // Get full template literal with expressions replaced by placeholders
@@ -73,7 +73,7 @@ async function printEmbedCss(textToDoc, print, path, options) {
  * css.resolve``
  * @returns {boolean}
  */
-function isStyledJsx(path) {
+function isStyledJsx(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path) {
   return (
     path.match(
       undefined,
@@ -169,7 +169,7 @@ function isCssProp({ parent, grandparent }) {
   );
 }
 
-const isEmbedCss = /** @returns {boolean} */ (path /* , options*/) =>
+const isEmbedCss = /** @returns {boolean} */ (/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path /* , options*/) =>
   isStyledJsx(path) ||
   isStyledComponents(path) ||
   isCssProp(path) ||

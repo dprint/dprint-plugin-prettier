@@ -49,7 +49,7 @@ import { printUnionType } from "./union-type.js";
 
 /** @import AstPath from "../../common/ast-path.js" */
 
-function printTypescript(/** @type {AstPath} */ path, options, print, args) {
+function printTypescript(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print, args) {
   const { node } = path;
 
   // TypeScript nodes always starts with `TS`

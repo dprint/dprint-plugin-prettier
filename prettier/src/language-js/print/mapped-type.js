@@ -38,7 +38,7 @@ function printFlowMappedTypeOptionalModifier(optional) {
   }
 }
 
-function printFlowMappedTypeProperty(/** @type {AstPath} */ path, options, print) {
+function printFlowMappedTypeProperty(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   const { node } = path;
   return [
     group([
@@ -70,7 +70,7 @@ function printTypeScriptMappedTypeModifier(tokenNode, keyword) {
   return keyword;
 }
 
-function printTypeScriptMappedType(/** @type {AstPath} */ path, options, print) {
+function printTypeScriptMappedType(/** @type {AstPath} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   const { node } = path;
   // Break after `{` like `printObject`
   let shouldBreak = false;

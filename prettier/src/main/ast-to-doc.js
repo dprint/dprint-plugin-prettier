@@ -31,7 +31,7 @@ import printIgnored from "./print-ignored.js";
  * state of the recursion. It is called "path", because it represents
  * the path to the current node through the Abstract Syntax Tree.
  */
-async function printAstToDoc(ast, options) {
+async function printAstToDoc(ast, /** @type {import("../../../prettier/src/main/format-options.js").FormatOptions} */ options) {
   ({ ast } = await prepareToPrint(ast, options));
 
   const cache = new Map();
@@ -102,7 +102,7 @@ async function printAstToDoc(ast, options) {
   }
 }
 
-function callPluginPrintFunction(/** @type {AstPath} */ path, options, printPath, args, embeds) {
+function callPluginPrintFunction(/** @type {AstPath} */ path, /** @type {import("../../../prettier/src/main/format-options.js").FormatOptions} */ options, printPath, args, embeds) {
   const { node } = path;
   const { printer } = options;
 

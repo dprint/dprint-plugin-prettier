@@ -25,7 +25,7 @@ import { printOptionalToken } from "./miscellaneous.js";
 - `TSImportType` (TypeScript)
 - `TSExternalModuleReference` (TypeScript)
 */
-function printCallExpression(/** @type {AstPath} */ path, options, print) {
+function printCallExpression(/** @type {AstPath} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   const { node } = path;
   const isNewExpression = node.type === "NewExpression";
 
@@ -133,7 +133,7 @@ const moduleImportCallees = [
   "require.resolve.paths",
   "import.meta.resolve",
 ];
-/** @returns {boolean} */ function isSimpleModuleImport(path) {
+/** @returns {boolean} */ function isSimpleModuleImport(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path) {
   const { node } = path;
 
   if (!(

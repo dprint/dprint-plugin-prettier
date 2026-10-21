@@ -78,8 +78,8 @@ import { printWhileStatement } from "./while-statement.js";
 
 /**
  * @param {AstPath} path
- * @param {*} options
- * @param {*} print
+ * @param {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} options
+ * @param {import("../../../../prettier/src/language-js/print-options.js").JsPrint} print
  * @param {*} [args]
  * @returns {Doc}
  */

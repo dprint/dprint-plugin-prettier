@@ -16,7 +16,7 @@ import { printIfStatementCondition } from "./miscellaneous.js";
  * @import {Doc} from "../../document/index.js"
  */
 
-function printIfStatement(path, options, print) {
+function printIfStatement(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   const { node } = path;
   const opening = group([
     "if (",

@@ -64,7 +64,7 @@ function parseWithOptions(filepath, text, options) {
   return result;
 }
 
-function parseJs(text, options) {
+function parseJs(text, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options) {
   let filepath = options?.filepath;
   const sourceType = getSourceType(filepath);
 
@@ -99,7 +99,7 @@ function parseJs(text, options) {
 /**
 @returns {ParserOptions["lang"][]}
 */
-function getLanguageCombinations(text, options) {
+function getLanguageCombinations(text, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options) {
   const filepath = options?.filepath;
 
   if (typeof filepath === "string") {
@@ -116,7 +116,7 @@ function getLanguageCombinations(text, options) {
   return shouldEnableJsx ? ["tsx", "ts", "dts"] : ["ts", "tsx", "dts"];
 }
 
-function parseTs(text, options) {
+function parseTs(text, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options) {
   let filepath = options?.filepath;
 
   const sourceType = getSourceType(filepath);

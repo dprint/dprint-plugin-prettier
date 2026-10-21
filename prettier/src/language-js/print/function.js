@@ -37,7 +37,7 @@ const isMethodValue = /** @returns {boolean} */ ({ node, key, parent }) =>
 - `HookDeclaration` (Flow)
 - `TSDeclareFunction`(TypeScript)
 */
-function printFunction(path, options, print, args) {
+function printFunction(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print, args) {
   if (isMethodValue(path)) {
     return printMethodValue(path, options, print);
   }
@@ -104,7 +104,7 @@ function printFunction(path, options, print, args) {
 - `TSAbstractMethodDefinition` (TypeScript)
 - `TSDeclareMethod` (TypeScript)
 */
-/** @returns {any[]} */ function printMethod(/** @type {AstPath} */ path, options, print) {
+/** @returns {any[]} */ function printMethod(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   const { node } = path;
   const { kind } = node;
   const value = node.value || node;
@@ -145,7 +145,7 @@ function printFunction(path, options, print, args) {
 - `TSDeclareMethod` (TypeScript)
 - `TSEmptyBodyFunctionExpression` (TypeScript)
 */
-/** @returns {any[]} */ function printMethodValue(/** @type {AstPath} */ path, options, print) {
+/** @returns {any[]} */ function printMethodValue(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   const { node } = path;
   const parametersDoc = printFunctionParameters(path, options, print);
   const returnTypeDoc = printReturnType(path, print);
@@ -190,7 +190,7 @@ function printFunction(path, options, print, args) {
   );
 }
 
-/** @returns {boolean} */ function shouldPrintParamsWithoutParens(/** @type {AstPath} */ path, options) {
+/** @returns {boolean} */ function shouldPrintParamsWithoutParens(/** @type {AstPath} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options) {
   if (options.arrowParens === "always") {
     return false;
   }
@@ -206,7 +206,7 @@ function printFunction(path, options, print, args) {
 }
 
 /** @returns {Doc} */
-function printReturnType(/** @type {AstPath} */ path, print) {
+function printReturnType(/** @type {AstPath} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   const { node } = path;
   const returnType = printTypeAnnotationProperty(path, print, "returnType");
 

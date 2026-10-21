@@ -82,7 +82,7 @@ function isKeySafeToQuote(node, options) {
 // (Vue.js supports unquoted numbers in expressions, but let’s keep it simple.)
 //
 // Identifiers can be unquoted in more circumstances, though.
-/** @returns {boolean} */ function isKeySafeToUnquote(node, options) {
+/** @returns {boolean} */ function isKeySafeToUnquote(node, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options) {
   const { parser } = options;
   if (parser === "json" || parser === "jsonc") {
     return false;
@@ -157,7 +157,7 @@ function hasSiblingsRequireQuoted(/** @type {AstPath} */ path, options) {
   );
 }
 
-/** @returns {boolean} */ function shouldQuoteKey(/** @type {AstPath} */ path, options) {
+/** @returns {boolean} */ function shouldQuoteKey(/** @type {AstPath} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options) {
   return (
     (options.parser === "json" ||
       options.parser === "jsonc" ||
@@ -167,7 +167,7 @@ function hasSiblingsRequireQuoted(/** @type {AstPath} */ path, options) {
   );
 }
 
-/** @returns {boolean} */ function shouldUnquoteKey(/** @type {AstPath} */ path, options) {
+/** @returns {boolean} */ function shouldUnquoteKey(/** @type {AstPath} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options) {
   return (
     (options.quoteProps === "as-needed" ||
       (options.quoteProps === "consistent" &&
@@ -201,7 +201,7 @@ function hasSiblingsRequireQuoted(/** @type {AstPath} */ path, options) {
 - `RecordDeclarationProperty` (Flow)
 - `RecordDeclarationStaticProperty` (Flow)
 */
-function printKey(/** @type {AstPath} */ path, options, print) {
+function printKey(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   const { node } = path;
   const property = getKeyProperty(node);
 

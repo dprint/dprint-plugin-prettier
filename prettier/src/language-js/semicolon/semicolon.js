@@ -7,7 +7,7 @@ import {
 } from "../utilities/left-side.js";
 import { isJsxElement } from "../utilities/node-types.js";
 
-/** @returns {boolean} */ function shouldExpressionStatementPrintLeadingSemicolon(path, options) {
+/** @returns {boolean} */ function shouldExpressionStatementPrintLeadingSemicolon(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options) {
   if (options.semi) {
     return false;
   }
@@ -40,7 +40,7 @@ import { isJsxElement } from "../utilities/node-types.js";
   return false;
 }
 
-function expressionNeedsAsiProtection(path, options) {
+function expressionNeedsAsiProtection(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, options) {
   const { node } = path;
   switch (node.type) {
     case "ParenthesizedExpression":
@@ -106,7 +106,7 @@ const isSingleExpressionStatement = /** @returns {boolean} */ ({ node, parent })
   ((Array.isArray(parent.directives) && parent.directives.length === 0) ||
     !parent.directives);
 
-/** @returns {boolean} */ function isSingleJsxExpressionStatementInMarkdown(path, options) {
+/** @returns {boolean} */ function isSingleJsxExpressionStatementInMarkdown(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options) {
   return (
     (options.parentParser === "markdown" || options.parentParser === "mdx") &&
     isSingleExpressionStatement(path) &&
@@ -114,13 +114,13 @@ const isSingleExpressionStatement = /** @returns {boolean} */ ({ node, parent })
   );
 }
 
-/** @returns {boolean | undefined} */ function isSingleHtmlEventHandlerExpressionStatement(path, options) {
+/** @returns {boolean | undefined} */ function isSingleHtmlEventHandlerExpressionStatement(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options) {
   return (
     options.__isHtmlInlineEventHandler && isSingleExpressionStatement(path)
   );
 }
 
-/** @returns {boolean} */ function isSingleVueEventBindingExpressionStatement(path, options) {
+/** @returns {boolean} */ function isSingleVueEventBindingExpressionStatement(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options) {
   return (
     (options.parser === "__vue_event_binding" ||
       options.parser === "__vue_ts_event_binding") &&

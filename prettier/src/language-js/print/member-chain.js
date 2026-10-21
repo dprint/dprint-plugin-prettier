@@ -52,7 +52,7 @@ import { printOptionalToken } from "./miscellaneous.js";
 - `MemberExpression`
 - `OptionalMemberExpression`
 */
-function printMemberChain(/** @type {AstPath} */ path, options, print) {
+function printMemberChain(/** @type {AstPath} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   /** @type {boolean} */ const isExpressionStatement =
     (path.parent.type === "ChainExpression" ? path.grandparent : path.parent)
       .type === "ExpressionStatement";

@@ -183,8 +183,8 @@ const ancestorNameMap = new Map([
  * ternary operators, namely ConditionalExpression,
  * ConditionalTypeAnnotation and TSConditionalType
  * @param {AstPath} path - The path to the ConditionalExpression/TSConditionalType node.
- * @param {Options} options - Prettier options
- * @param {Function} print - Print function to call recursively
+ * @param {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} options - Prettier options
+ * @param {import("../../../../prettier/src/language-js/print-options.js").JsPrint} print - Print function to call recursively
  * @returns {Doc}
  */
 function printTernaryOld(path, options, print) {

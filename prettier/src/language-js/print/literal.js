@@ -74,7 +74,7 @@ function printLiteral(/** @type {AstPath} */ path, options /* , print*/) {
 }
 
 const DIRECTIVE_USE_STRICT = "use strict";
-/** @returns {string} */ function printDirective(/** @type {string} */ rawText, options) {
+/** @returns {string} */ function printDirective(/** @type {string} */ rawText, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options) {
   /** @type {string} */ const rawContent = rawText.slice(1, -1);
 
   // Check for the alternate quote, to determine if we're allowed to swap

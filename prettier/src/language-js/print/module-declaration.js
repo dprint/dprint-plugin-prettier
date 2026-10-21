@@ -4,7 +4,7 @@ import { printDeclareToken, printSemicolon } from "./miscellaneous.js";
 /*
 - `TSModuleDeclaration` (TypeScript)
 */
-function printModuleDeclaration(path, options, print) {
+function printModuleDeclaration(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   const { node } = path;
 
   return [

@@ -21,7 +21,7 @@ import { printOptionalToken } from "./miscellaneous.js";
 const isCallExpressionWithArguments = /** @returns {boolean} */ (node) =>
   isCallExpression(node) && getCallArguments(node).length > 0;
 
-/** @returns {boolean} */ function shouldInlineNewExpressionCallee(path) {
+/** @returns {boolean} */ function shouldInlineNewExpressionCallee(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path) {
   let { node: child, ancestors } = path;
   for (const ancestor of ancestors) {
     if (!(
@@ -37,7 +37,7 @@ const isCallExpressionWithArguments = /** @returns {boolean} */ (node) =>
   return false;
 }
 
-function printMemberExpression(/** @type {AstPath} */ path, options, print) {
+function printMemberExpression(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   const objectDoc = print("object");
   const lookupDoc = printMemberLookup(path, options, print);
   const { node } = path;

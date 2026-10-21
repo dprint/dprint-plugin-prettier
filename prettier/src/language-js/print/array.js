@@ -38,7 +38,7 @@ import { printTypeAnnotationProperty } from "./type-annotation.js";
 - `TSTupleType`(TypeScript)
 - `TupleTypeAnnotation`(Flow)
 */
-/** @returns {any[]} */ function printArray(/** @type {AstPath} */ path, options, print) {
+/** @returns {any[]} */ function printArray(/** @type {AstPath} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   const { node } = path;
   /** @type{Doc[]} */
   const parts = [];
@@ -136,7 +136,7 @@ import { printTypeAnnotationProperty } from "./type-annotation.js";
   return parts;
 }
 
-/** @returns {boolean} */ function isConciselyPrintedArray(node, options) {
+/** @returns {boolean} */ function isConciselyPrintedArray(node, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options) {
   return (
     isArrayExpression(node) &&
     node.elements.length > 0 &&
@@ -177,7 +177,7 @@ import { printTypeAnnotationProperty } from "./type-annotation.js";
   return isNextLineEmptyAfterIndex(text, currentIdx);
 }
 
-function printArrayElements(/** @type {AstPath} */ path, options, print, /** @type {string} */ elementsProperty, inexact) {
+function printArrayElements(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print, /** @type {string} */ elementsProperty, inexact) {
   const parts = [];
 
   path.each(({ node, isLast }) => {

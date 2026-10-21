@@ -129,7 +129,7 @@ function parentNeedsParentheses(path, options, needsParentheses) {
   }
 }
 
-/** @returns {boolean} */ function willReturnOrThrowStatementBreak(path, options) {
+/** @returns {boolean} */ function willReturnOrThrowStatementBreak(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, options) {
   const { key, parent } = path;
   if (!(key === "argument" && isReturnOrThrowStatement(parent))) {
     return false;

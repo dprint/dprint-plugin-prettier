@@ -8,7 +8,7 @@ const SUPPORTED_EMBED_LANGUAGES = new Set(["yaml", "toml"]);
 const isEmbedFrontMatter = /** @returns {boolean} */ ({ node } /* , options */) =>
   isFrontMatter(node) && SUPPORTED_EMBED_LANGUAGES.has(node.language);
 
-async function printEmbedFrontMatter(textToDoc, print, path, options) {
+async function printEmbedFrontMatter(textToDoc, print, /** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, options) {
   const { node } = path;
   const { language } = node;
 

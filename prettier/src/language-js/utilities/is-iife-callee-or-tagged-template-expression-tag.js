@@ -1,7 +1,7 @@
 // @nts-check
 import { isCallExpression } from "./node-types.js";
 
-/** @returns {boolean} */ function isIifeCalleeOrTaggedTemplateExpressionTag(path) {
+/** @returns {boolean} */ function isIifeCalleeOrTaggedTemplateExpressionTag(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path) {
   const { node } = path;
   return (
     (node.type === "FunctionExpression" ||

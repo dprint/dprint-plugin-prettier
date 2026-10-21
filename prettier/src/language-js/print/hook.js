@@ -14,7 +14,7 @@ import { printDeclareToken, printSemicolon } from "./miscellaneous.js";
 /*
 - "DeclareHook"
 */
-function printDeclareHook(/** @type {AstPath} */ path, options, print) {
+function printDeclareHook(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   return [
     printDeclareToken(path),
     "hook",
@@ -39,7 +39,7 @@ function printDeclareHook(/** @type {AstPath} */ path, options, print) {
 /*
 - `HookTypeAnnotation` (Flow)
 */
-function printHookTypeAnnotation(/** @type {AstPath} */ path, options, print) {
+function printHookTypeAnnotation(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   const { node } = path;
 
   const parametersDoc = printFunctionParameters(

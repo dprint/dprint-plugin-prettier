@@ -3,7 +3,7 @@ import { group, indent, join, line, softline } from "../../document/index.js";
 
 /** @import AstPath from "../../common/ast-path.js" */
 
-/** @returns {any[] | undefined} */ function printHtmlBinding(/** @type {AstPath} */ path, options, print) {
+/** @returns {any[] | undefined} */ function printHtmlBinding(/** @type {AstPath} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   if (options.__isVueBindings || options.__isVueForBindingLeft) {
     const parameterDocs = path.map(print, "program", "body", 0, "params");
 

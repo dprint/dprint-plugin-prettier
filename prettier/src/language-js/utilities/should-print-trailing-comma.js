@@ -1,5 +1,5 @@
 /**
- * @param {any} options
+ * @param {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} options
  * @param {("es5" | "all")} [level]
  * @returns {boolean}
  */

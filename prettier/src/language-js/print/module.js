@@ -34,7 +34,7 @@ import { printObject } from "./object.js";
 /*
 - `ImportDeclaration`
 */
-function printImportDeclaration(/** @type {AstPath} */ path, options, print) {
+function printImportDeclaration(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   const { node } = path;
   /** @type{Doc[]} */
   return [
@@ -59,7 +59,7 @@ const isDefaultExport = /** @returns {boolean} */ (node) =>
 - `DeclareExportDeclaration`(flow)
 - `DeclareExportAllDeclaration`(flow)
 */
-/** @returns {any[]} */ function printExportDeclaration(/** @type {AstPath} */ path, options, print) {
+/** @returns {any[]} */ function printExportDeclaration(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   const { node } = path;
 
   /** @type{Doc[]} */
@@ -160,7 +160,7 @@ function printModuleSource(/** @type {AstPath} */ path, options, /** @type {(a0?
   ];
 }
 
-function printModuleSpecifiers(/** @type {AstPath} */ path, options, /** @type {() => any} */ print) {
+function printModuleSpecifiers(/** @type {AstPath} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options, /** @type {() => any} */ print) {
   const { node } = path;
 
   if (!shouldPrintSpecifiers(node, options)) {
@@ -299,7 +299,7 @@ const isSingleTypeImportAttributes = (node) => {
 - `DeclareExportDeclaration` (Flow)
 - `DeclareExportAllDeclaration` (Flow)
 */
-function printImportAttributes(/** @type {AstPath} */ path, options, print) {
+function printImportAttributes(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   const { node } = path;
 
   if (!node.source) {

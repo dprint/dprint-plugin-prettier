@@ -14,7 +14,7 @@ const flowObjectTypeAnnotationChildrenProperties = [
   "internalSlots",
 ];
 
-function iterateClassMembersPath(path, iteratee) {
+function iterateClassMembersPath(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, iteratee) {
   const { node } = path;
   if (node.type === "ClassBody" || node.type === "TSInterfaceBody") {
     path.each(iteratee, "body");

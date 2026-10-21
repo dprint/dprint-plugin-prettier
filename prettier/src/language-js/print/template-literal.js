@@ -38,7 +38,7 @@ import { stripChainElementWrappers } from "../utilities/strip-chain-element-wrap
 - `TemplateLiteral`
 - `TSTemplateLiteralType` (TypeScript)
 */
-function printTemplateLiteral(/** @type {AstPath} */ path, options, print) {
+function printTemplateLiteral(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   if (isJestEachTemplateLiteral(path)) {
     const printed = printJestEachTemplateLiteral(path, options, print);
     if (printed) {
@@ -55,7 +55,7 @@ function printTemplateLiteral(/** @type {AstPath} */ path, options, print) {
   return [lineSuffixBoundary, "`", ...parts, "`"];
 }
 
-function printTaggedTemplateExpression(/** @type {AstPath} */ path, options, print) {
+function printTaggedTemplateExpression(/** @type {AstPath} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   const quasiDoc = print("quasi");
   const { node } = path;
 
@@ -88,7 +88,7 @@ function printTaggedTemplateExpression(/** @type {AstPath} */ path, options, pri
   ]);
 }
 
-/** @returns {any[] | undefined} */ function printJestEachTemplateLiteral(/** @type {AstPath} */ path, options, print) {
+/** @returns {any[] | undefined} */ function printJestEachTemplateLiteral(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   /**
    * a    | b    | expected
    * ${1} | ${1} | ${2}
@@ -178,7 +178,7 @@ function printTaggedTemplateExpression(/** @type {AstPath} */ path, options, pri
 }
 
 const templateLiteralIndentCache = new WeakMap();
-function getTemplateLiteralExpressionIndent(/** @type {AstPath} */ path, options) {
+function getTemplateLiteralExpressionIndent(/** @type {AstPath} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options) {
   const { parent: templateLiteral, index } = path;
   const sizes = getOrInsertComputed(
     templateLiteralIndentCache,
@@ -207,8 +207,8 @@ function getTemplateLiteralExpressionIndent(/** @type {AstPath} */ path, options
 */
 function printTemplateExpression(
   /** @type {AstPath} */ path,
-  options,
-  print,
+  /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options,
+  /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print,
   shouldPreserveIndentation = true,
 ) {
   const { node, index } = path;
@@ -288,14 +288,14 @@ function printTemplateExpression(
   return group(["${", expressionDoc, lineSuffixBoundary, "}"]);
 }
 
-function printTemplateExpressions(/** @type {AstPath} */ path, options, print) {
+function printTemplateExpressions(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   return path.map(
     () => printTemplateExpression(path, options, print),
     path.node.type === "TSTemplateLiteralType" ? "types" : "expressions",
   );
 }
 
-function printEmbeddedTemplateExpressions(/** @type {AstPath} */ path, options, print) {
+function printEmbeddedTemplateExpressions(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   return path.map(
     () =>
       printTemplateExpression(

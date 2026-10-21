@@ -17,7 +17,7 @@ import { stripComments } from "./strip-comments.js";
 */
 function getCallOrNewExpressionClosingParenthesisIndex(
   callOrNewExpression,
-  options,
+  /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options,
 ) {
   const closingParenthesisIndex = locEnd(callOrNewExpression) - 1;
 

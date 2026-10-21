@@ -40,7 +40,7 @@ import { shouldHugUnionType } from "./union-type.js";
 function printAssignment(
   /** @type {AstPath} */ path,
   options,
-  print,
+  /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print,
   leftDoc,
   operator,
   /** @type {string | undefined} */ rightPropertyName,
@@ -91,7 +91,7 @@ function printAssignment(
   }
 }
 
-function printAssignmentExpression(/** @type {AstPath} */ path, options, print) {
+function printAssignmentExpression(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   const { node } = path;
   return printAssignment(
     path,
@@ -103,11 +103,11 @@ function printAssignmentExpression(/** @type {AstPath} */ path, options, print) 
   );
 }
 
-function printVariableDeclarator(/** @type {AstPath} */ path, options, print) {
+function printVariableDeclarator(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   return printAssignment(path, options, print, print("id"), " =", "init");
 }
 
-/** @returns {string} */ function chooseLayout(/** @type {AstPath} */ path, options, print, leftDoc, /** @type {string | undefined} */ rightPropertyName) {
+/** @returns {string} */ function chooseLayout(/** @type {AstPath} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print, leftDoc, /** @type {string | undefined} */ rightPropertyName) {
   const { node } = path;
   const rightNode = node[rightPropertyName];
 
@@ -198,7 +198,7 @@ function printVariableDeclarator(/** @type {AstPath} */ path, options, print) {
   return "fluid";
 }
 
-/** @returns {boolean} */ function shouldBreakAfterOperator(/** @type {AstPath} */ path, options, print, /** @type {boolean} */ hasShortKey) {
+/** @returns {boolean} */ function shouldBreakAfterOperator(/** @type {AstPath} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print, /** @type {boolean} */ hasShortKey) {
   const rightNode = path.node;
 
   if (isBinaryish(rightNode) && !shouldInlineLogicalExpression(rightNode)) {
@@ -364,7 +364,7 @@ function printVariableDeclarator(/** @type {AstPath} */ path, options, print) {
 function isPoorlyBreakableMemberOrCallChain(
   /** @type {AstPath} */ path,
   options,
-  print,
+  /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print,
   deep = false,
 ) {
   const { node } = path;
@@ -404,7 +404,7 @@ function isPoorlyBreakableMemberOrCallChain(
   return deep && (node.type === "Identifier" || node.type === "ThisExpression");
 }
 
-/** @returns {boolean} */ function isObjectPropertyWithShortKey(node, keyDoc, options) {
+/** @returns {boolean} */ function isObjectPropertyWithShortKey(node, keyDoc, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options) {
   if (!isObjectProperty(node)) {
     return false;
   }

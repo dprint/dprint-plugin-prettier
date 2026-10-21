@@ -77,7 +77,7 @@ function getParseOptionsCombinations(text, filepath) {
   );
 }
 
-function parse(text, options) {
+function parse(text, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options) {
   let filepath = options?.filepath;
   if (typeof filepath !== "string") {
     filepath = undefined;

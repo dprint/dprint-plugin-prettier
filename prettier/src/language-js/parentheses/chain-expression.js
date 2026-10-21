@@ -6,7 +6,7 @@ import { createTypeCheckFunction } from "../utilities/create-type-check-function
 * @returns {boolean}
 */
 
-function shouldAddParenthesesToChainExpression(path) {
+function shouldAddParenthesesToChainExpression(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path) {
   const { key, parent } = path;
 
   return (

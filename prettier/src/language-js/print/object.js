@@ -68,7 +68,7 @@ const isPrintingFlowEnumBody = createTypeCheckFunction([
 - `DeclareExportAllDeclaration` (Flow)
 - `TSEnumDeclaration`(TypeScript)
 */
-/** @returns {Doc} */ function printObject(/** @type {AstPath} */ path, options, print) {
+/** @returns {Doc} */ function printObject(/** @type {AstPath} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   const { node, parent } = path;
 
   const isFlowEnumBody = isPrintingFlowEnumBody(node);
@@ -199,7 +199,7 @@ const isPrintingFlowEnumBody = createTypeCheckFunction([
   return group(content, { shouldBreak });
 }
 
-/** @returns {boolean} */ function hasNewLineAfterOpeningBrace(node, firstProperty, options) {
+/** @returns {boolean} */ function hasNewLineAfterOpeningBrace(node, firstProperty, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options) {
   const text = options.originalText;
   const firstPropertyStart = locStart(firstProperty);
 

@@ -10,7 +10,7 @@ import { CommentCheckFlags, hasComment } from "../utilities/comments.js";
 import { isNextLineEmpty } from "../utilities/is-next-line-empty.js";
 import { printStatementSequence } from "./statement-sequence.js";
 
-function printSwitchStatement(path, options, print) {
+function printSwitchStatement(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   return [
     group([
       "switch (",
@@ -39,7 +39,7 @@ function printSwitchStatement(path, options, print) {
   ];
 }
 
-function printSwitchCase(path, options, print) {
+function printSwitchCase(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   const { node } = path;
   const parts = [];
   if (node.test) {

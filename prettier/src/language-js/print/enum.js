@@ -3,7 +3,7 @@ import { printKey } from "./key.js";
 import { printDeclareToken } from "./miscellaneous.js";
 import { printObject } from "./object.js";
 
-function printFlowEnumBody(path, options, print) {
+function printFlowEnumBody(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   const { node } = path;
   return [
     node.explicitType ? `of ${node.explicitType} ` : "",
@@ -11,7 +11,7 @@ function printFlowEnumBody(path, options, print) {
   ];
 }
 
-function printLegacyFlowEnumBody(path, options, print) {
+function printLegacyFlowEnumBody(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   const { node } = path;
   return [
     node.type === "EnumSymbolBody" || node.explicitType
@@ -36,7 +36,7 @@ function printLegacyFlowEnumBody(path, options, print) {
 - `EnumDefaultedMember`(flow)
 - `TSEnumMember`(TypeScript)
 */
-function printEnumMember(path, options, print) {
+function printEnumMember(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   const { node } = path;
   const isTsEnumMember = node.type === "TSEnumMember";
 
@@ -57,7 +57,7 @@ function printEnumMember(path, options, print) {
 - `EnumDeclaration`(flow)
 - `TSEnumDeclaration`(TypeScript)
 */
-function printEnumDeclaration(path, print) {
+function printEnumDeclaration(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   const { node } = path;
   return [
     printDeclareToken(path),

@@ -5,7 +5,7 @@ import {
   printSemicolon,
 } from "./miscellaneous.js";
 
-function printDoWhileStatement(path, options, print) {
+function printDoWhileStatement(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   return [
     group(["do", printDoWhileStatementBody(path, options, print)]),
     path.node.body.type === "BlockStatement" ? " " : hardline,

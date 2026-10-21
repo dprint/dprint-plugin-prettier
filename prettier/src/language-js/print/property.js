@@ -9,7 +9,7 @@ import { printKey } from "./key.js";
 - `ObjectProperty`
 - `ImportAttribute`
 */
-function printProperty(/** @type {AstPath} */ path, options, print) {
+function printProperty(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   const { node } = path;
   if (node.shorthand) {
     return print("value");

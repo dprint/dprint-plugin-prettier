@@ -74,7 +74,7 @@ const isFlowDeclareNode = createTypeCheckFunction([
   "DeclareInterface",
 ]);
 
-const shouldPrintDeclareToken = /** @returns {boolean | undefined} */ (path) => {
+const shouldPrintDeclareToken = /** @returns {boolean | undefined} */ (/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path) => {
   const { node } = path;
 
   if (isFlowDeclareNode(node)) {
@@ -156,7 +156,7 @@ const isLogicalNot = /** @returns {boolean} */ (node) =>
   return node.type === "LogicalExpression";
 }
 
-function printIfOrWhileConditionOrWithStatementObject(path, options, print) {
+function printIfOrWhileConditionOrWithStatementObject(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   const { node } = path;
   const property = node.type === "WithStatement" ? "object" : "test";
   const conditionDoc = print(property);
@@ -172,7 +172,7 @@ function printIfOrWhileConditionOrWithStatementObject(path, options, print) {
 @param {(comment: Comment) => boolean} [filter]
 @returns {Doc}
 */
-function printDanglingCommentsInList(path, options, filter) {
+function printDanglingCommentsInList(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, options, filter) {
   const { node } = path;
 
   return hasComment(node, CommentCheckFlags.Dangling, filter)
@@ -197,7 +197,7 @@ function printTrailingComma(options, level = "es5") {
   return shouldPrintTrailingComma(options, level) ? ifBreak(",") : "";
 }
 
-/** @returns {string} */ function printSemicolon(options) {
+/** @returns {string} */ function printSemicolon(/** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options) {
   return options.semi ? ";" : "";
 }
 

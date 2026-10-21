@@ -22,7 +22,7 @@ import { isNextLineEmpty } from "../utilities/is-next-line-empty.js";
 - `MatchExpression` (Flow)
 - `MatchStatement` (Flow)
 */
-export function printMatch(path, options, print) {
+export function printMatch(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   const { node } = path;
   return [
     group(["match (", indent([softline, print("argument")]), softline, ")"]),
@@ -51,7 +51,7 @@ export function printMatch(path, options, print) {
 - `MatchExpressionCase` (Flow)
 - `MatchStatementCase` (Flow)
 */
-export function printMatchCase(path, options, print) {
+export function printMatchCase(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   const { node } = path;
 
   const comment = hasComment(node, CommentCheckFlags.Dangling)
@@ -84,7 +84,7 @@ export function printMatchCase(path, options, print) {
 - `MatchObjectPatternProperty` (Flow)
 - `MatchRestPattern` (Flow)
 */
-export function printMatchPattern(path, options, print) {
+export function printMatchPattern(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   const { node } = path;
 
   switch (node.type) {
@@ -143,7 +143,7 @@ export function printMatchPattern(path, options, print) {
   }
 }
 
-function printMatchObjectPattern(path, options, print) {
+function printMatchObjectPattern(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   const { node } = path;
   const properties = path.map(print, "properties");
   if (node.rest) {
@@ -195,7 +195,7 @@ function shouldHugMatchPattern(node) {
   return false;
 }
 
-function printMatchOrPattern(path, options, print) {
+function printMatchOrPattern(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   const { node } = path;
   // single-line variation
   // A | B | C

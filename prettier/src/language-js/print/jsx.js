@@ -62,7 +62,7 @@ const isEmptyStringOrAnyLine = /** @returns {boolean} */ (doc) =>
 //
 // To support that case properly, all leading and trailing spaces
 // are stripped from the list of children, and replaced with a single hardline.
-function printJsxElementInternal(/** @type {AstPath} */ path, options, print) {
+function printJsxElementInternal(/** @type {AstPath} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   const { node } = path;
 
   if (node.type === "JSXElement" && isEmptyJsxElement(node)) {
@@ -312,7 +312,7 @@ function printJsxElementInternal(/** @type {AstPath} */ path, options, print) {
 /** @returns {any[]} */ function printJsxChildren(
   /** @type {AstPath} */ path,
   options,
-  print,
+  /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print,
   whitespace,
   /** @type {boolean} */ isFacebookTranslationTag,
 ) {
@@ -538,7 +538,7 @@ function maybeWrapJsxElementInParens(/** @type {AstPath} */ path, elem, options)
   );
 }
 
-/** @returns {any[]} */ function printJsxAttribute(/** @type {AstPath} */ path, options, /** @type {(a0?: any) => any} */ print) {
+/** @returns {any[]} */ function printJsxAttribute(/** @type {AstPath} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options, /** @type {(a0?: any) => any} */ print) {
   const { node } = path;
   const parts = [print("name")];
 
@@ -604,7 +604,7 @@ function printJsxExpressionContainer(/** @type {AstPath} */ path, options, /** @
   ]);
 }
 
-function printJsxOpeningElement(/** @type {AstPath} */ path, options, print) {
+function printJsxOpeningElement(/** @type {AstPath} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   const { node } = path;
 
   /** @type {boolean} */ const nameHasComments =
@@ -692,7 +692,7 @@ function printJsxOpeningElement(/** @type {AstPath} */ path, options, print) {
   return [softline, ">"];
 }
 
-/** @returns {boolean | undefined} */ function shouldPrintBracketSameLine(node, options, /** @type {boolean} */ nameHasComments) {
+/** @returns {boolean | undefined} */ function shouldPrintBracketSameLine(node, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options, /** @type {boolean} */ nameHasComments) {
   /** @type {boolean} */ const lastAttrHasTrailingComments =
     node.attributes.length > 0 &&
     hasComment(node.attributes.at(-1), CommentCheckFlags.Trailing);
@@ -758,7 +758,7 @@ function printJsxOpeningClosingFragment(/** @type {AstPath} */ path, options /* 
   ];
 }
 
-function printJsxElement(/** @type {AstPath} */ path, options, print) {
+function printJsxElement(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   const elem = printComments(
     path,
     printJsxElementInternal(path, options, print),
@@ -799,7 +799,7 @@ function printJsxEmptyExpression(/** @type {AstPath} */ path, options /* , print
   ];
 }
 
-function printJsx(/** @type {AstPath} */ path, options, print) {
+function printJsx(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   const { node } = path;
 
   // JSX nodes always starts with `JSX`

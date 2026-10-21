@@ -8,7 +8,7 @@ import { printDeclareToken, printSemicolon } from "./miscellaneous.js";
 - `TypeAlias`(flow)
 - `TSTypeAliasDeclaration`(TypeScript)
 */
-/** @returns {any[]} */ function printTypeAlias(/** @type {AstPath} */ path, options, print) {
+/** @returns {any[]} */ function printTypeAlias(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   const { node } = path;
   const parts = [
     printDeclareToken(path),

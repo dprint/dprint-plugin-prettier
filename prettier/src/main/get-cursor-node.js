@@ -17,7 +17,7 @@ import { getChildren, getDescendants, isLeaf } from "../utilities/ast.js";
  * "cursorNode" when the cursor lies within a leaf node of the AST, and one of
  * the other possibilities otherwise.
  */
-function getCursorLocation(ast, options) {
+function getCursorLocation(ast, /** @type {import("../../../prettier/src/main/format-options.js").FormatOptions} */ options) {
   const { cursorOffset, locStart, locEnd, getVisitorKeys } = options;
 
   const nodeContainsCursor = /** @returns {boolean} */ (node) =>

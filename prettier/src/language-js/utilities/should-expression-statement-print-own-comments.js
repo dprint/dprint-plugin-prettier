@@ -3,7 +3,7 @@ import { shouldExpressionStatementPrintLeadingSemicolon } from "../semicolon/sem
 import { CommentCheckFlags, getComments } from "./comments.js";
 import { isTypeCastComment } from "./is-type-cast-comment.js";
 
-/** @returns {boolean} */ function shouldExpressionStatementPrintOwnComments(path, options) {
+/** @returns {boolean} */ function shouldExpressionStatementPrintOwnComments(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, options) {
   if (!shouldExpressionStatementPrintLeadingSemicolon(path, options)) {
     return false;
   }

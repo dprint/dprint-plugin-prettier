@@ -16,7 +16,7 @@ import { printStatementSequence } from "./statement-sequence.js";
 - `StaticBlock`
 - `TSModuleBlock` (TypeScript)
 */
-function printBlock(/** @type {AstPath} */ path, options, print) {
+function printBlock(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   const bodyDoc = printBlockBody(path, options, print);
   const { node, parent } = path;
 
@@ -70,7 +70,7 @@ function printBlock(/** @type {AstPath} */ path, options, print) {
 - `StaticBlock`
 - `TSModuleBlock` (TypeScript)
 */
-function printBlockBody(/** @type {AstPath} */ path, options, print) {
+function printBlockBody(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   const { node } = path;
 
   /** @type {boolean} */ const hasDirectives = isNonEmptyArray(node.directives);

@@ -1,7 +1,7 @@
 import { group } from "../../document/index.js";
 import { printForXStatementBody } from "./clause.js";
 
-function printForXStatement(path, options, print) {
+function printForXStatement(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   const { node } = path;
   const isForOfStatement = node.type === "ForOfStatement";
   return group([

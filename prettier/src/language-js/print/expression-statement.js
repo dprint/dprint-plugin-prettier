@@ -23,7 +23,7 @@ import {
 * @returns {boolean}
 */
 
-function shouldPrintSemicolon(/** @type {AstPath} */ path, options) {
+function shouldPrintSemicolon(/** @type {AstPath} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options) {
   if (isSingleVueEventBindingExpressionStatement(path, options)) {
     const expression = unwrapVueEventBindingTsNode(path.node.expression);
     return (

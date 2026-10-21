@@ -10,7 +10,7 @@ import { isJsxElement } from "./node-types.js";
 // This recurses the return argument, looking for the first token
 // (the leftmost leaf node) and, if it (or its parents) has any
 // leadingComments, returns true (so it can be wrapped in parens).
-/** @returns {boolean} */ function returnArgumentHasLeadingCommentWithoutCache(node, options) {
+/** @returns {boolean} */ function returnArgumentHasLeadingCommentWithoutCache(node, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options) {
   if (
     hasLeadingOwnLineComment(options.originalText, node) ||
     (hasComment(node, CommentCheckFlags.Leading, /** @returns {boolean} */ (comment) =>

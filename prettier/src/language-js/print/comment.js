@@ -19,7 +19,7 @@ import {
 @import {Comment} from "../types/estree.js"
 */
 
-function printComment(/** @type {AstPath} */ path, options) {
+function printComment(/** @type {AstPath} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options) {
   const comment = path.node;
 
   if (isLineComment(comment)) {

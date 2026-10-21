@@ -7,7 +7,7 @@ import { printBinaryishExpression } from "./binaryish.js";
 
 /** @import AstPath from "../../common/ast-path.js" */
 
-function printAngular(/** @type {AstPath} */ path, options, print) {
+function printAngular(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   const { node } = path;
 
   // Angular nodes always starts with `NG`
@@ -93,7 +93,7 @@ function printAngular(/** @type {AstPath} */ path, options, print) {
   );
 }
 
-/** @returns {boolean} */ function isNgForOfTrack(path) {
+/** @returns {boolean} */ function isNgForOfTrack(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path) {
   const { node } = path;
   return (
     path.parent.body[1].key.name === "of" &&

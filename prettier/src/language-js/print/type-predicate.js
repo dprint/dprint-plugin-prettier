@@ -6,7 +6,7 @@ import { printTypeAnnotationProperty } from "./type-annotation.js";
 - `TSTypePredicate` (TypeScript)
 - `TypePredicate` (flow)
 */
-/** @returns {any[]} */ function printTypePredicate(/** @type {AstPath} */ path, print) {
+/** @returns {any[]} */ function printTypePredicate(/** @type {AstPath} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   const { node } = path;
   const prefix =
     node.type === "TSTypePredicate" && node.asserts
