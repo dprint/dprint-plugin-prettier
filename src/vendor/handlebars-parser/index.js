@@ -312,7 +312,7 @@ function omitLeft(body, i, multiple) {
 /**
  * Where a token or a rule's match is, which jison works out as it goes, and the lexer, which the parser makes one of for
  * each input from this one, an interface whose methods are given it
- * @import {JisonLexer, JisonLocation} from "handlebars-parser-types"
+ * @import {JisonLexer, JisonLocation, JisonParser} from "handlebars-parser-types"
  */
 /**
  * What a rule gives and where it is, which the parser's action is called on
@@ -335,23 +335,9 @@ function omitLeft(body, i, multiple) {
  *   lexer?: any,
  *   parser?: any,
  * }} JisonShared
- * The parser, whose tables say what each state does with each symbol (an array for an action, a number for the state
- * to go to), and whose methods jison writes into it
- * @typedef {{
- *   trace: (this: JisonParser, ...args: any[]) => void,
- *   yy: any,
- *   symbols_: Record<string, any>,
- *   terminals_: Record<string, any>,
- *   productions_: any[],
- *   table: Record<string, any>[],
- *   defaultActions: Record<string, any>,
- *   performAction: any,
- *   parseError: (this: JisonParser, str: string, hash: any) => void,
- *   parse: (this: JisonParser, input: string | undefined) => any,
- *   lexer: JisonLexer,
- * }} JisonParser
  */
-var parser = (function() {
+/** @type {JisonParser} */
+var parser = (/** @returns {JisonParser} */ function() {
 	var o = function(/** @type {any[] | undefined} */ k, /** @type {any[] | undefined} */ v, o, l) {
 		for (o = o || {}, l = k.length; l--; o[k[l]] = v);
 		return o;
@@ -514,7 +500,7 @@ var parser = (function() {
 		88,
 		89
 	], $Vx = [33, 79], $Vy = [1, 134], $Vz = [73, 81];
-	var parser = {
+	var parser = /** @type {JisonParser} */ ({
 		trace: function trace() {},
 		yy: {},
 		symbols_: {
@@ -1906,7 +1892,7 @@ var parser = (function() {
 			}
 			return true;
 		}
-	};
+	});
 	parser.lexer = (function() {
 		return /** @type {JisonLexer} */ ({
 			EOF: 1,

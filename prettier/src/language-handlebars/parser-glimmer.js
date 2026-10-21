@@ -36,8 +36,10 @@ function addBackslash(/** @type {import("./print-types.js").GlimmerNode} */ node
 }
 
 const isIndex = /** @returns {boolean} */ (/** @type {number} */ value) => Number.isSafeInteger(value) && value >= 0;
+// a node of glimmer's tree, whose location is a span of the source
+/** @typedef {{ loc: InstanceType<typeof import("@glimmer/syntax").src.SourceSpan> }} GlimmerLocated */
 // Add `offset` to `loc.{start,end}`
-const setOffset = (/** @type {import("./print-types.js").GlimmerNode} */ node) => {
+const setOffset = (/** @type {GlimmerLocated} */ node) => {
   const { start, end } = node.loc;
 
   start.offset = node.loc.getStart().offset;

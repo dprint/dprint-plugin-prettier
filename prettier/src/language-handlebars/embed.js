@@ -1,4 +1,7 @@
-function embed(path /* , options*/) {
+// @nts-check
+/** @import {GlimmerNode, GlimmerPath} from "./print-types.js" */
+
+function embed(/** @type {GlimmerPath} */ path /* , options*/) {
   /** @type {{ node: import("./print-types.js").GlimmerNode }} */ const { node } = path;
 
   if (node.type !== "TextNode") {
@@ -17,7 +20,7 @@ function embed(path /* , options*/) {
   }
 
   const languageAttribute = parent.attributes.find(
-    (attribute) => attribute.type === "AttrNode" && attribute.name === "lang",
+    /** @returns {boolean} */ (attribute) => attribute.type === "AttrNode" && attribute.name === "lang",
   );
   if (
     languageAttribute &&

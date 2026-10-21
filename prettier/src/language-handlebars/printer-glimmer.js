@@ -29,7 +29,7 @@ import {
 /**
 @import {Doc} from "../document/index.js"
 @import {AST} from "@glimmer/syntax"
-@import {GlimmerNode, GlimmerOptions, GlimmerPrint} from "./print-types.js"
+@import {GlimmerNode, GlimmerOptions, GlimmerPath, GlimmerPrint} from "./print-types.js"
 */
 
 /** @type {number} */ const NEWLINES_TO_PRESERVE_MAX = 2;
@@ -37,7 +37,7 @@ import {
 // Formatter based on @glimmerjs/syntax's built-in test formatter:
 // https://github.com/glimmerjs/glimmer-vm/blob/master/packages/%40glimmer/syntax/lib/generation/print.ts
 
-function print(/** @type {AstPath} */ path, /** @type {GlimmerOptions} */ options, /** @type {GlimmerPrint} */ print) {
+function print(/** @type {GlimmerPath} */ path, /** @type {GlimmerOptions} */ options, /** @type {GlimmerPrint} */ print) {
   /** @type {{ node: GlimmerNode }} */ const { node } = path;
 
   switch (node.type) {
@@ -118,7 +118,7 @@ function print(/** @type {AstPath} */ path, /** @type {GlimmerOptions} */ option
       ]);
 
     case "AttrNode": {
-      const { name, value } = node;
+      /** @type {{ name: string, value: GlimmerNode }} */ const { name, value } = node;
       /** @type {boolean} */ const isText = value.type === "TextNode";
       /** @type {boolean} */ const isEmptyText = isText && value.chars === "";
 
@@ -136,7 +136,7 @@ function print(/** @type {AstPath} */ path, /** @type {GlimmerOptions} */ option
         : value.type === "ConcatStatement"
           ? getPreferredQuote(
               value.parts
-                .map(/** @returns {string} */ (part) => (part.type === "TextNode" ? part.chars : ""))
+                .map(/** @returns {string} */ (/** @type {GlimmerNode} */ part) => (part.type === "TextNode" ? part.chars : ""))
                 .join(""),
               options.singleQuote,
             )
@@ -379,7 +379,7 @@ function print(/** @type {AstPath} */ path, /** @type {GlimmerOptions} */ option
       /** @type {boolean} */ const isRightWhitespaceSensitive =
         options.originalText.charAt(end - 3) === "~";
 
-      /** @type {string} */ const dashes = node.value.includes("}}") ? "--" : "";
+      /** @type {string} */ const dashes = /** @type {string} */ (node.value).includes("}}") ? "--" : "";
       return [
         "{{",
         isLeftWhiteSpaceSensitive ? "~" : "",
@@ -424,11 +424,11 @@ function print(/** @type {AstPath} */ path, /** @type {GlimmerOptions} */ option
 
 /* ElementNode print helpers */
 
-/** @returns {number} */ function sortByLoc(a, b) {
+/** @returns {number} */ function sortByLoc(/** @type {GlimmerNode} */ a, /** @type {GlimmerNode} */ b) {
   return locStart(a) - locStart(b);
 }
 
-/** @returns {any[]} */ function printStartingTag(/** @type {AstPath} */ path, /** @type {() => any} */ print) {
+/** @returns {any[]} */ function printStartingTag(/** @type {GlimmerPath} */ path, /** @type {() => any} */ print) {
   /** @type {{ node: GlimmerNode }} */ const { node } = path;
 
   const types = ["attributes", "modifiers", "comments"].filter(/** @returns {boolean} */ (property) =>
@@ -437,7 +437,7 @@ function print(/** @type {AstPath} */ path, /** @type {GlimmerOptions} */ option
   const attributes = types.flatMap(/** @returns {any[]} */ (type) => node[type]).sort(sortByLoc);
 
   for (const attributeType of types) {
-    path.each(({ node }) => {
+    path.each((/** @type {GlimmerPath} */ { node }) => {
       /** @type {number} */ const index = attributes.indexOf(node);
       attributes[index] = [line, print()];
     }, attributeType);
@@ -510,7 +510,7 @@ function printStartingTagEndMarker(/** @type {GlimmerNode} */ node) {
   return [strip, closing];
 }
 
-function printOpenBlock(/** @type {AstPath} */ path, /** @type {GlimmerPrint} */ print) {
+function printOpenBlock(/** @type {GlimmerPath} */ path, /** @type {GlimmerPrint} */ print) {
   /** @type {{ node: GlimmerNode }} */ const { node } = path;
   /** @type {Doc[]} */
   const parts = [];
@@ -543,8 +543,8 @@ function printOpenBlock(/** @type {AstPath} */ path, /** @type {GlimmerPrint} */
 }
 
 /**
-@param {AST.BlockStatement} param0
-@param {AST.BlockStatement} param1
+@param {GlimmerNode} param0
+@param {GlimmerNode} param1
 @returns {boolean}
 */
 const hasSamePathHeadName = ({ path: pathA }, { path: pathB }) =>
@@ -554,13 +554,13 @@ const hasSamePathHeadName = ({ path: pathA }, { path: pathB }) =>
   // @ts-expect-error -- safe
   pathA.head.name === pathB.head.name;
 
-/** @returns {boolean} */ function isElseIfBlock(path) {
+/** @returns {boolean} */ function isElseIfBlock(/** @type {GlimmerPath} */ path) {
   if (
     !path.match(
-      /** @returns {boolean} */ (node) => node.type === "BlockStatement",
-      /** @returns {boolean} */ (node, key) =>
+      /** @returns {boolean} */ (/** @type {GlimmerNode} */ node) => node.type === "BlockStatement",
+      /** @returns {boolean} */ (/** @type {GlimmerNode} */ node, /** @type {string | null} */ key) =>
         key === "body" && node.type === "Block" && node.body.length === 1,
-      /** @returns {boolean} */ (node, key) => key === "inverse" && node.type === "BlockStatement",
+      /** @returns {boolean} */ (/** @type {GlimmerNode} */ node, /** @type {string | null} */ key) => key === "inverse" && node.type === "BlockStatement",
     )
   ) {
     return false;
@@ -590,7 +590,7 @@ const hasSamePathHeadName = ({ path: pathA }, { path: pathB }) =>
   );
 }
 
-function printElseIfBlock(/** @type {AstPath} */ path, /** @type {GlimmerPrint} */ print) {
+function printElseIfBlock(/** @type {GlimmerPath} */ path, /** @type {GlimmerPrint} */ print) {
   /** @type {{ node: import("./print-types.js").GlimmerNode, grandparent: import("./print-types.js").GlimmerNode }} */ const { node, grandparent } = path;
   return group([
     printInverseBlockOpeningMustache(grandparent),
@@ -607,7 +607,7 @@ function printElseIfBlock(/** @type {AstPath} */ path, /** @type {GlimmerPrint} 
   ]);
 }
 
-function printCloseBlock(/** @type {AstPath} */ path, /** @type {GlimmerOptions} */ options, /** @type {GlimmerPrint} */ print) {
+function printCloseBlock(/** @type {GlimmerPath} */ path, /** @type {GlimmerOptions} */ options, /** @type {GlimmerPrint} */ print) {
   /** @type {{ node: GlimmerNode }} */ const { node } = path;
 
   if (options.htmlWhitespaceSensitivity === "ignore") {
@@ -637,7 +637,7 @@ function printCloseBlock(/** @type {AstPath} */ path, /** @type {GlimmerOptions}
   );
 }
 
-function printProgram(/** @type {AstPath} */ path, /** @type {GlimmerOptions} */ options, /** @type {GlimmerPrint} */ print) {
+function printProgram(/** @type {GlimmerPath} */ path, /** @type {GlimmerOptions} */ options, /** @type {GlimmerPrint} */ print) {
   /** @type {{ node: GlimmerNode }} */ const { node } = path;
 
   if (blockStatementHasOnlyWhitespaceInProgram(node)) {
@@ -653,7 +653,7 @@ function printProgram(/** @type {AstPath} */ path, /** @type {GlimmerOptions} */
   return indent(program);
 }
 
-function printInverse(/** @type {AstPath} */ path, /** @type {GlimmerOptions} */ options, /** @type {GlimmerPrint} */ print) {
+function printInverse(/** @type {GlimmerPath} */ path, /** @type {GlimmerOptions} */ options, /** @type {GlimmerPrint} */ print) {
   /** @type {{ node: GlimmerNode }} */ const { node } = path;
 
   if (!node.inverse) {
@@ -679,7 +679,7 @@ function printInverse(/** @type {AstPath} */ path, /** @type {GlimmerOptions} */
   return join(line, htmlWhitespace.split(value));
 }
 
-/** @returns {string | undefined} */ function getCurrentAttributeName(/** @type {AstPath} */ path) {
+/** @returns {string | undefined} */ function getCurrentAttributeName(/** @type {GlimmerPath} */ path) {
   for (let depth = 0; depth < 2; depth++) {
     /** @type {import("./print-types.js").GlimmerNode} */ const parentNode = path.getParentNode(depth);
     if (parentNode?.type === "AttrNode") {
@@ -727,8 +727,8 @@ function printInverse(/** @type {AstPath} */ path, /** @type {GlimmerOptions} */
  * are treated in hbs string literals.
  * @returns {any[]}
  */
-function printStringLiteral(/** @type {AstPath} */ path, /** @type {GlimmerOptions} */ options) {
-  /** @type {{ node: import("./print-types.js").GlimmerNode }} */ const {
+function printStringLiteral(/** @type {GlimmerPath} */ path, /** @type {GlimmerOptions} */ options) {
+  /** @type {{ node: { value: string } }} */ const {
     node: { value },
   } = path;
 
@@ -740,8 +740,8 @@ function printStringLiteral(/** @type {AstPath} */ path, /** @type {GlimmerOptio
   return [quote, value.replaceAll(quote, `\\${quote}`), quote];
 }
 
-/** @returns {boolean} */ function needsOppositeQuote(path) {
-  const { ancestors } = path;
+/** @returns {boolean} */ function needsOppositeQuote(/** @type {GlimmerPath} */ path) {
+  /** @type {{ ancestors: GlimmerNode[] }} */ const { ancestors } = path;
   const level = ancestors.findIndex(/** @returns {boolean} */ (node) => node.type !== "SubExpression");
 
   return (
@@ -753,7 +753,7 @@ function printStringLiteral(/** @type {AstPath} */ path, /** @type {GlimmerOptio
 
 /* SubExpression print helpers */
 
-function printSubExpressionPathAndParams(/** @type {AstPath} */ path, /** @type {GlimmerPrint} */ print) {
+function printSubExpressionPathAndParams(/** @type {GlimmerPath} */ path, /** @type {GlimmerPrint} */ print) {
   const printed = printPath(path, print);
   const params = printParams(path, print);
 
@@ -766,7 +766,7 @@ function printSubExpressionPathAndParams(/** @type {AstPath} */ path, /** @type 
 
 /* misc. print helpers */
 
-function printPathAndParams(/** @type {AstPath} */ path, /** @type {GlimmerPrint} */ print) {
+function printPathAndParams(/** @type {GlimmerPath} */ path, /** @type {GlimmerPrint} */ print) {
   const pathDoc = printPath(path, print);
   const paramsDoc = printParams(path, print);
 
@@ -777,11 +777,11 @@ function printPathAndParams(/** @type {AstPath} */ path, /** @type {GlimmerPrint
   return [indent([pathDoc, line, paramsDoc]), softline];
 }
 
-function printPath(/** @type {AstPath} */ path, /** @type {(a0?: any) => any} */ print) {
+function printPath(/** @type {GlimmerPath} */ path, /** @type {(a0?: any) => any} */ print) {
   return print("path");
 }
 
-function printParams(/** @type {AstPath} */ path, /** @type {GlimmerPrint} */ print) {
+function printParams(/** @type {GlimmerPath} */ path, /** @type {GlimmerPrint} */ print) {
   /** @type {{ node: GlimmerNode }} */ const { node } = path;
   const parts = [];
 
@@ -823,7 +823,7 @@ const isPathExpressionPartNeedBrackets = /** @returns {boolean} */ (/** @type {s
     (index !== 0 && PATH_EXPRESSION_FORBIDDEN_IN_FIRST_PART.has(part)) ||
     /\s/.test(part) ||
     /^\d/.test(part) ||
-    Array.prototype.some.call(part, /** @returns {boolean} */ (character) =>
+    Array.prototype.some.call(part, /** @returns {boolean} */ (/** @type {string} */ character) =>
       PATH_EXPRESSION_FORBIDDEN_CHARACTERS.has(character),
     )
   );

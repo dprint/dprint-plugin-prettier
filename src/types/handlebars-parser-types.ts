@@ -61,3 +61,23 @@ export interface JisonLexer {
   stateStackSize(this: JisonLexer): number;
   performAction(this: JisonLexer, yy: any, yy_: JisonLexer, $avoiding_name_collisions: number, YY_START: string): any;
 }
+
+// handlebars' jison parser, an object literal whose tables say what each state does with each symbol (an array for an
+// action, a number for the state to go to) and whose methods call each other through `this`: an interface, so that it
+// is an object of a class whose methods are given it; jison creates the parser with `new` of a function whose
+// prototype it is, which copies it
+export interface JisonParser {
+  trace(this: JisonParser, str: string): void;
+  yy: any;
+  symbols_: Record<string, any>;
+  terminals_: Record<string, any>;
+  productions_: any[];
+  table: Record<string, any>[];
+  defaultActions: Record<string, any>;
+  performAction: any;
+  parseError(this: JisonParser, str: string, hash: any): void;
+  parse(this: JisonParser, input: string | undefined): any;
+  lexer: JisonLexer;
+  // the function that creates parsers from it
+  Parser?: any;
+}

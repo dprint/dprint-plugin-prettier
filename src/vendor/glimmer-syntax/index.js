@@ -419,8 +419,8 @@ function getFirst(/** @type {any[]} */ list) {
 
 /**
 @typedef {{ line: number, column: number }} SourcePosition
-@typedef {{ start: HbsPosition, end: HbsPosition }} HbsPositions
-@typedef {{ start: CharPosition, end: CharPosition }} CharPositions
+@typedef {import("glimmer-parser-types").HbsPositions} HbsPositions
+@typedef {import("glimmer-parser-types").CharPositions} CharPositions
 */
 
 const UNKNOWN_POSITION = Object.freeze({
@@ -446,7 +446,7 @@ class WhenList {
     }
     first(/** @type {string} */ kind) {
         for (const when of this._whens) {
-            const value = when.match(kind);
+            const value = /** @type {When} */ (when).match(kind);
             if (isPresentArray(value)) return value[0];
         }
         return null;
@@ -489,7 +489,7 @@ class Matcher {
    * You didn't exhaustively match all possibilities.
    */
     validate() {
-        return /** @returns {SourceSpan} */ (/** @type {HbsPosition | CharPosition} */ left, /** @type {HbsPosition | CharPosition} */ right) => this.matchFor(left.kind, right.kind)(left, right);
+        return (/** @type {HbsPosition | CharPosition} */ left, /** @type {HbsPosition | CharPosition} */ right) => this.matchFor(left.kind, right.kind)(left, right);
     }
     matchFor(/** @type {string} */ left, /** @type {string} */ right) {
         const nesteds = this._whens.match(left);
@@ -562,6 +562,8 @@ class SourceSlice {
  * happens when an AST plugin attempts to modify the `start` or `end` of a span directly.
  *
  * The goal is to avoid creating any problems for use-cases like AST Explorer.
+ *
+ * @property {CharPositionSpan | HbsSpan | InvisibleSpan} data
  */ class SourceSpan {
     static get NON_EXISTENT() {
         return new InvisibleSpan("NonExistent", NON_EXISTENT_LOCATION).wrap();
@@ -858,10 +860,10 @@ class InvisibleSpan {
         // TODO: Make this reflect the actual module this span originated from
         return "an unknown module";
     }
-    getStart() {
+    /** @returns {InvisiblePosition} */ getStart() {
         return new InvisiblePosition(this.kind, this.loc.start);
     }
-    getEnd() {
+    /** @returns {InvisiblePosition} */ getEnd() {
         return new InvisiblePosition(this.kind, this.loc.end);
     }
     /** @returns {InvisibleSpan} */ toCharPosSpan() {
@@ -921,8 +923,8 @@ class SourceOffset {
    */    /** @returns {SourceOffset} */ static broken(pos = UNKNOWN_POSITION) {
         return new InvisiblePosition("Broken", pos).wrap();
     }
-    constructor(/** @type {HbsPosition | CharPosition} */ data) {
-        /** @type {HbsPosition | CharPosition} */ this.data = data;
+    constructor(/** @type {HbsPosition | CharPosition | InvisiblePosition} */ data) {
+        /** @type {HbsPosition | CharPosition | InvisiblePosition} */ this.data = data;
     }
     /**
    * Get the character offset for this `SourceOffset`, if possible.
@@ -2054,7 +2056,7 @@ class Parser {
     pos({line: line, column: column}) {
         return this.source.offsetFor(line, column);
     }
-    finish(node) {
+    finish(/** @type {GlimmerPendingNode} */ node) {
         return assign({}, node, {
             loc: node.start.until(this.offset())
         });
@@ -2138,7 +2140,7 @@ class HandlebarsNodeVisitors extends Parser {
         return node;
     }
     BlockStatement(/** @type {HbsNode} */ block) {
-        if ("comment" === this.tokenizer.state) return block.loc, void this.appendToCommentData(this.sourceForNode(block));
+        if ("comment" === this.tokenizer.state) return block.loc, void /** @type {TokenizerEventHandlers} */ (this).appendToCommentData(this.sourceForNode(block));
         if ("data" !== this.tokenizer.state && "beforeData" !== this.tokenizer.state) throw generateSyntaxError("A block may only be used inside an HTML element or another block.", this.source.spanFor(block.loc));
         const {path: path, params: params, hash: hash} = acceptCallNodes(this, block), loc = this.source.spanFor(block.loc);
         // Backfill block params loc for the default block
@@ -2189,7 +2191,7 @@ class HandlebarsNodeVisitors extends Parser {
     MustacheStatement(/** @type {HbsNode} */ rawMustache) {
         this.pendingError?.mustache(this.source.spanFor(rawMustache.loc));
         const {tokenizer: tokenizer} = this;
-        if ("comment" === tokenizer.state) return void this.appendToCommentData(this.sourceForNode(rawMustache));
+        if ("comment" === tokenizer.state) return void /** @type {TokenizerEventHandlers} */ (this).appendToCommentData(this.sourceForNode(rawMustache));
         let mustache;
         const {escaped: escaped, loc: loc, strip: strip} = rawMustache;
         if ("original" in rawMustache.path && "...attributes" === rawMustache.path.original) throw generateSyntaxError("Illegal use of ...attributes", this.source.spanFor(rawMustache.loc));
@@ -2226,7 +2228,7 @@ class HandlebarsNodeVisitors extends Parser {
 
           case "attributeName":
           case "afterAttributeName":
-            this.beginAttributeValue(!1), this.finishAttributeValue(), addElementModifier(this.currentStartTag, mustache), 
+            /** @type {TokenizerEventHandlers} */ (this).beginAttributeValue(!1), /** @type {TokenizerEventHandlers} */ (this).finishAttributeValue(), addElementModifier(this.currentStartTag, mustache), 
             tokenizer.transitionTo("beforeAttributeName");
             break;
 
@@ -2236,7 +2238,7 @@ class HandlebarsNodeVisitors extends Parser {
 
             // Attribute values
                       case "beforeAttributeValue":
-            this.beginAttributeValue(!1), this.appendDynamicAttributeValuePart(mustache), tokenizer.transitionTo("attributeValueUnquoted");
+            /** @type {TokenizerEventHandlers} */ (this).beginAttributeValue(!1), this.appendDynamicAttributeValuePart(mustache), tokenizer.transitionTo("attributeValueUnquoted");
             break;
 
           case "attributeValueDoubleQuoted":
@@ -2289,7 +2291,7 @@ class HandlebarsNodeVisitors extends Parser {
     }
     CommentStatement(/** @type {HbsNode} */ rawComment) {
         const {tokenizer: tokenizer} = this;
-        if ("comment" === tokenizer.state) return this.appendToCommentData(this.sourceForNode(rawComment)), 
+        if ("comment" === tokenizer.state) return /** @type {TokenizerEventHandlers} */ (this).appendToCommentData(this.sourceForNode(rawComment)), 
         null;
         const {value: value, loc: loc} = rawComment, comment = b.mustacheComment({
             value: value,
@@ -2679,7 +2681,7 @@ class TokenizerEventHandlers extends HandlebarsNodeVisitors {
             // initially assume the text node is a single char
             let loc = this.offset();
             // the tokenizer line/column have already been advanced, correct location info
-                        loc = "\n" === char ? lastPart ? lastPart.loc.getEnd() : this.currentAttr.valueSpan.getStart() : loc.move(-1), 
+                        loc = "\n" === char ? lastPart ? /** @type {SourceOffset} */ (lastPart.loc.getEnd()) : this.currentAttr.valueSpan.getStart() : loc.move(-1), 
             this.currentAttr.currentPart = b.text({
                 chars: char,
                 loc: loc.collapsed()

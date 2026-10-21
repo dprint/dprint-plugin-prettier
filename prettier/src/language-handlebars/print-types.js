@@ -41,6 +41,17 @@
 /** @typedef {{ open: boolean, close: boolean }} StripFlags */
 
 /**
+ * A path of the printer, whose nodes are glimmer's
+ * @typedef {import("../common/ast-path.js").default & {
+ *   node: GlimmerNode,
+ *   parent: GlimmerNode | null,
+ *   grandparent: GlimmerNode | null,
+ *   previous: GlimmerNode | null,
+ *   next: GlimmerNode | null,
+ * }} GlimmerPath
+ */
+
+/**
  * The options that the handlebars printer reads
  * @typedef {{
  *   htmlWhitespaceSensitivity: string,
