@@ -53,7 +53,7 @@ module.exports = class Parser {
   }
 
   colon () {
-    let token = this.currToken;
+    let /** @type {any[]} */ token = this.currToken;
 
     this.newNode(new Colon({
       value: token[1],
@@ -74,7 +74,7 @@ module.exports = class Parser {
   }
 
   comma () {
-    let token = this.currToken;
+    let /** @type {any[]} */ token = this.currToken;
 
     this.newNode(new Comma({
       value: token[1],
@@ -95,9 +95,9 @@ module.exports = class Parser {
   }
 
   comment () {
-    let inline = false,
-      value = this.currToken[1].replace(/\/\*|\*\//g, ''),
-      node;
+    let /** @type {boolean} */ inline = false,
+      /** @type {string} */ value = this.currToken[1].replace(/\/\*|\*\//g, ''),
+      /** @type {any} */ node;
 
     if (this.options.loose && value.startsWith("//")) {
       value = value.substring(2);
@@ -149,8 +149,8 @@ module.exports = class Parser {
 
     // if a +|- operator is followed by a non-word character (. is allowed) and
     // is preceded by a non-word character. (5+5)
-    let char = this.currToken[1],
-      node;
+    let /** @type {string} */ char = this.currToken[1],
+      /** @type {any} */ node;
 
     if (char === '+' || char === '-') {
       // only inspect if the operator is not the first token, and we're only
@@ -258,14 +258,14 @@ module.exports = class Parser {
   }
 
   parenOpen () {
-    let unbalanced = 1,
-      pos = this.position + 1,
-      token = this.currToken,
-      last;
+    let /** @type {number} */ unbalanced = 1,
+      /** @type {number} */ pos = this.position + 1,
+      /** @type {any[]} */ token = this.currToken,
+      /** @type {any} */ last;
 
     // check for balanced parens
     while (pos < this.tokens.length && unbalanced) {
-      let tkn = this.tokens[pos];
+      let /** @type {any[]} */ tkn = this.tokens[pos];
 
       if (tkn[0] === '(') {
         unbalanced++;
@@ -314,8 +314,8 @@ module.exports = class Parser {
         this.current.value === 'url' && this.currToken[0] !== 'string' &&
         this.currToken[0] !== ')' && !this.options.loose) {
 
-      let nextToken = this.nextToken,
-        value = this.currToken[1],
+      let /** @type {any[]} */ nextToken = this.nextToken,
+        /** @type {string} */ value = this.currToken[1],
         start = {
           line: this.currToken[2],
           column: this.currToken[3]
@@ -347,7 +347,7 @@ module.exports = class Parser {
   }
 
   parenClose () {
-    let token = this.currToken;
+    let /** @type {any[]} */ token = this.currToken;
 
     this.newNode(new Paren({
       value: token[1],
@@ -416,8 +416,8 @@ module.exports = class Parser {
   }
 
   splitWord () {
-    let nextToken = this.nextToken,
-      word = this.currToken[1],
+    let /** @type {any[]} */ nextToken = this.nextToken,
+      /** @type {string} */ word = this.currToken[1],
       rNumber = /^[\+\-]?((\d+(\.\d*)?)|(\.\d+))([eE][\+\-]?\d+)?/,
 
       // treat css-like groupings differently so they can be inspected,
@@ -431,7 +431,7 @@ module.exports = class Parser {
       while (nextToken && nextToken[0] === 'word') {
         this.position ++;
 
-        let current = this.currToken[1];
+        let /** @type {string} */ current = this.currToken[1];
         word += current;
 
         nextToken = this.nextToken;
@@ -442,9 +442,9 @@ module.exports = class Parser {
     indices = sortAscending(uniq(flatten([[0], hasAt])));
 
     indices.forEach((ind, i) => {
-      let index = indices[i + 1] || word.length,
-        value = word.slice(ind, index),
-        node;
+      let /** @type {number} */ index = indices[i + 1] || word.length,
+        /** @type {string} */ value = word.slice(ind, index),
+        /** @type {any} */ node;
 
       if (~hasAt.indexOf(ind)) {
         node = new AtWord({
@@ -463,7 +463,7 @@ module.exports = class Parser {
         });
       }
       else if (rNumber.test(this.currToken[1])) {
-        let unit = value.replace(rNumber, '');
+        let /** @type {string} */ unit = value.replace(rNumber, '');
 
         node = new Numbr({
           value: value.replace(unit, ''),
@@ -514,8 +514,8 @@ module.exports = class Parser {
   }
 
   string () {
-    let token = this.currToken,
-      value = this.currToken[1],
+    let /** @type {any[]} */ token = this.currToken,
+      /** @type {string} */ value = this.currToken[1],
       rQuote = /^(\"|\')/,
       quoted = rQuote.test(value),
       quote = '',

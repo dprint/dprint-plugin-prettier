@@ -15,9 +15,9 @@ let lineToIndexCache = Symbol('lineToIndexCache')
 /** @type {boolean} */ let sourceMapAvailable = Boolean(SourceMapConsumer && SourceMapGenerator)
 /** @type {boolean} */ let pathAvailable = Boolean(resolve && isAbsolute)
 
-function getLineToIndex(input) {
+/** @returns {number[]} */ function getLineToIndex(/** @type {Input} */ input) {
   if (input[lineToIndexCache]) return input[lineToIndexCache]
-  let lines = input.css.split('\n')
+  /** @type {string[]} */ let lines = input.css.split('\n')
   /** @type {number[]} */ let lineToIndex = new Array(lines.length)
   /** @type {number} */ let prevIndex = 0
 
@@ -170,7 +170,7 @@ class Input {
 
   fromOffset(/** @type {number} */ offset) {
     /** @type {number[]} */ let lineToIndex = getLineToIndex(this)
-    let lastLine = lineToIndex[lineToIndex.length - 1]
+    /** @type {number} */ let lastLine = lineToIndex[lineToIndex.length - 1]
 
     /** @type {number} */ let min = 0
     if (offset >= lastLine) {

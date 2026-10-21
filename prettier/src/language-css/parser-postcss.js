@@ -92,7 +92,7 @@ function parseNestedCSS(node, options) {
       return node;
     }
 
-    let selector = "";
+    /** @type {string} */ let selector = "";
 
     if (typeof node.selector === "string") {
       selector = node.raws.selector
@@ -106,7 +106,7 @@ function parseNestedCSS(node, options) {
       node.raws.selector = selector;
     }
 
-    let value = "";
+    /** @type {string} */ let value = "";
 
     if (typeof node.value === "string") {
       value = node.raws.value
@@ -116,7 +116,7 @@ function parseNestedCSS(node, options) {
       node.raws.value = value.trim();
     }
 
-    let params = "";
+    /** @type {string} */ let params = "";
 
     if (typeof node.params === "string") {
       params = node.raws.params

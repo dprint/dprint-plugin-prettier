@@ -1,3 +1,4 @@
+// @nts-check
 'use strict'
 
 let CssSyntaxError = require('./css-syntax-error')
@@ -59,13 +60,28 @@ function sourceOffset(inputCSS, position) {
   return offset
 }
 
+/**
+ * @property {any} [source]
+ * @property {any} [parent]
+ * @property {any} [nodes]
+ * @property {any} [name]
+ * @property {any} [params]
+ * @property {any} [selector]
+ * @property {any} [prop]
+ * @property {any} [value]
+ * @property {any} [important]
+ * @property {any} [text]
+ * @property {any} [lastEach]
+ * @property {any} [indexes]
+ * @property {any} [proxyCache]
+ */
 class Node {
   get proxyOf() {
     return this
   }
 
   constructor(defaults = {}) {
-    this.raws = {}
+    /** @type {any} */ this.raws = {}
     this[isClean] = false
     this[my] = true
 

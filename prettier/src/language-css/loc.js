@@ -39,7 +39,7 @@ function calculateLocEnd(node, /** @type {string} */ text) {
   }
 
   if (node.type === "value-paren" && typeof node.sourceIndex === "number") {
-    return node.sourceIndex + (node.value === ")" ? node.value.length : 0);
+    return /** @type {number} */ (node.sourceIndex) + (node.value === ")" ? node.value.length : 0);
   }
 
   // `postcss>=8`
@@ -72,7 +72,7 @@ function calculateLocEnd(node, /** @type {string} */ text) {
   }
 
   if (typeof node.sourceIndex === "number" && typeof node.value === "string") {
-    return node.sourceIndex + node.value.length;
+    return /** @type {number} */ (node.sourceIndex) + /** @type {string} */ (node.value).length;
   }
 
   return null;
@@ -102,7 +102,7 @@ function calculateNodeLoc(node, /** @type {string} */ text, /** @type {number} *
     const endOffset = calculateLocEnd(node, text);
     node.source.endOffset =
       typeof endOffset === "number"
-        ? Math.min(endOffset + rootOffset, maxEndOffset)
+        ? Math.min(/** @type {number} */ (endOffset) + rootOffset, maxEndOffset)
         : endOffset;
   }
 
@@ -168,7 +168,7 @@ function getNestedLoc(parentNode, node, /** @type {number} */ rootOffset) {
 }
 
 /** @returns {number} */ function getValueRootOffset(node) {
-  let result = node.source.startOffset;
+  /** @type {number} */ let result = node.source.startOffset;
   if (typeof node.prop === "string") {
     result += node.prop.length;
   }
@@ -186,7 +186,7 @@ function getNestedLoc(parentNode, node, /** @type {number} */ rootOffset) {
 }
 
 /** @returns {number} */ function getAtRuleParamsRootOffset(node) {
-  let result = node.source.startOffset;
+  /** @type {number} */ let result = node.source.startOffset;
 
   if (node.type === "css-atrule" && typeof node.name === "string") {
     result +=
@@ -255,7 +255,7 @@ function getNestedLoc(parentNode, node, /** @type {number} */ rootOffset) {
     typeof selectorNode.sourceIndex === "number" &&
     typeof selectorNode.raws?.selector === "string"
   ) {
-    return rootOffset + selectorNode.sourceIndex;
+    return rootOffset + /** @type {number} */ (selectorNode.sourceIndex);
   }
 
   if (parentNode.mixin) {
@@ -308,8 +308,8 @@ function fillLocFromChildren(node) {
     return;
   }
 
-  let startOffset = Number.POSITIVE_INFINITY;
-  let endOffset = Number.NEGATIVE_INFINITY;
+  /** @type {number} */ let startOffset = Number.POSITIVE_INFINITY;
+  /** @type {number} */ let endOffset = Number.NEGATIVE_INFINITY;
   let start;
   let end;
 

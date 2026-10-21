@@ -41,17 +41,17 @@ module.exports = /** @returns {any[]} */ function tokenize (/** @type {string | 
 
   options = options || {};
 
-  let tokens = [],
-    css = input.valueOf(),
-    length = css.length,
-    offset = -1,
-    line =  1,
-    pos =  0,
-    parentCount = 0,
+  let /** @type {any[][]} */ tokens = [],
+    /** @type {string} */ css = input.valueOf(),
+    /** @type {number} */ length = css.length,
+    /** @type {number} */ offset = -1,
+    /** @type {number} */ line =  1,
+    /** @type {number} */ pos =  0,
+    /** @type {number} */ parentCount = 0,
     isURLArg = null,
 
-    code, next, quote, lines, last, content, escape, nextLine, nextOffset,
-    escaped, escapePos, nextChar;
+    /** @type {number} */ code, next, /** @type {string} */ quote, /** @type {string[]} */ lines, /** @type {number} */ last, /** @type {string} */ content, /** @type {boolean} */ escape, /** @type {number} */ nextLine, /** @type {number} */ nextOffset,
+    /** @type {boolean} */ escaped, /** @type {number} */ escapePos, /** @type {string} */ nextChar;
 
   function unclosed (/** @type {string} */ what) {
     let message = util.format('Unclosed %s at line: %d, column: %d, token: %d', what, line, pos - offset, pos);

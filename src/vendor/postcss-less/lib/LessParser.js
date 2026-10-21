@@ -16,10 +16,10 @@ module.exports = class LessParser extends Parser {
   constructor(...args) {
     super(...args);
 
-    this.lastNode = null;
+    /** @type {import("postcss/lib/node")} */ this.lastNode = null;
   }
 
-  atrule(token) {
+  atrule(/** @type {any[]} */ token) {
     if (interpolation.bind(this)(token)) {
       return;
     }
@@ -59,7 +59,7 @@ module.exports = class LessParser extends Parser {
     this.lastNode.params = params;
   }
 
-  init(node, line, column) {
+  init(/** @type {import("postcss/lib/node")} */ node, /** @type {number} */ line, /** @type {any} */ column) {
     super.init(node, line, column);
     this.lastNode = node;
   }
@@ -153,13 +153,13 @@ module.exports = class LessParser extends Parser {
     }
   }
 
-  other(token) {
+  other(/** @type {any[]} */ token) {
     if (!isInlineComment.bind(this)(token)) {
       super.other(token);
     }
   }
 
-  rule(tokens) {
+  rule(/** @type {any[][]} */ tokens) {
     const last = tokens[tokens.length - 1];
     const prev = tokens[tokens.length - 2];
 
@@ -188,7 +188,7 @@ module.exports = class LessParser extends Parser {
     }
   }
 
-  unknownWord(tokens) {
+  unknownWord(/** @type {any[][]} */ tokens) {
     // NOTE: keep commented for examining unknown structures
     // console.log('unknown', tokens);
 

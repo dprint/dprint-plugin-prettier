@@ -34,17 +34,17 @@
 /** @type {RegExp} */ const RE_NEW_LINE = /[\n\f\r]/g // SCSS PATCH
 
 // SCSS PATCH function name was changed
-module.exports = function scssTokenize(input, options = {}) {
-  let css = input.css.valueOf()
+module.exports = function scssTokenize(/** @type {import("postcss/lib/input")} */ input, options = {}) {
+  let css = /** @type {string} */ (input.css.valueOf())
   let ignore = options.ignoreErrors
 
-  let code, next, quote, content, escape
-  let escaped, prev, n, currentToken
+  let /** @type {number} */ code, /** @type {number} */ next, /** @type {number} */ quote, /** @type {string} */ content, /** @type {boolean} */ escape
+  let /** @type {boolean} */ escaped, /** @type {string} */ prev, /** @type {number} */ n, /** @type {any[]} */ currentToken
 
-  let length = css.length
-  let pos = 0
-  let buffer = []
-  let returned = []
+  /** @type {number} */ let length = css.length
+  /** @type {number} */ let pos = 0
+  /** @type {any[][]} */ let buffer = []
+  /** @type {any[][]} */ let returned = []
 
   /** @type {number | undefined} */ let brackets // SCSS PATCH
 

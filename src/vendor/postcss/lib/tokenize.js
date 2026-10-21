@@ -26,18 +26,18 @@
 /** @type {RegExp} */ const RE_BAD_BRACKET = /.[\r\n"'(/\\]/
 /** @type {RegExp} */ const RE_HEX_ESCAPE = /[\da-f]/i
 
-module.exports = function tokenizer(input, options = {}) {
-  let css = input.css.valueOf()
+module.exports = function tokenizer(/** @type {import("./input")} */ input, options = {}) {
+  let css = /** @type {string} */ (input.css.valueOf())
   let ignore = options.ignoreErrors
 
-  let code, content, escape, next, quote
-  let currentToken, escaped, escapePos, n, prev
+  let /** @type {number} */ code, /** @type {string} */ content, /** @type {boolean} */ escape, /** @type {number} */ next, /** @type {string} */ quote
+  let /** @type {any[]} */ currentToken, /** @type {boolean} */ escaped, /** @type {number} */ escapePos, /** @type {number} */ n, /** @type {string} */ prev
 
-  let length = css.length
-  let pos = 0
-  let buffer = []
-  let returned = []
-  let lastBadParen = -1
+  /** @type {number} */ let length = css.length
+  /** @type {number} */ let pos = 0
+  /** @type {any[][]} */ let buffer = []
+  /** @type {any[][]} */ let returned = []
+  /** @type {number} */ let lastBadParen = -1
 
   /** @returns {number} */ function position() {
     return pos

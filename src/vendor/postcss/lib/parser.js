@@ -8,12 +8,16 @@ let Root = require('./root')
 let Rule = require('./rule')
 let tokenizer = require('./tokenize')
 
-const SAFE_COMMENT_NEIGHBOR = {
+/**
+ * @typedef {{ back: (token: any[]) => void, endOfFile: () => boolean, nextToken: (opts?: any) => any[], position: () => number }} Tokenizer
+ */
+
+/** @type {Record<string, boolean>} */ const SAFE_COMMENT_NEIGHBOR = {
   empty: true,
   space: true
 }
 
-/** @returns {number} */ function findLastWithPosition(tokens) {
+/** @returns {number} */ function findLastWithPosition(/** @type {any[][]} */ tokens) {
   for (let i = tokens.length - 1; i >= 0; i--) {
     let token = tokens[i]
     let pos = token[3] || token[2]
@@ -21,26 +25,26 @@ const SAFE_COMMENT_NEIGHBOR = {
   }
 }
 
-function tokensToString(tokens, from, to) {
+/** @returns {string} */ function tokensToString(/** @type {any[][]} */ tokens, /** @type {number} */ from, /** @type {number} */ to) {
   /** @type {string} */ let result = ''
   for (let i = from; i < to; i++) result += tokens[i][1]
   return result
 }
 
 class Parser {
-  constructor(input) {
-    this.input = input
+  constructor(/** @type {import("./input")} */ input) {
+    /** @type {import("./input")} */ this.input = input
 
-    this.root = new Root()
-    this.current = this.root
-    this.spaces = ''
-    this.semicolon = false
+    /** @type {import("./root")} */ this.root = new Root()
+    /** @type {import("./container")} */ this.current = this.root
+    /** @type {string} */ this.spaces = ''
+    /** @type {boolean} */ this.semicolon = false
 
     this.createTokenizer()
     this.root.source = { input, start: { column: 1, line: 1, offset: 0 } }
   }
 
-  atrule(token) {
+  atrule(/** @type {any[]} */ token) {
     let node = new AtRule()
     node.name = token[1].slice(1)
     if (node.name === '') {
@@ -48,13 +52,13 @@ class Parser {
     }
     this.init(node, token[2])
 
-    let type
-    let prev
+    /** @type {string} */ let type
+    /** @type {any[]} */ let prev
     /** @type {number | undefined} */ let shift
     /** @type {boolean} */ let last = false
     /** @type {boolean} */ let open = false
-    let params = []
-    let brackets = []
+    /** @type {any[][]} */ let params = []
+    /** @type {string[]} */ let brackets = []
 
     while (!this.tokenizer.endOfFile()) {
       token = this.tokenizer.nextToken()
@@ -126,12 +130,12 @@ class Parser {
     }
   }
 
-  checkMissedSemicolon(tokens) {
+  checkMissedSemicolon(/** @type {any[][]} */ tokens) {
     /** @type {boolean} */ let colon = this.colon(tokens)
     if (colon === false) return
 
-    let founded = 0
-    let token
+    /** @type {number} */ let founded = 0
+    /** @type {any[]} */ let token
     for (let j = colon - 1; j >= 0; j--) {
       token = tokens[j]
       if (token[0] !== 'space') {
@@ -149,9 +153,9 @@ class Parser {
     )
   }
 
-  /** @returns {boolean} */ colon(tokens) {
+  /** @returns {boolean} */ colon(/** @type {any[][]} */ tokens) {
     /** @type {number} */ let brackets = 0
-    let prev, token, type
+    let /** @type {any[]} */ prev, /** @type {any[]} */ token, /** @type {string} */ type
     for (let [i, element] of tokens.entries()) {
       token = element
       type = token[0]
@@ -177,13 +181,13 @@ class Parser {
     return false
   }
 
-  comment(token) {
+  comment(/** @type {any[]} */ token) {
     let node = new Comment()
     this.init(node, token[2])
     node.source.end = this.getPosition(token[3] || token[2])
     node.source.end.offset++
 
-    let text = token[1].slice(2, -2)
+    /** @type {string} */ let text = token[1].slice(2, -2)
     if (!text.trim()) {
       node.text = ''
       node.raws.left = text
@@ -197,14 +201,14 @@ class Parser {
   }
 
   createTokenizer() {
-    this.tokenizer = tokenizer(this.input)
+    /** @type {Tokenizer} */ this.tokenizer = tokenizer(this.input)
   }
 
-  decl(tokens, customProperty) {
+  decl(/** @type {any[][]} */ tokens, /** @type {boolean} */ customProperty) {
     let node = new Declaration()
     this.init(node, tokens[0][2])
 
-    let last = tokens[tokens.length - 1]
+    /** @type {any[]} */ let last = tokens[tokens.length - 1]
     if (last[0] === ';') {
       this.semicolon = true
       tokens.pop()
@@ -215,7 +219,7 @@ class Parser {
     )
     node.source.end.offset++
 
-    let start = 0
+    /** @type {number} */ let start = 0
     while (tokens[start][0] !== 'word') {
       if (start === tokens.length - 1) this.unknownWord([tokens[start]])
       start++
@@ -223,7 +227,7 @@ class Parser {
     node.raws.before += tokensToString(tokens, 0, start)
     node.source.start = this.getPosition(tokens[start][2])
 
-    let propStart = start
+    /** @type {number} */ let propStart = start
     while (start < tokens.length) {
       let type = tokens[start][0]
       if (type === ':' || type === 'space' || type === 'comment') {
@@ -233,8 +237,8 @@ class Parser {
     }
     node.prop = tokensToString(tokens, propStart, start)
 
-    let betweenStart = start
-    let token
+    /** @type {number} */ let betweenStart = start
+    /** @type {any[]} */ let token
     while (start < tokens.length) {
       token = tokens[start]
       start++
@@ -250,13 +254,13 @@ class Parser {
       node.prop = node.prop.slice(1)
     }
 
-    let firstSpacesStart = start
+    /** @type {number} */ let firstSpacesStart = start
     while (start < tokens.length) {
       let next = tokens[start][0]
       if (next !== 'space' && next !== 'comment') break
       start++
     }
-    let firstSpaces = tokens.slice(firstSpacesStart, start)
+    /** @type {any[][]} */ let firstSpaces = tokens.slice(firstSpacesStart, start)
 
     tokens = tokens.slice(start)
 
@@ -271,7 +275,7 @@ class Parser {
         if (string !== ' !important') node.raws.important = string
         break
       } else if (token[1].toLowerCase() === 'important') {
-        let cache = tokens.slice(0)
+        /** @type {any[][]} */ let cache = tokens.slice(0)
         /** @type {string} */ let str = ''
         for (let j = i; j > 0; j--) {
           let type = cache[j][0]
@@ -305,7 +309,7 @@ class Parser {
     }
   }
 
-  doubleColon(token) {
+  doubleColon(/** @type {any[]} */ token) {
     throw this.input.error(
       'Double colon',
       { offset: token[2] },
@@ -313,7 +317,7 @@ class Parser {
     )
   }
 
-  emptyRule(token) {
+  emptyRule(/** @type {any[]} */ token) {
     let node = new Rule()
     this.init(node, token[2])
     node.selector = ''
@@ -321,7 +325,7 @@ class Parser {
     this.current = node
   }
 
-  end(token) {
+  end(/** @type {any[]} */ token) {
     if (this.current.nodes && this.current.nodes.length) {
       this.current.raws.semicolon = this.semicolon
     }
@@ -348,7 +352,7 @@ class Parser {
     this.root.source.end = this.getPosition(this.tokenizer.position())
   }
 
-  freeSemicolon(token) {
+  freeSemicolon(/** @type {any[]} */ token) {
     this.spaces += token[1]
     if (this.current.nodes) {
       let prev = this.current.nodes[this.current.nodes.length - 1]
@@ -372,7 +376,7 @@ class Parser {
     }
   }
 
-  init(node, offset) {
+  init(/** @type {import("./node")} */ node, /** @type {number} */ offset) {
     this.current.push(node)
     node.source = {
       input: this.input,
@@ -383,16 +387,16 @@ class Parser {
     if (node.type !== 'comment') this.semicolon = false
   }
 
-  other(start) {
+  other(/** @type {any[]} */ start) {
     /** @type {boolean} */ let end = false
-    let type = null
+    /** @type {string} */ let type = null
     /** @type {boolean} */ let colon = false
-    let bracket = null
-    let brackets = []
-    let customProperty = start[1].startsWith('--')
+    /** @type {any[]} */ let bracket = null
+    /** @type {string[]} */ let brackets = []
+    /** @type {boolean} */ let customProperty = start[1].startsWith('--')
 
-    let tokens = []
-    let token = start
+    /** @type {any[][]} */ let tokens = []
+    /** @type {any} */ let token = start
     while (token) {
       type = token[0]
       tokens.push(token)
@@ -447,7 +451,7 @@ class Parser {
   }
 
   parse() {
-    let token
+    /** @type {any[]} */ let token
     while (!this.tokenizer.endOfFile()) {
       token = this.tokenizer.nextToken()
 
@@ -488,12 +492,12 @@ class Parser {
     // Hook for Safe Parser
   }
 
-  raw(node, prop, tokens, customProperty) {
-    let token, type
-    let length = tokens.length
+  raw(/** @type {import("./node")} */ node, /** @type {string} */ prop, /** @type {any[][]} */ tokens, /** @type {boolean} */ customProperty) {
+    let /** @type {any[]} */ token, /** @type {string} */ type
+    /** @type {number} */ let length = tokens.length
     /** @type {string} */ let value = ''
     /** @type {boolean} */ let clean = true
-    let next, prev
+    let /** @type {string} */ next, /** @type {string} */ prev
 
     for (let i = 0; i < length; i += 1) {
       token = tokens[i]
@@ -517,13 +521,13 @@ class Parser {
       }
     }
     if (!clean) {
-      let raw = tokens.reduce(/** @returns {string} */ (all, i) => all + i[1], '')
+      /** @type {string} */ let raw = tokens.reduce(/** @returns {string} */ (/** @type {string} */ all, i) => all + i[1], '')
       node.raws[prop] = { raw, value }
     }
     node[prop] = value
   }
 
-  rule(tokens) {
+  rule(/** @type {any[][]} */ tokens) {
     tokens.pop()
 
     let node = new Rule()
@@ -534,8 +538,8 @@ class Parser {
     this.current = node
   }
 
-  /** @returns {string} */ spacesAndCommentsFromEnd(tokens) {
-    let lastTokenType
+  /** @returns {string} */ spacesAndCommentsFromEnd(/** @type {any[][]} */ tokens) {
+    /** @type {string} */ let lastTokenType
     /** @type {string} */ let spaces = ''
     while (tokens.length) {
       lastTokenType = tokens[tokens.length - 1][0]
@@ -547,8 +551,8 @@ class Parser {
 
   // Errors
 
-  /** @returns {string} */ spacesAndCommentsFromStart(tokens) {
-    let next
+  /** @returns {string} */ spacesAndCommentsFromStart(/** @type {any[][]} */ tokens) {
+    /** @type {string} */ let next
     /** @type {string} */ let spaces = ''
     while (tokens.length) {
       next = tokens[0][0]
@@ -558,8 +562,8 @@ class Parser {
     return spaces
   }
 
-  /** @returns {string} */ spacesFromEnd(tokens) {
-    let lastTokenType
+  /** @returns {string} */ spacesFromEnd(/** @type {any[][]} */ tokens) {
+    /** @type {string} */ let lastTokenType
     /** @type {string} */ let spaces = ''
     while (tokens.length) {
       lastTokenType = tokens[tokens.length - 1][0]
@@ -569,7 +573,7 @@ class Parser {
     return spaces
   }
 
-  /** @returns {string} */ stringFrom(tokens, /** @type {number} */ from) {
+  /** @returns {string} */ stringFrom(/** @type {any[][]} */ tokens, /** @type {number} */ from) {
     /** @type {string} */ let result = ''
     for (let i = from; i < tokens.length; i++) {
       result += tokens[i][1]
@@ -583,7 +587,7 @@ class Parser {
     throw this.input.error('Unclosed block', pos.line, pos.column)
   }
 
-  unclosedBracket(bracket) {
+  unclosedBracket(/** @type {any[]} */ bracket) {
     throw this.input.error(
       'Unclosed bracket',
       { offset: bracket[2] },
@@ -591,7 +595,7 @@ class Parser {
     )
   }
 
-  unexpectedClose(token) {
+  unexpectedClose(/** @type {any[]} */ token) {
     throw this.input.error(
       'Unexpected }',
       { offset: token[2] },
@@ -599,7 +603,7 @@ class Parser {
     )
   }
 
-  unknownWord(tokens) {
+  unknownWord(/** @type {any[][]} */ tokens) {
     throw this.input.error(
       'Unknown word ' + tokens[0][1],
       { offset: tokens[0][2] },
@@ -607,7 +611,7 @@ class Parser {
     )
   }
 
-  unnamedAtrule(node, token) {
+  unnamedAtrule(/** @type {import("./node")} */ node, /** @type {any[]} */ token) {
     throw this.input.error(
       'At-rule without name',
       { offset: token[2] },
