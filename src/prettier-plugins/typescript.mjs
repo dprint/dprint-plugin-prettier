@@ -16885,7 +16885,7 @@ function Pg(e, t) {
   let t = e;
   return t.length >= 3 && t.charCodeAt(0) === 95 && t.charCodeAt(1) === 95 && t.charCodeAt(2) === 95 ? t.substr(1) : t;
 }
-/** @returns {string} */ function Pn(/** @type {Kf | vh | xh | Th} */ e) {
+/** @returns {string} */ function Pn(/** @type {xh | Th} */ e) {
   return h_(e.escapedText);
 }
 /** @returns {number | undefined} */ function df(/** @type {InstanceType<typeof xh>} */ e) {
@@ -17923,7 +17923,7 @@ function Ba(e) {
   return !!((e.templateFlags || 0) & 2048);
 }
 /** @returns {boolean} */ function Z2(/** @type {Kf | vh | xh | Th} */ e) {
-  return e && !!(I1(e) ? Dp(e) : Dp(e.head) || nn(e.templateSpans, /** @returns {boolean} */ (/** @type {Kf | vh | xh | Th} */ t) => Dp(t.literal)));
+  return e && !!(I1(e) ? Dp(e) : Dp(e.head) || nn(e.templateSpans, /** @returns {boolean} */ (/** @type {Kf} */ t) => Dp(t.literal)));
 }
 var C3 = new Map(
   Object.entries({
@@ -19356,7 +19356,7 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
     return t.createBaseNode(r);
   }
   /** @returns {InstanceType<typeof Kf>} */ function ae(/** @type {number} */ r) {
-    /** @type {Kf | vh | xh | Th} */ let i = I(r);
+    /** @type {Kf} */ let i = I(r);
     return ((i.symbol = void 0), (i.localSymbol = void 0), i);
   }
   function Le(r, i) {
@@ -19410,7 +19410,7 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
     }
   }
   /** @returns {InstanceType<typeof xh>} */ function bn(/** @type {string} */ r) {
-    let i = t.createBaseIdentifierNode(80);
+    /** @type {xh} */ let i = t.createBaseIdentifierNode(80);
     return ((i.escapedText = r), (i.jsDoc = void 0), (i.flowNode = void 0), (i.symbol = void 0), i);
   }
   function In(r, i, _, c) {
@@ -19455,7 +19455,7 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
     return ((T.original = r), T);
   }
   function On(/** @type {string | undefined} */ r) {
-    let i = t.createBasePrivateIdentifierNode(81);
+    /** @type {Th} */ let i = t.createBasePrivateIdentifierNode(81);
     return ((i.escapedText = r), (i.transformFlags |= 16777216), i);
   }
   function jt(r) {
@@ -29093,13 +29093,14 @@ function o6(e, /** @type {string} */ t) {
 }
 var p_ = uf(w_.Latest, !0);
 /** @returns {Kf | xh | vh | Th} */ function bh(/** @type {number} */ e, /** @type {number} */ t, /** @type {number} */ a, /** @type {d6 | Kf | xh | vh | Th} */ s) {
-  /** @type {vh | Kf} */ let f = bf(e) ? new Kf(e, t, a) : e === 80 ? new xh(80, t, a) : e === 81 ? new Th(81, t, a) : new vh(e, t, a);
+  /** @type {Kf | vh | xh | Th} */ let f = bf(e) ? new Kf(e, t, a) : e === 80 ? new xh(80, t, a) : e === 81 ? new Th(81, t, a) : new vh(e, t, a);
   return ((f.parent = s), (f.flags = s.flags & 101441536), f);
 }
 /**
  * the parent that the parser gives each node, and the properties that it gives nodes of some kinds, which are
  * other nodes
  * @property {Kf} parent
+ * @property {Kf[]} jsDoc
  * @sideProperty {Kf | xh | vh | Th} [name]
  * @sideProperty {Kf | xh | vh | Th} [expression]
  * @sideProperty {Kf | xh | vh | Th} [questionDotToken]
@@ -29408,6 +29409,11 @@ var Zf = class {
       super(e, t, a);
     }
   },
+  /**
+   * the name that the parser gives an identifier, and the JSDoc comments in front of it
+   * @property {string} escapedText
+   * @property {Kf[]} jsDoc
+   */
   xh = class extends Zf {
     constructor(/** @type {int} */ e, /** @type {number} */ t, /** @type {number} */ a) {
       super(e, t, a);
@@ -29416,6 +29422,10 @@ var Zf = class {
       return Pn(this);
     }
   },
+  /**
+   * the name that the parser gives a private identifier, which has no JSDoc comments of its own
+   * @property {string} escapedText
+   */
   Th = class extends Zf {
     constructor(/** @type {int} */ e, /** @type {number} */ t, /** @type {number} */ a) {
       super(e, t, a);
@@ -30327,7 +30337,7 @@ function Wh(/** @type {d6 | Kf | xh | vh | Th} */ e, /** @type {d6 | Kf | undefi
   let s = e;
   switch (s.kind) {
     case be.SwitchStatement:
-      if (s.caseBlock.clauses.filter(/** @returns {boolean} */ (/** @type {Kf | vh | xh | Th} */ f) => f.kind === be.DefaultClause).length > 1)
+      if (s.caseBlock.clauses.filter(/** @returns {boolean} */ (/** @type {Kf} */ f) => f.kind === be.DefaultClause).length > 1)
         throw ue(s, "A 'default' clause cannot appear more than once in a 'switch' statement.");
       break;
     case be.ThrowStatement:
@@ -30748,7 +30758,7 @@ var Fl = class {
   }
   convertParameters(t) {
     return t?.length
-      ? t.map((/** @type {Kf | vh | xh | Th} */ a) => {
+      ? t.map((/** @type {Kf} */ a) => {
           let s = this.convertChild(a);
           return ((s.decorators = this.convertChildren(wi(a) ?? [])), s);
         })
@@ -30763,7 +30773,7 @@ var Fl = class {
     let b = this.convertNode(t, h);
     return (this.registerTSNodeInNodeMap(t, b), (this.allowPattern = f), b);
   }
-  convertImportAttributes(/** @type {Kf | vh | xh | Th} */ t) {
+  convertImportAttributes(/** @type {Kf} */ t) {
     let a = t.attributes ?? t.assertClause;
     return this.convertChildren(a?.elements ?? []);
   }
@@ -30812,7 +30822,7 @@ var Fl = class {
     }
     return (this.registerTSNodeInNodeMap(t, s), s);
   }
-  convertMethodSignature(/** @type {Kf | vh | xh | Th} */ t) {
+  convertMethodSignature(/** @type {Kf} */ t) {
     return this.createNode(t, {
       type: A.TSMethodSignature,
       accessibility: ki(t),
@@ -31020,7 +31030,7 @@ var Fl = class {
               type: A.ObjectPattern,
               decorators: [],
               optional: !1,
-              properties: t.properties.map((/** @type {Kf | vh | xh | Th} */ s) => this.convertPattern(s)),
+              properties: t.properties.map((/** @type {Kf} */ s) => this.convertPattern(s)),
               typeAnnotation: void 0,
             })
           : this.createNode(t, { type: A.ObjectExpression, properties: this.convertChildren(t.properties) });
@@ -31220,7 +31230,7 @@ var Fl = class {
         return this.createNode(t, {
           type: A.ArrayPattern,
           decorators: [],
-          elements: t.elements.map((/** @type {Kf | vh | xh | Th} */ s) => this.convertPattern(s)),
+          elements: t.elements.map((/** @type {Kf} */ s) => this.convertPattern(s)),
           optional: !1,
           typeAnnotation: void 0,
         });
@@ -31231,7 +31241,7 @@ var Fl = class {
           type: A.ObjectPattern,
           decorators: [],
           optional: !1,
-          properties: t.elements.map((/** @type {Kf | vh | xh | Th} */ s) => this.convertPattern(s)),
+          properties: t.elements.map((/** @type {Kf} */ s) => this.convertPattern(s)),
           typeAnnotation: void 0,
         });
       case w.BindingElement: {
@@ -31328,7 +31338,7 @@ var Fl = class {
       case w.TemplateExpression: {
         let s = this.createNode(t, { type: A.TemplateLiteral, expressions: [], quasis: [this.convertChild(t.head)] });
         return (
-          t.templateSpans.forEach((/** @type {Kf | vh | xh | Th} */ f) => {
+          t.templateSpans.forEach((/** @type {Kf} */ f) => {
             (s.expressions.push(this.convertChild(f.expression)), s.quasis.push(this.convertChild(f.literal)));
           }),
           s
@@ -31417,8 +31427,8 @@ var Fl = class {
       case w.ClassDeclaration:
       case w.ClassExpression: {
         let s = t.kind === w.ClassDeclaration ? A.ClassDeclaration : A.ClassExpression,
-          f = t.heritageClauses?.find(/** @returns {boolean} */ (/** @type {Kf | vh | xh | Th} */ v) => v.token === w.ExtendsKeyword),
-          h = t.heritageClauses?.find(/** @returns {boolean} */ (/** @type {Kf | vh | xh | Th} */ v) => v.token === w.ImplementsKeyword),
+          f = t.heritageClauses?.find(/** @returns {boolean} */ (/** @type {Kf} */ v) => v.token === w.ExtendsKeyword),
+          h = t.heritageClauses?.find(/** @returns {boolean} */ (/** @type {Kf} */ v) => v.token === w.ImplementsKeyword),
           b = this.createNode(t, {
             type: s,
             abstract: Fe(w.AbstractKeyword, t),
@@ -31960,8 +31970,8 @@ var Fl = class {
       }
       case w.InterfaceDeclaration: {
         let s =
-            t.heritageClauses?.flatMap((/** @type {Kf | vh | xh | Th} */ h) =>
-              h.token === w.ExtendsKeyword ? h.types.map((/** @type {Kf | vh | xh | Th} */ b) => this.convertChild(b, t)) : [],
+            t.heritageClauses?.flatMap((/** @type {Kf} */ h) =>
+              h.token === w.ExtendsKeyword ? h.types.map((/** @type {Kf} */ b) => this.convertChild(b, t)) : [],
             ) ?? [],
           f = this.createNode(t, {
             type: A.TSInterfaceDeclaration,
