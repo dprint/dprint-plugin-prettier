@@ -9,14 +9,21 @@ const decimalNumber = /^\d+$/;
 // The map to `acorn-jsx` tokens from `acorn` namespace objects.
 const acornJsxMap = new WeakMap();
 
+/**
+ * @typedef {{
+ *   tokContexts: { tc_oTag: import("acorn").TokContext, tc_cTag: import("acorn").TokContext, tc_expr: import("acorn").TokContext },
+ *   tokTypes: { jsxName: import("acorn").TokenType, jsxText: import("acorn").TokenType, jsxTagStart: import("acorn").TokenType, jsxTagEnd: import("acorn").TokenType }
+ * }} AcornJsx
+ */
+
 // Get the original tokens for the given `acorn` namespace object.
-function getJsxTokens(acorn) {
+/** @returns {AcornJsx} */ function getJsxTokens(acorn) {
   acorn = acorn.Parser.acorn || acorn;
   let acornJsx = acornJsxMap.get(acorn);
   if (!acornJsx) {
-    const tt = acorn.tokTypes;
-    const TokContext = acorn.TokContext;
-    const TokenType = acorn.TokenType;
+    const tt = /** @type {typeof import("acorn").tokTypes} */ (acorn.tokTypes);
+    const TokContext = /** @type {typeof import("acorn").TokContext} */ (acorn.TokContext);
+    const TokenType = /** @type {typeof import("acorn").TokenType} */ (acorn.TokenType);
     const tc_oTag = new TokContext('<tag', false);
     const tc_cTag = new TokContext('</tag', false);
     const tc_expr = new TokContext('<tag>...</tag>', true, true);
@@ -91,7 +98,9 @@ Object.defineProperty(module.exports, "tokTypes", {
   enumerable: true
 });
 
-function plugin(options, /** @type {typeof import("acorn").Parser} */ Parser) {
+/** @typedef {{ allowNamespaces: boolean, allowNamespacedObjects: boolean }} AcornJsxOptions */
+
+function plugin(/** @type {AcornJsxOptions} */ options, /** @type {typeof import("acorn").Parser} */ Parser) {
   const acorn = Parser.acorn || require("acorn");
   const acornJsx = getJsxTokens(acorn);
   const tt = acorn.tokTypes;
@@ -248,7 +257,7 @@ function plugin(options, /** @type {typeof import("acorn").Parser} */ Parser) {
 
     // Parse next token as JSX identifier
 
-    jsx_parseIdentifier() {
+    /** @returns {import("acorn").Node} */ jsx_parseIdentifier() {
       let node = this.startNode();
       if (this.type === tok.jsxName)
         node.name = this.value;
@@ -262,7 +271,7 @@ function plugin(options, /** @type {typeof import("acorn").Parser} */ Parser) {
 
     // Parse namespaced identifier.
 
-    jsx_parseNamespacedName() {
+    /** @returns {import("acorn").Node} */ jsx_parseNamespacedName() {
       let startPos = this.start, startLoc = this.startLoc;
       let name = this.jsx_parseIdentifier();
       if (!options.allowNamespaces || !this.eat(tt.colon)) return name;
@@ -293,7 +302,7 @@ function plugin(options, /** @type {typeof import("acorn").Parser} */ Parser) {
 
     // Parses any type of JSX attribute value.
 
-    jsx_parseAttributeValue() {
+    /** @returns {import("acorn").Node} */ jsx_parseAttributeValue() {
       switch (this.type) {
       case tt.braceL:
         let node = this.jsx_parseExpressionContainer();
@@ -314,14 +323,14 @@ function plugin(options, /** @type {typeof import("acorn").Parser} */ Parser) {
     // and so it should start at the end of last read token (left brace) and finish
     // at the beginning of the next one (right brace).
 
-    jsx_parseEmptyExpression() {
+    /** @returns {import("acorn").Node} */ jsx_parseEmptyExpression() {
       let node = this.startNodeAt(this.lastTokEnd, this.lastTokEndLoc);
       return this.finishNodeAt(node, 'JSXEmptyExpression', this.start, this.startLoc);
     }
 
     // Parses JSX expression enclosed into curly brackets.
 
-    jsx_parseExpressionContainer() {
+    /** @returns {import("acorn").Node} */ jsx_parseExpressionContainer() {
       let node = this.startNode();
       this.next();
       node.expression = this.type === tt.braceR
@@ -333,7 +342,7 @@ function plugin(options, /** @type {typeof import("acorn").Parser} */ Parser) {
 
     // Parses following JSX attribute name-value pair.
 
-    jsx_parseAttribute() {
+    /** @returns {import("acorn").Node} */ jsx_parseAttribute() {
       let node = this.startNode();
       if (this.eat(tt.braceL)) {
         this.expect(tt.ellipsis);
@@ -348,7 +357,7 @@ function plugin(options, /** @type {typeof import("acorn").Parser} */ Parser) {
 
     // Parses JSX opening tag starting after '<'.
 
-    jsx_parseOpeningElementAt(/** @type {number} */ startPos, startLoc) {
+    /** @returns {import("acorn").Node} */ jsx_parseOpeningElementAt(/** @type {number} */ startPos, /** @type {import("acorn").Position | undefined} */ startLoc) {
       let node = this.startNodeAt(startPos, startLoc);
       node.attributes = [];
       let nodeName = this.jsx_parseElementName();
@@ -362,7 +371,7 @@ function plugin(options, /** @type {typeof import("acorn").Parser} */ Parser) {
 
     // Parses JSX closing tag starting after '</'.
 
-    jsx_parseClosingElementAt(/** @type {number} */ startPos, startLoc) {
+    /** @returns {import("acorn").Node} */ jsx_parseClosingElementAt(/** @type {number} */ startPos, /** @type {import("acorn").Position | undefined} */ startLoc) {
       let node = this.startNodeAt(startPos, startLoc);
       let nodeName = this.jsx_parseElementName();
       if (nodeName) node.name = nodeName;
@@ -373,7 +382,7 @@ function plugin(options, /** @type {typeof import("acorn").Parser} */ Parser) {
     // Parses entire JSX element, including it's opening tag
     // (starting after '<'), attributes, contents and closing tag.
 
-    jsx_parseElementAt(/** @type {number} */ startPos, startLoc) {
+    /** @returns {import("acorn").Node} */ jsx_parseElementAt(/** @type {number} */ startPos, /** @type {import("acorn").Position | undefined} */ startLoc) {
       let node = this.startNodeAt(startPos, startLoc);
       let children = [];
       let openingElement = this.jsx_parseOpeningElementAt(startPos, startLoc);
@@ -423,7 +432,7 @@ function plugin(options, /** @type {typeof import("acorn").Parser} */ Parser) {
 
     // Parse JSX text
 
-    jsx_parseText() {
+    /** @returns {import("acorn").Node} */ jsx_parseText() {
       let node = this.parseLiteral(this.value);
       node.type = "JSXText";
       return node;
@@ -431,7 +440,7 @@ function plugin(options, /** @type {typeof import("acorn").Parser} */ Parser) {
 
     // Parses entire JSX element from current position.
 
-    jsx_parseElement() {
+    /** @returns {import("acorn").Node} */ jsx_parseElement() {
       let startPos = this.start, startLoc = this.startLoc;
       this.next();
       return this.jsx_parseElementAt(startPos, startLoc);
@@ -470,7 +479,7 @@ function plugin(options, /** @type {typeof import("acorn").Parser} */ Parser) {
       return super.readToken(code);
     }
 
-    updateContext(prevType) {
+    updateContext(/** @type {import("acorn").TokenType} */ prevType) {
       if (this.type == tt.braceL) {
         var curContext = this.curContext();
         if (curContext == tc_oTag) this.context.push(tokContexts.b_expr);

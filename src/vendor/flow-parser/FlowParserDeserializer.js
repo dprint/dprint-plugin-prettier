@@ -12,6 +12,9 @@ function _interopRequireDefault(e) {
     default: e
   };
 }
+/** @typedef {{ start?: { line: number, column: number }, end?: { line: number, column: number }, rangeStart?: number, rangeEnd?: number }} FlowLoc */
+/** @typedef {import("./FlowParserNodeDeserializers.js").FlowNode} FlowNode */
+
 class FlowParserDeserializer {
   constructor(/** @type {number} */ programBuffer, /** @type {number} */ positionBuffer, /** @type {number} */ positionBufferSize, /** @type {number} */ stringBufferBase, wasmParser, options) {
     /** @type {number | undefined} */ this.programBufferIdx = void 0;
@@ -22,7 +25,7 @@ class FlowParserDeserializer {
     this.HEAPU8 = void 0;
     this.HEAPU32 = void 0;
     this.HEAPF64 = void 0;
-    this.options = void 0;
+    /** @type {{ tokens?: boolean } | undefined} */ this.options = void 0;
     /** @type {string[]} */ this.commentTypes = ['Block', 'Line'];
     /** @type {string[]} */ this.tokenTypes = ['Boolean', 'Identifier', 'Keyword', 'Null', 'Numeric', 'BigInt', 'Punctuator', 'String', 'RegularExpression', 'Template', 'JSXText'];
     this.programBufferIdx = programBuffer / 4;
@@ -40,7 +43,7 @@ class FlowParserDeserializer {
     return num;
   }
   deserialize() {
-    const program = {
+    /** @type {FlowNode} */ const program = {
       type: 'Program',
       loc: this.addEmptyLoc(),
       body: this.deserializeNodeList(),
@@ -94,7 +97,7 @@ class FlowParserDeserializer {
     const size = this.next();
     return (0, _HermesParserDecodeUTF8String.default)(this.stringBufferBase + offsetPlusOne - 1, size, this.HEAPU8);
   }
-  deserializeNode() {
+  /** @returns {FlowNode | null} */ deserializeNode() {
     const nodeType = this.next();
     if (nodeType === 0) {
       return null;
@@ -140,8 +143,8 @@ class FlowParserDeserializer {
     }
     return tokens;
   }
-  addEmptyLoc() {
-    const loc = {};
+  /** @returns {FlowLoc} */ addEmptyLoc() {
+    /** @type {FlowLoc} */ const loc = {};
     this.locMap[this.next()] = loc;
     return loc;
   }
@@ -152,7 +155,7 @@ class FlowParserDeserializer {
       const line = this.HEAPU32[this.positionBufferIdx++];
       const column = this.HEAPU32[this.positionBufferIdx++];
       const offset = this.HEAPU32[this.positionBufferIdx++];
-      const loc = this.locMap[locId];
+      /** @type {FlowLoc} */ const loc = this.locMap[locId];
       if (kind === 0) {
         loc.start = {
           line,

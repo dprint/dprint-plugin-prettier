@@ -1,8 +1,11 @@
 // @nts-check
 /** @typedef {{ index: number, line: number, column: number }} MeriyahLocation */
+/** @typedef {{ start: boolean, end: boolean, range: boolean }} MeriyahRanges */
+/** @typedef {{ type: string, start?: number, end?: number, range?: any[], loc?: any }} MeriyahNode */
+/** @typedef {{ validateRegex?: boolean, next?: boolean, ranges?: MeriyahRanges, webcompat?: boolean, loc?: boolean, raw?: boolean, impliedStrict?: boolean, preserveParens?: boolean, lexical?: boolean, jsx?: boolean, sourceType?: string, onComment?: any, onToken?: any, onInsertedSemicolon?: any, module?: boolean, globalReturn?: boolean, source?: string }} MeriyahOptions */
 var version$1 = "7.1.1";
 
-const unicodeLookup = ((/** @type {any[]} */ compressed, /** @type {any[]} */ lookup) => {
+const unicodeLookup = ((/** @type {number[]} */ compressed, /** @type {number[]} */ lookup) => {
     const result = new Uint32Array(69632);
     let index = 0;
     let subIndex = 0;
@@ -608,6 +611,7 @@ function skipHashBang(/** @type {Parser} */ parser) {
     parser.report(18);
 }
 
+/** @type {Record<number, string>} */
 const errorMessages = {
     [0]: 'Unexpected token',
     [30]: "Unexpected token: '%0'",
@@ -790,11 +794,11 @@ const errorMessages = {
 class ParseError extends SyntaxError {
     /** @type {number} */ start;
     /** @type {number} */ end;
-    range;
-    loc;
+    /** @type {number[]} */ range;
+    /** @type {{ start: { line: number, column: number }, end: { line: number, column: number } }} */ loc;
     /** @type {string} */ description;
-    constructor(/** @type {MeriyahLocation} */ start, end, /** @type {number} */ type, ...params) {
-        const description = errorMessages[type].replace(/%(\d+)/g, /** @returns {string} */ (/** @type {string} */ _, /** @type {string} */ i) => params[i]);
+    constructor(/** @type {MeriyahLocation} */ start, /** @type {MeriyahLocation} */ end, /** @type {number} */ type, ...params) {
+        const description = /** @type {string} */ (errorMessages[type]).replace(/%(\d+)/g, /** @returns {string} */ (/** @type {string} */ _, /** @type {string} */ i) => params[i]);
         const message = '[' + start.line + ':' + start.column + '-' + end.line + ':' + end.column + ']: ' + description;
         super(message);
         /** @type {number} */ this.start = start.index;
@@ -809,7 +813,7 @@ class ParseError extends SyntaxError {
 }
 const isParseError = (error) => error instanceof ParseError;
 
-/** @returns {number | undefined} */ function getOwnProperty(object, key) {
+/** @returns {any} */ function getOwnProperty(object, key) {
     return Object.hasOwn(object, key) ? object[key] : undefined;
 }
 
@@ -2139,7 +2143,7 @@ function consume(/** @type {Parser | undefined} */ parser, /** @type {number} */
         parser.report(25, KeywordDescTable[t & 255]);
     nextToken(parser, context);
 }
-function reinterpretToPattern(/** @type {Parser} */ parser, node) {
+function reinterpretToPattern(/** @type {Parser} */ parser, /** @type {MeriyahNode} */ node) {
     switch (node.type) {
         case 'ArrayExpression': {
             node.type = 'ArrayPattern';
@@ -2233,7 +2237,7 @@ function validateFunctionName(/** @type {Parser} */ parser, /** @type {number} *
         (t & 36864) === 36864 ||
         t == -2147483527);
 }
-/** @returns {boolean} */ function isPropertyWithPrivateFieldKey(expr) {
+/** @returns {boolean} */ function isPropertyWithPrivateFieldKey(/** @type {MeriyahNode} */ expr) {
     return !expr.property ? false : expr.property.type === 'PrivateIdentifier';
 }
 /** @returns {number} */ function isValidLabel(/** @type {Parser} */ parser, labels, /** @type {string} */ name, /** @type {number} */ isIterationStatement) {
@@ -2258,7 +2262,7 @@ function validateAndDeclareLabel(/** @type {Parser} */ parser, labels, /** @type
     }
     labels['$' + name] = 1;
 }
-/** @returns {string} */ function isEqualTagName(elementName) {
+/** @returns {string} */ function isEqualTagName(/** @type {MeriyahNode} */ elementName) {
     switch (elementName.type) {
         case 'JSXIdentifier':
             return elementName.name;
@@ -4544,7 +4548,7 @@ function nextJSXToken(/** @type {Parser} */ parser) {
     return parser.getToken();
 }
 
-function normalizeRanges(/** @type {boolean} */ ranges) {
+/** @returns {MeriyahRanges | undefined} */ function normalizeRanges(/** @type {boolean} */ ranges) {
     if (!ranges)
         return undefined;
     if (ranges === true)
@@ -4555,8 +4559,8 @@ function normalizeRanges(/** @type {boolean} */ ranges) {
         range: ranges.range ?? false,
     };
 }
-function normalizeOptions(rawOptions) {
-    const options = {
+/** @returns {MeriyahOptions} */ function normalizeOptions(rawOptions) {
+    /** @type {MeriyahOptions} */ const options = {
         validateRegex: true,
         ...rawOptions,
         ranges: normalizeRanges(rawOptions.ranges),
@@ -4574,7 +4578,7 @@ class PrivateScope {
     /** @type {Parser} */ parser;
     /** @type {undefined | PrivateScope} */ parent;
     refs = Object.create(null);
-    privateIdentifiers = new Map();
+    /** @type {Map<string, number>} */ privateIdentifiers = new Map();
     constructor(/** @type {Parser} */ parser, /** @type {undefined | PrivateScope} */ parent) {
         /** @type {Parser} */ this.parser = parser;
         /** @type {undefined | PrivateScope} */ this.parent = parent;
@@ -4615,8 +4619,8 @@ class Scope {
     /** @type {Parser} */ parser;
     /** @type {number} */ type;
     /** @type {undefined | Scope} */ parent;
-    scopeError;
-    variableBindings = new Map();
+    /** @type {{ type: number, params: any[], start: MeriyahLocation, end: MeriyahLocation } | undefined} */ scopeError;
+    /** @type {Map<string, number>} */ variableBindings = new Map();
     constructor(/** @type {Parser} */ parser, /** @type {undefined | number} */ type = 2, /** @type {undefined | Scope} */ parent) {
         /** @type {Parser} */ this.parser = parser;
         /** @type {number} */ this.type = type;
@@ -4723,8 +4727,8 @@ class Scope {
 
 class Parser {
     /** @type {string} */ source;
-    lastOnToken = null;
-    options;
+    /** @type {any[] | null} */ lastOnToken = null;
+    /** @type {MeriyahOptions} */ options;
     /** @type {number} */ token = 1048576;
     /** @type {number} */ flags = 0;
     /** @type {number} */ index = 0;
@@ -4739,14 +4743,14 @@ class Parser {
     /** @type {number} */ startLine = 1;
     /** @type {any} */ tokenValue = '';
     /** @type {string} */ tokenRaw = '';
-    tokenRegExp = void 0;
+    /** @type {{ pattern: string, flags: string } | undefined} */ tokenRegExp = void 0;
     /** @type {number} */ currentChar = 0;
-    exportedNames = new Set();
-    exportedBindings = new Set();
+    /** @type {Set<string>} */ exportedNames = new Set();
+    /** @type {Set<string>} */ exportedBindings = new Set();
     /** @type {number} */ assignable = 0;
     /** @type {number} */ destructible = 0;
-    strictReservedRange = null;
-    leadingDecorators = { decorators: [] };
+    /** @type {MeriyahLocation[] | null} */ strictReservedRange = null;
+    /** @type {{ decorators: any[], start?: MeriyahLocation }} */ leadingDecorators = { decorators: [] };
     constructor(/** @type {string} */ source, rawOptions = {}) {
         /** @type {string} */ this.source = source;
         /** @type {number} */ this.end = source.length;
@@ -4791,17 +4795,18 @@ class Parser {
         }
         return value;
     }
-    get tokenStart() {
+    /** @returns {MeriyahLocation} */ get tokenStart() {
         return {
             index: this.tokenIndex,
             line: this.tokenLine,
             column: this.tokenColumn,
         };
     }
-    get currentLocation() {
+    /** @returns {MeriyahLocation} */ get currentLocation() {
         return { index: this.index, line: this.line, column: this.column };
     }
-    finishNode(node, /** @type {MeriyahLocation} */ start, end) {
+    /** @template {MeriyahNode} T @param {T} node @returns {T} */
+    finishNode(node, /** @type {MeriyahLocation} */ start, /** @type {MeriyahLocation | undefined} */ end) {
         const { ranges } = this.options;
         if (ranges) {
             const endIndex = end ? end.index : this.startIndex;
@@ -4854,13 +4859,13 @@ class Parser {
         }
         return undefined;
     }
-    cloneIdentifier(original) {
+    /** @returns {MeriyahNode} */ cloneIdentifier(/** @type {MeriyahNode} */ original) {
         return this.cloneLocationInformation({ ...original }, original);
     }
-    cloneStringLiteral(original) {
+    /** @returns {MeriyahNode} */ cloneStringLiteral(/** @type {MeriyahNode} */ original) {
         return this.cloneLocationInformation({ ...original }, original);
     }
-    cloneLocationInformation(node, original) {
+    /** @returns {MeriyahNode} */ cloneLocationInformation(/** @type {MeriyahNode} */ node, /** @type {MeriyahNode} */ original) {
         const { ranges } = this.options;
         if (ranges) {
             if (ranges.start)
@@ -4880,7 +4885,7 @@ class Parser {
         return node;
     }
 }
-function pushComment(/** @type {any[]} */ comments, options) {
+function pushComment(/** @type {any[]} */ comments, /** @type {MeriyahOptions} */ options) {
     return function (/** @type {string} */ type, /** @type {string} */ value, /** @type {number} */ start, /** @type {number} */ end, loc) {
         const comment = {
             type,
@@ -4901,7 +4906,7 @@ function pushComment(/** @type {any[]} */ comments, options) {
         comments.push(comment);
     };
 }
-function pushToken(tokens, options) {
+function pushToken(/** @type {any[]} */ tokens, /** @type {MeriyahOptions} */ options) {
     return function (type, start, end, loc) {
         const token = {
             token: type,
@@ -4996,7 +5001,7 @@ function parseModuleItem(/** @type {Parser | undefined} */ parser, /** @type {nu
             decorators: parseDecorators(parser, context, undefined),
         });
     }
-    let moduleItem;
+    /** @type {MeriyahNode | undefined} */ let moduleItem;
     switch (parser.getToken()) {
         case 20564:
             moduleItem = parseExportDeclaration(parser, context, scope);
@@ -5012,7 +5017,7 @@ function parseModuleItem(/** @type {Parser | undefined} */ parser, /** @type {nu
     }
     return moduleItem;
 }
-function parseStatementListItem(/** @type {Parser | undefined} */ parser, /** @type {number} */ context, /** @type {Scope | undefined} */ scope, /** @type {PrivateScope | undefined} */ privateScope, origin, labels) {
+function parseStatementListItem(/** @type {Parser | undefined} */ parser, /** @type {number} */ context, /** @type {Scope | undefined} */ scope, /** @type {PrivateScope | undefined} */ privateScope, /** @type {number} */ origin, labels) {
     const start = parser.tokenStart;
     switch (parser.getToken()) {
         case 86104:
@@ -5042,7 +5047,7 @@ function parseStatementListItem(/** @type {Parser | undefined} */ parser, /** @t
             return parseStatement(parser, context, scope, privateScope, origin, labels, 1);
     }
 }
-function parseStatement(/** @type {Parser | undefined} */ parser, /** @type {number} */ context, /** @type {Scope | undefined} */ scope, /** @type {PrivateScope | undefined} */ privateScope, origin, labels, allowFuncDecl) {
+function parseStatement(/** @type {Parser | undefined} */ parser, /** @type {number} */ context, /** @type {Scope | undefined} */ scope, /** @type {PrivateScope | undefined} */ privateScope, /** @type {number} */ origin, labels, /** @type {number} */ allowFuncDecl) {
     switch (parser.getToken()) {
         case 86088:
             return parseVariableStatement(parser, context, scope, privateScope, 0);
@@ -5095,7 +5100,7 @@ function parseStatement(/** @type {Parser | undefined} */ parser, /** @type {num
 function parseExpressionOrLabelledStatement(/** @type {Parser} */ parser, /** @type {number} */ context, /** @type {Scope | undefined} */ scope, /** @type {PrivateScope | undefined} */ privateScope, /** @type {number} */ origin, labels, /** @type {number} */ allowFuncDecl) {
     const { tokenValue, tokenStart } = parser;
     const token = parser.getToken();
-    let expr;
+    /** @type {MeriyahNode | undefined} */ let expr;
     switch (token) {
         case 241737:
             expr = parseIdentifier(parser, context);
@@ -5143,14 +5148,14 @@ function parseReturnStatement(/** @type {Parser} */ parser, /** @type {number} *
         argument,
     }, start);
 }
-function parseExpressionStatement(/** @type {Parser} */ parser, /** @type {number} */ context, expression, /** @type {MeriyahLocation} */ start) {
+function parseExpressionStatement(/** @type {Parser} */ parser, /** @type {number} */ context, /** @type {MeriyahNode} */ expression, /** @type {MeriyahLocation} */ start) {
     matchOrInsertSemicolon(parser, context | 32);
     return parser.finishNode({
         type: 'ExpressionStatement',
         expression,
     }, start);
 }
-function parseLabelledStatement(/** @type {Parser} */ parser, /** @type {number} */ context, /** @type {Scope | undefined} */ scope, /** @type {PrivateScope | undefined} */ privateScope, /** @type {number} */ origin, labels, /** @type {string} */ value, expr, /** @type {number} */ token, /** @type {number} */ allowFuncDecl, /** @type {MeriyahLocation} */ start) {
+function parseLabelledStatement(/** @type {Parser} */ parser, /** @type {number} */ context, /** @type {Scope | undefined} */ scope, /** @type {PrivateScope | undefined} */ privateScope, /** @type {number} */ origin, labels, /** @type {string} */ value, /** @type {MeriyahNode} */ expr, /** @type {number} */ token, /** @type {number} */ allowFuncDecl, /** @type {MeriyahLocation} */ start) {
     validateBindingIdentifier(parser, context, 0, token, 1);
     validateAndDeclareLabel(parser, labels, value);
     nextToken(parser, context | 32);
@@ -5208,7 +5213,7 @@ function parseAsyncArrowOrAsyncFunctionDeclaration(/** @type {Parser} */ parser,
     }
     return parseExpressionStatement(parser, context, expr, start);
 }
-function parseDirective(/** @type {Parser} */ parser, /** @type {number} */ context, expression, /** @type {number} */ token, /** @type {MeriyahLocation} */ start) {
+function parseDirective(/** @type {Parser} */ parser, /** @type {number} */ context, /** @type {MeriyahNode} */ expression, /** @type {number} */ token, /** @type {MeriyahLocation} */ start) {
     const endIndex = parser.startIndex;
     if (token !== 1074790417) {
         parser.assignable = 2;
@@ -5257,7 +5262,7 @@ function parseIfStatement(/** @type {Parser} */ parser, /** @type {number} */ co
     const test = parseExpressions(parser, context, privateScope, 0, 1, parser.tokenStart);
     consume(parser, context | 32, 16);
     const consequent = parseConsequentOrAlternative(parser, context, scope, privateScope, labels);
-    let alternate = null;
+    /** @type {MeriyahNode | null} */ let alternate = null;
     if (parser.getToken() === 20563) {
         nextToken(parser, context | 32);
         alternate = parseConsequentOrAlternative(parser, context, scope, privateScope, labels);
@@ -5289,7 +5294,7 @@ function parseSwitchStatement(/** @type {Parser} */ parser, /** @type {number} *
     scope = scope?.createChildScope(8);
     while (parser.getToken() !== 1074790415) {
         const { tokenStart } = parser;
-        let test = null;
+        /** @type {MeriyahNode | null} */ let test = null;
         const consequent = [];
         if (consumeOpt(parser, context | 32, 20556)) {
             test = parseExpressions(parser, context, privateScope, 0, 1, parser.tokenStart);
@@ -5342,7 +5347,7 @@ function parseContinueStatement(/** @type {Parser} */ parser, /** @type {number}
         parser.report(68);
     const start = parser.tokenStart;
     nextToken(parser, context);
-    let label = null;
+    /** @type {MeriyahNode | null} */ let label = null;
     if ((parser.flags & 1) === 0 && parser.getToken() & 143360) {
         const { tokenValue } = parser;
         label = parseIdentifier(parser, context | 32);
@@ -5358,7 +5363,7 @@ function parseContinueStatement(/** @type {Parser} */ parser, /** @type {number}
 function parseBreakStatement(/** @type {Parser} */ parser, /** @type {number} */ context, labels) {
     const start = parser.tokenStart;
     nextToken(parser, context | 32);
-    let label = null;
+    /** @type {MeriyahNode | null} */ let label = null;
     if ((parser.flags & 1) === 0 && parser.getToken() & 143360) {
         const { tokenValue } = parser;
         label = parseIdentifier(parser, context | 32);
@@ -5406,7 +5411,7 @@ function parseTryStatement(/** @type {Parser} */ parser, /** @type {number} */ c
     const handler = consumeOpt(parser, context | 32, 20557)
         ? parseCatchBlock(parser, context, scope, privateScope, labels, tokenStart)
         : null;
-    let finalizer = null;
+    /** @type {MeriyahNode | null} */ let finalizer = null;
     if (parser.getToken() === 20566) {
         nextToken(parser, context | 32);
         const finalizerScope = scope?.createChildScope(4);
@@ -5424,7 +5429,7 @@ function parseTryStatement(/** @type {Parser} */ parser, /** @type {number} */ c
     }, start);
 }
 function parseCatchBlock(/** @type {Parser} */ parser, /** @type {number} */ context, /** @type {Scope | undefined} */ scope, /** @type {PrivateScope | undefined} */ privateScope, labels, /** @type {MeriyahLocation} */ start) {
-    let param = null;
+    /** @type {MeriyahNode | null} */ let param = null;
     let additionalScope = scope;
     if (consumeOpt(parser, context, 67174411)) {
         scope = scope?.createChildScope(4);
@@ -5547,7 +5552,7 @@ function parseVariableStatement(/** @type {Parser} */ parser, /** @type {number}
 function parseVariableDeclaration(/** @type {Parser} */ parser, /** @type {number} */ context, /** @type {Scope | undefined} */ scope, /** @type {PrivateScope | undefined} */ privateScope, /** @type {number} */ kind, /** @type {number} */ origin) {
     const { tokenStart } = parser;
     const token = parser.getToken();
-    let init = null;
+    /** @type {MeriyahNode | null} */ let init = null;
     const id = parseBindingPattern(parser, context, scope, privateScope, kind, origin);
     if (parser.getToken() === 1077936155) {
         nextToken(parser, context | 32);
@@ -5577,14 +5582,14 @@ function parseForStatement(/** @type {Parser} */ parser, /** @type {number} */ c
         consumeOpt(parser, context, 209006);
     consume(parser, context | 32, 67174411);
     scope = scope?.createChildScope(1);
-    let test = null;
-    let update = null;
+    /** @type {MeriyahNode | null} */ let test = null;
+    /** @type {MeriyahNode | null} */ let update = null;
     let destructible = 0;
-    let init = null;
+    /** @type {MeriyahNode | null} */ let init = null;
     let isVarDecl = parser.getToken() === 86088 ||
         parser.getToken() === 241737 ||
         parser.getToken() === 86090;
-    let right;
+    /** @type {MeriyahNode | undefined} */ let right;
     const { tokenStart } = parser;
     const token = parser.getToken();
     if (isVarDecl) {
@@ -5722,7 +5727,7 @@ function parseRestrictedIdentifier(/** @type {Parser} */ parser, /** @type {numb
 function parseImportDeclaration(/** @type {Parser} */ parser, /** @type {number} */ context, /** @type {Scope | undefined} */ scope) {
     const start = parser.tokenStart;
     nextToken(parser, context);
-    let source = null;
+    /** @type {MeriyahNode | null} */ let source = null;
     const { tokenStart } = parser;
     let specifiers = [];
     if (parser.getToken() === 134283267) {
@@ -5802,7 +5807,7 @@ function parseModuleSpecifier(/** @type {Parser} */ parser, /** @type {number} *
         let { tokenValue, tokenStart } = parser;
         const token = parser.getToken();
         const imported = parseModuleExportName(parser, context);
-        let local;
+        /** @type {MeriyahNode | undefined} */ let local;
         if (consumeOpt(parser, context, 77932)) {
             if ((parser.getToken() & 134217728) === 134217728 ||
                 parser.getToken() === 18) {
@@ -5857,8 +5862,8 @@ function parseExportDeclaration(/** @type {Parser} */ parser, /** @type {number}
     const start = parser.leadingDecorators.decorators.length ? parser.leadingDecorators.start : parser.tokenStart;
     nextToken(parser, context | 32);
     const specifiers = [];
-    let declaration = null;
-    let source = null;
+    /** @type {MeriyahNode | null} */ let declaration = null;
+    /** @type {MeriyahNode | null} */ let source = null;
     let attributes = [];
     if (consumeOpt(parser, context | 32, 20561)) {
         switch (parser.getToken()) {
@@ -5908,7 +5913,7 @@ function parseExportDeclaration(/** @type {Parser} */ parser, /** @type {number}
     switch (parser.getToken()) {
         case 8391476: {
             nextToken(parser, context);
-            let exported = null;
+            /** @type {MeriyahNode | null} */ let exported = null;
             const isNamedDeclaration = consumeOpt(parser, context, 77932);
             if (isNamedDeclaration) {
                 if (scope)
@@ -5940,7 +5945,7 @@ function parseExportDeclaration(/** @type {Parser} */ parser, /** @type {number}
                 if (local.type === 'Literal') {
                     hasLiteralLocal = 1;
                 }
-                let exported;
+                /** @type {MeriyahNode | undefined} */ let exported;
                 if (parser.getToken() === 77932) {
                     nextToken(parser, context);
                     if ((parser.getToken() & 143360) === 0 && parser.getToken() !== 134283267) {
@@ -6025,12 +6030,12 @@ function parseExportDeclaration(/** @type {Parser} */ parser, /** @type {number}
     };
     return parser.finishNode(node, start);
 }
-function parseExpression(/** @type {Parser | undefined} */ parser, /** @type {number} */ context, /** @type {PrivateScope | undefined} */ privateScope, canAssign, inGroup, /** @type {MeriyahLocation} */ start) {
+function parseExpression(/** @type {Parser | undefined} */ parser, /** @type {number} */ context, /** @type {PrivateScope | undefined} */ privateScope, /** @type {number} */ canAssign, /** @type {number} */ inGroup, /** @type {MeriyahLocation} */ start) {
     let expr = parsePrimaryExpression(parser, context, privateScope, 2, 0, canAssign, inGroup, 1, start);
     expr = parseMemberOrUpdateExpression(parser, context, privateScope, expr, inGroup, 0, start);
     return parseAssignmentExpression(parser, context, privateScope, inGroup, 0, start, expr);
 }
-function parseSequenceExpression(/** @type {Parser} */ parser, /** @type {number} */ context, /** @type {PrivateScope | undefined} */ privateScope, /** @type {number} */ inGroup, /** @type {MeriyahLocation} */ start, expr) {
+function parseSequenceExpression(/** @type {Parser} */ parser, /** @type {number} */ context, /** @type {PrivateScope | undefined} */ privateScope, /** @type {number} */ inGroup, /** @type {MeriyahLocation} */ start, /** @type {MeriyahNode} */ expr) {
     const expressions = [expr];
     while (consumeOpt(parser, context | 32, 18)) {
         expressions.push(parseExpression(parser, context, privateScope, 1, inGroup, parser.tokenStart));
@@ -6046,7 +6051,7 @@ function parseExpressions(/** @type {Parser} */ parser, /** @type {number} */ co
         ? parseSequenceExpression(parser, context, privateScope, inGroup, start, expr)
         : expr;
 }
-function parseAssignmentExpression(/** @type {Parser} */ parser, /** @type {number} */ context, /** @type {PrivateScope | undefined} */ privateScope, /** @type {number} */ inGroup, /** @type {number} */ isPattern, /** @type {MeriyahLocation} */ start, left) {
+function parseAssignmentExpression(/** @type {Parser} */ parser, /** @type {number} */ context, /** @type {PrivateScope | undefined} */ privateScope, /** @type {number} */ inGroup, /** @type {number} */ isPattern, /** @type {MeriyahLocation} */ start, /** @type {MeriyahNode} */ left) {
     const token = parser.getToken();
     if ((token & 4194304) === 4194304) {
         if (parser.assignable & 2)
@@ -6081,7 +6086,7 @@ function parseAssignmentExpression(/** @type {Parser} */ parser, /** @type {numb
     }
     return left;
 }
-function parseAssignmentExpressionOrPattern(/** @type {Parser} */ parser, /** @type {number} */ context, /** @type {PrivateScope | undefined} */ privateScope, inGroup, isPattern, /** @type {MeriyahLocation} */ start, left) {
+function parseAssignmentExpressionOrPattern(/** @type {Parser} */ parser, /** @type {number} */ context, /** @type {PrivateScope | undefined} */ privateScope, /** @type {number} */ inGroup, /** @type {number} */ isPattern, /** @type {MeriyahLocation} */ start, /** @type {MeriyahNode} */ left) {
     const token = parser.getToken();
     nextToken(parser, context | 32);
     const right = parseExpression(parser, context, privateScope, 1, inGroup, parser.tokenStart);
@@ -6100,7 +6105,7 @@ function parseAssignmentExpressionOrPattern(/** @type {Parser} */ parser, /** @t
     parser.assignable = 2;
     return left;
 }
-function parseConditionalExpression(/** @type {Parser} */ parser, /** @type {number} */ context, /** @type {PrivateScope | undefined} */ privateScope, test, /** @type {MeriyahLocation} */ start) {
+function parseConditionalExpression(/** @type {Parser} */ parser, /** @type {number} */ context, /** @type {PrivateScope | undefined} */ privateScope, /** @type {MeriyahNode} */ test, /** @type {MeriyahLocation} */ start) {
     const consequent = parseExpression(parser, (context | 131072) ^ 131072, privateScope, 1, 0, parser.tokenStart);
     consume(parser, context | 32, 21);
     parser.assignable = 1;
@@ -6113,7 +6118,7 @@ function parseConditionalExpression(/** @type {Parser} */ parser, /** @type {num
         alternate,
     }, start);
 }
-function parseBinaryExpression(/** @type {Parser} */ parser, /** @type {number} */ context, /** @type {PrivateScope | undefined} */ privateScope, /** @type {number} */ inGroup, /** @type {MeriyahLocation} */ start, /** @type {number} */ minPrecedence, /** @type {number} */ operator, left) {
+function parseBinaryExpression(/** @type {Parser} */ parser, /** @type {number} */ context, /** @type {PrivateScope | undefined} */ privateScope, /** @type {number} */ inGroup, /** @type {MeriyahLocation} */ start, /** @type {number} */ minPrecedence, /** @type {number} */ operator, /** @type {MeriyahNode} */ left) {
     const bit = -((context & 131072) > 0) & 8673330;
     let t;
     let precedence;
@@ -6206,7 +6211,7 @@ function parseYieldExpressionOrIdentifier(/** @type {Parser} */ parser, /** @typ
             parser.report(26);
         if (parser.getToken() === 22)
             parser.report(124);
-        let argument = null;
+        /** @type {MeriyahNode | null} */ let argument = null;
         let delegate = false;
         if ((parser.flags & 1) === 0) {
             delegate = consumeOpt(parser, context | 32, 8391476);
@@ -6264,7 +6269,7 @@ function parseAwaitExpressionOrIdentifier(/** @type {Parser} */ parser, /** @typ
         throw new ParseError(start, { index: parser.startIndex, line: parser.startLine, column: parser.startColumn }, 98);
     return possibleIdentifierOrArrowFunc;
 }
-function parseFunctionBody(/** @type {Parser} */ parser, /** @type {number} */ context, /** @type {Scope | undefined} */ scope, /** @type {PrivateScope | undefined} */ privateScope, origin, /** @type {number | undefined} */ funcNameToken, functionScope) {
+function parseFunctionBody(/** @type {Parser} */ parser, /** @type {number} */ context, /** @type {Scope | undefined} */ scope, /** @type {PrivateScope | undefined} */ privateScope, /** @type {number} */ origin, /** @type {number | undefined} */ funcNameToken, functionScope) {
     const { tokenStart } = parser;
     consume(parser, context | 32, 2162700);
     const body = [];
@@ -6352,7 +6357,7 @@ function parseLeftHandSideExpression(/** @type {Parser} */ parser, /** @type {nu
     const expression = parsePrimaryExpression(parser, context, privateScope, 2, 0, canAssign, inGroup, isLHS, start);
     return parseMemberOrUpdateExpression(parser, context, privateScope, expression, inGroup, 0, start);
 }
-function parseUpdateExpression(/** @type {Parser} */ parser, /** @type {number} */ context, expr, /** @type {MeriyahLocation} */ start) {
+function parseUpdateExpression(/** @type {Parser} */ parser, /** @type {number} */ context, /** @type {MeriyahNode} */ expr, /** @type {MeriyahLocation} */ start) {
     if (parser.assignable & 2)
         parser.report(55);
     const token = parser.getToken();
@@ -6365,7 +6370,7 @@ function parseUpdateExpression(/** @type {Parser} */ parser, /** @type {number} 
         prefix: false,
     }, start);
 }
-function parseMemberOrUpdateExpression(/** @type {Parser} */ parser, /** @type {number} */ context, /** @type {PrivateScope | undefined} */ privateScope, expr, /** @type {number} */ inGroup, /** @type {number} */ inChain, /** @type {MeriyahLocation} */ start) {
+function parseMemberOrUpdateExpression(/** @type {Parser} */ parser, /** @type {number} */ context, /** @type {PrivateScope | undefined} */ privateScope, /** @type {MeriyahNode} */ expr, /** @type {number} */ inGroup, /** @type {number} */ inChain, /** @type {MeriyahLocation} */ start) {
     if ((parser.getToken() & 33619968) === 33619968 && (parser.flags & 1) === 0) {
         expr = parseUpdateExpression(parser, context, expr, start);
     }
@@ -6474,9 +6479,9 @@ function parseMemberOrUpdateExpression(/** @type {Parser} */ parser, /** @type {
     }
     return expr;
 }
-function parseOptionalChain(/** @type {Parser} */ parser, /** @type {number} */ context, /** @type {PrivateScope | undefined} */ privateScope, expr, /** @type {MeriyahLocation} */ start) {
+function parseOptionalChain(/** @type {Parser} */ parser, /** @type {number} */ context, /** @type {PrivateScope | undefined} */ privateScope, /** @type {MeriyahNode} */ expr, /** @type {MeriyahLocation} */ start) {
     let restoreHasOptionalChaining = false;
-    let node;
+    /** @type {MeriyahNode | undefined} */ let node;
     if (parser.getToken() === 69271571 || parser.getToken() === 67174411) {
         if ((parser.flags & 2048) === 2048) {
             restoreHasOptionalChaining = true;
@@ -6665,7 +6670,7 @@ function parseImportCallOrMetaExpression(/** @type {Parser} */ parser, /** @type
     parser.assignable = 2;
     return parseMemberOrUpdateExpression(parser, context, privateScope, expr, inGroup, 0, start);
 }
-function parseImportMetaExpression(/** @type {Parser} */ parser, /** @type {number} */ context, meta, /** @type {MeriyahLocation} */ start) {
+function parseImportMetaExpression(/** @type {Parser} */ parser, /** @type {number} */ context, /** @type {MeriyahNode} */ meta, /** @type {MeriyahLocation} */ start) {
     if ((context & 2) === 0)
         parser.report(169);
     nextToken(parser, context);
@@ -6688,7 +6693,7 @@ function parseImportExpression(/** @type {Parser} */ parser, /** @type {number} 
     if (parser.getToken() === 14)
         parser.report(143);
     const source = parseExpression(parser, context, privateScope, 1, inGroup, parser.tokenStart);
-    let options = null;
+    /** @type {MeriyahNode | null} */ let options = null;
     if (parser.getToken() === 18) {
         consume(parser, context, 18);
         if (parser.getToken() !== 16) {
@@ -6821,7 +6826,7 @@ function parseTemplate(/** @type {Parser | undefined} */ parser, /** @type {numb
         quasis,
     }, tokenStart);
 }
-function parseTemplateElement(/** @type {Parser} */ parser, /** @type {string | undefined | null} */ cooked, /** @type {string | undefined} */ raw, /** @type {MeriyahLocation} */ start, tail) {
+function parseTemplateElement(/** @type {Parser} */ parser, /** @type {string | undefined | null} */ cooked, /** @type {string | undefined} */ raw, /** @type {MeriyahLocation} */ start, /** @type {boolean} */ tail) {
     const node = parser.finishNode({
         type: 'TemplateElement',
         value: {
@@ -6933,7 +6938,7 @@ function parseThisExpression(/** @type {Parser} */ parser, /** @type {number} */
 function parseFunctionDeclaration(/** @type {Parser} */ parser, /** @type {number} */ context, /** @type {Scope | undefined} */ scope, /** @type {PrivateScope | undefined} */ privateScope, /** @type {number} */ origin, /** @type {number} */ allowGen, /** @type {number} */ flags, /** @type {number} */ isAsync, /** @type {MeriyahLocation} */ start) {
     nextToken(parser, context | 32);
     const isGenerator = allowGen ? optionalBit(parser, context, 8391476) : 0;
-    let id = null;
+    /** @type {MeriyahNode | null} */ let id = null;
     let funcNameToken;
     let functionScope = scope ? parser.createScope() : void 0;
     if (parser.getToken() === 67174411) {
@@ -6998,7 +7003,7 @@ function parseFunctionExpression(/** @type {Parser} */ parser, /** @type {number
     nextToken(parser, context | 32);
     const isGenerator = optionalBit(parser, context, 8391476);
     const generatorAndAsyncFlags = (isAsync ? 2048 : 0) | (isGenerator ? 1024 : 0);
-    let id = null;
+    /** @type {MeriyahNode | null} */ let id = null;
     let funcNameToken;
     let scope = parser.createScopeIfLexical();
     const modifierFlags = 256 |
@@ -7055,7 +7060,7 @@ function parseArrayExpressionOrPattern(/** @type {Parser} */ parser, /** @type {
             elements.push(null);
         }
         else {
-            let left;
+            /** @type {MeriyahNode | undefined} */ let left;
             const { tokenStart, tokenValue } = parser;
             const token = parser.getToken();
             if (token & 143360) {
@@ -7195,7 +7200,7 @@ function parseArrayExpressionOrPattern(/** @type {Parser} */ parser, /** @type {
     parser.destructible = destructible;
     return node;
 }
-function parseArrayOrObjectAssignmentPattern(/** @type {Parser} */ parser, /** @type {number} */ context, /** @type {PrivateScope | undefined} */ privateScope, /** @type {number} */ destructible, /** @type {number} */ inGroup, /** @type {number} */ isPattern, /** @type {MeriyahLocation} */ start, node) {
+function parseArrayOrObjectAssignmentPattern(/** @type {Parser} */ parser, /** @type {number} */ context, /** @type {PrivateScope | undefined} */ privateScope, /** @type {number} */ destructible, /** @type {number} */ inGroup, /** @type {number} */ isPattern, /** @type {MeriyahLocation} */ start, /** @type {MeriyahNode} */ node) {
     if (parser.getToken() !== 1077936155)
         parser.report(26);
     nextToken(parser, context | 32);
@@ -7226,7 +7231,7 @@ function parseArrayOrObjectAssignmentPattern(/** @type {Parser} */ parser, /** @
 function parseSpreadOrRestElement(/** @type {Parser} */ parser, /** @type {number} */ context, /** @type {Scope | undefined} */ scope, /** @type {PrivateScope | undefined} */ privateScope, /** @type {number} */ closingToken, /** @type {number} */ kind, /** @type {number} */ origin, /** @type {number} */ isAsync, /** @type {number} */ inGroup, /** @type {number} */ isPattern) {
     const { tokenStart: start } = parser;
     nextToken(parser, context | 32);
-    let argument = null;
+    /** @type {MeriyahNode | null} */ let argument = null;
     let destructible = 0;
     const { tokenValue, tokenStart } = parser;
     let token = parser.getToken();
@@ -7407,8 +7412,8 @@ function parseObjectLiteralOrPattern(/** @type {Parser} */ parser, /** @type {nu
         }
         else {
             let state = 0;
-            let key = null;
-            let value;
+            /** @type {MeriyahNode | null} */ let key = null;
+            /** @type {MeriyahNode | undefined} */ let value;
             if (parser.getToken() & 143360 ||
                 parser.getToken() === -2147483528 ||
                 parser.getToken() === -2147483527) {
@@ -7948,7 +7953,7 @@ function parseObjectLiteralOrPattern(/** @type {Parser} */ parser, /** @type {nu
     let setterArgs = 0;
     let isNonSimpleParameterList = 0;
     while (parser.getToken() !== 18) {
-        let left = null;
+        /** @type {MeriyahNode | null} */ let left = null;
         const { tokenStart } = parser;
         if (parser.getToken() & 143360) {
             if ((context & 1) === 0) {
@@ -8020,7 +8025,7 @@ function parseParenthesizedExpression(/** @type {Parser} */ parser, /** @type {n
     }
     let destructible = 0;
     parser.destructible &= -385;
-    let expr;
+    /** @type {MeriyahNode | undefined} */ let expr;
     let expressions = [];
     let isSequence = 0;
     let isNonSimpleParameterList = 0;
@@ -8199,7 +8204,7 @@ function parseIdentifierOrArrow(/** @type {Parser} */ parser, /** @type {number}
     }
     return expr;
 }
-function parseArrowFromIdentifier(/** @type {Parser} */ parser, /** @type {number} */ context, /** @type {PrivateScope | undefined} */ privateScope, /** @type {string} */ value, expr, /** @type {number} */ inNew, /** @type {number} */ canAssign, /** @type {number} */ isAsync, /** @type {MeriyahLocation} */ start) {
+function parseArrowFromIdentifier(/** @type {Parser} */ parser, /** @type {number} */ context, /** @type {PrivateScope | undefined} */ privateScope, /** @type {string} */ value, /** @type {MeriyahNode} */ expr, /** @type {number} */ inNew, /** @type {number} */ canAssign, /** @type {number} */ isAsync, /** @type {MeriyahLocation} */ start) {
     if (!canAssign)
         parser.report(57);
     if (inNew)
@@ -8222,7 +8227,7 @@ function parseArrowFunctionExpression(/** @type {Parser} */ parser, /** @type {n
     const modifierFlags = 1024 | 2048 | 8192 | 524288;
     context = ((context | modifierFlags) ^ modifierFlags) | (isAsync ? 2048 : 0);
     const expression = parser.getToken() !== 2162700;
-    let body;
+    /** @type {MeriyahNode | undefined} */ let body;
     scope?.reportScopeError();
     if (expression) {
         parser.flags =
@@ -8277,7 +8282,7 @@ function parseArrowFunctionExpression(/** @type {Parser} */ parser, /** @type {n
     context = (context | 131072) ^ 131072;
     let isNonSimpleParameterList = 0;
     while (parser.getToken() !== 18) {
-        let left;
+        /** @type {MeriyahNode | undefined} */ let left;
         const { tokenStart } = parser;
         const token = parser.getToken();
         if (token & 143360) {
@@ -8335,7 +8340,7 @@ function parseArrowFunctionExpression(/** @type {Parser} */ parser, /** @type {n
     consume(parser, context, 16);
     return params;
 }
-function parseMemberExpressionNoCall(/** @type {Parser} */ parser, /** @type {number} */ context, /** @type {PrivateScope | undefined} */ privateScope, expr, /** @type {number} */ inGroup, /** @type {MeriyahLocation} */ start) {
+function parseMemberExpressionNoCall(/** @type {Parser} */ parser, /** @type {number} */ context, /** @type {PrivateScope | undefined} */ privateScope, /** @type {MeriyahNode} */ expr, /** @type {number} */ inGroup, /** @type {MeriyahLocation} */ start) {
     const token = parser.getToken();
     if (token & 67108864) {
         if (token === 67108877) {
@@ -8404,7 +8409,7 @@ function parseNewExpression(/** @type {Parser} */ parser, /** @type {number} */ 
         arguments: parser.getToken() === 67174411 ? parseArguments(parser, context, privateScope, inGroup) : [],
     }, start);
 }
-function parseMetaProperty(/** @type {Parser} */ parser, /** @type {number} */ context, meta, /** @type {MeriyahLocation} */ start) {
+function parseMetaProperty(/** @type {Parser} */ parser, /** @type {number} */ context, /** @type {MeriyahNode} */ meta, /** @type {MeriyahLocation} */ start) {
     const property = parseIdentifier(parser, context);
     return parser.finishNode({
         type: 'MetaProperty',
@@ -8424,7 +8429,7 @@ function parseAsyncArrowAfterIdent(/** @type {Parser} */ parser, /** @type {numb
     }
     return parseArrowFromIdentifier(parser, (context & -524289) | 2048, privateScope, parser.tokenValue, parseIdentifier(parser, context), 0, canAssign, 1, start);
 }
-function parseAsyncArrowOrCallExpression(/** @type {Parser} */ parser, /** @type {number} */ context, /** @type {PrivateScope | undefined} */ privateScope, callee, /** @type {number} */ canAssign, /** @type {number} */ kind, /** @type {number} */ origin, /** @type {number} */ flags, /** @type {MeriyahLocation} */ start) {
+function parseAsyncArrowOrCallExpression(/** @type {Parser} */ parser, /** @type {number} */ context, /** @type {PrivateScope | undefined} */ privateScope, /** @type {MeriyahNode} */ callee, /** @type {number} */ canAssign, /** @type {number} */ kind, /** @type {number} */ origin, /** @type {number} */ flags, /** @type {MeriyahLocation} */ start) {
     nextToken(parser, context | 32);
     const scope = parser.createScopeIfLexical()?.createChildScope(512);
     context = (context | 131072) ^ 131072;
@@ -8448,7 +8453,7 @@ function parseAsyncArrowOrCallExpression(/** @type {Parser} */ parser, /** @type
         }, start);
     }
     let destructible = 0;
-    let expr = null;
+    /** @type {MeriyahNode | null} */ let expr = null;
     let isNonSimpleParameterList = 0;
     parser.destructible =
         (parser.destructible | 256 | 128) ^
@@ -8608,8 +8613,8 @@ function parseClassDeclaration(/** @type {Parser} */ parser, /** @type {number} 
     }
     context = (context | 16384 | 1) ^ 16384;
     nextToken(parser, context);
-    let id = null;
-    let superClass = null;
+    /** @type {MeriyahNode | null} */ let id = null;
+    /** @type {MeriyahNode | null} */ let superClass = null;
     const { tokenValue } = parser;
     if (parser.getToken() & 4096 && parser.getToken() !== 20565) {
         if (isStrictReservedWord(parser, context, parser.getToken())) {
@@ -8650,8 +8655,8 @@ function parseClassDeclaration(/** @type {Parser} */ parser, /** @type {number} 
     }, start);
 }
 function parseClassExpression(/** @type {Parser} */ parser, /** @type {number} */ context, /** @type {PrivateScope | undefined} */ privateScope, /** @type {number} */ inGroup, /** @type {MeriyahLocation} */ start) {
-    let id = null;
-    let superClass = null;
+    /** @type {MeriyahNode | null} */ let id = null;
+    /** @type {MeriyahNode | null} */ let superClass = null;
     const decorators = parseDecorators(parser, context, privateScope);
     context = (context | 1 | 16384) ^ 16384;
     nextToken(parser, context);
@@ -8701,7 +8706,7 @@ function parseDecoratorList(/** @type {Parser} */ parser, /** @type {number} */ 
         expression,
     }, start);
 }
-function parseClassBody(/** @type {Parser} */ parser, /** @type {number} */ context, inheritedContext, /** @type {Scope | undefined} */ scope, /** @type {PrivateScope | undefined} */ parentScope, kind, origin, inGroup) {
+function parseClassBody(/** @type {Parser} */ parser, /** @type {number} */ context, /** @type {number} */ inheritedContext, /** @type {Scope | undefined} */ scope, /** @type {PrivateScope | undefined} */ parentScope, /** @type {number} */ kind, /** @type {number} */ origin, /** @type {number} */ inGroup) {
     const { tokenStart } = parser;
     const privateScope = parser.createPrivateScopeIfLexical(parentScope);
     consume(parser, context | 32, 2162700);
@@ -8735,7 +8740,7 @@ function parseClassBody(/** @type {Parser} */ parser, /** @type {number} */ cont
 }
 function parseClassElementList(/** @type {Parser} */ parser, /** @type {number} */ context, /** @type {Scope | undefined} */ scope, /** @type {PrivateScope | undefined} */ privateScope, /** @type {number} */ inheritedContext, /** @type {number} */ type, /** @type {any[]} */ decorators, /** @type {number} */ isStatic, /** @type {number} */ inGroup, /** @type {MeriyahLocation} */ start) {
     let kind = isStatic ? 32 : 0;
-    let key = null;
+    /** @type {MeriyahNode | null} */ let key = null;
     const token = parser.getToken();
     if (token & (143360 | 36864) || token === -2147483528) {
         key = parseIdentifier(parser, context);
@@ -8898,8 +8903,8 @@ function parsePrivateIdentifier(/** @type {Parser} */ parser, /** @type {number}
         name: tokenValue,
     }, tokenStart);
 }
-function parsePropertyDefinition(/** @type {Parser} */ parser, /** @type {number} */ context, /** @type {PrivateScope | undefined} */ privateScope, key, state, /** @type {any[] | undefined} */ decorators, /** @type {MeriyahLocation} */ start) {
-    let value = null;
+function parsePropertyDefinition(/** @type {Parser} */ parser, /** @type {number} */ context, /** @type {PrivateScope | undefined} */ privateScope, /** @type {MeriyahNode} */ key, /** @type {number} */ state, /** @type {any[] | undefined} */ decorators, /** @type {MeriyahLocation} */ start) {
+    /** @type {MeriyahNode | null} */ let value = null;
     if (state & 8)
         parser.report(0);
     if (parser.getToken() === 1077936155) {
@@ -9002,7 +9007,7 @@ function parseJSXRootElementOrFragment(/** @type {Parser} */ parser, /** @type {
     }
     if (parser.getToken() === 8457014)
         parser.report(30, KeywordDescTable[parser.getToken() & 255]);
-    let closingElement = null;
+    /** @type {MeriyahNode | null} */ let closingElement = null;
     let children = [];
     const openingElement = parseJSXOpeningElementOrSelfCloseElement(parser, context, privateScope, inJSXChild, start);
     if (!openingElement.selfClosing) {
@@ -9153,7 +9158,7 @@ function parseJSXElementName(/** @type {Parser} */ parser, /** @type {number} */
     }
     return key;
 }
-function parseJSXMemberExpression(/** @type {Parser} */ parser, /** @type {number} */ context, object, /** @type {MeriyahLocation} */ start) {
+function parseJSXMemberExpression(/** @type {Parser} */ parser, /** @type {number} */ context, /** @type {MeriyahNode} */ object, /** @type {MeriyahLocation} */ start) {
     const property = parseJSXIdentifier(parser, context);
     return parser.finishNode({
         type: 'JSXMemberExpression',
@@ -9186,7 +9191,7 @@ function parseJsxAttribute(/** @type {Parser} */ parser, /** @type {number} */ c
     if (parser.getToken() === 2162700)
         return parseJSXSpreadAttribute(parser, context, privateScope);
     rescanJSXIdentifier(parser);
-    let value = null;
+    /** @type {MeriyahNode | null} */ let value = null;
     let name = parseJSXIdentifier(parser, context);
     if (parser.getToken() === 21) {
         name = parseJSXNamespacedName(parser, context, name, tokenStart);
@@ -9213,7 +9218,7 @@ function parseJsxAttribute(/** @type {Parser} */ parser, /** @type {number} */ c
         name,
     }, tokenStart);
 }
-function parseJSXNamespacedName(/** @type {Parser} */ parser, /** @type {number} */ context, namespace, /** @type {MeriyahLocation} */ start) {
+function parseJSXNamespacedName(/** @type {Parser} */ parser, /** @type {number} */ context, /** @type {MeriyahNode} */ namespace, /** @type {MeriyahLocation} */ start) {
     consume(parser, context, 21);
     const name = parseJSXIdentifier(parser, context);
     return parser.finishNode({
@@ -9228,7 +9233,7 @@ function parseJSXExpressionContainer(/** @type {Parser} */ parser, /** @type {nu
     const { tokenStart } = parser;
     if (parser.getToken() === 14)
         return parseJSXSpreadChild(parser, context, privateScope, start);
-    let expression = null;
+    /** @type {MeriyahNode | null} */ let expression = null;
     if (parser.getToken() === 1074790415) {
         if (isAttr)
             parser.report(157);

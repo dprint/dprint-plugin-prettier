@@ -1,7 +1,9 @@
 import isObject from "../../../utilities/is-object.js";
 import getVisitorKeys from "../../traverse/get-visitor-keys.js";
 
-function visitNode(/** @type {import("../../types/estree.js").Node} */ node, options) {
+/** @typedef {{ onEnter?: (node: any) => any, onLeave?: (node: any) => any }} VisitNodeOptions */
+
+function visitNode(/** @type {import("../../types/estree.js").Node} */ node, /** @type {VisitNodeOptions} */ options) {
   if (!isObject(node)) {
     return node;
   }

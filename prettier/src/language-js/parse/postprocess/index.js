@@ -91,6 +91,7 @@ function postprocess(ast, options) {
     ast.range = [0, text.length];
   }
 
+  /** @type {number[] | undefined} */
   let typeCastCommentsEnds;
 
   ast = visitNode(ast, {

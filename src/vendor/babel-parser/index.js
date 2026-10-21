@@ -1346,6 +1346,8 @@ class TokContext {
   /** @type {string | undefined} */ token;
   /** @type {boolean | undefined} */ preserveSpace;
 }
+/** @typedef {Readonly<{ brace: TokContext, j_oTag: TokContext, j_cTag: TokContext, j_expr: TokContext }>} TokContexts */
+/** @type {TokContexts} */
 const types = {
   brace: new TokContext("{"),
   j_oTag: new TokContext("<tag"),
@@ -1588,7 +1590,7 @@ class FlowScopeHandler extends ScopeHandler {
     return new FlowScope(flags);
   }
   declareName(/** @type {string} */ name, /** @type {int} */ bindingType, /** @type {number} */ loc) {
-    const scope = this.currentScope();
+    const scope = /** @type {FlowScope} */ (this.currentScope());
     if (bindingType & 2048) {
       this.checkRedeclarationInScope(scope, name, bindingType, loc);
       this.maybeExportDefined(scope, name);
@@ -1599,14 +1601,14 @@ class FlowScopeHandler extends ScopeHandler {
   }
   /** @returns {boolean} */ isRedeclaredInScope(/** @type {Scope} */ scope, /** @type {string} */ name, /** @type {int} */ bindingType) {
     if (super.isRedeclaredInScope(scope, name, bindingType)) return true;
-    if (bindingType & 2048 && !scope.declareFunctions.has(name)) {
+    if (bindingType & 2048 && !/** @type {FlowScope} */ (scope).declareFunctions.has(name)) {
       const type = scope.names.get(name);
       return (type & 4) > 0 || (type & 2) > 0;
     }
     return false;
   }
   checkLocalExport(/** @type {Node} */ id) {
-    if (!this.scopeStack[0].declareFunctions.has(id.name)) {
+    if (!/** @type {FlowScope} */ (this.scopeStack[0]).declareFunctions.has(id.name)) {
       super.checkLocalExport(id);
     }
   }
@@ -4786,7 +4788,7 @@ class TypeScriptScopeHandler extends ScopeHandler {
       this.importsStack[this.importsStack.length - 1].add(name);
       return;
     }
-    const scope = this.currentScope();
+    const scope = /** @type {TypeScriptScope} */ (this.currentScope());
     let type = scope.tsNames.get(name) || 0;
     if (bindingType & 1024) {
       this.maybeExportDefined(scope, name);
@@ -4813,7 +4815,7 @@ class TypeScriptScopeHandler extends ScopeHandler {
     if (type) scope.tsNames.set(name, type);
   }
   /** @returns {boolean} */ isRedeclaredInScope(/** @type {Scope} */ scope, /** @type {string} */ name, /** @type {int} */ bindingType) {
-    const type = scope.tsNames.get(name);
+    const type = /** @type {TypeScriptScope} */ (scope).tsNames.get(name);
     if ((type & 2) > 0) {
       if (bindingType & 256) {
         const isConst = (bindingType & 512) > 0;
@@ -4841,7 +4843,7 @@ class TypeScriptScopeHandler extends ScopeHandler {
     if (this.hasImport(name)) return;
     const len = this.scopeStack.length;
     for (let i = len - 1; i >= 0; i--) {
-      const scope = this.scopeStack[i];
+      const scope = /** @type {TypeScriptScope} */ (this.scopeStack[i]);
       const type = scope.tsNames.get(name);
       if ((type & 1) > 0 || (type & 16) > 0) {
         return;
@@ -12785,7 +12787,7 @@ const typescript = superClass => class TypeScriptParserMixin extends superClass 
   /** @returns {Node} */ parseImport(/** @type {Node} */ node) {
     if (this.match(130)) {
       node.importKind = "value";
-      if (this.scope.inTSNamespace) {
+      if (/** @type {TypeScriptScopeHandler} */ (this.scope).inTSNamespace) {
         this.raise(TSErrors.ImportInTSNamespace, node);
       }
       return super.parseImport(node);
@@ -12794,14 +12796,14 @@ const typescript = superClass => class TypeScriptParserMixin extends superClass 
     if (tokenIsIdentifier(this.state.type) && this.lookaheadCharCode() === 61) {
       node.importKind = "value";
       const result = this.tsParseImportEqualsDeclaration(node);
-      if (this.scope.inTSNamespace && result.moduleReference.type === "TSExternalModuleReference") {
+      if (/** @type {TypeScriptScopeHandler} */ (this.scope).inTSNamespace && result.moduleReference.type === "TSExternalModuleReference") {
         this.raise(TSErrors.ImportInTSNamespace, node);
       }
       return result;
     } else if (this.isContextual(126)) {
       const maybeDefaultIdentifier = this.parseMaybeImportPhase(node, false);
       if (this.lookaheadCharCode() === 61) {
-        if (this.scope.inTSNamespace) {
+        if (/** @type {TypeScriptScopeHandler} */ (this.scope).inTSNamespace) {
           this.raise(TSErrors.ImportInTSNamespace, node);
         }
         return this.tsParseImportEqualsDeclaration(node, maybeDefaultIdentifier);
@@ -12813,7 +12815,7 @@ const typescript = superClass => class TypeScriptParserMixin extends superClass 
     }
     if (importNode.importKind === "type" && importNode.specifiers.length > 1 && importNode.specifiers[0].type === "ImportDefaultSpecifier") {
       this.raise(TSErrors.TypeImportCannotSpecifyDefaultAndNamed, importNode);
-    } else if (this.scope.inTSNamespace) {
+    } else if (/** @type {TypeScriptScopeHandler} */ (this.scope).inTSNamespace) {
       this.raise(TSErrors.ImportInTSNamespace, importNode);
     }
     return importNode;
@@ -12840,7 +12842,7 @@ const typescript = superClass => class TypeScriptParserMixin extends superClass 
       assign.expression = super.parseExpression();
       this.semicolon();
       this.sawUnambiguousESM = true;
-      if (this.scope.inTSNamespace) {
+      if (/** @type {TypeScriptScopeHandler} */ (this.scope).inTSNamespace) {
         this.raise(TSErrors.ExportAssignmentInTSNamespace, assign);
       }
       return this.finishNode(assign, "TSExportAssignment");
@@ -12850,13 +12852,13 @@ const typescript = superClass => class TypeScriptParserMixin extends superClass 
       decl.id = this.parseIdentifier();
       this.checkIdentifier(decl.id, 8201);
       this.semicolon();
-      if (this.scope.inTSNamespace) {
+      if (/** @type {TypeScriptScopeHandler} */ (this.scope).inTSNamespace) {
         this.raise(TSErrors.NamespaceExportInTSNamespace, decl);
       }
       return this.finishNode(decl, "TSNamespaceExportDeclaration");
     } else {
       const result = super.parseExport(node, decorators);
-      if (this.scope.inTSNamespace && (result.type !== "ExportNamedDeclaration" || result.source || !result.declaration && !this.state.isAmbientContext)) {
+      if (/** @type {TypeScriptScopeHandler} */ (this.scope).inTSNamespace && (result.type !== "ExportNamedDeclaration" || result.source || !result.declaration && !this.state.isAmbientContext)) {
         this.raise(TSErrors.ExportInTSNamespace, result);
       }
       return result;
