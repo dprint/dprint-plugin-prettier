@@ -1,3 +1,4 @@
+// @nts-check
 import { parse as flowParse } from "flow-parser";
 import createError from "../../common/parser-create-error.js";
 import postprocess from "./postprocess/index.js";
@@ -47,7 +48,7 @@ function createParseError(error) {
   });
 }
 
-function parse(text, options) {
+function parse(/** @type {string | undefined} */ text, options) {
   const filepath = options?.filepath;
   const sourceFilename =
     typeof filepath === "string" ? filepath : "prettier.js.flow";

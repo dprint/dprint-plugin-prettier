@@ -122,7 +122,7 @@ function postprocess(ast, options) {
 
             // Keep ParenthesizedExpression nodes only if they have Closure-style type cast comments.
             const previousCommentEnd = typeCastCommentsEnds.findLast(
-              (end) => end <= start,
+              /** @returns {boolean} */ (end) => end <= start,
             );
             shouldKeepParenthesizedExpression =
               previousCommentEnd &&

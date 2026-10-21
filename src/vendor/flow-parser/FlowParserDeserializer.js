@@ -14,17 +14,17 @@ function _interopRequireDefault(e) {
 }
 class FlowParserDeserializer {
   constructor(/** @type {number} */ programBuffer, /** @type {number} */ positionBuffer, /** @type {number} */ positionBufferSize, /** @type {number} */ stringBufferBase, wasmParser, options) {
-    this.programBufferIdx = void 0;
-    this.positionBufferIdx = void 0;
-    this.positionBufferSize = void 0;
-    this.stringBufferBase = void 0;
-    this.locMap = void 0;
+    /** @type {number | undefined} */ this.programBufferIdx = void 0;
+    /** @type {number | undefined} */ this.positionBufferIdx = void 0;
+    /** @type {number | undefined} */ this.positionBufferSize = void 0;
+    /** @type {number | undefined} */ this.stringBufferBase = void 0;
+    /** @type {Record<number, any> | undefined} */ this.locMap = void 0;
     this.HEAPU8 = void 0;
     this.HEAPU32 = void 0;
     this.HEAPF64 = void 0;
     this.options = void 0;
-    this.commentTypes = ['Block', 'Line'];
-    this.tokenTypes = ['Boolean', 'Identifier', 'Keyword', 'Null', 'Numeric', 'BigInt', 'Punctuator', 'String', 'RegularExpression', 'Template', 'JSXText'];
+    /** @type {string[]} */ this.commentTypes = ['Block', 'Line'];
+    /** @type {string[]} */ this.tokenTypes = ['Boolean', 'Identifier', 'Keyword', 'Null', 'Numeric', 'BigInt', 'Punctuator', 'String', 'RegularExpression', 'Template', 'JSXText'];
     this.programBufferIdx = programBuffer / 4;
     this.positionBufferIdx = positionBuffer / 4;
     this.positionBufferSize = positionBufferSize;

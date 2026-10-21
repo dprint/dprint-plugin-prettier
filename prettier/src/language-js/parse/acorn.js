@@ -81,7 +81,7 @@ function parseWithOptions(/** @type {string} */ text, /** @type {string} */ sour
   return ast;
 }
 
-function parse(text, options) {
+function parse(/** @type {string | undefined} */ text, options) {
   const sourceType = getSourceType(options?.filepath);
   const combinations = (
     sourceType ? [sourceType] : SOURCE_TYPE_COMBINATIONS

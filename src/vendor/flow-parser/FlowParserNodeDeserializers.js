@@ -1,24 +1,26 @@
+// @nts-check
 'use strict';
+/** @typedef {import("./FlowParserDeserializer.js").default} FlowParserDeserializer */
 
-module.exports = [function () {
+module.exports = [/** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'EmptyStatement',
     loc: this.addEmptyLoc()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'ExpressionStatement',
     loc: this.addEmptyLoc(),
     expression: this.deserializeNode(),
     directive: this.deserializeString()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'BlockStatement',
     loc: this.addEmptyLoc(),
     body: this.deserializeNodeList()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'IfStatement',
     loc: this.addEmptyLoc(),
@@ -26,52 +28,52 @@ module.exports = [function () {
     consequent: this.deserializeNode(),
     alternate: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'LabeledStatement',
     loc: this.addEmptyLoc(),
     label: this.deserializeNode(),
     body: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'BreakStatement',
     loc: this.addEmptyLoc(),
     label: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'ContinueStatement',
     loc: this.addEmptyLoc(),
     label: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'WithStatement',
     loc: this.addEmptyLoc(),
     object: this.deserializeNode(),
     body: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'SwitchStatement',
     loc: this.addEmptyLoc(),
     discriminant: this.deserializeNode(),
     cases: this.deserializeNodeList()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'ReturnStatement',
     loc: this.addEmptyLoc(),
     argument: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'ThrowStatement',
     loc: this.addEmptyLoc(),
     argument: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'TryStatement',
     loc: this.addEmptyLoc(),
@@ -79,21 +81,21 @@ module.exports = [function () {
     handler: this.deserializeNode(),
     finalizer: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'WhileStatement',
     loc: this.addEmptyLoc(),
     body: this.deserializeNode(),
     test: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'DoWhileStatement',
     loc: this.addEmptyLoc(),
     body: this.deserializeNode(),
     test: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'ForStatement',
     loc: this.addEmptyLoc(),
@@ -102,7 +104,7 @@ module.exports = [function () {
     update: this.deserializeNode(),
     body: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'ForInStatement',
     loc: this.addEmptyLoc(),
@@ -110,7 +112,7 @@ module.exports = [function () {
     right: this.deserializeNode(),
     body: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'ForOfStatement',
     loc: this.addEmptyLoc(),
@@ -119,19 +121,19 @@ module.exports = [function () {
     body: this.deserializeNode(),
     await: this.deserializeBoolean()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'DebuggerStatement',
     loc: this.addEmptyLoc()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'MatchStatement',
     loc: this.addEmptyLoc(),
     argument: this.deserializeNode(),
     cases: this.deserializeNodeList()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'FunctionDeclaration',
     loc: this.addEmptyLoc(),
@@ -145,21 +147,21 @@ module.exports = [function () {
     predicate: this.deserializeNode(),
     expression: this.deserializeBoolean()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'VariableDeclaration',
     loc: this.addEmptyLoc(),
     kind: this.deserializeString(),
     declarations: this.deserializeNodeList()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'VariableDeclarator',
     loc: this.addEmptyLoc(),
     init: this.deserializeNode(),
     id: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'ClassDeclaration',
     loc: this.addEmptyLoc(),
@@ -171,7 +173,7 @@ module.exports = [function () {
     superTypeArguments: this.deserializeNode(),
     decorators: this.deserializeNodeList()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'ComponentDeclaration',
     loc: this.addEmptyLoc(),
@@ -182,7 +184,7 @@ module.exports = [function () {
     typeParameters: this.deserializeNode(),
     async: this.deserializeBoolean()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'HookDeclaration',
     loc: this.addEmptyLoc(),
@@ -193,14 +195,14 @@ module.exports = [function () {
     typeParameters: this.deserializeNode(),
     async: this.deserializeBoolean()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'EnumDeclaration',
     loc: this.addEmptyLoc(),
     id: this.deserializeNode(),
     body: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'InterfaceDeclaration',
     loc: this.addEmptyLoc(),
@@ -209,7 +211,7 @@ module.exports = [function () {
     extends: this.deserializeNodeList(),
     body: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'TypeAlias',
     loc: this.addEmptyLoc(),
@@ -217,7 +219,7 @@ module.exports = [function () {
     typeParameters: this.deserializeNode(),
     right: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'RecordDeclaration',
     loc: this.addEmptyLoc(),
@@ -226,7 +228,7 @@ module.exports = [function () {
     implements: this.deserializeNodeList(),
     body: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'ImportDeclaration',
     loc: this.addEmptyLoc(),
@@ -235,19 +237,19 @@ module.exports = [function () {
     importKind: this.deserializeString(),
     attributes: this.deserializeNodeList()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'ImportDefaultSpecifier',
     loc: this.addEmptyLoc(),
     local: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'ImportNamespaceSpecifier',
     loc: this.addEmptyLoc(),
     local: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'ImportSpecifier',
     loc: this.addEmptyLoc(),
@@ -255,14 +257,14 @@ module.exports = [function () {
     local: this.deserializeNode(),
     importKind: this.deserializeString()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'ImportAttribute',
     loc: this.addEmptyLoc(),
     key: this.deserializeNode(),
     value: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'ImportEqualsDeclaration',
     loc: this.addEmptyLoc(),
@@ -271,13 +273,13 @@ module.exports = [function () {
     importKind: this.deserializeString(),
     isExport: this.deserializeBoolean()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'ExternalModuleReference',
     loc: this.addEmptyLoc(),
     expression: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'ExportNamedDeclaration',
     loc: this.addEmptyLoc(),
@@ -286,13 +288,13 @@ module.exports = [function () {
     source: this.deserializeNode(),
     exportKind: this.deserializeString()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'ExportDefaultDeclaration',
     loc: this.addEmptyLoc(),
     declaration: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'ExportAllDeclaration',
     loc: this.addEmptyLoc(),
@@ -300,49 +302,49 @@ module.exports = [function () {
     exported: this.deserializeNode(),
     exportKind: this.deserializeString()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'ExportSpecifier',
     loc: this.addEmptyLoc(),
     exported: this.deserializeNode(),
     local: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'ExportNamespaceSpecifier',
     loc: this.addEmptyLoc(),
     exported: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'ExportAssignment',
     loc: this.addEmptyLoc(),
     expression: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'ThisExpression',
     loc: this.addEmptyLoc()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'Super',
     loc: this.addEmptyLoc()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'ArrayExpression',
     loc: this.addEmptyLoc(),
     elements: this.deserializeNodeList(),
     trailingComma: this.deserializeBoolean()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'ObjectExpression',
     loc: this.addEmptyLoc(),
     properties: this.deserializeNodeList()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'FunctionExpression',
     loc: this.addEmptyLoc(),
@@ -356,7 +358,7 @@ module.exports = [function () {
     predicate: this.deserializeNode(),
     expression: this.deserializeBoolean()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'ArrowFunctionExpression',
     loc: this.addEmptyLoc(),
@@ -369,13 +371,13 @@ module.exports = [function () {
     predicate: this.deserializeNode(),
     expression: this.deserializeBoolean()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'SequenceExpression',
     loc: this.addEmptyLoc(),
     expressions: this.deserializeNodeList()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'UnaryExpression',
     loc: this.addEmptyLoc(),
@@ -383,7 +385,7 @@ module.exports = [function () {
     argument: this.deserializeNode(),
     prefix: this.deserializeBoolean()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'BinaryExpression',
     loc: this.addEmptyLoc(),
@@ -391,7 +393,7 @@ module.exports = [function () {
     right: this.deserializeNode(),
     operator: this.deserializeString()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'LogicalExpression',
     loc: this.addEmptyLoc(),
@@ -399,7 +401,7 @@ module.exports = [function () {
     right: this.deserializeNode(),
     operator: this.deserializeString()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'ConditionalExpression',
     loc: this.addEmptyLoc(),
@@ -407,7 +409,7 @@ module.exports = [function () {
     alternate: this.deserializeNode(),
     consequent: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'UpdateExpression',
     loc: this.addEmptyLoc(),
@@ -415,7 +417,7 @@ module.exports = [function () {
     argument: this.deserializeNode(),
     prefix: this.deserializeBoolean()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'AssignmentExpression',
     loc: this.addEmptyLoc(),
@@ -423,7 +425,7 @@ module.exports = [function () {
     left: this.deserializeNode(),
     right: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'MemberExpression',
     loc: this.addEmptyLoc(),
@@ -432,7 +434,7 @@ module.exports = [function () {
     computed: this.deserializeBoolean(),
     optional: this.deserializeBoolean()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'OptionalMemberExpression',
     loc: this.addEmptyLoc(),
@@ -441,7 +443,7 @@ module.exports = [function () {
     computed: this.deserializeBoolean(),
     optional: this.deserializeBoolean()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'CallExpression',
     loc: this.addEmptyLoc(),
@@ -450,7 +452,7 @@ module.exports = [function () {
     arguments: this.deserializeNodeList(),
     optional: this.deserializeBoolean()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'OptionalCallExpression',
     loc: this.addEmptyLoc(),
@@ -459,7 +461,7 @@ module.exports = [function () {
     arguments: this.deserializeNodeList(),
     optional: this.deserializeBoolean()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'NewExpression',
     loc: this.addEmptyLoc(),
@@ -467,48 +469,48 @@ module.exports = [function () {
     typeArguments: this.deserializeNode(),
     arguments: this.deserializeNodeList()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'YieldExpression',
     loc: this.addEmptyLoc(),
     argument: this.deserializeNode(),
     delegate: this.deserializeBoolean()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'AwaitExpression',
     loc: this.addEmptyLoc(),
     argument: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'ImportExpression',
     loc: this.addEmptyLoc(),
     source: this.deserializeNode(),
     options: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'MetaProperty',
     loc: this.addEmptyLoc(),
     meta: this.deserializeNode(),
     property: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'TaggedTemplateExpression',
     loc: this.addEmptyLoc(),
     tag: this.deserializeNode(),
     quasi: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'TemplateLiteral',
     loc: this.addEmptyLoc(),
     quasis: this.deserializeNodeList(),
     expressions: this.deserializeNodeList()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'TemplateElement',
     loc: this.addEmptyLoc(),
@@ -518,48 +520,48 @@ module.exports = [function () {
       raw: this.deserializeString()
     }
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'TypeCastExpression',
     loc: this.addEmptyLoc(),
     expression: this.deserializeNode(),
     typeAnnotation: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'AsExpression',
     loc: this.addEmptyLoc(),
     expression: this.deserializeNode(),
     typeAnnotation: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'SatisfiesExpression',
     loc: this.addEmptyLoc(),
     expression: this.deserializeNode(),
     typeAnnotation: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'AsConstExpression',
     loc: this.addEmptyLoc(),
     expression: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'NonNullExpression',
     loc: this.addEmptyLoc(),
     argument: this.deserializeNode(),
     chain: this.deserializeBoolean()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'MatchExpression',
     loc: this.addEmptyLoc(),
     argument: this.deserializeNode(),
     cases: this.deserializeNodeList()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'RecordExpression',
     loc: this.addEmptyLoc(),
@@ -567,13 +569,13 @@ module.exports = [function () {
     typeArguments: this.deserializeNode(),
     properties: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'RecordExpressionProperties',
     loc: this.addEmptyLoc(),
     properties: this.deserializeNodeList()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   const loc = this.addEmptyLoc();
   const valueKind = this.next();
   let value = null;
@@ -611,7 +613,7 @@ module.exports = [function () {
     }
   }
   return node;
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'Identifier',
     loc: this.addEmptyLoc(),
@@ -619,7 +621,7 @@ module.exports = [function () {
     typeAnnotation: this.deserializeNode(),
     optional: this.deserializeBoolean()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'PrivateIdentifier',
     loc: this.addEmptyLoc(),
@@ -627,34 +629,34 @@ module.exports = [function () {
     typeAnnotation: this.deserializeNode(),
     optional: this.deserializeBoolean()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'ObjectPattern',
     loc: this.addEmptyLoc(),
     properties: this.deserializeNodeList(),
     typeAnnotation: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'ArrayPattern',
     loc: this.addEmptyLoc(),
     elements: this.deserializeNodeList(),
     typeAnnotation: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'RestElement',
     loc: this.addEmptyLoc(),
     argument: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'AssignmentPattern',
     loc: this.addEmptyLoc(),
     left: this.deserializeNode(),
     right: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'Property',
     loc: this.addEmptyLoc(),
@@ -665,13 +667,13 @@ module.exports = [function () {
     shorthand: this.deserializeBoolean(),
     computed: this.deserializeBoolean()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'SpreadElement',
     loc: this.addEmptyLoc(),
     argument: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'ClassExpression',
     loc: this.addEmptyLoc(),
@@ -683,20 +685,20 @@ module.exports = [function () {
     superTypeArguments: this.deserializeNode(),
     decorators: this.deserializeNodeList()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'ClassBody',
     loc: this.addEmptyLoc(),
     body: this.deserializeNodeList()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'ClassImplements',
     loc: this.addEmptyLoc(),
     id: this.deserializeNode(),
     typeParameters: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'MethodDefinition',
     loc: this.addEmptyLoc(),
@@ -709,7 +711,7 @@ module.exports = [function () {
     override: this.deserializeBoolean(),
     tsAccessibility: this.deserializeString()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'PropertyDefinition',
     loc: this.addEmptyLoc(),
@@ -725,19 +727,19 @@ module.exports = [function () {
     override: this.deserializeBoolean(),
     decorators: this.deserializeNodeList()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'StaticBlock',
     loc: this.addEmptyLoc(),
     body: this.deserializeNodeList()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'Decorator',
     loc: this.addEmptyLoc(),
     expression: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'ParameterProperty',
     loc: this.addEmptyLoc(),
@@ -752,7 +754,7 @@ module.exports = [function () {
     optional: this.deserializeBoolean(),
     decorators: this.deserializeNodeList()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'DeclareMethodDefinition',
     loc: this.addEmptyLoc(),
@@ -764,7 +766,7 @@ module.exports = [function () {
     kind: this.deserializeString(),
     override: this.deserializeBoolean()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'AbstractMethodDefinition',
     loc: this.addEmptyLoc(),
@@ -774,7 +776,7 @@ module.exports = [function () {
     override: this.deserializeBoolean(),
     tsAccessibility: this.deserializeString()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'AbstractPropertyDefinition',
     loc: this.addEmptyLoc(),
@@ -785,21 +787,21 @@ module.exports = [function () {
     override: this.deserializeBoolean(),
     tsAccessibility: this.deserializeString()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'SwitchCase',
     loc: this.addEmptyLoc(),
     test: this.deserializeNode(),
     consequent: this.deserializeNodeList()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'CatchClause',
     loc: this.addEmptyLoc(),
     param: this.deserializeNode(),
     body: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'ComponentParameter',
     loc: this.addEmptyLoc(),
@@ -807,7 +809,7 @@ module.exports = [function () {
     local: this.deserializeNode(),
     shorthand: this.deserializeBoolean()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'DeclareVariable',
     loc: this.addEmptyLoc(),
@@ -815,7 +817,7 @@ module.exports = [function () {
     kind: this.deserializeString(),
     implicitDeclare: this.deserializeBoolean()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'DeclareFunction',
     loc: this.addEmptyLoc(),
@@ -823,7 +825,7 @@ module.exports = [function () {
     implicitDeclare: this.deserializeBoolean(),
     predicate: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'DeclareClass',
     loc: this.addEmptyLoc(),
@@ -835,7 +837,7 @@ module.exports = [function () {
     body: this.deserializeNode(),
     implicitDeclare: this.deserializeBoolean()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'DeclareComponent',
     loc: this.addEmptyLoc(),
@@ -846,27 +848,27 @@ module.exports = [function () {
     typeParameters: this.deserializeNode(),
     implicitDeclare: this.deserializeBoolean()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'DeclareHook',
     loc: this.addEmptyLoc(),
     id: this.deserializeNode(),
     implicitDeclare: this.deserializeBoolean()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'DeclareModule',
     loc: this.addEmptyLoc(),
     id: this.deserializeNode(),
     body: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'DeclareModuleExports',
     loc: this.addEmptyLoc(),
     typeAnnotation: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'DeclareExportDeclaration',
     loc: this.addEmptyLoc(),
@@ -876,14 +878,14 @@ module.exports = [function () {
     source: this.deserializeNode(),
     implicitDeclare: this.deserializeBoolean()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'DeclareExportAllDeclaration',
     loc: this.addEmptyLoc(),
     source: this.deserializeNode(),
     implicitDeclare: this.deserializeBoolean()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'DeclareNamespace',
     loc: this.addEmptyLoc(),
@@ -893,7 +895,7 @@ module.exports = [function () {
     implicitDeclare: this.deserializeBoolean(),
     keyword: this.deserializeString()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'DeclareInterface',
     loc: this.addEmptyLoc(),
@@ -903,7 +905,7 @@ module.exports = [function () {
     extends: this.deserializeNodeList(),
     implicitDeclare: this.deserializeBoolean()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'DeclareTypeAlias',
     loc: this.addEmptyLoc(),
@@ -912,7 +914,7 @@ module.exports = [function () {
     right: this.deserializeNode(),
     implicitDeclare: this.deserializeBoolean()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'DeclareEnum',
     loc: this.addEmptyLoc(),
@@ -920,88 +922,88 @@ module.exports = [function () {
     body: this.deserializeNode(),
     implicitDeclare: this.deserializeBoolean()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'TypeAnnotation',
     loc: this.addEmptyLoc(),
     typeAnnotation: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'Variance',
     loc: this.addEmptyLoc(),
     kind: this.deserializeString()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'AnyTypeAnnotation',
     loc: this.addEmptyLoc()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'MixedTypeAnnotation',
     loc: this.addEmptyLoc()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'EmptyTypeAnnotation',
     loc: this.addEmptyLoc()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'VoidTypeAnnotation',
     loc: this.addEmptyLoc()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'NullLiteralTypeAnnotation',
     loc: this.addEmptyLoc()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'SymbolTypeAnnotation',
     loc: this.addEmptyLoc()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'NumberTypeAnnotation',
     loc: this.addEmptyLoc()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'BigIntTypeAnnotation',
     loc: this.addEmptyLoc()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'StringTypeAnnotation',
     loc: this.addEmptyLoc()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'BooleanTypeAnnotation',
     loc: this.addEmptyLoc()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'NullableTypeAnnotation',
     loc: this.addEmptyLoc(),
     typeAnnotation: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'ArrayTypeAnnotation',
     loc: this.addEmptyLoc(),
     elementType: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'IndexedAccessType',
     loc: this.addEmptyLoc(),
     objectType: this.deserializeNode(),
     indexType: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'OptionalIndexedAccessType',
     loc: this.addEmptyLoc(),
@@ -1009,46 +1011,46 @@ module.exports = [function () {
     indexType: this.deserializeNode(),
     optional: this.deserializeBoolean()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'UnionTypeAnnotation',
     loc: this.addEmptyLoc(),
     types: this.deserializeNodeList()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'IntersectionTypeAnnotation',
     loc: this.addEmptyLoc(),
     types: this.deserializeNodeList()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'KeyofTypeAnnotation',
     loc: this.addEmptyLoc(),
     argument: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'TypeOperator',
     loc: this.addEmptyLoc(),
     operator: this.deserializeString(),
     typeAnnotation: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'StringLiteralTypeAnnotation',
     loc: this.addEmptyLoc(),
     value: this.deserializeString(),
     raw: this.deserializeString()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'NumberLiteralTypeAnnotation',
     loc: this.addEmptyLoc(),
     value: this.deserializeNumber(),
     raw: this.deserializeString()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   const loc = this.addEmptyLoc();
   this.deserializeNode();
   const raw = this.deserializeString();
@@ -1068,75 +1070,75 @@ module.exports = [function () {
     raw,
     bigint
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'BooleanLiteralTypeAnnotation',
     loc: this.addEmptyLoc(),
     value: this.deserializeBoolean(),
     raw: this.deserializeString()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'ExistsTypeAnnotation',
     loc: this.addEmptyLoc()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'UnknownTypeAnnotation',
     loc: this.addEmptyLoc()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'NeverTypeAnnotation',
     loc: this.addEmptyLoc()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'UndefinedTypeAnnotation',
     loc: this.addEmptyLoc()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'GenericTypeAnnotation',
     loc: this.addEmptyLoc(),
     id: this.deserializeNode(),
     typeParameters: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'QualifiedTypeIdentifier',
     loc: this.addEmptyLoc(),
     qualification: this.deserializeNode(),
     id: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'QualifiedTypeofIdentifier',
     loc: this.addEmptyLoc(),
     qualification: this.deserializeNode(),
     id: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'TypeofTypeAnnotation',
     loc: this.addEmptyLoc(),
     argument: this.deserializeNode(),
     typeArguments: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'ImportType',
     loc: this.addEmptyLoc(),
     argument: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'TupleTypeAnnotation',
     loc: this.addEmptyLoc(),
     elementTypes: this.deserializeNodeList(),
     inexact: this.deserializeBoolean()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'TupleTypeLabeledElement',
     loc: this.addEmptyLoc(),
@@ -1145,14 +1147,14 @@ module.exports = [function () {
     variance: this.deserializeNode(),
     optional: this.deserializeBoolean()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'TupleTypeSpreadElement',
     loc: this.addEmptyLoc(),
     label: this.deserializeNode(),
     typeAnnotation: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'ObjectTypeAnnotation',
     loc: this.addEmptyLoc(),
@@ -1163,7 +1165,7 @@ module.exports = [function () {
     inexact: this.deserializeBoolean(),
     exact: this.deserializeBoolean()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'ObjectTypeProperty',
     loc: this.addEmptyLoc(),
@@ -1176,13 +1178,13 @@ module.exports = [function () {
     variance: this.deserializeNode(),
     kind: this.deserializeString()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'ObjectTypeSpreadProperty',
     loc: this.addEmptyLoc(),
     argument: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'ObjectTypeIndexer',
     loc: this.addEmptyLoc(),
@@ -1192,14 +1194,14 @@ module.exports = [function () {
     static: this.deserializeBoolean(),
     variance: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'ObjectTypeCallProperty',
     loc: this.addEmptyLoc(),
     value: this.deserializeNode(),
     static: this.deserializeBoolean()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'ObjectTypeMappedTypeProperty',
     loc: this.addEmptyLoc(),
@@ -1209,7 +1211,7 @@ module.exports = [function () {
     variance: this.deserializeNode(),
     optional: this.deserializeString()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'ObjectTypeInternalSlot',
     loc: this.addEmptyLoc(),
@@ -1219,7 +1221,7 @@ module.exports = [function () {
     method: this.deserializeBoolean(),
     value: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'FunctionTypeParam',
     loc: this.addEmptyLoc(),
@@ -1227,7 +1229,7 @@ module.exports = [function () {
     typeAnnotation: this.deserializeNode(),
     optional: this.deserializeBoolean()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'TypePredicate',
     loc: this.addEmptyLoc(),
@@ -1235,7 +1237,7 @@ module.exports = [function () {
     typeAnnotation: this.deserializeNode(),
     kind: this.deserializeString()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'ConditionalTypeAnnotation',
     loc: this.addEmptyLoc(),
@@ -1244,33 +1246,33 @@ module.exports = [function () {
     trueType: this.deserializeNode(),
     falseType: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'InferTypeAnnotation',
     loc: this.addEmptyLoc(),
     typeParameter: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'InterfaceExtends',
     loc: this.addEmptyLoc(),
     id: this.deserializeNode(),
     typeParameters: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'InterfaceTypeAnnotation',
     loc: this.addEmptyLoc(),
     extends: this.deserializeNodeList(),
     body: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'TypeParameterDeclaration',
     loc: this.addEmptyLoc(),
     params: this.deserializeNodeList()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'TypeParameter',
     loc: this.addEmptyLoc(),
@@ -1281,13 +1283,13 @@ module.exports = [function () {
     default: this.deserializeNode(),
     usesExtendsBound: this.deserializeBoolean()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'TypeParameterInstantiation',
     loc: this.addEmptyLoc(),
     params: this.deserializeNodeList()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'ComponentTypeAnnotation',
     loc: this.addEmptyLoc(),
@@ -1296,7 +1298,7 @@ module.exports = [function () {
     rendersType: this.deserializeNode(),
     typeParameters: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'ComponentTypeParameter',
     loc: this.addEmptyLoc(),
@@ -1304,18 +1306,18 @@ module.exports = [function () {
     typeAnnotation: this.deserializeNode(),
     optional: this.deserializeBoolean()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'DeclaredPredicate',
     loc: this.addEmptyLoc(),
     value: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'InferredPredicate',
     loc: this.addEmptyLoc()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'JSXElement',
     loc: this.addEmptyLoc(),
@@ -1323,7 +1325,7 @@ module.exports = [function () {
     children: this.deserializeNodeList(),
     closingElement: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'JSXFragment',
     loc: this.addEmptyLoc(),
@@ -1331,7 +1333,7 @@ module.exports = [function () {
     children: this.deserializeNodeList(),
     closingFragment: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'JSXOpeningElement',
     loc: this.addEmptyLoc(),
@@ -1340,80 +1342,80 @@ module.exports = [function () {
     selfClosing: this.deserializeBoolean(),
     typeArguments: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'JSXOpeningFragment',
     loc: this.addEmptyLoc()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'JSXClosingElement',
     loc: this.addEmptyLoc(),
     name: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'JSXClosingFragment',
     loc: this.addEmptyLoc()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'JSXAttribute',
     loc: this.addEmptyLoc(),
     name: this.deserializeNode(),
     value: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'JSXSpreadAttribute',
     loc: this.addEmptyLoc(),
     argument: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'JSXEmptyExpression',
     loc: this.addEmptyLoc()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'JSXExpressionContainer',
     loc: this.addEmptyLoc(),
     expression: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'JSXSpreadChild',
     loc: this.addEmptyLoc(),
     expression: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'JSXText',
     loc: this.addEmptyLoc(),
     value: this.deserializeString(),
     raw: this.deserializeString()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'JSXMemberExpression',
     loc: this.addEmptyLoc(),
     object: this.deserializeNode(),
     property: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'JSXNamespacedName',
     loc: this.addEmptyLoc(),
     namespace: this.deserializeNode(),
     name: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'JSXIdentifier',
     loc: this.addEmptyLoc(),
     name: this.deserializeString()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'EnumBooleanBody',
     loc: this.addEmptyLoc(),
@@ -1421,14 +1423,14 @@ module.exports = [function () {
     explicitType: this.deserializeBoolean(),
     hasUnknownMembers: this.deserializeBoolean()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'EnumBooleanMember',
     loc: this.addEmptyLoc(),
     id: this.deserializeNode(),
     init: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'EnumNumberBody',
     loc: this.addEmptyLoc(),
@@ -1436,14 +1438,14 @@ module.exports = [function () {
     explicitType: this.deserializeBoolean(),
     hasUnknownMembers: this.deserializeBoolean()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'EnumNumberMember',
     loc: this.addEmptyLoc(),
     id: this.deserializeNode(),
     init: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'EnumStringBody',
     loc: this.addEmptyLoc(),
@@ -1451,27 +1453,27 @@ module.exports = [function () {
     explicitType: this.deserializeBoolean(),
     hasUnknownMembers: this.deserializeBoolean()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'EnumStringMember',
     loc: this.addEmptyLoc(),
     id: this.deserializeNode(),
     init: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'EnumSymbolBody',
     loc: this.addEmptyLoc(),
     members: this.deserializeNodeList(),
     hasUnknownMembers: this.deserializeBoolean()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'EnumDefaultedMember',
     loc: this.addEmptyLoc(),
     id: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'EnumBigIntBody',
     loc: this.addEmptyLoc(),
@@ -1479,20 +1481,20 @@ module.exports = [function () {
     explicitType: this.deserializeBoolean(),
     hasUnknownMembers: this.deserializeBoolean()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'EnumBigIntMember',
     loc: this.addEmptyLoc(),
     id: this.deserializeNode(),
     init: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'RecordDeclarationBody',
     loc: this.addEmptyLoc(),
     elements: this.deserializeNodeList()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'RecordDeclarationProperty',
     loc: this.addEmptyLoc(),
@@ -1500,7 +1502,7 @@ module.exports = [function () {
     typeAnnotation: this.deserializeNode(),
     defaultValue: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'RecordDeclarationStaticProperty',
     loc: this.addEmptyLoc(),
@@ -1508,14 +1510,14 @@ module.exports = [function () {
     typeAnnotation: this.deserializeNode(),
     value: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'RecordDeclarationImplements',
     loc: this.addEmptyLoc(),
     id: this.deserializeNode(),
     typeArguments: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'MatchExpressionCase',
     loc: this.addEmptyLoc(),
@@ -1523,7 +1525,7 @@ module.exports = [function () {
     body: this.deserializeNode(),
     guard: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'MatchStatementCase',
     loc: this.addEmptyLoc(),
@@ -1531,86 +1533,86 @@ module.exports = [function () {
     body: this.deserializeNode(),
     guard: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'MatchWildcardPattern',
     loc: this.addEmptyLoc()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'MatchLiteralPattern',
     loc: this.addEmptyLoc(),
     literal: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'MatchUnaryPattern',
     loc: this.addEmptyLoc(),
     operator: this.deserializeString(),
     argument: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'MatchObjectPattern',
     loc: this.addEmptyLoc(),
     properties: this.deserializeNodeList(),
     rest: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'MatchInstancePattern',
     loc: this.addEmptyLoc(),
     targetConstructor: this.deserializeNode(),
     properties: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'MatchInstanceObjectPattern',
     loc: this.addEmptyLoc(),
     properties: this.deserializeNodeList(),
     rest: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'MatchOrPattern',
     loc: this.addEmptyLoc(),
     patterns: this.deserializeNodeList()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'MatchAsPattern',
     loc: this.addEmptyLoc(),
     pattern: this.deserializeNode(),
     target: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'MatchIdentifierPattern',
     loc: this.addEmptyLoc(),
     id: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'MatchMemberPattern',
     loc: this.addEmptyLoc(),
     base: this.deserializeNode(),
     property: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'MatchBindingPattern',
     loc: this.addEmptyLoc(),
     id: this.deserializeNode(),
     kind: this.deserializeString()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'MatchArrayPattern',
     loc: this.addEmptyLoc(),
     elements: this.deserializeNodeList(),
     rest: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'MatchObjectPatternProperty',
     loc: this.addEmptyLoc(),
@@ -1618,25 +1620,25 @@ module.exports = [function () {
     pattern: this.deserializeNode(),
     shorthand: this.deserializeBoolean()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'MatchRestPattern',
     loc: this.addEmptyLoc(),
     argument: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'Program',
     loc: this.addEmptyLoc(),
     body: this.deserializeNodeList()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'InterpreterDirective',
     loc: this.addEmptyLoc(),
     value: this.deserializeString()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'FunctionTypeAnnotation',
     loc: this.addEmptyLoc(),
@@ -1646,45 +1648,45 @@ module.exports = [function () {
     rest: this.deserializeNode(),
     typeParameters: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'RendersType',
     loc: this.addEmptyLoc(),
     argument: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'RendersMaybeType',
     loc: this.addEmptyLoc(),
     argument: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'RendersStarType',
     loc: this.addEmptyLoc(),
     argument: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'TemplateLiteralTypeAnnotation',
     loc: this.addEmptyLoc(),
     quasis: this.deserializeNodeList(),
     types: this.deserializeNodeList()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'NamespaceExportDeclaration',
     loc: this.addEmptyLoc(),
     id: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'DeclareClassExtendsCall',
     loc: this.addEmptyLoc(),
     callee: this.deserializeNode(),
     argument: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'OpaqueType',
     loc: this.addEmptyLoc(),
@@ -1695,7 +1697,7 @@ module.exports = [function () {
     upperBound: this.deserializeNode(),
     supertype: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'DeclareOpaqueType',
     loc: this.addEmptyLoc(),
@@ -1707,7 +1709,7 @@ module.exports = [function () {
     supertype: this.deserializeNode(),
     implicitDeclare: this.deserializeBoolean()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'EnumBody',
     loc: this.addEmptyLoc(),
@@ -1715,7 +1717,7 @@ module.exports = [function () {
     explicitType: this.deserializeString(),
     hasUnknownMembers: this.deserializeBoolean()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'HookTypeAnnotation',
     loc: this.addEmptyLoc(),
@@ -1724,7 +1726,7 @@ module.exports = [function () {
     rest: this.deserializeNode(),
     typeParameters: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'ConstructorTypeAnnotation',
     loc: this.addEmptyLoc(),
@@ -1734,20 +1736,20 @@ module.exports = [function () {
     rest: this.deserializeNode(),
     typeParameters: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'ObjectTypePrivateField',
     loc: this.addEmptyLoc(),
     key: this.deserializeNode()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'TupleTypeElement',
     loc: this.addEmptyLoc(),
     elementType: this.deserializeNode(),
     optional: this.deserializeBoolean()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'DeclareComponent',
     loc: this.addEmptyLoc(),
@@ -1760,12 +1762,12 @@ module.exports = [function () {
     typeParameters: this.deserializeNode(),
     async: this.deserializeBoolean()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'ThisTypeAnnotation',
     loc: this.addEmptyLoc()
   };
-}, function () {
+}, /** @this {FlowParserDeserializer} */ function () {
   return {
     type: 'ChainExpression',
     loc: this.addEmptyLoc(),
