@@ -266,6 +266,7 @@ var _Tokenizer = class {
 	* @returns whether an ICU token has been created
 	* @internal
 	* @returns {boolean}
+	* @returns {boolean}
 	*/
 	_tokenizeExpansionForm() {
 		if (this.isExpansionFormStart()) {

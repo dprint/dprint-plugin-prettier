@@ -11,7 +11,7 @@
 var NodeWithI18n = class {
 	/** @type {ParseSourceSpan} */ sourceSpan;
 	i18n;
-	constructor(sourceSpan, i18n) {
+	constructor(/** @type {import("../parse_util.mjs").ParseSourceSpan} */ sourceSpan, i18n) {
 		this.sourceSpan = sourceSpan;
 		this.i18n = i18n;
 	}
@@ -19,7 +19,7 @@ var NodeWithI18n = class {
 var Text = class extends NodeWithI18n {
 	/** @type {string} */ value;
 	tokens;
-	constructor(/** @type {string} */ value, sourceSpan, /** @type {any[]} */ tokens, i18n) {
+	constructor(/** @type {string} */ value, /** @type {import("../parse_util.mjs").ParseSourceSpan} */ sourceSpan, /** @type {any[]} */ tokens, i18n) {
 		super(sourceSpan, i18n);
 		this.value = value;
 		this.tokens = tokens;
@@ -32,7 +32,7 @@ var Text = class extends NodeWithI18n {
 var CDATA = class extends NodeWithI18n {
 	/** @type {string} */ value;
 	tokens;
-	constructor(/** @type {string} */ value, sourceSpan, /** @type {any[]} */ tokens, i18n) {
+	constructor(/** @type {string} */ value, /** @type {import("../parse_util.mjs").ParseSourceSpan} */ sourceSpan, /** @type {any[]} */ tokens, i18n) {
 		super(sourceSpan, i18n);
 		this.value = value;
 		this.tokens = tokens;
@@ -43,11 +43,11 @@ var CDATA = class extends NodeWithI18n {
 	kind = "cdata";
 };
 var Expansion = class extends NodeWithI18n {
-	switchValue;
-	type;
+	/** @type {string} */ switchValue;
+	/** @type {string} */ type;
 	cases;
-	switchValueSourceSpan;
-	constructor(/** @type {string} */ switchValue, /** @type {string} */ type, /** @type {any[]} */ cases, sourceSpan, switchValueSourceSpan, i18n) {
+	/** @type {import("../parse_util.mjs").ParseSourceSpan} */ switchValueSourceSpan;
+	constructor(/** @type {string} */ switchValue, /** @type {string} */ type, /** @type {any[]} */ cases, /** @type {import("../parse_util.mjs").ParseSourceSpan} */ sourceSpan, /** @type {import("../parse_util.mjs").ParseSourceSpan} */ switchValueSourceSpan, i18n) {
 		super(sourceSpan, i18n);
 		this.switchValue = switchValue;
 		this.type = type;
@@ -60,12 +60,12 @@ var Expansion = class extends NodeWithI18n {
 	kind = "expansion";
 };
 var ExpansionCase = class {
-	value;
+	/** @type {string} */ value;
 	expression;
 	/** @type {ParseSourceSpan} */ sourceSpan;
-	valueSourceSpan;
-	expSourceSpan;
-	constructor(/** @type {string} */ value, /** @type {any[]} */ expression, sourceSpan, valueSourceSpan, expSourceSpan) {
+	/** @type {import("../parse_util.mjs").ParseSourceSpan} */ valueSourceSpan;
+	/** @type {import("../parse_util.mjs").ParseSourceSpan} */ expSourceSpan;
+	constructor(/** @type {string} */ value, /** @type {any[]} */ expression, /** @type {import("../parse_util.mjs").ParseSourceSpan} */ sourceSpan, /** @type {import("../parse_util.mjs").ParseSourceSpan} */ valueSourceSpan, /** @type {import("../parse_util.mjs").ParseSourceSpan} */ expSourceSpan) {
 		this.value = value;
 		this.expression = expression;
 		this.sourceSpan = sourceSpan;
@@ -83,7 +83,7 @@ var Attribute = class extends NodeWithI18n {
 	/** @type {ParseSourceSpan} */ keySpan;
 	/** @type {ParseSourceSpan | undefined} */ valueSpan;
 	valueTokens;
-	constructor(/** @type {string} */ name, /** @type {string} */ value, sourceSpan, keySpan, valueSpan, /** @type {any[] | undefined} */ valueTokens, i18n) {
+	constructor(/** @type {string} */ name, /** @type {string} */ value, /** @type {import("../parse_util.mjs").ParseSourceSpan} */ sourceSpan, /** @type {import("../parse_util.mjs").ParseSourceSpan} */ keySpan, /** @type {import("../parse_util.mjs").ParseSourceSpan | undefined} */ valueSpan, /** @type {any[] | undefined} */ valueTokens, i18n) {
 		super(sourceSpan, i18n);
 		this.name = name;
 		this.value = value;
@@ -95,15 +95,15 @@ var Attribute = class extends NodeWithI18n {
 		return visitor.visitAttribute(this, context);
 	}
 	kind = "attribute";
-	get nameSpan() {
+	/** @returns {import("../parse_util.mjs").ParseSourceSpan} */ get nameSpan() {
 		return this.keySpan;
 	}
 };
 var StartTagComment = class {
-	value;
-	type;
+	/** @type {string} */ value;
+	/** @type {string} */ type;
 	/** @type {ParseSourceSpan} */ sourceSpan;
-	constructor(/** @type {string} */ value, /** @type {string} */ type, sourceSpan) {
+	constructor(/** @type {string} */ value, /** @type {string} */ type, /** @type {import("../parse_util.mjs").ParseSourceSpan} */ sourceSpan) {
 		this.value = value;
 		this.type = type;
 		this.sourceSpan = sourceSpan;
@@ -124,7 +124,7 @@ var Element = class extends NodeWithI18n {
 	/** @type {ParseSourceSpan | null} */ nameSpan;
 	/** @type {boolean} */ isVoid;
 	comments;
-	constructor(/** @type {string} */ name, /** @type {any[]} */ attrs, /** @type {any[]} */ directives, /** @type {any[]} */ children, /** @type {boolean} */ isSelfClosing, sourceSpan, startSourceSpan, endSourceSpan = null, nameSpan = null, /** @type {boolean} */ isVoid, i18n, comments = []) {
+	constructor(/** @type {string} */ name, /** @type {any[]} */ attrs, /** @type {any[]} */ directives, /** @type {any[]} */ children, /** @type {boolean} */ isSelfClosing, /** @type {import("../parse_util.mjs").ParseSourceSpan} */ sourceSpan, /** @type {import("../parse_util.mjs").ParseSourceSpan} */ startSourceSpan, endSourceSpan = null, nameSpan = null, /** @type {boolean} */ isVoid, i18n, comments = []) {
 		super(sourceSpan, i18n);
 		this.name = name;
 		this.attrs = attrs;
@@ -145,7 +145,7 @@ var Element = class extends NodeWithI18n {
 var Comment = class {
 	/** @type {string | null} */ value;
 	/** @type {ParseSourceSpan} */ sourceSpan;
-	constructor(/** @type {string} */ value, sourceSpan) {
+	constructor(/** @type {string} */ value, /** @type {import("../parse_util.mjs").ParseSourceSpan} */ sourceSpan) {
 		this.value = value;
 		this.sourceSpan = sourceSpan;
 	}
@@ -157,7 +157,7 @@ var Comment = class {
 var DocType = class {
 	/** @type {string | null} */ value;
 	/** @type {ParseSourceSpan} */ sourceSpan;
-	constructor(/** @type {string} */ value, sourceSpan) {
+	constructor(/** @type {string} */ value, /** @type {import("../parse_util.mjs").ParseSourceSpan} */ sourceSpan) {
 		this.value = value;
 		this.sourceSpan = sourceSpan;
 	}
@@ -167,13 +167,13 @@ var DocType = class {
 	kind = "docType";
 };
 var Block = class extends NodeWithI18n {
-	name;
+	/** @type {string} */ name;
 	parameters;
 	children;
 	/** @type {ParseSourceSpan | null} */ nameSpan;
 	/** @type {ParseSourceSpan} */ startSourceSpan;
 	/** @type {ParseSourceSpan | null} */ endSourceSpan;
-	constructor(/** @type {string} */ name, /** @type {any[]} */ parameters, /** @type {any[]} */ children, sourceSpan, nameSpan, startSourceSpan, endSourceSpan = null, i18n) {
+	constructor(/** @type {string} */ name, /** @type {any[]} */ parameters, /** @type {any[]} */ children, /** @type {import("../parse_util.mjs").ParseSourceSpan} */ sourceSpan, /** @type {import("../parse_util.mjs").ParseSourceSpan} */ nameSpan, /** @type {import("../parse_util.mjs").ParseSourceSpan} */ startSourceSpan, endSourceSpan = null, i18n) {
 		super(sourceSpan, i18n);
 		this.name = name;
 		this.parameters = parameters;
@@ -235,26 +235,26 @@ var Directive = class {
 	kind = "directive";
 };
 var BlockParameter = class {
-	expression;
+	/** @type {string} */ expression;
 	/** @type {ParseSourceSpan} */ sourceSpan;
-	constructor(/** @type {string} */ expression, sourceSpan) {
+	constructor(/** @type {string} */ expression, /** @type {import("../parse_util.mjs").ParseSourceSpan} */ sourceSpan) {
 		this.expression = expression;
 		this.sourceSpan = sourceSpan;
 	}
 	visit(visitor, context) {
 		return visitor.visitBlockParameter(this, context);
 	}
-	kind = "blockParameter";
+	/** @type {string} */ kind = "blockParameter";
 	startSourceSpan = null;
 	endSourceSpan = null;
 };
 var LetDeclaration = class {
-	name;
-	value;
+	/** @type {string} */ name;
+	/** @type {string} */ value;
 	/** @type {ParseSourceSpan} */ sourceSpan;
 	/** @type {ParseSourceSpan | null} */ nameSpan;
 	/** @type {ParseSourceSpan | undefined} */ valueSpan;
-	constructor(/** @type {string} */ name, /** @type {string} */ value, sourceSpan, nameSpan, valueSpan) {
+	constructor(/** @type {string} */ name, /** @type {string} */ value, /** @type {import("../parse_util.mjs").ParseSourceSpan} */ sourceSpan, /** @type {import("../parse_util.mjs").ParseSourceSpan} */ nameSpan, /** @type {import("../parse_util.mjs").ParseSourceSpan} */ valueSpan) {
 		this.name = name;
 		this.value = value;
 		this.sourceSpan = sourceSpan;
@@ -288,25 +288,25 @@ var RecursiveVisitor = class {
 		});
 	}
 	visitAttribute(/** @type {Attribute} */ ast, context) {}
-	visitStartTagComment(ast, context) {}
+	visitStartTagComment(/** @type {StartTagComment} */ ast, context) {}
 	visitText(/** @type {Text} */ ast, context) {}
 	visitCdata(/** @type {CDATA} */ ast, context) {}
 	visitComment(/** @type {Comment} */ ast, context) {}
 	visitDocType(/** @type {DocType} */ ast, context) {}
-	/** @returns {any[]} */ visitExpansion(ast, context) {
+	/** @returns {any[]} */ visitExpansion(/** @type {Expansion} */ ast, context) {
 		return this.visitChildren(context, (visit) => {
 			visit(ast.cases);
 		});
 	}
 	visitExpansionCase(ast, context) {}
-	visitBlock(block, context) {
+	visitBlock(/** @type {Block} */ block, context) {
 		this.visitChildren(context, (visit) => {
 			visit(block.parameters);
 			visit(block.children);
 		});
 	}
-	visitBlockParameter(ast, context) {}
-	visitLetDeclaration(decl, context) {}
+	visitBlockParameter(/** @type {BlockParameter} */ ast, context) {}
+	visitLetDeclaration(/** @type {LetDeclaration} */ decl, context) {}
 	visitComponent(component, context) {
 		this.visitChildren(context, (visit) => {
 			visit(component.attrs);

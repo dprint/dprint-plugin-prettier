@@ -1,5 +1,6 @@
+// @nts-check
 //#region src/ast-transform/transforms/transform-interpolation.ts
-const visitInterpolation = (node, transformer) => {
+const visitInterpolation = (node, /** @type {import("../node-transformer.js").NodeTransformer} */ transformer) => {
 	const { expressions } = node;
 	/* c8 ignore next 3 @preserve */
 	if (expressions.length !== 1) throw new Error("Unexpected 'Interpolation'");

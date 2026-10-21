@@ -736,7 +736,7 @@ var TypeModifier;
   TypeModifier[TypeModifier["Const"] = 1] = "Const";
 })(TypeModifier || (TypeModifier = {}));
 class Type {
-  modifiers;
+  /** @type {number} */ modifiers;
   constructor(modifiers = TypeModifier.None) {
     this.modifiers = modifiers;
   }
@@ -756,7 +756,7 @@ var BuiltinTypeName;
   BuiltinTypeName[BuiltinTypeName["None"] = 7] = "None";
 })(BuiltinTypeName || (BuiltinTypeName = {}));
 class BuiltinType extends Type {
-  name;
+  /** @type {number} */ name;
   constructor(/** @type {number} */ name, modifiers) {
     super(modifiers);
     this.name = name;
@@ -877,9 +877,9 @@ function areAllEquivalent(base, other) {
 }
 class Expression {
   leadingComments;
-  type;
+  /** @type {BuiltinType | null} */ type;
   sourceSpan;
-  constructor(type, sourceSpan, leadingComments) {
+  constructor(/** @type {BuiltinType | null} */ type, sourceSpan, leadingComments) {
     this.leadingComments = leadingComments;
     this.type = type || null;
     this.sourceSpan = sourceSpan || null;
@@ -1135,7 +1135,7 @@ class RegularExpressionLiteralExpr extends Expression {
 }
 class LiteralExpr extends Expression {
   value;
-  constructor(value, type, sourceSpan, leadingComments) {
+  constructor(value, /** @type {BuiltinType | null} */ type, sourceSpan, leadingComments) {
     super(type, sourceSpan, leadingComments);
     this.value = value;
   }
@@ -3259,10 +3259,10 @@ function stringify(token) {
   return newLineIndex >= 0 ? result.slice(0, newLineIndex) : result;
 }
 class Version {
-  full;
-  major;
-  minor;
-  patch;
+  /** @type {string} */ full;
+  /** @type {string} */ major;
+  /** @type {string} */ minor;
+  /** @type {string} */ patch;
   constructor(/** @type {string} */ full) {
     this.full = full;
     const splits = full.split('.');
@@ -4191,20 +4191,20 @@ function getInjectFn(target) {
 }
 
 class ParseSpan {
-  start;
-  end;
+  /** @type {number} */ start;
+  /** @type {number} */ end;
   constructor(/** @type {number} */ start, /** @type {number} */ end) {
     this.start = start;
     this.end = end;
   }
-  toAbsolute(/** @type {number} */ absoluteOffset) {
+  /** @returns {AbsoluteSourceSpan} */ toAbsolute(/** @type {number} */ absoluteOffset) {
     return new AbsoluteSourceSpan(absoluteOffset + this.start, absoluteOffset + this.end);
   }
 }
 class AST {
-  span;
-  sourceSpan;
-  constructor(span, sourceSpan) {
+  /** @type {ParseSpan} */ span;
+  /** @type {AbsoluteSourceSpan} */ sourceSpan;
+  constructor(/** @type {ParseSpan} */ span, /** @type {AbsoluteSourceSpan} */ sourceSpan) {
     this.span = span;
     this.sourceSpan = sourceSpan;
   }
@@ -4213,8 +4213,8 @@ class AST {
   }
 }
 class ASTWithName extends AST {
-  nameSpan;
-  constructor(span, sourceSpan, nameSpan) {
+  /** @type {AbsoluteSourceSpan} */ nameSpan;
+  constructor(/** @type {ParseSpan} */ span, /** @type {AbsoluteSourceSpan} */ sourceSpan, /** @type {AbsoluteSourceSpan} */ nameSpan) {
     super(span, sourceSpan);
     this.nameSpan = nameSpan;
   }
@@ -4236,7 +4236,7 @@ class ThisReceiver extends AST {
 }
 class Chain extends AST {
   expressions;
-  constructor(span, sourceSpan, /** @type {any[]} */ expressions) {
+  constructor(/** @type {ParseSpan} */ span, /** @type {AbsoluteSourceSpan} */ sourceSpan, /** @type {any[]} */ expressions) {
     super(span, sourceSpan);
     this.expressions = expressions;
   }
@@ -4248,7 +4248,7 @@ class Conditional extends AST {
   condition;
   trueExp;
   falseExp;
-  constructor(span, sourceSpan, condition, trueExp, falseExp) {
+  constructor(/** @type {ParseSpan} */ span, /** @type {AbsoluteSourceSpan} */ sourceSpan, condition, trueExp, falseExp) {
     super(span, sourceSpan);
     this.condition = condition;
     this.trueExp = trueExp;
@@ -4260,8 +4260,8 @@ class Conditional extends AST {
 }
 class PropertyRead extends ASTWithName {
   receiver;
-  name;
-  constructor(span, sourceSpan, nameSpan, receiver, /** @type {string} */ name) {
+  /** @type {string} */ name;
+  constructor(/** @type {ParseSpan} */ span, /** @type {AbsoluteSourceSpan} */ sourceSpan, /** @type {AbsoluteSourceSpan} */ nameSpan, receiver, /** @type {string} */ name) {
     super(span, sourceSpan, nameSpan);
     this.receiver = receiver;
     this.name = name;
@@ -4272,8 +4272,8 @@ class PropertyRead extends ASTWithName {
 }
 class SafePropertyRead extends ASTWithName {
   receiver;
-  name;
-  constructor(span, sourceSpan, nameSpan, receiver, /** @type {string} */ name) {
+  /** @type {string} */ name;
+  constructor(/** @type {ParseSpan} */ span, /** @type {AbsoluteSourceSpan} */ sourceSpan, /** @type {AbsoluteSourceSpan} */ nameSpan, receiver, /** @type {string} */ name) {
     super(span, sourceSpan, nameSpan);
     this.receiver = receiver;
     this.name = name;
@@ -4285,7 +4285,7 @@ class SafePropertyRead extends ASTWithName {
 class KeyedRead extends AST {
   receiver;
   key;
-  constructor(span, sourceSpan, receiver, key) {
+  constructor(/** @type {ParseSpan} */ span, /** @type {AbsoluteSourceSpan} */ sourceSpan, receiver, key) {
     super(span, sourceSpan);
     this.receiver = receiver;
     this.key = key;
@@ -4295,9 +4295,9 @@ class KeyedRead extends AST {
   }
 }
 class SafeKeyedRead extends AST {
-  receiver;
-  key;
-  constructor(span, sourceSpan, receiver, key) {
+  /** @type {PropertyRead} */ receiver;
+  /** @type {PropertyRead} */ key;
+  constructor(/** @type {ParseSpan} */ span, /** @type {AbsoluteSourceSpan} */ sourceSpan, /** @type {PropertyRead} */ receiver, /** @type {PropertyRead} */ key) {
     super(span, sourceSpan);
     this.receiver = receiver;
     this.key = key;
@@ -4313,10 +4313,10 @@ var BindingPipeType;
 })(BindingPipeType || (BindingPipeType = {}));
 class BindingPipe extends ASTWithName {
   exp;
-  name;
+  /** @type {string} */ name;
   args;
-  type;
-  constructor(span, sourceSpan, exp, /** @type {string} */ name, /** @type {any[]} */ args, /** @type {number} */ type, nameSpan) {
+  /** @type {number} */ type;
+  constructor(/** @type {ParseSpan} */ span, /** @type {AbsoluteSourceSpan} */ sourceSpan, exp, /** @type {string} */ name, /** @type {any[]} */ args, /** @type {number} */ type, /** @type {AbsoluteSourceSpan} */ nameSpan) {
     super(span, sourceSpan, nameSpan);
     this.exp = exp;
     this.name = name;
@@ -4329,7 +4329,7 @@ class BindingPipe extends ASTWithName {
 }
 class LiteralPrimitive extends AST {
   value;
-  constructor(span, sourceSpan, value) {
+  constructor(/** @type {ParseSpan} */ span, /** @type {AbsoluteSourceSpan} */ sourceSpan, value) {
     super(span, sourceSpan);
     this.value = value;
   }
@@ -4339,7 +4339,7 @@ class LiteralPrimitive extends AST {
 }
 class LiteralArray extends AST {
   expressions;
-  constructor(span, sourceSpan, /** @type {any[]} */ expressions) {
+  constructor(/** @type {ParseSpan} */ span, /** @type {AbsoluteSourceSpan} */ sourceSpan, /** @type {any[]} */ expressions) {
     super(span, sourceSpan);
     this.expressions = expressions;
   }
@@ -4348,8 +4348,8 @@ class LiteralArray extends AST {
   }
 }
 class SpreadElement extends AST {
-  expression;
-  constructor(span, sourceSpan, expression) {
+  /** @type {PropertyRead} */ expression;
+  constructor(/** @type {ParseSpan} */ span, /** @type {AbsoluteSourceSpan} */ sourceSpan, /** @type {PropertyRead} */ expression) {
     super(span, sourceSpan);
     this.expression = expression;
   }
@@ -4360,7 +4360,7 @@ class SpreadElement extends AST {
 class LiteralMap extends AST {
   keys;
   values;
-  constructor(span, sourceSpan, /** @type {any[]} */ keys, /** @type {any[]} */ values) {
+  constructor(/** @type {ParseSpan} */ span, /** @type {AbsoluteSourceSpan} */ sourceSpan, /** @type {any[]} */ keys, /** @type {any[]} */ values) {
     super(span, sourceSpan);
     this.keys = keys;
     this.values = values;
@@ -4372,7 +4372,7 @@ class LiteralMap extends AST {
 let Interpolation$1 = class Interpolation extends AST {
   strings;
   expressions;
-  constructor(span, sourceSpan, /** @type {any[]} */ strings, /** @type {any[]} */ expressions) {
+  constructor(/** @type {ParseSpan} */ span, /** @type {AbsoluteSourceSpan} */ sourceSpan, /** @type {any[]} */ strings, /** @type {any[]} */ expressions) {
     super(span, sourceSpan);
     this.strings = strings;
     this.expressions = expressions;
@@ -4382,10 +4382,10 @@ let Interpolation$1 = class Interpolation extends AST {
   }
 };
 class Binary extends AST {
-  operation;
+  /** @type {string} */ operation;
   left;
   right;
-  constructor(span, sourceSpan, /** @type {string} */ operation, left, right) {
+  constructor(/** @type {ParseSpan} */ span, /** @type {AbsoluteSourceSpan} */ sourceSpan, /** @type {string} */ operation, left, right) {
     super(span, sourceSpan);
     this.operation = operation;
     this.left = left;
@@ -4399,18 +4399,18 @@ class Binary extends AST {
   }
 }
 class Unary extends Binary {
-  operator;
+  /** @type {string} */ operator;
   expr;
   left = null;
-  right = null;
-  operation = null;
-  static createMinus(span, sourceSpan, expr) {
+  /** @type {LiteralPrimitive} */ right = null;
+  /** @type {string} */ operation = null;
+  /** @returns {Unary} */ static createMinus(/** @type {ParseSpan} */ span, /** @type {AbsoluteSourceSpan} */ sourceSpan, /** @type {LiteralPrimitive} */ expr) {
     return new Unary(span, sourceSpan, '-', expr, '-', new LiteralPrimitive(span, sourceSpan, 0), expr);
   }
-  static createPlus(span, sourceSpan, expr) {
+  /** @returns {Unary} */ static createPlus(/** @type {ParseSpan} */ span, /** @type {AbsoluteSourceSpan} */ sourceSpan, /** @type {PropertyRead} */ expr) {
     return new Unary(span, sourceSpan, '+', expr, '-', expr, new LiteralPrimitive(span, sourceSpan, 0));
   }
-  constructor(span, sourceSpan, /** @type {string} */ operator, expr, /** @type {string} */ binaryOp, binaryLeft, binaryRight) {
+  constructor(/** @type {ParseSpan} */ span, /** @type {AbsoluteSourceSpan} */ sourceSpan, /** @type {string} */ operator, expr, /** @type {string} */ binaryOp, binaryLeft, /** @type {LiteralPrimitive} */ binaryRight) {
     super(span, sourceSpan, binaryOp, binaryLeft, binaryRight);
     this.operator = operator;
     this.expr = expr;
@@ -4424,7 +4424,7 @@ class Unary extends Binary {
 }
 class PrefixNot extends AST {
   expression;
-  constructor(span, sourceSpan, expression) {
+  constructor(/** @type {ParseSpan} */ span, /** @type {AbsoluteSourceSpan} */ sourceSpan, expression) {
     super(span, sourceSpan);
     this.expression = expression;
   }
@@ -4433,8 +4433,8 @@ class PrefixNot extends AST {
   }
 }
 class TypeofExpression extends AST {
-  expression;
-  constructor(span, sourceSpan, expression) {
+  /** @type {PropertyRead} */ expression;
+  constructor(/** @type {ParseSpan} */ span, /** @type {AbsoluteSourceSpan} */ sourceSpan, /** @type {PropertyRead} */ expression) {
     super(span, sourceSpan);
     this.expression = expression;
   }
@@ -4443,8 +4443,8 @@ class TypeofExpression extends AST {
   }
 }
 class VoidExpression extends AST {
-  expression;
-  constructor(span, sourceSpan, expression) {
+  /** @type {ParenthesizedExpression} */ expression;
+  constructor(/** @type {ParseSpan} */ span, /** @type {AbsoluteSourceSpan} */ sourceSpan, /** @type {ParenthesizedExpression} */ expression) {
     super(span, sourceSpan);
     this.expression = expression;
   }
@@ -4454,7 +4454,7 @@ class VoidExpression extends AST {
 }
 class NonNullAssert extends AST {
   expression;
-  constructor(span, sourceSpan, expression) {
+  constructor(/** @type {ParseSpan} */ span, /** @type {AbsoluteSourceSpan} */ sourceSpan, expression) {
     super(span, sourceSpan);
     this.expression = expression;
   }
@@ -4465,8 +4465,8 @@ class NonNullAssert extends AST {
 class Call extends AST {
   receiver;
   args;
-  argumentSpan;
-  constructor(span, sourceSpan, receiver, /** @type {any[]} */ args, argumentSpan) {
+  /** @type {AbsoluteSourceSpan} */ argumentSpan;
+  constructor(/** @type {ParseSpan} */ span, /** @type {AbsoluteSourceSpan} */ sourceSpan, receiver, /** @type {any[]} */ args, argumentSpan) {
     super(span, sourceSpan);
     this.receiver = receiver;
     this.args = args;
@@ -4477,10 +4477,10 @@ class Call extends AST {
   }
 }
 class SafeCall extends AST {
-  receiver;
+  /** @type {PropertyRead} */ receiver;
   args;
-  argumentSpan;
-  constructor(span, sourceSpan, receiver, /** @type {any[]} */ args, argumentSpan) {
+  /** @type {AbsoluteSourceSpan} */ argumentSpan;
+  constructor(/** @type {ParseSpan} */ span, /** @type {AbsoluteSourceSpan} */ sourceSpan, /** @type {PropertyRead} */ receiver, /** @type {any[]} */ args, /** @type {AbsoluteSourceSpan} */ argumentSpan) {
     super(span, sourceSpan);
     this.receiver = receiver;
     this.args = args;
@@ -4491,54 +4491,54 @@ class SafeCall extends AST {
   }
 }
 class TaggedTemplateLiteral extends AST {
-  tag;
-  template;
-  constructor(span, sourceSpan, tag, template) {
+  /** @type {PropertyRead} */ tag;
+  /** @type {TemplateLiteral} */ template;
+  constructor(/** @type {ParseSpan} */ span, /** @type {AbsoluteSourceSpan} */ sourceSpan, /** @type {PropertyRead} */ tag, /** @type {TemplateLiteral} */ template) {
     super(span, sourceSpan);
     this.tag = tag;
     this.template = template;
   }
-  visit(visitor, context) {
+  visit(visitor, /** @type {import("../angular-estree-parser/dist/ast-transform/node-transformer.js").NodeTransformer | undefined} */ context) {
     return visitor.visitTaggedTemplateLiteral(this, context);
   }
 }
 class TemplateLiteral extends AST {
   elements;
   expressions;
-  constructor(span, sourceSpan, /** @type {any[]} */ elements, /** @type {any[]} */ expressions) {
+  constructor(/** @type {ParseSpan} */ span, /** @type {AbsoluteSourceSpan} */ sourceSpan, /** @type {any[]} */ elements, /** @type {any[]} */ expressions) {
     super(span, sourceSpan);
     this.elements = elements;
     this.expressions = expressions;
   }
-  visit(visitor, context) {
+  visit(visitor, /** @type {import("../angular-estree-parser/dist/ast-transform/node-transformer.js").NodeTransformer | undefined} */ context) {
     return visitor.visitTemplateLiteral(this, context);
   }
 }
 class TemplateLiteralElement extends AST {
-  text;
-  constructor(span, sourceSpan, /** @type {string} */ text) {
+  /** @type {string} */ text;
+  constructor(/** @type {ParseSpan} */ span, /** @type {AbsoluteSourceSpan} */ sourceSpan, /** @type {string} */ text) {
     super(span, sourceSpan);
     this.text = text;
   }
-  visit(visitor, context) {
+  visit(visitor, /** @type {import("../angular-estree-parser/dist/ast-transform/node-transformer.js").NodeTransformer | undefined} */ context) {
     return visitor.visitTemplateLiteralElement(this, context);
   }
 }
 class ParenthesizedExpression extends AST {
   expression;
-  constructor(span, sourceSpan, expression) {
+  constructor(/** @type {ParseSpan} */ span, /** @type {AbsoluteSourceSpan} */ sourceSpan, expression) {
     super(span, sourceSpan);
     this.expression = expression;
   }
-  visit(visitor, context) {
+  visit(visitor, /** @type {import("../angular-estree-parser/dist/ast-transform/node-transformer.js").NodeTransformer | undefined} */ context) {
     return visitor.visitParenthesizedExpression(this, context);
   }
 }
 class ArrowFunctionIdentifierParameter {
-  name;
-  span;
-  sourceSpan;
-  constructor(/** @type {string} */ name, span, sourceSpan) {
+  /** @type {string} */ name;
+  /** @type {ParseSpan} */ span;
+  /** @type {AbsoluteSourceSpan} */ sourceSpan;
+  constructor(/** @type {string} */ name, /** @type {ParseSpan} */ span, /** @type {AbsoluteSourceSpan} */ sourceSpan) {
     this.name = name;
     this.span = span;
     this.sourceSpan = sourceSpan;
@@ -4547,30 +4547,30 @@ class ArrowFunctionIdentifierParameter {
 class ArrowFunction extends AST {
   parameters;
   body;
-  constructor(span, sourceSpan, /** @type {any[]} */ parameters, body) {
+  constructor(/** @type {ParseSpan} */ span, /** @type {AbsoluteSourceSpan} */ sourceSpan, /** @type {any[]} */ parameters, body) {
     super(span, sourceSpan);
     this.parameters = parameters;
     this.body = body;
   }
-  visit(visitor, context) {
+  visit(visitor, /** @type {import("../angular-estree-parser/dist/ast-transform/node-transformer.js").NodeTransformer | undefined} */ context) {
     return visitor.visitArrowFunction(this, context);
   }
 }
 class RegularExpressionLiteral extends AST {
-  body;
-  flags;
-  constructor(span, sourceSpan, /** @type {string} */ body, /** @type {string | null} */ flags) {
+  /** @type {string} */ body;
+  /** @type {string | null} */ flags;
+  constructor(/** @type {ParseSpan} */ span, /** @type {AbsoluteSourceSpan} */ sourceSpan, /** @type {string} */ body, /** @type {string | null} */ flags) {
     super(span, sourceSpan);
     this.body = body;
     this.flags = flags;
   }
-  visit(visitor, context) {
+  visit(visitor, /** @type {import("../angular-estree-parser/dist/ast-transform/node-transformer.js").NodeTransformer | undefined} */ context) {
     return visitor.visitRegularExpressionLiteral(this, context);
   }
 }
 class AbsoluteSourceSpan {
-  start;
-  end;
+  /** @type {number} */ start;
+  /** @type {number} */ end;
   constructor(/** @type {number} */ start, /** @type {number} */ end) {
     this.start = start;
     this.end = end;
@@ -4578,8 +4578,8 @@ class AbsoluteSourceSpan {
 }
 class ASTWithSource extends AST {
   ast;
-  source;
-  location;
+  /** @type {string} */ source;
+  /** @type {string} */ location;
   errors;
   constructor(ast, /** @type {string} */ source, /** @type {string} */ location, /** @type {number} */ absoluteOffset, /** @type {any[]} */ errors) {
     super(new ParseSpan(0, source === null ? 0 : source.length), new AbsoluteSourceSpan(absoluteOffset, source === null ? absoluteOffset : absoluteOffset + source.length));
@@ -4599,20 +4599,20 @@ class ASTWithSource extends AST {
   }
 }
 class VariableBinding {
-  sourceSpan;
+  /** @type {AbsoluteSourceSpan} */ sourceSpan;
   key;
   value;
-  constructor(sourceSpan, key, value) {
+  constructor(/** @type {AbsoluteSourceSpan} */ sourceSpan, key, value) {
     this.sourceSpan = sourceSpan;
     this.key = key;
     this.value = value;
   }
 }
 class ExpressionBinding {
-  sourceSpan;
+  /** @type {AbsoluteSourceSpan} */ sourceSpan;
   key;
-  value;
-  constructor(sourceSpan, key, value) {
+  /** @type {ASTWithSource | null} */ value;
+  constructor(/** @type {AbsoluteSourceSpan} */ sourceSpan, key, /** @type {ASTWithSource | null} */ value) {
     this.sourceSpan = sourceSpan;
     this.key = key;
     this.value = value;
@@ -6458,11 +6458,11 @@ function isOctalDigit(code) {
 }
 
 class ParseLocation {
-  file;
-  offset;
-  line;
-  col;
-  constructor(file, /** @type {number} */ offset, /** @type {number} */ line, /** @type {number} */ col) {
+  /** @type {ParseSourceFile} */ file;
+  /** @type {number} */ offset;
+  /** @type {number} */ line;
+  /** @type {number} */ col;
+  constructor(/** @type {ParseSourceFile} */ file, /** @type {number} */ offset, /** @type {number} */ line, /** @type {number} */ col) {
     this.file = file;
     this.offset = offset;
     this.line = line;
@@ -6471,7 +6471,7 @@ class ParseLocation {
   /** @returns {string} */ toString() {
     return this.offset != null ? `${this.file.url}@${this.line}:${this.col}` : this.file.url;
   }
-  moveBy(/** @type {number} */ delta) {
+  /** @returns {ParseLocation} */ moveBy(/** @type {number} */ delta) {
     const source = this.file.content;
     const len = source.length;
     let offset = this.offset;
@@ -6541,19 +6541,19 @@ class ParseLocation {
   }
 }
 class ParseSourceFile {
-  content;
-  url;
+  /** @type {string} */ content;
+  /** @type {string} */ url;
   constructor(/** @type {string} */ content, /** @type {string} */ url) {
     this.content = content;
     this.url = url;
   }
 }
 class ParseSourceSpan {
-  start;
-  end;
-  fullStart;
+  /** @type {ParseLocation} */ start;
+  /** @type {ParseLocation} */ end;
+  /** @type {ParseLocation} */ fullStart;
   details;
-  constructor(start, end, fullStart = start, details = null) {
+  constructor(/** @type {ParseLocation} */ start, /** @type {ParseLocation} */ end, fullStart = start, details = null) {
     this.start = start;
     this.end = end;
     this.fullStart = fullStart;
@@ -6569,11 +6569,11 @@ var ParseErrorLevel;
   ParseErrorLevel[ParseErrorLevel["ERROR"] = 1] = "ERROR";
 })(ParseErrorLevel || (ParseErrorLevel = {}));
 class ParseError extends Error {
-  span;
-  msg;
-  level;
+  /** @type {ParseSourceSpan} */ span;
+  /** @type {string} */ msg;
+  /** @type {number} */ level;
   relatedError;
-  constructor(span, /** @type {string} */ msg, level = ParseErrorLevel.ERROR, relatedError) {
+  constructor(/** @type {ParseSourceSpan} */ span, /** @type {string} */ msg, level = ParseErrorLevel.ERROR, relatedError) {
     super(msg);
     this.span = span;
     this.msg = msg;
@@ -7971,10 +7971,10 @@ function createInterpolateTextOp(xref, interpolation, sourceSpan) {
   };
 }
 class Interpolation {
-  strings;
-  expressions;
-  i18nPlaceholders;
-  constructor(strings, expressions, i18nPlaceholders) {
+  /** @type {any[]} */ strings;
+  /** @type {any[]} */ expressions;
+  /** @type {any[]} */ i18nPlaceholders;
+  constructor(/** @type {any[]} */ strings, /** @type {any[]} */ expressions, /** @type {any[]} */ i18nPlaceholders) {
     this.strings = strings;
     this.expressions = expressions;
     this.i18nPlaceholders = i18nPlaceholders;
@@ -15744,16 +15744,16 @@ var StringTokenKind;
 })(StringTokenKind || (StringTokenKind = {}));
 const KEYWORDS = ['var', 'let', 'as', 'null', 'undefined', 'true', 'false', 'if', 'else', 'this', 'typeof', 'void', 'in', 'instanceof'];
 class Lexer {
-  /** @returns {any[]} */ tokenize(/** @type {string | undefined} */ text) {
+  /** @returns {Token[]} */ tokenize(/** @type {string | undefined} */ text) {
     return new _Scanner(text).scan();
   }
 }
 class Token {
-  index;
-  end;
-  type;
-  numValue;
-  strValue;
+  /** @type {number} */ index;
+  /** @type {number} */ end;
+  /** @type {number} */ type;
+  /** @type {number} */ numValue;
+  /** @type {string} */ strValue;
   constructor(/** @type {number} */ index, /** @type {number} */ end, /** @type {number} */ type, /** @type {number} */ numValue, /** @type {string} */ strValue) {
     this.index = index;
     this.end = end;
@@ -15856,53 +15856,53 @@ class Token {
   }
 }
 class StringToken extends Token {
-  kind;
+  /** @type {number} */ kind;
   constructor(/** @type {number} */ index, /** @type {number} */ end, /** @type {string} */ strValue, /** @type {number} */ kind) {
     super(index, end, TokenType.String, 0, strValue);
     this.kind = kind;
   }
 }
-function newCharacterToken(/** @type {number} */ index, /** @type {number} */ end, /** @type {number} */ code) {
+/** @returns {Token} */ function newCharacterToken(/** @type {number} */ index, /** @type {number} */ end, /** @type {number} */ code) {
   return new Token(index, end, TokenType.Character, code, String.fromCharCode(code));
 }
-function newIdentifierToken(/** @type {number} */ index, /** @type {number} */ end, /** @type {string} */ text) {
+/** @returns {Token} */ function newIdentifierToken(/** @type {number} */ index, /** @type {number} */ end, /** @type {string} */ text) {
   return new Token(index, end, TokenType.Identifier, 0, text);
 }
 function newPrivateIdentifierToken(index, end, text) {
   return new Token(index, end, TokenType.PrivateIdentifier, 0, text);
 }
-function newKeywordToken(/** @type {number} */ index, /** @type {number} */ end, /** @type {string} */ text) {
+/** @returns {Token} */ function newKeywordToken(/** @type {number} */ index, /** @type {number} */ end, /** @type {string} */ text) {
   return new Token(index, end, TokenType.Keyword, 0, text);
 }
-function newOperatorToken(/** @type {number} */ index, /** @type {number} */ end, /** @type {string} */ text) {
+/** @returns {Token} */ function newOperatorToken(/** @type {number} */ index, /** @type {number} */ end, /** @type {string} */ text) {
   return new Token(index, end, TokenType.Operator, 0, text);
 }
-function newNumberToken(/** @type {number} */ index, /** @type {number} */ end, /** @type {number} */ n) {
+/** @returns {Token} */ function newNumberToken(/** @type {number} */ index, /** @type {number} */ end, /** @type {number} */ n) {
   return new Token(index, end, TokenType.Number, n, '');
 }
 function newErrorToken(index, end, message) {
   return new Token(index, end, TokenType.Error, 0, message);
 }
-function newRegExpBodyToken(/** @type {number} */ index, /** @type {number} */ end, /** @type {string} */ text) {
+/** @returns {Token} */ function newRegExpBodyToken(/** @type {number} */ index, /** @type {number} */ end, /** @type {string} */ text) {
   return new Token(index, end, TokenType.RegExpBody, 0, text);
 }
-function newRegExpFlagsToken(/** @type {number} */ index, /** @type {number} */ end, /** @type {string} */ text) {
+/** @returns {Token} */ function newRegExpFlagsToken(/** @type {number} */ index, /** @type {number} */ end, /** @type {string} */ text) {
   return new Token(index, end, TokenType.RegExpFlags, 0, text);
 }
 const EOF = new Token(-1, -1, TokenType.Character, 0, '');
 class _Scanner {
-  input;
-  tokens = [];
-  length;
-  peek = 0;
-  index = -1;
+  /** @type {string} */ input;
+  /** @type {Token[]} */ tokens = [];
+  /** @type {number} */ length;
+  /** @type {number} */ peek = 0;
+  /** @type {number} */ index = -1;
   braceStack = [];
   constructor(/** @type {string} */ input) {
     this.input = input;
     this.length = input.length;
     this.advance();
   }
-  /** @returns {any[]} */ scan() {
+  /** @returns {Token[]} */ scan() {
     let token = this.scanToken();
     while (token !== null) {
       this.tokens.push(token);
@@ -15913,7 +15913,7 @@ class _Scanner {
   advance() {
     this.peek = ++this.index >= this.length ? $EOF : this.input.charCodeAt(this.index);
   }
-  scanToken() {
+  /** @returns {Token | null} */ scanToken() {
     const input = this.input;
     const length = this.length;
     let peek = this.peek;
@@ -16005,7 +16005,7 @@ class _Scanner {
     this.advance();
     return this.error(`Unexpected character [${String.fromCharCode(peek)}]`, 0);
   }
-  scanCharacter(/** @type {number} */ start, /** @type {number} */ code) {
+  /** @returns {Token} */ scanCharacter(/** @type {number} */ start, /** @type {number} */ code) {
     this.advance();
     return newCharacterToken(start, this.index, code);
   }
@@ -16013,7 +16013,7 @@ class _Scanner {
     this.advance();
     return newOperatorToken(start, this.index, str);
   }
-  scanOpenBrace(/** @type {number} */ start, /** @type {number} */ code) {
+  /** @returns {Token} */ scanOpenBrace(/** @type {number} */ start, /** @type {number} */ code) {
     this.braceStack.push('expression');
     this.advance();
     return newCharacterToken(start, this.index, code);
@@ -16027,7 +16027,7 @@ class _Scanner {
     }
     return newCharacterToken(start, this.index, code);
   }
-  scanComplexOperator(/** @type {number} */ start, /** @type {string} */ one, /** @type {number} */ twoCode, /** @type {string} */ two, /** @type {number | undefined} */ threeCode, /** @type {string | undefined} */ three) {
+  /** @returns {Token} */ scanComplexOperator(/** @type {number} */ start, /** @type {string} */ one, /** @type {number} */ twoCode, /** @type {string} */ two, /** @type {number | undefined} */ threeCode, /** @type {string | undefined} */ three) {
     this.advance();
     let str = one;
     if (this.peek == twoCode) {
@@ -16040,7 +16040,7 @@ class _Scanner {
     }
     return newOperatorToken(start, this.index, str);
   }
-  scanEquals(/** @type {number} */ start) {
+  /** @returns {Token} */ scanEquals(/** @type {number} */ start) {
     this.advance();
     let str = '=';
     if (this.peek === $EQ) {
@@ -16057,7 +16057,7 @@ class _Scanner {
     }
     return newOperatorToken(start, this.index, str);
   }
-  scanIdentifier() {
+  /** @returns {Token} */ scanIdentifier() {
     const start = this.index;
     this.advance();
     while (isIdentifierPart(this.peek)) this.advance();
@@ -16074,7 +16074,7 @@ class _Scanner {
     const identifierName = this.input.substring(start, this.index);
     return newPrivateIdentifierToken(start, this.index, identifierName);
   }
-  scanNumber(/** @type {number} */ start) {
+  /** @returns {Token} */ scanNumber(/** @type {number} */ start) {
     let simple = this.index === start;
     let hasSeparators = false;
     this.advance();
@@ -16128,7 +16128,7 @@ class _Scanner {
     this.advance();
     return new StringToken(start, this.index, buffer + last, StringTokenKind.Plain);
   }
-  scanQuestion(/** @type {number} */ start) {
+  /** @returns {Token} */ scanQuestion(/** @type {number} */ start) {
     this.advance();
     let operator = '?';
     if (this.peek === $QUESTION) {
@@ -16199,7 +16199,7 @@ class _Scanner {
     buffer += String.fromCharCode(unescapedCode);
     return buffer;
   }
-  scanStar(/** @type {number} */ start) {
+  /** @returns {Token} */ scanStar(/** @type {number} */ start) {
     this.advance();
     let operator = '*';
     if (this.peek === $STAR) {
@@ -16227,7 +16227,7 @@ class _Scanner {
     }
     return prevToken.type === TokenType.Operator || prevToken.isCharacter($LPAREN) || prevToken.isCharacter($LBRACKET) || prevToken.isCharacter($COMMA) || prevToken.isCharacter($COLON);
   }
-  scanRegex(/** @type {number} */ tokenStart) {
+  /** @returns {Token} */ scanRegex(/** @type {number} */ tokenStart) {
     this.advance();
     const textStart = this.index;
     let inEscape = false;
@@ -16260,7 +16260,7 @@ class _Scanner {
     }
     return bodyToken;
   }
-  scanRegexFlags(/** @type {number} */ start) {
+  /** @returns {Token | null} */ scanRegexFlags(/** @type {number} */ start) {
     if (!isAsciiLetter(this.peek)) {
       return null;
     }
@@ -16326,17 +16326,17 @@ class TemplateBindingParseResult {
     this.errors = errors;
   }
 }
-/** @returns {string} */ function getLocation(span) {
+/** @returns {string} */ function getLocation(/** @type {ParseSourceSpan} */ span) {
   return span.start.toString() || '(unknown)';
 }
 class Parser {
-  _lexer;
-  _supportsDirectPipeReferences;
-  constructor(_lexer, _supportsDirectPipeReferences = false) {
+  /** @type {Lexer} */ _lexer;
+  /** @type {boolean} */ _supportsDirectPipeReferences;
+  constructor(/** @type {Lexer} */ _lexer, _supportsDirectPipeReferences = false) {
     this._lexer = _lexer;
     this._supportsDirectPipeReferences = _supportsDirectPipeReferences;
   }
-  parseAction(/** @type {string} */ input, parseSourceSpan, /** @type {number} */ absoluteOffset) {
+  /** @returns {ASTWithSource} */ parseAction(/** @type {string} */ input, /** @type {ParseSourceSpan} */ parseSourceSpan, /** @type {number} */ absoluteOffset) {
     const errors = [];
     this._checkNoInterpolation(errors, input, parseSourceSpan);
     const {
@@ -16346,7 +16346,7 @@ class Parser {
     const ast = new _ParseAST(input, parseSourceSpan, absoluteOffset, tokens, 1, errors, 0, this._supportsDirectPipeReferences).parseChain();
     return new ASTWithSource(ast, input, getLocation(parseSourceSpan), absoluteOffset, errors);
   }
-  parseBinding(/** @type {string} */ input, parseSourceSpan, /** @type {number} */ absoluteOffset) {
+  /** @returns {ASTWithSource} */ parseBinding(/** @type {string} */ input, /** @type {ParseSourceSpan} */ parseSourceSpan, /** @type {number} */ absoluteOffset) {
     const errors = [];
     const ast = this._parseBindingAst(input, parseSourceSpan, absoluteOffset, errors);
     return new ASTWithSource(ast, input, getLocation(parseSourceSpan), absoluteOffset, errors);
@@ -16365,7 +16365,7 @@ class Parser {
     }
     return new ASTWithSource(ast, input, getLocation(parseSourceSpan), absoluteOffset, errors);
   }
-  _parseBindingAst(/** @type {string} */ input, parseSourceSpan, /** @type {number} */ absoluteOffset, /** @type {any[]} */ errors) {
+  _parseBindingAst(/** @type {string} */ input, /** @type {ParseSourceSpan} */ parseSourceSpan, /** @type {number} */ absoluteOffset, /** @type {any[]} */ errors) {
     this._checkNoInterpolation(errors, input, parseSourceSpan);
     const {
       stripped: sourceToLex
@@ -16373,7 +16373,7 @@ class Parser {
     const tokens = this._lexer.tokenize(sourceToLex);
     return new _ParseAST(input, parseSourceSpan, absoluteOffset, tokens, 0, errors, 0, this._supportsDirectPipeReferences).parseChain();
   }
-  parseTemplateBindings(/** @type {string} */ templateKey, /** @type {string | undefined} */ templateValue, parseSourceSpan, absoluteKeyOffset, absoluteValueOffset) {
+  /** @returns {TemplateBindingParseResult} */ parseTemplateBindings(/** @type {string} */ templateKey, /** @type {string | undefined} */ templateValue, /** @type {ParseSourceSpan | undefined} */ parseSourceSpan, absoluteKeyOffset, absoluteValueOffset) {
     const tokens = this._lexer.tokenize(templateValue);
     const errors = [];
     const parser = new _ParseAST(templateValue, parseSourceSpan, absoluteValueOffset, tokens, 0, errors, 0, this._supportsDirectPipeReferences);
@@ -16408,7 +16408,7 @@ class Parser {
     }
     return this.createInterpolationAst(strings.map(s => s.text), expressionNodes, input, getLocation(parseSourceSpan), absoluteOffset, errors);
   }
-  parseInterpolationExpression(/** @type {string} */ expression, parseSourceSpan, absoluteOffset) {
+  /** @returns {ASTWithSource} */ parseInterpolationExpression(/** @type {string} */ expression, /** @type {ParseSourceSpan} */ parseSourceSpan, absoluteOffset) {
     const {
       stripped: sourceToLex
     } = this._stripComments(expression);
@@ -16418,7 +16418,7 @@ class Parser {
     const strings = ['', ''];
     return this.createInterpolationAst(strings, [ast], expression, getLocation(parseSourceSpan), absoluteOffset, errors);
   }
-  createInterpolationAst(/** @type {any[]} */ strings, /** @type {any[]} */ expressions, /** @type {string} */ input, /** @type {string} */ location, /** @type {number} */ absoluteOffset, /** @type {any[]} */ errors) {
+  /** @returns {ASTWithSource} */ createInterpolationAst(/** @type {any[]} */ strings, /** @type {any[]} */ expressions, /** @type {string} */ input, /** @type {string} */ location, /** @type {number} */ absoluteOffset, /** @type {any[]} */ errors) {
     const span = new ParseSpan(0, input.length);
     const interpolation = new Interpolation$1(span, span.toAbsolute(absoluteOffset), strings, expressions);
     return new ASTWithSource(interpolation, input, location, absoluteOffset, errors);
@@ -16516,7 +16516,7 @@ class Parser {
     }
     return null;
   }
-  _checkNoInterpolation(/** @type {any[]} */ errors, /** @type {string} */ input, parseSourceSpan) {
+  _checkNoInterpolation(/** @type {any[]} */ errors, /** @type {string} */ input, /** @type {ParseSourceSpan} */ parseSourceSpan) {
     let startIndex = -1;
     let endIndex = -1;
     for (const charIndex of this._forEachUnquotedChar(input, 0)) {
@@ -16567,21 +16567,21 @@ var ParseContextFlags;
 })(ParseContextFlags || (ParseContextFlags = {}));
 const SUPPORTED_REGEX_FLAGS = new Set(['d', 'g', 'i', 'm', 's', 'u', 'v', 'y']);
 class _ParseAST {
-  input;
-  parseSourceSpan;
-  absoluteOffset;
-  tokens;
-  parseFlags;
+  /** @type {string} */ input;
+  /** @type {ParseSourceSpan} */ parseSourceSpan;
+  /** @type {number} */ absoluteOffset;
+  /** @type {Token[]} */ tokens;
+  /** @type {number} */ parseFlags;
   errors;
-  offset;
-  supportsDirectPipeReferences;
-  rparensExpected = 0;
-  rbracketsExpected = 0;
-  rbracesExpected = 0;
+  /** @type {number} */ offset;
+  /** @type {boolean} */ supportsDirectPipeReferences;
+  /** @type {number} */ rparensExpected = 0;
+  /** @type {number} */ rbracketsExpected = 0;
+  /** @type {number} */ rbracesExpected = 0;
   context = ParseContextFlags.None;
   sourceSpanCache = new Map();
-  index = 0;
-  constructor(/** @type {string} */ input, parseSourceSpan, /** @type {number} */ absoluteOffset, /** @type {any[]} */ tokens, /** @type {number} */ parseFlags, /** @type {any[]} */ errors, /** @type {number} */ offset, /** @type {boolean} */ supportsDirectPipeReferences) {
+  /** @type {number} */ index = 0;
+  constructor(/** @type {string} */ input, /** @type {ParseSourceSpan} */ parseSourceSpan, /** @type {number} */ absoluteOffset, /** @type {Token[]} */ tokens, /** @type {number} */ parseFlags, /** @type {any[]} */ errors, /** @type {number} */ offset, /** @type {boolean} */ supportsDirectPipeReferences) {
     this.input = input;
     this.parseSourceSpan = parseSourceSpan;
     this.absoluteOffset = absoluteOffset;
@@ -16591,11 +16591,11 @@ class _ParseAST {
     this.offset = offset;
     this.supportsDirectPipeReferences = supportsDirectPipeReferences;
   }
-  peek(offset) {
+  /** @returns {Token} */ peek(/** @type {number} */ offset) {
     const i = this.index + offset;
     return i < this.tokens.length ? this.tokens[i] : EOF;
   }
-  get next() {
+  /** @returns {Token} */ get next() {
     return this.peek(0);
   }
   /** @returns {boolean} */ get atEOF() {
@@ -16617,7 +16617,7 @@ class _ParseAST {
   /** @returns {number} */ get currentAbsoluteOffset() {
     return this.absoluteOffset + this.inputIndex;
   }
-  span(/** @type {number} */ start, /** @type {number | undefined} */ artificialEndIndex) {
+  /** @returns {ParseSpan} */ span(/** @type {number} */ start, /** @type {number | undefined} */ artificialEndIndex) {
     let endIndex = this.currentEndIndex;
     if (artificialEndIndex !== undefined && artificialEndIndex > this.currentEndIndex) {
       endIndex = artificialEndIndex;
@@ -16629,7 +16629,7 @@ class _ParseAST {
     }
     return new ParseSpan(start, endIndex);
   }
-  sourceSpan(/** @type {number} */ start, /** @type {number | undefined} */ artificialEndIndex) {
+  /** @returns {AbsoluteSourceSpan} */ sourceSpan(/** @type {number} */ start, /** @type {number | undefined} */ artificialEndIndex) {
     const serial = `${start}@${this.inputIndex}:${artificialEndIndex}`;
     if (!this.sourceSpanCache.has(serial)) {
       this.sourceSpanCache.set(serial, this.span(start, artificialEndIndex).toAbsolute(this.absoluteOffset));
@@ -17024,7 +17024,7 @@ class _ParseAST {
       return new EmptyExpr$1(this.span(start), this.sourceSpan(start));
     }
   }
-  parseLiteralArray(/** @type {number} */ arrayStart) {
+  /** @returns {LiteralArray} */ parseLiteralArray(/** @type {number} */ arrayStart) {
     this.rbracketsExpected++;
     const elements = [];
     do {
@@ -17040,7 +17040,7 @@ class _ParseAST {
     this.expectCharacter($RBRACKET);
     return new LiteralArray(this.span(arrayStart), this.sourceSpan(arrayStart), elements);
   }
-  parseLiteralMap() {
+  /** @returns {LiteralMap} */ parseLiteralMap() {
     const keys = [];
     const values = [];
     const start = this.inputIndex;
@@ -17142,7 +17142,7 @@ class _ParseAST {
     } while (this.consumeOptionalCharacter($COMMA));
     return positionals;
   }
-  parseSpreadElement() {
+  /** @returns {SpreadElement} */ parseSpreadElement() {
     if (!this.next.isOperator('...')) {
       this.error("Spread element must start with '...' operator");
     }
@@ -17169,7 +17169,7 @@ class _ParseAST {
       span: new AbsoluteSourceSpan(start, start + result.length)
     };
   }
-  parseTemplateBindings(templateKey) {
+  /** @returns {TemplateBindingParseResult} */ parseTemplateBindings(templateKey) {
     const bindings = [];
     bindings.push(...this.parseDirectiveKeywordBindings(templateKey));
     while (this.index < this.tokens.length) {
@@ -17233,7 +17233,7 @@ class _ParseAST {
     }
     return bindings;
   }
-  getDirectiveBoundTarget() {
+  /** @returns {ASTWithSource | null} */ getDirectiveBoundTarget() {
     if (this.next === EOF || this.peekKeywordAs() || this.peekKeywordLet()) {
       return null;
     }
@@ -17245,7 +17245,7 @@ class _ParseAST {
     const value = this.input.substring(start, end);
     return new ASTWithSource(ast, value, getLocation(this.parseSourceSpan), this.absoluteOffset + start, this.errors);
   }
-  parseAsBinding(value) {
+  /** @returns {VariableBinding | null} */ parseAsBinding(value) {
     if (!this.peekKeywordAs()) {
       return null;
     }
@@ -17255,7 +17255,7 @@ class _ParseAST {
     const sourceSpan = new AbsoluteSourceSpan(value.span.start, this.currentAbsoluteOffset);
     return new VariableBinding(sourceSpan, key, value);
   }
-  parseLetBinding() {
+  /** @returns {VariableBinding | null} */ parseLetBinding() {
     if (!this.peekKeywordLet()) {
       return null;
     }
@@ -17274,7 +17274,7 @@ class _ParseAST {
     const template = this.parseNoInterpolationTemplateLiteral();
     return new TaggedTemplateLiteral(this.span(start), this.sourceSpan(start), tag, template);
   }
-  parseNoInterpolationTemplateLiteral() {
+  /** @returns {TemplateLiteral} */ parseNoInterpolationTemplateLiteral() {
     const text = this.next.strValue;
     const start = this.inputIndex;
     this.advance();
@@ -17282,11 +17282,11 @@ class _ParseAST {
     const sourceSpan = this.sourceSpan(start);
     return new TemplateLiteral(span, sourceSpan, [new TemplateLiteralElement(span, sourceSpan, text)], []);
   }
-  parseTaggedTemplateLiteral(tag, /** @type {number} */ start) {
+  /** @returns {TaggedTemplateLiteral} */ parseTaggedTemplateLiteral(/** @type {PropertyRead} */ tag, /** @type {number} */ start) {
     const template = this.parseTemplateLiteral();
     return new TaggedTemplateLiteral(this.span(start), this.sourceSpan(start), tag, template);
   }
-  parseTemplateLiteral() {
+  /** @returns {TemplateLiteral} */ parseTemplateLiteral() {
     const elements = [];
     const expressions = [];
     const start = this.inputIndex;
@@ -17341,7 +17341,7 @@ class _ParseAST {
     const end = flagsToken ? flagsToken.end : bodyToken.end;
     return new RegularExpressionLiteral(this.span(start, end), this.sourceSpan(start, end), bodyToken.strValue, flagsToken ? flagsToken.strValue : null);
   }
-  parseArrowFunction(/** @type {number} */ start) {
+  /** @returns {ArrowFunction} */ parseArrowFunction(/** @type {number} */ start) {
     let params;
     if (this.next.isIdentifier()) {
       const token = this.next;
@@ -17390,7 +17390,7 @@ class _ParseAST {
     }
     return params;
   }
-  getArrowFunctionIdentifierArg(token) {
+  /** @returns {ArrowFunctionIdentifierParameter} */ getArrowFunctionIdentifierArg(/** @type {Token} */ token) {
     return new ArrowFunctionIdentifierParameter(token.strValue, this.span(token.index), this.sourceSpan(token.index));
   }
   /** @returns {boolean} */ isArrowFunction() {
@@ -17441,7 +17441,7 @@ class _ParseAST {
     }
   }
 }
-function getParseError(/** @type {string} */ message, /** @type {string} */ input, /** @type {string} */ locationText, parseSourceSpan) {
+/** @returns {ParseError} */ function getParseError(/** @type {string} */ message, /** @type {string} */ input, /** @type {string} */ locationText, /** @type {ParseSourceSpan} */ parseSourceSpan) {
   if (locationText.length > 0) {
     locationText = ` ${locationText} `;
   }
@@ -26939,7 +26939,7 @@ function compileService(meta, resolveForwardRefs) {
 }
 
 class CompilerFacadeImpl {
-  jitEvaluator;
+  /** @type {JitEvaluator} */ jitEvaluator;
   FactoryTarget = FactoryTarget;
   ResourceLoader = ResourceLoader;
   elementSchemaRegistry = new DomElementSchemaRegistry();

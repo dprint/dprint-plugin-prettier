@@ -6,7 +6,7 @@ const commonProperties = {
 	async: false,
 	expression: true
 };
-const visitArrowFunction = (/** @type {import("../../../../../../prettier/node_modules/@angular/compiler/fesm2022/compiler.mjs").ArrowFunction} */ node, transformer) => ({
+const visitArrowFunction = (/** @type {import("../../../../../../prettier/node_modules/@angular/compiler/fesm2022/compiler.mjs").ArrowFunction} */ node, /** @type {import("../node-transformer.js").NodeTransformer} */ transformer) => ({
 	type: "ArrowFunctionExpression",
 	params: node.parameters.map((/** @type {import("../../../../../../prettier/node_modules/@angular/compiler/fesm2022/compiler.mjs").ArrowFunctionIdentifierParameter} */ parameter) => transformer.createNode({
 		type: "Identifier",

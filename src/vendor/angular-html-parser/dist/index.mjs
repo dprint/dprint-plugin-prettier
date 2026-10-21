@@ -8,7 +8,7 @@ import { HtmlParser } from "./compiler/src/ml_parser/html_parser.mjs";
 import { XmlParser } from "./compiler/src/ml_parser/xml_parser.mjs";
 //#region src/index.ts
 let htmlParser;
-function parseHtml(/** @type {string} */ input, options = {}) {
+/** @returns {import("./compiler/src/ml_parser/parser.mjs").ParseTreeResult} */ function parseHtml(/** @type {string} */ input, options = {}) {
 	const { canSelfClose = false, allowHtmComponentClosingTags = false, allowStartTagComments = false, isTagNameCaseSensitive = false, getTagContentType, tokenizeAngularBlocks = false, tokenizeAngularLetDeclaration = false, enableAngularSelectorlessSyntax = false } = options;
 	htmlParser ?? (htmlParser = new HtmlParser());
 	return htmlParser.parse(input, "angular-html-parser", {

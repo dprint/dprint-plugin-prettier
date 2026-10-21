@@ -1,8 +1,9 @@
+// @nts-check
 import { isOptionalObjectOrCallee } from "../../utilities.js";
 //#region src/ast-transform/transforms/transform-call-expression.ts
 const callOptions = { optional: false };
 const safeCallOptions = { optional: true };
-const transformCall = ({ optional }) => (node, transformer) => {
+const transformCall = ({ optional }) => (node, /** @type {import("../node-transformer.js").NodeTransformer} */ transformer) => {
 	const arguments_ = transformer.transformChildren(node.args);
 	const callee = transformer.transformChild(node.receiver);
 	if (optional || isOptionalObjectOrCallee(callee)) return {

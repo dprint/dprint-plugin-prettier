@@ -1,3 +1,4 @@
+// @nts-check
 import { isOptionalObjectOrCallee } from "../../utilities.js";
 import { ImplicitReceiver } from "@angular/compiler";
 //#region src/ast-transform/transforms/transform-member-expression.ts
@@ -17,7 +18,7 @@ const safePropertyReadOptions = {
 	computed: false,
 	optional: true
 };
-const transformMemberExpression = ({ computed, optional }) => (node, transformer) => {
+const transformMemberExpression = ({ computed, optional }) => (node, /** @type {import("../node-transformer.js").NodeTransformer} */ transformer) => {
 	const { receiver } = node;
 	let property;
 	if (computed) {

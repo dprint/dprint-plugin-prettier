@@ -2,7 +2,7 @@
 import { getCharacterIndex, sourceSpanToLocationInformation } from "./utilities.js";
 //#region src/source.ts
 var Source = class {
-	text;
+	/** @type {string} */ text;
 	constructor(/** @type {string} */ text) {
 		this.text = text;
 	}

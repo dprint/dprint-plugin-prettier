@@ -131,11 +131,11 @@ let ParseErrorLevel = /* @__PURE__ */ function(ParseErrorLevel) {
 	return ParseErrorLevel;
 }({});
 var ParseError = class extends Error {
-	span;
-	msg;
-	level;
+	/** @type {ParseSourceSpan} */ span;
+	/** @type {string} */ msg;
+	/** @type {number} */ level;
 	relatedError;
-	constructor(span, /** @type {string} */ msg, level = 1, relatedError) {
+	constructor(/** @type {ParseSourceSpan} */ span, /** @type {string} */ msg, level = 1, relatedError) {
 		super(msg);
 		this.span = span;
 		this.msg = msg;

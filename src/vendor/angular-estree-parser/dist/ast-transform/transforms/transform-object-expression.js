@@ -1,6 +1,6 @@
 // @nts-check
 //#region src/ast-transform/transforms/transform-object-expression.ts
-const visitLiteralMap = (/** @type {import("../../../../../../prettier/node_modules/@angular/compiler/fesm2022/compiler.mjs").LiteralMap} */ node, transformer) => {
+const visitLiteralMap = (/** @type {import("../../../../../../prettier/node_modules/@angular/compiler/fesm2022/compiler.mjs").LiteralMap} */ node, /** @type {import("../node-transformer.js").NodeTransformer} */ transformer) => {
 	const { keys, values } = node;
 	const createChild = (properties, location = node) => transformer.create(properties, location, [node, ...transformer.ancestors]);
 	return {

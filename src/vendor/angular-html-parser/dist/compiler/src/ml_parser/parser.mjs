@@ -17,7 +17,7 @@ var TreeError = class TreeError extends ParseError {
 	static create(elementName, span, msg) {
 		return new TreeError(elementName, span, msg);
 	}
-	constructor(/** @type {string | null} */ elementName, span, /** @type {string} */ msg) {
+	constructor(/** @type {string | null} */ elementName, /** @type {ParseSourceSpan} */ span, /** @type {string} */ msg) {
 		super(span, msg);
 		this.elementName = elementName;
 	}
@@ -153,7 +153,7 @@ var _TreeBuilder = class _TreeBuilder {
 		this._addToParent(new Expansion(switchValue.parts[0], type.parts[0], cases, sourceSpan, switchValue.sourceSpan));
 		this._advance();
 	}
-	_parseExpansionCase() {
+	/** @returns {ExpansionCase | null} */ _parseExpansionCase() {
 		const value = this._advance();
 		if (this._peek.type !== 23) {
 			this.errors.push(TreeError.create(null, this._peek.sourceSpan, `Invalid ICU message. Missing '{'.`));
@@ -351,7 +351,7 @@ var _TreeBuilder = class _TreeBuilder {
 	* opening tag is recovered).
 	* @returns {boolean}
 	*/
-	_popContainer(/** @type {string | null} */ expectedName, expectedType, endSourceSpan) {
+	_popContainer(/** @type {string | null} */ expectedName, expectedType, /** @type {ParseSourceSpan | null} */ endSourceSpan) {
 		let unexpectedCloseTagDetected = false;
 		for (let stackIndex = this._containerStack.length - 1; stackIndex >= 0; stackIndex--) {
 			var _this$_getTagDefiniti7;
