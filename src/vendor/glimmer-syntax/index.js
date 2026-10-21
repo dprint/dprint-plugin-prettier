@@ -413,6 +413,11 @@ function getFirst(/** @type {any[]} */ list) {
 }
 
 /**
+@import {GlimmerPendingNode, GlimmerPendingAttribute} from "glimmer-parser-types"
+@import {HbsNode} from "@handlebars/parser"
+*/
+
+/**
 @typedef {{ line: number, column: number }} SourcePosition
 @typedef {{ start: HbsPosition, end: HbsPosition }} HbsPositions
 @typedef {{ start: CharPosition, end: CharPosition }} CharPositions
@@ -475,7 +480,7 @@ class When {
     }
 }
 
-function match(callback) {
+/** @returns {(left: any, right: any) => any} */ function match(/** @type {(m: Matcher) => Matcher} */ callback) {
     return callback(new Matcher).validate();
 }
 
@@ -2033,11 +2038,14 @@ class {
  * @property {EventedTokenizer} tokenizer
  * @property {string[]} lines
  * @property {Source} source
+ * @property {any[]} elementStack
+ * @property {GlimmerPendingNode | null} currentNode
+ * @property {GlimmerPendingAttribute | null} currentAttribute
  */
 class Parser {
     constructor(/** @type {Source} */ source, entityParser = new EntityParser(HTML5NamedCharRefs), mode = "precompile") {
         this.elementStack = [], this.currentAttribute = null, this.currentNode = null, this.source = source, 
-        this.lines = source.source.split(/\r\n?|\n/u), this.tokenizer = new EventedTokenizer(this, entityParser, mode);
+        this.lines = source.source.split(/\r\n?|\n/u), this.tokenizer = new EventedTokenizer(/** @type {TokenizerEventHandlers} */ (this), entityParser, mode);
     }
     /** @returns {SourceOffset} */ offset() {
         let {line: line, column: column} = this.tokenizer;
@@ -2052,36 +2060,36 @@ class Parser {
         });
         // node.loc = node.loc.withEnd(end);
         }
-    get currentAttr() {
+    /** @returns {GlimmerPendingAttribute} */ get currentAttr() {
         return this.currentAttribute;
     }
-    get currentTag() {
+    /** @returns {GlimmerPendingNode} */ get currentTag() {
         let node = this.currentNode;
         return node && ("StartTag" === node.type || node.type), node;
     }
-    get currentStartTag() {
+    /** @returns {GlimmerPendingNode} */ get currentStartTag() {
         let node = this.currentNode;
         return node && node.type, node;
     }
-    get currentEndTag() {
+    /** @returns {GlimmerPendingNode} */ get currentEndTag() {
         let node = this.currentNode;
         return node && node.type, node;
     }
-    get currentComment() {
+    /** @returns {GlimmerPendingNode} */ get currentComment() {
         let node = this.currentNode;
         return node && node.type, node;
     }
-    get currentData() {
+    /** @returns {GlimmerPendingNode} */ get currentData() {
         let node = this.currentNode;
         return node && node.type, node;
     }
-    acceptNode(node) {
+    acceptNode(/** @type {HbsNode} */ node) {
         return this[node.type](node);
     }
     currentElement() {
         return getLast(this.elementStack);
     }
-    sourceForNode(node, endNode) {
+    sourceForNode(/** @type {HbsNode} */ node, endNode) {
         let line, lastLine, lastColumn, firstLine = node.loc.start.line - 1, currentLine = firstLine - 1, firstColumn = node.loc.start.column, string = [];
         for (endNode ? (lastLine = endNode.loc.end.line - 1, lastColumn = endNode.loc.end.column) : (lastLine = node.loc.end.line - 1, 
         lastColumn = node.loc.end.column); currentLine < lastLine; ) currentLine++, line = this.lines[currentLine], 
@@ -2091,7 +2099,7 @@ class Parser {
 }
 
 class HandlebarsNodeVisitors extends Parser {
-    parse(program, /** @type {any[] | undefined} */ blockParams) {
+    parse(/** @type {HbsNode} */ program, /** @type {any[] | undefined} */ blockParams) {
         program.loc;
         let node = b.template({
             body: [],
@@ -2103,7 +2111,7 @@ class HandlebarsNodeVisitors extends Parser {
         // into `Template { body: [] }` which is obviously incorrect
         return this.pendingError?.eof(template.loc.getEnd()), template;
     }
-    Program(program, /** @type {any[]} */ blockParams) {
+    Program(/** @type {HbsNode} */ program, /** @type {any[]} */ blockParams) {
         program.loc;
         let node = b.blockItself({
             body: [],
@@ -2113,7 +2121,7 @@ class HandlebarsNodeVisitors extends Parser {
         });
         return this.parseProgram(node, program);
     }
-    parseProgram(node, program) {
+    parseProgram(node, /** @type {HbsNode} */ program) {
         if (0 === program.body.length) return node;
         let poppedNode;
         try {
@@ -2129,7 +2137,7 @@ class HandlebarsNodeVisitors extends Parser {
         }
         return node;
     }
-    BlockStatement(block) {
+    BlockStatement(/** @type {HbsNode} */ block) {
         if ("comment" === this.tokenizer.state) return block.loc, void this.appendToCommentData(this.sourceForNode(block));
         if ("data" !== this.tokenizer.state && "beforeData" !== this.tokenizer.state) throw generateSyntaxError("A block may only be used inside an HTML element or another block.", this.source.spanFor(block.loc));
         const {path: path, params: params, hash: hash} = acceptCallNodes(this, block), loc = this.source.spanFor(block.loc);
@@ -2178,7 +2186,7 @@ class HandlebarsNodeVisitors extends Parser {
         });
         appendChild(this.currentElement(), node);
     }
-    MustacheStatement(rawMustache) {
+    MustacheStatement(/** @type {HbsNode} */ rawMustache) {
         this.pendingError?.mustache(this.source.spanFor(rawMustache.loc));
         const {tokenizer: tokenizer} = this;
         if ("comment" === tokenizer.state) return void this.appendToCommentData(this.sourceForNode(rawMustache));
@@ -2256,7 +2264,7 @@ class HandlebarsNodeVisitors extends Parser {
     startTextPart() {
         this.currentAttr.currentPart = null;
     }
-    ContentStatement(content) {
+    ContentStatement(/** @type {HbsNode} */ content) {
         !function(tokenizer, content) {
             let line = content.loc.start.line, column = content.loc.start.column;
             const offsets = function(/** @type {string} */ original, /** @type {string} */ value) {
@@ -2279,7 +2287,7 @@ class HandlebarsNodeVisitors extends Parser {
             tokenizer.line = line, tokenizer.column = column;
         }(this.tokenizer, content), this.tokenizer.tokenizePart(content.value), this.tokenizer.flushData();
     }
-    CommentStatement(rawComment) {
+    CommentStatement(/** @type {HbsNode} */ rawComment) {
         const {tokenizer: tokenizer} = this;
         if ("comment" === tokenizer.state) return this.appendToCommentData(this.sourceForNode(rawComment)), 
         null;
@@ -2303,19 +2311,19 @@ class HandlebarsNodeVisitors extends Parser {
         }
         return comment;
     }
-    PartialStatement(partial) {
+    PartialStatement(/** @type {HbsNode} */ partial) {
         throw generateSyntaxError("Handlebars partials are not supported", this.source.spanFor(partial.loc));
     }
-    PartialBlockStatement(partialBlock) {
+    PartialBlockStatement(/** @type {HbsNode} */ partialBlock) {
         throw generateSyntaxError("Handlebars partial blocks are not supported", this.source.spanFor(partialBlock.loc));
     }
-    Decorator(decorator) {
+    Decorator(/** @type {HbsNode} */ decorator) {
         throw generateSyntaxError("Handlebars decorators are not supported", this.source.spanFor(decorator.loc));
     }
-    DecoratorBlock(decoratorBlock) {
+    DecoratorBlock(/** @type {HbsNode} */ decoratorBlock) {
         throw generateSyntaxError("Handlebars decorator blocks are not supported", this.source.spanFor(decoratorBlock.loc));
     }
-    SubExpression(sexpr) {
+    SubExpression(/** @type {HbsNode} */ sexpr) {
         const {path: path, params: params, hash: hash} = acceptCallNodes(this, sexpr);
         return b.sexpr({
             path: path,
@@ -2324,7 +2332,7 @@ class HandlebarsNodeVisitors extends Parser {
             loc: this.source.spanFor(sexpr.loc)
         });
     }
-    PathExpression(path) {
+    PathExpression(/** @type {HbsNode} */ path) {
         const {original: original} = path;
         let parts;
         if (-1 !== original.indexOf("/")) {
@@ -2388,7 +2396,7 @@ class HandlebarsNodeVisitors extends Parser {
             loc: this.source.spanFor(path.loc)
         });
     }
-    Hash(hash) {
+    Hash(/** @type {HbsNode} */ hash) {
         const pairs = hash.pairs.map((pair => b.pair({
             key: pair.key,
             value: this.acceptNode(pair.value),
@@ -2399,35 +2407,35 @@ class HandlebarsNodeVisitors extends Parser {
             loc: this.source.spanFor(hash.loc)
         });
     }
-    StringLiteral(string) {
+    StringLiteral(/** @type {HbsNode} */ string) {
         return b.literal({
             type: "StringLiteral",
             value: string.value,
             loc: this.source.spanFor(string.loc)
         });
     }
-    BooleanLiteral(boolean) {
+    BooleanLiteral(/** @type {HbsNode} */ boolean) {
         return b.literal({
             type: "BooleanLiteral",
             value: boolean.value,
             loc: this.source.spanFor(boolean.loc)
         });
     }
-    NumberLiteral(number) {
+    NumberLiteral(/** @type {HbsNode} */ number) {
         return b.literal({
             type: "NumberLiteral",
             value: number.value,
             loc: this.source.spanFor(number.loc)
         });
     }
-    UndefinedLiteral(undef) {
+    UndefinedLiteral(/** @type {HbsNode} */ undef) {
         return b.literal({
             type: "UndefinedLiteral",
             value: void 0,
             loc: this.source.spanFor(undef.loc)
         });
     }
-    NullLiteral(nul) {
+    NullLiteral(/** @type {HbsNode} */ nul) {
         return b.literal({
             type: "NullLiteral",
             value: null,
@@ -2446,7 +2454,7 @@ class HandlebarsNodeVisitors extends Parser {
     }
 }
 
-function acceptCallNodes(/** @type {HandlebarsNodeVisitors} */ compiler, node) {
+function acceptCallNodes(/** @type {HandlebarsNodeVisitors} */ compiler, /** @type {HbsNode} */ node) {
     let path;
     switch (node.path.type) {
       case "PathExpression":
@@ -2498,7 +2506,7 @@ function addElementModifier(element, mustache) {
     element.modifiers.push(modifier);
 }
 
-function repairBlock(/** @type {Source} */ source, block, /** @type {SourceSpan} */ fallbackStart) {
+function repairBlock(/** @type {Source} */ source, /** @type {HbsNode} */ block, /** @type {SourceSpan} */ fallbackStart) {
     // Extend till the beginning of the block
     if (!block.program.loc) {
         const start = block.program.body.at(0), end = block.program.body.at(-1);
@@ -2520,17 +2528,21 @@ function repairBlock(/** @type {Source} */ source, block, /** @type {SourceSpan}
     return /[\t\n\f ]/u.test(char);
 }
 
+/**
+ * What simple-html-tokenizer tells of what it finds, which is the only object that the program gives it
+ * @typedef {TokenizerEventHandlers} GlimmerTokenizerDelegate
+ */
 class TokenizerEventHandlers extends HandlebarsNodeVisitors {
     reset() {
         this.currentNode = null;
     }
     // Comment
     beginComment() {
-        this.currentNode = {
+        this.currentNode = /** @type {GlimmerPendingNode} */ ({
             type: "CommentStatement",
             value: "",
             start: this.source.offsetFor(this.tagOpenLine, this.tagOpenColumn)
-        };
+        });
     }
     appendToCommentData(/** @type {string} */ char) {
         this.currentComment.value += char;
@@ -2540,11 +2552,11 @@ class TokenizerEventHandlers extends HandlebarsNodeVisitors {
     }
     // Data
     beginData() {
-        this.currentNode = {
+        this.currentNode = /** @type {GlimmerPendingNode} */ ({
             type: "TextNode",
             chars: "",
             start: this.offset()
-        };
+        });
     }
     appendToData(/** @type {string} */ char) {
         this.currentData.chars += char;
@@ -2557,7 +2569,7 @@ class TokenizerEventHandlers extends HandlebarsNodeVisitors {
         this.tagOpenLine = this.tokenizer.line, this.tagOpenColumn = this.tokenizer.column;
     }
     beginStartTag() {
-        this.currentNode = {
+        this.currentNode = /** @type {GlimmerPendingNode} */ ({
             type: "StartTag",
             name: "",
             nameStart: null,
@@ -2568,14 +2580,14 @@ class TokenizerEventHandlers extends HandlebarsNodeVisitors {
             params: [],
             selfClosing: !1,
             start: this.source.offsetFor(this.tagOpenLine, this.tagOpenColumn)
-        };
+        });
     }
     beginEndTag() {
-        this.currentNode = {
+        this.currentNode = /** @type {GlimmerPendingNode} */ ({
             type: "EndTag",
             name: "",
             start: this.source.offsetFor(this.tagOpenLine, this.tagOpenColumn)
-        };
+        });
     }
     finishTag() {
         let tag = this.finish(this.currentTag);
@@ -2639,7 +2651,7 @@ class TokenizerEventHandlers extends HandlebarsNodeVisitors {
     // Tags - attributes
     beginAttribute() {
         let offset = this.offset();
-        this.currentAttribute = {
+        this.currentAttribute = /** @type {GlimmerPendingAttribute} */ ({
             name: "",
             parts: [],
             currentPart: null,
@@ -2647,7 +2659,7 @@ class TokenizerEventHandlers extends HandlebarsNodeVisitors {
             isDynamic: !1,
             start: offset,
             valueSpan: offset.collapsed()
-        };
+        });
     }
     appendToAttributeName(/** @type {string} */ char) {
         this.currentAttr.name += char, 

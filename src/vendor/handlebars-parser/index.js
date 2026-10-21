@@ -310,8 +310,11 @@ function omitLeft(body, i, multiple) {
 //#endregion
 //#region lib/parser.js
 /**
- * Where a token or a rule's match is, which jison works out as it goes
- * @typedef {{ first_line: number, last_line: number, first_column: number, last_column: number, range?: any[] }} JisonLocation
+ * Where a token or a rule's match is, which jison works out as it goes, and the lexer, which the parser makes one of for
+ * each input from this one, an interface whose methods are given it
+ * @import {JisonLexer, JisonLocation} from "handlebars-parser-types"
+ */
+/**
  * What a rule gives and where it is, which the parser's action is called on
  * @typedef {{ $: any, _$: JisonLocation }} JisonValue
  * What the parser's actions are given: handlebars' helpers, the location maker and the syntax of literals; the helpers
@@ -345,50 +348,8 @@ function omitLeft(body, i, multiple) {
  *   performAction: any,
  *   parseError: (this: JisonParser, str: string, hash: any) => void,
  *   parse: (this: JisonParser, input: string | undefined) => any,
- *   lexer: any,
+ *   lexer: JisonLexer,
  * }} JisonParser
- * The lexer, which the parser makes one of for each input from this one
- * @typedef {{
- *   EOF: number,
- *   last_line?: any,
- *   yy: any,
- *   yytext: string,
- *   yyleng: number,
- *   yylineno: number,
- *   yylloc: JisonLocation,
- *   match: string,
- *   matched: string,
- *   matches: any,
- *   offset: number,
- *   done: boolean,
- *   _input: string,
- *   _more: boolean,
- *   _backtrack: boolean,
- *   conditionStack: any[],
- *   conditions: Record<string, any>,
- *   rules: any[],
- *   options: any,
- *   parseError: (this: JisonLexer, str: string, hash: any) => any,
- *   setInput: (this: JisonLexer, input: string, yy: any) => JisonLexer,
- *   input: (this: JisonLexer) => string,
- *   unput: (this: JisonLexer, ch: string) => JisonLexer,
- *   more: (this: JisonLexer) => JisonLexer,
- *   reject: (this: JisonLexer) => any,
- *   less: (this: JisonLexer, n: number) => void,
- *   pastInput: (this: JisonLexer) => string,
- *   upcomingInput: (this: JisonLexer) => string,
- *   showPosition: (this: JisonLexer) => string,
- *   test_match: (this: JisonLexer, match: RegExpMatchArray, indexed_rule: number) => any,
- *   next: (this: JisonLexer) => any,
- *   lex: (this: JisonLexer) => any,
- *   begin: (this: JisonLexer, condition: string) => void,
- *   popState: (this: JisonLexer) => string,
- *   _currentRules: (this: JisonLexer) => any,
- *   topState: (this: JisonLexer, n?: number) => string,
- *   pushState: (this: JisonLexer, condition: string) => void,
- *   stateStackSize: (this: JisonLexer) => number,
- *   performAction: any,
- * }} JisonLexer
  */
 var parser = (function() {
 	var o = function(/** @type {any[] | undefined} */ k, /** @type {any[] | undefined} */ v, o, l) {
@@ -1947,7 +1908,7 @@ var parser = (function() {
 		}
 	};
 	parser.lexer = (function() {
-		return {
+		return /** @type {JisonLexer} */ ({
 			EOF: 1,
 			parseError: /** @this {JisonLexer} */ function parseError(str, hash) {
 				if (this.yy.parser) this.yy.parser.parseError(str, hash);
@@ -2381,7 +2342,7 @@ var parser = (function() {
 					"inclusive": true
 				}
 			}
-		};
+		});
 	})();
 	function Parser() {
 		this.yy = {};

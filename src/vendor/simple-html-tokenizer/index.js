@@ -1,4 +1,5 @@
 // @nts-check
+/** @import {GlimmerTokenizerDelegate} from "@glimmer/syntax" */
 /**
  * generated from https://raw.githubusercontent.com/w3c/html/26b5126f96f736f796b9e29718138919dd513744/entities.json
  * do not edit
@@ -48,9 +49,9 @@ var EntityParser = /** @class */ (function () {
 }
 
 var EventedTokenizer = /** @class */ (function () {
-    function EventedTokenizer(delegate, /** @type {EntityParser} */ entityParser, /** @type {string} */ mode) {
+    function EventedTokenizer(/** @type {GlimmerTokenizerDelegate} */ delegate, /** @type {EntityParser} */ entityParser, /** @type {string} */ mode) {
         if (mode === void 0) { mode = 'precompile'; }
-        this.delegate = delegate;
+        /** @type {GlimmerTokenizerDelegate} */ this.delegate = delegate;
         this.entityParser = entityParser;
         this.mode = mode;
         this.state = "beforeData" /* beforeData */;
