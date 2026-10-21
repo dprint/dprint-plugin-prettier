@@ -14490,7 +14490,7 @@ function xg(/** @type {string} */ e, /** @type {number} */ t, a, s, f) {
 function Tg(e, t, a, s, f) {
   return Nl(!0, e, t, !0, a, s, f);
 }
-function Zm(/** @type {number} */ e, t, a, s, f, h = []) {
+function Zm(/** @type {number} */ e, /** @type {number} */ t, /** @type {number} */ a, /** @type {boolean} */ s, f, h = []) {
   return (h.push({ kind: a, pos: e, end: t, hasTrailingNewLine: s }), h);
 }
 function Bp(/** @type {string} */ e, /** @type {number} */ t) {
@@ -14503,7 +14503,7 @@ function lf(/** @type {string} */ e) {
   let t = cf.exec(e);
   if (t) return t[0];
 }
-/** @returns {boolean} */ function tr(/** @type {number} */ e, t) {
+/** @returns {boolean} */ function tr(/** @type {number} */ e, /** @type {number} */ t) {
   return of(e) || e === 36 || e === 95 || (e > 127 && mg(e, t));
 }
 /** @returns {boolean} */ function Nr(/** @type {int} */ e, /** @type {number} */ t, /** @type {number | undefined} */ a) {
@@ -14969,7 +14969,7 @@ function uf(/** @type {number} */ e, /** @type {boolean} */ t, a = 0, s, f, h, b
     }
     return (k = 80);
   }
-  function zn(U) {
+  /** @returns {string} */ function zn(/** @type {number} */ U) {
     let K = "",
       Z = !1,
       we = !1;
@@ -17180,7 +17180,7 @@ function Kg(e) {
       return n2(e);
   }
 }
-function ia(e) {
+/** @returns {boolean} */ function ia(e) {
   return e && (e.kind === 264 || e.kind === 232);
 }
 function i2(e) {
@@ -17512,7 +17512,7 @@ function c_(e, t, a = !1) {
   let t = e.emitNode;
   return (t && t.flags) || 0;
 }
-function w2(/** @type {string} */ e, t, a) {
+function w2(/** @type {string} */ e, /** @type {number} */ t, /** @type {number} */ a) {
   (q.assertGreaterThanOrEqual(t, 0),
     q.assertGreaterThanOrEqual(a, 0),
     q.assertLessThanOrEqual(t, e.length),
@@ -17917,7 +17917,7 @@ function Dp(e) {
   return !!((e.templateFlags || 0) & 2048);
 }
 function Z2(e) {
-  return e && !!(I1(e) ? Dp(e) : Dp(e.head) || nn(e.templateSpans, (t) => Dp(t.literal)));
+  return e && !!(I1(e) ? Dp(e) : Dp(e.head) || nn(e.templateSpans, /** @returns {boolean} */ (t) => Dp(t.literal)));
 }
 var C3 = new Map(
   Object.entries({
@@ -20650,7 +20650,7 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
     let i = 1024;
     return (r && (i |= 128), i);
   }
-  /** @returns {InstanceType<typeof vh>} */ function iu(/** @type {number} */ r, /** @type {string | undefined} */ i, /** @type {string | undefined} */ _, c) {
+  /** @returns {InstanceType<typeof vh>} */ function iu(/** @type {number} */ r, /** @type {string | undefined} */ i, /** @type {string | undefined} */ _, /** @type {number | undefined} */ c) {
     let d = Zt(r);
     return ((d.text = i), (d.rawText = _), (d.templateFlags = c & 7176), (d.transformFlags = to(d.templateFlags)), d);
   }
@@ -20658,7 +20658,7 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
     let d = ae(r);
     return ((d.text = i), (d.rawText = _), (d.templateFlags = c & 7176), (d.transformFlags = to(d.templateFlags)), d);
   }
-  /** @returns {any} */ function ai(r, /** @type {string | undefined} */ i, /** @type {string | undefined} */ _, c) {
+  /** @returns {any} */ function ai(r, /** @type {string | undefined} */ i, /** @type {string | undefined} */ _, /** @type {number | undefined} */ c) {
     return r === 15 ? ii(r, i, _, c) : iu(r, i, _, c);
   }
   function no(r, i, _) {
@@ -23049,7 +23049,7 @@ function Z1(e) {
 /** @returns {boolean} */ function Ff(e) {
   return e.kind === 261;
 }
-function eh(e) {
+/** @returns {boolean} */ function eh(e) {
   return e.kind === 262;
 }
 function zf(e) {
@@ -24690,7 +24690,7 @@ var na;
   function Yl(o) {
     if (u() === o) return Xl();
   }
-  /** @returns {InstanceType<typeof vh>} */ function Xn(/** @type {number} */ o, p, m) {
+  /** @returns {InstanceType<typeof vh>} */ function Xn(/** @type {number} */ o, p, /** @type {string | undefined} */ m) {
     return ft(o) || Yt(o, !1, p || E._0_expected, m || rt(o));
   }
   function Hl(o) {
@@ -24918,7 +24918,7 @@ var na;
         q.assertNever(o, "Non-exhaustive case in 'isListElement'.");
     }
   }
-  function R_() {
+  /** @returns {boolean} */ function R_() {
     if ((q.assert(u() === 19), B() === 20)) {
       let o = B();
       return o === 28 || o === 19 || o === 96 || o === 119;
@@ -25565,7 +25565,7 @@ var na;
   /** @returns {boolean} */ function ho() {
     return B() === 25;
   }
-  function yo() {
+  /** @returns {boolean} */ function yo() {
     switch (B()) {
       case 21:
       case 30:
@@ -26149,7 +26149,7 @@ var na;
       return Bo(p, x, o, m, g);
     }
   }
-  function Wo() {
+  /** @returns {number} */ function Wo() {
     if (u() === 134) {
       if ((B(), t.hasPrecedingLineBreak() || u() === 39)) return 0;
       let o = Mi(0);
@@ -27047,10 +27047,10 @@ var na;
   function Ec() {
     return (B(), u() === 86 && !t.hasPrecedingLineBreak());
   }
-  function Ac() {
+  /** @returns {boolean} */ function Ac() {
     return (B(), u() === 100 && !t.hasPrecedingLineBreak());
   }
-  function Fs() {
+  /** @returns {boolean} */ function Fs() {
     return (B(), (kt(u()) || u() === 9 || u() === 10 || u() === 11) && !t.hasPrecedingLineBreak());
   }
   /** @returns {boolean} */ function zu() {
@@ -27420,7 +27420,7 @@ var na;
   function Uc() {
     return Pi() && B() === 22;
   }
-  /** @returns {InstanceType<typeof Kf>} */ function oi(/** @type {number} */ o, p, m) {
+  /** @returns {InstanceType<typeof Kf>} */ function oi(/** @type {number} */ o, /** @type {boolean} */ p, m) {
     let g = Rc(!1);
     en();
     let x = bn(m, g);
@@ -27623,7 +27623,7 @@ var na;
   function Hs(o, p, m) {
     return Xs(o, p, m, 264);
   }
-  /** @returns {InstanceType<typeof Kf>} */ function Xs(/** @type {number} */ o, p, m, g) {
+  /** @returns {InstanceType<typeof Kf>} */ function Xs(/** @type {number} */ o, /** @type {boolean} */ p, m, /** @type {number} */ g) {
     let x = Xe();
     j(86);
     let P = np(),
@@ -27706,7 +27706,7 @@ var na;
       p;
     return (j(19) ? ((p = Tn(1, Ht)), j(20)) : (p = fr()), D(y.createModuleBlock(p), o));
   }
-  /** @returns {InstanceType<typeof Kf>} */ function $c(/** @type {number} */ o, /** @type {boolean} */ p, m, g) {
+  /** @returns {InstanceType<typeof Kf>} */ function $c(/** @type {number} */ o, /** @type {boolean} */ p, m, /** @type {number} */ g) {
     let x = g & 32,
       P = g & 8 ? Ut() : vt(),
       Q = Je(25) ? $c(O(), !1, void 0, 8 | x) : Ks(),
@@ -27897,7 +27897,7 @@ var na;
   function bp(o) {
     return D(y.createNamespaceExport(li(Ut)), o);
   }
-  /** @returns {InstanceType<typeof Kf>} */ function rl(/** @type {number} */ o, p, m) {
+  /** @returns {InstanceType<typeof Kf>} */ function rl(/** @type {number} */ o, /** @type {boolean} */ p, m) {
     let g = Xe();
     _t(!0);
     let x,
@@ -29154,7 +29154,7 @@ var Kf = class {
     this.assertHasRealPosition();
     let t = this.getChildren(e);
     if (!t.length) return;
-    let a = Em(t, (s) => s.kind < 310 || s.kind > 352);
+    let a = Em(t, /** @returns {boolean} */ (s) => s.kind < 310 || s.kind > 352);
     return a.kind < 167 ? a : a.getFirstToken(e);
   }
   getLastToken(e) {
@@ -32646,7 +32646,7 @@ function la(e) {
 var R4 = 5,
   U4 = 8,
   B4 = 8,
-  d0 = (/** @type {number} */ e) => (t) => (t.label ? Kt(t.label) : Qt(t) + e),
+  d0 = (/** @type {number} */ e) => /** @returns {number} */ (t) => (t.label ? Kt(t.label) : Qt(t) + e),
   q4 = /** @returns {number} */ (e) => e.__contentEnd ?? ns(e),
   m0 = [
     "ExpressionStatement",
@@ -32691,7 +32691,7 @@ var rs = la(["Block", "CommentBlock", "MultiLine"]),
     "Hashbang",
     "InterpreterDirective",
   ]);
-function is(e, t, a) {
+/** @returns {string} */ function is(e, t, a) {
   if (!e.has(t)) {
     let s = a(t);
     e.set(t, s);
