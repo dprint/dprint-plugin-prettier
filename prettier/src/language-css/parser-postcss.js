@@ -264,7 +264,7 @@ function parseNestedCSS(/** @type {import("./types.js").CssNode} */ node, /** @t
         // `@color:blue;`
         if (node.name.includes(":")) {
           node.variable = true;
-          const parts = node.name.split(":");
+          /** @type {string[]} */ const parts = node.name.split(":");
           node.name = parts[0];
           let value = parts.slice(1).join(":");
 

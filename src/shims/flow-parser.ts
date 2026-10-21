@@ -6,13 +6,33 @@
 import * as deserializerModule from "../vendor/flow-parser/FlowParserDeserializer.js";
 import { getModuleDocblock } from "../vendor/flow-parser/getModuleDocblock.js";
 
-const FlowParserDeserializer: any = (deserializerModule as any).default;
+const FlowParserDeserializer = deserializerModule.default;
+
+// what prettier and the package's defaults give the parser
+type FlowOptions = {
+  flow?: string;
+  babel?: boolean;
+  tokens?: boolean;
+  allowReturnOutsideFunction?: boolean;
+  assertOperator?: boolean;
+  enableEnums?: boolean;
+  enableRecords?: boolean;
+  enableTypes?: boolean;
+  enableTypesPragmaDetection?: boolean;
+  enableExperimentalComponentSyntax?: boolean;
+  enableExperimentalFlowMatchSyntax?: boolean;
+  enableExperimentalFlowRecordSyntax?: boolean;
+  enableExperimentalDecorators?: boolean;
+  sourceType?: string;
+  sourceFilename?: string;
+  throwOnParseErrors?: boolean;
+};
 
 const DEFAULTS = {
   flow: "detect",
 };
 
-export function parse(code: string, opts: any): any {
+export function parse(code: string, opts: FlowOptions | undefined): any {
   const options = getOptions(opts);
   if (options.flow === "all") {
     options.enableTypes = true;
@@ -25,8 +45,8 @@ export function parse(code: string, opts: any): any {
   return parseFlow(code, options);
 }
 
-function getOptions(opts: any): any {
-  const options: any = {
+function getOptions(opts: FlowOptions | undefined): FlowOptions {
+  const options: FlowOptions = {
     ...DEFAULTS,
     ...(opts != null ? opts : {}),
   };
@@ -60,7 +80,7 @@ function getOptions(opts: any): any {
 }
 
 /** FlowParser.parse */
-function parseFlow(source: string, options: any): any {
+function parseFlow(source: string, options: FlowOptions): any {
   flowNative.start();
   const filename = typeof options.sourceFilename === "string" ? options.sourceFilename : "";
   let sourceAddr = 0;

@@ -50,7 +50,9 @@ function printAttribute(/** @type {AstPath} */ path, /** @type {import("../print
     return [node.rawName, "=", value];
   }
 
-  return printers.find(/** @returns {boolean} */ ({ test }) => test(path, options))?.print;
+  return printers.find(
+    /** @returns {boolean} */ (/** @type {AttributeValuePrinter} */ { test }) => test(path, options),
+  )?.print;
 }
 
 /**

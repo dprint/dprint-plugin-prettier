@@ -13,7 +13,7 @@ Check if node matches object name or key path.
 @returns {boolean}
 */
 function isNodeMatchesNameOrPath(node, nameOrPath) {
-  const names = nameOrPath.split(".");
+  /** @type {string[]} */ const names = nameOrPath.split(".");
   for (let index = names.length - 1; index >= 0; index--) {
     /** @type {string} */ const name = names[index];
 
