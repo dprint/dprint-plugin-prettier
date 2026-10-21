@@ -58,7 +58,7 @@ function printAngularControlFlowBlock(/** @type {AstPath} */ path, options, prin
   return group(docs, { shouldBreak: true });
 }
 
-/** @returns {boolean} */ function shouldCloseBlock(/** @type {import("../ast.js").Node} */ node) {
+/** @returns {boolean} */ function shouldCloseBlock(/** @type {import("../parse/ast.js").Node} */ node) {
   return !(
     node.next?.kind === "angularControlFlowBlock" &&
     ANGULAR_CONTROL_FLOW_BLOCK_SETTINGS.get(node.name)?.has(node.next.name)

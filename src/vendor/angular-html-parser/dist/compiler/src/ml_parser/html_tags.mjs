@@ -12,12 +12,12 @@ import { DomElementSchemaRegistry } from "../schema/dom_element_schema_registry.
 var HtmlTagDefinition = class {
 	closedByChildren = {};
 	contentType;
-	closedByParent = false;
-	implicitNamespacePrefix;
-	isVoid;
-	ignoreFirstLf;
-	canSelfClose;
-	preventNamespaceInheritance;
+	/** @type {boolean} */ closedByParent = false;
+	/** @type {string | null} */ implicitNamespacePrefix;
+	/** @type {boolean} */ isVoid;
+	/** @type {boolean} */ ignoreFirstLf;
+	/** @type {boolean} */ canSelfClose;
+	/** @type {boolean} */ preventNamespaceInheritance;
 	constructor({ closedByChildren, implicitNamespacePrefix, contentType = 2, closedByParent = false, isVoid = false, ignoreFirstLf = false, preventNamespaceInheritance = false, canSelfClose = false } = {}) {
 		if (closedByChildren && closedByChildren.length > 0) closedByChildren.forEach(/** @returns {boolean} */ (/** @type {string} */ tagName) => this.closedByChildren[tagName] = true);
 		this.isVoid = isVoid;
@@ -38,7 +38,7 @@ var HtmlTagDefinition = class {
 };
 let DEFAULT_TAG_DEFINITION;
 let TAG_DEFINITIONS;
-function getHtmlTagDefinition(/** @type {string} */ tagName) {
+/** @returns {HtmlTagDefinition} */ function getHtmlTagDefinition(/** @type {string} */ tagName) {
 	if (!TAG_DEFINITIONS) {
 		DEFAULT_TAG_DEFINITION = new HtmlTagDefinition({ canSelfClose: true });
 		TAG_DEFINITIONS = Object.assign(Object.create(null), {

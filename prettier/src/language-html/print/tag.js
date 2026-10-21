@@ -24,14 +24,14 @@ import {
   shouldPreserveContent,
 } from "../utilities/index.js";
 
-/** @returns {any[]} */ function printClosingTag(/** @type {import("../ast.js").Node} */ node, options) {
+/** @returns {any[]} */ function printClosingTag(/** @type {import("../parse/ast.js").Node} */ node, options) {
   return [
     node.isSelfClosing ? "" : printClosingTagStart(node, options),
     printClosingTagEnd(node, options),
   ];
 }
 
-function printClosingTagStart(/** @type {import("../ast.js").Node} */ node, options) {
+function printClosingTagStart(/** @type {import("../parse/ast.js").Node} */ node, options) {
   return node.lastChild &&
     needsToBorrowParentClosingTagStartMarker(node.lastChild)
     ? ""
@@ -41,7 +41,7 @@ function printClosingTagStart(/** @type {import("../ast.js").Node} */ node, opti
       ];
 }
 
-function printClosingTagEnd(/** @type {import("../ast.js").Node} */ node, options) {
+function printClosingTagEnd(/** @type {import("../parse/ast.js").Node} */ node, options) {
   return (
     node.next
       ? needsToBorrowPrevClosingTagEndMarker(node.next)
@@ -54,13 +54,13 @@ function printClosingTagEnd(/** @type {import("../ast.js").Node} */ node, option
       ];
 }
 
-/** @returns {string} */ function printClosingTagPrefix(/** @type {import("../ast.js").Node} */ node, options) {
+/** @returns {string} */ function printClosingTagPrefix(/** @type {import("../parse/ast.js").Node} */ node, options) {
   return needsToBorrowLastChildClosingTagEndMarker(node)
     ? printClosingTagEndMarker(node.lastChild, options)
     : "";
 }
 
-/** @returns {string} */ function printClosingTagSuffix(/** @type {import("../ast.js").Node} */ node, options) {
+/** @returns {string} */ function printClosingTagSuffix(/** @type {import("../parse/ast.js").Node} */ node, options) {
   return needsToBorrowParentClosingTagStartMarker(node)
     ? printClosingTagStartMarker(node.parent, options)
     : needsToBorrowNextOpeningTagStartMarker(node)
@@ -68,7 +68,7 @@ function printClosingTagEnd(/** @type {import("../ast.js").Node} */ node, option
       : "";
 }
 
-/** @returns {string} */ function printClosingTagStartMarker(/** @type {import("../ast.js").Node} */ node, options) {
+/** @returns {string} */ function printClosingTagStartMarker(/** @type {import("../parse/ast.js").Node} */ node, options) {
   /* c8 ignore next 3 */
   if (process.env.NODE_ENV !== "production") {
     assert.ok(!node.isSelfClosing);
@@ -90,7 +90,7 @@ function printClosingTagEnd(/** @type {import("../ast.js").Node} */ node, option
   }
 }
 
-/** @returns {string} */ function printClosingTagEndMarker(/** @type {import("../ast.js").Node} */ node, options) {
+/** @returns {string} */ function printClosingTagEndMarker(/** @type {import("../parse/ast.js").Node} */ node, options) {
   if (shouldNotPrintClosingTag(node, options)) {
     return "";
   }
@@ -114,7 +114,7 @@ function printClosingTagEnd(/** @type {import("../ast.js").Node} */ node, option
   }
 }
 
-/** @returns {boolean} */ function shouldNotPrintClosingTag(/** @type {import("../ast.js").Node} */ node, options) {
+/** @returns {boolean} */ function shouldNotPrintClosingTag(/** @type {import("../parse/ast.js").Node} */ node, options) {
   return (
     !node.isSelfClosing &&
     !node.endSourceSpan &&
@@ -122,7 +122,7 @@ function printClosingTagEnd(/** @type {import("../ast.js").Node} */ node, option
   );
 }
 
-/** @returns {boolean | undefined} */ function needsToBorrowPrevClosingTagEndMarker(/** @type {import("../ast.js").Node} */ node) {
+/** @returns {boolean | undefined} */ function needsToBorrowPrevClosingTagEndMarker(/** @type {import("../parse/ast.js").Node} */ node) {
   /**
    *     <p></p
    *     >123
@@ -142,7 +142,7 @@ function printClosingTagEnd(/** @type {import("../ast.js").Node} */ node, option
   );
 }
 
-/** @returns {boolean | undefined} */ function needsToBorrowLastChildClosingTagEndMarker(/** @type {import("../ast.js").Node} */ node) {
+/** @returns {boolean | undefined} */ function needsToBorrowLastChildClosingTagEndMarker(/** @type {import("../parse/ast.js").Node} */ node) {
   /**
    *     <p
    *       ><a></a
@@ -158,7 +158,7 @@ function printClosingTagEnd(/** @type {import("../ast.js").Node} */ node, option
   );
 }
 
-/** @returns {boolean | undefined} */ function needsToBorrowParentClosingTagStartMarker(/** @type {import("../ast.js").Node} */ node) {
+/** @returns {boolean | undefined} */ function needsToBorrowParentClosingTagStartMarker(/** @type {import("../parse/ast.js").Node} */ node) {
   /**
    *     <p>
    *       123</p
@@ -178,7 +178,7 @@ function printClosingTagEnd(/** @type {import("../ast.js").Node} */ node, option
   );
 }
 
-/** @returns {boolean | undefined} */ function needsToBorrowNextOpeningTagStartMarker(/** @type {import("../ast.js").Node} */ node) {
+/** @returns {boolean | undefined} */ function needsToBorrowNextOpeningTagStartMarker(/** @type {import("../parse/ast.js").Node} */ node) {
   /**
    *     123<p
    *        ^^
@@ -207,7 +207,7 @@ function getPrettierIgnoreAttributeCommentData(/** @type {string} */ value) {
   return match[1].split(/\s+/);
 }
 
-/** @returns {boolean | undefined} */ function needsToBorrowParentOpeningTagEndMarker(/** @type {import("../ast.js").Node} */ node) {
+/** @returns {boolean | undefined} */ function needsToBorrowParentOpeningTagEndMarker(/** @type {import("../parse/ast.js").Node} */ node) {
   /**
    *     <p
    *       >123
@@ -331,7 +331,7 @@ function printAttributes(/** @type {AstPath} */ path, options, /** @type {() => 
   return parts;
 }
 
-/** @returns {string} */ function printOpeningTagEnd(/** @type {import("../ast.js").Node} */ node) {
+/** @returns {string} */ function printOpeningTagEnd(/** @type {import("../parse/ast.js").Node} */ node) {
   return node.firstChild &&
     needsToBorrowParentOpeningTagEndMarker(node.firstChild)
     ? ""
@@ -348,7 +348,7 @@ function printAttributes(/** @type {AstPath} */ path, options, /** @type {() => 
   ];
 }
 
-function printOpeningTagStart(/** @type {import("../ast.js").Node} */ node, options) {
+function printOpeningTagStart(/** @type {import("../parse/ast.js").Node} */ node, options) {
   return node.prev && needsToBorrowNextOpeningTagStartMarker(node.prev)
     ? ""
     : [
@@ -357,7 +357,7 @@ function printOpeningTagStart(/** @type {import("../ast.js").Node} */ node, opti
       ];
 }
 
-/** @returns {string} */ function printOpeningTagPrefix(/** @type {import("../ast.js").Node} */ node, options) {
+/** @returns {string} */ function printOpeningTagPrefix(/** @type {import("../parse/ast.js").Node} */ node, options) {
   return needsToBorrowParentOpeningTagEndMarker(node)
     ? printOpeningTagEndMarker(node.parent)
     : needsToBorrowPrevClosingTagEndMarker(node)
@@ -366,7 +366,7 @@ function printOpeningTagStart(/** @type {import("../ast.js").Node} */ node, opti
 }
 
 /** @type {string} */ const HTML5_DOCTYPE_START_MARKER = "<!doctype";
-/** @returns {string} */ function printOpeningTagStartMarker(/** @type {import("../ast.js").Node} */ node, options) {
+/** @returns {string} */ function printOpeningTagStartMarker(/** @type {import("../parse/ast.js").Node} */ node, options) {
   switch (node.kind) {
     case "ieConditionalComment":
     case "ieConditionalStartComment":
@@ -403,7 +403,7 @@ function printOpeningTagStart(/** @type {import("../ast.js").Node} */ node, opti
   }
 }
 
-/** @returns {string} */ function printOpeningTagEndMarker(/** @type {import("../ast.js").Node} */ node) {
+/** @returns {string} */ function printOpeningTagEndMarker(/** @type {import("../parse/ast.js").Node} */ node) {
   /* c8 ignore next 3 */
   if (process.env.NODE_ENV !== "production") {
     assert.ok(!node.isSelfClosing);

@@ -8,11 +8,11 @@
 * found in the LICENSE file at https://angular.dev/license
 */
 var ParseLocation = class ParseLocation {
-	file;
-	offset;
-	line;
-	col;
-	constructor(file, /** @type {number} */ offset, /** @type {number} */ line, /** @type {number} */ col) {
+	/** @type {any} */ file;
+	/** @type {number} */ offset;
+	/** @type {number} */ line;
+	/** @type {number} */ col;
+	constructor(/** @type {ParseSourceFile} */ file, /** @type {number} */ offset, /** @type {number} */ line, /** @type {number} */ col) {
 		this.file = file;
 		this.offset = offset;
 		this.line = line;
@@ -21,7 +21,7 @@ var ParseLocation = class ParseLocation {
 	toString() {
 		return this.offset != null ? `${this.file.url}@${this.line}:${this.col}` : this.file.url;
 	}
-	moveBy(/** @type {number} */ delta) {
+	/** @returns {ParseLocation} */ moveBy(/** @type {number} */ delta) {
 		const source = this.file.content;
 		const len = source.length;
 		let offset = this.offset;
@@ -80,18 +80,18 @@ var ParseLocation = class ParseLocation {
 	}
 };
 var ParseSourceFile = class {
-	content;
-	url;
+	/** @type {string} */ content;
+	/** @type {string | undefined} */ url;
 	constructor(/** @type {string} */ content, /** @type {string} */ url) {
 		this.content = content;
 		this.url = url;
 	}
 };
 var ParseSourceSpan = class {
-	start;
-	end;
-	fullStart;
-	details;
+	/** @type {ParseLocation} */ start;
+	/** @type {ParseLocation} */ end;
+	/** @type {ParseLocation} */ fullStart;
+	/** @type {string | null} */ details;
 	/**
 	* Create an object that holds information about spans of tokens/nodes captured during
 	* lexing/parsing of text.
@@ -115,7 +115,7 @@ var ParseSourceSpan = class {
 	* @param details
 	* Additional information (such as identifier names) that should be associated with the span.
 	*/
-	constructor(start, end, fullStart = start, details = null) {
+	constructor(/** @type {ParseLocation} */ start, /** @type {ParseLocation} */ end, /** @type {ParseLocation} */ fullStart = start, /** @type {string | null} */ details = null) {
 		this.start = start;
 		this.end = end;
 		this.fullStart = fullStart;

@@ -949,7 +949,7 @@ export class Parser {
         }
         return false;
     }
-    unexpected(atToken) {
+    /** @returns {import("../error/GraphQLError.mjs").GraphQLError} */ unexpected(/** @type {import("./ast.mjs").Token | undefined} */ atToken) {
         const token = atToken ?? this._lexer.token;
         return syntaxError(this._lexer.source, token.start, `Unexpected ${getTokenDesc(token)}.`);
     }

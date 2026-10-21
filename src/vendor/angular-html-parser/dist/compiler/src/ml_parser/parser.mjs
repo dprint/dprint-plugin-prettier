@@ -13,7 +13,7 @@ import { tokenize } from "./lexer.mjs";
 * found in the LICENSE file at https://angular.dev/license
 */
 var TreeError = class TreeError extends ParseError {
-	elementName;
+	/** @type {string | null} */ elementName;
 	static create(elementName, span, msg) {
 		return new TreeError(elementName, span, msg);
 	}
@@ -54,9 +54,9 @@ var Parser = class {
 var _TreeBuilder = class _TreeBuilder {
 	tokens;
 	tagDefinitionResolver;
-	canSelfClose;
-	allowHtmComponentClosingTags;
-	isTagNameCaseSensitive;
+	/** @type {boolean} */ canSelfClose;
+	/** @type {boolean} */ allowHtmComponentClosingTags;
+	/** @type {boolean} */ isTagNameCaseSensitive;
 	_index = -1;
 	_peek;
 	_containerStack = [];
@@ -367,7 +367,7 @@ var _TreeBuilder = class _TreeBuilder {
 		}
 		return false;
 	}
-	_consumeAttr(attrName) {
+	/** @returns {Attribute} */ _consumeAttr(attrName) {
 		const fullName = mergeNsAndName(attrName.parts[0], attrName.parts[1]);
 		let attrEnd = attrName.sourceSpan.end;
 		let startQuoteToken;

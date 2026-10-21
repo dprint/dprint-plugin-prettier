@@ -42,7 +42,7 @@ const getLeadingAndTrailingHtmlWhitespace = (/** @type {string} */ string) => {
   };
 };
 
-/** @returns {boolean} */ function shouldPreserveContent(/** @type {import("../ast.js").Node} */ node, options) {
+/** @returns {boolean} */ function shouldPreserveContent(/** @type {import("../parse/ast.js").Node} */ node, options) {
   // unterminated node in ie conditional comment
   // e.g. <!--[if lt IE 9]><html><![endif]-->
   if (
@@ -81,7 +81,7 @@ const getLeadingAndTrailingHtmlWhitespace = (/** @type {string} */ string) => {
   return false;
 }
 
-/** @returns {boolean} */ function hasPrettierIgnore(/** @type {import("../ast.js").Node} */ node) {
+/** @returns {boolean} */ function hasPrettierIgnore(/** @type {import("../parse/ast.js").Node} */ node) {
   /* c8 ignore next 3 */
   if (node.kind === "attribute") {
     return false;
@@ -104,7 +104,7 @@ const getLeadingAndTrailingHtmlWhitespace = (/** @type {string} */ string) => {
 }
 
 /** there's no opening/closing tag or it's considered not breakable @returns {boolean} */
-function isTextLikeNode(/** @type {import("../ast.js").Node} */ node) {
+function isTextLikeNode(/** @type {import("../parse/ast.js").Node} */ node) {
   return node.kind === "text" || node.kind === "comment";
 }
 
@@ -133,11 +133,11 @@ function isTextLikeNode(/** @type {import("../ast.js").Node} */ node) {
   );
 }
 
-/** @returns {boolean} */ function isIndentationSensitiveNode(/** @type {import("../ast.js").Node} */ node) {
+/** @returns {boolean} */ function isIndentationSensitiveNode(/** @type {import("../parse/ast.js").Node} */ node) {
   return getNodeCssStyleWhiteSpace(node).startsWith("pre");
 }
 
-/** @returns {boolean} */ function isLeadingSpaceSensitiveNode(/** @type {import("../ast.js").Node} */ node, options) {
+/** @returns {boolean} */ function isLeadingSpaceSensitiveNode(/** @type {import("../parse/ast.js").Node} */ node, options) {
   /** @type {boolean} */ const isLeadingSpaceSensitive = _isLeadingSpaceSensitiveNode();
 
   if (
@@ -193,7 +193,7 @@ function isTextLikeNode(/** @type {import("../ast.js").Node} */ node) {
   }
 }
 
-/** @returns {boolean} */ function isTrailingSpaceSensitiveNode(/** @type {import("../ast.js").Node} */ node, options) {
+/** @returns {boolean} */ function isTrailingSpaceSensitiveNode(/** @type {import("../parse/ast.js").Node} */ node, options) {
   if (isFrontMatter(node) || node.kind === "angularControlFlowBlock") {
     return false;
   }
@@ -242,7 +242,7 @@ function isTextLikeNode(/** @type {import("../ast.js").Node} */ node) {
   );
 }
 
-/** @returns {boolean} */ function forceNextEmptyLine(/** @type {import("../ast.js").Node} */ node) {
+/** @returns {boolean} */ function forceNextEmptyLine(/** @type {import("../parse/ast.js").Node} */ node) {
   return (
     isFrontMatter(node) ||
     (node.next &&
@@ -252,13 +252,13 @@ function isTextLikeNode(/** @type {import("../ast.js").Node} */ node) {
 }
 
 /** firstChild leadingSpaces and lastChild trailingSpaces @returns {boolean | undefined} */
-function forceBreakContent(/** @type {import("../ast.js").Node} */ node) {
+function forceBreakContent(/** @type {import("../parse/ast.js").Node} */ node) {
   return (
     forceBreakChildren(node) ||
     (node.kind === "element" &&
       node.children.length > 0 &&
       (["body", "script", "style"].includes(node.name) ||
-        node.children.some(/** @returns {boolean | undefined} */ (/** @type {import("../ast.js").Node} */ child) => hasNonTextChild(child)))) ||
+        node.children.some(/** @returns {boolean | undefined} */ (/** @type {import("../parse/ast.js").Node} */ child) => hasNonTextChild(child)))) ||
     (node.firstChild &&
       node.firstChild === node.lastChild &&
       node.firstChild.kind !== "text" &&
@@ -269,7 +269,7 @@ function forceBreakContent(/** @type {import("../ast.js").Node} */ node) {
 }
 
 /** spaces between children @returns {boolean} */
-function forceBreakChildren(/** @type {import("../ast.js").Node} */ node) {
+function forceBreakChildren(/** @type {import("../parse/ast.js").Node} */ node) {
   return (
     node.kind === "element" &&
     node.children.length > 0 &&
@@ -278,7 +278,7 @@ function forceBreakChildren(/** @type {import("../ast.js").Node} */ node) {
   );
 }
 
-/** @returns {boolean | undefined} */ function preferHardlineAsLeadingSpaces(/** @type {import("../ast.js").Node} */ node) {
+/** @returns {boolean | undefined} */ function preferHardlineAsLeadingSpaces(/** @type {import("../parse/ast.js").Node} */ node) {
   return (
     preferHardlineAsSurroundingSpaces(node) ||
     (node.prev && preferHardlineAsTrailingSpaces(node.prev)) ||
@@ -286,7 +286,7 @@ function forceBreakChildren(/** @type {import("../ast.js").Node} */ node) {
   );
 }
 
-/** @returns {boolean | undefined} */ function preferHardlineAsTrailingSpaces(/** @type {import("../ast.js").Node} */ node) {
+/** @returns {boolean | undefined} */ function preferHardlineAsTrailingSpaces(/** @type {import("../parse/ast.js").Node} */ node) {
   return (
     preferHardlineAsSurroundingSpaces(node) ||
     (node.kind === "element" && node.fullName === "br") ||
@@ -294,11 +294,11 @@ function forceBreakChildren(/** @type {import("../ast.js").Node} */ node) {
   );
 }
 
-/** @returns {boolean | undefined} */ function hasSurroundingLineBreak(/** @type {import("../ast.js").Node} */ node) {
+/** @returns {boolean | undefined} */ function hasSurroundingLineBreak(/** @type {import("../parse/ast.js").Node} */ node) {
   return hasLeadingLineBreak(node) && hasTrailingLineBreak(node);
 }
 
-/** @returns {boolean | undefined} */ function hasLeadingLineBreak(/** @type {import("../ast.js").Node} */ node) {
+/** @returns {boolean | undefined} */ function hasLeadingLineBreak(/** @type {import("../parse/ast.js").Node} */ node) {
   return (
     node.hasLeadingSpaces &&
     (node.prev
@@ -308,7 +308,7 @@ function forceBreakChildren(/** @type {import("../ast.js").Node} */ node) {
   );
 }
 
-/** @returns {boolean | undefined} */ function hasTrailingLineBreak(/** @type {import("../ast.js").Node} */ node) {
+/** @returns {boolean | undefined} */ function hasTrailingLineBreak(/** @type {import("../parse/ast.js").Node} */ node) {
   return (
     node.hasTrailingSpaces &&
     (node.next
@@ -319,7 +319,7 @@ function forceBreakChildren(/** @type {import("../ast.js").Node} */ node) {
   );
 }
 
-/** @returns {boolean} */ function preferHardlineAsSurroundingSpaces(/** @type {import("../ast.js").Node} */ node) {
+/** @returns {boolean} */ function preferHardlineAsSurroundingSpaces(/** @type {import("../parse/ast.js").Node} */ node) {
   switch (node.kind) {
     case "ieConditionalComment":
     case "comment":
@@ -331,11 +331,11 @@ function forceBreakChildren(/** @type {import("../ast.js").Node} */ node) {
   return false;
 }
 
-/** @returns {import("../ast.js").Node} */ function getLastDescendant(/** @type {import("../ast.js").Node} */ node) {
+/** @returns {import("../parse/ast.js").Node} */ function getLastDescendant(/** @type {import("../parse/ast.js").Node} */ node) {
   return node.lastChild ? getLastDescendant(node.lastChild) : node;
 }
 
-/** @returns {boolean | undefined} */ function hasNonTextChild(/** @type {import("../ast.js").Node} */ node) {
+/** @returns {boolean | undefined} */ function hasNonTextChild(/** @type {import("../parse/ast.js").Node} */ node) {
   return node.children?.some(/** @returns {boolean} */ (child) => child.kind !== "text");
 }
 
@@ -375,7 +375,7 @@ function forceBreakChildren(/** @type {import("../ast.js").Node} */ node) {
   }
 }
 
-/** @returns {string | undefined} */ function inferScriptParser(/** @type {import("../ast.js").Node} */ node, options) {
+/** @returns {string | undefined} */ function inferScriptParser(/** @type {import("../parse/ast.js").Node} */ node, options) {
   const { name, attrMap } = node;
 
   if (name !== "script" || Object.hasOwn(attrMap, "src")) {
@@ -393,7 +393,7 @@ function forceBreakChildren(/** @type {import("../ast.js").Node} */ node) {
   );
 }
 
-/** @returns {string | undefined} */ function inferVueSfcBlockParser(/** @type {import("../ast.js").Node} */ node, options) {
+/** @returns {string | undefined} */ function inferVueSfcBlockParser(/** @type {import("../parse/ast.js").Node} */ node, options) {
   if (!isVueNonHtmlBlock(node, options)) {
     return;
   }
@@ -410,7 +410,7 @@ function forceBreakChildren(/** @type {import("../ast.js").Node} */ node) {
   );
 }
 
-/** @returns {string | undefined} */ function inferStyleParser(/** @type {import("../ast.js").Node} */ node, options) {
+/** @returns {string | undefined} */ function inferStyleParser(/** @type {import("../parse/ast.js").Node} */ node, options) {
   if (node.name === "style") {
     const { lang } = node.attrMap;
     return lang ? inferParser(options, { language: lang }) : "css";
@@ -421,7 +421,7 @@ function forceBreakChildren(/** @type {import("../ast.js").Node} */ node) {
   }
 }
 
-/** @returns {string | undefined} */ function inferElementParser(/** @type {import("../ast.js").Node} */ node, options) {
+/** @returns {string | undefined} */ function inferElementParser(/** @type {import("../parse/ast.js").Node} */ node, options) {
   return (
     inferScriptParser(node, options) ??
     inferStyleParser(node, options) ??
@@ -457,11 +457,11 @@ function forceBreakChildren(/** @type {import("../ast.js").Node} */ node) {
   return !isBlockLikeCssDisplay(cssDisplay) && cssDisplay !== "inline-block";
 }
 
-/** @returns {boolean} */ function isPreLikeNode(/** @type {import("../ast.js").Node} */ node) {
+/** @returns {boolean} */ function isPreLikeNode(/** @type {import("../parse/ast.js").Node} */ node) {
   return getNodeCssStyleWhiteSpace(node).startsWith("pre");
 }
 
-/** @returns {boolean} */ function hasParent(/** @type {import("../ast.js").Node} */ node, /** @type {(a0?: any) => any} */ fn) {
+/** @returns {boolean} */ function hasParent(/** @type {import("../parse/ast.js").Node} */ node, /** @type {(a0?: any) => any} */ fn) {
   let current = node;
 
   while (current) {
@@ -475,7 +475,7 @@ function forceBreakChildren(/** @type {import("../ast.js").Node} */ node) {
   return false;
 }
 
-/** @returns {string} */ function getNodeCssStyleDisplay(/** @type {import("../ast.js").Node} */ node, options) {
+/** @returns {string} */ function getNodeCssStyleDisplay(/** @type {import("../parse/ast.js").Node} */ node, options) {
   // Every root block in Vue.js SFC is a block
   if (isVueSfcBlock(node, options)) {
     return "block";
@@ -516,7 +516,7 @@ function forceBreakChildren(/** @type {import("../ast.js").Node} */ node) {
   return CSS_DISPLAY_DEFAULT;
 }
 
-/** @returns {string} */ function getNodeCssStyleWhiteSpace(/** @type {import("../ast.js").Node} */ node) {
+/** @returns {string} */ function getNodeCssStyleWhiteSpace(/** @type {import("../parse/ast.js").Node} */ node) {
   if (
     node.kind === "element" &&
     (!node.namespace || isUnknownNamespace(node)) &&
@@ -532,18 +532,18 @@ function forceBreakChildren(/** @type {import("../ast.js").Node} */ node) {
   return text.replaceAll("&apos;", "'").replaceAll("&quot;", '"');
 }
 
-/** @returns {string} */ function getUnescapedAttributeValue(/** @type {import("../ast.js").Node} */ node) {
+/** @returns {string} */ function getUnescapedAttributeValue(/** @type {import("../parse/ast.js").Node} */ node) {
   return unescapeQuoteEntities(node.value);
 }
 
 // top-level elements (excluding <template>, <style> and <script>) in Vue.js SFC are considered custom block
 // See https://vue-loader.vuejs.org/spec.html for detail
 const vueRootElementsSet = new Set(["template", "style", "script"]);
-/** @returns {boolean} */ function isVueCustomBlock(/** @type {import("../ast.js").Node} */ node, options) {
+/** @returns {boolean} */ function isVueCustomBlock(/** @type {import("../parse/ast.js").Node} */ node, options) {
   return isVueSfcBlock(node, options) && !vueRootElementsSet.has(node.fullName);
 }
 
-/** @returns {boolean} */ function isVueSfcBlock(/** @type {import("../ast.js").Node} */ node, options) {
+/** @returns {boolean} */ function isVueSfcBlock(/** @type {import("../parse/ast.js").Node} */ node, options) {
   return (
     options.parser === "vue" &&
     node.kind === "element" &&
@@ -552,7 +552,7 @@ const vueRootElementsSet = new Set(["template", "style", "script"]);
   );
 }
 
-function isVueNonHtmlBlock(/** @type {import("../ast.js").Node} */ node, options) {
+function isVueNonHtmlBlock(/** @type {import("../parse/ast.js").Node} */ node, options) {
   return (
     isVueSfcBlock(node, options) &&
     (isVueCustomBlock(node, options) ||
@@ -560,7 +560,7 @@ function isVueNonHtmlBlock(/** @type {import("../ast.js").Node} */ node, options
   );
 }
 
-/** @returns {boolean} */ function isVueSlotAttribute(/** @type {import("../ast.js").Node} */ attribute) {
+/** @returns {boolean} */ function isVueSlotAttribute(/** @type {import("../parse/ast.js").Node} */ attribute) {
   /** @type {string | undefined} */ const attributeName = attribute.fullName;
   return (
     attributeName.charAt(0) === "#" ||
@@ -570,7 +570,7 @@ function isVueNonHtmlBlock(/** @type {import("../ast.js").Node} */ node, options
   );
 }
 
-/** @returns {boolean} */ function isVueSfcBindingsAttribute(/** @type {import("../ast.js").Node} */ attribute, options) {
+/** @returns {boolean} */ function isVueSfcBindingsAttribute(/** @type {import("../parse/ast.js").Node} */ attribute, options) {
   const element = attribute.parent;
   if (!isVueSfcBlock(element, options)) {
     return false;
@@ -586,7 +586,7 @@ function isVueNonHtmlBlock(/** @type {import("../ast.js").Node} */ node, options
   );
 }
 
-/** @returns {any[]} */ function getTextValueParts(/** @type {import("../ast.js").Node} */ node, value = node.value) {
+/** @returns {any[]} */ function getTextValueParts(/** @type {import("../parse/ast.js").Node} */ node, value = node.value) {
   return node.parent.isWhitespaceSensitive
     ? node.parent.isIndentationSensitive
       ? replaceEndOfLine(value)
@@ -597,7 +597,7 @@ function isVueNonHtmlBlock(/** @type {import("../ast.js").Node} */ node, options
     : join(line, htmlWhitespace.split(value));
 }
 
-/** @returns {boolean} */ function isVueScriptTag(/** @type {import("../ast.js").Node} */ node, options) {
+/** @returns {boolean} */ function isVueScriptTag(/** @type {import("../parse/ast.js").Node} */ node, options) {
   return isVueSfcBlock(node, options) && node.name === "script";
 }
 

@@ -8,7 +8,7 @@ import {
   printOpeningTagEndMarker,
 } from "./print/tag.js";
 
-/** @returns {string} */ function getNodeContent(/** @type {import("./ast.js").Node} */ node, options) {
+/** @returns {string} */ function getNodeContent(/** @type {import("./parse/ast.js").Node} */ node, options) {
   if (!node.endSourceSpan) {
     return "";
   }

@@ -29,7 +29,7 @@ import {
   printOpeningTagStartMarker,
 } from "./tag.js";
 
-/** @returns {number} */ function getEndLocation(/** @type {import("../ast.js").Node} */ node) {
+/** @returns {number} */ function getEndLocation(/** @type {import("../parse/ast.js").Node} */ node) {
   /** @type {number} */ const endLocation = locEnd(node);
 
   // Element can be unclosed
@@ -73,7 +73,7 @@ function printChild(path, options, print) {
   return print();
 }
 
-function printBetweenLine(/** @type {import("../ast.js").Node} */ prevNode, /** @type {import("../ast.js").Node} */ nextNode) {
+function printBetweenLine(/** @type {import("../parse/ast.js").Node} */ prevNode, /** @type {import("../parse/ast.js").Node} */ nextNode) {
   if (isTextLikeNode(prevNode) && isTextLikeNode(nextNode)) {
     if (prevNode.isTrailingSpaceSensitive) {
       if (prevNode.hasTrailingSpaces) {

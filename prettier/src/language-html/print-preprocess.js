@@ -26,7 +26,7 @@ const PREPROCESS_PIPELINE = [
   mergeSimpleElementIntoText,
 ];
 
-/** @returns {import("./ast.js").Node} */ function preprocess(/** @type {import("./ast.js").Node} */ ast, options) {
+/** @returns {import("./parse/ast.js").Node} */ function preprocess(/** @type {import("./parse/ast.js").Node} */ ast, options) {
   for (const fn of PREPROCESS_PIPELINE) {
     fn(ast, options);
   }
@@ -35,7 +35,7 @@ const PREPROCESS_PIPELINE = [
 }
 
 function removeIgnorableFirstLf(/** @type {import("./parse/ast.js").Node} */ ast /* , options */) {
-  ast.walk((/** @type {import("./ast.js").Node} */ node) => {
+  ast.walk((/** @type {import("./parse/ast.js").Node} */ node) => {
     if (
       node.kind === "element" &&
       node.tagDefinition.ignoreFirstLf &&
@@ -59,13 +59,13 @@ function mergeIfConditionalStartEndCommentIntoElementOpeningTag(
   /**
    *     <!--[if ...]><!--><target><!--<![endif]-->
    */
-  const isTarget = /** @returns {boolean} */ (/** @type {import("./ast.js").Node} */ node) =>
+  const isTarget = /** @returns {boolean} */ (/** @type {import("./parse/ast.js").Node} */ node) =>
     node.kind === "element" &&
     node.prev?.kind === "ieConditionalStartComment" &&
     node.prev.sourceSpan.end.offset === node.startSourceSpan.start.offset &&
     node.firstChild?.kind === "ieConditionalEndComment" &&
     node.firstChild.sourceSpan.start.offset === node.startSourceSpan.end.offset;
-  ast.walk((/** @type {import("./ast.js").Node} */ node) => {
+  ast.walk((/** @type {import("./parse/ast.js").Node} */ node) => {
     if (node.children) {
       for (let i = 0; i < node.children.length; i++) {
         const child = node.children[i];
@@ -98,8 +98,8 @@ function mergeIfConditionalStartEndCommentIntoElementOpeningTag(
   });
 }
 
-function mergeNodeIntoText(/** @type {import("./ast.js").Node} */ ast, /** @type {(a0?: any) => any} */ shouldMerge, /** @type {(a0?: any) => any} */ getValue) {
-  ast.walk((/** @type {import("./ast.js").Node} */ node) => {
+function mergeNodeIntoText(/** @type {import("./parse/ast.js").Node} */ ast, /** @type {(a0?: any) => any} */ shouldMerge, /** @type {(a0?: any) => any} */ getValue) {
+  ast.walk((/** @type {import("./parse/ast.js").Node} */ node) => {
     if (node.children) {
       for (let i = 0; i < node.children.length; i++) {
         const child = node.children[i];
@@ -140,7 +140,7 @@ function mergeCdataIntoText(/** @type {import("./parse/ast.js").Node} */ ast /* 
 }
 
 function mergeSimpleElementIntoText(/** @type {import("./parse/ast.js").Node} */ ast /* , options */) {
-  const isSimpleElement = /** @returns {boolean} */ (/** @type {import("./ast.js").Node} */ node) =>
+  const isSimpleElement = /** @returns {boolean} */ (/** @type {import("./parse/ast.js").Node} */ node) =>
     node.kind === "element" &&
     node.attrs.length === 0 &&
     !isNonEmptyArray(node.startTagComments) &&
@@ -155,7 +155,7 @@ function mergeSimpleElementIntoText(/** @type {import("./parse/ast.js").Node} */
     !node.hasTrailingSpaces &&
     node.prev?.kind === "text" &&
     node.next?.kind === "text";
-  ast.walk((/** @type {import("./ast.js").Node} */ node) => {
+  ast.walk((/** @type {import("./parse/ast.js").Node} */ node) => {
     if (node.children) {
       for (let i = 0; i < node.children.length; i++) {
         const child = node.children[i];
@@ -185,13 +185,13 @@ function mergeSimpleElementIntoText(/** @type {import("./parse/ast.js").Node} */
   });
 }
 
-function extractInterpolation(/** @type {import("./ast.js").Node} */ ast, options) {
+function extractInterpolation(/** @type {import("./parse/ast.js").Node} */ ast, options) {
   if (options.parser === "html") {
     return;
   }
 
   const interpolationRegex = /\{\{(.+?)\}\}/s;
-  ast.walk((/** @type {import("./ast.js").Node} */ node) => {
+  ast.walk((/** @type {import("./parse/ast.js").Node} */ node) => {
     if (!canHaveInterpolation(node, options)) {
       return;
     }
@@ -256,7 +256,7 @@ function extractInterpolation(/** @type {import("./ast.js").Node} */ ast, option
  * - remove insensitive whitespaces
  */
 function extractWhitespaces(/** @type {import("./parse/ast.js").Node} */ ast, options) {
-  ast.walk((/** @type {import("./ast.js").Node} */ node) => {
+  ast.walk((/** @type {import("./parse/ast.js").Node} */ node) => {
     const children = node.$children;
 
     if (!children) {
@@ -331,7 +331,7 @@ function extractWhitespaces(/** @type {import("./parse/ast.js").Node} */ ast, op
 }
 
 function addIsSelfClosing(/** @type {import("./parse/ast.js").Node} */ ast /* , options */) {
-  ast.walk((/** @type {import("./ast.js").Node} */ node) => {
+  ast.walk((/** @type {import("./parse/ast.js").Node} */ node) => {
     node.isSelfClosing =
       !node.children ||
       (node.kind === "element" &&
@@ -343,8 +343,8 @@ function addIsSelfClosing(/** @type {import("./parse/ast.js").Node} */ ast /* , 
   });
 }
 
-function addHasHtmComponentClosingTag(/** @type {import("./ast.js").Node} */ ast, options) {
-  ast.walk((/** @type {import("./ast.js").Node} */ node) => {
+function addHasHtmComponentClosingTag(/** @type {import("./parse/ast.js").Node} */ ast, options) {
+  ast.walk((/** @type {import("./parse/ast.js").Node} */ node) => {
     if (node.kind !== "element") {
       return;
     }
@@ -360,8 +360,8 @@ function addHasHtmComponentClosingTag(/** @type {import("./ast.js").Node} */ ast
   });
 }
 
-function addCssDisplay(/** @type {import("./ast.js").Node} */ ast, options) {
-  ast.walk((/** @type {import("./ast.js").Node} */ node) => {
+function addCssDisplay(/** @type {import("./parse/ast.js").Node} */ ast, options) {
+  ast.walk((/** @type {import("./parse/ast.js").Node} */ node) => {
     node.cssDisplay = getNodeCssStyleDisplay(node, options);
   });
 }
@@ -371,8 +371,8 @@ function addCssDisplay(/** @type {import("./ast.js").Node} */ ast, options) {
  * - add `isTrailingSpaceSensitive` field
  * - add `isDanglingSpaceSensitive` field for parent nodes
  */
-function addIsSpaceSensitive(/** @type {import("./ast.js").Node} */ ast, options) {
-  ast.walk((/** @type {import("./ast.js").Node} */ node) => {
+function addIsSpaceSensitive(/** @type {import("./parse/ast.js").Node} */ ast, options) {
+  ast.walk((/** @type {import("./parse/ast.js").Node} */ node) => {
     const { children } = node;
     if (!children) {
       return;

@@ -13,9 +13,68 @@ const NON_ENUMERABLE_PROPERTIES = new Set(["parent"]);
 // TODO: typechecking is problematic for this class because of this issue:
 // https://github.com/microsoft/TypeScript/issues/26811
 
+/**
+ * @typedef {import("../../../../src/vendor/angular-html-parser/dist/compiler/src/parse_util.mjs").ParseSourceSpan} ParseSourceSpan
+ * @typedef {import("../../../../src/vendor/angular-html-parser/dist/compiler/src/ml_parser/html_tags.mjs").HtmlTagDefinition} HtmlTagDefinition
+ */
+
+/**
+ * @property {ParseSourceSpan} [sourceSpan]
+ * @property {ParseSourceSpan} [startSourceSpan]
+ * @property {ParseSourceSpan | null} [endSourceSpan]
+ * @property {ParseSourceSpan} [nameSpan]
+ * @property {ParseSourceSpan} [keySpan]
+ * @property {ParseSourceSpan} [valueSpan]
+ * @property {any} [switchValueSourceSpan]
+ * @property {any} [expSourceSpan]
+ * @property {any} [valueSourceSpan]
+ * @property {string} [name]
+ * @property {any} [value]
+ * @property {any} [type]
+ * @property {any} [children]
+ * @property {any} [attrs]
+ * @property {any} [directives]
+ * @property {any} [comments]
+ * @property {any} [tokens]
+ * @property {any} [valueTokens]
+ * @property {any} [parameters]
+ * @property {any} [cases]
+ * @property {any} [expression]
+ * @property {any} [switchValue]
+ * @property {any} [namespace]
+ * @property {boolean} [hasExplicitNamespace]
+ * @property {HtmlTagDefinition} [tagDefinition]
+ * @property {any} [isSelfClosing]
+ * @property {boolean} [isVoid]
+ * @property {any} [i18n]
+ * @property {any} [componentName]
+ * @property {any} [tagName]
+ * @property {string} [cssDisplay]
+ * @property {boolean} [isWhitespaceSensitive]
+ * @property {boolean} [isIndentationSensitive]
+ * @property {boolean} [hasLeadingSpaces]
+ * @property {boolean} [hasTrailingSpaces]
+ * @property {boolean} [hasDanglingSpaces]
+ * @property {boolean} [isLeadingSpaceSensitive]
+ * @property {boolean} [isTrailingSpaceSensitive]
+ * @property {boolean} [isDanglingSpaceSensitive]
+ * @property {any} [hasHtmComponentClosingTag]
+ * @property {any} [condition]
+ * @property {any} [complete]
+ * @property {any} [startTagComments]
+ * @property {any} [language]
+ * @property {any} [explicitLanguage]
+ * @property {any} [startDelimiter]
+ * @property {any} [endDelimiter]
+ * @property {any} [raw]
+ * @property {any} [start]
+ * @property {any} [end]
+ * @property {any} [id]
+ * @property {any} [init]
+ */
 class Node {
   /** @type {string} */ kind;
-  parent;
+  /** @type {Node | undefined} */ parent;
 
   constructor(nodeOrProperties = {}) {
     for (const property of new Set([
@@ -79,9 +138,9 @@ class Node {
     return fn(newNode || this);
   }
 
-  walk(fn) {
+  walk(/** @type {(node: Node) => void} */ fn) {
     for (const NODES_KEY in NODES_KEYS) {
-      const nodes = this[NODES_KEY];
+      /** @type {Node[] | undefined} */ const nodes = this[NODES_KEY];
       if (nodes) {
         for (let i = 0; i < nodes.length; i++) {
           nodes[i].walk(fn);
@@ -145,11 +204,11 @@ class Node {
   // Use `$` prefix since `children` already exits in the original AST,
   // Can't use `#children` either, since it need be public
   // There are other children in different Node, see `#childrenProperty`
-  get $children() {
+  /** @returns {Node[] | undefined} */ get $children() {
     return this[this.#childrenProperty];
   }
 
-  set $children(value) {
+  set $children(/** @type {Node[] | undefined} */ value) {
     this[this.#childrenProperty] = value;
   }
 
@@ -161,7 +220,7 @@ class Node {
     return this.$children?.at(-1);
   }
 
-  get #siblings() {
+  /** @returns {Node[]} */ get #siblings() {
     return this.parent?.$children ?? [];
   }
 

@@ -86,7 +86,7 @@ var _Tokenizer = class {
 	*     name.
 	* @param options Configuration of the tokenization.
 	*/
-	constructor(/** @type {import("../../../prettier/node_modules/angular-html-parser/dist/compiler/src/parse_util.mjs").ParseSourceFile} */ _file, _getTagContentType, options) {
+	constructor(/** @type {import("../parse_util.mjs").ParseSourceFile} */ _file, _getTagContentType, options) {
 		this._getTagContentType = _getTagContentType;
 		this._tokenizeIcu = options.tokenizeExpansionForms || false;
 		this._leadingTriviaCodePoints = options.leadingTriviaChars && options.leadingTriviaChars.map((c) => c.codePointAt(0) || 0);
@@ -305,7 +305,7 @@ var _Tokenizer = class {
 		this._currentTokenType = null;
 		return token;
 	}
-	/** @returns {import("../../../prettier/node_modules/angular-html-parser/dist/compiler/src/parse_util.mjs").ParseError} */ _createError(/** @type {string} */ msg, /** @type {import("../../../prettier/node_modules/angular-html-parser/dist/compiler/src/parse_util.mjs").ParseSourceSpan} */ span) {
+	/** @returns {import("../parse_util.mjs").ParseError} */ _createError(/** @type {string} */ msg, /** @type {import("../parse_util.mjs").ParseSourceSpan} */ span) {
 		if (this._isInExpansionForm()) msg += ` (Do you have an unescaped "{" in your template? Use "{{ '{' }}") to escape it.)`;
 		const error = new ParseError(span, msg);
 		this._currentTokenStart = null;
@@ -1011,10 +1011,10 @@ function isSelectorlessNameChar(code) {
 }
 var PlainCharacterCursor = class PlainCharacterCursor {
 	/** @type {CursorState} */ state;
-	/** @type {import("../../../prettier/node_modules/angular-html-parser/dist/compiler/src/parse_util.mjs").ParseSourceFile} */ file;
+	/** @type {import("../parse_util.mjs").ParseSourceFile} */ file;
 	/** @type {string} */ input;
 	/** @type {number} */ end;
-	constructor(fileOrCursor, range) {
+	constructor(/** @type {PlainCharacterCursor | import("../parse_util.mjs").ParseSourceFile} */ fileOrCursor, range) {
 		if (fileOrCursor instanceof PlainCharacterCursor) {
 			this.file = fileOrCursor.file;
 			this.input = fileOrCursor.input;
@@ -1058,7 +1058,7 @@ var PlainCharacterCursor = class PlainCharacterCursor {
 	init() {
 		this.updatePeek(this.state);
 	}
-	/** @returns {import("../../../prettier/node_modules/angular-html-parser/dist/compiler/src/parse_util.mjs").ParseSourceSpan} */ getSpan(/** @type {PlainCharacterCursor | undefined} */ start, leadingTriviaCodePoints) {
+	/** @returns {import("../parse_util.mjs").ParseSourceSpan} */ getSpan(/** @type {PlainCharacterCursor | undefined} */ start, leadingTriviaCodePoints) {
 		start = start || this;
 		let fullStart = start;
 		if (leadingTriviaCodePoints) while (this.diff(start) > 0 && leadingTriviaCodePoints.indexOf(start.peek()) !== -1) {
@@ -1070,7 +1070,7 @@ var PlainCharacterCursor = class PlainCharacterCursor {
 		const fullStartLocation = fullStart !== start ? this.locationFromCursor(fullStart) : startLocation;
 		return new ParseSourceSpan(startLocation, endLocation, fullStartLocation);
 	}
-	getChars(start) {
+	/** @returns {string} */ getChars(/** @type {PlainCharacterCursor} */ start) {
 		return this.input.substring(start.state.offset, this.state.offset);
 	}
 	/** @returns {number} */ charAt(/** @type {number} */ pos) {
@@ -1092,13 +1092,13 @@ var PlainCharacterCursor = class PlainCharacterCursor {
 	updatePeek(/** @type {CursorState} */ state) {
 		state.peek = state.offset >= this.end ? 0 : this.charAt(state.offset);
 	}
-	/** @returns {import("../../../prettier/node_modules/angular-html-parser/dist/compiler/src/parse_util.mjs").ParseLocation} */ locationFromCursor(/** @type {PlainCharacterCursor} */ cursor) {
+	/** @returns {import("../parse_util.mjs").ParseLocation} */ locationFromCursor(/** @type {PlainCharacterCursor} */ cursor) {
 		return new ParseLocation(cursor.file, cursor.state.offset, cursor.state.line, cursor.state.column);
 	}
 };
 var EscapedCharacterCursor = class EscapedCharacterCursor extends PlainCharacterCursor {
-	internalState;
-	constructor(fileOrCursor, range) {
+	/** @type {CursorState} */ internalState;
+	constructor(/** @type {PlainCharacterCursor | import("../parse_util.mjs").ParseSourceFile} */ fileOrCursor, range) {
 		if (fileOrCursor instanceof EscapedCharacterCursor) {
 			super(fileOrCursor);
 			this.internalState = { ...fileOrCursor.internalState };
@@ -1119,7 +1119,7 @@ var EscapedCharacterCursor = class EscapedCharacterCursor extends PlainCharacter
 	clone() {
 		return new EscapedCharacterCursor(this);
 	}
-	getChars(start) {
+	/** @returns {string} */ getChars(/** @type {PlainCharacterCursor} */ start) {
 		const cursor = start.clone();
 		let chars = "";
 		while (cursor.internalState.offset < this.internalState.offset) {
