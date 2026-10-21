@@ -4842,9 +4842,6 @@ class TypeScriptScopeHandler extends ScopeHandler {
     super.checkLocalExport(id);
   }
 }
-/**
- * @property {int} [optionFlags]
- */
 class BaseParser {
   /** @type {boolean} */ sawUnambiguousESM = false;
   /** @type {boolean} */ ambiguousScriptDifferentAst = false;
