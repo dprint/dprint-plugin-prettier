@@ -1,4 +1,5 @@
 // @nts-check
+/** @import {GlimmerNode} from "./print-types.js" */
 // Do not use void tags from other package, won't match
 import { getVoidTags } from "@glimmer/syntax";
 
@@ -10,7 +11,7 @@ const htmlVoidElements = new Set(getVoidTags());
   return string.toUpperCase() === string;
 }
 
-/** @returns {boolean} */ function isGlimmerComponent(node) {
+/** @returns {boolean} */ function isGlimmerComponent(/** @type {GlimmerNode} */ node) {
   return (
     node.type === "ElementNode" &&
     typeof node.tag === "string" &&
@@ -24,7 +25,7 @@ const htmlVoidElements = new Set(getVoidTags());
   return htmlVoidElements.has(tag.toLowerCase()) && !isUppercase(tag[0]);
 }
 
-/** @returns {boolean} */ function isVoidElement(node) {
+/** @returns {boolean} */ function isVoidElement(/** @type {GlimmerNode} */ node) {
   return (
     node.selfClosing === true ||
     isVoidTag(node.tag) ||
@@ -33,11 +34,11 @@ const htmlVoidElements = new Set(getVoidTags());
   );
 }
 
-/** @returns {boolean} */ function isWhitespaceNode(node) {
+/** @returns {boolean} */ function isWhitespaceNode(/** @type {GlimmerNode} */ node) {
   return node.type === "TextNode" && !/\S/.test(node.chars);
 }
 
-/** @returns {boolean} */ function isPrettierIgnoreNode(node) {
+/** @returns {boolean} */ function isPrettierIgnoreNode(/** @type {GlimmerNode} */ node) {
   return (
     node?.type === "MustacheCommentStatement" &&
     typeof node.value === "string" &&

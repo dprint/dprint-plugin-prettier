@@ -1,4 +1,5 @@
 // @nts-check
+/** @import {GraphqlNode, GraphqlOptions, GraphqlPrint} from "./print-types.js" */
 /** @import AstPath from "../common/ast-path.js" */
 import {
   group,
@@ -22,8 +23,8 @@ import { printDirectives } from "./print/directives.js";
 import { printSequence } from "./print/sequence.js";
 import { printVariableDefinitions } from "./print/variable-definitions.js";
 
-function genericPrint(/** @type {AstPath} */ path, options, print) {
-  const { node } = path;
+function genericPrint(/** @type {AstPath} */ path, /** @type {GraphqlOptions} */ options, /** @type {GraphqlPrint} */ print) {
+  /** @type {{ node: GraphqlNode }} */ const { node } = path;
 
   switch (node.kind) {
     case "Document":
@@ -454,8 +455,8 @@ function genericPrint(/** @type {AstPath} */ path, options, print) {
   throw new Error("Not a comment: " + JSON.stringify(comment));
 }
 
-/** @returns {boolean | undefined} */ function hasPrettierIgnore(path) {
-  const { node } = path;
+/** @returns {boolean | undefined} */ function hasPrettierIgnore(/** @type {AstPath} */ path) {
+  /** @type {{ node: GraphqlNode }} */ const { node } = path;
   return node?.comments?.some(
     /** @returns {boolean} */ (comment) => comment.value.trim() === "prettier-ignore",
   );

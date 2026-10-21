@@ -17,6 +17,16 @@ module.exports = footnotes
 /** @type {number} */ var tabSize = 4
 /** @type {number} */ var maxSlice = 1024
 
+/**
+ * A place in the file, which remark-parse's tokenizer writes out as an object
+ * @typedef {{ line: number, column: number, offset: number }} RemarkPoint
+ */
+
+/**
+ * A line of a footnote's definition, with where its content starts and ends
+ * @typedef {{ start: number, contentStart: number, contentEnd: number, end: number }} FootnoteLine
+ */
+
 function footnotes(options) {
   var parser = this.Parser
   var compiler = this.Compiler
@@ -95,20 +105,20 @@ function attachParser(parser, options) {
     var offsets = self.offset
     /** @type {number} */ var length = value.length + 1
     /** @type {number} */ var index = 0
-    var content = []
+    /** @type {string[]} */ var content = []
     /** @type {string} */ var label
     /** @type {number} */ var labelStart
     /** @type {number | undefined} */ var labelEnd
     /** @type {number | undefined} */ var code
-    var now
+    /** @type {RemarkPoint} */ var now
     var add
-    var exit
+    /** @type {() => void} */ var exit
     var children
     /** @type {number} */ var start
     /** @type {number | undefined} */ var indent
     /** @type {number | undefined} */ var contentStart
-    var lines
-    var line
+    /** @type {FootnoteLine[]} */ var lines
+    /** @type {FootnoteLine} */ var line
 
     // Skip initial whitespace.
     while (index < length) {
@@ -319,16 +329,16 @@ function attachParser(parser, options) {
   // Parse an inline note / footnote, such as `^[text]`
   function footnote(eat, /** @type {StringView} */ value, silent) {
     var self = this
-    var length = value.length + 1
-    var index = 0
-    var balance = 0
-    var now
-    var code
-    var contentStart
-    var contentEnd
-    var fenceStart
-    var fenceOpenSize
-    var fenceCloseSize
+    /** @type {number} */ var length = value.length + 1
+    /** @type {number} */ var index = 0
+    /** @type {number} */ var balance = 0
+    /** @type {RemarkPoint} */ var now
+    /** @type {number} */ var code
+    /** @type {number} */ var contentStart
+    /** @type {number | undefined} */ var contentEnd
+    /** @type {number} */ var fenceStart
+    /** @type {number | undefined} */ var fenceOpenSize
+    /** @type {number | undefined} */ var fenceCloseSize
 
     if (value.charCodeAt(index++) !== caret) return
     if (value.charCodeAt(index++) !== leftSquareBracket) return

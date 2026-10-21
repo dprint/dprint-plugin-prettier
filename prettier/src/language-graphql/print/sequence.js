@@ -1,3 +1,4 @@
+// @nts-check
 import { hardline } from "../../document/index.js";
 import isNextLineEmpty from "../../utilities/is-next-line-empty.js";
 import { locEnd } from "../loc.js";

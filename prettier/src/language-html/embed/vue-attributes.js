@@ -20,12 +20,12 @@ import { printVueVForDirective } from "./vue-v-for-directive.js";
 /** @type {AttributeValuePrinter[]} */
 const printers = /** @type {AttributeValuePrinter[]} */ ([
   {
-    test: /** @returns {boolean} */ (path) => path.node.fullName === "v-for",
+    test: /** @returns {boolean} */ (path) => /** @type {import("../parse/ast.js").Node} */ (path.node).fullName === "v-for",
     print: printVueVForDirective,
   },
   {
     test: /** @returns {boolean} */ (path, options) =>
-      path.node.fullName === "generic" && isVueScriptTag(path.parent, options),
+      /** @type {import("../parse/ast.js").Node} */ (path.node).fullName === "generic" && isVueScriptTag(path.parent, options),
     print: printVueScriptGenericAttributeValue,
   },
   {
@@ -41,7 +41,7 @@ const printers = /** @type {AttributeValuePrinter[]} */ ([
     - `v-on:click="jsExpression"`
     */
     /** @returns {boolean} */ test(path /* , options */) {
-      const name = path.node.fullName;
+      /** @type {string} */ const name = /** @type {import("../parse/ast.js").Node} */ (path.node).fullName;
       return name.startsWith("@") || name.startsWith("v-on:");
     },
     print: printVueVOnDirective,
@@ -53,7 +53,7 @@ const printers = /** @type {AttributeValuePrinter[]} */ ([
     - `v-bind:property="vueExpression"`
     */
     /** @returns {boolean} */ test(path /* , options */) {
-      const name = path.node.fullName;
+      /** @type {string} */ const name = /** @type {import("../parse/ast.js").Node} */ (path.node).fullName;
       return (
         name.startsWith(":") ||
         name.startsWith(".") ||
@@ -66,7 +66,7 @@ const printers = /** @type {AttributeValuePrinter[]} */ ([
     /*
     - `v-if="jsExpression"`
     */
-    test: /** @returns {boolean} */ (path /* , options */) => path.node.fullName.startsWith("v-"),
+    test: /** @returns {boolean} */ (path /* , options */) => /** @type {import("../parse/ast.js").Node} */ (path.node).fullName.startsWith("v-"),
     print: printExpression,
   },
 ]).map(({ test, print }) => ({
@@ -77,7 +77,7 @@ const printers = /** @type {AttributeValuePrinter[]} */ ([
 /**
  * @returns {Promise<Doc>}
  */
-async function printVueVOnDirective(textToDoc, print, path, options) {
+async function printVueVOnDirective(textToDoc, print, /** @type {AstPath} */ path, options) {
   try {
     return await printExpression(textToDoc, print, path, options);
   } catch (error) {
@@ -103,7 +103,7 @@ async function printVueVOnDirective(textToDoc, print, path, options) {
 /**
  * @returns {Promise<Doc>}
  */
-function printVueVBindDirective(textToDoc, print, path, options) {
+function printVueVBindDirective(textToDoc, print, /** @type {AstPath} */ path, options) {
   const text = getUnescapedAttributeValue(path.node);
   const parser = isVueSfcWithTypescriptScript(path, options)
     ? "__vue_ts_expression"
@@ -120,7 +120,7 @@ function printVueVBindDirective(textToDoc, print, path, options) {
 /**
  * @returns {Promise<Doc>}
  */
-function printExpression(textToDoc, print, path, options) {
+function printExpression(textToDoc, print, /** @type {AstPath} */ path, options) {
   const text = getUnescapedAttributeValue(path.node);
   const parser = isVueSfcWithTypescriptScript(path, options)
     ? "__ts_expression"

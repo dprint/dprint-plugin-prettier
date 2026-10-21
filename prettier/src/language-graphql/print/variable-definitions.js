@@ -1,3 +1,5 @@
+// @nts-check
+/** @import {GraphqlNode, GraphqlOptions, GraphqlPrint} from "../print-types.js" */
 import {
   group,
   ifBreak,
@@ -9,8 +11,8 @@ import isNonEmptyArray from "../../utilities/is-non-empty-array.js";
 
 /** @import AstPath from "../../common/ast-path.js" */
 
-function printVariableDefinitions(/** @type {AstPath} */ path, print) {
-  const { node } = path;
+function printVariableDefinitions(/** @type {AstPath} */ path, /** @type {GraphqlPrint} */ print) {
+  /** @type {{ node: GraphqlNode }} */ const { node } = path;
   if (!isNonEmptyArray(node.variableDefinitions)) {
     return "";
   }

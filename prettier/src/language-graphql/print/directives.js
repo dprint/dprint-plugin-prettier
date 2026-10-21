@@ -1,8 +1,11 @@
+// @nts-check
+/** @import AstPath from "../../common/ast-path.js" */
+/** @import {GraphqlNode, GraphqlOptions, GraphqlPrint} from "../print-types.js" */
 import { group, indent, join, line, softline } from "../../document/index.js";
 import isNonEmptyArray from "../../utilities/is-non-empty-array.js";
 
-function printDirectives(path, print) {
-  const { node } = path;
+function printDirectives(/** @type {AstPath} */ path, /** @type {GraphqlPrint} */ print) {
+  /** @type {{ node: GraphqlNode }} */ const { node } = path;
 
   if (!isNonEmptyArray(node.directives)) {
     return "";

@@ -1,10 +1,11 @@
 // @nts-check
+/** @import {GraphqlNode, GraphqlOptions, GraphqlPrint} from "../print-types.js" */
 import { hardline, line } from "../../document/index.js";
 
 /** @import AstPath from "../../common/ast-path.js" */
 
-function printDescription(/** @type {AstPath} */ path, options, /** @type {(a0?: any) => any} */ print) {
-  const { node } = path;
+function printDescription(/** @type {AstPath} */ path, /** @type {GraphqlOptions} */ options, /** @type {(a0?: any) => any} */ print) {
+  /** @type {{ node: GraphqlNode }} */ const { node } = path;
   if (!node.description) {
     return "";
   }

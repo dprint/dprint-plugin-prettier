@@ -29,6 +29,7 @@ import {
 /**
 @import {Doc} from "../document/index.js"
 @import {AST} from "@glimmer/syntax"
+@import {GlimmerNode, GlimmerOptions, GlimmerPrint} from "./print-types.js"
 */
 
 /** @type {number} */ const NEWLINES_TO_PRESERVE_MAX = 2;
@@ -36,8 +37,8 @@ import {
 // Formatter based on @glimmerjs/syntax's built-in test formatter:
 // https://github.com/glimmerjs/glimmer-vm/blob/master/packages/%40glimmer/syntax/lib/generation/print.ts
 
-function print(/** @type {AstPath} */ path, options, print) {
-  const { node } = path;
+function print(/** @type {AstPath} */ path, /** @type {GlimmerOptions} */ options, /** @type {GlimmerPrint} */ print) {
+  /** @type {{ node: GlimmerNode }} */ const { node } = path;
 
   switch (node.type) {
     case "Block":
@@ -428,7 +429,7 @@ function print(/** @type {AstPath} */ path, options, print) {
 }
 
 /** @returns {any[]} */ function printStartingTag(/** @type {AstPath} */ path, /** @type {() => any} */ print) {
-  const { node } = path;
+  /** @type {{ node: GlimmerNode }} */ const { node } = path;
 
   const types = ["attributes", "modifiers", "comments"].filter(/** @returns {boolean} */ (property) =>
     isNonEmptyArray(node[property]),
@@ -449,7 +450,7 @@ function print(/** @type {AstPath} */ path, options, print) {
   return ["<", node.tag, indent(attributes), printStartingTagEndMarker(node)];
 }
 
-function printStartingTagEndMarker(node) {
+function printStartingTagEndMarker(/** @type {GlimmerNode} */ node) {
   if (isVoidElement(node)) {
     return ifBreak([softline, "/>"], [" />", softline]);
   }
@@ -459,13 +460,13 @@ function printStartingTagEndMarker(node) {
 
 /* MustacheStatement print helpers */
 
-/** @returns {any[]} */ function printOpeningMustache(node) {
+/** @returns {any[]} */ function printOpeningMustache(/** @type {GlimmerNode} */ node) {
   /** @type {string} */ const mustache = node.trusting ? "{{{" : "{{";
   /** @type {string} */ const strip = node.strip?.open ? "~" : "";
   return [mustache, strip];
 }
 
-/** @returns {any[]} */ function printClosingMustache(node) {
+/** @returns {any[]} */ function printClosingMustache(/** @type {GlimmerNode} */ node) {
   /** @type {string} */ const mustache = node.trusting ? "}}}" : "}}";
   /** @type {string} */ const strip = node.strip?.close ? "~" : "";
   return [strip, mustache];
@@ -473,44 +474,44 @@ function printStartingTagEndMarker(node) {
 
 /* BlockStatement print helpers */
 
-/** @returns {any[]} */ function printOpeningBlockOpeningMustache(node) {
+/** @returns {any[]} */ function printOpeningBlockOpeningMustache(/** @type {GlimmerNode} */ node) {
   const opening = printOpeningMustache(node);
   /** @type {string} */ const strip = node.openStrip.open ? "~" : "";
   return [opening, strip, "#"];
 }
 
-/** @returns {any[]} */ function printOpeningBlockClosingMustache(node) {
+/** @returns {any[]} */ function printOpeningBlockClosingMustache(/** @type {GlimmerNode} */ node) {
   const closing = printClosingMustache(node);
   /** @type {string} */ const strip = node.openStrip.close ? "~" : "";
   return [strip, closing];
 }
 
-/** @returns {any[]} */ function printClosingBlockOpeningMustache(node) {
+/** @returns {any[]} */ function printClosingBlockOpeningMustache(/** @type {GlimmerNode} */ node) {
   const opening = printOpeningMustache(node);
   /** @type {string} */ const strip = node.closeStrip.open ? "~" : "";
   return [opening, strip, "/"];
 }
 
-/** @returns {any[]} */ function printClosingBlockClosingMustache(node) {
+/** @returns {any[]} */ function printClosingBlockClosingMustache(/** @type {GlimmerNode} */ node) {
   const closing = printClosingMustache(node);
   /** @type {string} */ const strip = node.closeStrip.close ? "~" : "";
   return [strip, closing];
 }
 
-/** @returns {any[]} */ function printInverseBlockOpeningMustache(node) {
+/** @returns {any[]} */ function printInverseBlockOpeningMustache(/** @type {GlimmerNode} */ node) {
   const opening = printOpeningMustache(node);
   /** @type {string} */ const strip = node.inverseStrip.open ? "~" : "";
   return [opening, strip];
 }
 
-/** @returns {any[]} */ function printInverseBlockClosingMustache(node) {
+/** @returns {any[]} */ function printInverseBlockClosingMustache(/** @type {GlimmerNode} */ node) {
   const closing = printClosingMustache(node);
   /** @type {string} */ const strip = node.inverseStrip.close ? "~" : "";
   return [strip, closing];
 }
 
-function printOpenBlock(/** @type {AstPath} */ path, print) {
-  const { node } = path;
+function printOpenBlock(/** @type {AstPath} */ path, /** @type {GlimmerPrint} */ print) {
+  /** @type {{ node: GlimmerNode }} */ const { node } = path;
   /** @type {Doc[]} */
   const parts = [];
 
@@ -532,7 +533,7 @@ function printOpenBlock(/** @type {AstPath} */ path, print) {
   ]);
 }
 
-/** @returns {any[]} */ function printElseBlock(node, options) {
+/** @returns {any[]} */ function printElseBlock(/** @type {GlimmerNode} */ node, /** @type {GlimmerOptions} */ options) {
   return [
     options.htmlWhitespaceSensitivity === "ignore" ? hardline : "",
     printInverseBlockOpeningMustache(node),
@@ -565,7 +566,7 @@ const hasSamePathHeadName = ({ path: pathA }, { path: pathB }) =>
     return false;
   }
 
-  const { node } = path;
+  /** @type {{ node: GlimmerNode }} */ const { node } = path;
 
   return (
     /*
@@ -589,7 +590,7 @@ const hasSamePathHeadName = ({ path: pathA }, { path: pathB }) =>
   );
 }
 
-function printElseIfBlock(path, print) {
+function printElseIfBlock(/** @type {AstPath} */ path, /** @type {GlimmerPrint} */ print) {
   const { node, grandparent } = path;
   return group([
     printInverseBlockOpeningMustache(grandparent),
@@ -606,8 +607,8 @@ function printElseIfBlock(path, print) {
   ]);
 }
 
-function printCloseBlock(path, options, print) {
-  const { node } = path;
+function printCloseBlock(/** @type {AstPath} */ path, /** @type {GlimmerOptions} */ options, /** @type {GlimmerPrint} */ print) {
+  /** @type {{ node: GlimmerNode }} */ const { node } = path;
 
   if (options.htmlWhitespaceSensitivity === "ignore") {
     const escape = blockStatementHasOnlyWhitespaceInProgram(node)
@@ -629,15 +630,15 @@ function printCloseBlock(path, options, print) {
   ];
 }
 
-/** @returns {boolean} */ function blockStatementHasOnlyWhitespaceInProgram(node) {
+/** @returns {boolean} */ function blockStatementHasOnlyWhitespaceInProgram(/** @type {GlimmerNode} */ node) {
   return (
     node.type === "BlockStatement" &&
     node.program.body.every(/** @returns {boolean} */ (node) => isWhitespaceNode(node))
   );
 }
 
-function printProgram(path, options, print) {
-  const { node } = path;
+function printProgram(/** @type {AstPath} */ path, /** @type {GlimmerOptions} */ options, /** @type {GlimmerPrint} */ print) {
+  /** @type {{ node: GlimmerNode }} */ const { node } = path;
 
   if (blockStatementHasOnlyWhitespaceInProgram(node)) {
     return "";
@@ -652,8 +653,8 @@ function printProgram(path, options, print) {
   return indent(program);
 }
 
-function printInverse(path, options, print) {
-  const { node } = path;
+function printInverse(/** @type {AstPath} */ path, /** @type {GlimmerOptions} */ options, /** @type {GlimmerPrint} */ print) {
+  /** @type {{ node: GlimmerNode }} */ const { node } = path;
 
   if (!node.inverse) {
     return "";
@@ -726,7 +727,7 @@ function printInverse(path, options, print) {
  * are treated in hbs string literals.
  * @returns {any[]}
  */
-function printStringLiteral(/** @type {AstPath} */ path, options) {
+function printStringLiteral(/** @type {AstPath} */ path, /** @type {GlimmerOptions} */ options) {
   const {
     node: { value },
   } = path;
@@ -752,7 +753,7 @@ function printStringLiteral(/** @type {AstPath} */ path, options) {
 
 /* SubExpression print helpers */
 
-function printSubExpressionPathAndParams(/** @type {AstPath} */ path, print) {
+function printSubExpressionPathAndParams(/** @type {AstPath} */ path, /** @type {GlimmerPrint} */ print) {
   const printed = printPath(path, print);
   const params = printParams(path, print);
 
@@ -765,7 +766,7 @@ function printSubExpressionPathAndParams(/** @type {AstPath} */ path, print) {
 
 /* misc. print helpers */
 
-function printPathAndParams(/** @type {AstPath} */ path, print) {
+function printPathAndParams(/** @type {AstPath} */ path, /** @type {GlimmerPrint} */ print) {
   const pathDoc = printPath(path, print);
   const paramsDoc = printParams(path, print);
 
@@ -780,8 +781,8 @@ function printPath(/** @type {AstPath} */ path, /** @type {(a0?: any) => any} */
   return print("path");
 }
 
-function printParams(/** @type {AstPath} */ path, print) {
-  const { node } = path;
+function printParams(/** @type {AstPath} */ path, /** @type {GlimmerPrint} */ print) {
+  /** @type {{ node: GlimmerNode }} */ const { node } = path;
   const parts = [];
 
   if (node.params.length > 0) {
@@ -799,7 +800,7 @@ function printParams(/** @type {AstPath} */ path, print) {
   return join(line, parts);
 }
 
-/** @returns {any[]} */ function printBlockParams(node) {
+/** @returns {any[]} */ function printBlockParams(/** @type {GlimmerNode} */ node) {
   return ["as |", node.blockParams.join(" "), "|"];
 }
 
@@ -827,7 +828,7 @@ const isPathExpressionPartNeedBrackets = /** @returns {boolean} */ (/** @type {s
     )
   );
 };
-/** @returns {string} */ function printPathExpression(node) {
+/** @returns {string} */ function printPathExpression(/** @type {GlimmerNode} */ node) {
   // check if node is a legacy path expression and leave it alone
   if (node.tail.length === 0 && node.original.includes("/")) {
     return node.original;
