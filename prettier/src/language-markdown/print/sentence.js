@@ -1,6 +1,8 @@
+// @nts-check
 /**
  * @import AstPath from "../../common/ast-path.js"
  * @import {Doc} from "../../document/index.js"
+ * @import {MdastNode} from "../utilities.js"
  */
 
 import { DOC_TYPE_STRING, fill, getDocType } from "../../document/index.js";
@@ -15,7 +17,7 @@ function printSentence(path, print) {
   const parts = [""];
 
   path.each(() => {
-    const { node } = path;
+    /** @type {{ node: MdastNode }} */ const { node } = path;
     const doc = print();
     switch (node.type) {
       case "whitespace":

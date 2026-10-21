@@ -1,5 +1,8 @@
 // @nts-check
-/** @import AstPath from "../../common/ast-path.js" */
+/**
+ * @import AstPath from "../../common/ast-path.js"
+ * @import {MdastNode} from "../utilities.js"
+ */
 import {
   breakParent,
   group,
@@ -11,7 +14,7 @@ import { printDocToString } from "../../document/printer/printer.js";
 import getStringWidth from "../../utilities/get-string-width.js";
 
 function printTable(/** @type {AstPath} */ path, options, /** @type {() => any} */ print) {
-  const { node } = path;
+  /** @type {{ node: MdastNode }} */ const { node } = path;
 
   const columnMaxWidths = [];
   // { [rowIndex: number]: { [columnIndex: number]: {text: string, width: number} } }

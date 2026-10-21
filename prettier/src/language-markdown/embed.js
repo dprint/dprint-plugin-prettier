@@ -4,10 +4,13 @@ import getMaxContinuousCount from "../utilities/get-max-continuous-count.js";
 import inferParser from "../utilities/infer-parser.js";
 import { getFencedCodeBlockValue } from "./utilities.js";
 
-/** @import AstPath from "../common/ast-path.js" */
+/**
+ * @import AstPath from "../common/ast-path.js"
+ * @import {MdastNode, MarkdownOptions} from "./utilities.js"
+ */
 
-function embed(/** @type {AstPath} */ path, options) {
-  const { node } = path;
+function embed(/** @type {AstPath} */ path, /** @type {MarkdownOptions} */ options) {
+  /** @type {{ node: MdastNode }} */ const { node } = path;
 
   switch (node.type) {
     case "code": {

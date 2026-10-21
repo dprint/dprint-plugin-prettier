@@ -9,6 +9,7 @@ import { printChildren } from "./children.js";
 /**
  * @import AstPath from "../../common/ast-path.js"
  * @import {Doc} from "../../document/index.js"
+ * @import {MdastNode} from "../utilities.js"
  */
 
 // 999,999,999 is the maximum number that can be parsed as a list item number as intended in CommonMark
@@ -22,7 +23,7 @@ const MAXIMUM_ORDERED_LIST_MARKER = 999_999_999;
  * @return {Doc}
  */
 function printList(path, options, print) {
-  const { node } = path;
+  /** @type {{ node: MdastNode }} */ const { node } = path;
   /** @type {number | undefined} */ const nthSiblingIndex = getNthListSiblingIndex(node, path.parent);
 
   /** @type {boolean} */ const isGitDiffFriendlyOrderedList = hasGitDiffFriendlyOrderedList(
@@ -35,7 +36,7 @@ function printList(path, options, print) {
   return printChildren(path, options, print, {
     processor() {
       /** @type {string} */ const prefix = getPrefix();
-      const { node: childNode } = path;
+      /** @type {{ node: MdastNode }} */ const { node: childNode } = path;
 
       if (
         childNode.children.length === 2 &&
@@ -94,7 +95,7 @@ function printList(path, options, print) {
 }
 
 /** @returns {any[]} */ function printListItem(/** @type {AstPath} */ path, options, print, /** @type {string} */ listPrefix) {
-  const { node } = path;
+  /** @type {{ node: MdastNode }} */ const { node } = path;
   /** @type {string} */ const prefix = node.checked === null ? "" : node.checked ? "[x] " : "[ ] ";
   return [
     prefix,
@@ -124,7 +125,7 @@ function printList(path, options, print) {
  * @return {number}
  */
 function requiredIndent(path) {
-  const { node, next } = path;
+  /** @type {{ node: MdastNode, next: MdastNode | null | undefined }} */ const { node, next } = path;
   if (node.checked === null) {
     return 0;
   }
@@ -150,7 +151,7 @@ function requiredIndent(path) {
  * @return {Doc}
  */
 function printListLegacy(path, options, print) {
-  const { node } = path;
+  /** @type {{ node: MdastNode }} */ const { node } = path;
   /** @type {number | undefined} */ const nthSiblingIndex = getNthListSiblingIndex(node, path.parent);
 
   /** @type {boolean} */ const isGitDiffFriendlyOrderedList = hasGitDiffFriendlyOrderedList(
@@ -161,7 +162,7 @@ function printListLegacy(path, options, print) {
   return printChildren(path, options, print, {
     processor() {
       /** @type {string} */ const prefix = getPrefix();
-      const { node: childNode } = path;
+      /** @type {{ node: MdastNode }} */ const { node: childNode } = path;
 
       if (
         childNode.children.length === 2 &&
@@ -203,7 +204,7 @@ function printListLegacy(path, options, print) {
 }
 
 function printListItemLegacy(path, options, print, listPrefix) {
-  const { node } = path;
+  /** @type {{ node: MdastNode }} */ const { node } = path;
   /** @type {string} */ const prefix = node.checked === null ? "" : node.checked ? "[x] " : "[ ] ";
   return [
     prefix,

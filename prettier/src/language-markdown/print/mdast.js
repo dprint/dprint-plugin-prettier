@@ -40,6 +40,7 @@ import { printWord, printWordLegacy } from "./word.js";
 /**
  * @import AstPath from "../../common/ast-path.js";
  * @import {Doc} from "../../document/index.js";
+ * @import {MdastNode, MarkdownOptions} from "../utilities.js";
  * @returns {boolean}
  */
 
@@ -82,8 +83,12 @@ function isNextTokenFakeSetextH2Line(path) {
   return !afterNext || isNewLine(afterNext);
 }
 
-function printMdast(path, options, print) {
-  const { node } = path;
+function printMdast(
+  /** @type {AstPath} */ path,
+  /** @type {MarkdownOptions} */ options,
+  print,
+) {
+  /** @type {{ node: MdastNode }} */ const { node } = path;
 
   if (shouldRemainTheSameContent(path)) {
     /*

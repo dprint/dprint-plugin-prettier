@@ -7,15 +7,16 @@ const fakeSetextHeaderRegex = /^(?:=+|-+)$/;
 /**
  * @import AstPath from "../../common/ast-path.js"
  * @import {Doc} from "../../document/index.js"
+ * @import {MdastNode, MarkdownOptions} from "../utilities.js"
  */
 
 /**
  * @param {AstPath} path
- * @param {*} options
+ * @param {MarkdownOptions} options
  * @return {Doc}
  */
 function printWord(path, options) {
-  const { node } = path;
+  /** @type {{ node: MdastNode }} */ const { node } = path;
   const emphasisOrStrong = path.findAncestor(
     /** @returns {boolean} */ (p) => p.type === "emphasis" || p.type === "strong",
   );
@@ -121,7 +122,7 @@ function canOpenOrCloseStrongOrEmphasis(preceding, delimiterRun, following) {
  * @return {Doc}
  */
 function printWordLegacy(path) {
-  const { node } = path;
+  /** @type {{ node: MdastNode }} */ const { node } = path;
   /** @type {string} */ let escapedValue = node.value
     .replaceAll("*", String.raw`\*`) // escape all `*`
     .replaceAll(

@@ -116,6 +116,9 @@
     "./vendor/meriyah/meriyah.mjs",
     "./vendor/angular-compiler/compiler.mjs"
   ],
+  "types": {
+    "../prettier/node_modules/mdast-util-from-markdown/lib/types.d.ts": "./types/mdast-util-from-markdown-types.ts"
+  },
   "checked": [
     "../prettier/node_modules/mdast-util-find-and-replace",
     "../prettier/node_modules/mdast-util-from-markdown",

@@ -1,17 +1,26 @@
+// @nts-check
+/**
+ * @import AstPath from "../../common/ast-path.js"
+ * @import {MdastNode, MarkdownOptions} from "../utilities.js"
+ */
 import { hardline } from "../../document/index.js";
 import { isSetextHeading } from "../utilities.js";
 import { printChildren } from "./children.js";
 
-function printAtxHeading(path, options, print) {
+function printAtxHeading(/** @type {AstPath} */ path, options, print) {
   return [
-    "#".repeat(path.node.depth) + " ",
+    "#".repeat(/** @type {MdastNode} */ (path.node).depth) + " ",
     printChildren(path, options, print),
   ];
 }
 
-function printSetextHeading(path, options, print) {
+function printSetextHeading(
+  /** @type {AstPath} */ path,
+  /** @type {MarkdownOptions} */ options,
+  print,
+) {
   const { originalText } = options;
-  const { node } = path;
+  /** @type {{ node: MdastNode }} */ const { node } = path;
   const end = node.position.end.offset;
   const lineStart = originalText.lastIndexOf("\n", end - 1) + 1;
   const lastLine = originalText.slice(lineStart, end);

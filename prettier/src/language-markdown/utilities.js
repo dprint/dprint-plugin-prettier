@@ -56,13 +56,45 @@ const K_REGEXP = /\p{Script_Extensions=Hangul}/u;
  * }} WordNode
  * Node for a single CJK character or a sequence of non-CJK characters
  * @typedef {WhitespaceNode | WordNode} TextNode
+ * A node of the markdown tree as prettier's printers read it, which the parser and prettier write out as objects
+ * @typedef {{
+ *   type: string,
+ *   value?: string,
+ *   children?: any[],
+ *   url?: string,
+ *   position?: any,
+ *   referenceType?: string,
+ *   title?: string | null,
+ *   meta?: string | null,
+ *   originalAltText?: string,
+ *   label?: string | null,
+ *   lang?: string | null,
+ *   isIndented?: boolean,
+ *   alt?: string | null,
+ *   depth?: number,
+ *   ordered?: boolean | null,
+ *   start?: number | null,
+ *   checked?: boolean | null,
+ *   spread?: boolean | null,
+ *   isAligned?: boolean,
+ *   hasIndentedCodeblock?: boolean,
+ *   align?: any[],
+ * }} MdastNode
+ * The options that prettier's markdown printers read
+ * @typedef {{
+ *   parser: string,
+ *   originalText: string,
+ *   proseWrap: string,
+ *   singleQuote: boolean,
+ *   __inJsTemplate?: boolean,
+ * }} MarkdownOptions
  */
 
 /**
  * split text into whitespaces and words
  * @param {string} text
  */
-function splitText(text) {
+function splitText(/** @type {string} */ text) {
   /** @type {Array<TextNode>} */
   const nodes = [];
 
@@ -160,7 +192,7 @@ function splitText(text) {
 
   return nodes;
 
-  function appendNode(node) {
+  function appendNode(/** @type {WordNode} */ node) {
     const lastNode = nodes.at(-1);
     if (
       lastNode?.type === "word" &&
@@ -172,7 +204,7 @@ function splitText(text) {
     }
     nodes.push(node);
 
-    function isBetween(kind1, kind2) {
+    /** @returns {boolean} */ function isBetween(/** @type {string} */ kind1, /** @type {string} */ kind2) {
       return (
         (lastNode.kind === kind1 && node.kind === kind2) ||
         (lastNode.kind === kind2 && node.kind === kind1)
@@ -181,7 +213,10 @@ function splitText(text) {
   }
 }
 
-function getOrderedListItemInfo(orderListItem, options) {
+function getOrderedListItemInfo(
+  /** @type {MdastNode} */ orderListItem,
+  /** @type {MarkdownOptions} */ options,
+) {
   let text = options.originalText.slice(
     orderListItem.position.start.offset,
     orderListItem.position.end.offset,
@@ -263,13 +298,13 @@ function mapAst(ast, handler) {
 }
 
 /** @return {false | 'next' | 'start' | 'end'} */
-function isPrettierIgnore(/** @type {import("mdast").Nodes} */ node) {
+function isPrettierIgnore(/** @type {MdastNode} */ node) {
   let match;
 
   if (node.type === "html") {
     match = node.value.match(/^<!--\s*prettier-ignore(?:-(start|end))?\s*-->$/);
   } else {
-    let comment;
+    /** @type {MdastNode | undefined} */ let comment;
 
     if (node.type === "esComment") {
       comment = node;
