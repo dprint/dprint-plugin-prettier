@@ -1,4 +1,5 @@
 // @nts-check
+/** @import { CssOptions } from "../utilities/index.js" */
 import PostcssValuesParser from "postcss-values-parser/lib/parser.js";
 import isObject from "../../utilities/is-object.js";
 import getFunctionArgumentsText from "../utilities/get-function-arguments-text.js";
@@ -12,7 +13,7 @@ import { addTypePrefix } from "./utilities.js";
 const isClosingParenthesis = /** @returns {boolean} */ (node) =>
   node.type === "paren" && node.value === ")";
 
-function parseValueNode(valueNode, options) {
+function parseValueNode(valueNode, /** @type {CssOptions} */ options) {
   const { nodes } = valueNode;
   let parenGroup = {
     open: null,
@@ -158,7 +159,7 @@ function flattenGroups(node) {
   return node;
 }
 
-function parseNestedValue(node, options) {
+function parseNestedValue(node, /** @type {CssOptions} */ options) {
   if (isObject(node)) {
     for (const key in node) {
       if (key !== "parent") {
@@ -175,7 +176,7 @@ function parseNestedValue(node, options) {
   return node;
 }
 
-function parseValue(/** @type {string} */ value, options) {
+function parseValue(/** @type {string} */ value, /** @type {CssOptions} */ options) {
   // Inline JavaScript in Less
   if (options.parser === "less" && value.startsWith("~`")) {
     return { type: "value-unknown", value };

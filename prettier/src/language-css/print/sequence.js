@@ -6,8 +6,9 @@ import isNextLineEmpty from "../../utilities/is-next-line-empty.js";
 import { locEnd, locStart } from "../loc.js";
 
 /** @import AstPath from "../../common/ast-path.js" */
+/** @import { CssPrint, CssOptions } from "../utilities/index.js" */
 
-/** @returns {any[]} */ function printSequence(/** @type {AstPath} */ path, options, /** @type {() => any} */ print) {
+/** @returns {any[]} */ function printSequence(/** @type {AstPath} */ path, /** @type {CssOptions} */ options, /** @type {CssPrint} */ print) {
   const parts = [];
   path.each(() => {
     const { node, previous } = path;

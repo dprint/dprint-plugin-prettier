@@ -5,33 +5,9 @@ import { transformContentProperties } from "./content.mjs";
 import { transformNode } from "./transform.mjs";
 //#region src/transforms/context.ts
 /**
- * @typedef {{ line: number, column: number, offset: number }} Point
- * @typedef {{ start: Point, end: Point }} Position
- * @typedef {{
- *   type: string,
- *   position: Position,
- *   children?: any[],
- *   leadingComments?: any[],
- *   middleComments?: any[],
- *   indicatorComment?: any,
- *   trailingComment?: any,
- *   endComments?: any[],
- *   anchor?: any,
- *   tag?: any,
- *   _parent?: any,
- *   comments?: any[],
- *   content?: any,
- *   head?: any,
- *   body?: any,
- *   key?: any,
- *   value?: any,
- *   indent?: any,
- *   chomping?: string,
- *   name?: string,
- *   parameters?: any[],
- *   documentEndMarker?: any,
- *   directivesEndMarker?: any,
- * }} YamlNode
+ * @typedef {import("yaml-unist-types").Point} Point
+ * @typedef {import("yaml-unist-types").Position} Position
+ * @typedef {import("yaml-unist-types").YamlNode} YamlNode
  */
 var Context = class {
 	/** @type {string} */ text;

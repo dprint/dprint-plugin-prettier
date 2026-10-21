@@ -1,11 +1,13 @@
+// @nts-check
+/** @import { Point, Position } from "yaml-unist-types" */
 //#region src/factories/position.ts
-function createPosition(start, end) {
+/** @returns {Position} */ function createPosition(/** @type {Point} */ start, /** @type {Point} */ end) {
 	return {
 		start,
 		end
 	};
 }
-function createEmptyPosition(point) {
+/** @returns {Position} */ function createEmptyPosition(/** @type {Point} */ point) {
 	return {
 		start: point,
 		end: point

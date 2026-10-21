@@ -1,5 +1,6 @@
 // @nts-check
 /** @import AstPath from "../../common/ast-path.js" */
+/** @import { CssPrint, CssOptions } from "../utilities/index.js" */
 import {
   assertDocArray,
   dedent,
@@ -30,7 +31,7 @@ import {
 } from "../utilities/index.js";
 import { shouldPrintTrailingComma } from "./misc.js";
 
-/** @returns {boolean} */ function hasComma({ node, parent }, options) {
+/** @returns {boolean} */ function hasComma({ node, parent }, /** @type {CssOptions} */ options) {
   return Boolean(
     node.source &&
     options.originalText
@@ -40,7 +41,7 @@ import { shouldPrintTrailingComma } from "./misc.js";
   );
 }
 
-function printTrailingComma(/** @type {AstPath} */ path, options) {
+function printTrailingComma(/** @type {AstPath} */ path, /** @type {CssOptions} */ options) {
   if (isVarFunctionNode(path.grandparent) && hasComma(path, options)) {
     return ",";
   }
@@ -60,7 +61,7 @@ function printTrailingComma(/** @type {AstPath} */ path, options) {
   return "";
 }
 
-function printParenthesizedValueGroup(/** @type {AstPath} */ path, options, /** @type {(a0?: any) => any} */ print) {
+function printParenthesizedValueGroup(/** @type {AstPath} */ path, /** @type {CssOptions} */ options, /** @type {CssPrint} */ print) {
   const { node, parent } = path;
   const groupDocs = path.map(
     ({ node }) => (typeof node === "string" ? node : print()),

@@ -12,6 +12,8 @@ import isNonEmptyArray from "../utilities/is-non-empty-array.js";
  *   singleQuote: boolean,
  *   trailingComma?: string,
  * }} YamlOptions
+ * The callback that prints a part of the node that a printer is at, which prettier gives each printer
+ * @typedef {(selector?: any, args?: any) => any} YamlPrint
  */
 
 /**
@@ -219,8 +221,8 @@ function getFlowScalarLineContents(nodeType, content, /** @type {YamlOptions} */
 }
 
 function getBlockValueLineContents(
-  node,
-  { parentIndent, isLastDescendant, options },
+  /** @type {YamlNode} */ node,
+  /** @type {{ parentIndent: number, isLastDescendant: boolean, options: YamlOptions }} */ { parentIndent, isLastDescendant, options },
 ) {
   /** @type {string} */
   const content =

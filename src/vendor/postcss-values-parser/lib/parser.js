@@ -34,7 +34,7 @@ module.exports = class Parser {
     // cache needs to be an array for values with more than 1 level of function nesting
     /** @type {any[]} */ this.cache = [];
     /** @type {string} */ this.input = input;
-    this.options = Object.assign({}, defaults, options);
+    /** @type {{ loose: boolean }} */ this.options = Object.assign({}, defaults, options);
     /** @type {number} */ this.position = 0;
     // we'll use this to keep track of the paren balance
     /** @type {number} */ this.unbalanced = 0;

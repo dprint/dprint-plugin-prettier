@@ -1,5 +1,6 @@
 // @nts-check
 /** @import AstPath from "../common/ast-path.js" */
+/** @import { CssPrint, CssOptions } from "./utilities/index.js" */
 import {
   breakParent,
   dedent,
@@ -56,7 +57,7 @@ import {
   maybeToLowerCase,
 } from "./utilities/index.js";
 
-function genericPrint(/** @type {AstPath} */ path, options, print) {
+function genericPrint(/** @type {AstPath} */ path, /** @type {CssOptions} */ options, /** @type {CssPrint} */ print) {
   const { node } = path;
 
   switch (node.type) {

@@ -43,6 +43,7 @@ import {
 
 /**
  * @import AstPath from "../../common/ast-path.js"
+ * @import { CssPrint, CssOptions } from "../utilities/index.js"
  * @import {Doc} from "../../document/index.js"
  */
 
@@ -52,7 +53,7 @@ import {
  * @param {(...args: *[]) => Doc} print
  * @returns {Doc}
  */
-function printCommaSeparatedValueGroup(/** @type {AstPath} */ path, options, print) {
+function printCommaSeparatedValueGroup(/** @type {AstPath} */ path, /** @type {CssOptions} */ options, /** @type {CssPrint} */ print) {
   const { node } = path;
   const parentNode = path.parent;
   const parentParentNode = path.grandparent;

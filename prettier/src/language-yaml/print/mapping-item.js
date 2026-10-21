@@ -20,9 +20,9 @@ import {
 import { alignWithSpaces } from "./misc.js";
 /** @import AstPath from "../../common/ast-path.js" */
 /** @import { YamlNode } from "../../../../src/vendor/yaml-unist-parser/transforms/context.mjs" */
-/** @import { YamlOptions } from "../utilities.js" */
+/** @import { YamlOptions, YamlPrint } from "../utilities.js" */
 
-function printMappingItem(/** @type {AstPath} */ path, /** @type {YamlOptions} */ options, print) {
+function printMappingItem(/** @type {AstPath} */ path, /** @type {YamlOptions} */ options, /** @type {YamlPrint} */ print) {
   /** @type {{ node: YamlNode, parent: YamlNode }} */ const { node, parent } = path;
   /** @type {{ key: YamlNode, value: YamlNode }} */ const { key, value } = node;
 

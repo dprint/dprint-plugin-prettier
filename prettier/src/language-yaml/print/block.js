@@ -19,9 +19,11 @@ import {
 import { alignWithSpaces } from "./misc.js";
 
 /** @import AstPath from "../../common/ast-path.js" */
+/** @import { YamlNode } from "../../../../src/vendor/yaml-unist-parser/transforms/context.mjs" */
+/** @import { YamlOptions, YamlPrint } from "../utilities.js" */
 
-function printBlock(/** @type {AstPath} */ path, options, print) {
-  const { node } = path;
+function printBlock(/** @type {AstPath} */ path, /** @type {YamlOptions} */ options, /** @type {YamlPrint} */ print) {
+  /** @type {{ node: YamlNode }} */ const { node } = path;
   /** @type {number} */ const parentIndent = path.ancestors.filter(
     /** @returns {boolean} */ (node) => node.type === "sequence" || node.type === "mapping",
   ).length;

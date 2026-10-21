@@ -45,9 +45,9 @@ import {
 
 /** @import AstPath from "../common/ast-path.js" */
 /** @import { YamlNode } from "../../../src/vendor/yaml-unist-parser/transforms/context.mjs" */
-/** @import { YamlOptions } from "./utilities.js" */
+/** @import { YamlOptions, YamlPrint } from "./utilities.js" */
 
-/** @returns {any[]} */ function genericPrint(/** @type {AstPath} */ path, /** @type {YamlOptions} */ options, print) {
+/** @returns {any[]} */ function genericPrint(/** @type {AstPath} */ path, /** @type {YamlOptions} */ options, /** @type {YamlPrint} */ print) {
   /** @type {{ node: YamlNode }} */ const { node } = path;
 
   /** @type {Doc[]} */
@@ -150,7 +150,7 @@ import {
   return parts;
 }
 
-function printNode(/** @type {AstPath} */ path, /** @type {YamlOptions} */ options, print) {
+function printNode(/** @type {AstPath} */ path, /** @type {YamlOptions} */ options, /** @type {YamlPrint} */ print) {
   /** @type {{ node: YamlNode }} */ const { node } = path;
   switch (node.type) {
     case "root": {

@@ -1,5 +1,6 @@
 // @nts-check
-/** @returns {boolean} */ function isScssNestedPropertyNode(node, options) {
+/** @import { CssOptions } from "./index.js" */
+/** @returns {boolean} */ function isScssNestedPropertyNode(node, /** @type {CssOptions} */ options) {
   if (options.parser !== "scss") {
     return false;
   }

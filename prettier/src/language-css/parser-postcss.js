@@ -1,4 +1,5 @@
 // @nts-check
+/** @import { CssOptions } from "./utilities/index.js" */
 import postcssParse from "postcss/lib/parse";
 import postcssLess from "postcss-less";
 import postcssScssParse from "postcss-scss/lib/scss-parse";
@@ -23,7 +24,7 @@ import isScssNestedPropertyNode from "./utilities/is-scss-nested-property-node.j
 const DEFAULT_SCSS_DIRECTIVE = /(\s*)(!default).*$/;
 const GLOBAL_SCSS_DIRECTIVE = /(\s*)(!global).*$/;
 
-function parseNestedCSS(node, options) {
+function parseNestedCSS(node, /** @type {CssOptions} */ options) {
   if (isObject(node)) {
     delete node.parent;
 
@@ -394,7 +395,7 @@ function parseNestedCSS(node, options) {
   return node;
 }
 
-function parseWithParser(/** @type {(a0?: any, a1?: any) => any} */ parse, /** @type {string} */ text, options) {
+function parseWithParser(/** @type {(a0?: any, a1?: any) => any} */ parse, /** @type {string} */ text, /** @type {CssOptions} */ options) {
   const { frontMatter, content: textToParse } = parseFrontMatter(text);
 
   let result;

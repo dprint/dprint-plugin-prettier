@@ -1,5 +1,17 @@
 // @nts-check
 /** @import AstPath from "../../common/ast-path.js" */
+/**
+ * The callback that prints a part of the node that a printer is at, which prettier gives each printer
+ * @typedef {(selector?: any, args?: any) => any} CssPrint
+ * The options that prettier's CSS code reads
+ * @typedef {{
+ *   parser: string,
+ *   originalText: string,
+ *   singleQuote: boolean,
+ *   trailingComma?: string,
+ *   __isHTMLStyleAttribute?: boolean,
+ * }} CssOptions
+ */
 const colorAdjusterFunctions = new Set([
   "red",
   "green",
@@ -187,7 +199,7 @@ const wideKeywords = new Set(["initial", "inherit", "unset", "revert"]);
   );
 }
 
-/** @returns {boolean} */ function isSCSSControlDirectiveNode(node, options) {
+/** @returns {boolean} */ function isSCSSControlDirectiveNode(node, /** @type {CssOptions} */ options) {
   return (
     options.parser === "scss" &&
     node.type === "css-atrule" &&
@@ -251,7 +263,7 @@ function isDetachedRulesetCallNode(node) {
   );
 }
 
-/** @returns {boolean} */ function isSCSSMapItemNode(/** @type {AstPath} */ path, options) {
+/** @returns {boolean} */ function isSCSSMapItemNode(/** @type {AstPath} */ path, /** @type {CssOptions} */ options) {
   if (options.parser !== "scss") {
     return false;
   }

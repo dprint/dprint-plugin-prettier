@@ -1,4 +1,5 @@
 // @nts-check
+/** @import { CssOptions } from "../utilities/index.js" */
 import printNumber from "../../utilities/print-number.js";
 import printString from "../../utilities/print-string.js";
 import CSS_UNITS from "./css-units.evaluate.js";
@@ -22,11 +23,11 @@ const WORD_PART_REGEX = /[$@]?[_a-z\u0080-\uFFFF][\w\u0080-\uFFFF-]*/gi;
   "gi",
 );
 
-/** @returns {string} */ function adjustStrings(/** @type {string} */ value, options) {
+/** @returns {string} */ function adjustStrings(/** @type {string} */ value, /** @type {CssOptions} */ options) {
   return value.replaceAll(STRING_REGEX, /** @returns {string} */ (match) => printString(match, options));
 }
 
-/** @returns {string} */ function quoteAttributeValue(/** @type {string} */ value, options) {
+/** @returns {string} */ function quoteAttributeValue(/** @type {string} */ value, /** @type {CssOptions} */ options) {
   /** @type {string} */ const quote = options.singleQuote ? "'" : '"';
 
   // The selector parser currently only understand `i` flag,
@@ -77,7 +78,7 @@ const WORD_PART_REGEX = /[$@]?[_a-z\u0080-\uFFFF][\w\u0080-\uFFFF-]*/gi;
   );
 }
 
-/** @returns {boolean} */ function shouldPrintTrailingComma(options) {
+/** @returns {boolean} */ function shouldPrintTrailingComma(/** @type {CssOptions} */ options) {
   return options.trailingComma === "es5" || options.trailingComma === "all";
 }
 
