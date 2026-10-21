@@ -11,10 +11,10 @@ import { isNumericLiteral, isStringLiteral } from "../utilities/node-types.js";
 @import {Node, NodeMap, NumericLiteral, StringLiteral} from "../types/estree.js"
 */
 
-const isTsEnumMember = /** @returns {boolean} */ (node) => node.type === "TSEnumMember";
-const getKeyProperty = /** @returns {string} */ (node) => (isTsEnumMember(node) ? "id" : "key");
-const getKey = (node) => node[getKeyProperty(node)];
-const isComputedKey = /** @returns {boolean} */ (node) => !isTsEnumMember(node) && node.computed;
+const isTsEnumMember = /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node) => node.type === "TSEnumMember";
+const getKeyProperty = /** @returns {string} */ (/** @type {import("../types/estree.js").Node} */ node) => (isTsEnumMember(node) ? "id" : "key");
+const getKey = (/** @type {import("../types/estree.js").Node} */ node) => node[getKeyProperty(node)];
+const isComputedKey = /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node) => !isTsEnumMember(node) && node.computed;
 
 // Matches “simple” numbers like `123` and `2.5` but not `1_000`, `1e+100` or `0b10`.
 /** @returns {boolean} */ function isSimpleNumber(/** @type {string} */ numberString) {
@@ -29,7 +29,7 @@ const isTypeScript = /** @returns {boolean} */ ({ parser }) =>
   parser === "yuku-ts";
 
 /**
-@param {any} node
+@param {import("../types/estree.js").Node} node
 @returns {boolean}
 */
 function isKeySafeToQuote(node, options) {
@@ -82,7 +82,7 @@ function isKeySafeToQuote(node, options) {
 // (Vue.js supports unquoted numbers in expressions, but let’s keep it simple.)
 //
 // Identifiers can be unquoted in more circumstances, though.
-/** @returns {boolean} */ function isKeySafeToUnquote(node, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options) {
+/** @returns {boolean} */ function isKeySafeToUnquote(/** @type {import("../types/estree.js").Node} */ node, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options) {
   const { parser } = options;
   if (parser === "json" || parser === "jsonc") {
     return false;
@@ -202,7 +202,7 @@ function hasSiblingsRequireQuoted(/** @type {AstPath} */ path, options) {
 - `RecordDeclarationStaticProperty` (Flow)
 */
 function printKey(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   const property = getKeyProperty(node);
 
   if (isComputedKey(node)) {

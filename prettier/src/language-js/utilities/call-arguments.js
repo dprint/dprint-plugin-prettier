@@ -21,7 +21,7 @@ import { getOrInsertComputed } from "../../utilities/get-or-insert.js";
 const callArgumentsCache = new WeakMap();
 
 /**
-@param {any} node
+@param {import("../types/estree.js").Node} node
 */
 function getCallArgumentsWithoutCache(node) {
   let args;
@@ -42,8 +42,9 @@ function getCallArgumentsWithoutCache(node) {
 
 /**
 @param {CallLikeNode} node
+@returns {any[]}
 */
-/** @returns {any[]} */ function getCallArguments(node) {
+function getCallArguments(node) {
   return getOrInsertComputed(
     callArgumentsCache,
     node,
@@ -52,7 +53,7 @@ function getCallArgumentsWithoutCache(node) {
 }
 
 function iterateCallArgumentsPath(/** @type {AstPath} */ path, iteratee) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
 
   if (node.type === "ImportExpression" || node.type === "TSImportType") {
     path.call(() => iteratee(path, 0), "source");
@@ -70,8 +71,9 @@ function iterateCallArgumentsPath(/** @type {AstPath} */ path, iteratee) {
 /**
 @param {CallLikeNode} node
 @param {number} index
+@returns {any[]}
 */
-/** @returns {any[]} */ function getCallArgumentSelector(node, /** @type {number} */ index) {
+function getCallArgumentSelector(node, /** @type {number} */ index) {
   if (node.type === "ImportExpression" || node.type === "TSImportType") {
     if (index === 0 || index === (node.options ? -2 : -1)) {
       return ["source"];

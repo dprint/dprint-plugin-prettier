@@ -94,7 +94,7 @@ function postprocess(ast, options) {
   let typeCastCommentsEnds;
 
   ast = visitNode(ast, {
-    onEnter(node) {
+    onEnter(/** @type {import("../../types/estree.js").Node} */ node) {
       setContentEnd(node, comments, text);
 
       switch (node.type) {
@@ -197,7 +197,7 @@ function postprocess(ast, options) {
           break;
       }
     },
-    onLeave(node) {
+    onLeave(/** @type {import("../../types/estree.js").Node} */ node) {
       switch (node.type) {
         // Children can be parenthesized, need do this in `onLeave`
         case "LogicalExpression":
@@ -222,7 +222,7 @@ function postprocess(ast, options) {
   return ast;
 }
 
-/** @returns {boolean} */ function isUnbalancedLogicalTree(node) {
+/** @returns {boolean} */ function isUnbalancedLogicalTree(/** @type {import("../../types/estree.js").Node} */ node) {
   return (
     node.type === "LogicalExpression" &&
     node.right.type === "LogicalExpression" &&
@@ -230,7 +230,7 @@ function postprocess(ast, options) {
   );
 }
 
-function rebalanceLogicalTree(node) {
+function rebalanceLogicalTree(/** @type {import("../../types/estree.js").Node} */ node) {
   if (!isUnbalancedLogicalTree(node)) {
     return node;
   }
@@ -276,7 +276,7 @@ function assertComments(comments, /** @type {string} */ text) {
 }
 
 /* c8 ignore next */
-function assertRaw(node, /** @type {string} */ text) {
+function assertRaw(/** @type {import("../../types/estree.js").Node} */ node, /** @type {string} */ text) {
   if (!isNodeWithRaw(node)) {
     return;
   }
@@ -286,7 +286,7 @@ function assertRaw(node, /** @type {string} */ text) {
 }
 
 /**
-@param {any} node
+@param {import("../../types/estree.js").Node} node
 @param {Comment[]} comments
 @param {string} originalText
 */

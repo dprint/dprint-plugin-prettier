@@ -6,7 +6,7 @@ import { isUnionType } from "../../utilities/node-types.js";
 import { stripComments } from "../../utilities/strip-comments.js";
 import { isSingleLineBlockComment } from "../attach/utilities.js";
 
-/** @returns {boolean} */ function shouldAttachToUnionTypeFirstElement(node, { comment, text, options }) {
+/** @returns {boolean} */ function shouldAttachToUnionTypeFirstElement(/** @type {import("../../types/estree.js").Node} */ node, { comment, text, options }) {
   if (
     isUnionType(node) &&
     isSingleLineBlockComment(comment, text) &&
@@ -20,7 +20,7 @@ import { isSingleLineBlockComment } from "../attach/utilities.js";
   return false;
 }
 
-function addLeadingCommentToPossibleUnionType(node, context) {
+function addLeadingCommentToPossibleUnionType(/** @type {import("../../types/estree.js").Node} */ node, context) {
   addLeadingComment(
     shouldAttachToUnionTypeFirstElement(node, context) ? node.types[0] : node,
     context.comment,

@@ -12,14 +12,9 @@ import {
 /**
 @template {unknown} InputDoc
 @param {InputDoc} doc
-@returns {
-  InputDoc extends string ? DOC_TYPE_STRING
-  : InputDoc extends readonly Doc[] ? DOC_TYPE_ARRAY
-  : InputDoc extends Doc ? InputDoc["type"]
-  : void
-}
+@returns {string | undefined}
 */
-/** @returns {string | undefined} */ function getDocType(doc) {
+function getDocType(doc) {
   if (typeof doc === "string") {
     // @ts-expect-error -- TS throws [TS2322], but actually works
     return DOC_TYPE_STRING;

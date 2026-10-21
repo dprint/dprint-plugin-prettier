@@ -7,7 +7,7 @@ import {
 import { hasLanguageComment } from "./utilities.js";
 
 async function printEmbedGraphQL(textToDoc, print, /** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, options) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
 
   const numQuasis = node.quasis.length;
 

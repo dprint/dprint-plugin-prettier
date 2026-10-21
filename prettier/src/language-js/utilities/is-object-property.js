@@ -8,9 +8,9 @@ import { isMethod } from "./is-method.js";
 
 /**
  * @param {Node} node
- * @returns {boolean}
+ * @returns {boolean | undefined}
  */
-/** @returns {boolean | undefined} */ function isObjectProperty(node) {
+function isObjectProperty(node) {
   return (
     node?.type === "ObjectProperty" ||
     (node?.type === "Property" && !isMethod(node))

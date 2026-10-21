@@ -3,7 +3,7 @@ import { isBinaryCastExpression } from "../utilities/node-types.js";
 import { startsWithNoLookaheadToken } from "../utilities/starts-with-no-lookahead-token.js";
 
 /** @returns {boolean} */ function shouldAddParenthesesToIdentifier(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
 
   // Identifiers never need parentheses.
   if (node.type !== "Identifier") {
@@ -22,7 +22,7 @@ import { startsWithNoLookaheadToken } from "../utilities/starts-with-no-lookahea
     return true;
   }
 
-  const { key, parent } = path;
+  /** @type {{ key: any, parent: import("../types/estree.js").Node }} */ const { key, parent } = path;
   // `for ((async) of []);` and `for ((let) of []);`
   if (
     key === "left" &&

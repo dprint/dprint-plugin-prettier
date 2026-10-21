@@ -39,7 +39,7 @@ import { printTypeAnnotationProperty } from "./type-annotation.js";
 - `TupleTypeAnnotation`(Flow)
 */
 /** @returns {any[]} */ function printArray(/** @type {AstPath} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   /** @type{Doc[]} */
   const parts = [];
 
@@ -136,7 +136,7 @@ import { printTypeAnnotationProperty } from "./type-annotation.js";
   return parts;
 }
 
-/** @returns {boolean} */ function isConciselyPrintedArray(node, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options) {
+/** @returns {boolean} */ function isConciselyPrintedArray(/** @type {import("../types/estree.js").Node} */ node, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options) {
   return (
     isArrayExpression(node) &&
     node.elements.length > 0 &&

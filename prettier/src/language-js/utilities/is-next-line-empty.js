@@ -9,7 +9,7 @@ import { locEnd, locEndWithFullText } from "../location/index.js";
 */
 
 /**
- * @param {any} node
+ * @param {import("../types/estree.js").Node} node
  * @returns {boolean}
  */
 const isNextLineEmpty = (node, { originalText }) => {

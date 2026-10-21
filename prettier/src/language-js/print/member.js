@@ -18,11 +18,11 @@ import { printOptionalToken } from "./miscellaneous.js";
 
 /** @import AstPath from "../../common/ast-path.js" */
 
-const isCallExpressionWithArguments = /** @returns {boolean} */ (node) =>
+const isCallExpressionWithArguments = /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node) =>
   isCallExpression(node) && getCallArguments(node).length > 0;
 
 /** @returns {boolean} */ function shouldInlineNewExpressionCallee(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path) {
-  let { node: child, ancestors } = path;
+  /** @type {{ node: import("../types/estree.js").Node, ancestors: any }} */ let { node: child, ancestors } = path;
   for (const ancestor of ancestors) {
     if (!(
       (isMemberExpression(ancestor) && ancestor.object === child) ||
@@ -40,7 +40,7 @@ const isCallExpressionWithArguments = /** @returns {boolean} */ (node) =>
 function printMemberExpression(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   const objectDoc = print("object");
   const lookupDoc = printMemberLookup(path, options, print);
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   const firstNonMemberParent = path.findAncestor(
     /** @returns {boolean} */ (node) =>
       !(isMemberExpression(node) || node.type === "TSNonNullExpression"),
@@ -72,7 +72,7 @@ function printMemberExpression(/** @type {AstPath} */ path, options, /** @type {
 
 function printMemberLookup(/** @type {AstPath} */ path, options, /** @type {(a0?: any) => any} */ print) {
   const property = print("property");
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   const optional = printOptionalToken(path);
 
   if (!node.computed) {

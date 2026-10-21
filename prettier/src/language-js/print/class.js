@@ -63,7 +63,7 @@ const isInterface = createTypeCheckFunction([
 /** @returns {any[]} */ function printClass(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   const doc = printClassWithoutDecorators(path, options, print);
 
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   if (node.type === "ClassExpression" && isNonEmptyArray(node.decorators)) {
     const decoratorsDoc = printDecorators(path, options, print);
     const needsParens = needsParentheses(path, options);
@@ -76,7 +76,7 @@ const isInterface = createTypeCheckFunction([
 }
 
 function printClassWithoutDecorators(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   const isPrintingInterface = isInterface(node);
   const isPrintingRecord = node.type === "RecordDeclaration";
 
@@ -164,7 +164,7 @@ function printClassWithoutDecorators(/** @type {AstPath} */ path, options, /** @
   return parts;
 }
 
-/** @returns {boolean} */ function hasMultipleHeritage(node) {
+/** @returns {boolean} */ function hasMultipleHeritage(/** @type {import("../types/estree.js").Node} */ node) {
   let count = node.superClass ? 1 : 0;
   for (const listName of ["extends", "mixins", "implements"]) {
     if (Array.isArray(node[listName])) {
@@ -181,7 +181,7 @@ function printClassWithoutDecorators(/** @type {AstPath} */ path, options, /** @
 @returns {boolean}
 */
 function shouldPrintClassInGroupModeWithoutCache(/** @type {AstPath} */ path) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   if (
     hasComment(node.id, CommentCheckFlags.Trailing) ||
     hasComment(node.typeParameters, CommentCheckFlags.Trailing) ||
@@ -230,7 +230,7 @@ const shouldPrintClassInGroupModeCache = new WeakMap();
 }
 
 function printHeritageClauses(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print, /** @type {string} */ listName) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   if (!isNonEmptyArray(node[listName])) {
     return "";
   }
@@ -265,7 +265,7 @@ function printHeritageClauses(/** @type {AstPath} */ path, options, /** @type {i
 
 function printSuperClass(/** @type {AstPath} */ path, options, /** @type {(a0?: any) => any} */ print) {
   const printed = print("superClass");
-  const { parent } = path;
+  /** @type {{ parent: import("../types/estree.js").Node }} */ const { parent } = path;
   if (parent.type === "AssignmentExpression") {
     return group(
       ifBreak(["(", indent([softline, printed]), softline, ")"], printed),
@@ -275,7 +275,7 @@ function printSuperClass(/** @type {AstPath} */ path, options, /** @type {(a0?: 
 }
 
 /** @returns {any[]} */ function printClassMethod(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   const parts = [];
 
   if (isNonEmptyArray(node.decorators)) {
@@ -309,7 +309,7 @@ function printSuperClass(/** @type {AstPath} */ path, options, /** @type {(a0?: 
 - `TSAbstractPropertyDefinition` (TypeScript)
 */
 /** @returns {any[]} */ function printClassProperty(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   const parts = [];
 
   if (isNonEmptyArray(node.decorators)) {

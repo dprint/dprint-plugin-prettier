@@ -4,7 +4,7 @@ import { isNumericLiteral, isStringLiteral } from "../utilities/node-types.js";
 @import {Node} from "../types/estree.js"
 */
 
-function cleanNodeKey(cloned, original, property) {
+function cleanNodeKey(cloned, /** @type {import("../types/estree.js").Node} */ original, property) {
   const key = original[property];
   if (isStringLiteral(key) || isNumericLiteral(key)) {
     cloned[property] = String(key.value);

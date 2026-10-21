@@ -7,7 +7,7 @@ import { createTypeCheckFunction } from "../utilities/create-type-check-function
 */
 
 function shouldAddParenthesesToChainExpression(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path) {
-  const { key, parent } = path;
+  /** @type {{ key: any, parent: import("../types/estree.js").Node }} */ const { key, parent } = path;
 
   return (
     (key === "expression" && parent.type === "TSNonNullExpression") ||
@@ -22,7 +22,7 @@ function shouldAddParenthesesToChainExpression(/** @type {import("../../../../pr
   );
 }
 
-const isParenthesized = (node) => node.extra?.parenthesized;
+const isParenthesized = (/** @type {import("../types/estree.js").Node} */ node) => node.extra?.parenthesized;
 const isBabelOptionalChainElement = createTypeCheckFunction([
   "OptionalCallExpression",
   "OptionalMemberExpression",
@@ -33,7 +33,7 @@ const isBabelOptionalChainElement = createTypeCheckFunction([
 * @returns {boolean}
 */
 function isBabelOptionalChainRoot(path) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
 
   let child = node;
   while (child.type === "TSNonNullExpression") {

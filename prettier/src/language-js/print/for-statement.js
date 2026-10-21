@@ -3,7 +3,7 @@ import { printDanglingComments } from "../../main/comments/print.js";
 import { printForXStatementBody } from "./clause.js";
 
 function printForStatement(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   const body = printForXStatementBody(path, options, print);
 
   // We want to keep dangling comments above the loop to stay consistent.

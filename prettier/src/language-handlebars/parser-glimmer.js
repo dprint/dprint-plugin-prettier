@@ -18,7 +18,7 @@ import { locEnd, locStart } from "./loc.js";
  * glimmer parser will produce an AST missing a backslash
  * so here we add it back
  * */
-function addBackslash(node) {
+function addBackslash(/** @type {import("./print-types.js").GlimmerNode} */ node) {
   const childrenOrBody = node.children ?? node.body;
   if (childrenOrBody) {
     for (let i = 0; i < childrenOrBody.length - 1; i++) {
@@ -37,7 +37,7 @@ function addBackslash(node) {
 
 const isIndex = /** @returns {boolean} */ (/** @type {number} */ value) => Number.isSafeInteger(value) && value >= 0;
 // Add `offset` to `loc.{start,end}`
-const setOffset = (node) => {
+const setOffset = (/** @type {import("./print-types.js").GlimmerNode} */ node) => {
   const { start, end } = node.loc;
 
   start.offset = node.loc.getStart().offset;
@@ -56,7 +56,7 @@ const setOffset = (node) => {
 const glimmerPrettierParsePlugin = (/* options*/) => ({
   name: "glimmerPrettierParsePlugin",
   visitor: {
-    All(node) {
+    All(/** @type {import("./print-types.js").GlimmerNode} */ node) {
       setOffset(node);
       addBackslash(node);
     },

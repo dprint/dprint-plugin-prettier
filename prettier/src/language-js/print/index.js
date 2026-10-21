@@ -63,7 +63,7 @@ function print(path, options, print, args) {
     options.__onHtmlBindingRoot?.(path.node, options);
   }
 
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
 
   let doc = isIgnored(path)
     ? printIgnored(path, options)
@@ -98,7 +98,7 @@ function print(path, options, print, args) {
 }
 
 function printCommentsForFunction(/** @type {AstPath} */ path, options, doc) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
 
   if (
     (hasComment(node, CommentCheckFlags.Leading) ||

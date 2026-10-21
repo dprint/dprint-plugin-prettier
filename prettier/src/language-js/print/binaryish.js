@@ -41,7 +41,7 @@ import { shouldFlatten } from "../utilities/should-flatten.js";
 - `NGPipeExpression`(Angular)
 */
 function printBinaryishExpression(/** @type {AstPath} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
-  const { node, parent, grandparent, key } = path;
+  /** @type {{ node: import("../types/estree.js").Node, parent: import("../types/estree.js").Node, grandparent: import("../types/estree.js").Node, key: any }} */ const { node, parent, grandparent, key } = path;
   /** @type {boolean} */ const isInsideParenthesis =
     key !== "body" &&
     (parent.type === "IfStatement" ||
@@ -201,7 +201,7 @@ function printBinaryishExpressions(
   /** @type {boolean} */ isNested,
   /** @type {boolean} */ isInsideParenthesis,
 ) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
 
   // Simply print the node normally.
   if (!isBinaryish(node)) {
@@ -325,7 +325,7 @@ function printBinaryishExpressions(
 
   // If there's only a single binary expression, we want to create a group
   // in order to avoid having a small right part like -1 be on its own line.
-  const { parent } = path;
+  /** @type {{ parent: import("../types/estree.js").Node }} */ const { parent } = path;
   /** @type {boolean} */ const shouldBreak = hasComment(
     node.left,
     CommentCheckFlags.Trailing | CommentCheckFlags.Line,
@@ -362,7 +362,7 @@ function printBinaryishExpressions(
   return parts;
 }
 
-/** @returns {boolean} */ function shouldInlineLogicalExpression(node) {
+/** @returns {boolean} */ function shouldInlineLogicalExpression(/** @type {import("../types/estree.js").Node} */ node) {
   if (node.type !== "LogicalExpression") {
     return false;
   }
@@ -382,7 +382,7 @@ function printBinaryishExpressions(
   return false;
 }
 
-const isBitwiseOrExpression = /** @returns {boolean} */ (node) =>
+const isBitwiseOrExpression = /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node) =>
   node.type === "BinaryExpression" && node.operator === "|";
 
 /** @returns {boolean} */ function isVueFilterSequenceExpression(/** @type {AstPath} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options) {

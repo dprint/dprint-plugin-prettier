@@ -6,7 +6,7 @@ import { isIndex } from "./is-index.js";
 */
 
 /**
-@param {any} node
+@param {import("../types/estree.js").Node} node
 @return {number}
 */
 function locEndWithFullText(node) {

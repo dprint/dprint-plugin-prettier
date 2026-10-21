@@ -289,7 +289,7 @@ function printMdast(
       ];
     }
     case "html": {
-      const { parent, isLast } = path;
+      /** @type {{ parent: import("../utilities.js").MdastNode, isLast: any }} */ const { parent, isLast } = path;
       /** @type {string} */ const value =
         parent.type === "root" && isLast ? node.value.trimEnd() : node.value;
       const isHtmlComment = /^<!--.*-->$/s.test(value);
@@ -494,7 +494,7 @@ function printMdast(
   });
 }
 
-function printIgnoreComment(node) {
+function printIgnoreComment(/** @type {import("../utilities.js").MdastNode} */ node) {
   if (node.type === "html") {
     return node.value;
   }
@@ -567,7 +567,7 @@ function printUrl(url, dangerousCharOrChars = []) {
   return `${quote}${title}${quote}`;
 }
 
-/** @returns {string} */ function printLinkReference(node, options) {
+/** @returns {string} */ function printLinkReference(/** @type {import("../utilities.js").MdastNode} */ node, options) {
   // `remark-parse` lowercase the `label` as `identifier`, we don't want do that
   // https://github.com/remarkjs/remark/blob/daddcb463af2d5b2115496c395d0571c0ff87d15/packages/remark-parse/lib/tokenize/reference.js
   const label = collapseWhiteSpace(node.label);
@@ -578,11 +578,11 @@ function printUrl(url, dangerousCharOrChars = []) {
   return `[${name}]`;
 }
 
-/** @returns {string} */ function printFootnoteReference(node) {
+/** @returns {string} */ function printFootnoteReference(/** @type {import("../utilities.js").MdastNode} */ node) {
   return `[^${node.label}]`;
 }
 
-function printImageAlt(node, options) {
+function printImageAlt(/** @type {import("../utilities.js").MdastNode} */ node, options) {
   if (options.parser !== "mdx" && node.originalAltText) {
     return node.originalAltText;
   }

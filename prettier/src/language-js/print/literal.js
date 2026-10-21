@@ -10,7 +10,7 @@ import printString from "../../utilities/print-string.js";
 */
 
 function printLiteral(/** @type {AstPath} */ path, options /* , print*/) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
 
   switch (node.type) {
     case "RegExpLiteral": // Babel
@@ -57,7 +57,7 @@ function printLiteral(/** @type {AstPath} */ path, options /* , print*/) {
     return;
   }
 
-  const { parent } = path;
+  /** @type {{ parent: import("../types/estree.js").Node }} */ const { parent } = path;
   return (
     parent.type === "ExpressionStatement" &&
     typeof parent.directive === "string"

@@ -9,7 +9,7 @@ import { isBlockComment } from "./comment-types.js";
 const cache = new WeakMap();
 
 /**
- * @param {any} comment
+ * @param {import("../types/estree.js").Comment} comment
  * @returns {boolean}
  */
 function isTypeCastComment(comment) {

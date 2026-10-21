@@ -3,7 +3,7 @@ import isNonEmptyArray from "../utilities/is-non-empty-array.js";
 import lineColumnToIndex from "../utilities/line-column-to-index.js";
 import { skipEverythingButNewLine } from "../utilities/skip.js";
 
-/** @returns {number} */ function fixValueWordLoc(node, /** @type {number} */ originalIndex) {
+/** @returns {number} */ function fixValueWordLoc(/** @type {import("./types.js").CssNode} */ node, /** @type {number} */ originalIndex) {
   const { value } = node;
   if (value === "-" || value === "--" || value.charAt(0) !== "-") {
     return originalIndex;
@@ -11,7 +11,7 @@ import { skipEverythingButNewLine } from "../utilities/skip.js";
   return originalIndex - (value.charAt(1) === "-" ? 2 : 1);
 }
 
-/** @returns {number} */ function calculateLocStart(node, /** @type {string} */ text) {
+/** @returns {number} */ function calculateLocStart(/** @type {import("./types.js").CssNode} */ node, /** @type {string} */ text) {
   // `postcss>=8`
   if (typeof node.source?.start?.offset === "number") {
     return node.source.start.offset;
@@ -33,7 +33,7 @@ import { skipEverythingButNewLine } from "../utilities/skip.js";
   throw Object.assign(new Error("Can not locate node."), { node });
 }
 
-function calculateLocEnd(node, /** @type {string} */ text) {
+function calculateLocEnd(/** @type {import("./types.js").CssNode} */ node, /** @type {string} */ text) {
   if (node.type === "css-comment" && node.inline) {
     return skipEverythingButNewLine(text, node.source.startOffset);
   }
@@ -78,11 +78,11 @@ function calculateLocEnd(node, /** @type {string} */ text) {
   return null;
 }
 
-function calculateLoc(node, /** @type {string} */ text) {
+function calculateLoc(/** @type {import("./types.js").CssNode} */ node, /** @type {string} */ text) {
   calculateNodeLoc(node, text, 0, false);
 }
 
-function calculateNodeLoc(node, /** @type {string} */ text, /** @type {number} */ rootOffset, /** @type {boolean} */ isRootOfText) {
+function calculateNodeLoc(/** @type {import("./types.js").CssNode} */ node, /** @type {string} */ text, /** @type {number} */ rootOffset, /** @type {boolean} */ isRootOfText) {
   if (isRootOfText && typeof node.type === "string") {
     node.source ??= {};
     node.source.startOffset = rootOffset;
@@ -135,7 +135,7 @@ function calculateNodeLoc(node, /** @type {string} */ text, /** @type {number} *
   fillEmptyChildLocs(node);
 }
 
-function getNestedLoc(parentNode, node, /** @type {number} */ rootOffset) {
+function getNestedLoc(/** @type {import("./types.js").CssNode} */ parentNode, /** @type {import("./types.js").CssNode} */ node, /** @type {number} */ rootOffset) {
   if (node.type === "value-root" || node.type === "value-unknown") {
     return {
       rootOffset: getValueRootOffset(parentNode),
@@ -167,7 +167,7 @@ function getNestedLoc(parentNode, node, /** @type {number} */ rootOffset) {
   }
 }
 
-/** @returns {number} */ function getValueRootOffset(node) {
+/** @returns {number} */ function getValueRootOffset(/** @type {import("./types.js").CssNode} */ node) {
   /** @type {number} */ let result = node.source.startOffset;
   if (typeof node.prop === "string") {
     result += node.prop.length;
@@ -185,7 +185,7 @@ function getNestedLoc(parentNode, node, /** @type {number} */ rootOffset) {
   return result;
 }
 
-/** @returns {number} */ function getAtRuleParamsRootOffset(node) {
+/** @returns {number} */ function getAtRuleParamsRootOffset(/** @type {import("./types.js").CssNode} */ node) {
   /** @type {number} */ let result = node.source.startOffset;
 
   if (node.type === "css-atrule" && typeof node.name === "string") {
@@ -196,7 +196,7 @@ function getNestedLoc(parentNode, node, /** @type {number} */ rootOffset) {
   return result;
 }
 
-/** @returns {string | undefined} */ function getSelectorText(parentNode, selectorNode) {
+/** @returns {string | undefined} */ function getSelectorText(/** @type {import("./types.js").CssNode} */ parentNode, selectorNode) {
   if (typeof selectorNode.raws?.selector === "string") {
     return selectorNode.raws.selector;
   }
@@ -246,7 +246,7 @@ function getNestedLoc(parentNode, node, /** @type {number} */ rootOffset) {
 }
 
 /** @returns {number} */ function getSelectorRootOffset(
-  parentNode,
+  /** @type {import("./types.js").CssNode} */ parentNode,
   selectorNode,
   /** @type {string} */ selectorText,
   /** @type {number} */ rootOffset,
@@ -294,7 +294,7 @@ function getNestedLoc(parentNode, node, /** @type {number} */ rootOffset) {
   return index === -1 ? 0 : index;
 }
 
-function fillLocFromChildren(node) {
+function fillLocFromChildren(/** @type {import("./types.js").CssNode} */ node) {
   if (typeof node.type !== "string") {
     return;
   }
@@ -354,7 +354,7 @@ function fillLocFromChildren(node) {
   }
 }
 
-function fillEmptyLocFromParent(node, parentNode) {
+function fillEmptyLocFromParent(/** @type {import("./types.js").CssNode} */ node, /** @type {import("./types.js").CssNode} */ parentNode) {
   if (
     typeof node.type !== "string" ||
     node.source ||
@@ -373,7 +373,7 @@ function fillEmptyLocFromParent(node, parentNode) {
   };
 }
 
-function fillEmptyChildLocs(node) {
+function fillEmptyChildLocs(/** @type {import("./types.js").CssNode} */ node) {
   if (
     typeof node.source?.startOffset !== "number" ||
     typeof node.source?.endOffset !== "number"
@@ -397,7 +397,7 @@ function fillEmptyChildLocs(node) {
   }
 }
 
-/** @returns {boolean} */ function isEmptyLocNode(node) {
+/** @returns {boolean} */ function isEmptyLocNode(/** @type {import("./types.js").CssNode} */ node) {
   return (
     (Array.isArray(node.nodes) && node.nodes.length === 0) ||
     (Array.isArray(node.groups) && node.groups.length === 0)
@@ -531,7 +531,7 @@ function replaceQuotesInInlineComments(text) {
   return text;
 }
 
-const locStart = /** @returns {number} */ (node) => node.source.startOffset;
-const locEnd = /** @returns {number} */ (node) => node.source.endOffset;
+const locStart = /** @returns {number} */ (/** @type {import("./types.js").CssNode} */ node) => node.source.startOffset;
+const locEnd = /** @returns {number} */ (/** @type {import("./types.js").CssNode} */ node) => node.source.endOffset;
 
 export { calculateLoc, locEnd, locStart, replaceQuotesInInlineComments };

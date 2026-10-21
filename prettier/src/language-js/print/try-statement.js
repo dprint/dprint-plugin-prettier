@@ -5,7 +5,7 @@ import { isBlockComment } from "../utilities/comment-types.js";
 import { hasComment } from "../utilities/comments.js";
 
 function printTryStatement(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   return [
     "try ",
     print("block"),
@@ -15,7 +15,7 @@ function printTryStatement(/** @type {import("../../../../prettier/src/common/as
 }
 
 function printCatchClause(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   if (node.param) {
     /** @type {boolean} */ const parameterHasComments = hasComment(
       node.param,

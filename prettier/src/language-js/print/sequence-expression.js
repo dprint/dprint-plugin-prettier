@@ -11,7 +11,7 @@ import needsParentheses from "../parentheses/needs-parentheses.js";
 import { isReturnOrThrowStatement } from "../utilities/node-types.js";
 
 /** @returns {boolean} */ function shouldIndentSequenceExpression(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, options) {
-  const { key, parent } = path;
+  /** @type {{ key: any, parent: import("../types/estree.js").Node }} */ const { key, parent } = path;
   if (
     key === "argument" &&
     isReturnOrThrowStatement(parent) &&
@@ -28,7 +28,7 @@ import { isReturnOrThrowStatement } from "../utilities/node-types.js";
 }
 
 function printSequenceExpression(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
-  const { parent } = path;
+  /** @type {{ parent: import("../types/estree.js").Node }} */ const { parent } = path;
   if (parent.type === "ExpressionStatement" || parent.type === "ForStatement") {
     // For ExpressionStatements and for-loop heads, which are among
     // the few places a SequenceExpression appears unparenthesized, we want

@@ -51,7 +51,7 @@ import {
 - `TSExternalModuleReference` (TypeScript)
 */
 function printCallArguments(/** @type {AstPath} */ path, options, /** @type {(a0?: any, a1?: any) => any} */ print) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
 
   const args = getCallArguments(node);
 
@@ -204,7 +204,7 @@ function printCallArguments(/** @type {AstPath} */ path, options, /** @type {(a0
   });
 }
 
-/** @returns {boolean} */ function couldExpandArg(arg, arrowChainRecursion = false) {
+/** @returns {boolean} */ function couldExpandArg(/** @type {import("../types/estree.js").Node} */ arg, arrowChainRecursion = false) {
   if (
     isObjectExpression(arg) &&
     (arg.properties.length > 0 || hasComment(arg))
@@ -318,7 +318,7 @@ function printCallArguments(/** @type {AstPath} */ path, options, /** @type {(a0
 // https://github.com/prettier/prettier/issues/5172
 // https://github.com/prettier/prettier/issues/12892
 // A proper (printWidth-aware) fix for those would require a complex change in the doc printer.
-/** @returns {boolean} */ function isHopefullyShortCallArgument(node) {
+/** @returns {boolean} */ function isHopefullyShortCallArgument(/** @type {import("../types/estree.js").Node} */ node) {
   if (node.type === "ParenthesizedExpression") {
     return isHopefullyShortCallArgument(node.expression);
   }
@@ -406,7 +406,7 @@ function isReactHookCallWithDepsArray(/** @type {any[]} */ args) {
 }
 
 // `{ type: "module" }` and `{"type": "module"}`
-/** @returns {boolean} */ function isTypeModuleObjectExpression(node) {
+/** @returns {boolean} */ function isTypeModuleObjectExpression(/** @type {import("../types/estree.js").Node} */ node) {
   if (!(node.type === "ObjectExpression" && node.properties.length === 1)) {
     return false;
   }

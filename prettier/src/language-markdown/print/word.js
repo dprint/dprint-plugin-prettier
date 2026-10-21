@@ -140,9 +140,9 @@ function printWordLegacy(path) {
         ).replaceAll("_", String.raw`\_`),
     ); // escape all `_` except concating with non-punctuation, e.g. `1_2_3` is not considered emphasis
 
-  const isFirstSentence = /** @returns {boolean} */ (node, /** @type {string} */ name, /** @type {number} */ index) =>
+  const isFirstSentence = /** @returns {boolean} */ (/** @type {import("../utilities.js").MdastNode} */ node, /** @type {string} */ name, /** @type {number} */ index) =>
     node.type === "sentence" && index === 0;
-  const isLastChildAutolink = /** @returns {boolean} */ (node, /** @type {string} */ name, /** @type {number} */ index) =>
+  const isLastChildAutolink = /** @returns {boolean} */ (/** @type {import("../utilities.js").MdastNode} */ node, /** @type {string} */ name, /** @type {number} */ index) =>
     isAutolink(node.children[index - 1]);
 
   if (

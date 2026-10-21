@@ -13,7 +13,7 @@ import { isNodeMatches } from "../utilities/is-node-matches.js";
 import { isAngularComponentStyles } from "./utilities.js";
 
 async function printEmbedCss(textToDoc, print, /** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, options) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
 
   // Get full template literal with expressions replaced by placeholders
   let text = "";
@@ -101,11 +101,11 @@ function isStyledJsx(/** @type {import("../../../../prettier/src/common/ast-path
   );
 }
 
-/** @returns {boolean} */ function isStyledIdentifier(node) {
+/** @returns {boolean} */ function isStyledIdentifier(/** @type {import("../types/estree.js").Node} */ node) {
   return node.type === "Identifier" && node.name === "styled";
 }
 
-/** @returns {boolean} */ function isStyledExtend(node) {
+/** @returns {boolean} */ function isStyledExtend(/** @type {import("../types/estree.js").Node} */ node) {
   return /^[A-Z]/.test(node.object.name) && node.property.name === "extend";
 }
 

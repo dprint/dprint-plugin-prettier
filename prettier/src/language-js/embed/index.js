@@ -24,7 +24,7 @@ const printers = [
 }));
 
 function embed(/** @type {AstPath} */ path) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
 
   if (
     node.type !== "TemplateLiteral" ||

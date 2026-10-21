@@ -47,7 +47,7 @@ function removeBlockquoteMarkers(line, greaterThanToKeep) {
 }
 
 const newLineRegexp = /(?<!\\)(?:\\\\)*(?:&NewLine;|&#0*10;|&#[Xx]0*[Aa];)/g;
-/** @returns {string} */ function getBlockquoteRawText(/** @type {string} */ text, node) {
+/** @returns {string} */ function getBlockquoteRawText(/** @type {string} */ text, /** @type {import("../utilities.js").MdastNode} */ node) {
   const rawLines = text.split("\n");
   const valueLines = node.value.split("\n");
   let valueIndex = 0;

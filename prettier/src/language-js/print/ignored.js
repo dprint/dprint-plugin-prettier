@@ -8,7 +8,7 @@ import {
 import { shouldExpressionStatementPrintLeadingSemicolon } from "../semicolon/semicolon.js";
 
 function printIgnored(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options /* , print*/) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   let text = options.originalText.slice(locStart(node), locEnd(node));
 
   if (options.semi && shouldIgnoredNodePrintSemicolon(node)) {

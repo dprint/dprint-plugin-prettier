@@ -92,7 +92,7 @@ function printAssignment(
 }
 
 function printAssignmentExpression(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   return printAssignment(
     path,
     options,
@@ -108,7 +108,7 @@ function printVariableDeclarator(/** @type {AstPath} */ path, options, /** @type
 }
 
 /** @returns {string} */ function chooseLayout(/** @type {AstPath} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print, leftDoc, /** @type {string | undefined} */ rightPropertyName) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   const rightNode = node[rightPropertyName];
 
   if (!rightNode) {
@@ -199,7 +199,7 @@ function printVariableDeclarator(/** @type {AstPath} */ path, options, /** @type
 }
 
 /** @returns {boolean} */ function shouldBreakAfterOperator(/** @type {AstPath} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print, /** @type {boolean} */ hasShortKey) {
-  const rightNode = path.node;
+  /** @type {import("../types/estree.js").Node} */ const rightNode = path.node;
 
   if (isBinaryish(rightNode) && !shouldInlineLogicalExpression(rightNode)) {
     return true;
@@ -269,7 +269,7 @@ function printVariableDeclarator(/** @type {AstPath} */ path, options, /** @type
 
 // prefer to break destructuring assignment
 // if it includes default values or non-shorthand properties
-/** @returns {boolean} */ function isComplexDestructuring(node) {
+/** @returns {boolean} */ function isComplexDestructuring(/** @type {import("../types/estree.js").Node} */ node) {
   if (isAssignmentOrVariableDeclarator(node)) {
     const leftNode = node.left || node.id;
     return (
@@ -285,15 +285,15 @@ function printVariableDeclarator(/** @type {AstPath} */ path, options, /** @type
   return false;
 }
 
-/** @returns {boolean} */ function isAssignment(node) {
+/** @returns {boolean} */ function isAssignment(/** @type {import("../types/estree.js").Node} */ node) {
   return node.type === "AssignmentExpression";
 }
 
-/** @returns {boolean} */ function isAssignmentOrVariableDeclarator(node) {
+/** @returns {boolean} */ function isAssignmentOrVariableDeclarator(/** @type {import("../types/estree.js").Node} */ node) {
   return isAssignment(node) || node.type === "VariableDeclarator";
 }
 
-/** @returns {boolean} */ function isComplexTypeAliasParams(node) {
+/** @returns {boolean} */ function isComplexTypeAliasParams(/** @type {import("../types/estree.js").Node} */ node) {
   const typeParams = getTypeParametersFromTypeAlias(node);
   if (isNonEmptyArray(typeParams)) {
     /** @type {string} */ const constraintPropertyName =
@@ -308,13 +308,13 @@ function printVariableDeclarator(/** @type {AstPath} */ path, options, /** @type
   return false;
 }
 
-/** @returns {any[] | undefined} */ function getTypeParametersFromTypeAlias(node) {
+/** @returns {any[] | undefined} */ function getTypeParametersFromTypeAlias(/** @type {import("../types/estree.js").Node} */ node) {
   if (isTypeAlias(node)) {
     return node.typeParameters?.params;
   }
 }
 
-/** @returns {boolean} */ function hasComplexTypeAnnotation(node) {
+/** @returns {boolean} */ function hasComplexTypeAnnotation(/** @type {import("../types/estree.js").Node} */ node) {
   if (node.type !== "VariableDeclarator") {
     return false;
   }
@@ -336,14 +336,14 @@ function printVariableDeclarator(/** @type {AstPath} */ path, options, /** @type
   );
 }
 
-/** @returns {boolean} */ function isArrowFunctionVariableDeclarator(node) {
+/** @returns {boolean} */ function isArrowFunctionVariableDeclarator(/** @type {import("../types/estree.js").Node} */ node) {
   return (
     node.type === "VariableDeclarator" &&
     node.init?.type === "ArrowFunctionExpression"
   );
 }
 
-/** @returns {any[] | undefined} */ function getTypeParametersFromTypeReference(node) {
+/** @returns {any[] | undefined} */ function getTypeParametersFromTypeReference(/** @type {import("../types/estree.js").Node} */ node) {
   let typeArguments;
   switch (node.type) {
     case "GenericTypeAnnotation":
@@ -367,7 +367,7 @@ function isPoorlyBreakableMemberOrCallChain(
   /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print,
   deep = false,
 ) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   const goDeeper = /** @returns {boolean} */ () =>
     isPoorlyBreakableMemberOrCallChain(path, options, print, true);
 
@@ -404,7 +404,7 @@ function isPoorlyBreakableMemberOrCallChain(
   return deep && (node.type === "Identifier" || node.type === "ThisExpression");
 }
 
-/** @returns {boolean} */ function isObjectPropertyWithShortKey(node, keyDoc, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options) {
+/** @returns {boolean} */ function isObjectPropertyWithShortKey(/** @type {import("../types/estree.js").Node} */ node, keyDoc, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options) {
   if (!isObjectProperty(node)) {
     return false;
   }
@@ -424,7 +424,7 @@ function isPoorlyBreakableMemberOrCallChain(
   );
 }
 
-/** @returns {boolean} */ function isCallExpressionWithComplexTypeArguments(node, /** @type {(a0?: any) => any} */ print) {
+/** @returns {boolean} */ function isCallExpressionWithComplexTypeArguments(/** @type {import("../types/estree.js").Node} */ node, /** @type {(a0?: any) => any} */ print) {
   const typeArgs = node.typeArguments?.params;
   if (isNonEmptyArray(typeArgs)) {
     if (typeArgs.length > 1) {
@@ -448,7 +448,7 @@ function isPoorlyBreakableMemberOrCallChain(
   return false;
 }
 
-/** @returns {boolean} */ function isGeneric(node) {
+/** @returns {boolean} */ function isGeneric(/** @type {import("../types/estree.js").Node} */ node) {
   switch (node.type) {
     case "FunctionTypeAnnotation":
     case "GenericTypeAnnotation":
@@ -461,7 +461,7 @@ function isPoorlyBreakableMemberOrCallChain(
   }
 }
 
-/** @returns {boolean} */ function shouldBreakBeforeConditionalType(node) {
+/** @returns {boolean} */ function shouldBreakBeforeConditionalType(/** @type {import("../types/estree.js").Node} */ node) {
   return isGeneric(node.checkType) || isGeneric(node.extendsType);
 }
 

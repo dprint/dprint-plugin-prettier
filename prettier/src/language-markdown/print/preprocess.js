@@ -231,7 +231,7 @@ function splitTextIntoSentences(ast) {
   });
 
   function walkAst(ast, handler) {
-    return (function preorder(node, parentStack) {
+    return (function preorder(/** @type {import("../utilities.js").MdastNode} */ node, parentStack) {
       handler(node, parentStack);
       if (node.children) {
         for (const child of node.children) {

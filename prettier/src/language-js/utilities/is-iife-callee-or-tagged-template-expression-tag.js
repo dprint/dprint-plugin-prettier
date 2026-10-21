@@ -2,7 +2,7 @@
 import { isCallExpression } from "./node-types.js";
 
 /** @returns {boolean} */ function isIifeCalleeOrTaggedTemplateExpressionTag(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   return (
     (node.type === "FunctionExpression" ||
       node.type === "ArrowFunctionExpression") &&

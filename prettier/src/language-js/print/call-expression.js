@@ -26,7 +26,7 @@ import { printOptionalToken } from "./miscellaneous.js";
 - `TSExternalModuleReference` (TypeScript)
 */
 function printCallExpression(/** @type {AstPath} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   const isNewExpression = node.type === "NewExpression";
 
   const optional = printOptionalToken(path);
@@ -106,7 +106,7 @@ function printCallExpression(/** @type {AstPath} */ path, /** @type {import("../
 }
 
 function printCallee(/** @type {AstPath} */ path, /** @type {(a0?: any) => any} */ print) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
 
   if (node.type === "ImportExpression") {
     return `import${node.phase ? `.${node.phase}` : ""}`;
@@ -134,7 +134,7 @@ const moduleImportCallees = [
   "import.meta.resolve",
 ];
 /** @returns {boolean} */ function isSimpleModuleImport(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
 
   if (!(
     // `import("foo")`
@@ -160,7 +160,7 @@ const moduleImportCallees = [
 }
 
 /** @returns {boolean} */ function isCommonsJsOrAmdModuleDefinition(/** @type {AstPath} */ path) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
 
   if (node.type !== "CallExpression" || node.optional) {
     return false;

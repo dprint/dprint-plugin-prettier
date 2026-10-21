@@ -10,7 +10,7 @@ import isSCSSVariable from "../utilities/is-scss-variable.js";
 import parseSelector from "./parse-selector.js";
 import { addTypePrefix } from "./utilities.js";
 
-const isClosingParenthesis = /** @returns {boolean} */ (node) =>
+const isClosingParenthesis = /** @returns {boolean} */ (/** @type {import("../types.js").CssNode} */ node) =>
   node.type === "paren" && node.value === ")";
 
 function parseValueNode(valueNode, /** @type {CssOptions} */ options) {
@@ -138,7 +138,7 @@ function parseValueNode(valueNode, /** @type {CssOptions} */ options) {
   return rootParenGroup;
 }
 
-function flattenGroups(node) {
+function flattenGroups(/** @type {import("../types.js").CssNode} */ node) {
   if (
     node.type === "paren_group" &&
     !node.open &&
@@ -159,7 +159,7 @@ function flattenGroups(node) {
   return node;
 }
 
-function parseNestedValue(node, /** @type {CssOptions} */ options) {
+function parseNestedValue(/** @type {import("../types.js").CssNode} */ node, /** @type {CssOptions} */ options) {
   if (isObject(node)) {
     for (const key in node) {
       if (key !== "parent") {

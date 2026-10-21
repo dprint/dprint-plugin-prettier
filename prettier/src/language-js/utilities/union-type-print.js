@@ -26,7 +26,7 @@ const isObjectLikeType = createTypeCheckFunction([
   );
 }
 
-/** @returns {boolean} */ function shouldHugUnionType(node) {
+/** @returns {boolean} */ function shouldHugUnionType(/** @type {import("../types/estree.js").Node} */ node) {
   const { types } = node;
   if (types.some(/** @returns {boolean} */ (node) => hasComment(node))) {
     return false;
@@ -41,7 +41,7 @@ const isObjectLikeType = createTypeCheckFunction([
 }
 
 /** @returns {boolean} */ function shouldUnionTypePrintOwnComments(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path) {
-  const { key, node, parent } = path;
+  /** @type {{ key: any, node: import("../types/estree.js").Node, parent: import("../types/estree.js").Node }} */ const { key, node, parent } = path;
   if (
     shouldHugUnionType(node) ||
     // If it's `types` of union type, parent will print comment for it

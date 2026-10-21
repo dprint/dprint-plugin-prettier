@@ -9,7 +9,7 @@ import { isChainElementWrapper } from "./node-types.js";
 */
 
 /**
-@param {any} node
+@param {import("../types/estree.js").Node} node
 @returns {any}
 */
 function stripChainElementWrappers(node) {

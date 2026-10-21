@@ -14,7 +14,7 @@ import {
 - `TSTypeAssertion` (TypeScript)
 */
 function printTypeAssertion(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   /** @type {boolean} */ const shouldBreakAfterCast = !(
     isArrayExpression(node.expression) || isObjectExpression(node.expression)
   );

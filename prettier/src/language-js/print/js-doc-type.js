@@ -4,7 +4,7 @@ import { printTypeAnnotationProperty } from "./type-annotation.js";
 
 // `TSJSDocNullableType`, `TSJSDocNonNullableType`
 /** @returns {any[]} */ function printJSDocType(/** @type {AstPath} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print, /** @type {string} */ token) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   return [
     node.postfix ? "" : token,
     printTypeAnnotationProperty(path, print),

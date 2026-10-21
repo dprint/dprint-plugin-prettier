@@ -11,7 +11,7 @@ const isVueEventBindingTsNode = createTypeCheckFunction([
 ]);
 
 // https://github.com/vuejs/core/blob/35785f3cd7bd86cbec3f8324022491da2d088b61/packages/compiler-core/src/babelUtils.ts#L506C8-L512C2
-function unwrapVueEventBindingTsNode(node) {
+function unwrapVueEventBindingTsNode(/** @type {import("../types/estree.js").Node} */ node) {
   if (isVueEventBindingTsNode(node)) {
     return unwrapVueEventBindingTsNode(node.expression);
   }
@@ -26,7 +26,7 @@ const isVueEventBindingFunctionExpression = createTypeCheckFunction([
 ]);
 
 // https://github.com/vuejs/core/blob/35785f3cd7bd86cbec3f8324022491da2d088b61/packages/compiler-core/src/utils.ts#L161
-/** @returns {boolean} */ function isVueEventBindingMemberExpression(node) {
+/** @returns {boolean} */ function isVueEventBindingMemberExpression(/** @type {import("../types/estree.js").Node} */ node) {
   return (
     node.type === "MemberExpression" ||
     node.type === "OptionalMemberExpression" ||

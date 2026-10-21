@@ -1,6 +1,6 @@
 import isObject from "../../utilities/is-object.js";
 
-/** @returns {number} */ function getExpressionInnerNodeCount(node, /** @type {number} */ maxCount) {
+/** @returns {number} */ function getExpressionInnerNodeCount(/** @type {import("../types/estree.js").Node} */ node, /** @type {number} */ maxCount) {
   let count = 0;
   for (const k in node) {
     const prop = node[k];
@@ -22,7 +22,7 @@ import isObject from "../../utilities/is-object.js";
  * Attempts to gauge the rough complexity of a node, for example
  * to detect deeply-nested booleans, call expressions with lots of arguments, etc.
  */
-function isSimpleExpressionByNodeCount(node, maxInnerNodeCount = 5) {
+function isSimpleExpressionByNodeCount(/** @type {import("../types/estree.js").Node} */ node, maxInnerNodeCount = 5) {
   const count = getExpressionInnerNodeCount(node, maxInnerNodeCount);
   return count <= maxInnerNodeCount;
 }

@@ -16,7 +16,7 @@ import { printSemicolon } from "./miscellaneous.js";
 */
 
 /** @returns {Doc} */ function printReturnOrThrowArgument(/** @type {AstPath} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options, /** @type {(a0?: any) => any} */ print) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   const argumentDoc = print();
 
   if (returnArgumentHasLeadingComment(node, options)) {
@@ -43,7 +43,7 @@ import { printSemicolon } from "./miscellaneous.js";
 
 // `ReturnStatement` and `ThrowStatement`
 function printReturnOrThrowStatement(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   return [
     node.type === "ThrowStatement" ? "throw" : "return",
     node.argument

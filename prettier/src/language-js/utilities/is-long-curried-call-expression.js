@@ -24,7 +24,7 @@ import { isCallExpression } from "./node-types.js";
  * @returns {boolean}
  */
 function isLongCurriedCallExpression(path) {
-  const { node, parent, key } = path;
+  /** @type {{ node: import("../types/estree.js").Node, parent: import("../types/estree.js").Node, key: any }} */ const { node, parent, key } = path;
   return (
     key === "callee" &&
     isCallExpression(node) &&

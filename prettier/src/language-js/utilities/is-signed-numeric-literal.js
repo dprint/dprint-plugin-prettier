@@ -10,9 +10,9 @@ import { isNumericLiteral } from "./node-types.js";
 
 /**
 @param {Node} node
-@returns {node is NodeMap["UnaryExpression"] & {operator: "+" | "-", argument: NumericLiteral}}
+@returns {boolean}}
 */
-/** @returns {boolean} */ function isSignedNumericLiteral(node) {
+function isSignedNumericLiteral(node) {
   return (
     node.type === "UnaryExpression" &&
     (node.operator === "+" || node.operator === "-") &&

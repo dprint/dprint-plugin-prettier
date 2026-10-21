@@ -20,7 +20,7 @@ import {
 */
 
 function printComment(/** @type {AstPath} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options) {
-  const comment = path.node;
+  /** @type {import("../types/estree.js").Node} */ const comment = path.node;
 
   if (isLineComment(comment)) {
     // Supports `//`, `#!`, `<!--`, and `-->`
@@ -43,9 +43,9 @@ function printComment(/** @type {AstPath} */ path, /** @type {import("../../../.
 
 /**
 @param {Comment} comment
-@returns {Doc}
+@returns {any[]}
 */
-/** @returns {any[]} */ function printIndentableBlockComment(comment) {
+function printIndentableBlockComment(comment) {
   const lines = getIndentableBlockCommentLines(comment);
   const isJsdoc = comment.value[0] === "*" && comment.value[1] !== "*";
 

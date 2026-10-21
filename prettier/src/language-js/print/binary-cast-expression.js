@@ -9,7 +9,7 @@ import {
 /** @import AstPath from "../../common/ast-path.js" */
 
 function printBinaryCastExpression(/** @type {AstPath} */ path, options, /** @type {(a0?: any) => any} */ print) {
-  const { parent, node, key } = path;
+  /** @type {{ parent: import("../types/estree.js").Node, node: import("../types/estree.js").Node, key: any }} */ const { parent, node, key } = path;
   const isFlowAsConstExpression = node.type === "AsConstExpression";
   const typeAnnotationDoc = isFlowAsConstExpression
     ? "const"

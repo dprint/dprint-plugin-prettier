@@ -8,8 +8,8 @@ import { locStart } from "./start.js";
 */
 
 /**
- * @param {any} nodeA
- * @param {any} nodeB
+ * @param {import("../types/estree.js").Node} nodeA
+ * @param {import("../types/estree.js").Node} nodeB
  * @returns {boolean}
  */
 function hasSameLocStart(nodeA, nodeB) {
@@ -18,8 +18,8 @@ function hasSameLocStart(nodeA, nodeB) {
 }
 
 /**
- * @param {any} nodeA
- * @param {any} nodeB
+ * @param {import("../types/estree.js").Node} nodeA
+ * @param {import("../types/estree.js").Node} nodeB
  * @returns {boolean}
  */
 function hasSameLocEnd(nodeA, nodeB) {
@@ -28,8 +28,8 @@ function hasSameLocEnd(nodeA, nodeB) {
 }
 
 /**
- * @param {any} nodeA
- * @param {any} nodeB
+ * @param {import("../types/estree.js").Node} nodeA
+ * @param {import("../types/estree.js").Node} nodeB
  * @returns {boolean}
  */
 function hasSameLoc(nodeA, nodeB) {

@@ -3,7 +3,7 @@ import { hasComment } from "../utilities/comments.js";
 import { printDeclareToken, printSemicolon } from "./miscellaneous.js";
 
 function printVariableDeclaration(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   const printed = path.map(print, "declarations");
 
   // We generally want to terminate all variable declarations with a

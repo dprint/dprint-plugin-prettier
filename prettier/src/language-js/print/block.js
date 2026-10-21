@@ -18,7 +18,7 @@ import { printStatementSequence } from "./statement-sequence.js";
 */
 function printBlock(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   const bodyDoc = printBlockBody(path, options, print);
-  const { node, parent } = path;
+  /** @type {{ node: import("../types/estree.js").Node, parent: import("../types/estree.js").Node }} */ const { node, parent } = path;
 
   if (node.type === "Program" && parent?.type !== "ModuleExpression") {
     return bodyDoc ? [bodyDoc, hardline] : "";
@@ -34,7 +34,7 @@ function printBlock(/** @type {AstPath} */ path, options, /** @type {import("../
   if (bodyDoc) {
     parts.push(indent([hardline, bodyDoc]), hardline);
   } else {
-    const parentParent = path.grandparent;
+    /** @type {import("../types/estree.js").Node} */ const parentParent = path.grandparent;
     if (!(
       parent.type === "ArrowFunctionExpression" ||
       parent.type === "FunctionExpression" ||
@@ -71,7 +71,7 @@ function printBlock(/** @type {AstPath} */ path, options, /** @type {import("../
 - `TSModuleBlock` (TypeScript)
 */
 function printBlockBody(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
 
   /** @type {boolean} */ const hasDirectives = isNonEmptyArray(node.directives);
   const hasBody = node.body.some(/** @returns {boolean} */ (node) => node.type !== "EmptyStatement");

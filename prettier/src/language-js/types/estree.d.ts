@@ -1,6 +1,6 @@
-import type { ESTree as MeriyahESTree } from "meriyah";
+import type { ESTree as MeriyahESTree } from "../../../node_modules/meriyah/dist/types/meriyah.d.ts";
 import type * as Babel from "@babel/types";
-import type { NGTree } from "angular-estree-parser";
+import type { NGTree } from "../../../node_modules/angular-estree-parser/dist/index.d.ts";
 import type * as TSESTree from "./typescript-estree.js";
 import type * as FlowESTree from "./flow-estree.js";
 import type * as Babel from "./babel.js";

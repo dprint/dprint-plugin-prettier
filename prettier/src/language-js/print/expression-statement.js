@@ -54,18 +54,18 @@ function shouldPrintSemicolon(/** @type {AstPath} */ path, /** @type {import("..
 
   if (shouldExpressionStatementPrintLeadingSemicolon(path, options)) {
     if (shouldExpressionStatementPrintOwnComments(path, options)) {
-      const { node } = path;
+      /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
       const typeCastComment = getComments(node, CommentCheckFlags.Leading).at(
         -1,
       );
 
       // Print the type cast comment separately and print `;` before it
       const typeCastCommentDoc = printLeadingComments(path, options, {
-        filter: (comment) => comment === typeCastComment,
+        filter: (/** @type {import("../types/estree.js").Comment} */ comment) => comment === typeCastComment,
       });
 
       return printComments(path, [";", typeCastCommentDoc, ...parts], options, {
-        filter: (comment) => comment !== typeCastComment,
+        filter: (/** @type {import("../types/estree.js").Comment} */ comment) => comment !== typeCastComment,
       });
     }
 

@@ -26,7 +26,7 @@ import { shouldPrintTrailingComma } from "../utilities/should-print-trailing-com
  * @returns {Doc}
  */
 function printOptionalToken(path) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   if (
     !node.optional ||
     // It's an optional computed method parsed by typescript-estree.
@@ -75,7 +75,7 @@ const isFlowDeclareNode = createTypeCheckFunction([
 ]);
 
 const shouldPrintDeclareToken = /** @returns {boolean | undefined} */ (/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path) => {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
 
   if (isFlowDeclareNode(node)) {
     return (
@@ -111,14 +111,14 @@ function printAbstractToken({ node }) {
   return node.abstract || isTsAbstractNode(node) ? "abstract " : "";
 }
 
-/** @returns {string} */ function printTypeScriptAccessibilityToken(node) {
+/** @returns {string} */ function printTypeScriptAccessibilityToken(/** @type {import("../types/estree.js").Node} */ node) {
   return node.accessibility ? node.accessibility + " " : "";
 }
 
-const isLogicalNot = /** @returns {boolean} */ (node) =>
+const isLogicalNot = /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node) =>
   node.type === "UnaryExpression" && node.operator === "!";
 
-/** @returns {boolean} */ function shouldInlineCondition(node) {
+/** @returns {boolean} */ function shouldInlineCondition(/** @type {import("../types/estree.js").Node} */ node) {
   if (hasComment(node)) {
     return false;
   }
@@ -157,7 +157,7 @@ const isLogicalNot = /** @returns {boolean} */ (node) =>
 }
 
 function printIfOrWhileConditionOrWithStatementObject(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   const property = node.type === "WithStatement" ? "object" : "test";
   const conditionDoc = print(property);
 
@@ -173,7 +173,7 @@ function printIfOrWhileConditionOrWithStatementObject(/** @type {import("../../.
 @returns {Doc}
 */
 function printDanglingCommentsInList(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, options, filter) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
 
   return hasComment(node, CommentCheckFlags.Dangling, filter)
     ? [

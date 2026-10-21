@@ -10,7 +10,7 @@ import { printKey } from "./key.js";
 - `ImportAttribute`
 */
 function printProperty(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   if (node.shorthand) {
     return print("value");
   }

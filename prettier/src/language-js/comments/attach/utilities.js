@@ -15,7 +15,7 @@ import {
 */
 
 /**
-@param {any} comment
+@param {import("../../types/estree.js").Comment} comment
 @param {string} text
 @returns {boolean}
 */
@@ -24,7 +24,7 @@ const isSingleLineBlockComment = (comment, text) =>
   !hasNewlineInRange(text, locStart(comment), locEnd(comment));
 
 /**
-@param {any} comment
+@param {import("../../types/estree.js").Comment} comment
 @param {string} text
 @returns {boolean}
 */
@@ -35,7 +35,7 @@ const isSingleLineComment = (comment, text) =>
  * @param {Node} node
  * @returns {void}
  */
-function addBlockOrNotComment(node, comment) {
+function addBlockOrNotComment(node, /** @type {import("../../types/estree.js").Comment} */ comment) {
   if (node.type === "BlockStatement") {
     addBlockStatementFirstComment(node, comment);
   } else {
@@ -47,7 +47,7 @@ function addBlockOrNotComment(node, comment) {
  * @param {Node} node
  * @returns {void}
  */
-function addBlockStatementFirstComment(node, comment) {
+function addBlockStatementFirstComment(node, /** @type {import("../../types/estree.js").Comment} */ comment) {
   // @ts-expect-error
   const firstNonEmptyNode = (node.body || node.properties).find(
     /** @returns {boolean} */ ({ type }) => type !== "EmptyStatement",

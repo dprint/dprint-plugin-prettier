@@ -29,7 +29,7 @@ import {
 
 // `TSUnionType` and `UnionTypeAnnotation`
 function printUnionType(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print, args) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
 
   // {
   //   a: string
@@ -92,7 +92,7 @@ function printUnionType(/** @type {import("../../../../prettier/src/common/ast-p
 }
 
 /** @returns {boolean} */ function shouldIndentUnionType(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path) {
-  const { key, parent } = path;
+  /** @type {{ key: any, parent: import("../types/estree.js").Node }} */ const { key, parent } = path;
   if (
     (key === "typeAnnotation" && parent.type === "TSTypeAssertion") ||
     (key === "elementTypes" && isTupleType(parent)) ||

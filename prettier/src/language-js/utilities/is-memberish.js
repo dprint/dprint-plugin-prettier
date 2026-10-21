@@ -8,7 +8,7 @@ import { isMemberExpression } from "./node-types.js";
 */
 
 /**
- * @param {any} node
+ * @param {import("../types/estree.js").Node} node
  * @returns {boolean}
  */
 function isMemberish(node) {

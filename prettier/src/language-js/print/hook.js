@@ -29,7 +29,7 @@ function printDeclareHook(/** @type {AstPath} */ path, options, /** @type {impor
 - `var A: hook (a: B) => void;`
 */
 /** @returns {boolean} */ function isDeclareHookTypeAnnotation(/** @type {AstPath} */ path) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   return (
     node.type === "HookTypeAnnotation" &&
     path.getParentNode(2)?.type === "DeclareHook"
@@ -40,7 +40,7 @@ function printDeclareHook(/** @type {AstPath} */ path, options, /** @type {impor
 - `HookTypeAnnotation` (Flow)
 */
 function printHookTypeAnnotation(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
 
   const parametersDoc = printFunctionParameters(
     path,

@@ -1,7 +1,7 @@
 // @nts-check
 import isObject from "../../utilities/is-object.js";
 
-function addTypePrefix(node, /** @type {string} */ prefix, /** @type {RegExp | undefined} */ skipPrefix) {
+function addTypePrefix(/** @type {import("../types.js").CssNode} */ node, /** @type {string} */ prefix, /** @type {RegExp | undefined} */ skipPrefix) {
   if (isObject(node)) {
     delete node.parent;
     for (const key in node) {
@@ -19,7 +19,7 @@ function addTypePrefix(node, /** @type {string} */ prefix, /** @type {RegExp | u
   return node;
 }
 
-function addMissingType(node) {
+function addMissingType(/** @type {import("../types.js").CssNode} */ node) {
   if (isObject(node)) {
     delete node.parent;
     for (const key in node) {

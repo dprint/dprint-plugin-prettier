@@ -1,6 +1,6 @@
 import htmlWhitespace from "../../utilities/html-whitespace.js";
 
-function massageAstNode(original, cloned, parent) {
+function massageAstNode(/** @type {import("../print-types.js").GlimmerNode} */ original, cloned, /** @type {import("../print-types.js").GlimmerNode} */ parent) {
   // (Glimmer/HTML) ignore TextNode
   if (original.type === "TextNode") {
     const trimmed = original.chars.trim();

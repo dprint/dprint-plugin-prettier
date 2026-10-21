@@ -2,7 +2,7 @@
 import { getOrInsertComputed } from "../../utilities/get-or-insert.js";
 import { isBlockComment } from "./comment-types.js";
 
-function getIndentableBlockCommentLinesInternal(comment) {
+function getIndentableBlockCommentLinesInternal(/** @type {import("../types/estree.js").Comment} */ comment) {
   /*
   In postprocess.js
   this only called when two comments are next to each other,
@@ -41,7 +41,7 @@ function getIndentableBlockCommentLinesInternal(comment) {
 
 const cache = new WeakMap();
 
-function getIndentableBlockCommentLines(comment) {
+function getIndentableBlockCommentLines(/** @type {import("../types/estree.js").Comment} */ comment) {
   return getOrInsertComputed(
     cache,
     comment,
@@ -49,11 +49,11 @@ function getIndentableBlockCommentLines(comment) {
   );
 }
 
-function deleteIndentableBlockCommentLines(comment) {
+function deleteIndentableBlockCommentLines(/** @type {import("../types/estree.js").Comment} */ comment) {
   cache.delete(comment);
 }
 
-/** @returns {boolean} */ function isIndentableBlockComment(comment) {
+/** @returns {boolean} */ function isIndentableBlockComment(/** @type {import("../types/estree.js").Comment} */ comment) {
   return getIndentableBlockCommentLines(comment).length > 0;
 }
 

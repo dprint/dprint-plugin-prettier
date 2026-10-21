@@ -9,7 +9,7 @@ import { jsxWhitespace } from "./jsx-whitespace.js";
 // Meaningful if it contains non-whitespace characters,
 // or it contains whitespace without a new line.
 /**
- * @param {any} node
+ * @param {import("../types/estree.js").Node} node
  * @returns {boolean}
  */
 function isMeaningfulJsxText(node) {

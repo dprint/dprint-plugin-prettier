@@ -39,7 +39,7 @@ function printFlowMappedTypeOptionalModifier(optional) {
 }
 
 function printFlowMappedTypeProperty(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   return [
     group([
       node.variance ? print("variance") : "",
@@ -58,7 +58,7 @@ function printFlowMappedTypeProperty(/** @type {AstPath} */ path, options, /** @
 }
 
 /**
- * @param {any} tokenNode
+ * @param {import("../types/estree.js").Node} tokenNode
  * @param {string} keyword
  * @returns {string}
  */
@@ -71,7 +71,7 @@ function printTypeScriptMappedTypeModifier(tokenNode, keyword) {
 }
 
 function printTypeScriptMappedType(/** @type {AstPath} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   // Break after `{` like `printObject`
   let shouldBreak = false;
   if (options.objectWrap === "preserve") {

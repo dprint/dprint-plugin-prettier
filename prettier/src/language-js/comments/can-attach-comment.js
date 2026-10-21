@@ -29,7 +29,7 @@ const isNodeCantAttachComment = createTypeCheckFunction([
 ]);
 
 /**
-@param {any} node
+@param {import("../types/estree.js").Node} node
 @param {Node[]} param1
 @returns {boolean}
 */
@@ -70,7 +70,7 @@ class Foo {
 }
 ```
 
-@param {any} node
+@param {import("../types/estree.js").Node} node
 @param {Node[]} param1
 @returns {boolean}
 */
@@ -90,7 +90,7 @@ const isClassMethodCantAttachComment = (node, [parent]) =>
 //         ^^^^^ `TSTypeReference` (`TSAsExpression.typeAnnotation`)
 //         ^^^^^ `Identifier` (`TSTypeReference.typeName`)
 /**
-@param {any} node
+@param {import("../types/estree.js").Node} node
 @param {Node[]} param1
 @returns {boolean}
 */
@@ -98,7 +98,7 @@ const isTsAsConstTypeReference = (node, [parent]) =>
   // @ts-expect-error -- Safe
   parent?.typeAnnotation === node && isTsAsConstExpression(parent);
 /**
-@param {any} node
+@param {import("../types/estree.js").Node} node
 @param {Node[]} param1
 @returns {boolean}
 */
@@ -108,7 +108,7 @@ const isTsAsConst = (node, [parent, ...ancestors]) =>
   (parent?.typeName === node && isTsAsConstTypeReference(parent, ancestors));
 
 /**
-@param {any} node
+@param {import("../types/estree.js").Node} node
 @param {any[]} ancestors
 @returns {boolean}
 */

@@ -29,7 +29,7 @@ const ignoredProperties = new Set([
   "__contentEnd",
 ]);
 
-const removeTemplateElementsValue = (node) => {
+const removeTemplateElementsValue = (/** @type {import("../types/estree.js").Node} */ node) => {
   for (const templateElement of node.quasis) {
     delete templateElement.value;
   }

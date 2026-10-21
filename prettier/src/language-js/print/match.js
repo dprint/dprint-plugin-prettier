@@ -23,7 +23,7 @@ import { isNextLineEmpty } from "../utilities/is-next-line-empty.js";
 - `MatchStatement` (Flow)
 */
 export function printMatch(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   return [
     group(["match (", indent([softline, print("argument")]), softline, ")"]),
     " {",
@@ -52,7 +52,7 @@ export function printMatch(/** @type {import("../../../../prettier/src/common/as
 - `MatchStatementCase` (Flow)
 */
 export function printMatchCase(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
 
   const comment = hasComment(node, CommentCheckFlags.Dangling)
     ? [" ", printDanglingComments(path, options)]
@@ -85,7 +85,7 @@ export function printMatchCase(/** @type {import("../../../../prettier/src/commo
 - `MatchRestPattern` (Flow)
 */
 export function printMatchPattern(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
 
   switch (node.type) {
     case "MatchOrPattern":
@@ -144,7 +144,7 @@ export function printMatchPattern(/** @type {import("../../../../prettier/src/co
 }
 
 function printMatchObjectPattern(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   const properties = path.map(print, "properties");
   if (node.rest) {
     properties.push(print("rest"));
@@ -165,7 +165,7 @@ const isSimpleMatchPattern = createTypeCheckFunction([
   "MatchIdentifierPattern",
 ]);
 
-function shouldHugMatchOrPattern(node) {
+function shouldHugMatchOrPattern(/** @type {import("../types/estree.js").Node} */ node) {
   const { patterns } = node;
   if (patterns.some((node) => hasComment(node))) {
     return false;
@@ -183,7 +183,7 @@ function shouldHugMatchOrPattern(node) {
   );
 }
 
-function shouldHugMatchPattern(node) {
+function shouldHugMatchPattern(/** @type {import("../types/estree.js").Node} */ node) {
   if (isSimpleMatchPattern(node) || node.type === "MatchObjectPattern") {
     return true;
   }
@@ -196,7 +196,7 @@ function shouldHugMatchPattern(node) {
 }
 
 function printMatchOrPattern(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   // single-line variation
   // A | B | C
 
@@ -205,7 +205,7 @@ function printMatchOrPattern(/** @type {import("../../../../prettier/src/common/
   // | B
   // | C
 
-  const { parent } = path;
+  /** @type {{ parent: import("../types/estree.js").Node }} */ const { parent } = path;
 
   /** @type {boolean} */ const shouldIndent =
     parent.type !== "MatchStatementCase" &&

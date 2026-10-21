@@ -41,7 +41,7 @@ import { printTrailingComma } from "./miscellaneous.js";
 // a => a ? a : a
 // a <= a ? a : a
 const shouldAddParensIfNotBreakCache = new WeakMap();
-/** @returns {boolean} */ function shouldAddParensIfNotBreak(node) {
+/** @returns {boolean} */ function shouldAddParensIfNotBreak(/** @type {import("../types/estree.js").Node} */ node) {
   return getOrInsertComputed(
     shouldAddParensIfNotBreakCache,
     node,
@@ -56,7 +56,7 @@ const shouldAddParensIfNotBreakCache = new WeakMap();
 
 // We handle sequence expressions as the body of arrows specially,
 // so that the required parentheses end up on their own lines.
-const shouldAlwaysAddParens = /** @returns {boolean} */ (node) => node.type === "SequenceExpression";
+const shouldAlwaysAddParens = /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node) => node.type === "SequenceExpression";
 
 /*
 - `ArrowFunctionExpression`
@@ -74,7 +74,7 @@ function printArrowFunction(/** @type {AstPath} */ path, /** @type {import("../.
   let functionBody;
 
   (function rec() {
-    const { node } = path;
+    /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
     const signatureDoc = printArrowFunctionSignature(
       path,
       options,
@@ -169,7 +169,7 @@ function printArrowFunction(/** @type {AstPath} */ path, /** @type {import("../.
 }
 
 /** @returns {any[]} */ function printArrowFunctionSignature(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print, args) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   const parts = [];
 
   if (node.async) {
@@ -248,7 +248,7 @@ function printArrowFunctionSignatures(
     return signatureDocs[0];
   }
 
-  const { parent, key } = path;
+  /** @type {{ parent: import("../types/estree.js").Node, key: any }} */ const { parent, key } = path;
   if (
     (key !== "callee" && isCallLikeExpression(parent)) ||
     isBinaryish(parent)
@@ -291,7 +291,7 @@ function printArrowFunctionBody(
   args,
   { bodyDoc, bodyComments, functionBody, shouldPutBodyOnSameLine },
 ) {
-  const { node, parent } = path;
+  /** @type {{ node: import("../types/estree.js").Node, parent: import("../types/estree.js").Node }} */ const { node, parent } = path;
 
   const trailingComma = args.expandLastArg
     ? printTrailingComma(options, "all")

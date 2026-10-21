@@ -11,7 +11,7 @@ import { locEnd, locStart } from "../loc.js";
 /** @returns {any[]} */ function printSequence(/** @type {AstPath} */ path, /** @type {CssOptions} */ options, /** @type {CssPrint} */ print) {
   const parts = [];
   path.each(() => {
-    const { node, previous } = path;
+    /** @type {{ node: import("../types.js").CssNode, previous: any }} */ const { node, previous } = path;
     if (
       previous?.type === "css-comment" &&
       previous.text.trim() === "prettier-ignore"

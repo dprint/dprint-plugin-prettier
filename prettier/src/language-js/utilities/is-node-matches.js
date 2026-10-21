@@ -8,7 +8,7 @@
 /**
 Check if node matches object name or key path.
 
-@param {any} node - The AST node to check.
+@param {import("../types/estree.js").Node} node - The AST node to check.
 @param {string} nameOrPath - The object name or key path.
 @returns {boolean}
 */
@@ -50,7 +50,7 @@ function isNodeMatchesNameOrPath(node, nameOrPath) {
 /**
 Check if node matches any object name or key path.
 
-@param {any} node - The AST node to check.
+@param {import("../types/estree.js").Node} node - The AST node to check.
 @param {string[]} nameOrPaths - The object name or key paths.
 @returns {boolean}
 */

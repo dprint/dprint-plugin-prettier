@@ -1,11 +1,11 @@
 function embed(path /* , options*/) {
-  const { node } = path;
+  /** @type {{ node: import("./print-types.js").GlimmerNode }} */ const { node } = path;
 
   if (node.type !== "TextNode") {
     return;
   }
 
-  const { parent } = path;
+  /** @type {{ parent: import("./print-types.js").GlimmerNode }} */ const { parent } = path;
 
   if (!(
     parent.type === "ElementNode" &&

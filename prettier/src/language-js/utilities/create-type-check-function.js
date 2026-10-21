@@ -26,10 +26,10 @@ function createTypeCheckFunction(typesArray) {
   }
 
   /**
-  @param {any} node
+  @param {import("../types/estree.js").Node} node
   @returns {node is (NodeMap & CommentMap)[InputNodeTypes[number]]}
   */
-  return /** @returns {boolean} */ (node) => types.has(node?.type);
+  return /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node) => types.has(node?.type);
 }
 
 export { createTypeCheckFunction };

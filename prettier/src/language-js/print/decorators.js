@@ -14,7 +14,7 @@ import isIgnored from "../utilities/is-ignored.js";
 import { isExportDeclaration } from "../utilities/node-types.js";
 
 function printClassMemberDecorators(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   return group([
     join(line, path.map(print, "decorators")),
     hasNewlineBetweenOrAfterDecorators(node, options) ? hardline : line,
@@ -37,7 +37,7 @@ function printDecoratorsBeforeExport(/** @type {AstPath} */ path, options, /** @
 }
 
 function printDecorators(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
-  const { node, parent } = path;
+  /** @type {{ node: import("../types/estree.js").Node, parent: import("../types/estree.js").Node }} */ const { node, parent } = path;
   const { decorators } = node;
 
   if (
@@ -68,13 +68,13 @@ function printDecorators(/** @type {AstPath} */ path, options, /** @type {import
   ];
 }
 
-/** @returns {boolean} */ function hasNewlineBetweenOrAfterDecorators(node, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options) {
+/** @returns {boolean} */ function hasNewlineBetweenOrAfterDecorators(/** @type {import("../types/estree.js").Node} */ node, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options) {
   return node.decorators.some(/** @returns {boolean} */ (decorator) =>
     hasNewline(options.originalText, locEnd(decorator)),
   );
 }
 
-/** @returns {boolean} */ function hasDecoratorsBeforeExport(node) {
+/** @returns {boolean} */ function hasDecoratorsBeforeExport(/** @type {import("../types/estree.js").Node} */ node) {
   if (
     node.type !== "ExportDefaultDeclaration" &&
     node.type !== "ExportNamedDeclaration" &&

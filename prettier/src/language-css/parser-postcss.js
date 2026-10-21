@@ -24,7 +24,7 @@ import isScssNestedPropertyNode from "./utilities/is-scss-nested-property-node.j
 const DEFAULT_SCSS_DIRECTIVE = /(\s*)(!default).*$/;
 const GLOBAL_SCSS_DIRECTIVE = /(\s*)(!global).*$/;
 
-function parseNestedCSS(node, /** @type {CssOptions} */ options) {
+function parseNestedCSS(/** @type {import("./types.js").CssNode} */ node, /** @type {CssOptions} */ options) {
   if (isObject(node)) {
     delete node.parent;
 

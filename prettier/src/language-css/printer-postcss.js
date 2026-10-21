@@ -58,7 +58,7 @@ import {
 } from "./utilities/index.js";
 
 function genericPrint(/** @type {AstPath} */ path, /** @type {CssOptions} */ options, /** @type {CssPrint} */ print) {
-  const { node } = path;
+  /** @type {{ node: import("./types.js").CssNode }} */ const { node } = path;
 
   switch (node.type) {
     case "css-root": {
@@ -112,7 +112,7 @@ function genericPrint(/** @type {AstPath} */ path, /** @type {CssOptions} */ opt
       ];
 
     case "css-decl": {
-      const parentNode = path.parent;
+      /** @type {import("./types.js").CssNode} */ const parentNode = path.parent;
 
       const { between: rawBetween } = node.raws;
       const trimmedBetween = rawBetween.trim();
@@ -194,7 +194,7 @@ function genericPrint(/** @type {AstPath} */ path, /** @type {CssOptions} */ opt
       ];
     }
     case "css-atrule": {
-      const parentNode = path.parent;
+      /** @type {import("./types.js").CssNode} */ const parentNode = path.parent;
       /** @type {boolean} */ const isTemplatePlaceholderNodeWithoutSemiColon =
         isTemplatePlaceholderNode(node) &&
         !parentNode.raws.semicolon &&
@@ -440,7 +440,7 @@ function genericPrint(/** @type {AstPath} */ path, /** @type {CssOptions} */ opt
         node.value === "~" ||
         node.value === ">>>"
       ) {
-        const parentNode = path.parent;
+        /** @type {import("./types.js").CssNode} */ const parentNode = path.parent;
         const leading =
           parentNode.type === "selector-selector" &&
           parentNode.nodes[0] === node
@@ -493,7 +493,7 @@ function genericPrint(/** @type {AstPath} */ path, /** @type {CssOptions} */ opt
       }
 
       // originalText has to be used for Less, see replaceQuotesInInlineComments in loc.js
-      const parentNode = path.parent;
+      /** @type {import("./types.js").CssNode} */ const parentNode = path.parent;
       if (parentNode.raws?.selector) {
         const start = locStart(parentNode);
         const end = start + parentNode.raws.selector.length;
@@ -501,7 +501,7 @@ function genericPrint(/** @type {AstPath} */ path, /** @type {CssOptions} */ opt
       }
 
       // Same reason above
-      const grandParent = path.grandparent;
+      /** @type {import("./types.js").CssNode} */ const grandParent = path.grandparent;
       if (
         parentNode.type === "value-paren_group" &&
         grandParent?.type === "value-func" &&

@@ -10,7 +10,7 @@ import { shouldHugUnionType } from "./union-type.js";
  * @import {Doc} from "../../document/index.js"
  */
 
-/** @returns {boolean} */ function shouldHugType(node) {
+/** @returns {boolean} */ function shouldHugType(/** @type {import("../types/estree.js").Node} */ node) {
   if (isSimpleType(node) || isObjectType(node)) {
     return true;
   }
@@ -33,7 +33,7 @@ function printTypeAnnotationProperty(
   /** @type {(a0?: any) => any} */ print,
   propertyName = "typeAnnotation",
 ) {
-  const {
+  /** @type {{ node: import("../types/estree.js").Node }} */ const {
     node: { [propertyName]: typeAnnotation },
   } = path;
 
@@ -144,7 +144,7 @@ function printTypeAnnotation(/** @type {AstPath} */ path, options, /** @type {(a
   // `printTypeAnnotationProperty` is responsible for it.
   /* c8 ignore start */
   if (process.env.NODE_ENV !== "production") {
-    const { node } = path;
+    /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
 
     if (!typeAnnotationNodesCheckedLeadingComments.has(node)) {
       throw Object.assign(

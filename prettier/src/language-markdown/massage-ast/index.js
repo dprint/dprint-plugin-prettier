@@ -6,7 +6,7 @@ const ignoredProperties = new Set([
   "position",
   "raw", // front-matter
 ]);
-function massageAstNode(original, cloned, parent) {
+function massageAstNode(/** @type {import("../utilities.js").MdastNode} */ original, cloned, /** @type {import("../utilities.js").MdastNode} */ parent) {
   // for codeblock
   if (
     original.type === "code" ||

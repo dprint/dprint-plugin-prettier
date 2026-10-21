@@ -12,12 +12,12 @@ import { startsWithNoLookaheadToken } from "../utilities/starts-with-no-lookahea
  */
 
 function printAwaitExpression(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   /** @type{Doc[]} */
   let parts = ["await"];
   if (node.argument) {
     parts.push(" ", print("argument"));
-    const { parent } = path;
+    /** @type {{ parent: import("../types/estree.js").Node }} */ const { parent } = path;
     if (
       (isCallExpression(parent) && parent.callee === node) ||
       (isMemberExpression(parent) && parent.object === node)

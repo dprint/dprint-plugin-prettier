@@ -12,7 +12,7 @@ import { isJsxElement } from "../utilities/node-types.js";
     return false;
   }
 
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
 
   if (
     node.type !== "ExpressionStatement" ||
@@ -23,7 +23,7 @@ import { isJsxElement } from "../utilities/node-types.js";
     return false;
   }
 
-  const { key, parent } = path;
+  /** @type {{ key: any, parent: import("../types/estree.js").Node }} */ const { key, parent } = path;
   if (
     // `Program.directives` don't need leading semicolon
     ((key === "body" &&
@@ -41,7 +41,7 @@ import { isJsxElement } from "../utilities/node-types.js";
 }
 
 function expressionNeedsAsiProtection(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, options) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   switch (node.type) {
     case "ParenthesizedExpression":
     case "TypeCastExpression":

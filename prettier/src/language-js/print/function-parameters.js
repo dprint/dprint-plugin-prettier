@@ -34,7 +34,7 @@ import {
 /** @import AstPath from "../../common/ast-path.js" */
 
 // `ArrowFunctionExpression` has other dangling comments
-const functionParameterDanglingCommentFilter = (comment) =>
+const functionParameterDanglingCommentFilter = (/** @type {import("../types/estree.js").Comment} */ comment) =>
   comment.mark !== "commentBeforeArrow";
 
 /*
@@ -70,7 +70,7 @@ function printFunctionParameters(
   /** @type {boolean | undefined} */ shouldExpandParameters,
   /** @type {boolean | undefined} */ shouldPrintTypeParameters,
 ) {
-  const functionNode = path.node;
+  /** @type {import("../types/estree.js").Node} */ const functionNode = path.node;
   const parameters = getFunctionParameters(functionNode);
   const typeParametersDoc =
     shouldPrintTypeParameters && functionNode.typeParameters
@@ -90,7 +90,7 @@ function printFunctionParameters(
     ];
   }
 
-  const { parent } = path;
+  /** @type {{ parent: import("../types/estree.js").Node }} */ const { parent } = path;
   /** @type {boolean} */ const isParametersInTestCall = isTestCall(parent);
   /** @type {boolean} */ const shouldHugParameters = shouldHugTheOnlyFunctionParameter(functionNode);
   const printed = [];
@@ -196,7 +196,7 @@ function printFunctionParameters(
   ];
 }
 
-/** @returns {boolean} */ function shouldHugTheOnlyFunctionParameter(node) {
+/** @returns {boolean} */ function shouldHugTheOnlyFunctionParameter(/** @type {import("../types/estree.js").Node} */ node) {
   if (!node) {
     return false;
   }
@@ -228,7 +228,7 @@ function printFunctionParameters(
   );
 }
 
-function getReturnTypeNode(functionNode) {
+function getReturnTypeNode(/** @type {import("../types/estree.js").Node} */ functionNode) {
   let returnTypeNode;
   if (functionNode.returnType) {
     returnTypeNode = functionNode.returnType;
@@ -242,7 +242,7 @@ function getReturnTypeNode(functionNode) {
 }
 
 // When parameters are grouped, the return type annotation breaks first.
-/** @returns {boolean} */ function shouldGroupFunctionParameters(functionNode, returnTypeDoc) {
+/** @returns {boolean} */ function shouldGroupFunctionParameters(/** @type {import("../types/estree.js").Node} */ functionNode, returnTypeDoc) {
   const returnTypeNode = getReturnTypeNode(functionNode);
   if (!returnTypeNode) {
     return false;
@@ -321,7 +321,7 @@ function isDecoratedFunction(path) {
   );
 }
 
-/** @returns {boolean} */ function shouldBreakFunctionParameters(functionNode) {
+/** @returns {boolean} */ function shouldBreakFunctionParameters(/** @type {import("../types/estree.js").Node} */ functionNode) {
   const parameters = getFunctionParameters(functionNode);
   return (
     parameters.length > 1 &&
@@ -329,7 +329,7 @@ function isDecoratedFunction(path) {
   );
 }
 
-/** @returns {boolean} */ function shouldHugTheOnlyParameter(node, /** @type {string} */ name) {
+/** @returns {boolean} */ function shouldHugTheOnlyParameter(/** @type {import("../types/estree.js").Node} */ node, /** @type {string} */ name) {
   return (
     (name === "params" || name === "this" || name === "rest") &&
     shouldHugTheOnlyFunctionParameter(node)

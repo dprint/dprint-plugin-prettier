@@ -6,7 +6,7 @@
 */
 
 /**
- * @param {any} node
+ * @param {import("../types/estree.js").Node} node
  * @returns {boolean}
  */
 function isNullishCoalescing(node) {

@@ -16,7 +16,7 @@ import { isNextLineEmpty } from "../utilities/is-next-line-empty.js";
 - `TSModuleBlock` (TypeScript)
 */
 function printStatementSequence(/** @type {AstPath} */ path, options, /** @type {() => any} */ print, /** @type {string} */ property) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   const parts = [];
   const lastStatement = node[property].findLast(
     /** @returns {boolean} */ (statement) => statement.type !== "EmptyStatement",

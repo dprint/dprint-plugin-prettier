@@ -16,7 +16,7 @@
  *
  * Will be overzealous if there already are necessary grouping parentheses.
  *
- * @param {any} node
+ * @param {import("../types/estree.js").Node} node
  * @param {(leftmostNode: Node) => boolean} predicate
  * @returns {boolean}
  */

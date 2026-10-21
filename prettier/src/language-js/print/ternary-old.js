@@ -52,7 +52,7 @@ import {
 //     }
 //   }
 // }
-function conditionalExpressionChainContainsJsx(node) {
+function conditionalExpressionChainContainsJsx(/** @type {import("../types/estree.js").Node} */ node) {
   // Given this code:
   //
   // // Using a ConditionalExpression as the consequent is uncommon, but should
@@ -101,13 +101,13 @@ function conditionalExpressionChainContainsJsx(node) {
 }
 
 function printTernaryTest(/** @type {AstPath} */ path, options, /** @type {(a0?: any) => any} */ print) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   /** @type {boolean} */ const isConditionalExpression = node.type === "ConditionalExpression";
   /** @type {string} */ const alternateNodePropertyName = isConditionalExpression
     ? "alternate"
     : "falseType";
 
-  const { parent } = path;
+  /** @type {{ parent: import("../types/estree.js").Node }} */ const { parent } = path;
 
   const printed = isConditionalExpression
     ? print("test")
@@ -138,7 +138,7 @@ const ancestorNameMap = new Map([
   ["AwaitExpression", "argument"],
 ]);
 /** @returns {boolean} */ function shouldExtraIndentForConditionalExpression(/** @type {AstPath} */ path) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   if (node.type !== "ConditionalExpression") {
     return false;
   }
@@ -146,7 +146,7 @@ const ancestorNameMap = new Map([
   let parent;
   let child = node;
   for (let ancestorCount = 0; !parent; ancestorCount++) {
-    const node = path.getParentNode(ancestorCount);
+    /** @type {import("../types/estree.js").Node} */ const node = path.getParentNode(ancestorCount);
 
     if (
       (isChainElementWrapper(node) && node.expression === child) ||
@@ -188,7 +188,7 @@ const ancestorNameMap = new Map([
  * @returns {Doc}
  */
 function printTernaryOld(path, options, print) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   /** @type {boolean} */ const isConditionalExpression = node.type === "ConditionalExpression";
   /** @type {string} */ const consequentNodePropertyName = isConditionalExpression
     ? "consequent"
@@ -206,7 +206,7 @@ function printTernaryOld(path, options, print) {
   // We print a ConditionalExpression in either "JSX mode" or "normal mode".
   // See `tests/format/jsx/conditional-expression.js` for more info.
   /** @type {boolean} */ let jsxMode = false;
-  const { parent } = path;
+  /** @type {{ parent: import("../types/estree.js").Node }} */ const { parent } = path;
   /** @type {boolean} */ const isParentTest =
     parent.type === node.type &&
     testNodePropertyNames.some(/** @returns {boolean} */ (prop) => parent[prop] === node);
@@ -256,7 +256,7 @@ function printTernaryOld(path, options, print) {
     // * Nested conditional expressions in alternates
     // * null
     // * undefined
-    const isNil = /** @returns {boolean} */ (node) =>
+    const isNil = /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node) =>
       node.type === "NullLiteral" ||
       (node.type === "Literal" && node.value === null) ||
       (node.type === "Identifier" && node.name === "undefined");

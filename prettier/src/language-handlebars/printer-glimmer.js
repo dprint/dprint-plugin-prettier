@@ -169,7 +169,7 @@ function print(/** @type {AstPath} */ path, /** @type {GlimmerOptions} */ option
 
       let text = node.chars;
 
-      const { parent } = path;
+      /** @type {{ parent: import("./print-types.js").GlimmerNode }} */ const { parent } = path;
       if (parent.type === "ElementNode") {
         if (parent.tag === "pre") {
           return replaceEndOfLine(text);
@@ -591,7 +591,7 @@ const hasSamePathHeadName = ({ path: pathA }, { path: pathB }) =>
 }
 
 function printElseIfBlock(/** @type {AstPath} */ path, /** @type {GlimmerPrint} */ print) {
-  const { node, grandparent } = path;
+  /** @type {{ node: import("./print-types.js").GlimmerNode, grandparent: import("./print-types.js").GlimmerNode }} */ const { node, grandparent } = path;
   return group([
     printInverseBlockOpeningMustache(grandparent),
     ["else", " ", grandparent.inverse.body[0].path.head.name],
@@ -681,7 +681,7 @@ function printInverse(/** @type {AstPath} */ path, /** @type {GlimmerOptions} */
 
 /** @returns {string | undefined} */ function getCurrentAttributeName(/** @type {AstPath} */ path) {
   for (let depth = 0; depth < 2; depth++) {
-    const parentNode = path.getParentNode(depth);
+    /** @type {import("./print-types.js").GlimmerNode} */ const parentNode = path.getParentNode(depth);
     if (parentNode?.type === "AttrNode") {
       return parentNode.name.toLowerCase();
     }
@@ -728,7 +728,7 @@ function printInverse(/** @type {AstPath} */ path, /** @type {GlimmerOptions} */
  * @returns {any[]}
  */
 function printStringLiteral(/** @type {AstPath} */ path, /** @type {GlimmerOptions} */ options) {
-  const {
+  /** @type {{ node: import("./print-types.js").GlimmerNode }} */ const {
     node: { value },
   } = path;
 

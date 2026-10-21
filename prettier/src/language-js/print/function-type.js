@@ -23,7 +23,7 @@ import { printTypeAnnotationProperty } from "./type-annotation.js";
 - `FunctionTypeAnnotation` (Flow)
 */
 function printFunctionType(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   /** @type {Doc[]} */
   const parts = [
     // `TSConstructorType` only
@@ -78,7 +78,7 @@ function printFunctionType(/** @type {AstPath} */ path, options, /** @type {impo
 - `var A: (a: B) => void;`
 */
 /** @returns {boolean} */ function isFlowArrowFunctionTypeAnnotation(/** @type {AstPath} */ path) {
-  const { node, parent } = path;
+  /** @type {{ node: import("../types/estree.js").Node, parent: import("../types/estree.js").Node }} */ const { node, parent } = path;
   return (
     node.type === "FunctionTypeAnnotation" &&
     (isFlowObjectTypePropertyAFunction(parent) ||

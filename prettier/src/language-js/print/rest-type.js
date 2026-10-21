@@ -5,7 +5,7 @@
 - `TupleTypeSpreadElement`(flow)
 */
 /** @returns {any[]} */ function printRestType(/** @type {AstPath} */ path, options, /** @type {(a0?: any) => any} */ print) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
 
   return [
     "...",

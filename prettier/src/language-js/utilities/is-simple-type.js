@@ -10,7 +10,7 @@ import isTsKeywordType from "./is-ts-keyword-type.js";
 */
 
 /**
- * @param {any} node
+ * @param {import("../types/estree.js").Node} node
  * @returns {boolean}
  */
 function isSimpleType(node) {

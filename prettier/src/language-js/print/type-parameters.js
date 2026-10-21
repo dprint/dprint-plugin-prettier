@@ -37,7 +37,7 @@ import {
 // has one type parameter that isn't extend with any types.
 // Because, otherwise formatted result will be invalid as tsx.
 /** @returns {boolean} */ function shouldForceTrailingComma(/** @type {AstPath} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options, /** @type {string} */ paramsKey) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   return (
     getFunctionParameters(node).length === 1 &&
     node.type.startsWith("TS") &&
@@ -59,7 +59,7 @@ import {
 - `TSTypeReference` (TypeScript)
 */
 function printTypeParameters(path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print, /** @type {string} */ paramsKey) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   const parameters = node[paramsKey];
 
   if (!parameters) {
@@ -129,7 +129,7 @@ function printTypeParameters(path, /** @type {import("../../../../prettier/src/l
 }
 
 function printDanglingCommentsForInline(/** @type {AstPath} */ path, options) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   if (!hasComment(node, CommentCheckFlags.Dangling)) {
     return "";
   }
@@ -145,7 +145,7 @@ function printDanglingCommentsForInline(/** @type {AstPath} */ path, options) {
 
 // `TSTypeParameter` and `TypeParameter`
 function printTypeParameter(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
 
   /**
    * @type {Doc[]}

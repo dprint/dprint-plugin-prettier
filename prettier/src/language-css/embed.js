@@ -3,7 +3,7 @@
 function embed() {}
 
 // `front-matter` only available on `css-root`
-embed.getVisitorKeys = /** @returns {any[]} */ (node) =>
+embed.getVisitorKeys = /** @returns {any[]} */ (/** @type {import("./types.js").CssNode} */ node) =>
   node.type === "css-root" ? ["frontMatter"] : [];
 
 export default embed;

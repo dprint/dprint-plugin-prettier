@@ -17,9 +17,9 @@ import {
  * @param {*} options
  * @param {() => Doc} print
  * @param {*} [events]
- * @return {Doc}
+ * @returns {any[]}
  */
-/** @returns {any[]} */ function printChildren(/** @type {AstPath} */ path, options, print, events = {}) {
+function printChildren(/** @type {AstPath} */ path, options, print, events = {}) {
   const { processor = print } = events;
 
   const parts = [];
@@ -62,7 +62,7 @@ const SIBLING_NODE_TYPES = new Set(["listItem", "definition"]);
  * @returns {boolean}
  */
 function shouldPrePrintDoubleHardline(path, options) {
-  const { node, previous, parent } = path;
+  /** @type {{ node: import("../utilities.js").MdastNode, previous: any, parent: import("../utilities.js").MdastNode }} */ const { node, previous, parent } = path;
 
   if (options.parser === "mdx") {
     if (
@@ -139,7 +139,7 @@ function shouldPrePrintDoubleHardline(path, options) {
   );
 }
 
-function isLooseListItemLegacy(node, options) {
+function isLooseListItemLegacy(/** @type {import("../utilities.js").MdastNode} */ node, options) {
   return (
     node.type === "listItem" &&
     (node.spread ||

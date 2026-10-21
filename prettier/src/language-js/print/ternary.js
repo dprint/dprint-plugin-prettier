@@ -45,7 +45,7 @@ import { printTernaryOld } from "./ternary-old.js";
 //   ? b
 //   : c
 // ).call()
-function shouldBreakClosingParen(node, parent) {
+function shouldBreakClosingParen(/** @type {import("../types/estree.js").Node} */ node, /** @type {import("../types/estree.js").Node} */ parent) {
   return (
     (isMemberExpression(parent) ||
       (parent.type === "NGPipeExpression" && parent.left === node)) &&
@@ -98,7 +98,7 @@ const ancestorNameMap = new Map([
  * @returns {boolean}
  */
 function shouldExtraIndentForConditionalExpression(/** @type {AstPath} */ path) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   if (node.type !== "ConditionalExpression") {
     return false;
   }
@@ -106,7 +106,7 @@ function shouldExtraIndentForConditionalExpression(/** @type {AstPath} */ path) 
   let parent;
   let child = node;
   for (let ancestorCount = 0; !parent; ancestorCount++) {
-    const node = path.getParentNode(ancestorCount);
+    /** @type {import("../types/estree.js").Node} */ const node = path.getParentNode(ancestorCount);
 
     if (
       (isChainElementWrapper(node) && node.expression === child) ||
@@ -158,7 +158,7 @@ function printTernary(path, options, print, args) {
     return printTernaryOld(path, options, print);
   }
 
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   const isConditionalExpression = node.type === "ConditionalExpression";
   const isTSConditional = isConditionalType(node);
   const consequentNodePropertyName = isConditionalExpression
@@ -173,7 +173,7 @@ function printTernary(path, options, print, args) {
   const consequentNode = node[consequentNodePropertyName];
   const alternateNode = node[alternateNodePropertyName];
   const testNodes = testNodePropertyNames.map((prop) => node[prop]);
-  const { parent } = path;
+  /** @type {{ parent: import("../types/estree.js").Node }} */ const { parent } = path;
 
   const isParentTernary = parent.type === node.type;
   const isInTest =

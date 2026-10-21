@@ -69,7 +69,7 @@ function printMemberChain(/** @type {AstPath} */ path, /** @type {import("../../
 
   // Here we try to retain one typed empty line after each call expression or
   // the first group whether it is in parentheses or not
-  /** @returns {boolean} */ function shouldInsertEmptyLineAfter(node) {
+  /** @returns {boolean} */ function shouldInsertEmptyLineAfter(/** @type {import("../types/estree.js").Node} */ node) {
     const { originalText } = options;
     const nextCharIndex = getNextNonSpaceNonCommentCharacterIndex(
       originalText,
@@ -90,7 +90,7 @@ function printMemberChain(/** @type {AstPath} */ path, /** @type {import("../../
   }
 
   function rec() {
-    const { node } = path;
+    /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
 
     if (
       isCallExpression(node) &&
@@ -151,7 +151,7 @@ function printMemberChain(/** @type {AstPath} */ path, /** @type {import("../../
   // Note: the comments of the root node have already been printed, so we
   // need to extract this first call without printing them as they would
   // if handled inside of the recursive call.
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   printedNodes.unshift({
     node,
     printed: [

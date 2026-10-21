@@ -42,11 +42,11 @@ function printFunction(/** @type {import("../../../../prettier/src/common/ast-pa
     return printMethodValue(path, options, print);
   }
 
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
 
   let shouldExpandParameters = false;
   if (node.type === "FunctionExpression" && args?.expandLastArg) {
-    const { parent } = path;
+    /** @type {{ parent: import("../types/estree.js").Node }} */ const { parent } = path;
     if (
       isCallExpression(parent) &&
       (getCallArguments(parent).length > 1 ||
@@ -105,7 +105,7 @@ function printFunction(/** @type {import("../../../../prettier/src/common/ast-pa
 - `TSDeclareMethod` (TypeScript)
 */
 /** @returns {any[]} */ function printMethod(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   const { kind } = node;
   const value = node.value || node;
   const parts = [];
@@ -146,7 +146,7 @@ function printFunction(/** @type {import("../../../../prettier/src/common/ast-pa
 - `TSEmptyBodyFunctionExpression` (TypeScript)
 */
 /** @returns {any[]} */ function printMethodValue(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   const parametersDoc = printFunctionParameters(path, options, print);
   const returnTypeDoc = printReturnType(path, print);
   /** @type {boolean} */ const shouldBreakParameters = shouldBreakFunctionParameters(node);
@@ -175,7 +175,7 @@ function printFunction(/** @type {import("../../../../prettier/src/common/ast-pa
   return parts;
 }
 
-/** @returns {boolean} */ function canPrintParamsWithoutParens(node) {
+/** @returns {boolean} */ function canPrintParamsWithoutParens(/** @type {import("../types/estree.js").Node} */ node) {
   const parameters = getFunctionParameters(node);
   return (
     parameters.length === 1 &&
@@ -196,7 +196,7 @@ function printFunction(/** @type {import("../../../../prettier/src/common/ast-pa
   }
 
   if (options.arrowParens === "avoid") {
-    const { node } = path;
+    /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
     return canPrintParamsWithoutParens(node);
   }
 
@@ -207,7 +207,7 @@ function printFunction(/** @type {import("../../../../prettier/src/common/ast-pa
 
 /** @returns {Doc} */
 function printReturnType(/** @type {AstPath} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   const returnType = printTypeAnnotationProperty(path, print, "returnType");
 
   const parts = [returnType];

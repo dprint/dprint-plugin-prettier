@@ -20,7 +20,7 @@ import { isJsxElement } from "./node-types.js";
 
 /**
  * @param {string} text
- * @param {any} node
+ * @param {import("../types/estree.js").Node} node
  * @returns {boolean}
  */
 function hasLeadingOwnLineComment(text, node) {

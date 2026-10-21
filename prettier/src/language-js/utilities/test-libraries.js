@@ -49,12 +49,12 @@ const testCallCalleePatterns = [
  * @param {Node} node
  * @returns {boolean}
  */
-/** @returns {boolean} */ function isTestCallCallee(node) {
+function isTestCallCallee(node) {
   return isNodeMatches(node, testCallCalleePatterns);
 }
 
 /**
- * @param {any} node
+ * @param {import("../types/estree.js").Node} node
  * @returns {boolean}
  */
 function isUnitTestSetupIdentifier(node) {
@@ -74,7 +74,7 @@ function isUnitTestSetupIdentifier(node) {
  *
  * example: https://docs.angularjs.org/guide/unit-testing#using-beforeall-
  *
- * @param {any} node
+ * @param {import("../types/estree.js").Node} node
  * @returns {boolean}
  */
 function isAngularTestWrapper(node) {
@@ -98,7 +98,7 @@ function isFunctionOrArrowExpressionWithBody(node) {
 }
 
 // eg; `describe("some string", (done) => {})`
-/** @returns {boolean} */ function isTestCall(node, parent) {
+/** @returns {boolean} */ function isTestCall(/** @type {import("../types/estree.js").Node} */ node, /** @type {import("../types/estree.js").Node} */ parent) {
   if (node?.type !== "CallExpression" || node.optional) {
     return false;
   }

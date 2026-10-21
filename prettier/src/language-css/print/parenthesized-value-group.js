@@ -62,7 +62,7 @@ function printTrailingComma(/** @type {AstPath} */ path, /** @type {CssOptions} 
 }
 
 function printParenthesizedValueGroup(/** @type {AstPath} */ path, /** @type {CssOptions} */ options, /** @type {CssPrint} */ print) {
-  const { node, parent } = path;
+  /** @type {{ node: import("../types.js").CssNode, parent: import("../types.js").CssNode }} */ const { node, parent } = path;
   const groupDocs = path.map(
     ({ node }) => (typeof node === "string" ? node : print()),
     "groups",

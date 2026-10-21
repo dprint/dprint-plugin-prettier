@@ -29,7 +29,7 @@ const isSingleWordType = createTypeCheckFunction([
 ]);
 
 /**
- * @param {any} node
+ * @param {import("../types/estree.js").Node} node
  * @param {number} depth
  * @returns {boolean}
  */
@@ -38,7 +38,7 @@ function isSimpleCallArgument(node, depth = 2) {
     return false;
   }
 
-  const isChildSimple = /** @returns {boolean} */ (child) => isSimpleCallArgument(child, depth - 1);
+  const isChildSimple = /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ child) => isSimpleCallArgument(child, depth - 1);
 
   node = stripChainElementWrappers(node);
 

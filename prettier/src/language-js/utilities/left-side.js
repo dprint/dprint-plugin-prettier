@@ -20,7 +20,7 @@ import {
 */
 
 /**
- * @param {any} node
+ * @param {import("../types/estree.js").Node} node
  * @returns {boolean}
  */
 function hasNakedLeftSide(node) {
@@ -41,7 +41,7 @@ function hasNakedLeftSide(node) {
   );
 }
 
-function getLeftSide(node) {
+function getLeftSide(/** @type {import("../types/estree.js").Node} */ node) {
   if (node.expressions) {
     return node.expressions[0];
   }
@@ -56,7 +56,7 @@ function getLeftSide(node) {
   );
 }
 
-/** @returns {any[]} */ function getLeftSidePathName(node) {
+/** @returns {any[]} */ function getLeftSidePathName(/** @type {import("../types/estree.js").Node} */ node) {
   if (node.expressions) {
     return ["expressions", 0];
   }

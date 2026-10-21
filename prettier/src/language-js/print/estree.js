@@ -84,7 +84,7 @@ import { printWhileStatement } from "./while-statement.js";
  * @returns {Doc}
  */
 function printEstree(path, options, print, args) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
 
   if (isLiteral(node)) {
     return printLiteral(path, options);

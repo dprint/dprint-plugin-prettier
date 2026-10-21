@@ -22,10 +22,10 @@ const overrideBreakOrContinueEnd =
   @param {BREAK_KEYWORD_LENGTH | CONTINUE_KEYWORD_LENGTH} keywordLength
   @returns {LocEndOverride<NodeMap["BreakStatement"] | NodeMap["ContinueStatement"]>}
   */
-  (keywordLength) => /** @returns {number} */ (node) =>
+  (keywordLength) => /** @returns {number} */ (/** @type {import("../types/estree.js").Node} */ node) =>
     node.label ? locEnd(node.label) : locStart(node) + keywordLength;
 /** @type {LocEndOverride} */
-const getContentEnd = /** @returns {number | undefined} */ (node) => node.__contentEnd ?? locEndWithFullText(node);
+const getContentEnd = /** @returns {number | undefined} */ (/** @type {import("../types/estree.js").Node} */ node) => node.__contentEnd ?? locEndWithFullText(node);
 
 const nodeTypesWithContentEnd = /** @type {const} */ ([
   "ExpressionStatement",
@@ -44,15 +44,15 @@ const overrides =
   new Map([
     ["BreakStatement", overrideBreakOrContinueEnd(BREAK_KEYWORD_LENGTH)],
     ["ContinueStatement", overrideBreakOrContinueEnd(CONTINUE_KEYWORD_LENGTH)],
-    ["DebuggerStatement", (node) => locStart(node) + DEBUGGER_KEYWORD_LENGTH],
+    ["DebuggerStatement", (/** @type {import("../types/estree.js").Node} */ node) => locStart(node) + DEBUGGER_KEYWORD_LENGTH],
     // @ts-expect-error -- ignore
-    ["VariableDeclaration", /** @returns {number} */ (node) => locEnd(node.declarations.at(-1))],
+    ["VariableDeclaration", /** @returns {number} */ (/** @type {import("../types/estree.js").Node} */ node) => locEnd(node.declarations.at(-1))],
     ...nodeTypesWithContentEnd.map((type) => [type, getContentEnd]),
   ]);
 
 const shouldAddContentEnd = createTypeCheckFunction(nodeTypesWithContentEnd);
 
-const shouldIgnoredNodePrintSemicolon = /** @returns {boolean} */ (node) => {
+const shouldIgnoredNodePrintSemicolon = /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node) => {
   if (shouldAddContentEnd(node) && node.__contentEnd) {
     return true;
   }
@@ -87,7 +87,7 @@ const shouldIgnoredNodePrintSemicolon = /** @returns {boolean} */ (node) => {
 };
 
 /**
-@param {any} node
+@param {import("../types/estree.js").Node} node
 @return {number}
 */
 function locEnd(node) {

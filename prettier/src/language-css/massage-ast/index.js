@@ -11,7 +11,7 @@ const ignoredProperties = new Set([
   "spaces",
 ]);
 
-function massageAstNode(original, cloned, parent) {
+function massageAstNode(/** @type {import("../types.js").CssNode} */ original, cloned, /** @type {import("../types.js").CssNode} */ parent) {
   if (
     original.type === "css-comment" &&
     parent.type === "css-root" &&

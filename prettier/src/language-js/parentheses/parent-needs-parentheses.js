@@ -23,7 +23,7 @@ import { stripChainElementWrappers } from "../utilities/strip-chain-element-wrap
 @param {AstPath} path
 */
 function parentNeedsParentheses(path, options, needsParentheses) {
-  const { node, key, parent } = path;
+  /** @type {{ node: import("../types/estree.js").Node, key: any, parent: import("../types/estree.js").Node }} */ const { node, key, parent } = path;
 
   switch (parent.type) {
     case "ReturnStatement":
@@ -130,7 +130,7 @@ function parentNeedsParentheses(path, options, needsParentheses) {
 }
 
 /** @returns {boolean} */ function willReturnOrThrowStatementBreak(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, options) {
-  const { key, parent } = path;
+  /** @type {{ key: any, parent: import("../types/estree.js").Node }} */ const { key, parent } = path;
   if (!(key === "argument" && isReturnOrThrowStatement(parent))) {
     return false;
   }
@@ -141,7 +141,7 @@ function parentNeedsParentheses(path, options, needsParentheses) {
   But we can't know how the argument printed, so only matches cases that will break for sure
   */
 
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
 
   if (
     (node.type === "SequenceExpression" ||
@@ -159,7 +159,7 @@ function parentNeedsParentheses(path, options, needsParentheses) {
  * @returns {boolean}
  */
 function shouldWrapFunctionForExportDefault(path, options, needsParentheses) {
-  const { node, parent } = path;
+  /** @type {{ node: import("../types/estree.js").Node, parent: import("../types/estree.js").Node }} */ const { node, parent } = path;
 
   if (node.type === "FunctionExpression" || node.type === "ClassExpression") {
     return (
@@ -187,7 +187,7 @@ function shouldWrapFunctionForExportDefault(path, options, needsParentheses) {
 
 // Based on babel implementation
 // https://github.com/nicolo-ribaudo/babel/blob/c4b88a4e5005364255f7e964fe324cf7bfdfb019/packages/babel-generator/src/node/index.ts#L111
-/** @returns {boolean} */ function canDecoratorExpressionUnparenthesized(node) {
+/** @returns {boolean} */ function canDecoratorExpressionUnparenthesized(/** @type {import("../types/estree.js").Node} */ node) {
   if (node.type === "ChainExpression") {
     node = node.expression;
   }
@@ -201,7 +201,7 @@ function shouldWrapFunctionForExportDefault(path, options, needsParentheses) {
   );
 }
 
-/** @returns {boolean} */ function isDecoratorMemberExpression(node) {
+/** @returns {boolean} */ function isDecoratorMemberExpression(/** @type {import("../types/estree.js").Node} */ node) {
   if (node.type === "Identifier") {
     return true;
   }
@@ -219,7 +219,7 @@ function shouldWrapFunctionForExportDefault(path, options, needsParentheses) {
   return false;
 }
 
-/** @returns {boolean} */ function includesFunctionTypeInObjectType(node) {
+/** @returns {boolean} */ function includesFunctionTypeInObjectType(/** @type {import("../types/estree.js").Node} */ node) {
   return hasNode(
     node,
     (node) =>

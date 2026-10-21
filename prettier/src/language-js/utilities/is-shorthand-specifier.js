@@ -12,7 +12,7 @@ import { isStringLiteral } from "./node-types.js";
  * @param {Node} specifier
  * @returns {boolean}
  */
-/** @returns {boolean} */ function isShorthandSpecifier(specifier) {
+function isShorthandSpecifier(specifier) {
   if (
     specifier.type !== "ImportSpecifier" &&
     specifier.type !== "ExportSpecifier"

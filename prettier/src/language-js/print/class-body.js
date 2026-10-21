@@ -33,7 +33,7 @@ import { printSemicolon, printTrailingComma } from "./miscellaneous.js";
 - `RecordDeclarationBody` (Flow)
 */
 /** @returns {Doc} */ function printClassBody(/** @type {AstPath} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options, /** @type {() => any} */ print) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   const parts = [];
   const isFlowTypeAnnotation = node.type === "ObjectTypeAnnotation";
   const isFlowRecordDeclaration = node.type === "RecordDeclarationBody";
@@ -52,7 +52,7 @@ import { printSemicolon, printTrailingComma } from "./miscellaneous.js";
     parts.push(print());
 
     if (!isFlowRecordDeclaration && isObjectType && isFlowTypeAnnotation) {
-      const { parent } = path;
+      /** @type {{ parent: import("../types/estree.js").Node }} */ const { parent } = path;
 
       if (parent.inexact || !isLast) {
         parts.push(",");
@@ -162,10 +162,10 @@ import { printSemicolon, printTrailingComma } from "./miscellaneous.js";
 }
 
 /** @returns {boolean} */ function isClassBody(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
 
   if (node.type === "ObjectTypeAnnotation") {
-    const { key, parent } = path;
+    /** @type {{ key: any, parent: import("../types/estree.js").Node }} */ const { key, parent } = path;
     return (
       key === "body" &&
       (parent.type === "InterfaceDeclaration" ||
@@ -182,7 +182,7 @@ import { printSemicolon, printTrailingComma } from "./miscellaneous.js";
 }
 
 function printClassMemberSemicolon(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options) {
-  const { parent } = path;
+  /** @type {{ parent: import("../types/estree.js").Node }} */ const { parent } = path;
 
   if (path.callParent(isClassBody)) {
     return parent.type === "ObjectTypeAnnotation"
@@ -221,7 +221,7 @@ const isClassProperty = createTypeCheckFunction([
   "TSAbstractAccessorProperty",
 ]);
 
-const isKeywordProperty = (node) => {
+const isKeywordProperty = (/** @type {import("../types/estree.js").Node} */ node) => {
   if (node.computed || node.typeAnnotation) {
     return false;
   }
@@ -237,7 +237,7 @@ const isKeywordProperty = (node) => {
  * @returns {boolean}
  */
 function shouldPrintSemicolonAfterClassProperty(
-  { node, next: nextNode },
+  /** @type {{ node: import("../types/estree.js").Node, next: any }} */ { node, next: nextNode },
   /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options,
 ) {
   if (options.semi || !isClassProperty(node)) {
@@ -314,7 +314,7 @@ function shouldPrintSemicolonAfterClassProperty(
 
 const isInterfaceProperty = createTypeCheckFunction(["TSPropertySignature"]);
 /** @returns {boolean} */ function shouldPrintSemicolonAfterInterfaceProperty(
-  { node, next: nextNode },
+  /** @type {{ node: import("../types/estree.js").Node, next: any }} */ { node, next: nextNode },
   /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options,
 ) {
   if (options.semi || !isInterfaceProperty(node)) {

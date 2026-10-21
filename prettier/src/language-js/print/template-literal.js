@@ -57,7 +57,7 @@ function printTemplateLiteral(/** @type {AstPath} */ path, options, /** @type {i
 
 function printTaggedTemplateExpression(/** @type {AstPath} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   const quasiDoc = print("quasi");
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
 
   /** @type {Doc} */
   let space = "";
@@ -95,7 +95,7 @@ function printTaggedTemplateExpression(/** @type {AstPath} */ path, /** @type {i
    * ${1} | ${2} | ${3}
    * ${2} | ${1} | ${3}
    */
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   const headerNames = node.quasis[0].value.raw.trim().split(/\s*\|\s*/);
   if (
     headerNames.length > 1 ||
@@ -179,7 +179,7 @@ function printTaggedTemplateExpression(/** @type {AstPath} */ path, /** @type {i
 
 const templateLiteralIndentCache = new WeakMap();
 function getTemplateLiteralExpressionIndent(/** @type {AstPath} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options) {
-  const { parent: templateLiteral, index } = path;
+  /** @type {{ parent: import("../types/estree.js").Node, index: any }} */ const { parent: templateLiteral, index } = path;
   const sizes = getOrInsertComputed(
     templateLiteralIndentCache,
     templateLiteral,
@@ -211,10 +211,10 @@ function printTemplateExpression(
   /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print,
   shouldPreserveIndentation = true,
 ) {
-  const { node, index } = path;
+  /** @type {{ node: import("../types/estree.js").Node, index: any }} */ const { node, index } = path;
   let expressionDoc = print();
 
-  const templateLiteral = path.parent;
+  /** @type {import("../types/estree.js").Node} */ const templateLiteral = path.parent;
   const { quasis } = templateLiteral;
   const start = locEnd(quasis[index]);
   const end = locStart(quasis[index + 1]);

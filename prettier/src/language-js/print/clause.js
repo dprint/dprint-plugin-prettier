@@ -9,7 +9,7 @@ import {
   hasComment,
 } from "../utilities/comments.js";
 
-/** @returns {boolean} */ function shouldPrintLeadingHardline(node, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options) {
+/** @returns {boolean} */ function shouldPrintLeadingHardline(/** @type {import("../types/estree.js").Node} */ node, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options) {
   const leadingComments = getComments(node, CommentCheckFlags.Leading);
   if (leadingComments.length === 0) {
     return false;

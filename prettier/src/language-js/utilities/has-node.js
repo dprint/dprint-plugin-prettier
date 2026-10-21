@@ -9,7 +9,7 @@ import getVisitorKeys from "../traverse/get-visitor-keys.js";
 */
 
 /**
- * @param {any} node
+ * @param {import("../types/estree.js").Node} node
  * @param {(node: Node) => boolean} predicate
  * @returns {boolean}
  */

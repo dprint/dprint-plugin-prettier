@@ -35,7 +35,7 @@ import { printObject } from "./object.js";
 - `ImportDeclaration`
 */
 function printImportDeclaration(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   /** @type{Doc[]} */
   return [
     "import",
@@ -48,7 +48,7 @@ function printImportDeclaration(/** @type {AstPath} */ path, options, /** @type 
   ];
 }
 
-const isDefaultExport = /** @returns {boolean} */ (node) =>
+const isDefaultExport = /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node) =>
   node.type === "ExportDefaultDeclaration" ||
   (node.type === "DeclareExportDeclaration" && node.default);
 
@@ -60,7 +60,7 @@ const isDefaultExport = /** @returns {boolean} */ (node) =>
 - `DeclareExportAllDeclaration`(flow)
 */
 /** @returns {any[]} */ function printExportDeclaration(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
 
   /** @type{Doc[]} */
   const parts = [
@@ -121,7 +121,7 @@ const shouldOmitSemicolon = createTypeCheckFunction([
   "TSDeclareFunction",
   "EnumDeclaration",
 ]);
-/** @returns {string} */ function printSemicolonAfterExportDeclaration(node, options) {
+/** @returns {string} */ function printSemicolonAfterExportDeclaration(/** @type {import("../types/estree.js").Node} */ node, options) {
   if (
     !node.declaration ||
     (isDefaultExport(node) && !shouldOmitSemicolon(node.declaration))
@@ -138,16 +138,16 @@ const shouldOmitSemicolon = createTypeCheckFunction([
     : "";
 }
 
-/** @returns {string} */ function printImportKind(node, /** @type {boolean | undefined} */ spaceBeforeKind) {
+/** @returns {string} */ function printImportKind(/** @type {import("../types/estree.js").Node} */ node, /** @type {boolean | undefined} */ spaceBeforeKind) {
   return printImportOrExportKind(node.importKind, spaceBeforeKind);
 }
 
-/** @returns {string} */ function printExportKind(node) {
+/** @returns {string} */ function printExportKind(/** @type {import("../types/estree.js").Node} */ node) {
   return printImportOrExportKind(node.exportKind);
 }
 
 function printModuleSource(/** @type {AstPath} */ path, options, /** @type {(a0?: any) => any} */ print) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
 
   if (!node.source) {
     return "";
@@ -161,7 +161,7 @@ function printModuleSource(/** @type {AstPath} */ path, options, /** @type {(a0?
 }
 
 function printModuleSpecifiers(/** @type {AstPath} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options, /** @type {() => any} */ print) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
 
   if (!shouldPrintSpecifiers(node, options)) {
     return "";
@@ -235,7 +235,7 @@ function printModuleSpecifiers(/** @type {AstPath} */ path, /** @type {import(".
   return parts;
 }
 
-/** @returns {boolean} */ function shouldPrintSpecifiers(node, options) {
+/** @returns {boolean} */ function shouldPrintSpecifiers(/** @type {import("../types/estree.js").Node} */ node, options) {
   if (
     node.type !== "ImportDeclaration" ||
     isNonEmptyArray(node.specifiers) ||
@@ -252,7 +252,7 @@ function printModuleSpecifiers(/** @type {AstPath} */ path, /** @type {import(".
   return text.trimEnd().endsWith("from");
 }
 
-/** @returns {string | undefined} */ function getImportAttributesKeyword(node, options) {
+/** @returns {string | undefined} */ function getImportAttributesKeyword(/** @type {import("../types/estree.js").Node} */ node, options) {
   const textBetweenSourceAndAttributes = stripComments(options)
     .slice(
       locEnd(node.source),
@@ -271,7 +271,7 @@ function printModuleSpecifiers(/** @type {AstPath} */ path, /** @type {import(".
   return isNonEmptyArray(node.attributes) ? "with" : undefined;
 }
 
-const isSingleTypeImportAttributes = (node) => {
+const isSingleTypeImportAttributes = (/** @type {import("../types/estree.js").Node} */ node) => {
   const { attributes } = node;
 
   if (attributes.length !== 1) {
@@ -300,7 +300,7 @@ const isSingleTypeImportAttributes = (node) => {
 - `DeclareExportAllDeclaration` (Flow)
 */
 function printImportAttributes(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
 
   if (!node.source) {
     return "";
@@ -320,7 +320,7 @@ function printImportAttributes(/** @type {AstPath} */ path, options, /** @type {
 }
 
 /** @returns {any[]} */ function printModuleSpecifier(/** @type {AstPath} */ path, options, /** @type {(a0?: any) => any} */ print) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   const { type } = node;
 
   const isImportSpecifier = type.startsWith("Import");

@@ -54,9 +54,9 @@ import {
  * @returns {Doc}
  */
 function printCommaSeparatedValueGroup(/** @type {AstPath} */ path, /** @type {CssOptions} */ options, /** @type {CssPrint} */ print) {
-  const { node } = path;
-  const parentNode = path.parent;
-  const parentParentNode = path.grandparent;
+  /** @type {{ node: import("../types.js").CssNode }} */ const { node } = path;
+  /** @type {import("../types.js").CssNode} */ const parentNode = path.parent;
+  /** @type {import("../types.js").CssNode} */ const parentParentNode = path.grandparent;
   /** @type {string | undefined} */ const declAncestorProp = getPropOfDeclNode(path);
   /** @type {boolean | undefined} */ const isGridValue =
     declAncestorProp &&
@@ -569,7 +569,7 @@ function printCommaSeparatedValueGroup(/** @type {AstPath} */ path, /** @type {C
   return group(indent(fill(parts)));
 }
 
-function isPossibleFontSize(node) {
+function isPossibleFontSize(/** @type {import("../types.js").CssNode} */ node) {
   if (node?.type === "value-number") {
     return true;
   }

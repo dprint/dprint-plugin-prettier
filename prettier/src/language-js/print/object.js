@@ -69,7 +69,7 @@ const isPrintingFlowEnumBody = createTypeCheckFunction([
 - `TSEnumDeclaration`(TypeScript)
 */
 /** @returns {Doc} */ function printObject(/** @type {AstPath} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
-  const { node, parent } = path;
+  /** @type {{ node: import("../types/estree.js").Node, parent: import("../types/estree.js").Node }} */ const { node, parent } = path;
 
   const isFlowEnumBody = isPrintingFlowEnumBody(node);
   const isEnumBody = node.type === "TSEnumBody" || isFlowEnumBody;
@@ -199,7 +199,7 @@ const isPrintingFlowEnumBody = createTypeCheckFunction([
   return group(content, { shouldBreak });
 }
 
-/** @returns {boolean} */ function hasNewLineAfterOpeningBrace(node, firstProperty, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options) {
+/** @returns {boolean} */ function hasNewLineAfterOpeningBrace(/** @type {import("../types/estree.js").Node} */ node, firstProperty, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options) {
   const text = options.originalText;
   const firstPropertyStart = locStart(firstProperty);
 

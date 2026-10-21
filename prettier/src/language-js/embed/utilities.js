@@ -6,13 +6,13 @@ import { isArrayExpression } from "../utilities/node-types.js";
 /** @import AstPath from "../../common/ast-path.js" */
 
 const angularComponentObjectExpressionPredicates = [
-  /** @returns {boolean} */ (node, /** @type {string} */ name) => name === "properties" && node.type === "ObjectExpression",
-  /** @returns {boolean} */ (node, /** @type {string} */ name) =>
+  /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node, /** @type {string} */ name) => name === "properties" && node.type === "ObjectExpression",
+  /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node, /** @type {string} */ name) =>
     name === "arguments" &&
     node.type === "CallExpression" &&
     node.callee.type === "Identifier" &&
     node.callee.name === "Component",
-  /** @returns {boolean} */ (node, /** @type {string} */ name) => name === "expression" && node.type === "Decorator",
+  /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node, /** @type {string} */ name) => name === "expression" && node.type === "Decorator",
 ];
 
 /**
@@ -31,8 +31,8 @@ const angularComponentObjectExpressionPredicates = [
  * @returns {boolean}
  */
 function isAngularComponentStyles(/** @type {AstPath} */ path) {
-  const isTemplateLiteral = /** @returns {boolean} */ (node) => node.type === "TemplateLiteral";
-  const isObjectPropertyNamedStyles = /** @returns {boolean} */ (node, /** @type {string} */ key) =>
+  const isTemplateLiteral = /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node) => node.type === "TemplateLiteral";
+  const isObjectPropertyNamedStyles = /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node, /** @type {string} */ key) =>
     isObjectProperty(node) &&
     !node.computed &&
     node.key.type === "Identifier" &&
@@ -65,7 +65,7 @@ function isAngularComponentStyles(/** @type {AstPath} */ path) {
   );
 }
 
-/** @returns {boolean} */ function hasLeadingBlockCommentWithName(node, /** @type {string} */ languageName) {
+/** @returns {boolean} */ function hasLeadingBlockCommentWithName(/** @type {import("../types/estree.js").Node} */ node, /** @type {string} */ languageName) {
   // This checks for a leading comment that is exactly `/* GraphQL */`
   // In order to be in line with other implementations of this comment tag
   // we will not trim the comment value and we will expect exactly one space on
@@ -87,7 +87,7 @@ function isAngularComponentStyles(/** @type {AstPath} */ path) {
   );
 }
 
-/** @returns {boolean} */ function isAsConstExpression(node) {
+/** @returns {boolean} */ function isAsConstExpression(/** @type {import("../types/estree.js").Node} */ node) {
   return (
     node.type === "AsConstExpression" ||
     (node.type === "TSAsExpression" &&

@@ -38,7 +38,7 @@ function needsParentheses(path, /** @type {import("../../../../prettier/src/lang
     return false;
   }
 
-  const { node, key, parent } = path;
+  /** @type {{ node: import("../types/estree.js").Node, key: any, parent: import("../types/estree.js").Node }} */ const { node, key, parent } = path;
 
   // to avoid unexpected `}}` in HTML interpolations
   if (
@@ -170,7 +170,7 @@ function needsParentheses(path, /** @type {import("../../../../prettier/src/lang
         return true;
       }
       if (node.operator === "|>" && node.extra?.parenthesized) {
-        const grandParent = path.grandparent;
+        /** @type {import("../types/estree.js").Node} */ const grandParent = path.grandparent;
         if (
           grandParent.type === "BinaryExpression" &&
           grandParent.operator === "|>"
@@ -602,7 +602,7 @@ function needsParentheses(path, /** @type {import("../../../../prettier/src/lang
         typeof parent.directive !== "string"
       ) {
         // To avoid becoming a directive
-        const grandParent = path.grandparent;
+        /** @type {import("../types/estree.js").Node} */ const grandParent = path.grandparent;
 
         return (
           grandParent.type === "Program" ||
@@ -949,7 +949,7 @@ const isStatement = createTypeCheckFunction([
  */
 function isPathInForStatementInitializer(path) {
   /** @type {number} */ let i = 0;
-  let { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ let { node } = path;
   while (node) {
     const parent = path.getParentNode(i++);
     if (parent?.type === "ForStatement" && parent.init === node) {
@@ -961,7 +961,7 @@ function isPathInForStatementInitializer(path) {
   return false;
 }
 
-/** @returns {boolean} */ function endsWithRightBracket(node) {
+/** @returns {boolean} */ function endsWithRightBracket(/** @type {import("../types/estree.js").Node} */ node) {
   return isObjectExpression(node);
 }
 
@@ -970,7 +970,7 @@ function isPathInForStatementInitializer(path) {
  * @returns {boolean}
  */
 function isFollowedByRightBracket(path) {
-  const { parent, key } = path;
+  /** @type {{ parent: import("../types/estree.js").Node, key: any }} */ const { parent, key } = path;
   switch (parent.type) {
     case "NGPipeExpression":
       if (key === "arguments" && path.isLast) {

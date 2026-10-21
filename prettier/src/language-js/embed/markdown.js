@@ -9,7 +9,7 @@ import {
 import { escapeTemplateCharacters } from "../print/template-literal.js";
 
 async function printEmbedMarkdown(textToDoc, print, /** @type {AstPath} */ path /* , options*/) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   let text = node.quasis[0].value.raw.replaceAll(
     /((?:\\\\)*)\\`/g,
     /** @returns {string} */ (/** @type {string} */ _, /** @type {string} */ backslashes) => "\\".repeat(backslashes.length / 2) + "`",

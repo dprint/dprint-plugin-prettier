@@ -26,7 +26,7 @@ const isClassOrInterface = createTypeCheckFunction([
  * @returns {boolean}
  */
 function willPrintOwnComments(path, options) {
-  const { key, parent } = path;
+  /** @type {{ key: any, parent: import("../types/estree.js").Node }} */ const { key, parent } = path;
   if (
     (key === "types" && isUnionType(parent)) ||
     (key === "argument" && parent.type === "JSXSpreadAttribute") ||
@@ -43,7 +43,7 @@ function willPrintOwnComments(path, options) {
     return true;
   }
 
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
 
   if (hasNodeIgnoreComment(node)) {
     return false;

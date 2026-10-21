@@ -110,7 +110,7 @@ const wideKeywords = new Set(["initial", "inherit", "unset", "revert"]);
 }
 
 /** @returns {boolean} */ function insideURLFunctionInImportAtRuleNode(/** @type {AstPath} */ path) {
-  const { node } = path;
+  /** @type {{ node: import("../types.js").CssNode }} */ const { node } = path;
   return (
     node.groups[0]?.value === "url" &&
     node.groups.length === 2 &&
@@ -118,15 +118,15 @@ const wideKeywords = new Set(["initial", "inherit", "unset", "revert"]);
   );
 }
 
-/** @returns {boolean} */ function isURLFunctionNode(node) {
+/** @returns {boolean} */ function isURLFunctionNode(/** @type {import("../types.js").CssNode} */ node) {
   return node.type === "value-func" && node.value.toLowerCase() === "url";
 }
 
-/** @returns {boolean} */ function isVarFunctionNode(node) {
+/** @returns {boolean} */ function isVarFunctionNode(/** @type {import("../types.js").CssNode} */ node) {
   return node.type === "value-func" && node.value.toLowerCase() === "var";
 }
 
-/** @returns {boolean | undefined} */ function isDetachedRulesetDeclarationNode(node) {
+/** @returns {boolean | undefined} */ function isDetachedRulesetDeclarationNode(/** @type {import("../types.js").CssNode} */ node) {
   const { selector } = node;
   // If a Less file ends up being parsed with the SCSS parser, Less
   // variable declarations will be parsed as atrules with names ending
@@ -142,44 +142,44 @@ const wideKeywords = new Set(["initial", "inherit", "unset", "revert"]);
   );
 }
 
-/** @returns {boolean} */ function isForKeywordNode(node) {
+/** @returns {boolean} */ function isForKeywordNode(/** @type {import("../types.js").CssNode} */ node) {
   return (
     node.type === "value-word" &&
     ["from", "through", "end"].includes(node.value)
   );
 }
 
-/** @returns {boolean} */ function isIfElseKeywordNode(node) {
+/** @returns {boolean} */ function isIfElseKeywordNode(/** @type {import("../types.js").CssNode} */ node) {
   return (
     node.type === "value-word" && ["and", "or", "not"].includes(node.value)
   );
 }
 
-/** @returns {boolean} */ function isEachKeywordNode(node) {
+/** @returns {boolean} */ function isEachKeywordNode(/** @type {import("../types.js").CssNode} */ node) {
   return node.type === "value-word" && node.value === "in";
 }
 
-/** @returns {boolean} */ function isMultiplicationNode(node) {
+/** @returns {boolean} */ function isMultiplicationNode(/** @type {import("../types.js").CssNode} */ node) {
   return node.type === "value-operator" && node.value === "*";
 }
 
-/** @returns {boolean} */ function isDivisionNode(node) {
+/** @returns {boolean} */ function isDivisionNode(/** @type {import("../types.js").CssNode} */ node) {
   return node?.type === "value-operator" && node.value === "/";
 }
 
-/** @returns {boolean} */ function isAdditionNode(node) {
+/** @returns {boolean} */ function isAdditionNode(/** @type {import("../types.js").CssNode} */ node) {
   return node.type === "value-operator" && node.value === "+";
 }
 
-/** @returns {boolean} */ function isSubtractionNode(node) {
+/** @returns {boolean} */ function isSubtractionNode(/** @type {import("../types.js").CssNode} */ node) {
   return node.type === "value-operator" && node.value === "-";
 }
 
-/** @returns {boolean} */ function isModuloNode(node) {
+/** @returns {boolean} */ function isModuloNode(/** @type {import("../types.js").CssNode} */ node) {
   return node.type === "value-operator" && node.value === "%";
 }
 
-/** @returns {boolean} */ function isMathOperatorNode(node) {
+/** @returns {boolean} */ function isMathOperatorNode(/** @type {import("../types.js").CssNode} */ node) {
   return (
     isMultiplicationNode(node) ||
     isDivisionNode(node) ||
@@ -189,17 +189,17 @@ const wideKeywords = new Set(["initial", "inherit", "unset", "revert"]);
   );
 }
 
-/** @returns {boolean} */ function isEqualityOperatorNode(node) {
+/** @returns {boolean} */ function isEqualityOperatorNode(/** @type {import("../types.js").CssNode} */ node) {
   return node.type === "value-word" && ["==", "!="].includes(node.value);
 }
 
-/** @returns {boolean} */ function isRelationalOperatorNode(node) {
+/** @returns {boolean} */ function isRelationalOperatorNode(/** @type {import("../types.js").CssNode} */ node) {
   return (
     node.type === "value-word" && ["<", ">", "<=", ">="].includes(node.value)
   );
 }
 
-/** @returns {boolean} */ function isSCSSControlDirectiveNode(node, /** @type {CssOptions} */ options) {
+/** @returns {boolean} */ function isSCSSControlDirectiveNode(/** @type {import("../types.js").CssNode} */ node, /** @type {CssOptions} */ options) {
   return (
     options.parser === "scss" &&
     node.type === "css-atrule" &&
@@ -207,19 +207,19 @@ const wideKeywords = new Set(["initial", "inherit", "unset", "revert"]);
   );
 }
 
-function isDetachedRulesetCallNode(node) {
+function isDetachedRulesetCallNode(/** @type {import("../types.js").CssNode} */ node) {
   return node.raws?.params && /^\(\s*\)$/.test(node.raws.params);
 }
 
-/** @returns {boolean} */ function isTemplatePlaceholderNode(node) {
+/** @returns {boolean} */ function isTemplatePlaceholderNode(/** @type {import("../types.js").CssNode} */ node) {
   return node.name.startsWith("prettier-placeholder");
 }
 
-/** @returns {boolean} */ function isTemplatePropNode(node) {
+/** @returns {boolean} */ function isTemplatePropNode(/** @type {import("../types.js").CssNode} */ node) {
   return node.prop.startsWith("@prettier-placeholder");
 }
 
-/** @returns {boolean} */ function isPostcssSimpleVarNode(currentNode, nextNode) {
+/** @returns {boolean} */ function isPostcssSimpleVarNode(currentNode, /** @type {import("../types.js").CssNode} */ nextNode) {
   return (
     currentNode.value === "$$" &&
     currentNode.type === "value-func" &&
@@ -228,7 +228,7 @@ function isDetachedRulesetCallNode(node) {
   );
 }
 
-/** @returns {boolean} */ function hasComposesNode(node) {
+/** @returns {boolean} */ function hasComposesNode(/** @type {import("../types.js").CssNode} */ node) {
   return (
     node.value?.type === "value-root" &&
     node.value.group?.type === "value-value" &&
@@ -236,7 +236,7 @@ function isDetachedRulesetCallNode(node) {
   );
 }
 
-/** @returns {boolean} */ function hasParensAroundNode(node) {
+/** @returns {boolean} */ function hasParensAroundNode(/** @type {import("../types.js").CssNode} */ node) {
   return (
     node.value?.group?.group?.type === "value-paren_group" &&
     node.value.group.group.open !== null &&
@@ -244,18 +244,18 @@ function isDetachedRulesetCallNode(node) {
   );
 }
 
-/** @returns {boolean} */ function hasEmptyRawBefore(node) {
+/** @returns {boolean} */ function hasEmptyRawBefore(/** @type {import("../types.js").CssNode} */ node) {
   return node?.raws?.before === "";
 }
 
-/** @returns {boolean} */ function isKeyValuePairNode(node) {
+/** @returns {boolean} */ function isKeyValuePairNode(/** @type {import("../types.js").CssNode} */ node) {
   return (
     node.type === "value-comma_group" &&
     node.groups?.[1]?.type === "value-colon"
   );
 }
 
-/** @returns {boolean} */ function isKeyValuePairInParenGroupNode(node) {
+/** @returns {boolean} */ function isKeyValuePairInParenGroupNode(/** @type {import("../types.js").CssNode} */ node) {
   return (
     node.type === "value-paren_group" &&
     node.groups?.[0] &&
@@ -268,7 +268,7 @@ function isDetachedRulesetCallNode(node) {
     return false;
   }
 
-  const { node } = path;
+  /** @type {{ node: import("../types.js").CssNode }} */ const { node } = path;
 
   // Ignore empty item (i.e. `$key: ()`)
   if (node.groups.length === 0) {
@@ -286,7 +286,7 @@ function isDetachedRulesetCallNode(node) {
     return false;
   }
 
-  const parentNode = path.parent;
+  /** @type {import("../types.js").CssNode} */ const parentNode = path.parent;
 
   // Don't treat SCSS if function arguments as maps (`if(sass(condition): value; else: value)`)
   // https://sass-lang.com/documentation/breaking-changes/if-function/
@@ -298,7 +298,7 @@ function isDetachedRulesetCallNode(node) {
     return false;
   }
 
-  const parentParentNode = path.grandparent;
+  /** @type {import("../types.js").CssNode} */ const parentParentNode = path.grandparent;
 
   // Check open parens contain key/value pair (i.e. `(key: value)` and `(key: (value, other-value)`)
   if (
@@ -333,31 +333,31 @@ function isDetachedRulesetCallNode(node) {
   return false;
 }
 
-/** @returns {boolean} */ function isInlineValueCommentNode(node) {
+/** @returns {boolean} */ function isInlineValueCommentNode(/** @type {import("../types.js").CssNode} */ node) {
   return node.type === "value-comment" && node.inline;
 }
 
-/** @returns {boolean} */ function isHashNode(node) {
+/** @returns {boolean} */ function isHashNode(/** @type {import("../types.js").CssNode} */ node) {
   return node.type === "value-word" && node.value === "#";
 }
 
-/** @returns {boolean} */ function isLeftCurlyBraceNode(node) {
+/** @returns {boolean} */ function isLeftCurlyBraceNode(/** @type {import("../types.js").CssNode} */ node) {
   return node.type === "value-word" && node.value === "{";
 }
 
-/** @returns {boolean} */ function isRightCurlyBraceNode(node) {
+/** @returns {boolean} */ function isRightCurlyBraceNode(/** @type {import("../types.js").CssNode} */ node) {
   return node.type === "value-word" && node.value === "}";
 }
 
-/** @returns {boolean} */ function isWordNode(node) {
+/** @returns {boolean} */ function isWordNode(/** @type {import("../types.js").CssNode} */ node) {
   return ["value-word", "value-atword"].includes(node.type);
 }
 
-/** @returns {boolean} */ function isColonNode(node) {
+/** @returns {boolean} */ function isColonNode(/** @type {import("../types.js").CssNode} */ node) {
   return node?.type === "value-colon";
 }
 
-/** @returns {boolean} */ function isKeyInValuePairNode(node, parentNode) {
+/** @returns {boolean} */ function isKeyInValuePairNode(/** @type {import("../types.js").CssNode} */ node, /** @type {import("../types.js").CssNode} */ parentNode) {
   if (!isKeyValuePairNode(parentNode)) {
     return false;
   }
@@ -373,11 +373,11 @@ function isDetachedRulesetCallNode(node) {
   return isColonNode(groups[index + 1]);
 }
 
-/** @returns {boolean} */ function isMediaAndSupportsKeywords(node) {
+/** @returns {boolean} */ function isMediaAndSupportsKeywords(/** @type {import("../types.js").CssNode} */ node) {
   return node.value && ["not", "and", "or"].includes(node.value.toLowerCase());
 }
 
-/** @returns {boolean} */ function isColorAdjusterFuncNode(node) {
+/** @returns {boolean} */ function isColorAdjusterFuncNode(/** @type {import("../types.js").CssNode} */ node) {
   if (node.type !== "value-func") {
     return false;
   }
@@ -389,14 +389,14 @@ function isDetachedRulesetCallNode(node) {
   return /\/\//.test(text.split(/[\n\r]/).pop());
 }
 
-/** @returns {boolean} */ function isAtWordPlaceholderNode(node) {
+/** @returns {boolean} */ function isAtWordPlaceholderNode(/** @type {import("../types.js").CssNode} */ node) {
   return (
     node?.type === "value-atword" &&
     node.value.startsWith("prettier-placeholder-")
   );
 }
 
-/** @returns {boolean} */ function isConfigurationNode(node, parentNode) {
+/** @returns {boolean} */ function isConfigurationNode(/** @type {import("../types.js").CssNode} */ node, /** @type {import("../types.js").CssNode} */ parentNode) {
   if (
     node.open?.value !== "(" ||
     node.close?.value !== ")" ||
@@ -417,7 +417,7 @@ function isDetachedRulesetCallNode(node) {
   return false;
 }
 
-/** @returns {boolean} */ function isParenGroupNode(node) {
+/** @returns {boolean} */ function isParenGroupNode(/** @type {import("../types.js").CssNode} */ node) {
   return (
     node.type === "value-paren_group" &&
     node.open?.value === "(" &&

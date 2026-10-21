@@ -60,9 +60,9 @@ const K_REGEXP = /\p{Script_Extensions=Hangul}/u;
  * @typedef {{
  *   type: string,
  *   value?: string,
- *   children?: any[],
+ *   children?: MdastNode[],
  *   url?: string,
- *   position?: any,
+ *   position?: MdastPosition,
  *   referenceType?: string,
  *   title?: string | null,
  *   meta?: string | null,
@@ -80,6 +80,9 @@ const K_REGEXP = /\p{Script_Extensions=Hangul}/u;
  *   hasIndentedCodeblock?: boolean,
  *   align?: any[],
  * }} MdastNode
+ * Where a node is in the text, as unist says
+ * @typedef {{ start: MdastPoint, end: MdastPoint }} MdastPosition
+ * @typedef {{ line: number, column: number, offset?: number }} MdastPoint
  * The options that prettier's markdown printers read
  * @typedef {{
  *   parser: string,
@@ -238,7 +241,7 @@ function getOrderedListItemInfo(
   return { number: Number(numberText), leadingSpaces };
 }
 
-/** @returns {boolean} */ function hasGitDiffFriendlyOrderedList(node, options) {
+/** @returns {boolean} */ function hasGitDiffFriendlyOrderedList(/** @type {import("./utilities.js").MdastNode} */ node, options) {
   if (!node.ordered || node.children.length < 2) {
     return false;
   }
@@ -264,7 +267,7 @@ function getOrderedListItemInfo(
 // The final new line should not include in value
 // https://github.com/remarkjs/remark/issues/512
 // TODO[@fisker]: Use `node.value` directly when we update mdx to use latest remark
-function getFencedCodeBlockValue(node, originalText) {
+function getFencedCodeBlockValue(/** @type {import("./utilities.js").MdastNode} */ node, originalText) {
   const { value } = node;
   if (
     node.position.end.offset === originalText.length &&
@@ -278,7 +281,7 @@ function getFencedCodeBlockValue(node, originalText) {
 }
 
 function mapAst(ast, handler) {
-  return (function preorder(node, /** @type {number | null} */ index, parentStack) {
+  return (function preorder(/** @type {import("./utilities.js").MdastNode} */ node, /** @type {number | null} */ index, parentStack) {
     const newNode = { ...handler(node, index, parentStack) };
     newNode.children &&= newNode.children.map((child, index) =>
       preorder(child, index, [newNode, ...parentStack]),
@@ -288,7 +291,7 @@ function mapAst(ast, handler) {
   })(ast, null, []);
 }
 
-/** @returns {boolean} */ function isAutolink(node) {
+/** @returns {boolean} */ function isAutolink(/** @type {import("./utilities.js").MdastNode} */ node) {
   if (node?.type !== "link" || node.children.length !== 1) {
     return false;
   }
@@ -324,14 +327,14 @@ function isPrettierIgnore(/** @type {MdastNode} */ node) {
   return match ? match[1] || "next" : false;
 }
 
-/** @returns {number | undefined} */ function getNthListSiblingIndex(node, parentNode) {
+/** @returns {number | undefined} */ function getNthListSiblingIndex(/** @type {import("./utilities.js").MdastNode} */ node, /** @type {import("./utilities.js").MdastNode} */ parentNode) {
   return getNthSiblingIndex(
     node,
     parentNode,
     /** @returns {boolean} */ (siblingNode) => siblingNode.ordered === node.ordered,
   );
 
-  /** @returns {number | undefined} */ function getNthSiblingIndex(node, parentNode, /** @type {(a0?: any) => any} */ condition) {
+  /** @returns {number | undefined} */ function getNthSiblingIndex(/** @type {import("./utilities.js").MdastNode} */ node, /** @type {import("./utilities.js").MdastNode} */ parentNode, /** @type {(a0?: any) => any} */ condition) {
     let index = -1;
 
     for (const childNode of parentNode.children) {
@@ -352,12 +355,12 @@ function isPrettierIgnore(/** @type {MdastNode} */ node) {
   return path.index > 0 && isPrettierIgnore(path.previous) === "next";
 }
 
-/** @returns {boolean} */ function isSetextHeading(node) {
+/** @returns {boolean} */ function isSetextHeading(/** @type {import("./utilities.js").MdastNode} */ node) {
   const { start, end } = node.position;
   return start.line !== end.line;
 }
 
-const isNewLine = /** @returns {boolean} */ (node) => node?.type === "whitespace" && node.value === "\n";
+const isNewLine = /** @returns {boolean} */ (/** @type {import("./utilities.js").MdastNode} */ node) => node?.type === "whitespace" && node.value === "\n";
 
 export {
   getFencedCodeBlockValue,

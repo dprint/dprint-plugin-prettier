@@ -13,7 +13,7 @@ import { isJsxElement } from "./node-types.js";
  * @returns {boolean}
  */
 function hasJsxIgnoreComment(path) {
-  const { node, parent } = path;
+  /** @type {{ node: import("../types/estree.js").Node, parent: import("../types/estree.js").Node }} */ const { node, parent } = path;
   if (!isJsxElement(node) || !isJsxElement(parent)) {
     return false;
   }

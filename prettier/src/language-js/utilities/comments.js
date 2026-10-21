@@ -37,7 +37,7 @@ const getCommentTestFunction = (flags, fn) => {
     flags = 0;
   }
   if (flags || fn) {
-    return /** @returns {boolean} */ (comment, /** @type {number} */ index, /** @type {any[]} */ comments) =>
+    return /** @returns {boolean} */ (/** @type {import("../types/estree.js").Comment} */ comment, /** @type {number} */ index, /** @type {any[]} */ comments) =>
       !(
         (flags & CommentCheckFlags.Leading && !comment.leading) ||
         (flags & CommentCheckFlags.Trailing && !comment.trailing) ||
@@ -54,7 +54,7 @@ const getCommentTestFunction = (flags, fn) => {
   }
 };
 /**
- * @param {any} node
+ * @param {import("../types/estree.js").Node} node
  * @param {number | ((comment: Comment) => boolean)} [flags]
  * @param {(comment: Comment) => boolean} [fn]
  * @returns {boolean}
@@ -68,7 +68,7 @@ function hasComment(node, flags, fn) {
 }
 
 /**
- * @param {any} node
+ * @param {import("../types/estree.js").Node} node
  * @param {number | ((comment: Comment) => boolean)} [flags]
  * @param {(comment: Comment) => boolean} [fn]
  * @returns {Comment[]}

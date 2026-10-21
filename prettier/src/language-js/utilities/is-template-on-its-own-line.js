@@ -17,7 +17,7 @@ import { templateLiteralHasNewLines } from "./template-literal-has-new-lines.js"
 */
 
 /**
- * @param {any} node
+ * @param {import("../types/estree.js").Node} node
  * @param {string} text
  * @returns {boolean}
  */

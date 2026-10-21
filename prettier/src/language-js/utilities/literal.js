@@ -26,7 +26,7 @@ function isBigIntLiteral(node) {
 }
 
 /**
- * @param {any} node
+ * @param {import("../types/estree.js").Node} node
  * @returns {node is BooleanLiteral}
  */
 function isBooleanLiteral(node) {
@@ -37,7 +37,7 @@ function isBooleanLiteral(node) {
 }
 
 /**
- * @param {any} node
+ * @param {import("../types/estree.js").Node} node
  * @returns {node is NumericLiteral}
  */
 function isNumericLiteral(node) {
@@ -49,9 +49,9 @@ function isNumericLiteral(node) {
 
 /**
  * @param {Node} node
- * @returns {node is RegExpLiteral}
+ * @returns {boolean}
  */
-/** @returns {boolean} */ function isRegExpLiteral(node) {
+function isRegExpLiteral(node) {
   return (
     node.type === "RegExpLiteral" ||
     (node.type === "Literal" &&
@@ -61,7 +61,7 @@ function isNumericLiteral(node) {
 }
 
 /**
- * @param {any} node
+ * @param {import("../types/estree.js").Node} node
  * @returns {node is StringLiteral}
  */
 function isStringLiteral(node) {

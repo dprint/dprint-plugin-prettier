@@ -8,7 +8,7 @@ import { printBinaryishExpression } from "./binaryish.js";
 /** @import AstPath from "../../common/ast-path.js" */
 
 function printAngular(/** @type {AstPath} */ path, options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
 
   // Angular nodes always starts with `NG`
   if (!node.type.startsWith("NG")) {
@@ -50,7 +50,7 @@ function printAngular(/** @type {AstPath} */ path, options, /** @type {import(".
         node.alias === null ? "" : [" as ", print("alias")],
       ];
     case "NGMicrosyntaxKeyedExpression": {
-      const { index, parent } = path;
+      /** @type {{ index: any, parent: import("../types/estree.js").Node }} */ const { index, parent } = path;
       // https://github.com/prettier/angular-estree-parser/issues/267
       /** @type {boolean} */ const shouldNotPrintColon =
         isNgForOf(path) ||
@@ -94,7 +94,7 @@ function printAngular(/** @type {AstPath} */ path, options, /** @type {import(".
 }
 
 /** @returns {boolean} */ function isNgForOfTrack(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path) {
-  const { node } = path;
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   return (
     path.parent.body[1].key.name === "of" &&
     node.type === "NGMicrosyntaxKeyedExpression" &&

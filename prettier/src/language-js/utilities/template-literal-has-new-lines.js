@@ -13,7 +13,7 @@
 */
 
 /**
- * @param {any} template
+ * @param {import("../types/estree.js").Node} template
  * @returns {boolean}
  */
 function templateLiteralHasNewLines(template) {
