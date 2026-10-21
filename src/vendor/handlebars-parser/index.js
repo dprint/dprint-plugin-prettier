@@ -2598,7 +2598,7 @@ function hashLiteralNode(hash, loc) {
 		loc
 	};
 }
-function parse(input, options) {
+/** @returns {import("glimmer-ast-types").GlimmerNode} */ function parse(/** @type {string} */ input, options) {
 	let ast = parseWithoutProcessing(input, options);
 	return new WhitespaceControl(options).accept(ast);
 }

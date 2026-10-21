@@ -80,7 +80,7 @@ export class Lexer {
     }
     return 'U+' + code.toString(16).toUpperCase().padStart(4, '0');
 }
-/** @returns {Token} */ export function createToken(/** @type {Lexer} */ lexer, /** @type {string | undefined} */ kind, start, end, /** @type {string | undefined} */ value) {
+/** @returns {Token} */ export function createToken(/** @type {Lexer} */ lexer, /** @type {string | undefined} */ kind, /** @type {number} */ start, /** @type {number} */ end, /** @type {string | undefined} */ value) {
     /** @type {number} */ const line = lexer.line;
     /** @type {number} */ const col = 1 + start - lexer.lineStart;
     return new Token(kind, start, end, line, col, value);

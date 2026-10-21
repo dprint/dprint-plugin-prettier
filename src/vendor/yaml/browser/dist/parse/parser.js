@@ -38,7 +38,7 @@ import { Lexer } from './lexer.js';
         case 'document':
             return parent.start;
         case 'block-map': {
-            const it = parent.items[parent.items.length - 1];
+            /** @type {import("yaml-cst-types").CollectionItem | undefined} */ const it = parent.items[parent.items.length - 1];
             return it.sep ?? it.start;
         }
         case 'block-seq':
@@ -76,7 +76,7 @@ function arrayPushArray(/** @type {any[]} */ target, /** @type {any[]} */ source
         for (let i = 0; i < source.length; ++i)
             target.push(source[i]);
 }
-function fixFlowSeqItems(fc) {
+function fixFlowSeqItems(/** @type {import("yaml-cst-types").Token} */ fc) {
     if (fc.start.type === 'flow-seq-start') {
         for (const it of fc.items) {
             if (it.sep &&
@@ -133,21 +133,21 @@ class Parser {
      */
     constructor(onNewLine) {
         /** If true, space and sequence indicators count as indentation */
-        this.atNewLine = true;
+        /** @type {boolean} */ this.atNewLine = true;
         /** If true, next token is a scalar value */
-        this.atScalar = false;
+        /** @type {boolean} */ this.atScalar = false;
         /** Current indentation level */
-        this.indent = 0;
+        /** @type {number} */ this.indent = 0;
         /** Current offset since the start of parsing */
-        this.offset = 0;
+        /** @type {number} */ this.offset = 0;
         /** On the same line with a block map key */
-        this.onKeyLine = false;
+        /** @type {boolean} */ this.onKeyLine = false;
         /** Top indicates the node that's currently being built */
         this.stack = [];
         /** The source of the current token, set in parse() */
         this.source = '';
         /** The type of the current token, set in parse() */
-        this.type = '';
+        /** @type {string} */ this.type = '';
         // Must be defined after `next()`
         this.lexer = new Lexer();
         this.onNewLine = onNewLine;
@@ -160,7 +160,7 @@ class Parser {
      *
      * @returns A generator of tokens representing each directive, document, and other structure.
      */
-    *parse(source, incomplete = false) {
+    *parse(/** @type {string} */ source, /** @type {undefined | boolean} */ incomplete = false) {
         if (this.onNewLine && this.offset === 0)
             this.onNewLine(0);
         for (const lexeme of this.lexer.lex(source, incomplete))
@@ -269,10 +269,10 @@ class Parser {
         /* istanbul ignore next should not happen */
         yield* this.pop();
     }
-    peek(n) {
+    /** @returns {import("yaml-cst-types").Token | undefined} */ peek(/** @type {number} */ n) {
         return this.stack[this.stack.length - n];
     }
-    *pop(error) {
+    *pop(/** @type {import("yaml-cst-types").Token | undefined} */ error) {
         const token = error ?? this.stack.pop();
         /* istanbul ignore if should not happen */
         if (!token) {
@@ -302,7 +302,7 @@ class Parser {
                     top.props.push(token); // error
                     break;
                 case 'block-map': {
-                    const it = top.items[top.items.length - 1];
+                    /** @type {import("yaml-cst-types").CollectionItem | undefined} */ const it = top.items[top.items.length - 1];
                     if (it.value) {
                         top.items.push({ start: [], key: token, sep: [] });
                         this.onKeyLine = true;
@@ -319,7 +319,7 @@ class Parser {
                     break;
                 }
                 case 'block-seq': {
-                    const it = top.items[top.items.length - 1];
+                    /** @type {import("yaml-cst-types").CollectionItem | undefined} */ const it = top.items[top.items.length - 1];
                     if (it.value)
                         top.items.push({ start: [], value: token });
                     else
@@ -327,7 +327,7 @@ class Parser {
                     break;
                 }
                 case 'flow-collection': {
-                    const it = top.items[top.items.length - 1];
+                    /** @type {import("yaml-cst-types").CollectionItem | undefined} */ const it = top.items[top.items.length - 1];
                     if (!it || it.value)
                         top.items.push({ start: [], key: token, sep: [] });
                     else if (it.sep)
@@ -345,7 +345,7 @@ class Parser {
                 top.type === 'block-map' ||
                 top.type === 'block-seq') &&
                 (token.type === 'block-map' || token.type === 'block-seq')) {
-                const last = token.items[token.items.length - 1];
+                /** @type {import("yaml-cst-types").CollectionItem | undefined} */ const last = token.items[token.items.length - 1];
                 if (last &&
                     !last.sep &&
                     !last.value &&
@@ -393,7 +393,7 @@ class Parser {
             source: this.source
         };
     }
-    *document(doc) {
+    *document(/** @type {import("yaml-cst-types").Token} */ doc) {
         if (doc.value)
             return yield* this.lineEnd(doc);
         switch (this.type) {
@@ -426,7 +426,7 @@ class Parser {
             };
         }
     }
-    *scalar(scalar) {
+    *scalar(/** @type {import("yaml-cst-types").Token} */ scalar) {
         if (this.type === 'map-value-ind') {
             const prev = getPrevProps(this.peek(2));
             const start = getFirstKeyStartProps(prev);
@@ -450,7 +450,7 @@ class Parser {
         else
             yield* this.lineEnd(scalar);
     }
-    *blockScalar(scalar) {
+    *blockScalar(/** @type {import("yaml-cst-types").Token} */ scalar) {
         switch (this.type) {
             case 'space':
             case 'comment':
@@ -477,15 +477,15 @@ class Parser {
                 yield* this.step();
         }
     }
-    *blockMap(map) {
-        const it = map.items[map.items.length - 1];
+    *blockMap(/** @type {import("yaml-cst-types").Token} */ map) {
+        /** @type {import("yaml-cst-types").CollectionItem | undefined} */ const it = map.items[map.items.length - 1];
         // it.sep is true-ish if pair already has key or : separator
         switch (this.type) {
             case 'newline':
                 this.onKeyLine = false;
                 if (it.value) {
                     const end = 'end' in it.value ? it.value.end : undefined;
-                    const last = Array.isArray(end) ? end[end.length - 1] : undefined;
+                    /** @type {import("yaml-cst-types").Token | undefined} */ const last = Array.isArray(end) ? end[end.length - 1] : undefined;
                     if (last?.type === 'comment')
                         end?.push(this.sourceToken);
                     else
@@ -508,7 +508,7 @@ class Parser {
                 }
                 else {
                     if (this.atIndentedComment(it.start, map.indent)) {
-                        const prev = map.items[map.items.length - 2];
+                        /** @type {import("yaml-cst-types").CollectionItem | undefined} */ const prev = map.items[map.items.length - 2];
                         const end = prev?.value?.end;
                         if (Array.isArray(end)) {
                             arrayPushArray(end, it.start);
@@ -531,7 +531,7 @@ class Parser {
             if (atNextItem && it.sep && !it.value) {
                 const nl = [];
                 for (let i = 0; i < it.sep.length; ++i) {
-                    const st = it.sep[i];
+                    /** @type {import("yaml-cst-types").Token} */ const st = it.sep[i];
                     switch (st.type) {
                         case 'newline':
                             nl.push(i);
@@ -702,13 +702,13 @@ class Parser {
         yield* this.pop();
         yield* this.step();
     }
-    *blockSequence(seq) {
-        const it = seq.items[seq.items.length - 1];
+    *blockSequence(/** @type {import("yaml-cst-types").Token} */ seq) {
+        /** @type {import("yaml-cst-types").CollectionItem | undefined} */ const it = seq.items[seq.items.length - 1];
         switch (this.type) {
             case 'newline':
                 if (it.value) {
                     const end = 'end' in it.value ? it.value.end : undefined;
-                    const last = Array.isArray(end) ? end[end.length - 1] : undefined;
+                    /** @type {import("yaml-cst-types").Token | undefined} */ const last = Array.isArray(end) ? end[end.length - 1] : undefined;
                     if (last?.type === 'comment')
                         end?.push(this.sourceToken);
                     else
@@ -723,7 +723,7 @@ class Parser {
                     seq.items.push({ start: [this.sourceToken] });
                 else {
                     if (this.atIndentedComment(it.start, seq.indent)) {
-                        const prev = seq.items[seq.items.length - 2];
+                        /** @type {import("yaml-cst-types").CollectionItem | undefined} */ const prev = seq.items[seq.items.length - 2];
                         const end = prev?.value?.end;
                         if (Array.isArray(end)) {
                             arrayPushArray(end, it.start);
@@ -760,8 +760,8 @@ class Parser {
         yield* this.pop();
         yield* this.step();
     }
-    *flowCollection(fc) {
-        const it = fc.items[fc.items.length - 1];
+    *flowCollection(/** @type {import("yaml-cst-types").Token} */ fc) {
+        /** @type {import("yaml-cst-types").CollectionItem | undefined} */ const it = fc.items[fc.items.length - 1];
         if (this.type === 'flow-error-end') {
             let top;
             do {
@@ -870,7 +870,7 @@ class Parser {
             source: this.source
         };
     }
-    startBlockValue(parent) {
+    startBlockValue(/** @type {import("yaml-cst-types").Token} */ parent) {
         switch (this.type) {
             case 'alias':
             case 'scalar':
@@ -935,7 +935,7 @@ class Parser {
             return false;
         return start.every(/** @returns {boolean} */ st => st.type === 'newline' || st.type === 'space');
     }
-    *documentEnd(docEnd) {
+    *documentEnd(/** @type {import("yaml-cst-types").Token} */ docEnd) {
         if (this.type !== 'doc-mode') {
             if (docEnd.end)
                 docEnd.end.push(this.sourceToken);
@@ -945,7 +945,7 @@ class Parser {
                 yield* this.pop();
         }
     }
-    *lineEnd(token) {
+    *lineEnd(/** @type {import("yaml-cst-types").Token} */ token) {
         switch (this.type) {
             case 'comma':
             case 'doc-start':

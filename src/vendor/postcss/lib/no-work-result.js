@@ -57,7 +57,7 @@ class NoWorkResult {
     return 'NoWorkResult'
   }
 
-  constructor(processor, css, opts) {
+  constructor(processor, /** @type {string} */ css, opts) {
     css = css.toString()
     this.stringified = false
 
@@ -124,7 +124,7 @@ class NoWorkResult {
     return this.async().then(onFulfilled, onRejected)
   }
 
-  toString() {
+  /** @returns {string} */ toString() {
     return this._css
   }
 

@@ -6,7 +6,7 @@ import { visit } from '../visit.js';
  *
  * Will throw on errors.
  */
-function anchorIsValid(anchor) {
+/** @returns {boolean} */ function anchorIsValid(/** @type {string} */ anchor) {
     if (/[\x00-\x19\s,[\]{}]/.test(anchor)) {
         const sa = JSON.stringify(anchor);
         const msg = `Anchor must not contain whitespace or control characters: ${sa}`;
@@ -25,14 +25,14 @@ function anchorNames(root) {
     return anchors;
 }
 /** Find a new anchor name with the given `prefix` and a one-indexed suffix. */
-function findNewAnchor(prefix, exclude) {
+/** @returns {string} */ function findNewAnchor(/** @type {string} */ prefix, exclude) {
     for (let i = 1; true; ++i) {
         const name = `${prefix}${i}`;
         if (!exclude.has(name))
             return name;
     }
 }
-function createNodeAnchors(doc, prefix) {
+function createNodeAnchors(doc, /** @type {string} */ prefix) {
     const aliasObjects = [];
     const sourceObjects = new Map();
     let prevAnchors = null;

@@ -7,7 +7,7 @@ class NodeBase {
         Object.defineProperty(this, NODE_TYPE, { value: type });
     }
     /** Create a copy of this node.  */
-    clone() {
+    /** @returns {NodeBase} */ clone() {
         const copy = Object.create(Object.getPrototypeOf(this), Object.getOwnPropertyDescriptors(this));
         if (this.range)
             copy.range = this.range.slice();

@@ -2,7 +2,7 @@ import { isNode } from '../nodes/identity.js';
 import { createStringifyContext, stringify } from './stringify.js';
 import { indentComment, lineComment } from './stringifyComment.js';
 
-function stringifyDocument(doc, options) {
+/** @returns {string} */ function stringifyDocument(doc, options) {
     const lines = [];
     let hasDirectives = options.directives === true;
     if (options.directives !== false && doc.directives) {

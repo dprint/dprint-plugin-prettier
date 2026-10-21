@@ -892,7 +892,7 @@ var Tokenizer = /** @class */ (function () {
     return Tokenizer;
 }());
 
-function tokenize(input, options) {
+function tokenize(/** @type {string} */ input, options) {
     var tokenizer = new Tokenizer(new EntityParser(namedCharRefs), options);
     return tokenizer.tokenize(input);
 }

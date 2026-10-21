@@ -8,7 +8,7 @@ const lexer_ts_1 = require("./lexer.js");
 const tokenKind_ts_1 = require("./tokenKind.js");
 class SchemaCoordinateLexer {
     constructor(/** @type {import("./source.mjs").Source} */ source) {
-        this.line = 1;
+        /** @type {number} */ this.line = 1;
         /** @type {number} */ this.lineStart = 0;
         const startOfFileToken = new ast_ts_1.Token(tokenKind_ts_1.TokenKind.SOF, 0, 0, 0, 0);
         /** @type {import("./source.mjs").Source} */ this.source = source;

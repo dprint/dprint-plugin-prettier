@@ -3,7 +3,7 @@ import { resolveFlowScalar } from '../compose/resolve-flow-scalar.js';
 import { YAMLParseError } from '../errors.js';
 import { stringifyString } from '../stringify/stringifyString.js';
 
-function resolveAsScalar(token, strict = true, onError) {
+function resolveAsScalar(token, /** @type {undefined | boolean} */ strict = true, onError) {
     if (token) {
         const _onError = (pos, code, message) => {
             const offset = typeof pos === 'number' ? pos : Array.isArray(pos) ? pos[0] : pos.offset;
@@ -37,7 +37,7 @@ function resolveAsScalar(token, strict = true, onError) {
  * @param context.offset The offset position of the token.
  * @param context.type The preferred type of the scalar token. If undefined, the previous type of the `token` will be used, defaulting to `'PLAIN'`.
  */
-function createScalarToken(value, context) {
+function createScalarToken(/** @type {string} */ value, context) {
     const { implicitKey = false, indent, inFlow = false, offset = -1, type = 'PLAIN' } = context;
     const source = stringifyString({ type, value }, {
         implicitKey,
@@ -85,7 +85,7 @@ function createScalarToken(value, context) {
  * @param context.inFlow Being within a flow collection may affect the resolved type of the token's value.
  * @param context.type The preferred type of the scalar token. If undefined, the previous type of the `token` will be used, defaulting to `'PLAIN'`.
  */
-function setScalarValue(token, value, context = {}) {
+function setScalarValue(token, /** @type {string} */ value, context = {}) {
     let { afterKey = false, implicitKey = false, inFlow = false, type } = context;
     let indent = 'indent' in token ? token.indent : null;
     if (afterKey && typeof indent === 'number')

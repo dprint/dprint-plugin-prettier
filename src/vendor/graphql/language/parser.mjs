@@ -8,7 +8,7 @@ import { isPunctuatorTokenKind, Lexer } from "./lexer.mjs";
 import { SchemaCoordinateLexer } from "./schemaCoordinateLexer.mjs";
 import { isSource, Source } from "./source.mjs";
 import { TokenKind } from "./tokenKind.mjs";
-export function parse(/** @type {string | undefined} */ source, options) {
+/** @returns {import("graphql-ast-types").GraphqlAstNode} */ export function parse(/** @type {string | undefined} */ source, options) {
     return shouldTrace(parseChannel)
         ? parseChannel.traceSync(() => parseImpl(source, options), { source })
         : parseImpl(source, options);
@@ -22,28 +22,28 @@ function parseImpl(/** @type {string} */ source, options) {
     });
     return document;
 }
-export function parseValue(source, options) {
+/** @returns {import("graphql-ast-types").GraphqlAstNode} */ export function parseValue(source, options) {
     const parser = new Parser(source, options);
     parser.expectToken(TokenKind.SOF);
     const value = parser.parseValueLiteral(false);
     parser.expectToken(TokenKind.EOF);
     return value;
 }
-export function parseConstValue(source, options) {
+/** @returns {import("graphql-ast-types").GraphqlAstNode} */ export function parseConstValue(source, options) {
     const parser = new Parser(source, options);
     parser.expectToken(TokenKind.SOF);
     const value = parser.parseConstValueLiteral();
     parser.expectToken(TokenKind.EOF);
     return value;
 }
-export function parseType(source, options) {
+/** @returns {import("graphql-ast-types").GraphqlAstNode} */ export function parseType(source, options) {
     const parser = new Parser(source, options);
     parser.expectToken(TokenKind.SOF);
     const type = parser.parseTypeReference();
     parser.expectToken(TokenKind.EOF);
     return type;
 }
-export function parseSchemaCoordinate(source) {
+/** @returns {import("graphql-ast-types").GraphqlAstNode} */ export function parseSchemaCoordinate(source) {
     const sourceObj = isSource(source) ? source : new Source(source);
     const lexer = new SchemaCoordinateLexer(sourceObj);
     const parser = new Parser(source, { lexer });
@@ -68,20 +68,20 @@ export class Parser {
     /** @returns {number} */ get tokenCount() {
         return this._tokenCounter;
     }
-    parseName() {
+    /** @returns {import("graphql-ast-types").GraphqlAstNode} */ parseName() {
         /** @type {import("./ast.mjs").Token} */ const token = this.expectToken(TokenKind.NAME);
         return this.node(token, {
             kind: Kind.NAME,
             value: token.value,
         });
     }
-    parseDocument() {
+    /** @returns {import("graphql-ast-types").GraphqlAstNode} */ parseDocument() {
         return this.node(this._lexer.token, {
             kind: Kind.DOCUMENT,
             definitions: this.many(TokenKind.SOF, this.parseDefinition, TokenKind.EOF),
         });
     }
-    parseDefinition() {
+    /** @returns {import("graphql-ast-types").GraphqlAstNode} */ parseDefinition() {
         if (this.peek(TokenKind.BRACE_L)) {
             return this.parseOperationDefinition();
         }
@@ -129,7 +129,7 @@ export class Parser {
         }
         throw this.unexpected(keywordToken);
     }
-    parseOperationDefinition() {
+    /** @returns {import("graphql-ast-types").GraphqlAstNode} */ parseOperationDefinition() {
         /** @type {import("./ast.mjs").Token} */ const start = this._lexer.token;
         if (this.peek(TokenKind.BRACE_L)) {
             return this.node(start, {
@@ -173,7 +173,7 @@ export class Parser {
     /** @returns {any[] | undefined} */ parseVariableDefinitions() {
         return this.optionalMany(TokenKind.PAREN_L, this.parseVariableDefinition, TokenKind.PAREN_R);
     }
-    parseVariableDefinition() {
+    /** @returns {import("graphql-ast-types").GraphqlAstNode} */ parseVariableDefinition() {
         return this.node(this._lexer.token, {
             kind: Kind.VARIABLE_DEFINITION,
             description: this.parseDescription(),
@@ -185,7 +185,7 @@ export class Parser {
             directives: this.parseConstDirectives(),
         });
     }
-    parseVariable() {
+    /** @returns {import("graphql-ast-types").GraphqlAstNode} */ parseVariable() {
         /** @type {import("./ast.mjs").Token} */ const start = this._lexer.token;
         this.expectToken(TokenKind.DOLLAR);
         return this.node(start, {
@@ -193,18 +193,18 @@ export class Parser {
             name: this.parseName(),
         });
     }
-    parseSelectionSet() {
+    /** @returns {import("graphql-ast-types").GraphqlAstNode} */ parseSelectionSet() {
         return this.node(this._lexer.token, {
             kind: Kind.SELECTION_SET,
             selections: this.many(TokenKind.BRACE_L, this.parseSelection, TokenKind.BRACE_R),
         });
     }
-    parseSelection() {
+    /** @returns {import("graphql-ast-types").GraphqlAstNode} */ parseSelection() {
         return this.peek(TokenKind.SPREAD)
             ? this.parseFragment()
             : this.parseField();
     }
-    parseField() {
+    /** @returns {import("graphql-ast-types").GraphqlAstNode} */ parseField() {
         /** @type {import("./ast.mjs").Token} */ const start = this._lexer.token;
         const nameOrAlias = this.parseName();
         let alias;
@@ -245,10 +245,10 @@ export class Parser {
             value: this.parseValueLiteral(isConst),
         });
     }
-    parseConstArgument() {
+    /** @returns {import("graphql-ast-types").GraphqlAstNode} */ parseConstArgument() {
         return this.parseArgument(true);
     }
-    parseFragmentArgument() {
+    /** @returns {import("graphql-ast-types").GraphqlAstNode} */ parseFragmentArgument() {
         /** @type {import("./ast.mjs").Token} */ const start = this._lexer.token;
         const name = this.parseName();
         this.expectToken(TokenKind.COLON);
@@ -258,7 +258,7 @@ export class Parser {
             value: this.parseValueLiteral(false),
         });
     }
-    parseFragment() {
+    /** @returns {import("graphql-ast-types").GraphqlAstNode} */ parseFragment() {
         /** @type {import("./ast.mjs").Token} */ const start = this._lexer.token;
         this.expectToken(TokenKind.SPREAD);
         /** @type {boolean} */ const hasTypeCondition = this.expectOptionalKeyword('on');
@@ -286,7 +286,7 @@ export class Parser {
             selectionSet: this.parseSelectionSet(),
         });
     }
-    parseFragmentDefinition() {
+    /** @returns {import("graphql-ast-types").GraphqlAstNode} */ parseFragmentDefinition() {
         /** @type {import("./ast.mjs").Token} */ const start = this._lexer.token;
         const description = this.parseDescription();
         this.expectKeyword('fragment');
@@ -310,13 +310,13 @@ export class Parser {
             selectionSet: this.parseSelectionSet(),
         });
     }
-    parseFragmentName() {
+    /** @returns {import("graphql-ast-types").GraphqlAstNode} */ parseFragmentName() {
         if (this._lexer.token.value === 'on') {
             throw this.unexpected();
         }
         return this.parseName();
     }
-    parseValueLiteral(/** @type {boolean} */ isConst) {
+    /** @returns {import("graphql-ast-types").GraphqlAstNode} */ parseValueLiteral(/** @type {boolean} */ isConst) {
         /** @type {import("./ast.mjs").Token} */ const token = this._lexer.token;
         switch (token.kind) {
             case TokenKind.BRACKET_L:
@@ -375,10 +375,10 @@ export class Parser {
                 throw this.unexpected();
         }
     }
-    parseConstValueLiteral() {
+    /** @returns {import("graphql-ast-types").GraphqlAstNode} */ parseConstValueLiteral() {
         return this.parseValueLiteral(true);
     }
-    parseStringLiteral() {
+    /** @returns {import("graphql-ast-types").GraphqlAstNode} */ parseStringLiteral() {
         /** @type {import("./ast.mjs").Token} */ const token = this._lexer.token;
         this.advanceLexer();
         return this.node(token, {
@@ -387,21 +387,21 @@ export class Parser {
             block: token.kind === TokenKind.BLOCK_STRING,
         });
     }
-    parseList(/** @type {boolean} */ isConst) {
+    /** @returns {import("graphql-ast-types").GraphqlAstNode} */ parseList(/** @type {boolean} */ isConst) {
         const item = () => this.parseValueLiteral(isConst);
         return this.node(this._lexer.token, {
             kind: Kind.LIST,
             values: this.any(TokenKind.BRACKET_L, item, TokenKind.BRACKET_R),
         });
     }
-    parseObject(/** @type {boolean} */ isConst) {
+    /** @returns {import("graphql-ast-types").GraphqlAstNode} */ parseObject(/** @type {boolean} */ isConst) {
         const item = () => this.parseObjectField(isConst);
         return this.node(this._lexer.token, {
             kind: Kind.OBJECT,
             fields: this.any(TokenKind.BRACE_L, item, TokenKind.BRACE_R),
         });
     }
-    parseObjectField(/** @type {boolean} */ isConst) {
+    /** @returns {import("graphql-ast-types").GraphqlAstNode} */ parseObjectField(/** @type {boolean} */ isConst) {
         /** @type {import("./ast.mjs").Token} */ const start = this._lexer.token;
         const name = this.parseName();
         this.expectToken(TokenKind.COLON);
@@ -424,7 +424,7 @@ export class Parser {
     /** @returns {any[] | undefined} */ parseConstDirectives() {
         return this.parseDirectives(true);
     }
-    parseDirective(/** @type {boolean} */ isConst) {
+    /** @returns {import("graphql-ast-types").GraphqlAstNode} */ parseDirective(/** @type {boolean} */ isConst) {
         /** @type {import("./ast.mjs").Token} */ const start = this._lexer.token;
         this.expectToken(TokenKind.AT);
         return this.node(start, {
@@ -433,7 +433,7 @@ export class Parser {
             arguments: this.parseArguments(isConst),
         });
     }
-    parseTypeReference() {
+    /** @returns {import("graphql-ast-types").GraphqlAstNode} */ parseTypeReference() {
         /** @type {import("./ast.mjs").Token} */ const start = this._lexer.token;
         let type;
         if (this.expectOptionalToken(TokenKind.BRACKET_L)) {
@@ -455,7 +455,7 @@ export class Parser {
         }
         return type;
     }
-    parseNamedType() {
+    /** @returns {import("graphql-ast-types").GraphqlAstNode} */ parseNamedType() {
         return this.node(this._lexer.token, {
             kind: Kind.NAMED_TYPE,
             name: this.parseName(),
@@ -464,12 +464,12 @@ export class Parser {
     /** @returns {boolean} */ peekDescription() {
         return this.peek(TokenKind.STRING) || this.peek(TokenKind.BLOCK_STRING);
     }
-    parseDescription() {
+    /** @returns {undefined | import("graphql-ast-types").GraphqlAstNode} */ parseDescription() {
         if (this.peekDescription()) {
             return this.parseStringLiteral();
         }
     }
-    parseSchemaDefinition() {
+    /** @returns {import("graphql-ast-types").GraphqlAstNode} */ parseSchemaDefinition() {
         /** @type {import("./ast.mjs").Token} */ const start = this._lexer.token;
         const description = this.parseDescription();
         this.expectKeyword('schema');
@@ -482,7 +482,7 @@ export class Parser {
             operationTypes,
         });
     }
-    parseOperationTypeDefinition() {
+    /** @returns {import("graphql-ast-types").GraphqlAstNode} */ parseOperationTypeDefinition() {
         /** @type {import("./ast.mjs").Token} */ const start = this._lexer.token;
         /** @type {string} */ const operation = this.parseOperationType();
         this.expectToken(TokenKind.COLON);
@@ -493,7 +493,7 @@ export class Parser {
             type,
         });
     }
-    parseScalarTypeDefinition() {
+    /** @returns {import("graphql-ast-types").GraphqlAstNode} */ parseScalarTypeDefinition() {
         /** @type {import("./ast.mjs").Token} */ const start = this._lexer.token;
         const description = this.parseDescription();
         this.expectKeyword('scalar');
@@ -506,7 +506,7 @@ export class Parser {
             directives,
         });
     }
-    parseObjectTypeDefinition() {
+    /** @returns {import("graphql-ast-types").GraphqlAstNode} */ parseObjectTypeDefinition() {
         /** @type {import("./ast.mjs").Token} */ const start = this._lexer.token;
         const description = this.parseDescription();
         this.expectKeyword('type');
@@ -531,7 +531,7 @@ export class Parser {
     /** @returns {any[] | undefined} */ parseFieldsDefinition() {
         return this.optionalMany(TokenKind.BRACE_L, this.parseFieldDefinition, TokenKind.BRACE_R);
     }
-    parseFieldDefinition() {
+    /** @returns {import("graphql-ast-types").GraphqlAstNode} */ parseFieldDefinition() {
         /** @type {import("./ast.mjs").Token} */ const start = this._lexer.token;
         const description = this.parseDescription();
         const name = this.parseName();
@@ -551,7 +551,7 @@ export class Parser {
     /** @returns {any[] | undefined} */ parseArgumentDefs() {
         return this.optionalMany(TokenKind.PAREN_L, this.parseInputValueDef, TokenKind.PAREN_R);
     }
-    parseInputValueDef() {
+    /** @returns {import("graphql-ast-types").GraphqlAstNode} */ parseInputValueDef() {
         /** @type {import("./ast.mjs").Token} */ const start = this._lexer.token;
         const description = this.parseDescription();
         const name = this.parseName();
@@ -571,7 +571,7 @@ export class Parser {
             directives,
         });
     }
-    parseInterfaceTypeDefinition() {
+    /** @returns {import("graphql-ast-types").GraphqlAstNode} */ parseInterfaceTypeDefinition() {
         /** @type {import("./ast.mjs").Token} */ const start = this._lexer.token;
         const description = this.parseDescription();
         this.expectKeyword('interface');
@@ -588,7 +588,7 @@ export class Parser {
             fields,
         });
     }
-    parseUnionTypeDefinition() {
+    /** @returns {import("graphql-ast-types").GraphqlAstNode} */ parseUnionTypeDefinition() {
         /** @type {import("./ast.mjs").Token} */ const start = this._lexer.token;
         const description = this.parseDescription();
         this.expectKeyword('union');
@@ -608,7 +608,7 @@ export class Parser {
             ? this.delimitedMany(TokenKind.PIPE, this.parseNamedType)
             : undefined;
     }
-    parseEnumTypeDefinition() {
+    /** @returns {import("graphql-ast-types").GraphqlAstNode} */ parseEnumTypeDefinition() {
         /** @type {import("./ast.mjs").Token} */ const start = this._lexer.token;
         const description = this.parseDescription();
         this.expectKeyword('enum');
@@ -626,7 +626,7 @@ export class Parser {
     /** @returns {any[] | undefined} */ parseEnumValuesDefinition() {
         return this.optionalMany(TokenKind.BRACE_L, this.parseEnumValueDefinition, TokenKind.BRACE_R);
     }
-    parseEnumValueDefinition() {
+    /** @returns {import("graphql-ast-types").GraphqlAstNode} */ parseEnumValueDefinition() {
         /** @type {import("./ast.mjs").Token} */ const start = this._lexer.token;
         const description = this.parseDescription();
         const name = this.parseEnumValueName();
@@ -638,7 +638,7 @@ export class Parser {
             directives,
         });
     }
-    parseEnumValueName() {
+    /** @returns {import("graphql-ast-types").GraphqlAstNode} */ parseEnumValueName() {
         if (this._lexer.token.value === 'true' ||
             this._lexer.token.value === 'false' ||
             this._lexer.token.value === 'null') {
@@ -646,7 +646,7 @@ export class Parser {
         }
         return this.parseName();
     }
-    parseInputObjectTypeDefinition() {
+    /** @returns {import("graphql-ast-types").GraphqlAstNode} */ parseInputObjectTypeDefinition() {
         /** @type {import("./ast.mjs").Token} */ const start = this._lexer.token;
         const description = this.parseDescription();
         this.expectKeyword('input');
@@ -664,7 +664,7 @@ export class Parser {
     /** @returns {any[] | undefined} */ parseInputFieldsDefinition() {
         return this.optionalMany(TokenKind.BRACE_L, this.parseInputValueDef, TokenKind.BRACE_R);
     }
-    parseTypeSystemExtension() {
+    /** @returns {import("graphql-ast-types").GraphqlAstNode} */ parseTypeSystemExtension() {
         /** @type {import("./ast.mjs").Token} */ const keywordToken = this._lexer.lookahead();
         if (keywordToken.kind === TokenKind.NAME) {
             switch (keywordToken.value) {
@@ -688,7 +688,7 @@ export class Parser {
         }
         throw this.unexpected(keywordToken);
     }
-    parseSchemaExtension() {
+    /** @returns {import("graphql-ast-types").GraphqlAstNode} */ parseSchemaExtension() {
         /** @type {import("./ast.mjs").Token} */ const start = this._lexer.token;
         this.expectKeyword('extend');
         this.expectKeyword('schema');
@@ -703,7 +703,7 @@ export class Parser {
             operationTypes,
         });
     }
-    parseScalarTypeExtension() {
+    /** @returns {import("graphql-ast-types").GraphqlAstNode} */ parseScalarTypeExtension() {
         /** @type {import("./ast.mjs").Token} */ const start = this._lexer.token;
         this.expectKeyword('extend');
         this.expectKeyword('scalar');
@@ -718,7 +718,7 @@ export class Parser {
             directives,
         });
     }
-    parseObjectTypeExtension() {
+    /** @returns {import("graphql-ast-types").GraphqlAstNode} */ parseObjectTypeExtension() {
         /** @type {import("./ast.mjs").Token} */ const start = this._lexer.token;
         this.expectKeyword('extend');
         this.expectKeyword('type');
@@ -739,7 +739,7 @@ export class Parser {
             fields,
         });
     }
-    parseInterfaceTypeExtension() {
+    /** @returns {import("graphql-ast-types").GraphqlAstNode} */ parseInterfaceTypeExtension() {
         /** @type {import("./ast.mjs").Token} */ const start = this._lexer.token;
         this.expectKeyword('extend');
         this.expectKeyword('interface');
@@ -760,7 +760,7 @@ export class Parser {
             fields,
         });
     }
-    parseUnionTypeExtension() {
+    /** @returns {import("graphql-ast-types").GraphqlAstNode} */ parseUnionTypeExtension() {
         /** @type {import("./ast.mjs").Token} */ const start = this._lexer.token;
         this.expectKeyword('extend');
         this.expectKeyword('union');
@@ -777,7 +777,7 @@ export class Parser {
             types,
         });
     }
-    parseEnumTypeExtension() {
+    /** @returns {import("graphql-ast-types").GraphqlAstNode} */ parseEnumTypeExtension() {
         /** @type {import("./ast.mjs").Token} */ const start = this._lexer.token;
         this.expectKeyword('extend');
         this.expectKeyword('enum');
@@ -794,7 +794,7 @@ export class Parser {
             values,
         });
     }
-    parseInputObjectTypeExtension() {
+    /** @returns {import("graphql-ast-types").GraphqlAstNode} */ parseInputObjectTypeExtension() {
         /** @type {import("./ast.mjs").Token} */ const start = this._lexer.token;
         this.expectKeyword('extend');
         this.expectKeyword('input');
@@ -811,7 +811,7 @@ export class Parser {
             fields,
         });
     }
-    parseDirectiveExtension() {
+    /** @returns {import("graphql-ast-types").GraphqlAstNode} */ parseDirectiveExtension() {
         /** @type {import("./ast.mjs").Token} */ const start = this._lexer.token;
         this.expectKeyword('extend');
         this.expectKeyword('directive');
@@ -827,7 +827,7 @@ export class Parser {
             directives,
         });
     }
-    parseDirectiveDefinition() {
+    /** @returns {import("graphql-ast-types").GraphqlAstNode} */ parseDirectiveDefinition() {
         /** @type {import("./ast.mjs").Token} */ const start = this._lexer.token;
         const description = this.parseDescription();
         this.expectKeyword('directive');
@@ -851,7 +851,7 @@ export class Parser {
     /** @returns {any[]} */ parseDirectiveLocations() {
         return this.delimitedMany(TokenKind.PIPE, this.parseDirectiveLocation);
     }
-    parseDirectiveLocation() {
+    /** @returns {import("graphql-ast-types").GraphqlAstNode} */ parseDirectiveLocation() {
         /** @type {import("./ast.mjs").Token} */ const start = this._lexer.token;
         const name = this.parseName();
         if (Object.hasOwn(DirectiveLocation, name.value)) {
@@ -859,7 +859,7 @@ export class Parser {
         }
         throw this.unexpected(start);
     }
-    parseSchemaCoordinate() {
+    /** @returns {import("graphql-ast-types").GraphqlAstNode} */ parseSchemaCoordinate() {
         /** @type {import("./ast.mjs").Token} */ const start = this._lexer.token;
         const ofDirective = this.expectOptionalToken(TokenKind.AT);
         const name = this.parseName();

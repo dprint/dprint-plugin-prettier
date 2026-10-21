@@ -27,7 +27,7 @@ import { isWhiteSpace } from "./characterClasses.mjs";
     }
     return i;
 }
-export function isPrintableAsBlockString(value) {
+/** @returns {boolean} */ export function isPrintableAsBlockString(/** @type {string} */ value) {
     if (value === '') {
         return true;
     }
@@ -78,7 +78,7 @@ export function isPrintableAsBlockString(value) {
     }
     return true;
 }
-export function printBlockString(value, options) {
+/** @returns {string} */ export function printBlockString(/** @type {string} */ value, options) {
     const escapedValue = value.replaceAll('"""', '\\"""');
     const lines = escapedValue.split(/\r\n|[\n\r]/g);
     const isSingleLine = lines.length === 1;

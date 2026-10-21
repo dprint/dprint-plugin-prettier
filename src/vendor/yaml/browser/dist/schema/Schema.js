@@ -12,7 +12,7 @@ class Schema {
             : compat
                 ? getTags(null, compat)
                 : null;
-        this.name = (typeof schema === 'string' && schema) || 'core';
+        /** @type {string} */ this.name = (typeof schema === 'string' && schema) || 'core';
         this.knownTags = resolveKnownTags ? coreKnownTags : {};
         this.tags = getTags(customTags, this.name, merge);
         this.toStringOptions = toStringDefaults ?? null;
@@ -27,7 +27,7 @@ class Schema {
                     ? sortMapEntriesByKey
                     : null;
     }
-    clone() {
+    /** @returns {Schema} */ clone() {
         const copy = Object.create(Schema.prototype, Object.getOwnPropertyDescriptors(this));
         copy.tags = this.tags.slice();
         return copy;

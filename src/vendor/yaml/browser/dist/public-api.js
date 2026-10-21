@@ -20,7 +20,7 @@ function parseOptions(options) {
  *   EmptyStream and contain additional stream information. In
  *   TypeScript, you should use `'empty' in docs` as a type guard for it.
  */
-function parseAllDocuments(source, options = {}) {
+function parseAllDocuments(/** @type {string} */ source, options = {}) {
     const { lineCounter, prettyErrors } = parseOptions(options);
     const parser = new Parser(lineCounter?.addNewLine);
     const composer = new Composer(options);
@@ -35,7 +35,7 @@ function parseAllDocuments(source, options = {}) {
     return Object.assign([], { empty: true }, composer.streamInfo());
 }
 /** Parse an input string into a single YAML.Document */
-function parseDocument(source, options = {}) {
+function parseDocument(/** @type {string} */ source, options = {}) {
     const { lineCounter, prettyErrors } = parseOptions(options);
     const parser = new Parser(lineCounter?.addNewLine);
     const composer = new Composer(options);

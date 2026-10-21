@@ -3,7 +3,7 @@ import { Scalar } from '../nodes/Scalar.js';
 import { stringify } from './stringify.js';
 import { lineComment, indentComment } from './stringifyComment.js';
 
-function stringifyPair({ key, value }, ctx, onComment, onChompKeep) {
+/** @returns {string} */ function stringifyPair({ key, value }, ctx, onComment, onChompKeep) {
     const { allNullValues, doc, indent, indentStep, options: { commentString, indentSeq, simpleKeys } } = ctx;
     let keyComment = (isNode(key) && key.comment) || null;
     if (simpleKeys) {

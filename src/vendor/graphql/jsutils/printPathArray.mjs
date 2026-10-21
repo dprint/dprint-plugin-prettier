@@ -1,4 +1,4 @@
-export function printPathArray(path) {
+/** @returns {string} */ export function printPathArray(path) {
     if (path.length === 0) {
         return '';
     }

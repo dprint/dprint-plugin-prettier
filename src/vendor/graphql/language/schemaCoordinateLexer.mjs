@@ -5,7 +5,7 @@ import { createToken, printCodePointAt, readName } from "./lexer.mjs";
 import { TokenKind } from "./tokenKind.mjs";
 export class SchemaCoordinateLexer {
     constructor(/** @type {import("./source.mjs").Source} */ source) {
-        this.line = 1;
+        /** @type {number} */ this.line = 1;
         /** @type {number} */ this.lineStart = 0;
         /** @type {Token} */ const startOfFileToken = new Token(TokenKind.SOF, 0, 0, 0, 0);
         /** @type {import("./source.mjs").Source} */ this.source = source;
@@ -15,12 +15,12 @@ export class SchemaCoordinateLexer {
     get [Symbol.toStringTag]() {
         return 'SchemaCoordinateLexer';
     }
-    advance() {
+    /** @returns {Token} */ advance() {
         this.lastToken = this.token;
         /** @type {Token} */ const token = (this.token = this.lookahead());
         return token;
     }
-    lookahead() {
+    /** @returns {Token} */ lookahead() {
         /** @type {Token} */ let token = this.token;
         if (token.kind !== TokenKind.EOF) {
             const nextToken = readNextToken(this, token.end);

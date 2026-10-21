@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.invariant = invariant;
-function invariant(condition, message) {
+function invariant(/** @type {boolean} */ condition, /** @type {undefined | string} */ message) {
     if (!condition) {
         throw new Error(message ?? 'Unexpected invariant triggered.');
     }

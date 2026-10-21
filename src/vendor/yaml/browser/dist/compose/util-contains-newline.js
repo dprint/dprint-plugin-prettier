@@ -1,5 +1,5 @@
 // @nts-check
-/** @returns {boolean | null} */ function containsNewline(key) {
+/** @returns {boolean | null} */ function containsNewline(/** @type {undefined | null | import("yaml-cst-types").Token} */ key) {
     if (!key)
         return null;
     switch (key.type) {

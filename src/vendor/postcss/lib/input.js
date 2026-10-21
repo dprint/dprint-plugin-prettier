@@ -53,7 +53,7 @@ class Input {
       this.hasBOM = false
     }
 
-    this.document = this.css
+    /** @type {string} */ this.document = this.css
     if (opts.document) this.document = opts.document.toString()
 
     if (opts.from) {
@@ -162,7 +162,7 @@ class Input {
     return result
   }
 
-  fromLineAndColumn(line, column) {
+  /** @returns {number} */ fromLineAndColumn(/** @type {number} */ line, /** @type {number} */ column) {
     /** @type {number[]} */ let lineToIndex = getLineToIndex(this)
     let index = lineToIndex[line - 1]
     return index + column - 1

@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.isSameSet = isSameSet;
-function isSameSet(setA, setB) {
+/** @returns {boolean} */ function isSameSet(setA, setB) {
     if (setA.size !== setB.size) {
         return false;
     }

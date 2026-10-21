@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.printPathArray = printPathArray;
-function printPathArray(path) {
+/** @returns {string} */ function printPathArray(path) {
     if (path.length === 0) {
         return '';
     }

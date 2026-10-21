@@ -25,7 +25,7 @@ const STRING_ARRAY = [];
   const match = matchResult?.[0];
   return match == null ? contents : contents.slice(match.length);
 }
-function parse(docblock) {
+function parse(/** @type {string} */ docblock) {
   return parseWithComments(docblock).pragmas;
 }
 function parseWithComments(/** @type {string} */ docblock) {

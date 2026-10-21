@@ -45,7 +45,7 @@ class YAMLSeq extends Collection {
      * `key` must contain a representation of an integer for this to succeed.
      * It may be wrapped in a `Scalar`.
      */
-    has(key) {
+    /** @returns {boolean} */ has(key) {
         const idx = asItemIndex(key);
         return typeof idx === 'number' && idx < this.items.length;
     }
@@ -75,7 +75,7 @@ class YAMLSeq extends Collection {
             seq.push(toJS(item, String(i++), ctx));
         return seq;
     }
-    toString(ctx, onComment, onChompKeep) {
+    /** @returns {string} */ toString(ctx, onComment, onChompKeep) {
         if (!ctx)
             return JSON.stringify(this);
         return stringifyCollection(this, ctx, {
@@ -86,7 +86,7 @@ class YAMLSeq extends Collection {
             onComment
         });
     }
-    static from(schema, obj, ctx) {
+    /** @returns {YAMLSeq} */ static from(schema, obj, ctx) {
         const { replacer } = ctx;
         const seq = new this(schema);
         if (obj && Symbol.iterator in Object(obj)) {

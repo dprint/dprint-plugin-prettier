@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.inspect = inspect;
 const MAX_ARRAY_LENGTH = 10;
 const MAX_RECURSIVE_DEPTH = 2;
-function inspect(value) {
+/** @returns {string} */ function inspect(value) {
     return formatValue(value, []);
 }
 function formatValue(value, seenValues) {

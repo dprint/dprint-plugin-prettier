@@ -1,4 +1,4 @@
-export function isIterableObject(maybeIterable) {
+/** @returns {boolean} */ export function isIterableObject(maybeIterable) {
     return (typeof maybeIterable === 'object' &&
         typeof maybeIterable?.[Symbol.iterator] === 'function');
 }

@@ -1,5 +1,5 @@
 import { naturalCompare } from "./naturalCompare.mjs";
-export function suggestionList(input, options) {
+export function suggestionList(/** @type {string} */ input, options) {
     const optionsByDistance = Object.create(null);
     const lexicalDistance = new LexicalDistance(input);
     const threshold = Math.floor(input.length * 0.4) + 1;

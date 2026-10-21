@@ -4,7 +4,7 @@ export function enableDevMode() {
     devMode = true;
     enableDevInstanceOf();
 }
-export function isDevModeEnabled() {
+/** @returns {boolean} */ export function isDevModeEnabled() {
     return devMode;
 }
 //# sourceMappingURL=devMode.js.map

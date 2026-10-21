@@ -39,7 +39,7 @@ class YAMLOMap extends YAMLSeq {
         }
         return map;
     }
-    static from(schema, iterable, ctx) {
+    /** @returns {YAMLOMap} */ static from(schema, iterable, ctx) {
         const pairs = createPairs(schema, iterable, ctx);
         const omap = new this();
         omap.items = pairs.items;

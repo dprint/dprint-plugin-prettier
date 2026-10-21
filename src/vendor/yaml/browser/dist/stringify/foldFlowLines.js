@@ -6,7 +6,7 @@ const FOLD_QUOTED = 'quoted';
  * not followed by newlines or spaces unless `mode` is `'quoted'`. Lines are
  * terminated with `\n` and started with `indent`.
  */
-function foldFlowLines(text, indent, mode = 'flow', { indentAtStart, lineWidth = 80, minContentWidth = 20, onFold, onOverflow } = {}) {
+/** @returns {string} */ function foldFlowLines(/** @type {string} */ text, /** @type {string} */ indent, /** @type {undefined | string} */ mode = 'flow', { indentAtStart, lineWidth = 80, minContentWidth = 20, onFold, onOverflow } = {}) {
     if (!lineWidth || lineWidth < 0)
         return text;
     if (lineWidth < minContentWidth)

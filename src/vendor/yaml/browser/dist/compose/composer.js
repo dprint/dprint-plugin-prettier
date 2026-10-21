@@ -127,7 +127,7 @@ class Composer {
      * @param forceDoc - If the stream contains no document, still emit a final document including any comments and directives that would be applied to a subsequent document.
      * @param endOffset - Should be set if `forceDoc` is also set, to set the document range end and to indicate errors correctly.
      */
-    *compose(tokens, forceDoc = false, endOffset = -1) {
+    *compose(tokens, /** @type {undefined | boolean} */ forceDoc = false, /** @type {undefined | number} */ endOffset = -1) {
         for (const token of tokens)
             yield* this.next(token);
         yield* this.end(forceDoc, endOffset);
@@ -199,7 +199,7 @@ class Composer {
      * @param forceDoc - If the stream contains no document, still emit a final document including any comments and directives that would be applied to a subsequent document.
      * @param endOffset - Should be set if `forceDoc` is also set, to set the document range end and to indicate errors correctly.
      */
-    *end(forceDoc = false, endOffset = -1) {
+    *end(/** @type {undefined | boolean} */ forceDoc = false, /** @type {undefined | number} */ endOffset = -1) {
         if (this.doc) {
             this.decorate(this.doc, true);
             yield this.doc;

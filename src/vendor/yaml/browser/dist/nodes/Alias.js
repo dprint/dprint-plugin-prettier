@@ -8,7 +8,7 @@ import { toJS } from './toJS.js';
 class Alias extends NodeBase {
     constructor(/** @type {string} */ source) {
         super(ALIAS);
-        this.source = source;
+        /** @type {string} */ this.source = source;
         Object.defineProperty(this, 'tag', {
             set() {
                 throw new Error('Alias nodes cannot have tags');
@@ -77,7 +77,7 @@ class Alias extends NodeBase {
         }
         return data.res;
     }
-    toString(ctx, _onComment, _onChompKeep) {
+    /** @returns {string} */ toString(ctx, _onComment, _onChompKeep) {
         const src = `*${this.source}`;
         if (ctx) {
             anchorIsValid(this.source);

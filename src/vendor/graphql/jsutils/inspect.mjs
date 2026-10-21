@@ -1,7 +1,7 @@
 // @nts-check
 const MAX_ARRAY_LENGTH = 10;
 const MAX_RECURSIVE_DEPTH = 2;
-export function inspect(value) {
+/** @returns {string} */ export function inspect(value) {
     return formatValue(value, []);
 }
 function formatValue(value, seenValues) {

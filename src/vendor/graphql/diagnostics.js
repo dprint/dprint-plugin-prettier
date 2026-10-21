@@ -25,7 +25,7 @@ exports.executeRootSelectionSetChannel = dc?.tracingChannel('graphql:execute:roo
 exports.subscribeChannel = dc?.tracingChannel('graphql:subscribe');
 exports.resolveChannel = dc?.tracingChannel('graphql:resolve');
 const SUB_CHANNEL_KEYS = ['start', 'end', 'asyncStart', 'asyncEnd', 'error'];
-function shouldTrace(channel) {
+/** @returns {boolean} */ function shouldTrace(channel) {
     if (channel == null) {
         return false;
     }

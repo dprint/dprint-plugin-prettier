@@ -3,10 +3,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.orList = orList;
 exports.andList = andList;
 const invariant_ts_1 = require("./invariant.js");
-function orList(items) {
+/** @returns {string} */ function orList(items) {
     return formatList('or', items);
 }
-function andList(items) {
+/** @returns {string} */ function andList(items) {
     return formatList('and', items);
 }
 function formatList(conjunction, items) {

@@ -2,9 +2,9 @@
 class YAMLError extends Error {
     constructor(/** @type {string} */ name, /** @type {any[]} */ pos, /** @type {string} */ code, /** @type {string} */ message) {
         super();
-        this.name = name;
-        this.code = code;
-        this.message = message;
+        /** @type {string} */ this.name = name;
+        /** @type {string} */ this.code = code;
+        /** @type {string} */ this.message = message;
         this.pos = pos;
     }
 }

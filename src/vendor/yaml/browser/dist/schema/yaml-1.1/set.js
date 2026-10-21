@@ -27,7 +27,7 @@ class YAMLSet extends YAMLMap {
      * If `keepPair` is `true`, returns the Pair matching `key`.
      * Otherwise, returns the value of that Pair's key.
      */
-    get(key, keepPair) {
+    get(key, /** @type {undefined | boolean} */ keepPair) {
         const pair = findPair(this.items, key);
         return !keepPair && isPair(pair)
             ? isScalar(pair.key)
@@ -49,7 +49,7 @@ class YAMLSet extends YAMLMap {
     toJSON(_, ctx) {
         return super.toJSON(_, ctx, Set);
     }
-    toString(ctx, onComment, onChompKeep) {
+    /** @returns {string} */ toString(ctx, onComment, onChompKeep) {
         if (!ctx)
             return JSON.stringify(this);
         if (this.hasAllNullValues(true))
@@ -57,7 +57,7 @@ class YAMLSet extends YAMLMap {
         else
             throw new Error('Set items must all have null values');
     }
-    static from(schema, iterable, ctx) {
+    /** @returns {YAMLSet} */ static from(schema, iterable, ctx) {
         const { replacer } = ctx;
         const set = new this(schema);
         if (iterable && Symbol.iterator in Object(iterable))

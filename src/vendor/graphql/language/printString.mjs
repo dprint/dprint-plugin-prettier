@@ -1,4 +1,4 @@
-export function printString(str) {
+/** @returns {string} */ export function printString(/** @type {string} */ str) {
     return `"${str.replace(escapedRegExp, escapedReplacer)}"`;
 }
 const escapedRegExp = /[\x00-\x1f\x22\x5c\x7f-\x9f]/g;

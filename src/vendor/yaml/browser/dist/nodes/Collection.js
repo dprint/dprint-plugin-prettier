@@ -45,7 +45,7 @@ class Collection extends NodeBase {
      *
      * @param schema - If defined, overwrites the original's schema
      */
-    clone(schema) {
+    /** @returns {Collection} */ clone(schema) {
         const copy = Object.create(Object.getPrototypeOf(this), Object.getOwnPropertyDescriptors(this));
         if (schema)
             copy.schema = schema;
@@ -92,7 +92,7 @@ class Collection extends NodeBase {
      * scalar values from their surrounding node; to disable set `keepScalar` to
      * `true` (collections are always returned intact).
      */
-    getIn(path, keepScalar) {
+    getIn(path, /** @type {undefined | boolean} */ keepScalar) {
         const [key, ...rest] = path;
         const node = this.get(key, true);
         if (rest.length === 0)
@@ -117,7 +117,7 @@ class Collection extends NodeBase {
     /**
      * Checks if the collection includes a value with the key `key`.
      */
-    hasIn(path) {
+    /** @returns {boolean} */ hasIn(path) {
         const [key, ...rest] = path;
         if (rest.length === 0)
             return this.has(key);

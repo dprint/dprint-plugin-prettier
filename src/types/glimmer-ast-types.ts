@@ -1,0 +1,41 @@
+// a node of the trees that glimmer's parser builds (@glimmer/syntax's ASTv1 and the Handlebars tree it is made
+// from), which it writes out as objects, some with getters: one record type for every kind, with what any kind holds
+export type GlimmerNode = {
+  type: string;
+  attributes?: any;
+  blockParams?: any;
+  body?: any;
+  chained?: any;
+  chars?: any;
+  children?: any;
+  closeStrip?: any;
+  closeTag?: any;
+  comments?: any;
+  data?: any;
+  depth?: any;
+  escaped?: any;
+  hash?: any;
+  head?: any;
+  indent?: any;
+  inverse?: any;
+  inverseStrip?: any;
+  key?: any;
+  loc?: any;
+  modifiers?: any;
+  name?: any;
+  openStrip?: any;
+  openTag?: any;
+  original?: any;
+  pairs?: any;
+  params?: any;
+  parts?: any;
+  path?: any;
+  program?: any;
+  selfClosing?: any;
+  strip?: any;
+  tag?: any;
+  tail?: any;
+  this?: any;
+  trusting?: any;
+  value?: any;
+};

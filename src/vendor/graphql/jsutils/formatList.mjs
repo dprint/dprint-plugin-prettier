@@ -1,8 +1,8 @@
 import { invariant } from "./invariant.mjs";
-export function orList(items) {
+/** @returns {string} */ export function orList(items) {
     return formatList('or', items);
 }
-export function andList(items) {
+/** @returns {string} */ export function andList(items) {
     return formatList('and', items);
 }
 function formatList(conjunction, items) {

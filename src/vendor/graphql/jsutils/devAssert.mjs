@@ -1,4 +1,4 @@
-export function devAssert(condition, message) {
+export function devAssert(/** @type {boolean} */ condition, /** @type {string} */ message) {
     if (!condition) {
         throw new Error(message);
     }

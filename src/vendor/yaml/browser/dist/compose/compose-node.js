@@ -72,7 +72,7 @@ function composeNode(ctx, token, props, onError) {
         node.srcToken = token;
     return node;
 }
-function composeEmptyNode(ctx, /** @type {number} */ offset, /** @type {any[]} */ before, pos, { spaceBefore, comment, anchor, tag, end }, onError) {
+function composeEmptyNode(ctx, /** @type {number} */ offset, /** @type {any[]} */ before, /** @type {null | number} */ pos, { spaceBefore, comment, anchor, tag, end }, onError) {
     const token = {
         type: 'scalar',
         offset: emptyScalarPosition(offset, before, pos),

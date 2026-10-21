@@ -13,7 +13,7 @@ function findTagObject(value, tagName, tags) {
     }
     return tags.find(t => t.identify?.(value) && !t.format);
 }
-function createNode(value, tagName, ctx) {
+function createNode(value, /** @type {undefined | string} */ tagName, ctx) {
     if (isDocument(value))
         value = value.contents;
     if (isNode(value))

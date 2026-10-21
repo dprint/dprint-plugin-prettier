@@ -456,7 +456,7 @@ function scanNewLine(/** @type {Parser} */ parser) {
     parser.column = 0;
     parser.line++;
 }
-function isExoticECMAScriptWhitespace(ch) {
+/** @returns {boolean} */ function isExoticECMAScriptWhitespace(/** @type {number} */ ch) {
     return (ch === 160 ||
         ch === 65279 ||
         ch === 133 ||
@@ -471,7 +471,7 @@ function isExoticECMAScriptWhitespace(ch) {
 /** @returns {number} */ function toHex(/** @type {number} */ code) {
     return code < 65 ? code - 48 : (code - 65 + 10) & 0xf;
 }
-function convertTokenType(t) {
+/** @returns {string} */ function convertTokenType(/** @type {number} */ t) {
     switch (t) {
         case 134283266:
             return 'NumericLiteral';
@@ -788,23 +788,23 @@ const errorMessages = {
     [177]: 'cannot use "await" in static blocks',
 };
 class ParseError extends SyntaxError {
-    start;
-    end;
+    /** @type {number} */ start;
+    /** @type {number} */ end;
     range;
     loc;
-    description;
+    /** @type {string} */ description;
     constructor(/** @type {MeriyahLocation} */ start, end, /** @type {number} */ type, ...params) {
         const description = errorMessages[type].replace(/%(\d+)/g, /** @returns {string} */ (/** @type {string} */ _, /** @type {string} */ i) => params[i]);
         const message = '[' + start.line + ':' + start.column + '-' + end.line + ':' + end.column + ']: ' + description;
         super(message);
-        this.start = start.index;
-        this.end = end.index;
+        /** @type {number} */ this.start = start.index;
+        /** @type {number} */ this.end = end.index;
         this.range = [start.index, end.index];
         this.loc = {
             start: { line: start.line, column: start.column },
             end: { line: end.line, column: end.column },
         };
-        this.description = description;
+        /** @type {string} */ this.description = description;
     }
 }
 const isParseError = (error) => error instanceof ParseError;
@@ -895,7 +895,7 @@ const descKeywordTable = {
     accessor: 12402,
 };
 
-/** @returns {number} */ function scanIdentifier(/** @type {Parser | undefined} */ parser, /** @type {number} */ context, isValidAsKeyword) {
+/** @returns {number} */ function scanIdentifier(/** @type {Parser | undefined} */ parser, /** @type {number} */ context, /** @type {number} */ isValidAsKeyword) {
     while (isIdPart[advanceChar(parser)])
         ;
     parser.tokenValue = parser.source.slice(parser.tokenIndex, parser.index);
@@ -1046,7 +1046,7 @@ const descKeywordTable = {
     return codePoint;
 }
 
-/** @returns {number} */ function scanNumber(/** @type {Parser} */ parser, /** @type {number} */ context, kind) {
+/** @returns {number} */ function scanNumber(/** @type {Parser} */ parser, /** @type {number} */ context, /** @type {number} */ kind) {
     let char = parser.currentChar;
     let value = 0;
     let digit = 9;
@@ -1376,7 +1376,7 @@ var RegexFlags;
     }
 }
 
-/** @returns {number | undefined} */ function scanString(/** @type {Parser | undefined} */ parser, /** @type {number} */ context, quote) {
+/** @returns {number | undefined} */ function scanString(/** @type {Parser | undefined} */ parser, /** @type {number} */ context, /** @type {number} */ quote) {
     const { index: start } = parser;
     let ret = '';
     let char = advanceChar(parser);
@@ -1415,7 +1415,7 @@ var RegexFlags;
     }
     parser.report(16);
 }
-/** @returns {number} */ function parseEscape(/** @type {Parser} */ parser, /** @type {number} */ context, /** @type {number} */ first, isTemplate = 0) {
+/** @returns {number} */ function parseEscape(/** @type {Parser} */ parser, /** @type {number} */ context, /** @type {number} */ first, /** @type {undefined | number} */ isTemplate = 0) {
     switch (first) {
         case 98:
             return 8;
@@ -2134,7 +2134,7 @@ function matchOrInsertSemicolon(/** @type {Parser} */ parser, /** @type {number}
     nextToken(parser, context);
     return true;
 }
-function consume(/** @type {Parser | undefined} */ parser, /** @type {number} */ context, t) {
+function consume(/** @type {Parser | undefined} */ parser, /** @type {number} */ context, /** @type {number} */ t) {
     if (parser.getToken() !== t)
         parser.report(25, KeywordDescTable[t & 255]);
     nextToken(parser, context);
@@ -2221,7 +2221,7 @@ function validateFunctionName(/** @type {Parser} */ parser, /** @type {number} *
         parser.report(97, 'yield');
     }
 }
-/** @returns {boolean} */ function isStrictReservedWord(/** @type {Parser} */ parser, /** @type {number} */ context, t) {
+/** @returns {boolean} */ function isStrictReservedWord(/** @type {Parser} */ parser, /** @type {number} */ context, /** @type {number} */ t) {
     if (t === 209006) {
         if (context & (2048 | 2))
             parser.report(110);
@@ -4571,15 +4571,15 @@ function normalizeOptions(rawOptions) {
 }
 
 class PrivateScope {
-    parser;
-    parent;
+    /** @type {Parser} */ parser;
+    /** @type {undefined | PrivateScope} */ parent;
     refs = Object.create(null);
     privateIdentifiers = new Map();
-    constructor(/** @type {Parser} */ parser, parent) {
-        this.parser = parser;
-        this.parent = parent;
+    constructor(/** @type {Parser} */ parser, /** @type {undefined | PrivateScope} */ parent) {
+        /** @type {Parser} */ this.parser = parser;
+        /** @type {undefined | PrivateScope} */ this.parent = parent;
     }
-    addPrivateIdentifier(name, kind) {
+    addPrivateIdentifier(/** @type {string} */ name, /** @type {number} */ kind) {
         const { privateIdentifiers } = this;
         let focusKind = kind & (32 | 768);
         if (!(focusKind & 768))
@@ -4591,11 +4591,11 @@ class PrivateScope {
         }
         privateIdentifiers.set(name, this.hasPrivateIdentifier(name) ? value | focusKind : focusKind);
     }
-    addPrivateIdentifierRef(name) {
+    addPrivateIdentifierRef(/** @type {string} */ name) {
         this.refs[name] ??= [];
         this.refs[name].push(this.parser.tokenStart);
     }
-    isPrivateIdentifierDefined(name) {
+    /** @returns {boolean} */ isPrivateIdentifierDefined(/** @type {string} */ name) {
         return this.hasPrivateIdentifier(name) || Boolean(this.parent?.isPrivateIdentifierDefined(name));
     }
     validatePrivateIdentifierRefs() {
@@ -4606,26 +4606,26 @@ class PrivateScope {
             }
         }
     }
-    hasPrivateIdentifier(name) {
+    /** @returns {boolean} */ hasPrivateIdentifier(/** @type {string} */ name) {
         return this.privateIdentifiers.has(name);
     }
 }
 
 class Scope {
-    parser;
-    type;
-    parent;
+    /** @type {Parser} */ parser;
+    /** @type {number} */ type;
+    /** @type {undefined | Scope} */ parent;
     scopeError;
     variableBindings = new Map();
-    constructor(/** @type {Parser} */ parser, type = 2, parent) {
-        this.parser = parser;
-        this.type = type;
-        this.parent = parent;
+    constructor(/** @type {Parser} */ parser, /** @type {undefined | number} */ type = 2, /** @type {undefined | Scope} */ parent) {
+        /** @type {Parser} */ this.parser = parser;
+        /** @type {number} */ this.type = type;
+        /** @type {undefined | Scope} */ this.parent = parent;
     }
-    createChildScope(type) {
+    /** @returns {Scope} */ createChildScope(/** @type {undefined | number} */ type) {
         return new Scope(this.parser, type, this);
     }
-    addVarOrBlock(/** @type {number} */ context, name, kind, origin) {
+    addVarOrBlock(/** @type {number} */ context, /** @type {string} */ name, /** @type {number} */ kind, /** @type {number} */ origin) {
         if (kind & 4) {
             this.addVarName(context, name, kind);
         }
@@ -4636,7 +4636,7 @@ class Scope {
             this.parser.declareUnboundVariable(name);
         }
     }
-    addVarName(/** @type {number} */ context, name, kind) {
+    addVarName(/** @type {number} */ context, /** @type {string} */ name, /** @type {number} */ kind) {
         const { parser } = this;
         let currentScope = this;
         while (currentScope && (currentScope.type & 128) === 0) {
@@ -4664,10 +4664,10 @@ class Scope {
             currentScope = currentScope.parent;
         }
     }
-    hasVariable(name) {
+    /** @returns {boolean} */ hasVariable(/** @type {string} */ name) {
         return this.variableBindings.has(name);
     }
-    addBlockName(/** @type {number} */ context, name, kind, origin) {
+    addBlockName(/** @type {number} */ context, /** @type {string} */ name, /** @type {number} */ kind, /** @type {number} */ origin) {
         const { parser } = this;
         const value = this.variableBindings.get(name);
         if (value && (value & 2) === 0) {
@@ -4699,7 +4699,7 @@ class Scope {
         }
         this.variableBindings.set(name, kind);
     }
-    recordScopeError(type, ...params) {
+    recordScopeError(/** @type {number} */ type, ...params) {
         this.scopeError = {
             type,
             params,
@@ -4715,7 +4715,7 @@ class Scope {
         throw new ParseError(scopeError.start, scopeError.end, scopeError.type, ...scopeError.params);
     }
 }
-function createArrowHeadParsingScope(/** @type {Parser} */ parser, /** @type {number} */ context, value) {
+/** @returns {Scope} */ function createArrowHeadParsingScope(/** @type {Parser} */ parser, /** @type {number} */ context, /** @type {string} */ value) {
     const scope = parser.createScope().createChildScope(512);
     scope.addBlockName(context, value, 1, 0);
     return scope;
@@ -4728,7 +4728,7 @@ class Parser {
     /** @type {number} */ token = 1048576;
     /** @type {number} */ flags = 0;
     /** @type {number} */ index = 0;
-    line = 1;
+    /** @type {number} */ line = 1;
     /** @type {number} */ column = 0;
     /** @type {number} */ startIndex = 0;
     /** @type {number} */ end = 0;
@@ -4748,9 +4748,9 @@ class Parser {
     strictReservedRange = null;
     leadingDecorators = { decorators: [] };
     constructor(/** @type {string} */ source, rawOptions = {}) {
-        this.source = source;
-        this.end = source.length;
-        this.currentChar = source.charCodeAt(0);
+        /** @type {string} */ this.source = source;
+        /** @type {number} */ this.end = source.length;
+        /** @type {number} */ this.currentChar = source.charCodeAt(0);
         this.options = normalizeOptions(rawOptions);
         if (Array.isArray(this.options.onComment)) {
             this.options.onComment = pushComment(this.options.onComment, this.options);
@@ -4762,7 +4762,7 @@ class Parser {
     /** @returns {number} */ getToken() {
         return this.token;
     }
-    /** @returns {number} */ setToken(/** @type {number} */ value, replaceLast = false) {
+    /** @returns {number} */ setToken(/** @type {number} */ value, /** @type {undefined | boolean} */ replaceLast = false) {
         this.token = value;
         const { onToken } = this.options;
         if (onToken) {
@@ -4826,10 +4826,10 @@ class Parser {
         }
         return node;
     }
-    addBindingToExports(name) {
+    addBindingToExports(/** @type {string} */ name) {
         this.exportedBindings.add(name);
     }
-    declareUnboundVariable(name) {
+    declareUnboundVariable(/** @type {string} */ name) {
         const { exportedNames } = this;
         if (exportedNames.has(name)) {
             this.report(147, name);
@@ -4839,16 +4839,16 @@ class Parser {
     report(/** @type {number} */ type, ...params) {
         throw new ParseError(this.tokenStart, this.currentLocation, type, ...params);
     }
-    createScopeIfLexical(/** @type {number | undefined} */ type, parent) {
+    /** @returns {undefined | Scope} */ createScopeIfLexical(/** @type {number | undefined} */ type, /** @type {undefined | Scope} */ parent) {
         if (this.options.lexical) {
             return this.createScope(type, parent);
         }
         return undefined;
     }
-    createScope(type, parent) {
+    /** @returns {Scope} */ createScope(/** @type {undefined | number} */ type, /** @type {undefined | Scope} */ parent) {
         return new Scope(this, type, parent);
     }
-    createPrivateScopeIfLexical(parent) {
+    /** @returns {undefined | PrivateScope} */ createPrivateScopeIfLexical(/** @type {undefined | PrivateScope} */ parent) {
         if (this.options.lexical) {
             return new PrivateScope(this, parent);
         }
@@ -9283,10 +9283,10 @@ function parseJSXIdentifier(/** @type {Parser} */ parser, /** @type {number} */ 
 }
 
 const version = version$1;
-function parseScript(source, options) {
+function parseScript(/** @type {string} */ source, options) {
     return parseSource(source, { ...options, sourceType: 'script' });
 }
-function parseModule(source, options) {
+function parseModule(/** @type {string} */ source, options) {
     return parseSource(source, { ...options, sourceType: 'module' });
 }
 function parse(/** @type {string | undefined} */ source, options) {

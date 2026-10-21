@@ -2,7 +2,7 @@ import { isNode, isPair } from '../nodes/identity.js';
 import { stringify } from './stringify.js';
 import { lineComment, indentComment } from './stringifyComment.js';
 
-function stringifyCollection(collection, ctx, options) {
+/** @returns {string} */ function stringifyCollection(collection, ctx, options) {
     const flow = ctx.inFlow ?? collection.flow;
     const stringify = flow ? stringifyFlowCollection : stringifyBlockCollection;
     return stringify(collection, ctx, options);

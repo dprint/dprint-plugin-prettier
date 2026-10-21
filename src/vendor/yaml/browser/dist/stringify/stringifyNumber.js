@@ -1,4 +1,4 @@
-function stringifyNumber({ format, minFractionDigits, tag, value }) {
+/** @returns {string} */ function stringifyNumber({ format, minFractionDigits, tag, value }) {
     if (typeof value === 'bigint')
         return String(value);
     const num = typeof value === 'number' ? value : Number(value);

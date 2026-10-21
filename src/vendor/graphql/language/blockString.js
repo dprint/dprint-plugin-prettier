@@ -31,7 +31,7 @@ function dedentBlockStringLines(lines) {
     }
     return i;
 }
-function isPrintableAsBlockString(value) {
+/** @returns {boolean} */ function isPrintableAsBlockString(/** @type {string} */ value) {
     if (value === '') {
         return true;
     }
@@ -82,7 +82,7 @@ function isPrintableAsBlockString(value) {
     }
     return true;
 }
-function printBlockString(value, options) {
+/** @returns {string} */ function printBlockString(/** @type {string} */ value, options) {
     const escapedValue = value.replaceAll('"""', '\\"""');
     const lines = escapedValue.split(/\r\n|[\n\r]/g);
     const isSingleLine = lines.length === 1;

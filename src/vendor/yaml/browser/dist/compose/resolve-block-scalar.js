@@ -1,7 +1,7 @@
 // @nts-check
 import { Scalar } from '../nodes/Scalar.js';
 
-function resolveBlockScalar(ctx, scalar, onError) {
+function resolveBlockScalar(/** @type {import("yaml-cst-types").ComposeContext} */ ctx, /** @type {import("yaml-cst-types").Token} */ scalar, onError) {
     const start = scalar.offset;
     const header = parseBlockScalarHeader(scalar, ctx.options.strict, onError);
     if (!header)

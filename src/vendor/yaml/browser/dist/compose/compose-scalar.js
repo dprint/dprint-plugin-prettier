@@ -4,7 +4,7 @@ import { Scalar } from '../nodes/Scalar.js';
 import { resolveBlockScalar } from './resolve-block-scalar.js';
 import { resolveFlowScalar } from './resolve-flow-scalar.js';
 
-function composeScalar(ctx, token, tagToken, onError) {
+function composeScalar(/** @type {import("yaml-cst-types").ComposeContext} */ ctx, /** @type {import("yaml-cst-types").Token} */ token, /** @type {null | import("yaml-cst-types").Token} */ tagToken, onError) {
     const { value, type, comment, range } = token.type === 'block-scalar'
         ? resolveBlockScalar(ctx, token, onError)
         : resolveFlowScalar(token, ctx.options.strict, onError);

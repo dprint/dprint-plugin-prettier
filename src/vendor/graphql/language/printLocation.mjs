@@ -1,8 +1,8 @@
 import { getLocation } from "./location.mjs";
-export function printLocation(location) {
+/** @returns {string} */ export function printLocation(location) {
     return printSourceLocation(location.source, getLocation(location.source, location.start));
 }
-export function printSourceLocation(source, sourceLocation) {
+/** @returns {string} */ export function printSourceLocation(source, sourceLocation) {
     const firstLineColumnOffset = source.locationOffset.column - 1;
     const body = ''.padStart(firstLineColumnOffset) + source.body;
     const lineIndex = sourceLocation.line - 1;

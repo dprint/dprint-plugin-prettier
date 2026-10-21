@@ -32,7 +32,7 @@ function resolvePairs(seq, onError) {
         onError('Expected a sequence for this tag');
     return seq;
 }
-function createPairs(schema, iterable, ctx) {
+/** @returns {YAMLSeq} */ function createPairs(schema, iterable, ctx) {
     const { replacer } = ctx;
     const pairs = new YAMLSeq(schema);
     pairs.tag = 'tag:yaml.org,2002:pairs';

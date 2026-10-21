@@ -6,7 +6,7 @@ import { MAP, isPair, isScalar } from './identity.js';
 import { Pair, createPair } from './Pair.js';
 import { isScalarValue } from './Scalar.js';
 
-function findPair(items, key) {
+/** @returns {undefined | Pair} */ function findPair(items, key) {
     const k = isScalar(key) ? key.value : key;
     for (const it of items) {
         if (isPair(it)) {
@@ -30,7 +30,7 @@ class YAMLMap extends Collection {
      * A generic collection parsing method that can be extended
      * to other node classes that inherit from YAMLMap
      */
-    static from(schema, obj, ctx) {
+    /** @returns {YAMLMap} */ static from(schema, obj, ctx) {
         const { keepUndefined, replacer } = ctx;
         const map = new this(schema);
         const add = (key, value) => {
@@ -60,7 +60,7 @@ class YAMLMap extends Collection {
      * @param overwrite - If not set `true`, using a key that is already in the
      *   collection will throw. Otherwise, overwrites the previous value.
      */
-    add(pair, overwrite) {
+    add(pair, /** @type {undefined | boolean} */ overwrite) {
         let _pair;
         if (isPair(pair))
             _pair = pair;
@@ -92,7 +92,7 @@ class YAMLMap extends Collection {
             this.items.push(_pair);
         }
     }
-    delete(key) {
+    /** @returns {boolean} */ delete(key) {
         const it = findPair(this.items, key);
         if (!it)
             return false;
@@ -104,7 +104,7 @@ class YAMLMap extends Collection {
         const node = it?.value;
         return (!keepScalar && isScalar(node) ? node.value : node) ?? undefined;
     }
-    has(key) {
+    /** @returns {boolean} */ has(key) {
         return !!findPair(this.items, key);
     }
     set(key, value) {
@@ -123,7 +123,7 @@ class YAMLMap extends Collection {
             addPairToJSMap(ctx, map, item);
         return map;
     }
-    toString(ctx, onComment, onChompKeep) {
+    /** @returns {string} */ toString(ctx, onComment, onChompKeep) {
         if (!ctx)
             return JSON.stringify(this);
         for (const item of this.items) {

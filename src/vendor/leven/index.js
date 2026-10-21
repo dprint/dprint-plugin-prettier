@@ -1,7 +1,7 @@
 const array = [];
 const characterCodeCache = [];
 
-export default function leven(first, second, options) {
+/** @returns {number} */ export default function leven(/** @type {string} */ first, /** @type {string} */ second, options) {
 	if (first === second) {
 		return 0;
 	}
@@ -99,7 +99,7 @@ export default function leven(first, second, options) {
 	return maxDistance !== undefined && result > maxDistance ? maxDistance : result;
 }
 
-export function closestMatch(target, candidates, options) {
+/** @returns {undefined | string} */ export function closestMatch(/** @type {string} */ target, candidates, options) {
 	if (!Array.isArray(candidates) || candidates.length === 0) {
 		return undefined;
 	}

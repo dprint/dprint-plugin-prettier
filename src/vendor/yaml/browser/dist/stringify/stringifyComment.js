@@ -6,7 +6,7 @@
  * and all other lines are prefixed with a `#`.
  */
 const stringifyComment = (str) => str.replace(/^(?!$)(?: $)?/gm, '#');
-function indentComment(comment, indent) {
+/** @returns {string} */ function indentComment(/** @type {string} */ comment, /** @type {string} */ indent) {
     if (/^\n+$/.test(comment))
         return comment.substring(1);
     return indent ? comment.replace(/^(?! *$)/gm, indent) : comment;

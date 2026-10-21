@@ -150,7 +150,7 @@ class PreviousMap {
     return string.substr(0, start.length) === start
   }
 
-  withContent() {
+  /** @returns {boolean} */ withContent() {
     return !!(
       this.consumer().sourcesContent &&
       this.consumer().sourcesContent.length > 0

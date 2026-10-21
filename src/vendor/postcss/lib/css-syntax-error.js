@@ -6,7 +6,7 @@ let pico = require('picocolors')
 let terminalHighlight = require('./terminal-highlight')
 
 class CssSyntaxError extends Error {
-  constructor(/** @type {string} */ message, line, column, /** @type {string} */ source, file, plugin) {
+  constructor(/** @type {string} */ message, line, column, /** @type {string} */ source, /** @type {undefined | string} */ file, /** @type {undefined | string} */ plugin) {
     super(message)
     /** @type {string} */ this.name = 'CssSyntaxError'
     /** @type {string} */ this.reason = message
@@ -48,7 +48,7 @@ class CssSyntaxError extends Error {
     this.message += ': ' + this.reason
   }
 
-  showSourceCode(color) {
+  /** @returns {string} */ showSourceCode(/** @type {undefined | boolean} */ color) {
     if (!this.source) return ''
 
     let css = this.source
@@ -121,7 +121,7 @@ class CssSyntaxError extends Error {
       .join('\n')
   }
 
-  toString() {
+  /** @returns {string} */ toString() {
     let code = this.showSourceCode()
     if (code) {
       code = '\n\n' + code + '\n'

@@ -1,8 +1,8 @@
-function debug(logLevel, ...messages) {
+function debug(/** @type {string} */ logLevel, ...messages) {
     if (logLevel === 'debug')
         console.log(...messages);
 }
-function warn(logLevel, warning) {
+function warn(/** @type {string} */ logLevel, warning) {
     if (logLevel === 'debug' || logLevel === 'warn') {
         console.warn(warning);
     }

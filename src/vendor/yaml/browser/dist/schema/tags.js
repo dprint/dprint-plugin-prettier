@@ -51,7 +51,7 @@ const coreKnownTags = {
     'tag:yaml.org,2002:set': set,
     'tag:yaml.org,2002:timestamp': timestamp
 };
-/** @returns {any[]} */ function getTags(customTags, /** @type {string} */ schemaName, addMergeTag) {
+/** @returns {any[]} */ function getTags(customTags, /** @type {string} */ schemaName, /** @type {undefined | boolean} */ addMergeTag) {
     const schemaTags = schemas.get(schemaName);
     if (schemaTags && !customTags) {
         return addMergeTag && !schemaTags.includes(merge)

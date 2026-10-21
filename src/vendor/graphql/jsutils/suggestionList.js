@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.suggestionList = suggestionList;
 const naturalCompare_ts_1 = require("./naturalCompare.js");
-function suggestionList(input, options) {
+function suggestionList(/** @type {string} */ input, options) {
     const optionsByDistance = Object.create(null);
     const lexicalDistance = new LexicalDistance(input);
     const threshold = Math.floor(input.length * 0.4) + 1;

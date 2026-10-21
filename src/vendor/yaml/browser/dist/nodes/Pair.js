@@ -3,7 +3,7 @@ import { stringifyPair } from '../stringify/stringifyPair.js';
 import { addPairToJSMap } from './addPairToJSMap.js';
 import { NODE_TYPE, PAIR, isNode } from './identity.js';
 
-function createPair(key, value, ctx) {
+/** @returns {Pair} */ function createPair(key, value, ctx) {
     const k = createNode(key, undefined, ctx);
     const v = createNode(value, undefined, ctx);
     return new Pair(k, v);
@@ -14,7 +14,7 @@ class Pair {
         this.key = key;
         this.value = value;
     }
-    clone(schema) {
+    /** @returns {Pair} */ clone(schema) {
         let { key, value } = this;
         if (isNode(key))
             key = key.clone(schema);
@@ -26,7 +26,7 @@ class Pair {
         const pair = ctx?.mapAsMap ? new Map() : {};
         return addPairToJSMap(ctx, pair, this);
     }
-    toString(ctx, onComment, onChompKeep) {
+    /** @returns {string} */ toString(ctx, onComment, onChompKeep) {
         return ctx?.doc
             ? stringifyPair(this, ctx, onComment, onChompKeep)
             : JSON.stringify(this);

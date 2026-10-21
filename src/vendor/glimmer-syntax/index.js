@@ -51,7 +51,7 @@ function escapeAttrValue(attrValue) {
     return ATTR_VALUE_REGEX_TEST.test(attrValue) ? attrValue.replace(ATTR_VALUE_REGEX_REPLACE, attrValueReplacer) : attrValue;
 }
 
-function sortByLoc(a, b) {
+/** @returns {number} */ function sortByLoc(/** @type {import("glimmer-ast-types").GlimmerNode} */ a, /** @type {import("glimmer-ast-types").GlimmerNode} */ b) {
     // If either is invisible, don't try to order them
     return a.loc.isInvisible || b.loc.isInvisible ? 0 : a.loc.startPosition.line < b.loc.startPosition.line || a.loc.startPosition.line === b.loc.startPosition.line && a.loc.startPosition.column < b.loc.startPosition.column ? -1 : a.loc.startPosition.line === b.loc.startPosition.line && a.loc.startPosition.column === b.loc.startPosition.column ? 0 : 1;
 }
@@ -71,7 +71,7 @@ const NON_WHITESPACE = /^\S/u;
  *
  * Examples when false:
  *  - Link (component)
- */ function isVoidTag(tag) {
+ */ /** @returns {boolean} */ function isVoidTag(/** @type {string} */ tag) {
     return voidMap.has(tag.toLowerCase()) && tag[0]?.toLowerCase() === tag[0];
 }
 
@@ -362,7 +362,7 @@ class Printer {
     }
 }
 
-function build(ast, options = {
+/** @returns {string} */ function build(/** @type {import("glimmer-ast-types").GlimmerNode} */ ast, options = {
     entityEncoding: "transformed"
 }) {
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- JS users
@@ -500,14 +500,14 @@ class Matcher {
 }
 
 class SourceSlice {
-    static synthetic(chars) {
+    /** @returns {SourceSlice} */ static synthetic(chars) {
         let offsets = SourceSpan.synthetic(chars);
         return new SourceSlice({
             loc: offsets,
             chars: chars
         });
     }
-    static load(source, slice) {
+    /** @returns {SourceSlice} */ static load(/** @type {Source} */ source, slice) {
         return new SourceSlice({
             loc: SourceSpan.load(source, slice[1]),
             chars: slice[0]
@@ -516,7 +516,7 @@ class SourceSlice {
     constructor(options) {
         this.loc = options.loc, this.chars = options.chars;
     }
-    getString() {
+    /** @returns {string} */ getString() {
         return this.chars;
     }
     serialize() {
@@ -561,7 +561,7 @@ class SourceSlice {
     static get NON_EXISTENT() {
         return new InvisibleSpan("NonExistent", NON_EXISTENT_LOCATION).wrap();
     }
-    static load(source, serialized) {
+    /** @returns {SourceSpan} */ static load(/** @type {Source} */ source, serialized) {
         return "number" == typeof serialized ? SourceSpan.forCharPositions(source, serialized, serialized) : "string" == typeof serialized ? SourceSpan.synthetic(serialized) : Array.isArray(serialized) ? SourceSpan.forCharPositions(source, serialized[0], serialized[1]) : "NonExistent" === serialized ? SourceSpan.NON_EXISTENT : "Broken" === serialized ? SourceSpan.broken(BROKEN_LOCATION) : void assertNever(serialized);
     }
     /** @returns {SourceSpan} */ static forHbsLoc(/** @type {Source} */ source, loc) {
@@ -578,7 +578,7 @@ class SourceSlice {
             end: end
         }).wrap();
     }
-    static synthetic(chars) {
+    /** @returns {SourceSpan} */ static synthetic(/** @type {string} */ chars) {
         return new InvisibleSpan("InternalsSynthetic", NON_EXISTENT_LOCATION, chars).wrap();
     }
     /** @returns {SourceSpan} */ static broken(pos = BROKEN_LOCATION) {
@@ -625,7 +625,7 @@ class SourceSlice {
     }
     /**
    * Create a new span with the current span's end and a new beginning.
-   */    withStart(other) {
+   */    /** @returns {SourceSpan} */ withStart(/** @type {SourceOffset} */ other) {
         return span(other.data, this.data.getEnd());
     }
     /**
@@ -639,7 +639,7 @@ class SourceSlice {
     }
     /**
    * Convert this `SourceSpan` into a `SourceSlice`.
-   */    toSlice(expected) {
+   */    /** @returns {SourceSlice} */ toSlice(/** @type {undefined | string} */ expected) {
         const chars = this.data.asString();
         return JSON.stringify(chars), JSON.stringify(expected), new SourceSlice({
             loc: this,
@@ -700,13 +700,13 @@ class SourceSlice {
     serialize() {
         return this.data.serialize();
     }
-    slice({skipStart: skipStart = 0, skipEnd: skipEnd = 0}) {
+    /** @returns {SourceSpan} */ slice({skipStart: skipStart = 0, skipEnd: skipEnd = 0}) {
         return span(this.getStart().move(skipStart).data, this.getEnd().move(-skipEnd).data);
     }
     /** @returns {SourceSpan} */ sliceStartChars({skipStart: skipStart = 0, chars: chars}) {
         return span(this.getStart().move(skipStart).data, this.getStart().move(skipStart + chars).data);
     }
-    sliceEndChars({skipEnd: skipEnd = 0, chars: chars}) {
+    /** @returns {SourceSpan} */ sliceEndChars({skipEnd: skipEnd = 0, chars: chars}) {
         return span(this.getEnd().move(skipEnd - chars).data, this.getStart().move(-skipEnd).data);
     }
 }
@@ -727,7 +727,7 @@ class CharPositionSpan {
     /** @returns {string} */ asString() {
         return this.source.slice(this.charPositions.start.charPos, this.charPositions.end.charPos);
     }
-    getModule() {
+    /** @returns {string} */ getModule() {
         return this.source.module;
     }
     /** @returns {CharPosition} */ getStart() {
@@ -752,7 +752,7 @@ class CharPositionSpan {
         const {start: {charPos: start}, end: {charPos: end}} = this.charPositions;
         return start === end ? start : [ start, end ];
     }
-    toCharPosSpan() {
+    /** @returns {CharPositionSpan} */ toCharPosSpan() {
         return this;
     }
 }
@@ -827,7 +827,7 @@ class HbsSpan {
 class InvisibleSpan {
     constructor(/** @type {string} */ kind, // whatever was provided, possibly broken
     loc, // if the span represents a synthetic string
-    string = null) {
+    /** @type {undefined | null | string} */ string = null) {
         this.kind = kind, this.loc = loc, this.string = string;
     }
     serialize() {
@@ -843,13 +843,13 @@ class InvisibleSpan {
     /** @returns {SourceSpan} */ wrap() {
         return new SourceSpan(this);
     }
-    asString() {
+    /** @returns {string} */ asString() {
         return this.string || "";
     }
     locDidUpdate({start: start, end: end}) {
         void 0 !== start && (this.loc.start = start), void 0 !== end && (this.loc.end = end);
     }
-    getModule() {
+    /** @returns {string} */ getModule() {
         // TODO: Make this reflect the actual module this span originated from
         return "an unknown module";
     }
@@ -859,10 +859,10 @@ class InvisibleSpan {
     getEnd() {
         return new InvisiblePosition(this.kind, this.loc.end);
     }
-    toCharPosSpan() {
+    /** @returns {InvisibleSpan} */ toCharPosSpan() {
         return this;
     }
-    toHbsSpan() {
+    /** @returns {null} */ toHbsSpan() {
         return null;
     }
     toHbsLoc() {
@@ -913,7 +913,7 @@ class SourceOffset {
    * Create a `SourceOffset` that corresponds to a broken `SourcePosition`. This means that the
    * calling code determined (or knows) that the `SourceLocation` doesn't correspond correctly to
    * any part of the source.
-   */    static broken(pos = UNKNOWN_POSITION) {
+   */    /** @returns {SourceOffset} */ static broken(pos = UNKNOWN_POSITION) {
         return new InvisiblePosition("Broken", pos).wrap();
     }
     constructor(data) {
@@ -934,7 +934,7 @@ class SourceOffset {
    *
    * Otherwise, two `SourceOffset`s are equivalent if their successfully computed character offsets
    * are the same.
-   */    eql(right) {
+   */    /** @returns {boolean} */ eql(/** @type {SourceOffset} */ right) {
         return eql(this.data, right.data);
     }
     /**
@@ -1028,7 +1028,7 @@ class CharPosition {
  * @property {SourcePosition} hbsPos
  */
 class HbsPosition {
-    constructor(/** @type {Source} */ source, /** @type {SourcePosition} */ hbsPos, charPos = null) {
+    constructor(/** @type {Source} */ source, /** @type {SourcePosition} */ hbsPos, /** @type {undefined | null | number} */ charPos = null) {
         this.source = source, this.hbsPos = hbsPos, this.kind = "HbsPosition", this._charPos = null === charPos ? null : new CharPosition(source, charPos);
     }
     /**
@@ -1058,19 +1058,19 @@ class HbsPosition {
    * This is already an `HbsPosition`.
    *
    * {@see CharPosition} for the alternative.
-   */    toHbsPos() {
+   */    /** @returns {HbsPosition} */ toHbsPos() {
         return this;
     }
 }
 
 class InvisiblePosition {
-    constructor(kind, // whatever was provided, possibly broken
+    constructor(/** @type {string} */ kind, // whatever was provided, possibly broken
     pos) {
         this.kind = kind, this.pos = pos;
     }
     /**
    * A broken position cannot be turned into a {@see CharacterPosition}.
-   */    toCharPos() {
+   */    /** @returns {null} */ toCharPos() {
         return null;
     }
     /**
@@ -1082,7 +1082,7 @@ class InvisiblePosition {
    */    toJSON() {
         return this.pos;
     }
-    wrap() {
+    /** @returns {SourceOffset} */ wrap() {
         return new SourceOffset(this);
     }
     get offset() {
@@ -1097,19 +1097,19 @@ class InvisiblePosition {
  */ const eql = match((/** @returns {Matcher} */ (/** @type {Matcher} */ m) => m.when("HbsPosition", "HbsPosition", (({hbsPos: left}, {hbsPos: right}) => left.column === right.column && left.line === right.line)).when("CharPosition", "CharPosition", (({charPos: left}, {charPos: right}) => left === right)).when("CharPosition", "HbsPosition", (({offset: left}, right) => left === right.toCharPos()?.offset)).when("HbsPosition", "CharPosition", ((left, {offset: right}) => left.toCharPos()?.offset === right)).when("MATCH_ANY", "MATCH_ANY", (() => !1))));
 
 class Source {
-    static from(source, options = {}) {
+    /** @returns {Source} */ static from(/** @type {string} */ source, options = {}) {
         return new Source(source, options.meta?.moduleName);
     }
-    constructor(/** @type {string} */ source, module = "an unknown module") {
+    constructor(/** @type {string} */ source, /** @type {undefined | string} */ module = "an unknown module") {
         this.source = source, this.module = module;
     }
     /**
    * Validate that the character offset represents a position in the source string.
    * @returns {boolean}
-   */    validate(offset) {
+   */    validate(/** @type {number} */ offset) {
         return offset >= 0 && offset <= this.source.length;
     }
-    /** @returns {string} */ slice(start, end) {
+    /** @returns {string} */ slice(/** @type {number} */ start, /** @type {number} */ end) {
         return this.source.slice(start, end);
     }
     /** @returns {SourceOffset} */ offsetFor(/** @type {number} */ line, /** @type {number} */ column) {
@@ -1168,10 +1168,10 @@ class SpanList {
     constructor(span = []) {
         this._span = span;
     }
-    add(offset) {
+    add(/** @type {SourceSpan} */ offset) {
         this._span.push(offset);
     }
-    getRangeOffset(fallback) {
+    /** @returns {SourceSpan} */ getRangeOffset(/** @type {SourceSpan} */ fallback) {
         if (isPresentArray(this._span)) {
             let first = getFirst(this._span), last = getLast(this._span);
             return first.extend(last);
@@ -1180,7 +1180,7 @@ class SpanList {
     }
 }
 
-function loc(span) {
+/** @returns {SourceSpan} */ function loc(span) {
     if (Array.isArray(span)) {
         let first = getFirst(span), last = getLast(span);
         return loc(first).extend(loc(last));
@@ -1188,11 +1188,11 @@ function loc(span) {
     return span instanceof SourceSpan ? span : span.loc;
 }
 
-function hasSpan(span) {
+/** @returns {boolean} */ function hasSpan(span) {
     return !Array.isArray(span) || 0 !== span.length;
 }
 
-function maybeLoc(location, fallback) {
+/** @returns {SourceSpan} */ function maybeLoc(location, /** @type {SourceSpan} */ fallback) {
     return hasSpan(location) ? loc(location) : fallback;
 }
 
@@ -1252,11 +1252,11 @@ const visitorKeys = {
     TraversalError.prototype.constructor = TraversalError, TraversalError;
 }();
 
-function cannotRemoveNode(node, parent, key) {
+function cannotRemoveNode(/** @type {import("glimmer-ast-types").GlimmerNode} */ node, /** @type {import("glimmer-ast-types").GlimmerNode} */ parent, /** @type {string} */ key) {
     return new TraversalError("Cannot remove a node unless it is part of an array", node, parent, key);
 }
 
-function cannotReplaceNode(node, parent, key) {
+function cannotReplaceNode(/** @type {import("glimmer-ast-types").GlimmerNode} */ node, /** @type {import("glimmer-ast-types").GlimmerNode} */ parent, /** @type {string} */ key) {
     return new TraversalError("Cannot replace a node with multiple nodes unless it is part of an array", node, parent, key);
 }
 
@@ -1265,7 +1265,7 @@ function cannotReplaceOrRemoveInKeyHandlerYet(node, key) {
 }
 
 class WalkerPath {
-    constructor(node, parent = null, parentKey = null) {
+    constructor(node, /** @type {undefined | null | WalkerPath} */ parent = null, /** @type {undefined | null | string} */ parentKey = null) {
         this.node = node, this.parent = parent, this.parentKey = parentKey;
     }
     get parentNode() {
@@ -1376,7 +1376,7 @@ function spliceArray(array, index, result) {
     result.length) : (array.splice(index, 1, result), 1);
 }
 
-function traverse(node, visitor) {
+function traverse(/** @type {import("glimmer-ast-types").GlimmerNode} */ node, visitor) {
     visitNode(visitor, new WalkerPath(node));
 }
 
@@ -1433,14 +1433,14 @@ function SOURCE() {
     return _SOURCE || (_SOURCE = new Source("", "(synthetic)")), _SOURCE;
 }
 
-function buildVar(name, loc) {
+/** @returns {import("glimmer-ast-types").GlimmerNode} */ function buildVar(/** @type {string} */ name, loc) {
     return b.var({
         name: name,
         loc: buildLoc(loc || null)
     });
 }
 
-function buildPath(path, loc) {
+/** @returns {import("glimmer-ast-types").GlimmerNode} */ function buildPath(path, loc) {
     let span = buildLoc(loc || null);
     if ("string" != typeof path) {
         if ("type" in path) return path;
@@ -1486,7 +1486,7 @@ function buildLiteral(type, value, loc) {
 }
 
 // Miscellaneous
-function buildHash(pairs = [], loc) {
+/** @returns {import("glimmer-ast-types").GlimmerNode} */ function buildHash(pairs = [], loc) {
     return b.hash({
         pairs: pairs,
         loc: buildLoc(loc || null)
@@ -1500,7 +1500,7 @@ function buildBlockParams(params) {
     }) : p));
 }
 
-function buildBlockItself(body = [], params = [], chained = !1, loc) {
+/** @returns {import("glimmer-ast-types").GlimmerNode} */ function buildBlockItself(body = [], params = [], /** @type {undefined | boolean} */ chained = !1, loc) {
     return b.blockItself({
         body: body,
         params: buildBlockParams(params),
@@ -1509,7 +1509,7 @@ function buildBlockItself(body = [], params = [], chained = !1, loc) {
     });
 }
 
-function buildTemplate(body = [], blockParams = [], loc) {
+/** @returns {import("glimmer-ast-types").GlimmerNode} */ function buildTemplate(body = [], blockParams = [], loc) {
     return b.template({
         body: body,
         blockParams: blockParams,
@@ -2883,7 +2883,7 @@ class CodemodEntityParser extends EntityParser {
     parse() {}
 }
 
-function preprocess(/** @type {string | undefined} */ input, options = {}) {
+/** @returns {import("glimmer-ast-types").GlimmerNode} */ function preprocess(/** @type {string | undefined} */ input, options = {}) {
     let source, ast, entityParser, mode = options.mode || "precompile";
     "string" == typeof input ? (source = new Source(input, options.meta?.moduleName), 
     ast = "codemod" === mode ? parseWithoutProcessing(input, options.parseOptions) : parse(input, options.parseOptions)) : input instanceof Source ? (source = input, 
@@ -2945,7 +2945,7 @@ function addTokens(tokensSet, node, scopedTokens, options) {
  * Parses and traverses a given handlebars html template to extract all template locals
  * referenced that could possible come from the parent scope. Can exclude known keywords
  * optionally.
- */ function getTemplateLocals(html, options = {
+ */ function getTemplateLocals(/** @type {string} */ html, options = {
     includeHtmlElements: !1,
     includeKeywords: !1
 }) {
@@ -3015,27 +3015,27 @@ function node(/** @type {string | undefined} */ name) {
  * If `Args` is empty, the `SourceOffsets` for this node should be the collapsed position
  * immediately after the parent call node's `callee`.
  */ class Args extends(node().fields()){
-    static empty(loc) {
+    /** @returns {Args} */ static empty(/** @type {SourceSpan} */ loc) {
         return new Args({
             loc: loc,
             positional: PositionalArguments.empty(loc),
             named: NamedArguments.empty(loc)
         });
     }
-    static named(named) {
+    /** @returns {Args} */ static named(/** @type {NamedArguments} */ named) {
         return new Args({
             loc: named.loc,
             positional: PositionalArguments.empty(named.loc.collapse("end")),
             named: named
         });
     }
-    nth(offset) {
+    nth(/** @type {number} */ offset) {
         return this.positional.nth(offset);
     }
-    get(name) {
+    get(/** @type {string} */ name) {
         return this.named.get(name);
     }
-    isEmpty() {
+    /** @returns {boolean} */ isEmpty() {
         return this.positional.isEmpty() && this.named.isEmpty();
     }
 }
@@ -3046,7 +3046,7 @@ function node(/** @type {string | undefined} */ name) {
  * If `PositionalArguments` is empty, the `SourceOffsets` for this node should be the collapsed
  * position immediately after the parent call node's `callee`.
  */ class PositionalArguments extends(node().fields()){
-    static empty(loc) {
+    /** @returns {PositionalArguments} */ static empty(/** @type {SourceSpan} */ loc) {
         return new PositionalArguments({
             loc: loc,
             exprs: []
@@ -3055,10 +3055,10 @@ function node(/** @type {string | undefined} */ name) {
     get size() {
         return this.exprs.length;
     }
-    nth(offset) {
+    nth(/** @type {number} */ offset) {
         return this.exprs[offset] || null;
     }
-    isEmpty() {
+    /** @returns {boolean} */ isEmpty() {
         return 0 === this.exprs.length;
     }
 }
@@ -3072,7 +3072,7 @@ function node(/** @type {string | undefined} */ name) {
  * If `PositionalArguments` is not empty but `NamedArguments` is empty, the `SourceOffsets` for this
  * node should be the collapsed position immediately after the last positional argument.
  */ class NamedArguments extends(node().fields()){
-    static empty(loc) {
+    /** @returns {NamedArguments} */ static empty(/** @type {SourceSpan} */ loc) {
         return new NamedArguments({
             loc: loc,
             entries: []
@@ -3081,11 +3081,11 @@ function node(/** @type {string | undefined} */ name) {
     get size() {
         return this.entries.length;
     }
-    get(name) {
+    get(/** @type {string} */ name) {
         let entry = this.entries.filter((e => e.name.chars === name))[0];
         return entry ? entry.value : null;
     }
-    isEmpty() {
+    /** @returns {boolean} */ isEmpty() {
         return 0 === this.entries.length;
     }
 }
@@ -3120,7 +3120,7 @@ class SplatAttr extends(node("SplatAttr").fields()){}
     /**
    * Convert the component argument into a named argument node
    */
-    toNamedArgument() {
+    /** @returns {NamedArgument} */ toNamedArgument() {
         return new NamedArgument({
             name: this.name,
             value: this.value
@@ -3181,7 +3181,7 @@ class InvokeBlock extends(node("InvokeBlock").fields()){}
  *
  * @see {LiteralValue}
  */ class LiteralExpression extends(node("Literal").fields()){
-    toSlice() {
+    /** @returns {SourceSlice} */ toSlice() {
         return new SourceSlice({
             loc: this.loc,
             chars: this.value
@@ -3310,7 +3310,7 @@ class LooseModeResolution {
    * 3. `<a {{modifier}}>` (namespace: `Modifier`)
    * 4. `<Component />` (namespace: `Component`)
    */
-    static namespaced(namespace, isAngleBracket = !1) {
+    /** @returns {LooseModeResolution} */ static namespaced(/** @type {string} */ namespace, /** @type {undefined | boolean} */ isAngleBracket = !1) {
         return new LooseModeResolution([ namespace ], isAngleBracket);
     }
     /**
@@ -3326,7 +3326,7 @@ class LooseModeResolution {
    * ```
    *
    * ^ In either case, `x` should be resolved in the `component` and `helper` namespaces.
-   */    static append() {
+   */    /** @returns {LooseModeResolution} */ static append() {
         return new LooseModeResolution([ "Component", "Helper" ]);
     }
     /**
@@ -3342,13 +3342,13 @@ class LooseModeResolution {
    * ```
    *
    * ^ In either case, `x` should be resolved in the `helper` namespace.
-   */    static trustingAppend() {
+   */    /** @returns {LooseModeResolution} */ static trustingAppend() {
         return this.namespaced("Helper");
     }
-    constructor(namespaces, isAngleBracket = !1) {
+    constructor(namespaces, /** @type {undefined | boolean} */ isAngleBracket = !1) {
         this.namespaces = namespaces, this.isAngleBracket = isAngleBracket;
     }
-    resolution() {
+    /** @returns {number} */ resolution() {
         if (1 !== this.namespaces.length) return SexpOpcodes.GetFreeAsComponentOrHelperHead;
         switch (this.namespaces[0]) {
           case "Helper":
@@ -3361,7 +3361,7 @@ class LooseModeResolution {
             return SexpOpcodes.GetFreeAsComponentHead;
         }
     }
-    serialize() {
+    /** @returns {string} */ serialize() {
         return 1 === this.namespaces.length ? this.namespaces[0] : "ComponentOrHelper";
     }
 }
@@ -3415,10 +3415,10 @@ var api =  Object.freeze({
 });
 
 class SymbolTable {
-    static top(locals, keywords, options) {
+    /** @returns {ProgramSymbolTable} */ static top(locals, keywords, options) {
         return new ProgramSymbolTable(locals, keywords, options);
     }
-    child(locals) {
+    /** @returns {BlockSymbolTable} */ child(locals) {
         let symbols = locals.map((name => this.allocate(name)));
         return new BlockSymbolTable(this, locals, symbols);
     }
@@ -3430,25 +3430,25 @@ class ProgramSymbolTable extends SymbolTable {
         this.symbols = [], this.upvars = [], this.size = 1, this.named = dict(), this.blocks = dict(), 
         this.usedTemplateLocals = [];
     }
-    root() {
+    /** @returns {ProgramSymbolTable} */ root() {
         return this;
     }
-    hasLexical(name) {
+    /** @returns {boolean} */ hasLexical(/** @type {string} */ name) {
         return this.options.lexicalScope(name);
     }
-    hasKeyword(name) {
+    /** @returns {boolean} */ hasKeyword(/** @type {string} */ name) {
         return this.keywords.includes(name);
     }
-    getKeyword(name) {
+    /** @returns {number} */ getKeyword(/** @type {string} */ name) {
         return this.allocateFree(name, STRICT_RESOLUTION);
     }
     getUsedTemplateLocals() {
         return this.usedTemplateLocals;
     }
-    has(name) {
+    /** @returns {boolean} */ has(/** @type {string} */ name) {
         return this.templateLocals.includes(name);
     }
-    get(name) {
+    get(/** @type {string} */ name) {
         let index = this.usedTemplateLocals.indexOf(name);
         return -1 !== index || (index = this.usedTemplateLocals.length, this.usedTemplateLocals.push(name)), 
         [ index, !0 ];
@@ -3459,50 +3459,50 @@ class ProgramSymbolTable extends SymbolTable {
     getDebugInfo() {
         return [ this.getLocalsMap(), this.named ];
     }
-    allocateFree(name, resolution) {
+    /** @returns {number} */ allocateFree(/** @type {string} */ name, resolution) {
         // If the name in question is an uppercase (i.e. angle-bracket) component invocation, run
         // the optional `customizeComponentName` function provided to the precompiler.
         resolution.resolution() === SexpOpcodes.GetFreeAsComponentHead && resolution.isAngleBracket && (name = this.options.customizeComponentName(name));
         let index = this.upvars.indexOf(name);
         return -1 !== index || (index = this.upvars.length, this.upvars.push(name)), index;
     }
-    allocateNamed(name) {
+    /** @returns {number} */ allocateNamed(/** @type {string} */ name) {
         let named = this.named[name];
         return named || (named = this.named[name] = this.allocate(name)), named;
     }
-    allocateBlock(name) {
+    /** @returns {number} */ allocateBlock(/** @type {string} */ name) {
         "inverse" === name && (name = "else");
         let block = this.blocks[name];
         return block || (block = this.blocks[name] = this.allocate(`&${name}`)), block;
     }
-    allocate(identifier) {
+    /** @returns {number} */ allocate(/** @type {string} */ identifier) {
         return this.symbols.push(identifier), this.size++;
     }
 }
 
 class BlockSymbolTable extends SymbolTable {
-    constructor(parent, symbols, slots) {
+    constructor(/** @type {SymbolTable} */ parent, symbols, slots) {
         super(), this.parent = parent, this.symbols = symbols, this.slots = slots;
     }
-    root() {
+    /** @returns {ProgramSymbolTable} */ root() {
         return this.parent.root();
     }
     get locals() {
         return this.symbols;
     }
-    hasLexical(name) {
+    /** @returns {boolean} */ hasLexical(/** @type {string} */ name) {
         return this.parent.hasLexical(name);
     }
-    getKeyword(name) {
+    /** @returns {number} */ getKeyword(/** @type {string} */ name) {
         return this.parent.getKeyword(name);
     }
-    hasKeyword(name) {
+    /** @returns {boolean} */ hasKeyword(/** @type {string} */ name) {
         return this.parent.hasKeyword(name);
     }
-    has(name) {
+    /** @returns {boolean} */ has(/** @type {string} */ name) {
         return -1 !== this.symbols.indexOf(name) || this.parent.has(name);
     }
-    get(name) {
+    get(/** @type {string} */ name) {
         let local = this.#get(name);
         return local ? [ local, !1 ] : this.parent.get(name);
     }
@@ -3521,16 +3521,16 @@ class BlockSymbolTable extends SymbolTable {
             ...root.named
         }, Object.fromEntries(root.upvars.map(((s, i) => [ s, i ]))) ];
     }
-    allocateFree(name, resolution) {
+    /** @returns {number} */ allocateFree(/** @type {string} */ name, resolution) {
         return this.parent.allocateFree(name, resolution);
     }
-    allocateNamed(name) {
+    /** @returns {number} */ allocateNamed(/** @type {string} */ name) {
         return this.parent.allocateNamed(name);
     }
-    allocateBlock(name) {
+    /** @returns {number} */ allocateBlock(/** @type {string} */ name) {
         return this.parent.allocateBlock(name);
     }
-    allocate(identifier) {
+    /** @returns {number} */ allocate(/** @type {string} */ identifier) {
         return this.parent.allocate(identifier);
     }
 }
@@ -3841,7 +3841,7 @@ function isSimplePath(node) {
     return "PathExpression" === node.type && "VarHead" === node.head.type && 0 === node.tail.length;
 }
 
-function normalize(source, options = {
+function normalize(/** @type {Source} */ source, options = {
     lexicalScope: () => !1
 }) {
     let ast = preprocess(source, options), normalizeOptions = {
@@ -4402,7 +4402,7 @@ class ElementChildren extends Children {
     }
 }
 
-function isLiteral(node) {
+/** @returns {boolean} */ function isLiteral(node) {
     switch (node.type) {
       case "StringLiteral":
       case "BooleanLiteral":

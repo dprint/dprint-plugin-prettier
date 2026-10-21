@@ -59,7 +59,7 @@ class Document {
      *
      * Custom Node values that inherit from `Object` still refer to their original instances.
      */
-    clone() {
+    /** @returns {Document} */ clone() {
         const copy = Object.create(Document.prototype, {
             [NODE_TYPE]: { value: DOC }
         });
@@ -98,7 +98,7 @@ class Document {
      * `name` will be used as a prefix for a new unique anchor.
      * If `name` is undefined, the generated anchor will use 'a' as a prefix.
      */
-    createAlias(node, name) {
+    /** @returns {Alias} */ createAlias(node, /** @type {undefined | string} */ name) {
         if (!node.anchor) {
             const prev = anchorNames(this);
             node.anchor =
@@ -147,7 +147,7 @@ class Document {
      * Convert a key and a value into a `Pair` using the current schema,
      * recursively wrapping all values as `Scalar` or `Collection` nodes.
      */
-    createPair(key, value, options = {}) {
+    /** @returns {Pair} */ createPair(key, value, options = {}) {
         const k = this.createNode(key, null, options);
         const v = this.createNode(value, null, options);
         return new Pair(k, v);
@@ -180,7 +180,7 @@ class Document {
      * scalar values from their surrounding node; to disable set `keepScalar` to
      * `true` (collections are always returned intact).
      */
-    get(key, keepScalar) {
+    get(key, /** @type {undefined | boolean} */ keepScalar) {
         return isCollection(this.contents)
             ? this.contents.get(key, keepScalar)
             : undefined;
@@ -190,7 +190,7 @@ class Document {
      * scalar values from their surrounding node; to disable set `keepScalar` to
      * `true` (collections are always returned intact).
      */
-    getIn(path, keepScalar) {
+    getIn(path, /** @type {undefined | boolean} */ keepScalar) {
         if (isEmptyPath(path))
             return !keepScalar && isScalar(this.contents)
                 ? this.contents.value
@@ -202,13 +202,13 @@ class Document {
     /**
      * Checks if the document includes a value with the key `key`.
      */
-    has(key) {
+    /** @returns {boolean} */ has(key) {
         return isCollection(this.contents) ? this.contents.has(key) : false;
     }
     /**
      * Checks if the document includes a value at `path`.
      */
-    hasIn(path) {
+    /** @returns {boolean} */ hasIn(path) {
         if (isEmptyPath(path))
             return this.contents !== undefined;
         return isCollection(this.contents) ? this.contents.hasIn(path) : false;
@@ -312,11 +312,11 @@ class Document {
      * @param jsonArg Used by `JSON.stringify` to indicate the array index or
      *   property name.
      */
-    toJSON(jsonArg, onAnchor) {
+    toJSON(/** @type {undefined | null | string} */ jsonArg, onAnchor) {
         return this.toJS({ json: true, jsonArg, mapAsMap: false, onAnchor });
     }
     /** A YAML representation of the document. */
-    toString(options = {}) {
+    /** @returns {string} */ toString(options = {}) {
         if (this.errors.length > 0)
             throw new Error('Document with errors cannot be stringified');
         if ('indent' in options &&

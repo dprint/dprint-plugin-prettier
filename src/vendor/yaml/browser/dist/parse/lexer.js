@@ -148,7 +148,7 @@ class Lexer {
      *
      * @returns A generator of lexical tokens
      */
-    *lex(/** @type {string | undefined} */ source, incomplete = false) {
+    *lex(/** @type {string | undefined} */ source, /** @type {undefined | boolean} */ incomplete = false) {
         if (source) {
             if (typeof source !== 'string')
                 throw TypeError('source is not a string');

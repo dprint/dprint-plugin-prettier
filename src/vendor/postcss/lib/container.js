@@ -54,7 +54,7 @@ class Container extends Node {
     }
   }
 
-  each(/** @type {(a0?: any, a1?: any) => any} */ callback) {
+  /** @returns {undefined | boolean} */ each(/** @type {(a0?: any, a1?: any) => any} */ callback) {
     if (!this.proxyOf.nodes) return undefined
     /** @type {number} */ let iterator = this.getIterator()
 
@@ -71,7 +71,7 @@ class Container extends Node {
     return result
   }
 
-  every(condition) {
+  /** @returns {boolean} */ every(condition) {
     return this.nodes.every(condition)
   }
 
@@ -136,7 +136,7 @@ class Container extends Node {
     }
   }
 
-  index(child) {
+  /** @returns {number} */ index(child) {
     if (typeof child === 'number') return child
     if (child.proxyOf) child = child.proxyOf
     return this.proxyOf.nodes.indexOf(child)
@@ -305,11 +305,11 @@ class Container extends Node {
     return this
   }
 
-  some(condition) {
+  /** @returns {boolean} */ some(condition) {
     return this.nodes.some(condition)
   }
 
-  walk(callback) {
+  /** @returns {undefined | boolean} */ walk(callback) {
     return this.each((child, i) => {
       let result
       try {
@@ -348,7 +348,7 @@ class Container extends Node {
     })
   }
 
-  walkComments(callback) {
+  /** @returns {undefined | boolean} */ walkComments(callback) {
     return this.walk((child, i) => {
       if (child.type === 'comment') {
         return callback(child, i)

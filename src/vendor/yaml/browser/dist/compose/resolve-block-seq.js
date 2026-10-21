@@ -2,7 +2,7 @@ import { YAMLSeq } from '../nodes/YAMLSeq.js';
 import { resolveProps } from './resolve-props.js';
 import { flowIndentCheck } from './util-flow-indent-check.js';
 
-function resolveBlockSeq({ composeNode, composeEmptyNode }, ctx, bs, onError, tag) {
+function resolveBlockSeq({ composeNode, composeEmptyNode }, /** @type {import("yaml-cst-types").ComposeContext} */ ctx, /** @type {import("yaml-cst-types").Token} */ bs, onError, tag) {
     const NodeClass = tag?.nodeClass ?? YAMLSeq;
     const seq = new NodeClass(ctx.schema);
     if (ctx.atRoot)

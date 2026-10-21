@@ -6,7 +6,7 @@ const ast_ts_1 = require("../language/ast.js");
 const Executor_ts_1 = require("./Executor.js");
 const UNEXPECTED_MULTIPLE_PAYLOADS = 'Executing this GraphQL operation would unexpectedly produce multiple payloads (due to @defer or @stream directive)';
 class ExecutorThrowingOnIncremental extends Executor_ts_1.Executor {
-    executeCollectedRootFields(rootType, rootValue, originalGroupedFieldSet, serially, newDeferUsages) {
+    executeCollectedRootFields(rootType, rootValue, originalGroupedFieldSet, /** @type {boolean} */ serially, newDeferUsages) {
         if (newDeferUsages.length > 0) {
             if (!(this.validatedExecutionArgs.operation.operation !==
                 ast_ts_1.OperationTypeNode.SUBSCRIPTION))
@@ -28,7 +28,7 @@ class ExecutorThrowingOnIncremental extends Executor_ts_1.Executor {
         }
         return this.executeFields(parentType, sourceValue, path, originalGroupedFieldSet, undefined);
     }
-    completeListValue(returnType, fieldDetailsList, info, path, result, positionContext) {
+    completeListValue(returnType, fieldDetailsList, info, path, result, /** @type {undefined} */ positionContext) {
         const streamUsage = (0, Executor_ts_1.getStreamUsage)(this.validatedExecutionArgs, fieldDetailsList);
         if (streamUsage !== undefined) {
             if (!(this.validatedExecutionArgs.operation.operation !==

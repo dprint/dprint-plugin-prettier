@@ -450,7 +450,7 @@ class LazyResult {
     return this.async().then(onFulfilled, onRejected)
   }
 
-  toString() {
+  /** @returns {string} */ toString() {
     return this.css
   }
 

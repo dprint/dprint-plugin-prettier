@@ -24,7 +24,7 @@ function resolveCollection(CN, ctx, token, onError, /** @type {string | null} */
         coll.tag = tagName;
     return coll;
 }
-function composeCollection(CN, ctx, token, props, onError) {
+function composeCollection(CN, /** @type {import("yaml-cst-types").ComposeContext} */ ctx, /** @type {import("yaml-cst-types").Token} */ token, props, onError) {
     const tagToken = props.tag;
     const tagName = !tagToken
         ? null

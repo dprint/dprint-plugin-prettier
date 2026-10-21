@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.naturalCompare = naturalCompare;
-function naturalCompare(aStr, bStr) {
+/** @returns {number} */ function naturalCompare(/** @type {string} */ aStr, /** @type {string} */ bStr) {
     let aIndex = 0;
     let bIndex = 0;
     while (aIndex < aStr.length && bIndex < bStr.length) {
@@ -42,7 +42,7 @@ function naturalCompare(aStr, bStr) {
 }
 const DIGIT_0 = 48;
 const DIGIT_9 = 57;
-function isDigit(code) {
+/** @returns {boolean} */ function isDigit(/** @type {number} */ code) {
     return !isNaN(code) && DIGIT_0 <= code && code <= DIGIT_9;
 }
 //# sourceMappingURL=naturalCompare.js.map

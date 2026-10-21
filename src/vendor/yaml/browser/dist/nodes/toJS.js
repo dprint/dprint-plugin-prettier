@@ -10,7 +10,7 @@ import { hasAnchor } from './identity.js';
  *   `{ keep: true }` is not set, output should be suitable for JSON
  *   stringification.
  */
-function toJS(value, arg, ctx) {
+function toJS(value, /** @type {null | string} */ arg, ctx) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     if (Array.isArray(value))
         return value.map((v, i) => toJS(v, String(i), ctx));

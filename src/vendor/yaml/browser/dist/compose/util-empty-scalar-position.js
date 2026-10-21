@@ -1,5 +1,5 @@
 // @nts-check
-/** @returns {number} */ function emptyScalarPosition(/** @type {number} */ offset, /** @type {any[]} */ before, pos) {
+/** @returns {number} */ function emptyScalarPosition(/** @type {number} */ offset, /** @type {any[]} */ before, /** @type {null | number} */ pos) {
     if (before) {
         pos ?? (pos = before.length);
         for (let i = pos - 1; i >= 0; --i) {

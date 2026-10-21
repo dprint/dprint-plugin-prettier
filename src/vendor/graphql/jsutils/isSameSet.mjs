@@ -1,4 +1,4 @@
-export function isSameSet(setA, setB) {
+/** @returns {boolean} */ export function isSameSet(setA, setB) {
     if (setA.size !== setB.size) {
         return false;
     }

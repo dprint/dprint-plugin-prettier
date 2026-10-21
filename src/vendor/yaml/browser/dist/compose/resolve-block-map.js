@@ -6,7 +6,7 @@ import { flowIndentCheck } from './util-flow-indent-check.js';
 import { mapIncludes } from './util-map-includes.js';
 
 const startColMsg = 'All mapping items must start at the same column';
-function resolveBlockMap({ composeNode, composeEmptyNode }, ctx, bm, onError, tag) {
+function resolveBlockMap({ composeNode, composeEmptyNode }, /** @type {import("yaml-cst-types").ComposeContext} */ ctx, /** @type {import("yaml-cst-types").Token} */ bm, onError, tag) {
     const NodeClass = tag?.nodeClass ?? YAMLMap;
     const map = new NodeClass(ctx.schema);
     if (ctx.atRoot)

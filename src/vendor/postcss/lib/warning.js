@@ -1,9 +1,9 @@
 'use strict'
 
 class Warning {
-  constructor(text, opts = {}) {
-    this.type = 'warning'
-    this.text = text
+  constructor(/** @type {string} */ text, opts = {}) {
+    /** @type {string} */ this.type = 'warning'
+    /** @type {string} */ this.text = text
 
     if (opts.node && opts.node.source) {
       let range = opts.node.rangeBy(opts)
@@ -16,7 +16,7 @@ class Warning {
     for (let opt in opts) this[opt] = opts[opt]
   }
 
-  toString() {
+  /** @returns {string} */ toString() {
     if (this.node) {
       return this.node.error(this.text, {
         index: this.index,

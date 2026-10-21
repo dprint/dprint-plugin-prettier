@@ -36,7 +36,7 @@ class Stringifier {
     this.builder = builder
   }
 
-  atrule(node, semicolon) {
+  atrule(node, /** @type {undefined | boolean} */ semicolon) {
     let raws = node.raws
     let name = '@' + node.name
     let params = node.params ? this.rawValue(node, 'params') : ''
@@ -55,7 +55,7 @@ class Stringifier {
     }
   }
 
-  beforeAfter(node, detect) {
+  /** @returns {string} */ beforeAfter(node, /** @type {string} */ detect) {
     let value
     if (node.type === 'decl') {
       value = this.raw(node, null, 'beforeDecl')
@@ -84,7 +84,7 @@ class Stringifier {
     return value
   }
 
-  block(node, start) {
+  block(node, /** @type {string} */ start) {
     let between = this.raw(node, 'between', 'beforeOpen')
     this.builder(escapeHTMLInCSS(start + between) + '{', node, 'start')
 
@@ -124,7 +124,7 @@ class Stringifier {
     this.builder(escapeHTMLInCSS('/*' + left + node.text + right + '*/'), node)
   }
 
-  decl(node, semicolon) {
+  decl(node, /** @type {undefined | boolean} */ semicolon) {
     let raws = node.raws
     let between = this.raw(node, 'between', 'colon')
 
@@ -142,7 +142,7 @@ class Stringifier {
     this.body(node)
   }
 
-  raw(node, own, detect) {
+  raw(node, /** @type {null | string} */ own, /** @type {undefined | string} */ detect) {
     let value
     if (!detect) detect = own
 
@@ -196,7 +196,7 @@ class Stringifier {
     return value
   }
 
-  rawBeforeClose(root) {
+  /** @returns {undefined | string} */ rawBeforeClose(root) {
     let value
     root.walk(i => {
       if (i.nodes && i.nodes.length > 0) {
@@ -213,7 +213,7 @@ class Stringifier {
     return value
   }
 
-  rawBeforeComment(root, node) {
+  /** @returns {undefined | string} */ rawBeforeComment(root, node) {
     let value
     root.walkComments(i => {
       if (typeof i.raws.before !== 'undefined') {
@@ -232,7 +232,7 @@ class Stringifier {
     return value
   }
 
-  rawBeforeDecl(root, node) {
+  /** @returns {undefined | string} */ rawBeforeDecl(root, node) {
     let value
     root.walkDecls(i => {
       if (typeof i.raws.before !== 'undefined') {
@@ -251,7 +251,7 @@ class Stringifier {
     return value
   }
 
-  rawBeforeOpen(root) {
+  /** @returns {undefined | string} */ rawBeforeOpen(root) {
     let value
     root.walk(i => {
       if (i.type !== 'decl') {
@@ -262,7 +262,7 @@ class Stringifier {
     return value
   }
 
-  rawBeforeRule(root) {
+  /** @returns {undefined | string} */ rawBeforeRule(root) {
     let value
     root.walk(i => {
       if (i.nodes && (i.parent !== root || root.first !== i)) {
@@ -279,7 +279,7 @@ class Stringifier {
     return value
   }
 
-  rawColon(root) {
+  /** @returns {undefined | string} */ rawColon(root) {
     let value
     root.walkDecls(i => {
       if (typeof i.raws.between !== 'undefined') {
@@ -290,7 +290,7 @@ class Stringifier {
     return value
   }
 
-  rawEmptyBody(root) {
+  /** @returns {undefined | string} */ rawEmptyBody(root) {
     let value
     root.walk(i => {
       if (i.nodes && i.nodes.length === 0) {
@@ -301,7 +301,7 @@ class Stringifier {
     return value
   }
 
-  rawIndent(root) {
+  /** @returns {undefined | string} */ rawIndent(root) {
     if (root.raws.indent) return root.raws.indent
     let value
     root.walk(i => {
@@ -318,7 +318,7 @@ class Stringifier {
     return value
   }
 
-  rawSemicolon(root) {
+  /** @returns {undefined | boolean} */ rawSemicolon(root) {
     let value
     root.walk(i => {
       if (i.nodes && i.nodes.length && i.last.type === 'decl') {
@@ -329,7 +329,7 @@ class Stringifier {
     return value
   }
 
-  rawValue(node, prop) {
+  rawValue(node, /** @type {string} */ prop) {
     let value = node[prop]
     let raw = node.raws[prop]
     if (raw && raw.value === value) {
@@ -355,7 +355,7 @@ class Stringifier {
     }
   }
 
-  stringify(node, semicolon) {
+  stringify(node, /** @type {undefined | boolean} */ semicolon) {
     /* c8 ignore start */
     if (!this[node.type]) {
       throw new Error(

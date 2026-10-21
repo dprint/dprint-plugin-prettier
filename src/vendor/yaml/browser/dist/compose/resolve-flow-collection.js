@@ -10,7 +10,7 @@ import { mapIncludes } from './util-map-includes.js';
 
 const blockMsg = 'Block collections are not allowed within flow collections';
 const isBlock = /** @returns {boolean | undefined | null} */ (token) => token && (token.type === 'block-map' || token.type === 'block-seq');
-function resolveFlowCollection({ composeNode, composeEmptyNode }, ctx, fc, onError, tag) {
+function resolveFlowCollection({ composeNode, composeEmptyNode }, /** @type {import("yaml-cst-types").ComposeContext} */ ctx, /** @type {import("yaml-cst-types").Token} */ fc, onError, tag) {
     const isMap = fc.start.source === '{';
     const fcName = isMap ? 'flow map' : 'flow sequence';
     const NodeClass = (tag?.nodeClass ?? (isMap ? YAMLMap : YAMLSeq));

@@ -1,7 +1,7 @@
 // @nts-check
 import { isScalar } from '../nodes/identity.js';
 
-/** @returns {boolean} */ function mapIncludes(ctx, /** @type {any[]} */ items, search) {
+/** @returns {boolean} */ function mapIncludes(/** @type {import("yaml-cst-types").ComposeContext} */ ctx, /** @type {any[]} */ items, search) {
     const { uniqueKeys } = ctx.options;
     if (uniqueKeys === false)
         return false;

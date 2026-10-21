@@ -133,7 +133,7 @@ class Node {
     return this
   }
 
-  cleanRaws(keepBetween) {
+  cleanRaws(/** @type {undefined | boolean} */ keepBetween) {
     delete this.raws.before
     delete this.raws.after
     if (!keepBetween) delete this.raws.between
@@ -159,7 +159,7 @@ class Node {
     return cloned
   }
 
-  error(message, opts = {}) {
+  error(/** @type {string} */ message, opts = {}) {
     if (this.source) {
       let { end, start } = this.rangeBy(opts)
       return this.source.input.error(
@@ -247,7 +247,7 @@ class Node {
     return pos
   }
 
-  positionInside(index) {
+  positionInside(/** @type {number} */ index) {
     let column = this.source.start.column
     let line = this.source.start.line
     let inputString =
@@ -352,7 +352,7 @@ class Node {
     return { end, start }
   }
 
-  raw(prop, defaultType) {
+  /** @returns {string} */ raw(/** @type {string} */ prop, /** @type {undefined | string} */ defaultType) {
     let str = new Stringifier()
     return str.raw(this, prop, defaultType)
   }
@@ -452,7 +452,7 @@ class Node {
     return this.proxyCache
   }
 
-  toString(stringifier = stringify) {
+  /** @returns {string} */ toString(stringifier = stringify) {
     if (stringifier.stringify) stringifier = stringifier.stringify
     let result = ''
     stringifier(this, i => {

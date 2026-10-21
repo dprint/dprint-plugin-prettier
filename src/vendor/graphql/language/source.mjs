@@ -3,7 +3,7 @@ import { devAssert } from "../jsutils/devAssert.mjs";
 import { instanceOf } from "../jsutils/instanceOf.mjs";
 const sourceSymbol = Symbol('Source');
 export class Source {
-    constructor(/** @type {string} */ body, name = 'GraphQL request', locationOffset = { line: 1, column: 1 }) {
+    constructor(/** @type {string} */ body, /** @type {undefined | string} */ name = 'GraphQL request', locationOffset = { line: 1, column: 1 }) {
         this.__kind = sourceSymbol;
         /** @type {string} */ this.body = body;
         /** @type {string} */ this.name = name;

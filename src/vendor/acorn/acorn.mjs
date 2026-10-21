@@ -6283,7 +6283,7 @@ Parser.acorn = {
 //
 // [estree]: https://github.com/estree/estree
 
-function parse(input, options) {
+function parse(/** @type {string} */ input, options) {
   return Parser.parse(input, options)
 }
 
@@ -6291,14 +6291,14 @@ function parse(input, options) {
 // offset in a string. Useful for parsing mixed-language formats
 // that embed JavaScript expressions.
 
-function parseExpressionAt(input, pos, options) {
+function parseExpressionAt(/** @type {string} */ input, /** @type {number} */ pos, options) {
   return Parser.parseExpressionAt(input, pos, options)
 }
 
 // Acorn is organized as a tokenizer and a recursive-descent parser.
 // The `tokenizer` export provides an interface to the tokenizer.
 
-function tokenizer(input, options) {
+function tokenizer(/** @type {string} */ input, options) {
   return Parser.tokenizer(input, options)
 }
 

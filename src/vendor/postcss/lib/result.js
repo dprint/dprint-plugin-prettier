@@ -12,11 +12,11 @@ class Result {
     this.messages = []
     this.root = root
     this.opts = opts
-    this.css = ''
+    /** @type {string} */ this.css = ''
     this.map = undefined
   }
 
-  toString() {
+  /** @returns {string} */ toString() {
     return this.css
   }
 

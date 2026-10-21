@@ -137,7 +137,7 @@ export const QueryDocumentKeys = {
     DirectiveArgumentCoordinate: ['name', 'argumentName'],
 };
 const kindValues = new Set(Object.keys(QueryDocumentKeys));
-export function isNode(maybeNode) {
+/** @returns {boolean} */ export function isNode(maybeNode) {
     const maybeKind = maybeNode?.kind;
     return typeof maybeKind === 'string' && kindValues.has(maybeKind);
 }

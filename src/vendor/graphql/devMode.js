@@ -8,7 +8,7 @@ function enableDevMode() {
     devMode = true;
     (0, instanceOf_ts_1.enableDevInstanceOf)();
 }
-function isDevModeEnabled() {
+/** @returns {boolean} */ function isDevModeEnabled() {
     return devMode;
 }
 //# sourceMappingURL=devMode.js.map

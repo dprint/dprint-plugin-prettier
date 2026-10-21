@@ -59,7 +59,7 @@ export class GraphQLError extends Error {
     get [Symbol.toStringTag]() {
         return 'GraphQLError';
     }
-    toString() {
+    /** @returns {string} */ toString() {
         let output = this.message;
         if (this.nodes) {
             for (const node of this.nodes) {

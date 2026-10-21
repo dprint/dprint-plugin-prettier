@@ -23,7 +23,7 @@ class Directives {
         this.yaml = Object.assign({}, Directives.defaultYaml, yaml);
         this.tags = Object.assign({}, Directives.defaultTags, tags);
     }
-    clone() {
+    /** @returns {Directives} */ clone() {
         const copy = new Directives(this.yaml, this.tags);
         copy.docStart = this.docStart;
         return copy;
@@ -32,7 +32,7 @@ class Directives {
      * During parsing, get a Directives instance for the current document and
      * update the stream state according to the current version's spec.
      */
-    atDocument() {
+    /** @returns {Directives} */ atDocument() {
         const res = new Directives(this.yaml, this.tags);
         switch (this.yaml.version) {
             case '1.1':
@@ -141,14 +141,14 @@ class Directives {
      * Given a fully resolved tag, returns its printable string form,
      * taking into account current tag prefixes and defaults.
      */
-    tagString(tag) {
+    /** @returns {string} */ tagString(/** @type {string} */ tag) {
         for (const [handle, prefix] of Object.entries(this.tags)) {
             if (tag.startsWith(prefix))
                 return handle + escapeTagName(tag.substring(prefix.length));
         }
         return tag[0] === '!' ? tag : `!<${tag}>`;
     }
-    toString(doc) {
+    /** @returns {string} */ toString(doc) {
         const lines = this.yaml.explicit
             ? [`%YAML ${this.yaml.version || '1.2'}`]
             : [];

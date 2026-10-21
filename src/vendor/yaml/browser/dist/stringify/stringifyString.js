@@ -294,7 +294,7 @@ function plainString(item, ctx, onComment, onChompKeep) {
         ? str
         : foldFlowLines(str, indent, FOLD_FLOW, getFoldOptions(ctx, false));
 }
-function stringifyString(item, ctx, onComment, onChompKeep) {
+/** @returns {string} */ function stringifyString(item, ctx, onComment, onChompKeep) {
     const { implicitKey, inFlow } = ctx;
     const ss = typeof item.value === 'string'
         ? item

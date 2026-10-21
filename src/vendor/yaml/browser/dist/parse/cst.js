@@ -21,7 +21,7 @@ const isScalar = (token) => !!token &&
         token.type === 'block-scalar');
 /* istanbul ignore next */
 /** Get a printable representation of a lexer token */
-function prettyToken(token) {
+/** @returns {string} */ function prettyToken(/** @type {string} */ token) {
     switch (token) {
         case BOM:
             return '<BOM>';
