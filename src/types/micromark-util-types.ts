@@ -80,9 +80,12 @@ export type ContentType = 'content' | 'document' | 'flow' | 'string' | 'text'
  * them nothing that `Token` does not declare (the fields that its extensions add to the interface are written in
  * it). The tokenizer's context is an object type, which is a record as it was, with what it holds typed, as the
  * context that constructs that interrupt are given is a record made with `Object.create` of it; its functions are
- * properties rather than methods, so that they are called as what they are. `Event` is in micromark-events.js; and
- * the types of constructs, extensions, the parser, the compiler and the state functions are `any`, which is what
- * nts made of them before, as some of them are created as something else than they say.)
+ * properties rather than methods, so that they are called as what they are. `Event` is in micromark-events.js. A state
+ * function names its own type, which nts compiles to a delegate that gives itself; constructs, the parser and the
+ * combined extensions are object types, which are records with what they hold typed, as constructs are also written
+ * out by code that is not checked, and their tokenizers are given the tokenize context first. The types of the
+ * extensions as they are written, the compiler and the container state are `any`, which is what nts made of them
+ * before, as some of them are created as something else than they say.)
  *
  * `_bufferIndex` is `-1` when `_index` points to a code chunk and it’s a
  * non-negative integer when pointing to a string chunk.
@@ -380,10 +383,7 @@ export interface Effects {
  * @returns
  *   Next state.
  */
-// (dprint-plugin-prettier: `(code: Code) => State | undefined` in the package, a function type that names itself,
-// which nts has no C# type for, so the next state is held as anything)
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type State = (code: Code) => any
+export type State = (code: Code) => State | undefined
 
 /**
  * A resolver handles and cleans events coming from `tokenize`.
@@ -466,12 +466,39 @@ export type Previous = (this: TokenizeContext, code: Code) => boolean
 /**
  * An object describing how to parse a markdown construct.
  */
-export type Construct = any
+// (dprint-plugin-prettier: an object type rather than the package's interface, which nts compiles to a record whose
+// members have types, as constructs are written out by code that is not checked as well, and its functions that are
+// called on the tokenize context are given it first)
+export type Construct = {
+  add?: 'after' | 'before' | undefined
+  concrete?: boolean | undefined
+  continuation?: Construct | undefined
+  exit?: Exiter | undefined
+  name?: string | undefined
+  partial?: boolean | undefined
+  previous?: Previous | undefined
+  resolveAll?: Resolver | undefined
+  resolveTo?: Resolver | undefined
+  resolve?: Resolver | undefined
+  tokenize: Tokenizer
+}
 
 /**
  * Like a construct, but `tokenize` does not accept `ok` or `nok`.
  */
-export type InitialConstruct = any
+export type InitialConstruct = {
+  add?: 'after' | 'before' | undefined
+  concrete?: boolean | undefined
+  continuation?: Construct | undefined
+  exit?: Exiter | undefined
+  name?: string | undefined
+  partial?: boolean | undefined
+  previous?: Previous | undefined
+  resolveAll?: Resolver | undefined
+  resolveTo?: Resolver | undefined
+  resolve?: Resolver | undefined
+  tokenize: Initializer
+}
 
 /**
  * Several constructs, mapped from their initial codes.
@@ -679,7 +706,19 @@ export type NormalizedExtension = any
 /**
  * A full, filtereed, normalized, extension.
  */
-export type FullNormalizedExtension = any
+// (dprint-plugin-prettier: what `combineExtensions` makes of micromark's constructs and the extensions, a record of
+// records that hold an array of constructs for each code, written out as such rather than made from `Extension`)
+export type FullNormalizedExtension = {
+  attentionMarkers: {null: Array<Code>}
+  contentInitial: Record<string, Array<Construct>>
+  disable: {null: Array<string>}
+  document: Record<string, Array<Construct>>
+  flowInitial: Record<string, Array<Construct>>
+  flow: Record<string, Array<Construct>>
+  insideSpan: {null: Array<Pick<Construct, 'resolveAll'>>}
+  string: Record<string, Array<Construct>>
+  text: Record<string, Array<Construct>>
+}
 
 /**
  * Create a context.
@@ -689,7 +728,7 @@ export type FullNormalizedExtension = any
  * @returns
  *   Context.
  */
-export type Create = any
+export type Create = (from?: Omit<Point, '_bufferIndex' | '_index'> | undefined) => TokenizeContext
 
 /**
  * Config defining how to parse.
@@ -699,7 +738,16 @@ export type ParseOptions = any
 /**
  * A context object that helps w/ parsing markdown.
  */
-export type ParseContext = any
+export type ParseContext = {
+  constructs: FullNormalizedExtension
+  content: Create
+  document: Create
+  flow: Create
+  string: Create
+  text: Create
+  defined: Array<string>
+  lazy: Record<number, boolean>
+}
 
 /**
  * HTML compiler context.

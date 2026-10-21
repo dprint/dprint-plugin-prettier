@@ -55,13 +55,12 @@ export type Fragment = Parent & {
 
 export type Handles = Record<string, Handle>
 
-// a handler is called on the compile context with `call`, which a function of C# is not, so it is held as anything
-export type Handle = any
+// a handler is called on the compile context with `call`, which nts gives it first
+export type Handle = (this: CompileContext, token: Token) => undefined
 
-// called on the compile context with `call` as handlers are
-export type OnEnterError = any
+export type OnEnterError = (this: CompileContext, left: Token | undefined, right: Token) => undefined
 
-export type OnExitError = any
+export type OnExitError = (this: CompileContext, left: Token, right: Token) => undefined
 
 export type Options = ParseOptions & {
   mdastExtensions?: Array<Extension | Array<Extension>> | null | undefined
