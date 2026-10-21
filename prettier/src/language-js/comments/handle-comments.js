@@ -92,7 +92,11 @@ function handleOwnLineComment(context) {
     handleTSMappedTypeComments,
     handleBinaryCastExpressionComment,
     handleUnionTypeLeadingComments,
-  ].some(/** @returns {boolean | undefined} */ (fn) => fn(context));
+  ].some(
+    /** @returns {boolean | undefined} */ (
+      /** @type {(context: CommentContext) => boolean | undefined} */ fn,
+    ) => fn(context),
+  );
 }
 
 /**

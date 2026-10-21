@@ -11,7 +11,7 @@ var decodeEntity = require('./decode-entity')
 module.exports = parseEntities
 
 var own = {}.hasOwnProperty
-var fromCharCode = String.fromCharCode
+/** @type {(...codes: number[]) => string} */ var fromCharCode = String.fromCharCode
 var noop = Function.prototype
 
 // Default settings.
