@@ -225,7 +225,7 @@ class Parser {
             yield* this.pop();
     }
     /** @returns {import("yaml-cst-types").Token} */ get sourceToken() {
-        const st = {
+        /** @type {import("yaml-cst-types").Token} */ const st = {
             type: this.type,
             offset: this.offset,
             indent: this.indent,

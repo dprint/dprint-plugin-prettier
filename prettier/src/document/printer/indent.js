@@ -157,7 +157,7 @@ function makeAlign(indent, indentOptions, options) {
   }
 
   /** @type {IndentCommand} */
-  let command;
+  /** @type {IndentCommand} */ let command;
   if (typeof indentOptions === "number") {
     if (indentOptions < 0) {
       command = INDENT_COMMAND_DEDENT;
