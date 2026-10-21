@@ -189,6 +189,9 @@
     "../prettier/src/language-js",
     "./vendor/vnopts"
   ],
+  "mixinsComplete": [
+    "./vendor/babel-parser/index.js"
+  ],
   "mixins": {
     "./vendor/babel-parser/index.js": [
       [

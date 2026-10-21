@@ -44,8 +44,8 @@ import {
   return endLocation;
 }
 
-function printChild(path, options, print) {
-  const child = path.node;
+function printChild(/** @type {AstPath} */ path, options, print) {
+  /** @type {import("../parse/ast.js").Node} */ const child = path.node;
 
   if (hasPrettierIgnore(child)) {
     /** @type {number} */ const endLocation = getEndLocation(child);
@@ -173,7 +173,7 @@ function printBetweenLine(/** @type {import("../parse/ast.js").Node} */ prevNode
       breakParent,
 
       ...path.map(() => {
-        const childNode = path.node;
+        /** @type {import("../parse/ast.js").Node} */ const childNode = path.node;
         const prevBetweenLine = !childNode.prev
           ? ""
           : printBetweenLine(childNode.prev, childNode);
