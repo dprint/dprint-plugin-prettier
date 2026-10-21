@@ -5327,7 +5327,7 @@ function readEscapedChar(/** @type {string} */ input, /** @type {int} */ pos, /*
       }
     case 117:
       {
-        let code;
+        /** @type {number | null} */ let code;
         ({
           code,
           pos
@@ -5385,7 +5385,7 @@ function readEscapedChar(/** @type {string} */ input, /** @type {int} */ pos, /*
 }
 function readHexChar(/** @type {string} */ input, /** @type {int} */ pos, /** @type {int} */ lineStart, /** @type {int} */ curLine, /** @type {int} */ len, /** @type {boolean} */ forceLen, /** @type {boolean} */ throwOnInvalid, errors) {
   const initialPos = pos;
-  let n;
+  /** @type {number | null} */ let n;
   ({
     n,
     pos
@@ -7579,7 +7579,8 @@ class LValParser extends NodeUtils {
       });
       return;
     }
-    let key, isParenthesizedExpression;
+    /** @type {string} */ let key;
+    /** @type {boolean} */ let isParenthesizedExpression;
     if (typeof validity === "string") {
       key = validity;
       isParenthesizedExpression = type === "ParenthesizedExpression";
@@ -9684,7 +9685,7 @@ class StatementParser extends ExpressionParser {
     return this.finishNode(node, isBreak ? "BreakStatement" : "ContinueStatement");
   }
   verifyBreakContinue(/** @type {Node} */ node, /** @type {boolean} */ isBreak) {
-    let i;
+    /** @type {int} */ let i;
     for (i = 0; i < this.state.labels.length; ++i) {
       const lab = this.state.labels[i];
       if (node.label == null || lab.name === node.label.name) {
@@ -9725,7 +9726,7 @@ class StatementParser extends ExpressionParser {
   /** @returns {Node} */ parseForStatement(/** @type {Node} */ node) {
     this.next();
     this.state.labels.push(loopLabel);
-    let awaitAt = null;
+    /** @type {Position | null} */ let awaitAt = null;
     if (this.isContextual(92) && this.recordAwaitIfAllowed()) {
       awaitAt = this.state.startLoc;
       this.next();
@@ -9745,7 +9746,7 @@ class StatementParser extends ExpressionParser {
       const isLetOrUsing = startsWithLet && this.hasFollowingBindingAtom() || starsWithUsingDeclaration;
       if (this.match(70) || this.match(71) || isLetOrUsing) {
         const initNode = this.startNode();
-        let kind;
+        /** @type {string} */ let kind;
         if (startsWithAwaitUsing) {
           kind = "await using";
           if (!this.recordAwaitIfAllowed()) {
@@ -9830,8 +9831,8 @@ class StatementParser extends ExpressionParser {
     this.expect(2);
     this.state.labels.push(switchLabel);
     this.scope.enter(256);
-    let cur;
-    for (let sawDefault; !this.match(4);) {
+    /** @type {Node | undefined} */ let cur;
+    for (/** @type {boolean | undefined} */ let sawDefault; !this.match(4);) {
       if (this.match(57) || this.match(61)) {
         const isCase = this.match(57);
         if (cur) this.finishNode(cur, "SwitchCase");
@@ -10907,7 +10908,7 @@ class StatementParser extends ExpressionParser {
     return attrs;
   }
   maybeParseImportAttributes(/** @type {Node} */ node) {
-    let attributes;
+    /** @type {any[]} */ let attributes;
     if (this.match(72)) {
       if (this.hasPrecedingLineBreak() && this.lookaheadCharCode() === 40) {
         return;
@@ -14363,7 +14364,8 @@ function getParser(options, /** @type {string | undefined} */ input) {
   const pluginsMap = new Map();
   if (options?.plugins) {
     for (const plugin of options.plugins) {
-      let name, opts;
+      /** @type {string} */ let name;
+      /** @type {any} */ let opts;
       if (typeof plugin === "string") {
         name = plugin;
       } else {

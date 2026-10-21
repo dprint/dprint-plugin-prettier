@@ -522,8 +522,8 @@ var warnedAboutEcmaVersion = false;
   return options
 }
 
-function pushComment(options, /** @type {any[]} */ array) {
-  return function(/** @type {boolean} */ block, /** @type {string} */ text, /** @type {number} */ start, /** @type {number} */ end, startLoc, endLoc) {
+function pushComment(/** @type {AcornOptions} */ options, /** @type {any[]} */ array) {
+  return function(/** @type {boolean} */ block, /** @type {string} */ text, /** @type {number} */ start, /** @type {number} */ end, /** @type {Position | undefined} */ startLoc, /** @type {Position | undefined} */ endLoc) {
     var comment = {
       type: block ? "Block" : "Line",
       value: text,
@@ -1061,7 +1061,7 @@ pp$8.isUsing = /** @returns {boolean} */ /** @this {Parser} */ function(/** @typ
 // `if (foo) /blah/.exec(foo)`, where looking at the previous token
 // does not help.
 
-pp$8.parseStatement = /** @returns {Node} */ /** @this {Parser} */ function(/** @type {string | null} */ context, /** @type {boolean | undefined} */ topLevel, exports$1) {
+pp$8.parseStatement = /** @returns {Node} */ /** @this {Parser} */ function(/** @type {string | null} */ context, /** @type {boolean | undefined} */ topLevel, /** @type {Record<string, boolean> | undefined} */ exports$1) {
   var starttype = this.type, node = this.startNode(), kind;
 
   if (this.isLet(context)) {
@@ -1324,7 +1324,7 @@ pp$8.parseSwitchStatement = /** @returns {Node} */ /** @this {Parser} */ functio
   // nodes. `cur` is used to keep the node that we are currently
   // adding statements to.
 
-  var cur;
+  /** @type {Node | undefined} */ var cur;
   for (var sawDefault = false; this.type !== types$1.braceR;) {
     if (this.type === types$1._case || this.type === types$1._default) {
       var isCase = this.type === types$1._case;
@@ -1882,7 +1882,7 @@ pp$8.exitClassBody = /** @this {Parser} */ function() {
 
 // Parses module export declaration.
 
-pp$8.parseExportAllDeclaration = /** @returns {Node} */ /** @this {Parser} */ function(/** @type {Node} */ node, exports$1) {
+pp$8.parseExportAllDeclaration = /** @returns {Node} */ /** @this {Parser} */ function(/** @type {Node} */ node, /** @type {Record<string, boolean> | undefined} */ exports$1) {
   if (this.options.ecmaVersion >= 11) {
     if (this.eatContextual("as")) {
       node.exported = this.parseModuleExportName();
@@ -1900,7 +1900,7 @@ pp$8.parseExportAllDeclaration = /** @returns {Node} */ /** @this {Parser} */ fu
   return this.finishNode(node, "ExportAllDeclaration")
 };
 
-pp$8.parseExport = /** @returns {Node} */ /** @this {Parser} */ function(/** @type {Node} */ node, exports$1) {
+pp$8.parseExport = /** @returns {Node} */ /** @this {Parser} */ function(/** @type {Node} */ node, /** @type {Record<string, boolean> | undefined} */ exports$1) {
   this.next();
   // export * from '...'
   if (this.eat(types$1.star)) {
@@ -1974,7 +1974,7 @@ pp$8.parseExportDefaultDeclaration = /** @returns {Node} */ /** @this {Parser} *
   }
 };
 
-pp$8.checkExport = /** @this {Parser} */ function(exports$1, name, /** @type {number} */ pos) {
+pp$8.checkExport = /** @this {Parser} */ function(/** @type {Record<string, boolean> | undefined} */ exports$1, name, /** @type {number} */ pos) {
   if (!exports$1) { return }
   if (typeof name !== "string")
     { name = name.type === "Identifier" ? name.name : name.value; }
@@ -1983,7 +1983,7 @@ pp$8.checkExport = /** @this {Parser} */ function(exports$1, name, /** @type {nu
   exports$1[name] = true;
 };
 
-pp$8.checkPatternExport = /** @this {Parser} */ function(exports$1, /** @type {Node} */ pat) {
+pp$8.checkPatternExport = /** @this {Parser} */ function(/** @type {Record<string, boolean> | undefined} */ exports$1, /** @type {Node} */ pat) {
   var type = pat.type;
   if (type === "Identifier")
     { this.checkExport(exports$1, pat, pat.start); }
@@ -2008,7 +2008,7 @@ pp$8.checkPatternExport = /** @this {Parser} */ function(exports$1, /** @type {N
     { this.checkPatternExport(exports$1, pat.argument); }
 };
 
-pp$8.checkVariableExport = /** @this {Parser} */ function(exports$1, /** @type {any[]} */ decls) {
+pp$8.checkVariableExport = /** @this {Parser} */ function(/** @type {Record<string, boolean> | undefined} */ exports$1, /** @type {any[]} */ decls) {
   if (!exports$1) { return }
   for (var i = 0, list = decls; i < list.length; i += 1)
     {
@@ -2029,7 +2029,7 @@ pp$8.shouldParseExportStatement = /** @returns {boolean} */ /** @this {Parser} *
 
 // Parses a comma-separated list of module exports.
 
-pp$8.parseExportSpecifier = /** @returns {Node} */ /** @this {Parser} */ function(exports$1) {
+pp$8.parseExportSpecifier = /** @returns {Node} */ /** @this {Parser} */ function(/** @type {Record<string, boolean> | undefined} */ exports$1) {
   var node = this.startNode();
   node.local = this.parseModuleExportName();
 
@@ -2043,7 +2043,7 @@ pp$8.parseExportSpecifier = /** @returns {Node} */ /** @this {Parser} */ functio
   return this.finishNode(node, "ExportSpecifier")
 };
 
-pp$8.parseExportSpecifiers = /** @returns {any[]} */ /** @this {Parser} */ function(exports$1) {
+pp$8.parseExportSpecifiers = /** @returns {any[]} */ /** @this {Parser} */ function(/** @type {Record<string, boolean> | undefined} */ exports$1) {
   var nodes = [], first = true;
   // export { x, y as z } [from '...']
   this.expect(types$1.braceL);
@@ -2733,7 +2733,7 @@ pp$5.checkPropClash = /** @this {Parser} */ function(/** @type {Node} */ prop, p
   if (this.options.ecmaVersion >= 6 && (prop.computed || prop.method || prop.shorthand))
     { return }
   var key = prop.key;
-  var name;
+  /** @type {string} */ var name;
   switch (key.type) {
   case "Identifier": name = key.name; break
   case "Literal": name = String(key.value); break
