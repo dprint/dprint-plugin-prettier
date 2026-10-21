@@ -16885,7 +16885,7 @@ function Pg(e, t) {
   let t = e;
   return t.length >= 3 && t.charCodeAt(0) === 95 && t.charCodeAt(1) === 95 && t.charCodeAt(2) === 95 ? t.substr(1) : t;
 }
-/** @returns {string} */ function Pn(/** @type {xh | Th} */ e) {
+/** @returns {string} */ function Pn(/** @type {Kf | vh | xh | Th} */ e) {
   return h_(e.escapedText);
 }
 /** @returns {number | undefined} */ function df(/** @type {InstanceType<typeof xh>} */ e) {
@@ -17085,7 +17085,7 @@ function jd(e) {
   let t = e.kind;
   return !!(e.flags & 64) && (t === 212 || t === 213 || t === 214 || t === 236);
 }
-/** @returns {vh | Kf | xh} */ function gf(/** @type {vh | Kf | xh} */ e) {
+/** @returns {vh | Kf | xh} */ function gf(/** @type {Kf | vh | xh | Th} */ e) {
   return $f(e, 8);
 }
 function $g(e) {
@@ -17923,7 +17923,7 @@ function Ba(e) {
   return !!((e.templateFlags || 0) & 2048);
 }
 /** @returns {boolean} */ function Z2(/** @type {Kf | vh | xh | Th} */ e) {
-  return e && !!(I1(e) ? Dp(e) : Dp(e.head) || nn(e.templateSpans, /** @returns {boolean} */ (/** @type {Kf} */ t) => Dp(t.literal)));
+  return e && !!(I1(e) ? Dp(e) : Dp(e.head) || nn(e.templateSpans, /** @returns {boolean} */ (/** @type {Kf | vh | xh | Th} */ t) => Dp(t.literal)));
 }
 var C3 = new Map(
   Object.entries({
@@ -23210,7 +23210,7 @@ function Mv(e) {
 function Lv(e) {
   return Ml(e) && aa(e) && !!Gg(e);
 }
-/** @returns {boolean} */ function ph(/** @type {vh | Kf | xh} */ e, t = 63) {
+/** @returns {boolean} */ function ph(/** @type {Kf | vh | xh | Th} */ e, t = 63) {
   switch (e.kind) {
     case 218:
       return t & -2147483648 && Lv(e) ? !1 : (t & 1) !== 0;
@@ -23228,7 +23228,7 @@ function Lv(e) {
   }
   return !1;
 }
-/** @returns {vh | Kf | xh} */ function $f(/** @type {vh | Kf | xh} */ e, t = 63) {
+/** @returns {vh | Kf | xh} */ function $f(/** @type {Kf | vh | xh | Th} */ e, t = 63) {
   for (; ph(e, t);) e = e.expression;
   return e;
 }
@@ -23435,7 +23435,7 @@ function qv(e, t) {
 /** @returns {InstanceType<typeof Kf>} */ function Fv(/** @type {InstanceType<typeof d6>} */ e) {
   return Bn(e.statements, zv) || Vv(e);
 }
-/** @returns {InstanceType<typeof Kf> | undefined} */ function zv(/** @type {Kf} */ e) {
+/** @returns {InstanceType<typeof Kf> | undefined} */ function zv(/** @type {Kf | vh | xh | Th} */ e) {
   return (Rl(e) && Wv(e, 95)) || (Vf(e) && Hf(e.moduleReference)) || Wf(e) || Gf(e) || Yf(e) ? e : void 0;
 }
 function Vv(/** @type {d6} */ e) {
@@ -24351,7 +24351,7 @@ var na;
     }
   }
   let Gn = !1;
-  /** @returns {Kf | xh | vh | Th} */ function Pe(/** @type {Kf | vh} */ o, /** @type {boolean} */ p) {
+  /** @returns {Kf | xh | vh | Th} */ function Pe(/** @type {Kf | vh | xh | Th} */ o, /** @type {boolean} */ p) {
     if (!p) return o;
     q.assert(!o.jsDoc);
     let m = wy(E2(o, Ke), (g) => sl.parseJSDocComment(o, g.pos, g.end - g.pos));
@@ -24415,7 +24415,7 @@ var na;
     Rb(o, !0);
   }
   e.fixupParentReferences = L;
-  /** @returns {InstanceType<typeof d6>} */ function se(/** @type {string} */ o, p, m, g, x, /** @type {vh | undefined} */ P, Q, _e) {
+  /** @returns {InstanceType<typeof d6>} */ function se(/** @type {string} */ o, p, m, g, x, /** @type {Kf | vh | xh | Th | undefined} */ P, Q, _e) {
     let ee = y.createSourceFile(x, P, Q);
     if ((Hd(ee, 0, Ke.length), te(ee), !g && yh(ee) && ee.transformFlags & 67108864)) {
       let ce = ee;
@@ -24610,7 +24610,7 @@ var na;
     return u() === o ? (m && B(), !0) : (p ? De(p) : De(E._0_expected, rt(o)), !1);
   }
   let yt = Object.keys(_f).filter(/** @returns {boolean} */ (o) => o.length > 2);
-  function wt(/** @type {xh | Kf | vh} */ o) {
+  function wt(/** @type {Kf | vh | xh | Th} */ o) {
     if (H1(o)) {
       at(Ir(Ke, o.template.pos), o.template.end, E.Module_declaration_names_may_only_use_or_quoted_strings);
       return;
@@ -24656,7 +24656,7 @@ var na;
   function fn(/** @type {string | undefined} */ o) {
     for (let p of yt) if (o.length > p.length + 2 && xl(o, p)) return `${p} ${o.slice(p.length)}`;
   }
-  function Gl(/** @type {xh | Kf | Th} */ o, /** @type {vh | Kf | undefined} */ p, /** @type {Kf | vh | xh | undefined} */ m) {
+  function Gl(/** @type {Kf | vh | xh | Th} */ o, /** @type {Kf | vh | xh | Th | undefined} */ p, /** @type {Kf | vh | xh | Th | undefined} */ m) {
     if (u() === 60 && !t.hasPrecedingLineBreak()) {
       De(E.Decorators_must_precede_the_name_and_all_keywords_of_property_declarations);
       return;
@@ -25350,7 +25350,7 @@ var na;
     let o = O();
     return D(y.createTypeReferenceNode(ai(), no()), o);
   }
-  /** @returns {boolean} */ function ds(/** @type {Kf | vh} */ o) {
+  /** @returns {boolean} */ function ds(/** @type {Kf | vh | xh | Th} */ o) {
     switch (o.kind) {
       case 184:
         return ea(o.typeName);
@@ -26069,7 +26069,7 @@ var na;
         : D(y.createYieldExpression(void 0, void 0), o)
     );
   }
-  function Bo(/** @type {number} */ o, /** @type {xh} */ p, /** @type {boolean} */ m, /** @type {boolean} */ g, x) {
+  function Bo(/** @type {number} */ o, /** @type {Kf | vh | xh | Th} */ p, /** @type {boolean} */ m, /** @type {boolean} */ g, x) {
     q.assert(u() === 39, "parseSimpleArrowFunctionExpression should only have been called if we had a =>");
     /** @type {Kf} */ let P = y.createParameterDeclaration(void 0, void 0, p, void 0, void 0, void 0);
     D(P, p.pos);
@@ -26207,7 +26207,7 @@ var na;
     let x = o ? U(/** @returns {Kf | xh | vh} */ () => Vt(p)) : K(/** @returns {Kf | xh | vh} */ () => Vt(p));
     return ((Ft = g), $e(m), x);
   }
-  /** @returns {Kf | xh | vh | Th} */ function vu(/** @type {Kf | xh | vh} */ o, /** @type {number} */ p, /** @type {boolean} */ m) {
+  /** @returns {Kf | xh | vh | Th} */ function vu(/** @type {Kf | vh | xh | Th} */ o, /** @type {number} */ p, /** @type {boolean} */ m) {
     /** @type {vh | undefined} */ let g = ft(58);
     if (!g) return o;
     /** @type {vh | undefined} */ let x;
@@ -26230,7 +26230,7 @@ var na;
   /** @returns {boolean} */ function Yo(/** @type {number} */ o) {
     return o === 103 || o === 165;
   }
-  /** @returns {Kf | xh | vh | Th} */ function Ns(/** @type {number} */ o, /** @type {Kf | xh | vh} */ p, m) {
+  /** @returns {Kf | xh | vh | Th} */ function Ns(/** @type {number} */ o, /** @type {Kf | vh | xh | Th} */ p, m) {
     for (;;) {
       Ge();
       let g = Cp(u());
@@ -26251,10 +26251,10 @@ var na;
   /** @returns {InstanceType<typeof Kf>} */ function Xo(/** @type {Kf | vh | xh | Th} */ o, /** @type {Kf | vh | xh | Th} */ p) {
     return D(y.createSatisfiesExpression(o, p), o.pos);
   }
-  /** @returns {InstanceType<typeof Kf>} */ function Is(/** @type {xh | Kf | vh} */ o, /** @type {vh} */ p, /** @type {Kf | xh | vh} */ m, /** @type {number} */ g) {
+  /** @returns {InstanceType<typeof Kf>} */ function Is(/** @type {Kf | vh | xh | Th} */ o, /** @type {Kf | vh | xh | Th} */ p, /** @type {Kf | vh | xh | Th} */ m, /** @type {number} */ g) {
     return D(y.createBinaryExpression(o, p, m), g);
   }
-  /** @returns {InstanceType<typeof Kf>} */ function $o(/** @type {Kf | xh | vh} */ o, /** @type {Kf | vh} */ p) {
+  /** @returns {InstanceType<typeof Kf>} */ function $o(/** @type {Kf | vh | xh | Th} */ o, /** @type {Kf | vh | xh | Th} */ p) {
     return D(y.createAsExpression(o, p), o.pos);
   }
   /** @returns {InstanceType<typeof Kf>} */ function Qo() {
@@ -26439,7 +26439,7 @@ var na;
       p = y.createJsxText(t.getTokenValue(), lt === 13);
     return ((lt = t.scanJsxToken()), D(p, o));
   }
-  /** @returns {InstanceType<typeof Kf> | undefined} */ function wu(/** @type {Kf} */ o, /** @type {number} */ p) {
+  /** @returns {InstanceType<typeof Kf> | undefined} */ function wu(/** @type {Kf | vh | xh | Th} */ o, /** @type {number} */ p) {
     switch (p) {
       case 1:
         if (yv(o)) un(o, E.JSX_fragment_has_no_corresponding_closing_tag);
@@ -26463,7 +26463,7 @@ var na;
         return q.assertNever(p);
     }
   }
-  function ka(/** @type {Kf} */ o) {
+  function ka(/** @type {Kf | vh | xh | Th} */ o) {
     let p = [],
       m = O(),
       g = bt;
@@ -26549,7 +26549,7 @@ var na;
     let p = At();
     return (j(20), D(y.createJsxSpreadAttribute(p), o));
   }
-  /** @returns {InstanceType<typeof Kf>} */ function ac(/** @type {Kf} */ o, /** @type {boolean} */ p) {
+  /** @returns {InstanceType<typeof Kf>} */ function ac(/** @type {Kf | vh | xh | Th} */ o, /** @type {boolean} */ p) {
     let m = O();
     j(31);
     let g = Ms();
@@ -26593,7 +26593,7 @@ var na;
     }
     return !1;
   }
-  /** @returns {InstanceType<typeof Kf>} */ function oc(/** @type {number} */ o, /** @type {vh | xh | Kf} */ p, /** @type {vh | undefined} */ m) {
+  /** @returns {InstanceType<typeof Kf>} */ function oc(/** @type {number} */ o, /** @type {Kf | vh | xh | Th} */ p, /** @type {Kf | vh | xh | Th | undefined} */ m) {
     let g = ri(!0, !0, !0),
       x = m || js(p),
       P = x ? Le(p, m, g) : ae(p, g);
@@ -26606,7 +26606,7 @@ var na;
     }
     return D(P, o);
   }
-  /** @returns {InstanceType<typeof Kf>} */ function Iu(/** @type {number} */ o, /** @type {xh | Kf} */ p, /** @type {vh | undefined} */ m) {
+  /** @returns {InstanceType<typeof Kf>} */ function Iu(/** @type {number} */ o, /** @type {Kf | vh | xh | Th} */ p, /** @type {Kf | vh | xh | Th | undefined} */ m) {
     let g;
     if (u() === 24) g = Yt(80, !0, E.An_element_access_expression_should_take_an_argument);
     else {
@@ -26617,7 +26617,7 @@ var na;
     /** @type {Kf} */ let x = m || js(p) ? oe(p, m, g) : V(p, g);
     return D(x, o);
   }
-  /** @returns {Kf | xh | vh | Th} */ function on(/** @type {number} */ o, /** @type {vh | Kf | xh | undefined} */ p, m) {
+  /** @returns {Kf | xh | vh | Th} */ function on(/** @type {number} */ o, /** @type {Kf | vh | xh | Th | undefined} */ p, m) {
     for (;;) {
       let g,
         x = !1;
@@ -26650,11 +26650,11 @@ var na;
   /** @returns {boolean} */ function Sn() {
     return u() === 15 || u() === 16;
   }
-  function Wr(/** @type {number} */ o, /** @type {xh | Kf} */ p, m, g) {
+  function Wr(/** @type {number} */ o, /** @type {Kf | vh | xh | Th} */ p, m, g) {
     /** @type {Kf} */ let x = y.createTaggedTemplateExpression(p, g, u() === 15 ? (Nt(!0), $n()) : ya(!0));
     return ((m || p.flags & 64) && (x.flags |= 64), (x.questionDotToken = m), D(x, o));
   }
-  /** @returns {Kf | xh | vh | Th} */ function Js(/** @type {number} */ o, /** @type {Kf | xh | vh} */ p) {
+  /** @returns {Kf | xh | vh | Th} */ function Js(/** @type {number} */ o, /** @type {Kf | vh | xh | Th} */ p) {
     for (;;) {
       p = on(o, p, !0);
       let m,
@@ -27259,7 +27259,7 @@ var na;
     }
     return kc();
   }
-  /** @returns {boolean} */ function Ic(/** @type {Kf | vh} */ o) {
+  /** @returns {boolean} */ function Ic(/** @type {Kf | vh | xh | Th} */ o) {
     return o.kind === 138;
   }
   /** @returns {InstanceType<typeof Kf>} */ function Ui() {
@@ -27470,7 +27470,7 @@ var na;
       }
     });
   }
-  /** @returns {InstanceType<typeof Kf>} */ function qc(/** @type {number} */ o, /** @type {boolean} */ p, m, /** @type {vh | undefined} */ g, /** @type {xh | Kf} */ x, P, Q, _e) {
+  /** @returns {InstanceType<typeof Kf>} */ function qc(/** @type {number} */ o, /** @type {boolean} */ p, m, /** @type {Kf | vh | xh | Th | undefined} */ g, /** @type {Kf | vh | xh | Th} */ x, P, Q, _e) {
     let ee = g ? 1 : 0,
       te = nn(m, ml) ? 2 : 0,
       ce = mn(),
@@ -27480,7 +27480,7 @@ var na;
       Xt = y.createMethodDeclaration(m, g, x, P, ce, Ue, Re, Ne);
     return ((Xt.exclamationToken = Q), Pe(D(Xt, o), p));
   }
-  /** @returns {InstanceType<typeof Kf>} */ function Na(/** @type {number} */ o, /** @type {boolean} */ p, m, /** @type {xh | Kf | Th | undefined} */ g, /** @type {vh | undefined} */ x) {
+  /** @returns {InstanceType<typeof Kf>} */ function Na(/** @type {number} */ o, /** @type {boolean} */ p, m, /** @type {Kf | vh | xh | Th | undefined} */ g, /** @type {Kf | vh | xh | Th | undefined} */ x) {
     let P = !x && !t.hasPrecedingLineBreak() ? ft(54) : void 0,
       Q = wr(),
       _e = Pt(90112, Er);
@@ -27777,7 +27777,7 @@ var na;
     /** @type {Kf} */ let te = y.createImportDeclaration(m, Q, _e, ee);
     return Pe(D(te, o), p);
   }
-  /** @returns {InstanceType<typeof Kf> | undefined} */ function Zc(/** @type {xh | undefined} */ o, /** @type {number} */ p, /** @type {number | undefined} */ m, g = !1) {
+  /** @returns {InstanceType<typeof Kf> | undefined} */ function Zc(/** @type {Kf | vh | xh | Th | undefined} */ o, /** @type {number} */ p, /** @type {number | undefined} */ m, g = !1) {
     /** @type {Kf | undefined} */ let x;
     return ((o || u() === 42 || u() === 19) && ((x = mp(o, p, m, g)), j(161)), x);
   }
@@ -27817,14 +27817,14 @@ var na;
   /** @returns {boolean} */ function fp() {
     return u() === 28 || u() === 161;
   }
-  /** @returns {InstanceType<typeof Kf>} */ function dp(/** @type {number} */ o, /** @type {boolean} */ p, m, /** @type {xh} */ g, /** @type {boolean} */ x) {
+  /** @returns {InstanceType<typeof Kf>} */ function dp(/** @type {number} */ o, /** @type {boolean} */ p, m, /** @type {Kf | vh | xh | Th} */ g, /** @type {boolean} */ x) {
     j(64);
     let P = Fi();
     en();
     /** @type {Kf} */ let Q = y.createImportEqualsDeclaration(m, x, g, P);
     return Pe(D(Q, o), p);
   }
-  /** @returns {InstanceType<typeof Kf>} */ function mp(/** @type {xh | undefined} */ o, /** @type {number} */ p, /** @type {number | undefined} */ m, /** @type {boolean} */ g) {
+  /** @returns {InstanceType<typeof Kf>} */ function mp(/** @type {Kf | vh | xh | Th | undefined} */ o, /** @type {number} */ p, /** @type {number | undefined} */ m, /** @type {boolean} */ g) {
     /** @type {Kf | undefined} */ let x;
     return (
       (!o || Je(28)) &&
@@ -29080,7 +29080,7 @@ function o6(e, /** @type {string} */ t) {
   }
   return s;
 }
-/** @returns {boolean} */ function mi(/** @type {xh} */ e, /** @type {xh} */ t) {
+/** @returns {boolean} */ function mi(/** @type {Kf | vh | xh | Th} */ e, /** @type {Kf | vh | xh | Th} */ t) {
   return e.kind !== t.kind
     ? !1
     : e.kind === 80
@@ -29203,7 +29203,7 @@ var Kf = class {
     this.assertHasRealPosition();
     let t = this.getChildren(e);
     if (!t.length) return;
-    let a = Em(t, /** @returns {boolean} */ (/** @type {vh} */ s) => s.kind < 310 || s.kind > 352);
+    let a = Em(t, /** @returns {boolean} */ (/** @type {Kf | vh | xh | Th} */ s) => s.kind < 310 || s.kind > 352);
     return a.kind < 167 ? a : a.getFirstToken(e);
   }
   getLastToken(e) {
@@ -29871,8 +29871,8 @@ var v6 = ts["5.0"],
 /** @returns {boolean} */ function Dh(/** @type {Kf | vh | xh | Th} */ e) {
   return e.kind !== ye.SemicolonClassElement;
 }
-/** @returns {boolean} */ function Fe(/** @type {number} */ e, /** @type {Kf} */ t) {
-  return rr(t)?.some(/** @returns {boolean} */ (/** @type {vh} */ s) => s.kind === e) === !0;
+/** @returns {boolean} */ function Fe(/** @type {number} */ e, /** @type {Kf | vh | xh | Th} */ t) {
+  return rr(t)?.some(/** @returns {boolean} */ (/** @type {Kf | vh | xh | Th} */ s) => s.kind === e) === !0;
 }
 /** @returns {InstanceType<typeof vh> | null} */ function Ph(/** @type {InstanceType<typeof Kf>} */ e) {
   let t = rr(e);
@@ -30084,7 +30084,7 @@ var id = class extends Error {
   });
   return new id(t, a.fileName, { end: b, start: h });
 }
-/** @returns {boolean} */ function M6(/** @type {Kf | vh} */ e, /** @type {d6} */ t) {
+/** @returns {boolean} */ function M6(/** @type {Kf | vh | xh | Th} */ e, /** @type {d6} */ t) {
   return e.kind === ye.EndOfFileToken ? !!e.jsDoc : e.getWidth(t) !== 0;
 }
 /** @returns {InstanceType<typeof vh>} */ function L6(/** @type {any[] | undefined} */ e, /** @type {(node: any, index: number) => any} */ t) {
@@ -30123,7 +30123,7 @@ var id = class extends Error {
       return !1;
   }
 }
-function Rh(/** @type {Kf} */ e) {
+function Rh(/** @type {Kf | vh | xh | Th} */ e) {
   let t = rr(e),
     a = e;
   for (; (!t || t.length === 0) && Si(a.parent);) {
@@ -30161,7 +30161,7 @@ function B6(e) {
 function q6(e) {
   return od(e.name);
 }
-function F6(/** @type {Kf} */ e) {
+function F6(/** @type {Kf | vh | xh | Th} */ e) {
   return ff(e.parent, xf);
 }
 /** @returns {boolean} */ function z6(/** @type {Kf | vh | xh | Th} */ e) {
@@ -30303,12 +30303,12 @@ function Fh(/** @type {d6 | Kf | xh | vh | Th} */ e) {
   if (e.parent?.kind === ve.ObjectLiteralExpression)
     for (let a of e.modifiers ?? []) Ka(a) || t.includes(a) || qh(e, a);
 }
-function qh(/** @type {Kf} */ e, /** @type {vh} */ t) {
+function qh(/** @type {Kf | vh | xh | Th} */ e, /** @type {Kf | vh | xh | Th} */ t) {
   if ((t.kind !== ve.AsyncKeyword || e.kind !== ve.MethodDeclaration) && e.parent.kind === ve.ObjectLiteralExpression)
     throw ue(t, `'${rt(t.kind)}' modifier cannot be used here.`);
 }
 var G6 = ts["5.9"];
-/** @returns {string | null} */ function P_(/** @type {Kf | undefined} */ e) {
+/** @returns {string | null} */ function P_(/** @type {Kf | vh | xh | Th | undefined} */ e) {
   return e
     ? G6
       ? e.phaseModifier === Ae.TypeKeyword
@@ -30327,7 +30327,7 @@ function Wh(/** @type {d6 | Kf | xh | vh | Th} */ e, /** @type {d6 | Kf | undefi
   let s = e;
   switch (s.kind) {
     case be.SwitchStatement:
-      if (s.caseBlock.clauses.filter(/** @returns {boolean} */ (/** @type {Kf} */ f) => f.kind === be.DefaultClause).length > 1)
+      if (s.caseBlock.clauses.filter(/** @returns {boolean} */ (/** @type {Kf | vh | xh | Th} */ f) => f.kind === be.DefaultClause).length > 1)
         throw ue(s, "A 'default' clause cannot appear more than once in a 'switch' statement.");
       break;
     case be.ThrowStatement:
@@ -30578,7 +30578,7 @@ function Wh(/** @type {d6 | Kf | xh | vh | Th} */ e, /** @type {d6 | Kf | undefi
     }
   }
 }
-function Y6(/** @type {Kf} */ e) {
+function Y6(/** @type {Kf | vh | xh | Th} */ e) {
   let { initializer: t, kind: a } = e,
     s = a === be.ForInStatement ? "for...in" : "for...of";
   if (eh(t)) {
@@ -30590,7 +30590,7 @@ function Y6(/** @type {Kf} */ e) {
   } else if (!Bl(t) && t.kind !== be.ObjectLiteralExpression && t.kind !== be.ArrayLiteralExpression)
     throw ue(t, `The left-hand side of a '${s}' statement must be a variable or a property access.`);
 }
-function Vh(/** @type {Kf} */ e, /** @type {boolean} */ t) {
+function Vh(/** @type {Kf | vh | xh | Th} */ e, /** @type {boolean} */ t) {
   if (!t && e.moduleSpecifier == null) throw ue(e, "Module specifier must be a string literal.");
   if (e.moduleSpecifier && e.moduleSpecifier.kind !== be.StringLiteral)
     throw ue(e.moduleSpecifier, "Module specifier must be a string literal.");
@@ -30669,7 +30669,7 @@ var Fl = class {
       t
     );
   }
-  convertBindingNameWithTypeAnnotation(/** @type {xh | Kf} */ t, /** @type {Kf | vh | undefined} */ a, /** @type {Kf | undefined} */ s) {
+  convertBindingNameWithTypeAnnotation(/** @type {Kf | vh | xh | Th} */ t, /** @type {Kf | vh | xh | Th | undefined} */ a, /** @type {Kf | vh | xh | Th | undefined} */ s) {
     let f = this.convertPattern(t);
     return (
       a && ((f.typeAnnotation = this.convertTypeAnnotation(a, s)), this.fixParentLocation(f, f.typeAnnotation.range)),
@@ -30679,7 +30679,7 @@ var Fl = class {
   convertBodyExpressions(t, /** @type {d6 | Kf} */ a) {
     let s = Oh(a);
     return t
-      .map((/** @type {Kf} */ f) => {
+      .map((/** @type {Kf | vh | xh | Th} */ f) => {
         let h = this.convertChild(f);
         if (s) {
           if (h?.expression && Ll(f) && Lr(f.expression)) {
@@ -30692,7 +30692,7 @@ var Fl = class {
       })
       .filter((f) => f);
   }
-  convertChainExpression(t, /** @type {Kf} */ a) {
+  convertChainExpression(t, /** @type {Kf | vh | xh | Th} */ a) {
     let { child: s, isOptional: f } =
         t.type === A.MemberExpression
           ? { child: t.object, isOptional: t.optional }
@@ -30711,22 +30711,22 @@ var Fl = class {
     }
     return this.createNode(a, { type: A.ChainExpression, expression: t });
   }
-  convertChild(/** @type {Kf | xh | vh | Th | undefined} */ t, /** @type {Kf | undefined} */ a) {
+  convertChild(/** @type {Kf | xh | vh | Th | undefined} */ t, /** @type {Kf | vh | xh | Th | undefined} */ a) {
     return this.converter(t, a, !1);
   }
-  convertChildren(/** @type {any[]} */ t, /** @type {Kf | undefined} */ a) {
-    return t.map((/** @type {Kf | xh | vh} */ s) => this.converter(s, a, !1));
+  convertChildren(/** @type {any[]} */ t, /** @type {Kf | vh | xh | Th | undefined} */ a) {
+    return t.map((/** @type {Kf | vh | xh | Th} */ s) => this.converter(s, a, !1));
   }
-  convertPattern(/** @type {xh | Kf} */ t, a) {
+  convertPattern(/** @type {Kf | vh | xh | Th} */ t, a) {
     return this.converter(t, a, !0);
   }
-  convertTypeAnnotation(/** @type {vh | Kf} */ t, /** @type {Kf | undefined} */ a) {
+  convertTypeAnnotation(/** @type {Kf | vh | xh | Th} */ t, /** @type {Kf | vh | xh | Th | undefined} */ a) {
     let s = a?.kind === w.FunctionType || a?.kind === w.ConstructorType ? 2 : 1,
       h = [t.getFullStart() - s, t.end],
       b = Zr(h, this.ast);
     return { type: A.TSTypeAnnotation, loc: b, range: h, typeAnnotation: this.convertChild(t) };
   }
-  convertTypeArguments(/** @type {Kf} */ t) {
+  convertTypeArguments(/** @type {Kf | vh | xh | Th} */ t) {
     let { typeArguments: a } = t;
     if (!a) return;
     let s = ir(a, this.ast, this.ast),
@@ -30736,7 +30736,7 @@ var Fl = class {
       this.createNode(t, { type: A.TSTypeParameterInstantiation, range: f, params: this.convertChildren(a) })
     );
   }
-  convertTypeParameters(/** @type {Kf} */ t) {
+  convertTypeParameters(/** @type {Kf | vh | xh | Th} */ t) {
     let { typeParameters: a } = t;
     if (!a) return;
     let s = ir(a, this.ast, this.ast),
@@ -30748,13 +30748,13 @@ var Fl = class {
   }
   convertParameters(t) {
     return t?.length
-      ? t.map((/** @type {Kf} */ a) => {
+      ? t.map((/** @type {Kf | vh | xh | Th} */ a) => {
           let s = this.convertChild(a);
           return ((s.decorators = this.convertChildren(wi(a) ?? [])), s);
         })
       : [];
   }
-  converter(/** @type {d6 | Kf | xh | vh | Th | undefined} */ t, /** @type {Kf | undefined} */ a, /** @type {boolean | undefined} */ s) {
+  converter(/** @type {d6 | Kf | xh | vh | Th | undefined} */ t, /** @type {Kf | vh | xh | Th | undefined} */ a, /** @type {boolean | undefined} */ s) {
     if (!t) return null;
     let f = this.allowPattern;
     s != null && (this.allowPattern = s);
@@ -30763,15 +30763,15 @@ var Fl = class {
     let b = this.convertNode(t, h);
     return (this.registerTSNodeInNodeMap(t, b), (this.allowPattern = f), b);
   }
-  convertImportAttributes(/** @type {Kf} */ t) {
+  convertImportAttributes(/** @type {Kf | vh | xh | Th} */ t) {
     let a = t.attributes ?? t.assertClause;
     return this.convertChildren(a?.elements ?? []);
   }
-  convertJSXIdentifier(/** @type {xh} */ t) {
+  convertJSXIdentifier(/** @type {Kf | vh | xh | Th} */ t) {
     let a = this.createNode(t, { type: A.JSXIdentifier, name: t.getText() });
     return (this.registerTSNodeInNodeMap(t, a), a);
   }
-  convertJSXNamespaceOrIdentifier(/** @type {xh} */ t) {
+  convertJSXNamespaceOrIdentifier(/** @type {Kf | vh | xh | Th} */ t) {
     if (t.kind === Ae.JsxNamespacedName) {
       let f = this.createNode(t, {
         type: A.JSXNamespacedName,
@@ -30794,7 +30794,7 @@ var Fl = class {
     }
     return this.convertJSXIdentifier(t);
   }
-  convertJSXTagName(/** @type {xh} */ t, /** @type {Kf} */ a) {
+  convertJSXTagName(/** @type {Kf | vh | xh | Th} */ t, /** @type {Kf | vh | xh | Th} */ a) {
     let s;
     switch (t.kind) {
       case w.PropertyAccessExpression:
@@ -30812,7 +30812,7 @@ var Fl = class {
     }
     return (this.registerTSNodeInNodeMap(t, s), s);
   }
-  convertMethodSignature(/** @type {Kf} */ t) {
+  convertMethodSignature(/** @type {Kf | vh | xh | Th} */ t) {
     return this.createNode(t, {
       type: A.TSMethodSignature,
       accessibility: ki(t),
@@ -31009,7 +31009,7 @@ var Fl = class {
           ? this.createNode(t, {
               type: A.ArrayPattern,
               decorators: [],
-              elements: t.elements.map((/** @type {xh | Kf} */ s) => this.convertPattern(s)),
+              elements: t.elements.map((/** @type {Kf | vh | xh | Th} */ s) => this.convertPattern(s)),
               optional: !1,
               typeAnnotation: void 0,
             })
@@ -31020,7 +31020,7 @@ var Fl = class {
               type: A.ObjectPattern,
               decorators: [],
               optional: !1,
-              properties: t.properties.map((/** @type {Kf} */ s) => this.convertPattern(s)),
+              properties: t.properties.map((/** @type {Kf | vh | xh | Th} */ s) => this.convertPattern(s)),
               typeAnnotation: void 0,
             })
           : this.createNode(t, { type: A.ObjectExpression, properties: this.convertChildren(t.properties) });
@@ -31220,7 +31220,7 @@ var Fl = class {
         return this.createNode(t, {
           type: A.ArrayPattern,
           decorators: [],
-          elements: t.elements.map((/** @type {Kf} */ s) => this.convertPattern(s)),
+          elements: t.elements.map((/** @type {Kf | vh | xh | Th} */ s) => this.convertPattern(s)),
           optional: !1,
           typeAnnotation: void 0,
         });
@@ -31231,7 +31231,7 @@ var Fl = class {
           type: A.ObjectPattern,
           decorators: [],
           optional: !1,
-          properties: t.elements.map((/** @type {Kf} */ s) => this.convertPattern(s)),
+          properties: t.elements.map((/** @type {Kf | vh | xh | Th} */ s) => this.convertPattern(s)),
           typeAnnotation: void 0,
         });
       case w.BindingElement: {
@@ -31328,7 +31328,7 @@ var Fl = class {
       case w.TemplateExpression: {
         let s = this.createNode(t, { type: A.TemplateLiteral, expressions: [], quasis: [this.convertChild(t.head)] });
         return (
-          t.templateSpans.forEach((/** @type {Kf} */ f) => {
+          t.templateSpans.forEach((/** @type {Kf | vh | xh | Th} */ f) => {
             (s.expressions.push(this.convertChild(f.expression)), s.quasis.push(this.convertChild(f.literal)));
           }),
           s
@@ -31417,8 +31417,8 @@ var Fl = class {
       case w.ClassDeclaration:
       case w.ClassExpression: {
         let s = t.kind === w.ClassDeclaration ? A.ClassDeclaration : A.ClassExpression,
-          f = t.heritageClauses?.find(/** @returns {boolean} */ (/** @type {Kf} */ v) => v.token === w.ExtendsKeyword),
-          h = t.heritageClauses?.find(/** @returns {boolean} */ (/** @type {Kf} */ v) => v.token === w.ImplementsKeyword),
+          f = t.heritageClauses?.find(/** @returns {boolean} */ (/** @type {Kf | vh | xh | Th} */ v) => v.token === w.ExtendsKeyword),
+          h = t.heritageClauses?.find(/** @returns {boolean} */ (/** @type {Kf | vh | xh | Th} */ v) => v.token === w.ImplementsKeyword),
           b = this.createNode(t, {
             type: s,
             abstract: Fe(w.AbstractKeyword, t),
@@ -31960,8 +31960,8 @@ var Fl = class {
       }
       case w.InterfaceDeclaration: {
         let s =
-            t.heritageClauses?.flatMap((/** @type {Kf} */ h) =>
-              h.token === w.ExtendsKeyword ? h.types.map((/** @type {Kf} */ b) => this.convertChild(b, t)) : [],
+            t.heritageClauses?.flatMap((/** @type {Kf | vh | xh | Th} */ h) =>
+              h.token === w.ExtendsKeyword ? h.types.map((/** @type {Kf | vh | xh | Th} */ b) => this.convertChild(b, t)) : [],
             ) ?? [],
           f = this.createNode(t, {
             type: A.TSInterfaceDeclaration,
@@ -32306,7 +32306,7 @@ var Fl = class {
       s
     );
   }
-  fixExports(/** @type {Kf} */ t, a) {
+  fixExports(/** @type {Kf | vh | xh | Th} */ t, a) {
     let f = Si(t) && !Lr(t.name) ? Rh(t) : rr(t);
     if (f?.[0].kind === w.ExportKeyword) {
       this.registerTSNodeInNodeMap(t, a);
