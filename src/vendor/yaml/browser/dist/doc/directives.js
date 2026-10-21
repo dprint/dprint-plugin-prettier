@@ -17,9 +17,9 @@ class Directives {
          * The directives-end/doc-start marker `---`. If `null`, a marker may still be
          * included in the document's stringified representation.
          */
-        this.docStart = null;
+        /** @type {boolean | null} */ this.docStart = null;
         /** The doc-end marker `...`.  */
-        this.docEnd = false;
+        /** @type {boolean} */ this.docEnd = false;
         this.yaml = Object.assign({}, Directives.defaultYaml, yaml);
         this.tags = Object.assign({}, Directives.defaultTags, tags);
     }
@@ -52,6 +52,7 @@ class Directives {
     /**
      * @param onError - May be called even if the action was successful
      * @returns `true` on success
+     * @returns {boolean}
      * @returns {boolean}
      */
     add(/** @type {string} */ line, onError) {
@@ -100,6 +101,7 @@ class Directives {
      *
      * @returns Resolved tag, which may also be the non-specific tag `'!'` or a
      *   `'!local'` tag, or `null` if unresolvable.
+     * @returns {string | null}
      * @returns {string | null}
      */
     tagName(/** @type {string} */ source, onError) {

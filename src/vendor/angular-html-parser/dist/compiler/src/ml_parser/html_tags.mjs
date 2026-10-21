@@ -36,7 +36,7 @@ var HtmlTagDefinition = class {
 		return this.contentType;
 	}
 };
-let DEFAULT_TAG_DEFINITION;
+/** @type {HtmlTagDefinition | undefined} */ let DEFAULT_TAG_DEFINITION;
 let TAG_DEFINITIONS;
 /** @returns {HtmlTagDefinition} */ function getHtmlTagDefinition(/** @type {string} */ tagName) {
 	if (!TAG_DEFINITIONS) {

@@ -24,9 +24,9 @@ var ParseLocation = class ParseLocation {
 	/** @returns {ParseLocation} */ moveBy(/** @type {number} */ delta) {
 		const source = this.file.content;
 		const len = source.length;
-		let offset = this.offset;
-		let line = this.line;
-		let col = this.col;
+		/** @type {number} */ let offset = this.offset;
+		/** @type {number} */ let line = this.line;
+		/** @type {number} */ let col = this.col;
 		while (offset > 0 && delta < 0) {
 			offset--;
 			delta++;

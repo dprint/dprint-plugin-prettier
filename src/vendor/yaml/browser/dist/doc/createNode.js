@@ -1,8 +1,9 @@
+// @nts-check
 import { Alias } from '../nodes/Alias.js';
 import { isNode, isPair, MAP, SEQ, isDocument } from '../nodes/identity.js';
 import { Scalar } from '../nodes/Scalar.js';
 
-const defaultTagPrefix = 'tag:yaml.org,2002:';
+/** @type {string} */ const defaultTagPrefix = 'tag:yaml.org,2002:';
 function findTagObject(value, tagName, tags) {
     if (tagName) {
         const match = tags.filter(t => t.tag === tagName);

@@ -22,7 +22,7 @@ class YAMLMap extends Collection {
     /** @returns {string} */ static get tagName() {
         return 'tag:yaml.org,2002:map';
     }
-    constructor(schema) {
+    constructor(/** @type {import("../schema/Schema.js").Schema | undefined} */ schema) {
         super(MAP, schema);
         this.items = [];
     }

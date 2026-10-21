@@ -15,7 +15,7 @@ let TagContentType = /* @__PURE__ */ function(TagContentType) {
 }({});
 /** @returns {any[]} */ function splitNsName(/** @type {string} */ elementName, fatal = true) {
 	if (elementName[0] != ":") return [null, elementName];
-	const colonIndex = elementName.indexOf(":", 1);
+	/** @type {number} */ const colonIndex = elementName.indexOf(":", 1);
 	if (colonIndex === -1) {
 		if (fatal) throw new Error(`Unsupported format "${elementName}" expecting ":namespace:name"`);
 		else return [null, elementName];

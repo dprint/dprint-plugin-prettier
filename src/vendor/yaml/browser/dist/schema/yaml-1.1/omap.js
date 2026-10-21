@@ -1,3 +1,4 @@
+// @nts-check
 import { isScalar, isPair } from '../../nodes/identity.js';
 import { toJS } from '../../nodes/toJS.js';
 import { YAMLMap } from '../../nodes/YAMLMap.js';
@@ -12,7 +13,7 @@ class YAMLOMap extends YAMLSeq {
         this.get = YAMLMap.prototype.get.bind(this);
         this.has = YAMLMap.prototype.has.bind(this);
         this.set = YAMLMap.prototype.set.bind(this);
-        this.tag = YAMLOMap.tag;
+        /** @type {string} */ this.tag = YAMLOMap.tag;
     }
     /**
      * If `ctx` is given, the return type is actually `Map<unknown, unknown>`,
@@ -53,7 +54,7 @@ const omap = {
     nodeClass: YAMLOMap,
     default: false,
     tag: 'tag:yaml.org,2002:omap',
-    resolve(seq, onError) {
+    /** @returns {YAMLOMap} */ resolve(/** @type {YAMLOMap} */ seq, onError) {
         const pairs = resolvePairs(seq, onError);
         const seenKeys = [];
         for (const { key } of pairs.items) {

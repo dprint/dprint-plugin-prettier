@@ -1,3 +1,4 @@
+// @nts-check
 //#region ../compiler/src/util.ts
 /**
 * @license
@@ -6,7 +7,7 @@
 * Use of this source code is governed by an MIT-style license that can be
 * found in the LICENSE file at https://angular.dev/license
 */
-const DASH_CASE_REGEXP = /-+([a-z0-9])/g;
+/** @type {RegExp} */ const DASH_CASE_REGEXP = /-+([a-z0-9])/g;
 function dashCaseToCamelCase(input) {
 	return input.replace(DASH_CASE_REGEXP, (...m) => m[1].toUpperCase());
 }

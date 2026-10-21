@@ -58,7 +58,7 @@ class PreviousMap {
     throw new Error('Unsupported source map encoding ' + encoding)
   }
 
-  getAnnotationURL(sourceMapString) {
+  /** @returns {string} */ getAnnotationURL(/** @type {string} */ sourceMapString) {
     return sourceMapString.replace(/^\/\*\s*# sourceMappingURL=/, '').trim()
   }
 
@@ -85,7 +85,7 @@ class PreviousMap {
     }
   }
 
-  loadFile(path, cssFile, trusted) {
+  loadFile(/** @type {string} */ path, cssFile, /** @type {boolean} */ trusted) {
     /* c8 ignore next 5 */
     if (!trusted && !this.unsafeMap) {
       if (!/\.map$/i.test(path)) {
@@ -145,7 +145,7 @@ class PreviousMap {
     }
   }
 
-  /** @returns {boolean} */ startWith(string, /** @type {string} */ start) {
+  /** @returns {boolean} */ startWith(/** @type {string | undefined} */ string, /** @type {string} */ start) {
     if (!string) return false
     return string.substr(0, start.length) === start
   }

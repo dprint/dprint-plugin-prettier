@@ -31,7 +31,7 @@ const float = {
     default: true,
     tag: 'tag:yaml.org,2002:float',
     test: /^[-+]?(?:\.[0-9]+|[0-9]+\.[0-9]*)$/,
-    resolve(/** @type {string} */ str) {
+    /** @returns {Scalar} */ resolve(/** @type {string} */ str) {
         const node = new Scalar(parseFloat(str));
         const dot = str.indexOf('.');
         if (dot !== -1 && str[str.length - 1] === '0')

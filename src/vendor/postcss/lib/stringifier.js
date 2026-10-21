@@ -1,10 +1,11 @@
+// @nts-check
 'use strict'
 
 // Escapes sequences that could break out of an HTML <style> context.
 // Uses CSS unicode escaping (\3c = '<') which is valid CSS and parsed
 // correctly by all compliant CSS consumers.
-const STYLE_TAG = /(<)(\/?style\b)/gi
-const COMMENT_OPEN = /(<)(!--)/g
+/** @type {RegExp} */ const STYLE_TAG = /(<)(\/?style\b)/gi
+/** @type {RegExp} */ const COMMENT_OPEN = /(<)(!--)/g
 
 function escapeHTMLInCSS(str) {
   if (typeof str !== 'string') return str

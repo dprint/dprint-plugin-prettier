@@ -31,7 +31,7 @@ function resolveFlowScalar(/** @type {{ offset: number, type: string, source: st
                 range: [offset, offset + source.length, offset + source.length]
             };
     }
-    const valueEnd = offset + source.length;
+    /** @type {number} */ const valueEnd = offset + source.length;
     const re = resolveEnd(end, valueEnd, strict, onError);
     return {
         value,
@@ -41,7 +41,7 @@ function resolveFlowScalar(/** @type {{ offset: number, type: string, source: st
     };
 }
 /** @returns {string} */ function plainValue(/** @type {string} */ source, onError) {
-    let badChar = '';
+    /** @type {string} */ let badChar = '';
     switch (source[0]) {
         /* istanbul ignore next should not happen */
         case '\t':
@@ -94,8 +94,8 @@ function resolveFlowScalar(/** @type {{ offset: number, type: string, source: st
     if (!match)
         return source;
     /** @type {string} */ let res = match[1];
-    let sep = ' ';
-    let pos = first.lastIndex;
+    /** @type {string} */ let sep = ' ';
+    /** @type {number} */ let pos = first.lastIndex;
     line.lastIndex = pos;
     while ((match = line.exec(source))) {
         if (match[1] === '') {
@@ -110,15 +110,15 @@ function resolveFlowScalar(/** @type {{ offset: number, type: string, source: st
         }
         pos = line.lastIndex;
     }
-    const last = /[ \t]*(.*)/sy;
+    /** @type {RegExp} */ const last = /[ \t]*(.*)/sy;
     last.lastIndex = pos;
     match = last.exec(source);
     return res + sep + (match?.[1] ?? '');
 }
 /** @returns {string} */ function doubleQuotedValue(/** @type {string} */ source, onError) {
-    let res = '';
+    /** @type {string} */ let res = '';
     for (let i = 1; i < source.length - 1; ++i) {
-        const ch = source[i];
+        /** @type {string} */ const ch = source[i];
         if (ch === '\r' && source[i + 1] === '\n')
             continue;
         if (ch === '\n') {
@@ -127,7 +127,7 @@ function resolveFlowScalar(/** @type {{ offset: number, type: string, source: st
             i = offset;
         }
         else if (ch === '\\') {
-            let next = source[++i];
+            /** @type {string} */ let next = source[++i];
             const cc = escapeCodes[next];
             if (cc)
                 res += cc;
@@ -144,7 +144,7 @@ function resolveFlowScalar(/** @type {{ offset: number, type: string, source: st
                     next = source[++i + 1];
             }
             else if (next === 'x' || next === 'u' || next === 'U') {
-                const length = next === 'x' ? 2 : next === 'u' ? 4 : 8;
+                /** @type {number} */ const length = next === 'x' ? 2 : next === 'u' ? 4 : 8;
                 res += parseCharCode(source, i + 1, length, onError);
                 i += length;
             }
@@ -156,8 +156,8 @@ function resolveFlowScalar(/** @type {{ offset: number, type: string, source: st
         }
         else if (ch === ' ' || ch === '\t') {
             // trim trailing whitespace
-            const wsStart = i;
-            let next = source[i + 1];
+            /** @type {number} */ const wsStart = i;
+            /** @type {string} */ let next = source[i + 1];
             while (next === ' ' || next === '\t')
                 next = source[++i + 1];
             if (next !== '\n' && !(next === '\r' && source[i + 2] === '\n'))
@@ -176,8 +176,8 @@ function resolveFlowScalar(/** @type {{ offset: number, type: string, source: st
  * Presumes `source[offset] === '\n'`
  */
 function foldNewline(/** @type {string} */ source, /** @type {number} */ offset) {
-    let fold = '';
-    let ch = source[offset + 1];
+    /** @type {string} */ let fold = '';
+    /** @type {string} */ let ch = source[offset + 1];
     while (ch === ' ' || ch === '\t' || ch === '\n' || ch === '\r') {
         if (ch === '\r' && source[offset + 2] !== '\n')
             break;
@@ -211,9 +211,9 @@ const escapeCodes = {
     '\t': '\t'
 };
 /** @returns {string} */ function parseCharCode(/** @type {string} */ source, /** @type {number} */ offset, /** @type {number} */ length, onError) {
-    const cc = source.substr(offset, length);
-    const ok = cc.length === length && /^[0-9a-fA-F]+$/.test(cc);
-    const code = ok ? parseInt(cc, 16) : NaN;
+    /** @type {string} */ const cc = source.substr(offset, length);
+    /** @type {boolean} */ const ok = cc.length === length && /^[0-9a-fA-F]+$/.test(cc);
+    /** @type {number} */ const code = ok ? parseInt(cc, 16) : NaN;
     try {
         return String.fromCodePoint(code);
     }

@@ -1,9 +1,10 @@
+// @nts-check
 import { Document } from '../doc/Document.js';
 import { composeNode, composeEmptyNode } from './compose-node.js';
 import { resolveEnd } from './resolve-end.js';
 import { resolveProps } from './resolve-props.js';
 
-function composeDoc(options, directives, { offset, start, value, end }, onError) {
+/** @returns {Document} */ function composeDoc(options, /** @type {import("../doc/directives.js").Directives} */ directives, { offset, start, value, end }, onError) {
     const opts = Object.assign({ _directives: directives }, options);
     const doc = new Document(undefined, opts);
     const ctx = {

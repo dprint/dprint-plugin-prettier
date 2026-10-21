@@ -1,6 +1,7 @@
-const FOLD_FLOW = 'flow';
-const FOLD_BLOCK = 'block';
-const FOLD_QUOTED = 'quoted';
+// @nts-check
+/** @type {string} */ const FOLD_FLOW = 'flow';
+/** @type {string} */ const FOLD_BLOCK = 'block';
+/** @type {string} */ const FOLD_QUOTED = 'quoted';
 /**
  * Tries to keep input at up to `lineWidth` characters, splitting only on spaces
  * not followed by newlines or spaces unless `mode` is `'quoted'`. Lines are

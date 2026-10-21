@@ -23,11 +23,11 @@ var TokenizeResult = class {
 	}
 };
 /** @returns {TokenizeResult} */ function tokenize(/** @type {string | undefined} */ source, /** @type {string | undefined} */ url, getTagContentType, options = {}) {
-	const tokenizer = new _Tokenizer(new ParseSourceFile(source, url), getTagContentType, options);
+	/** @type {_Tokenizer} */ const tokenizer = new _Tokenizer(new ParseSourceFile(source, url), getTagContentType, options);
 	tokenizer.tokenize();
 	return new TokenizeResult(mergeTextTokens(tokenizer.tokens), tokenizer.errors, tokenizer.nonNormalizedIcuExpressions);
 }
-const _CR_OR_CRLF_REGEXP = /\r\n?/g;
+/** @type {RegExp} */ const _CR_OR_CRLF_REGEXP = /\r\n?/g;
 /** @returns {string} */ function _unexpectedCharacterErrorMsg(/** @type {number} */ charCode) {
 	return `Unexpected character "${charCode === 0 ? "EOF" : String.fromCharCode(charCode)}"`;
 }
@@ -56,8 +56,8 @@ const INTERPOLATION = {
 	start: "{{",
 	end: "}}"
 };
-const DEFAULT_NEVER_PATTERN = /^default[^\S\r\n]+never/;
-const ELSE_IF_PATTERN = /^else[^\S\r\n]+if/;
+/** @type {RegExp} */ const DEFAULT_NEVER_PATTERN = /^default[^\S\r\n]+never/;
+/** @type {RegExp} */ const ELSE_IF_PATTERN = /^else[^\S\r\n]+if/;
 var _Tokenizer = class {
 	_getTagContentType;
 	/** @type {PlainCharacterCursor} */ _cursor;
@@ -145,7 +145,7 @@ var _Tokenizer = class {
 		this._endToken([]);
 	}
 	/** @returns {string} */ _getBlockName() {
-		let spacesInNameAllowed = false;
+		/** @type {boolean} */ let spacesInNameAllowed = false;
 		const nameCursor = this._cursor.clone();
 		this._attemptCharCodeUntilFn(/** @returns {boolean} */ (/** @type {number} */ code) => {
 			if (isWhitespace(code)) return !spacesInNameAllowed;
@@ -155,7 +155,7 @@ var _Tokenizer = class {
 			}
 			return true;
 		});
-		let result = this._cursor.getChars(nameCursor).trim();
+		/** @type {string} */ let result = this._cursor.getChars(nameCursor).trim();
 		if (ELSE_IF_PATTERN.test(result)) result = "else if";
 		else if (DEFAULT_NEVER_PATTERN.test(result)) result = "default never";
 		return result;
@@ -200,10 +200,10 @@ var _Tokenizer = class {
 		while (this._cursor.peek() !== 41 && this._cursor.peek() !== 0) {
 			this._beginToken(29);
 			const start = this._cursor.clone();
-			let inQuote = null;
-			let openParens = 0;
+			/** @type {number | null} */ let inQuote = null;
+			/** @type {number} */ let openParens = 0;
 			while (this._cursor.peek() !== 59 && this._cursor.peek() !== 0 || inQuote !== null) {
-				const char = this._cursor.peek();
+				/** @type {number} */ const char = this._cursor.peek();
 				if (char === 92) this._cursor.advance();
 				else if (char === inQuote) inQuote = null;
 				else if (inQuote === null && isQuote(char)) inQuote = char;
@@ -246,7 +246,7 @@ var _Tokenizer = class {
 	}
 	/** @returns {string} */ _getLetDeclarationName() {
 		const nameCursor = this._cursor.clone();
-		let allowDigit = false;
+		/** @type {boolean} */ let allowDigit = false;
 		this._attemptCharCodeUntilFn(/** @returns {boolean} */ (/** @type {number} */ code) => {
 			if (isAsciiLetter(code) || code === 36 || code === 95 || allowDigit && isDigit(code)) {
 				allowDigit = true;
@@ -265,6 +265,7 @@ var _Tokenizer = class {
 	/**
 	* @returns whether an ICU token has been created
 	* @internal
+	* @returns {boolean}
 	* @returns {boolean}
 	* @returns {boolean}
 	*/
@@ -313,7 +314,7 @@ var _Tokenizer = class {
 		this._currentTokenType = null;
 		return error;
 	}
-	handleError(e) {
+	handleError(/** @type {ParseError | CursorError} */ e) {
 		if (e instanceof CursorError) e = this._createError(e.msg, this._cursor.getSpan(e.cursor));
 		if (e instanceof ParseError) this.errors.push(e);
 		else throw e;

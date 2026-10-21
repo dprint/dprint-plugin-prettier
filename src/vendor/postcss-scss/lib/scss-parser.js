@@ -42,7 +42,7 @@ class ScssParser extends Parser {
         node.raws.right = ''
       } else {
         let match = text.match(/^(\s*)([^]*\S)(\s*)$/)
-        let fixed = match[2].replace(/(\*\/|\/\*)/g, '*//*')
+        /** @type {string} */ let fixed = match[2].replace(/(\*\/|\/\*)/g, '*//*')
         node.text = fixed
         node.raws.left = match[1]
         node.raws.right = match[3]

@@ -18,10 +18,10 @@ class LineCounter {
          * called or `offset` is before the first known newline.
          */
         /** @type {(offset: number) => { line: number, col: number }} */ this.linePos = (/** @type {number} */ offset) => {
-            let low = 0;
-            let high = this.lineStarts.length;
+            /** @type {number} */ let low = 0;
+            /** @type {number} */ let high = this.lineStarts.length;
             while (low < high) {
-                const mid = (low + high) >> 1; // Math.floor((low + high) / 2)
+                /** @type {number} */ const mid = (low + high) >> 1; // Math.floor((low + high) / 2)
                 if (this.lineStarts[mid] < offset)
                     low = mid + 1;
                 else
@@ -31,7 +31,7 @@ class LineCounter {
                 return { line: low + 1, col: 1 };
             if (low === 0)
                 return { line: 0, col: offset };
-            const start = this.lineStarts[low - 1];
+            /** @type {number} */ const start = this.lineStarts[low - 1];
             return { line: low, col: offset - start + 1 };
         };
     }

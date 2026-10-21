@@ -31,7 +31,7 @@ function collectionFromPath(schema, path, value) {
 const isEmptyPath = (path) => path == null ||
     (typeof path === 'object' && !!path[Symbol.iterator]().next().done);
 class Collection extends NodeBase {
-    constructor(type, schema) {
+    constructor(type, /** @type {import("../schema/Schema.js").Schema | undefined} */ schema) {
         super(type);
         Object.defineProperty(this, 'schema', {
             value: schema,

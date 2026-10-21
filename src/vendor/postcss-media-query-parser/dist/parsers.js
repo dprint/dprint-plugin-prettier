@@ -1,3 +1,4 @@
+// @nts-check
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -35,13 +36,13 @@ function parseMediaFeature(string) {
     character: null
   }];
   var result = [];
-  var lastModeIndex = 0;
+  /** @type {number} */ var lastModeIndex = 0;
   var mediaFeature = '';
   var colon = null;
   var mediaFeatureValue = null;
   var indexLocal = index;
 
-  var stringNormalized = string;
+  /** @type {string} */ var stringNormalized = string;
   // Strip trailing parens (if any), and correct the starting index
   if (string[0] === '(' && string[string.length - 1] === ')') {
     stringNormalized = string.substring(1, string.length - 1);
@@ -49,7 +50,7 @@ function parseMediaFeature(string) {
   }
 
   for (var i = 0; i < stringNormalized.length; i++) {
-    var character = stringNormalized[i];
+    /** @type {string} */ var character = stringNormalized[i];
 
     // If entering/exiting a string
     if (character === '\'' || character === '"') {
@@ -81,7 +82,7 @@ function parseMediaFeature(string) {
     // If a : is met outside of a string, function call or interpolation, than
     // this : separates a media feature and a value
     if (modesEntered[lastModeIndex].mode === 'normal' && character === ':') {
-      var mediaFeatureValueStr = stringNormalized.substring(i + 1);
+      /** @type {string} */ var mediaFeatureValueStr = stringNormalized.substring(i + 1);
       mediaFeatureValue = {
         type: 'value',
         before: /^(\s*)/.exec(mediaFeatureValueStr)[1],
@@ -138,10 +139,10 @@ function parseMediaQuery(string) {
   var result = [];
 
   // How many timies the parser entered parens/curly braces
-  var localLevel = 0;
+  /** @type {number} */ var localLevel = 0;
   // Has any keyword, media type, media feature expression or interpolation
   // ('element' hereafter) started
-  var insideSomeValue = false;
+  /** @type {boolean} */ var insideSomeValue = false;
   var node = void 0;
 
   function resetNode() {
@@ -155,7 +156,7 @@ function parseMediaQuery(string) {
   node = resetNode();
 
   for (var i = 0; i < string.length; i++) {
-    var character = string[i];
+    /** @type {string} */ var character = string[i];
     // If not yet entered any element
     if (!insideSomeValue) {
       if (character.search(/\s/) !== -1) {
@@ -296,8 +297,8 @@ function parseMediaQuery(string) {
 
 function parseMediaList(string) {
   var result = [];
-  var interimIndex = 0;
-  var levelLocal = 0;
+  /** @type {number} */ var interimIndex = 0;
+  /** @type {number} */ var levelLocal = 0;
 
   // Check for a `url(...)` part (if it is contents of an @import rule)
   var doesHaveUrl = /^(\s*)url\s*\(/.exec(string);
@@ -326,7 +327,7 @@ function parseMediaList(string) {
 
   // Start processing the media query list
   for (var _i2 = interimIndex; _i2 < string.length; _i2++) {
-    var _character = string[_i2];
+    /** @type {string} */ var _character = string[_i2];
 
     // Dividing the media query list into comma-separated media queries
     // Only count commas that are outside of any parens
@@ -338,8 +339,8 @@ function parseMediaList(string) {
       levelLocal--;
     }
     if (levelLocal === 0 && _character === ',') {
-      var _mediaQueryString = string.substring(interimIndex, _i2);
-      var _spaceBefore = /^(\s*)/.exec(_mediaQueryString)[1];
+      /** @type {string} */ var _mediaQueryString = string.substring(interimIndex, _i2);
+      /** @type {string} */ var _spaceBefore = /^(\s*)/.exec(_mediaQueryString)[1];
       result.push(new _Container2.default({
         type: 'media-query',
         value: _mediaQueryString.trim(),
@@ -352,8 +353,8 @@ function parseMediaList(string) {
     }
   }
 
-  var mediaQueryString = string.substring(interimIndex);
-  var spaceBefore = /^(\s*)/.exec(mediaQueryString)[1];
+  /** @type {string} */ var mediaQueryString = string.substring(interimIndex);
+  /** @type {string} */ var spaceBefore = /^(\s*)/.exec(mediaQueryString)[1];
   result.push(new _Container2.default({
     type: 'media-query',
     value: mediaQueryString.trim(),

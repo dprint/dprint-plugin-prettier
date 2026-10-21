@@ -52,7 +52,7 @@ import { Lexer } from './lexer.js';
 function getFirstKeyStartProps(/** @type {any[]} */ prev) {
     if (prev.length === 0)
         return [];
-    let i = prev.length;
+    /** @type {number} */ let i = prev.length;
     loop: while (--i >= 0) {
         switch (prev[i].type) {
             case 'doc-start':
@@ -145,11 +145,11 @@ class Parser {
         /** Top indicates the node that's currently being built */
         this.stack = [];
         /** The source of the current token, set in parse() */
-        this.source = '';
+        /** @type {string} */ this.source = '';
         /** The type of the current token, set in parse() */
         /** @type {string} */ this.type = '';
         // Must be defined after `next()`
-        this.lexer = new Lexer();
+        /** @type {Lexer} */ this.lexer = new Lexer();
         this.onNewLine = onNewLine;
     }
     /**

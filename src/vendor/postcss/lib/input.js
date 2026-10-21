@@ -164,7 +164,7 @@ class Input {
 
   /** @returns {number} */ fromLineAndColumn(/** @type {number} */ line, /** @type {number} */ column) {
     /** @type {number[]} */ let lineToIndex = getLineToIndex(this)
-    let index = lineToIndex[line - 1]
+    /** @type {number} */ let index = lineToIndex[line - 1]
     return index + column - 1
   }
 

@@ -36,7 +36,7 @@ var Parser = class {
 		this.getTagDefinition = getTagDefinition;
 	}
 	parse(source, url, options, isTagNameCaseSensitive = false, getTagContentType) {
-		const lowercasify = (fn) => (/** @type {string} */ x, ...args) => fn(x.toLowerCase(), ...args);
+		const lowercasify = (fn) => /** @returns {import("./html_tags.mjs").HtmlTagDefinition} */ (/** @type {string} */ x, ...args) => fn(x.toLowerCase(), ...args);
 		const getTagDefinition = isTagNameCaseSensitive ? this.getTagDefinition : lowercasify(this.getTagDefinition);
 		const getDefaultTagContentType = /** @returns {number} */ (/** @type {string} */ tagName) => getTagDefinition(tagName).getContentType();
 		const getTagContentTypeWithProcessedTagName = isTagNameCaseSensitive ? getTagContentType : lowercasify(getTagContentType);
@@ -324,13 +324,13 @@ var _TreeBuilder = class _TreeBuilder {
 			this.errors.push(TreeError.create(fullName, endToken.sourceSpan, errMsg));
 		}
 	}
-	_getTagDefinition(nodeOrName) {
+	/** @returns {import("./html_tags.mjs").HtmlTagDefinition | null} */ _getTagDefinition(nodeOrName) {
 		if (typeof nodeOrName === "string") return this.tagDefinitionResolver(nodeOrName);
 		else if (nodeOrName instanceof Element) return this.tagDefinitionResolver(nodeOrName.name);
 		else if (nodeOrName instanceof Component && nodeOrName.tagName !== null) return this.tagDefinitionResolver(nodeOrName.tagName);
 		else return null;
 	}
-	_pushContainer(node, /** @type {boolean} */ isClosedByChild) {
+	_pushContainer(/** @type {Element | Block} */ node, /** @type {boolean} */ isClosedByChild) {
 		if (isClosedByChild) this._containerStack.pop();
 		this._addToParent(node);
 		this._containerStack.push(node);
@@ -482,22 +482,22 @@ var _TreeBuilder = class _TreeBuilder {
 		}
 		this.errors.push(TreeError.create(token.parts[0], token.sourceSpan, `Incomplete @let declaration${nameString}. @let declarations must be written as \`@let <name> = <value>;\``));
 	}
-	_getContainer() {
+	/** @returns {Element | Block | null} */ _getContainer() {
 		return this._containerStack.length > 0 ? this._containerStack[this._containerStack.length - 1] : null;
 	}
-	_getClosestElementLikeParent() {
+	/** @returns {Element | null} */ _getClosestElementLikeParent() {
 		for (let i = this._containerStack.length - 1; i > -1; i--) {
 			const current = this._containerStack[i];
 			if (current instanceof Element || current instanceof Component) return current;
 		}
 		return null;
 	}
-	_addToParent(node) {
+	_addToParent(/** @type {Text | Element | Comment | DocType | CDATA | Block | LetDeclaration} */ node) {
 		const parent = this._getContainer();
 		if (parent === null) this.rootNodes.push(node);
 		else parent.children.push(node);
 	}
-	/** @returns {string} */ _getElementFullName(token, parent) {
+	/** @returns {string} */ _getElementFullName(token, /** @type {Element | null} */ parent) {
 		const prefix = this._getPrefix(token, parent);
 		return mergeNsAndName(prefix, token.parts[1]);
 	}
@@ -514,7 +514,7 @@ var _TreeBuilder = class _TreeBuilder {
 		else if (!prefix && tagName) return tagName;
 		else return mergeNsAndName(prefix, tagName || "ng-component");
 	}
-	/** @returns {string | null} */ _getPrefix(token, parent) {
+	/** @returns {string | null} */ _getPrefix(token, /** @type {Element | null} */ parent) {
 		var _this$_getTagDefiniti8;
 		let prefix;
 		let tagName;

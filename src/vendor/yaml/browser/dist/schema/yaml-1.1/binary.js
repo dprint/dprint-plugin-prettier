@@ -17,7 +17,7 @@ const binary = {
     resolve(/** @type {string} */ src, onError) {
         if (typeof atob === 'function') {
             // On IE 11, atob() can't handle newlines
-            const str = atob(src.replace(/[\n\r]/g, ''));
+            /** @type {string} */ const str = atob(src.replace(/[\n\r]/g, ''));
             const buffer = new Uint8Array(str.length);
             for (let i = 0; i < str.length; ++i)
                 buffer[i] = str.charCodeAt(i);

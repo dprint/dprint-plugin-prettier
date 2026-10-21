@@ -15,9 +15,9 @@ import { resolveEnd } from './resolve-end.js';
     return [offset, offset + (typeof source === 'string' ? source.length : 1)];
 }
 function parsePrelude(/** @type {any[]} */ prelude) {
-    let comment = '';
-    let atComment = false;
-    let afterEmptyLine = false;
+    /** @type {string} */ let comment = '';
+    /** @type {boolean} */ let atComment = false;
+    /** @type {boolean} */ let afterEmptyLine = false;
     for (let i = 0; i < prelude.length; ++i) {
         const source = prelude[i];
         switch (source[0]) {
@@ -55,8 +55,8 @@ function parsePrelude(/** @type {any[]} */ prelude) {
  */
 class Composer {
     constructor(options = {}) {
-        this.doc = null;
-        this.atDirectives = false;
+        /** @type {Document | null} */ this.doc = null;
+        /** @type {boolean} */ this.atDirectives = false;
         this.prelude = [];
         this.errors = [];
         this.warnings = [];
@@ -68,10 +68,10 @@ class Composer {
                 this.errors.push(new YAMLParseError(pos, code, message));
         };
         // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
-        this.directives = new Directives({ version: options.version || '1.2' });
+        /** @type {Directives} */ this.directives = new Directives({ version: options.version || '1.2' });
         this.options = options;
     }
-    decorate(doc, /** @type {boolean} */ afterDoc) {
+    decorate(/** @type {Document} */ doc, /** @type {boolean} */ afterDoc) {
         const { comment, afterEmptyLine } = parsePrelude(this.prelude);
         //console.log({ dc: doc.comment, prelude, comment })
         if (comment) {

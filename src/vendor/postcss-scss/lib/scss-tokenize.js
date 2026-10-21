@@ -35,7 +35,7 @@
 
 // SCSS PATCH function name was changed
 module.exports = function scssTokenize(/** @type {import("postcss/lib/input")} */ input, options = {}) {
-  let css = /** @type {string} */ (input.css.valueOf())
+  /** @type {string} */ let css = /** @type {string} */ (input.css.valueOf())
   let ignore = options.ignoreErrors
 
   let /** @type {number} */ code, /** @type {number} */ next, /** @type {number} */ quote, /** @type {string} */ content, /** @type {boolean} */ escape

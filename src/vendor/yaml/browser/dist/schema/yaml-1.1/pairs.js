@@ -1,9 +1,10 @@
+// @nts-check
 import { isSeq, isPair, isMap } from '../../nodes/identity.js';
 import { createPair, Pair } from '../../nodes/Pair.js';
 import { Scalar } from '../../nodes/Scalar.js';
 import { YAMLSeq } from '../../nodes/YAMLSeq.js';
 
-function resolvePairs(seq, onError) {
+/** @returns {import("./omap.js").YAMLOMap | YAMLSeq} */ function resolvePairs(/** @type {import("./omap.js").YAMLOMap | YAMLSeq} */ seq, onError) {
     if (isSeq(seq)) {
         for (let i = 0; i < seq.items.length; ++i) {
             let item = seq.items[i];

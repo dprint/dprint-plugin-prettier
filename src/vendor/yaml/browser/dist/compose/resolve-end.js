@@ -2,8 +2,8 @@
 function resolveEnd(/** @type {any[] | undefined} */ end, /** @type {number} */ offset, /** @type {boolean} */ reqSpace, onError) {
     let comment = '';
     if (end) {
-        let hasSpace = false;
-        let sep = '';
+        /** @type {boolean} */ let hasSpace = false;
+        /** @type {string} */ let sep = '';
         for (const token of end) {
             const { source, type } = token;
             switch (type) {

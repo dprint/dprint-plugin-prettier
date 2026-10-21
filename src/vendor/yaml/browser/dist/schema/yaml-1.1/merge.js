@@ -1,3 +1,4 @@
+// @nts-check
 import { isScalar, isSeq, isAlias, isMap } from '../../nodes/identity.js';
 import { Scalar } from '../../nodes/Scalar.js';
 
@@ -15,7 +16,7 @@ const merge = {
     default: 'key',
     tag: 'tag:yaml.org,2002:merge',
     test: /^<<$/,
-    resolve: () => Object.assign(new Scalar(Symbol(MERGE_KEY)), {
+    resolve: /** @returns {Scalar} */ () => Object.assign(new Scalar(Symbol(MERGE_KEY)), {
         addToJSMap: addMergeToJSMap
     }),
     stringify: () => MERGE_KEY

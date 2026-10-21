@@ -9,7 +9,7 @@ import { createFlowSequenceItem } from "../factories/flow-sequence-item.mjs";
 import { getLast } from "../utils/get-last.mjs";
 import * as YAML from "yaml";
 //#region src/transforms/flow-seq.ts
-function transformFlowSeq(flowSeq, /** @type {import("./context.mjs").default} */ context, props) {
+function transformFlowSeq(/** @type {import("../../yaml/browser/dist/nodes/YAMLSeq.js").YAMLSeq | import("../../yaml/browser/dist/schema/yaml-1.1/omap.js").YAMLOMap} */ flowSeq, /** @type {import("./context.mjs").default} */ context, props) {
 	const srcToken = flowSeq.srcToken;
 	// istanbul ignore if -- @preserve
 	if (!srcToken || srcToken.type !== "flow-collection") throw new Error("Expected flow-collection CST node for flow sequence");
@@ -73,7 +73,7 @@ function transformFlowSeq(flowSeq, /** @type {import("./context.mjs").default} *
 * ```
 * @returns {boolean}
 */
-function isBlockMappingOfImmediateChildOfFlowSequence(item, srcItem) {
+function isBlockMappingOfImmediateChildOfFlowSequence(/** @type {import("../../yaml/browser/dist/nodes/Scalar.js").Scalar | import("../../yaml/browser/dist/nodes/YAMLMap.js").YAMLMap | import("../../yaml/browser/dist/nodes/YAMLSeq.js").YAMLSeq | import("../../yaml/browser/dist/nodes/Pair.js").Pair | import("../../yaml/browser/dist/nodes/Alias.js").Alias} */ item, srcItem) {
 	if (item.srcToken) return false;
 	// istanbul ignore if -- @preserve
 	if (!YAML.isMap(item)) return false;

@@ -31,26 +31,26 @@ var singleQuote = 39,
 
 /** @returns {any[]} */ function tokenize(input) {
     var tokens = [];
-    var css = input.css.valueOf();
+    /** @type {string} */ var css = input.css.valueOf();
 
-    var code = void 0,
-        next = void 0,
-        quote = void 0,
-        lines = void 0,
-        last = void 0,
-        content = void 0,
-        escape = void 0,
-        nextLine = void 0,
-        nextOffset = void 0,
-        escaped = void 0,
-        escapePos = void 0;
+    var /** @type {number | undefined} */ code = void 0,
+        /** @type {number | undefined} */ next = void 0,
+        /** @type {string | undefined} */ quote = void 0,
+        /** @type {string[] | undefined} */ lines = void 0,
+        /** @type {number | undefined} */ last = void 0,
+        /** @type {string | undefined} */ content = void 0,
+        /** @type {boolean | undefined} */ escape = void 0,
+        /** @type {number | undefined} */ nextLine = void 0,
+        /** @type {number | undefined} */ nextOffset = void 0,
+        /** @type {boolean | undefined} */ escaped = void 0,
+        /** @type {number | undefined} */ escapePos = void 0;
 
     var length = css.length;
     /** @type {number | undefined} */ var offset = -1;
     /** @type {number | undefined} */ var line = 1;
     /** @type {number | undefined} */ var pos = 0;
 
-    var unclosed = function unclosed(what, end) {
+    var unclosed = function unclosed(/** @type {string} */ what, /** @type {string} */ end) {
         if (input.safe) {
             css += end;
             next = css.length - 1;

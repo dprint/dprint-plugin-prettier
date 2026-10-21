@@ -21,11 +21,11 @@ function transformAstBlockValue(/** @type {import("../../yaml/browser/dist/nodes
 */
 function parseHeader(/** @type {string} */ header) {
 	const parsed = /([+-]?)(\d*)([+-]?)$/u.exec(header);
-	let indent = null;
-	let chomping = "clip";
+	/** @type {number | null} */ let indent = null;
+	/** @type {string} */ let chomping = "clip";
 	if (parsed) {
 		indent = parsed[2] ? Number(parsed[2]) : null;
-		const chompingStr = parsed[3] || parsed[1];
+		/** @type {string} */ const chompingStr = parsed[3] || parsed[1];
 		chomping = chompingStr === "+" ? "keep" : chompingStr === "-" ? "strip" : "clip";
 	}
 	return {

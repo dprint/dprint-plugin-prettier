@@ -1,3 +1,4 @@
+// @nts-check
 import { createNode } from '../doc/createNode.js';
 import { stringifyPair } from '../stringify/stringifyPair.js';
 import { addPairToJSMap } from './addPairToJSMap.js';
@@ -9,10 +10,10 @@ import { NODE_TYPE, PAIR, isNode } from './identity.js';
     return new Pair(k, v);
 }
 class Pair {
-    constructor(key, value = null) {
+    constructor(/** @type {import("./Scalar.js").Scalar | import("./YAMLMap.js").YAMLMap | import("./Alias.js").Alias | import("./YAMLSeq.js").YAMLSeq} */ key, value = null) {
         Object.defineProperty(this, NODE_TYPE, { value: PAIR });
-        this.key = key;
-        this.value = value;
+        /** @type {import("./Scalar.js").Scalar | import("./YAMLMap.js").YAMLMap | import("./Alias.js").Alias | import("./YAMLSeq.js").YAMLSeq} */ this.key = key;
+        /** @type {import("./Scalar.js").Scalar | import("./YAMLMap.js").YAMLMap | import("./YAMLSeq.js").YAMLSeq | import("./Alias.js").Alias | import("../schema/yaml-1.1/omap.js").YAMLOMap | import("../schema/yaml-1.1/set.js").YAMLSet | null} */ this.value = value;
     }
     /** @returns {Pair} */ clone(schema) {
         let { key, value } = this;

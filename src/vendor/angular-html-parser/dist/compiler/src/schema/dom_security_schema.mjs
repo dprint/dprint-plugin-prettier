@@ -1,3 +1,4 @@
+// @nts-check
 //#region ../compiler/src/schema/dom_security_schema.ts
 /**
 * @license
@@ -7,9 +8,9 @@
 * found in the LICENSE file at https://angular.dev/license
 */
 let _SECURITY_SCHEMA;
-const MATH_ML_NAMESPACE = "math";
-const NO_NAMESPACE = "";
-const MATCH_ALL_ELEMENTS = "*";
+/** @type {string} */ const MATH_ML_NAMESPACE = "math";
+/** @type {string} */ const NO_NAMESPACE = "";
+/** @type {string} */ const MATCH_ALL_ELEMENTS = "*";
 const createNullObj = () => Object.create(null);
 /**
 * @remarks Keep is a copy of DOM Security Schema.

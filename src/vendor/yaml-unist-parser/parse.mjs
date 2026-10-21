@@ -9,7 +9,7 @@ import * as YAML from "yaml";
 //#region src/parse.ts
 function parse(/** @type {string | undefined} */ text, options) {
 	const lineCounter = new YAML.LineCounter();
-	const context = new Context(text, lineCounter);
+	/** @type {Context} */ const context = new Context(text, lineCounter);
 	const parser = new YAML.Parser(lineCounter.addNewLine);
 	const composer = new YAML.Composer({
 		keepSourceTokens: true,

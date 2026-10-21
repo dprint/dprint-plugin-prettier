@@ -11,7 +11,7 @@ import { createSequenceItem } from "../factories/sequence-item.mjs";
 import { isEmptyNode } from "./transform.mjs";
 import * as YAML from "yaml";
 //#region src/transforms/seq.ts
-function transformSeq(seq, /** @type {import("./context.mjs").default} */ context, props) {
+function transformSeq(/** @type {import("../../yaml/browser/dist/nodes/YAMLSeq.js").YAMLSeq | import("../../yaml/browser/dist/schema/yaml-1.1/omap.js").YAMLOMap} */ seq, /** @type {import("./context.mjs").default} */ context, props) {
 	const srcToken = seq.srcToken;
 	// istanbul ignore if -- @preserve
 	if (!srcToken || srcToken.type !== "block-seq") throw new Error("Expected block sequence srcToken");
@@ -43,7 +43,7 @@ function transformSeq(seq, /** @type {import("./context.mjs").default} */ contex
 	}
 	return createSequence(createPosition(sequenceItems[0].position.start, getLast(sequenceItems).position.end), context.transformContentProperties(seq, props.tokens), sequenceItems);
 }
-function transformItemValue(itemNode, /** @type {import("./context.mjs").default} */ context, props) {
+function transformItemValue(/** @type {import("../../yaml/browser/dist/nodes/YAMLMap.js").YAMLMap | import("../../yaml/browser/dist/nodes/Scalar.js").Scalar | import("../../yaml/browser/dist/nodes/YAMLSeq.js").YAMLSeq | import("../../yaml/browser/dist/nodes/Alias.js").Alias | import("../../yaml/browser/dist/nodes/Pair.js").Pair} */ itemNode, /** @type {import("./context.mjs").default} */ context, props) {
 	if (!YAML.isPair(itemNode)) {
 		if (isEmptyNode(itemNode, props)) {
 			extractComments(props.tokens, context);

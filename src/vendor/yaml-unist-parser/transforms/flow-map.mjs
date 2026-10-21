@@ -4,7 +4,7 @@ import { createFlowMapping } from "../factories/flow-mapping.mjs";
 import { createFlowMappingItem } from "../factories/flow-mapping-item.mjs";
 import { transformPair } from "./pair.mjs";
 //#region src/transforms/flow-map.ts
-function transformFlowMap(flowMap, /** @type {import("./context.mjs").default} */ context, props) {
+function transformFlowMap(/** @type {import("../../yaml/browser/dist/nodes/YAMLMap.js").YAMLMap | import("../../yaml/browser/dist/schema/yaml-1.1/set.js").YAMLSet} */ flowMap, /** @type {import("./context.mjs").default} */ context, props) {
 	const srcToken = flowMap.srcToken;
 	// istanbul ignore if -- @preserve
 	if (!srcToken || srcToken.type !== "flow-collection") throw new Error("Expected flow-collection CST node for flow map");

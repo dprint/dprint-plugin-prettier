@@ -6,12 +6,12 @@ function resolveBlockScalar(/** @type {import("yaml-cst-types").ComposeContext} 
     const header = parseBlockScalarHeader(scalar, ctx.options.strict, onError);
     if (!header)
         return { value: '', type: null, comment: '', range: [start, start, start] };
-    const type = header.mode === '>' ? Scalar.BLOCK_FOLDED : Scalar.BLOCK_LITERAL;
+    /** @type {string} */ const type = header.mode === '>' ? Scalar.BLOCK_FOLDED : Scalar.BLOCK_LITERAL;
     const lines = scalar.source ? splitLines(scalar.source) : [];
     // determine the end of content & start of chomping
-    let chompStart = lines.length;
+    /** @type {number} */ let chompStart = lines.length;
     for (let i = lines.length - 1; i >= 0; --i) {
-        const content = lines[i][1];
+        /** @type {string} */ const content = lines[i][1];
         if (content === '' || content === '\r')
             chompStart = i;
         else
@@ -19,7 +19,7 @@ function resolveBlockScalar(/** @type {import("yaml-cst-types").ComposeContext} 
     }
     // shortcut for empty contents
     if (chompStart === 0) {
-        const value = header.chomp === '+' && lines.length > 0
+        /** @type {string} */ const value = header.chomp === '+' && lines.length > 0
             ? '\n'.repeat(Math.max(1, lines.length - 1))
             : '';
         let end = start + header.length;
@@ -30,7 +30,7 @@ function resolveBlockScalar(/** @type {import("yaml-cst-types").ComposeContext} 
     // find the indentation level to trim from start
     let trimIndent = scalar.indent + header.indent;
     let offset = scalar.offset + header.length;
-    let contentStart = 0;
+    /** @type {number} */ let contentStart = 0;
     for (let i = 0; i < chompStart; ++i) {
         const [indent, content] = lines[i];
         if (content === '' || content === '\r') {
@@ -39,7 +39,7 @@ function resolveBlockScalar(/** @type {import("yaml-cst-types").ComposeContext} 
         }
         else {
             if (indent.length < trimIndent) {
-                const message = 'Block scalars with more-indented leading empty lines must use an explicit indentation indicator';
+                /** @type {string} */ const message = 'Block scalars with more-indented leading empty lines must use an explicit indentation indicator';
                 onError(offset + indent.length, 'MISSING_CHAR', message);
             }
             if (header.indent === 0)
@@ -58,16 +58,16 @@ function resolveBlockScalar(/** @type {import("yaml-cst-types").ComposeContext} 
         if (lines[i][0].length > trimIndent)
             chompStart = i + 1;
     }
-    let value = '';
-    let sep = '';
-    let prevMoreIndented = false;
+    /** @type {string} */ let value = '';
+    /** @type {string} */ let sep = '';
+    /** @type {boolean} */ let prevMoreIndented = false;
     // leading whitespace is kept intact
     for (let i = 0; i < contentStart; ++i)
         value += lines[i][0].slice(trimIndent) + '\n';
     for (let i = contentStart; i < chompStart; ++i) {
         let [indent, content] = lines[i];
         offset += indent.length + content.length + 1;
-        const crlf = content[content.length - 1] === '\r';
+        /** @type {boolean} */ const crlf = content[content.length - 1] === '\r';
         if (crlf)
             content = content.slice(0, -1);
         /* istanbul ignore if already caught in lexer */
@@ -129,7 +129,7 @@ function parseBlockScalarHeader({ offset, props }, strict, onError) {
     }
     const { source } = props[0];
     const mode = source[0];
-    let indent = 0;
+    /** @type {number} */ let indent = 0;
     let chomp = '';
     let error = -1;
     for (let i = 1; i < source.length; ++i) {
@@ -137,7 +137,7 @@ function parseBlockScalarHeader({ offset, props }, strict, onError) {
         if (!chomp && (ch === '-' || ch === '+'))
             chomp = ch;
         else {
-            const n = Number(ch);
+            /** @type {number} */ const n = Number(ch);
             if (!indent && n)
                 indent = n;
             else if (error === -1)
@@ -146,7 +146,7 @@ function parseBlockScalarHeader({ offset, props }, strict, onError) {
     }
     if (error !== -1)
         onError(error, 'UNEXPECTED_TOKEN', `Block scalar header includes extra characters: ${source}`);
-    let hasSpace = false;
+    /** @type {boolean} */ let hasSpace = false;
     let comment = '';
     let length = source.length;
     for (let i = 1; i < props.length; ++i) {
@@ -185,7 +185,7 @@ function parseBlockScalarHeader({ offset, props }, strict, onError) {
 /** @returns Array of lines split up as `[indent, content]` @returns {any[]} */
 function splitLines(/** @type {string} */ source) {
     const split = source.split(/\n( *)/);
-    const first = split[0];
+    /** @type {string} */ const first = split[0];
     const m = first.match(/^( *)/);
     const line0 = m?.[1]
         ? [m[1], first.slice(m[1].length)]

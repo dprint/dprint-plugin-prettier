@@ -4,13 +4,13 @@ export { stringify } from './cst-stringify.js';
 export { visit } from './cst-visit.js';
 
 /** The byte order mark */
-const BOM = '\u{FEFF}';
+/** @type {string} */ const BOM = '\u{FEFF}';
 /** Start of doc-mode */
-const DOCUMENT = '\x02'; // C0: Start of Text
+/** @type {string} */ const DOCUMENT = '\x02'; // C0: Start of Text
 /** Unexpected end of flow-mode */
-const FLOW_END = '\x18'; // C0: Cancel
+/** @type {string} */ const FLOW_END = '\x18'; // C0: Cancel
 /** Next token is a scalar value */
-const SCALAR = '\x1f'; // C0: Unit Separator
+/** @type {string} */ const SCALAR = '\x1f'; // C0: Unit Separator
 /** @returns `true` if `token` is a flow or block collection */
 const isCollection = (token) => !!token && 'items' in token;
 /** @returns `true` if `token` is a flow or block scalar; not an alias */

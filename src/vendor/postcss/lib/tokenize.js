@@ -27,7 +27,7 @@
 /** @type {RegExp} */ const RE_HEX_ESCAPE = /[\da-f]/i
 
 module.exports = function tokenizer(/** @type {import("./input")} */ input, options = {}) {
-  let css = /** @type {string} */ (input.css.valueOf())
+  /** @type {string} */ let css = /** @type {string} */ (input.css.valueOf())
   let ignore = options.ignoreErrors
 
   let /** @type {number} */ code, /** @type {string} */ content, /** @type {boolean} */ escape, /** @type {number} */ next, /** @type {string} */ quote

@@ -296,7 +296,7 @@ class Parser {
       }
     }
 
-    let hasWord = tokens.some(/** @returns {boolean} */ i => i[0] !== 'space' && i[0] !== 'comment')
+    /** @type {boolean} */ let hasWord = tokens.some(/** @returns {boolean} */ i => i[0] !== 'space' && i[0] !== 'comment')
 
     if (hasWord) {
       node.raws.between += firstSpaces.map(/** @returns {string} */ i => i[1]).join('')

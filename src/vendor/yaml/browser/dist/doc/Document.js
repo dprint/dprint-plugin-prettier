@@ -14,9 +14,9 @@ import { Directives } from './directives.js';
 class Document {
     constructor(value, replacer, options) {
         /** A comment before this Document */
-        this.commentBefore = null;
+        /** @type {string | null} */ this.commentBefore = null;
         /** A comment immediately after this Document */
-        this.comment = null;
+        /** @type {string | null} */ this.comment = null;
         /** Errors encountered during parsing. */
         this.errors = [];
         /** Warnings encountered during parsing. */
@@ -51,7 +51,7 @@ class Document {
             this.directives = new Directives({ version });
         this.setSchema(version, options);
         // @ts-expect-error We can't really know that this matches Contents.
-        this.contents =
+        /** @type {import("../nodes/YAMLMap.js").YAMLMap | import("../nodes/YAMLSeq.js").YAMLSeq | import("../nodes/Scalar.js").Scalar | import("../schema/yaml-1.1/set.js").YAMLSet | import("../schema/yaml-1.1/omap.js").YAMLOMap | null} */ this.contents =
             value === undefined ? null : this.createNode(value, _replacer, options);
     }
     /**

@@ -10,7 +10,7 @@ class YAMLSeq extends Collection {
     /** @returns {string} */ static get tagName() {
         return 'tag:yaml.org,2002:seq';
     }
-    constructor(schema) {
+    constructor(/** @type {import("../schema/Schema.js").Schema | undefined} */ schema) {
         super(SEQ, schema);
         this.items = [];
     }

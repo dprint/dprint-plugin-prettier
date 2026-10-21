@@ -62,7 +62,7 @@ const voidMap = new Set([ "area", "base", "br", "col", "command", "embed", "hr",
     return [ ...voidMap ];
 }
 
-const NON_WHITESPACE = /^\S/u;
+/** @type {RegExp} */ const NON_WHITESPACE = /^\S/u;
 
 /**
  * Examples when true:
@@ -484,7 +484,7 @@ class Matcher {
    * You didn't exhaustively match all possibilities.
    */
     validate() {
-        return /** @returns {SourceSpan} */ (left, right) => this.matchFor(left.kind, right.kind)(left, right);
+        return /** @returns {SourceSpan} */ (/** @type {HbsPosition | CharPosition} */ left, /** @type {HbsPosition | CharPosition} */ right) => this.matchFor(left.kind, right.kind)(left, right);
     }
     matchFor(/** @type {string} */ left, /** @type {string} */ right) {
         const nesteds = this._whens.match(left);
@@ -584,7 +584,7 @@ class SourceSlice {
     /** @returns {SourceSpan} */ static broken(pos = BROKEN_LOCATION) {
         return new InvisibleSpan("Broken", pos).wrap();
     }
-    constructor(data) {
+    constructor(/** @type {CharPositionSpan | HbsSpan | InvisibleSpan} */ data) {
         var kind;
         /**
  * This file implements the DSL used by span and offset in places where they need to exhaustively
@@ -916,8 +916,8 @@ class SourceOffset {
    */    /** @returns {SourceOffset} */ static broken(pos = UNKNOWN_POSITION) {
         return new InvisiblePosition("Broken", pos).wrap();
     }
-    constructor(data) {
-        this.data = data;
+    constructor(/** @type {HbsPosition | CharPosition} */ data) {
+        /** @type {HbsPosition | CharPosition} */ this.data = data;
     }
     /**
    * Get the character offset for this `SourceOffset`, if possible.

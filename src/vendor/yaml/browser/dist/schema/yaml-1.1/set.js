@@ -1,11 +1,12 @@
+// @nts-check
 import { isMap, isPair, isScalar } from '../../nodes/identity.js';
 import { Pair, createPair } from '../../nodes/Pair.js';
 import { YAMLMap, findPair } from '../../nodes/YAMLMap.js';
 
 class YAMLSet extends YAMLMap {
-    constructor(schema) {
+    constructor(/** @type {import("../Schema.js").Schema | undefined} */ schema) {
         super(schema);
-        this.tag = YAMLSet.tag;
+        /** @type {string} */ this.tag = YAMLSet.tag;
     }
     add(key) {
         let pair;
@@ -77,7 +78,7 @@ const set = {
     default: false,
     tag: 'tag:yaml.org,2002:set',
     createNode: (schema, iterable, ctx) => YAMLSet.from(schema, iterable, ctx),
-    resolve(map, onError) {
+    /** @returns {YAMLSet} */ resolve(/** @type {YAMLSet} */ map, onError) {
         if (isMap(map)) {
             if (map.hasAllNullValues(true))
                 return Object.assign(new YAMLSet(), map);

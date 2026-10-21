@@ -1,3 +1,4 @@
+// @nts-check
 import { Scalar } from '../nodes/Scalar.js';
 import { foldFlowLines, FOLD_FLOW, FOLD_QUOTED, FOLD_BLOCK } from './foldFlowLines.js';
 
@@ -148,7 +149,7 @@ function quotedString(value, ctx) {
 }
 // The negative lookbehind avoids a polynomial search,
 // but isn't supported yet on Safari: https://caniuse.com/js-regexp-lookbehind
-let blockEndNewlines;
+/** @type {RegExp | undefined} */ let blockEndNewlines;
 try {
     blockEndNewlines = new RegExp('(^|(?<!\n))\n+(?!\n|$)', 'g');
 }

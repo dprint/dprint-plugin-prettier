@@ -106,41 +106,41 @@ class Lexer {
          * Flag indicating whether the end of the current buffer marks the end of
          * all input
          */
-        this.atEnd = false;
+        /** @type {boolean} */ this.atEnd = false;
         /**
          * Explicit indent set in block scalar header, as an offset from the current
          * minimum indent, so e.g. set to 1 from a header `|2+`. Set to -1 if not
          * explicitly set.
          */
-        this.blockScalarIndent = -1;
+        /** @type {number} */ this.blockScalarIndent = -1;
         /**
          * Block scalars that include a + (keep) chomping indicator in their header
          * include trailing empty lines, which are otherwise excluded from the
          * scalar's contents.
          */
-        this.blockScalarKeep = false;
+        /** @type {boolean} */ this.blockScalarKeep = false;
         /** Current input */
-        this.buffer = '';
+        /** @type {string} */ this.buffer = '';
         /**
          * Flag noting whether the map value indicator : can immediately follow this
          * node within a flow context.
          */
-        this.flowKey = false;
+        /** @type {boolean} */ this.flowKey = false;
         /** Count of surrounding flow collection levels. */
-        this.flowLevel = 0;
+        /** @type {number} */ this.flowLevel = 0;
         /**
          * Minimum level of indentation required for next lines to be parsed as a
          * part of the current scalar value.
          */
-        this.indentNext = 0;
+        /** @type {number} */ this.indentNext = 0;
         /** Indentation level of the current line. */
-        this.indentValue = 0;
+        /** @type {number} */ this.indentValue = 0;
         /** Position of the next \n character. */
-        this.lineEndPos = null;
+        /** @type {number | null} */ this.lineEndPos = null;
         /** Stores the state of the lexer if reaching the end of incpomplete input */
         this.next = null;
         /** A pointer to `buffer`; the current position of the lexer. */
-        this.pos = 0;
+        /** @type {number} */ this.pos = 0;
     }
     /**
      * Generate YAML tokens from the `source` string. If `incomplete`,

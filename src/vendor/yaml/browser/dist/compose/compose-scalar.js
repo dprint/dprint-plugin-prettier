@@ -4,7 +4,7 @@ import { Scalar } from '../nodes/Scalar.js';
 import { resolveBlockScalar } from './resolve-block-scalar.js';
 import { resolveFlowScalar } from './resolve-flow-scalar.js';
 
-function composeScalar(/** @type {import("yaml-cst-types").ComposeContext} */ ctx, /** @type {import("yaml-cst-types").Token} */ token, /** @type {null | import("yaml-cst-types").Token} */ tagToken, onError) {
+/** @returns {Scalar} */ function composeScalar(/** @type {import("yaml-cst-types").ComposeContext} */ ctx, /** @type {import("yaml-cst-types").Token} */ token, /** @type {null | import("yaml-cst-types").Token} */ tagToken, onError) {
     const { value, type, comment, range } = token.type === 'block-scalar'
         ? resolveBlockScalar(ctx, token, onError)
         : resolveFlowScalar(token, ctx.options.strict, onError);
@@ -43,7 +43,7 @@ function composeScalar(/** @type {import("yaml-cst-types").ComposeContext} */ ct
         scalar.comment = comment;
     return scalar;
 }
-function findScalarTagByName(schema, /** @type {string} */ value, /** @type {string} */ tagName, tagToken, onError) {
+function findScalarTagByName(/** @type {import("../schema/Schema.js").Schema} */ schema, /** @type {string} */ value, /** @type {string} */ tagName, tagToken, onError) {
     if (tagName === '!')
         return schema[SCALAR]; // non-specific tag
     const matchWithTest = [];

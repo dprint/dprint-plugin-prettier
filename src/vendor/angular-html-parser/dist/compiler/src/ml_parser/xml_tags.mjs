@@ -1,3 +1,4 @@
+// @nts-check
 import "./tags.mjs";
 //#region ../compiler/src/ml_parser/xml_tags.ts
 /**
@@ -24,7 +25,7 @@ var XmlTagDefinition = class {
 		return 2;
 	}
 };
-const _TAG_DEFINITION = new XmlTagDefinition();
+/** @type {XmlTagDefinition} */ const _TAG_DEFINITION = new XmlTagDefinition();
 function getXmlTagDefinition(tagName) {
 	return _TAG_DEFINITION;
 }

@@ -270,7 +270,7 @@ var LetDeclaration = class {
 };
 /** @returns {any[]} */ function visitAll(visitor, /** @type {any[] | undefined} */ nodes, context = null) {
 	const result = [];
-	const visit = visitor.visit ? /** @returns {any[] | undefined} */ (ast) => visitor.visit(ast, context) || ast.visit(visitor, context) : (ast) => ast.visit(visitor, context);
+	const visit = visitor.visit ? /** @returns {any[] | undefined} */ (/** @type {Text | Element | Attribute | Comment | DocType | CDATA | Block | BlockParameter | LetDeclaration} */ ast) => visitor.visit(ast, context) || ast.visit(visitor, context) : (ast) => ast.visit(visitor, context);
 	nodes.forEach((ast) => {
 		const astResult = visit(ast);
 		if (astResult) result.push(astResult);

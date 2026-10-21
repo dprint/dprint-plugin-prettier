@@ -1,3 +1,4 @@
+// @nts-check
 import { Pair } from '../nodes/Pair.js';
 import { YAMLMap } from '../nodes/YAMLMap.js';
 import { resolveProps } from './resolve-props.js';
@@ -6,7 +7,7 @@ import { flowIndentCheck } from './util-flow-indent-check.js';
 import { mapIncludes } from './util-map-includes.js';
 
 const startColMsg = 'All mapping items must start at the same column';
-function resolveBlockMap({ composeNode, composeEmptyNode }, /** @type {import("yaml-cst-types").ComposeContext} */ ctx, /** @type {import("yaml-cst-types").Token} */ bm, onError, tag) {
+/** @returns {YAMLMap | import("../schema/yaml-1.1/set.js").YAMLSet} */ function resolveBlockMap({ composeNode, composeEmptyNode }, /** @type {import("yaml-cst-types").ComposeContext} */ ctx, /** @type {import("yaml-cst-types").Token} */ bm, onError, tag) {
     const NodeClass = tag?.nodeClass ?? YAMLMap;
     const map = new NodeClass(ctx.schema);
     if (ctx.atRoot)

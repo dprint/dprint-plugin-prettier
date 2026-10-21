@@ -13,10 +13,10 @@ import { ElementSchemaRegistry } from "./element_schema_registry.mjs";
 * Use of this source code is governed by an MIT-style license that can be
 * found in the LICENSE file at https://angular.dev/license
 */
-const BOOLEAN = "boolean";
-const NUMBER = "number";
-const STRING = "string";
-const OBJECT = "object";
+/** @type {string} */ const BOOLEAN = "boolean";
+/** @type {string} */ const NUMBER = "number";
+/** @type {string} */ const STRING = "string";
+/** @type {string} */ const OBJECT = "object";
 function normalizeTagName(tagName) {
 	const tagNameLower = tagName.toLowerCase();
 	const [ns, name] = splitNsName(tagNameLower, false);

@@ -2,6 +2,14 @@
 import { defineParents } from "./utils/define-parents.mjs";
 import { getPointText } from "./utils/get-point-text.mjs";
 /** @import { YamlNode } from "./transforms/context.mjs" */
+/**
+ * @typedef {{
+ *   comment?: YamlNode,
+ *   leadingAttachableNode?: YamlNode,
+ *   trailingAttachableNode?: YamlNode,
+ *   trailingNode?: YamlNode,
+ * }} NodeTableEntry
+ */
 //#region src/attach.ts
 function attachComments(/** @type {YamlNode} */ root) {
 	defineParents(root);
@@ -12,13 +20,13 @@ function attachComments(/** @type {YamlNode} */ root) {
 		attachComment(comment, nodeTable, restDocuments[0]);
 	});
 }
-/** @returns {any[]} */ function createNodeTable(/** @type {YamlNode} */ root) {
+/** @returns {NodeTableEntry[]} */ function createNodeTable(/** @type {YamlNode} */ root) {
 	const nodeTable = Array.from(new Array(root.position.end.line), () => ({}));
 	for (const comment of root.comments) nodeTable[comment.position.start.line - 1].comment = comment;
 	initNodeTable(nodeTable, root);
 	return nodeTable;
 }
-function initNodeTable(/** @type {any[]} */ nodeTable, /** @type {YamlNode} */ node) {
+function initNodeTable(/** @type {NodeTableEntry[]} */ nodeTable, /** @type {YamlNode} */ node) {
 	if (node.position.start.offset === node.position.end.offset) return;
 	if ("leadingComments" in node) {
 		const { start } = node.position;
@@ -42,7 +50,7 @@ function initNodeTable(/** @type {any[]} */ nodeTable, /** @type {YamlNode} */ n
 		initNodeTable(nodeTable, child);
 	});
 }
-function attachComment(/** @type {YamlNode} */ comment, /** @type {any[]} */ nodeTable, /** @type {YamlNode} */ document) {
+function attachComment(/** @type {YamlNode} */ comment, /** @type {NodeTableEntry[]} */ nodeTable, /** @type {YamlNode} */ document) {
 	const commentLine = comment.position.start.line;
 	const { trailingAttachableNode } = nodeTable[commentLine - 1];
 	if (trailingAttachableNode) {

@@ -3,7 +3,7 @@ import { createAnchor } from "../factories/anchor.mjs";
 import { createContent } from "../factories/content.mjs";
 import { createTag } from "../factories/tag.mjs";
 //#region src/transforms/content.ts
-function transformContentProperties(node, /** @type {any[]} */ tokens, /** @type {import("./context.mjs").default | undefined} */ context) {
+function transformContentProperties(/** @type {import("../../yaml/browser/dist/nodes/Scalar.js").Scalar | import("../../yaml/browser/dist/nodes/YAMLMap.js").YAMLMap | import("../../yaml/browser/dist/nodes/YAMLSeq.js").YAMLSeq | import("../../yaml/browser/dist/nodes/Alias.js").Alias | import("../../yaml/browser/dist/schema/yaml-1.1/omap.js").YAMLOMap | import("../../yaml/browser/dist/schema/yaml-1.1/set.js").YAMLSet} */ node, /** @type {any[]} */ tokens, /** @type {import("./context.mjs").default | undefined} */ context) {
 	const middleComments = [];
 	let firstTagOrAnchorRange = null;
 	let tag = null;

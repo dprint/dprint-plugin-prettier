@@ -44,11 +44,11 @@ module.exports = class LessParser extends Parser {
     // prepend a space so the `name` will be parsed correctly
     tokens[0][1] = ` ${tokens[0][1]}`;
 
-    const firstParenIndex = tokens.findIndex(/** @returns {boolean} */ (t) => t[0] === '(');
+    /** @type {number} */ const firstParenIndex = tokens.findIndex(/** @returns {boolean} */ (t) => t[0] === '(');
     const lastParen = tokens.reverse().find(/** @returns {boolean} */ (t) => t[0] === ')');
-    const lastParenIndex = tokens.reverse().indexOf(lastParen);
+    /** @type {number} */ const lastParenIndex = tokens.reverse().indexOf(lastParen);
     const paramTokens = tokens.splice(firstParenIndex, lastParenIndex);
-    const params = paramTokens.map(/** @returns {string} */ (t) => t[1]).join('');
+    /** @type {string} */ const params = paramTokens.map(/** @returns {string} */ (t) => t[1]).join('');
 
     for (const token of tokens.reverse()) {
       this.tokenizer.back(token);
@@ -86,8 +86,8 @@ module.exports = class LessParser extends Parser {
   mixin(/** @type {any[]} */ tokens) {
     const [first] = tokens;
     const identifier = first[1].slice(0, 1);
-    const bracketsIndex = tokens.findIndex(/** @returns {boolean} */ (t) => t[0] === 'brackets');
-    const firstParenIndex = tokens.findIndex(/** @returns {boolean} */ (t) => t[0] === '(');
+    /** @type {number} */ const bracketsIndex = tokens.findIndex(/** @returns {boolean} */ (t) => t[0] === 'brackets');
+    /** @type {number} */ const firstParenIndex = tokens.findIndex(/** @returns {boolean} */ (t) => t[0] === '(');
     /** @type {string} */ let important = '';
 
     // fix for #86. if rulesets are mixin params, they need to be converted to a brackets token
@@ -95,7 +95,7 @@ module.exports = class LessParser extends Parser {
       const lastParenIndex = tokens.reduce((last, t, /** @type {number} */ i) => (t[0] === ')' ? i : last));
 
       const contents = tokens.slice(firstParenIndex, lastParenIndex + firstParenIndex);
-      const brackets = contents.map(/** @returns {string} */ (t) => t[1]).join('');
+      /** @type {string} */ const brackets = contents.map(/** @returns {string} */ (t) => t[1]).join('');
       const [paren] = tokens.slice(firstParenIndex);
       const start = [paren[2], paren[3]];
       const [last] = tokens.slice(lastParenIndex, lastParenIndex + 1);
@@ -132,7 +132,7 @@ module.exports = class LessParser extends Parser {
       tokens.splice(bangIndex, importantTokens.length, newToken);
     }
 
-    const importantIndex = tokens.findIndex(/** @returns {boolean} */ (t) => importantPattern.test(t[1]));
+    /** @type {number} */ const importantIndex = tokens.findIndex(/** @returns {boolean} */ (t) => importantPattern.test(t[1]));
 
     if (importantIndex > 0) {
       [, important] = tokens[importantIndex];

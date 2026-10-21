@@ -1,20 +1,20 @@
 // @nts-check
 /** @typedef {{ type: string, offset: number, indent: number, source: string }} SourceToken */
 function resolveProps(/** @type {SourceToken[]} */ tokens, /** @type {{ flow?: string, indicator: string, next: any, offset: number, onError: (source: any, code: string, message: string, warning?: boolean) => void, parentIndent: number, startOnNewline: boolean }} */ { flow, indicator, next, offset, onError, parentIndent, startOnNewline }) {
-    let spaceBefore = false;
-    let atNewline = startOnNewline;
-    let hasSpace = startOnNewline;
-    let comment = '';
-    let commentSep = '';
-    let hasNewline = false;
-    let reqSpace = false;
-    let tab = null;
-    let anchor = null;
-    let tag = null;
-    let newlineAfterProp = null;
-    let comma = null;
-    let found = null;
-    let start = null;
+    /** @type {boolean} */ let spaceBefore = false;
+    /** @type {boolean} */ let atNewline = startOnNewline;
+    /** @type {boolean} */ let hasSpace = startOnNewline;
+    /** @type {string} */ let comment = '';
+    /** @type {string} */ let commentSep = '';
+    /** @type {boolean} */ let hasNewline = false;
+    /** @type {boolean} */ let reqSpace = false;
+    /** @type {SourceToken | null} */ let tab = null;
+    /** @type {SourceToken | null} */ let anchor = null;
+    /** @type {SourceToken | null} */ let tag = null;
+    /** @type {SourceToken | null} */ let newlineAfterProp = null;
+    /** @type {SourceToken | null} */ let comma = null;
+    /** @type {SourceToken | null} */ let found = null;
+    /** @type {number | null} */ let start = null;
     for (const token of tokens) {
         if (reqSpace) {
             if (token.type !== 'space' &&
@@ -44,7 +44,7 @@ function resolveProps(/** @type {SourceToken[]} */ tokens, /** @type {{ flow?: s
             case 'comment': {
                 if (!hasSpace)
                     onError(token, 'MISSING_CHAR', 'Comments must be separated from other tokens by white space characters');
-                const cb = token.source.substring(1) || ' ';
+                /** @type {string} */ const cb = token.source.substring(1) || ' ';
                 if (!comment)
                     comment = cb;
                 else
@@ -117,7 +117,7 @@ function resolveProps(/** @type {SourceToken[]} */ tokens, /** @type {{ flow?: s
         }
     }
     const last = tokens[tokens.length - 1];
-    const end = last ? last.offset + last.source.length : offset;
+    /** @type {number} */ const end = last ? last.offset + last.source.length : offset;
     if (reqSpace &&
         next &&
         next.type !== 'space' &&
