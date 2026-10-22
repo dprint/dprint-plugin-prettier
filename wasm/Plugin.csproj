@@ -38,12 +38,14 @@
     <LinkMapPath Condition="'$(LinkMapPath)' == ''">$(MSBuildThisFileDirectory)../target/link.map</LinkMapPath>
   </PropertyGroup>
   <ItemGroup>
-    <!-- what the collector works with, in hexadecimal: 32 MB for new objects and 256 MB a segment, which makes
+    <!-- what the collector works with, in hexadecimal: 32 MB for new objects and 512 MB a segment, which makes
          formatting 3% faster than 4 and 64 MB. Without these it collects far too often. New objects need a segment
-         that has room for them several times over, or each collection is of everything. Only as much of a segment
-         is written to as the collector uses (wasm/gc), so a large one takes no more memory -->
+         that has room for them several times over, or each collection is of everything, and one of 512 MB has room
+         for the 300 MB that a large file is given at the most (src/main.ts) rather than 240: YAML 10% faster on one
+         thread and 17% on all of them, the rest the same, and JSON's peak 290 MB higher on all threads. Only as much
+         of a segment is written to as the collector uses (wasm/gc), so a large one takes no more memory -->
     <IlcArg Include="--runtimeopt:GCgen0size=2000000" />
-    <IlcArg Include="--runtimeopt:GCSegmentSize=10000000" />
+    <IlcArg Include="--runtimeopt:GCSegmentSize=20000000" />
     <IlcArg Include="--runtimeopt:GCgen0MaxBudget=2000000" />
     <!-- objects of up to 16 MB are new objects rather than large ones. remark's parser gives what is left of a
          markdown file to the next part each time it reads one, which is a copy here, and with the default of

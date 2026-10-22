@@ -26,9 +26,9 @@ const resolvedConfigs = new Map<number, { config: ResolvedConfig; diagnostics: C
 // about how many bytes formatting a file creates for each character of it: 124 for the longest of 1,284 JSON files.
 // A number rather than an int, so that a long file does not overflow it
 const bytesPerCharacter: number = 160;
-// YAML's create many times as much, so that each of its files of 240,000 characters or more is given all the room
-// there is (240 MB): its three files of 0.2-0.7 MB took 1,634 ms through dprint rather than 1,864. 64 MB for new
-// objects (wasm/Plugin.csproj) made them 4% faster on top, but markdown 5% slower on all threads
+// YAML's create many times as much, so that each of its files of 300,000 characters or more is given all the room
+// there is (300 MB): its three files of 0.2-0.7 MB took 1,634 ms through dprint rather than 1,864 with 240 MB at the
+// most, and 1,493-1,585 with 300 (wasm/Plugin.csproj)
 const yamlBytesPerCharacter: number = 1000;
 
 /** Keeps the configuration of an id, which dprint gives as JSON, until it is released. */
