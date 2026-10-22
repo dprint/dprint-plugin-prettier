@@ -6482,7 +6482,7 @@ class Tokenizer extends CommentsParser {
 class ClassScope {
   /** @type {Set<string>} */ privateNames = new Set();
   /** @type {Map<string, int>} */ loneAccessors = new Map();
-  /** @type {Map<string, Position>} */ undefinedPrivateNames = new Map();
+  /** @type {Map<string, Position | number>} */ undefinedPrivateNames = new Map();
 }
 class ClassScopeHandler {
   /** @type {Parser} */ parser;
@@ -6539,7 +6539,7 @@ class ClassScopeHandler {
     privateNames.add(name);
     undefinedPrivateNames.delete(name);
   }
-  usePrivateName(/** @type {string} */ name, /** @type {Position} */ loc) {
+  usePrivateName(/** @type {string} */ name, /** @type {Position | number} */ loc) {
     /** @type {ClassScope | undefined} */ let classScope;
     for (classScope of this.stack) {
       if (classScope.privateNames.has(name)) return;

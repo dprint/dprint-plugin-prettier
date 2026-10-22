@@ -32747,7 +32747,7 @@ var rs = la(["Block", "CommentBlock", "MultiLine"]),
     "Hashbang",
     "InterpreterDirective",
   ]);
-/** @returns {string} */ function is(e, t, a) {
+function is(e, t, a) {
   if (!e.has(t)) {
     let s = a(t);
     e.set(t, s);
