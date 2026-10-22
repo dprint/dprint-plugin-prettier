@@ -76,6 +76,11 @@ workflow({
       { name: "Build", run: "deno task build" },
       { name: "Test", run: "deno task test" },
       {
+        // formats the tests of prettier's repository with the plugin and with prettier, which must come out the same
+        name: "Test prettier's tests",
+        run: "deno task test:prettier",
+      },
+      {
         name: "Setup and test npm deployment",
         run: [
           "cd deployment/npm",

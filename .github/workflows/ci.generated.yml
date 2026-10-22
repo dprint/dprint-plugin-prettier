@@ -33,12 +33,14 @@ jobs:
         with:
           node-version: 24.x
           registry-url: 'https://registry.npmjs.org'
-      - name: Install WASI SDK and Binaryen
+      - name: 'Install WASI SDK, Binaryen and WABT'
         run: |-
           curl -sSfL https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-29/wasi-sdk-29.0-x86_64-linux.tar.gz | tar xz -C "$RUNNER_TEMP"
           echo "WASI_SDK_PATH=$RUNNER_TEMP/wasi-sdk-29.0-x86_64-linux" >> "$GITHUB_ENV"
           curl -sSfL https://github.com/WebAssembly/binaryen/releases/download/version_133/binaryen-version_133-x86_64-linux.tar.gz | tar xz -C "$RUNNER_TEMP"
           echo "BINARYEN=$RUNNER_TEMP/binaryen-version_133/bin" >> "$GITHUB_ENV"
+          curl -sSfL https://github.com/WebAssembly/wabt/releases/download/1.0.42/wabt-1.0.42-linux-x64.tar.gz | tar xz -C "$RUNNER_TEMP"
+          echo "WABT=$RUNNER_TEMP/wabt-1.0.42" >> "$GITHUB_ENV"
       - name: Lint workflow generation
         if: '!startsWith(github.ref, ''refs/tags/'')'
         run: |-
@@ -50,6 +52,8 @@ jobs:
         run: deno task build
       - name: Test
         run: deno task test
+      - name: Test prettier's tests
+        run: 'deno task test:prettier'
       - name: Setup and test npm deployment
         run: |-
           cd deployment/npm

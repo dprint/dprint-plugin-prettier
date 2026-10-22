@@ -1,4 +1,4 @@
-// An opt-in test (`deno task test:prettier`) that runs the format tests of prettier's repository, at the version
+// A test that CI runs apart from the others (`deno task test:prettier`), which runs the format tests of prettier's repository, at the version
 // that the plugin has, with prettier from npm and with target/plugin.wasm, each with the options of its test, and
 // checks that they come out the same. The repository and what its tests import go in target/prettier-tests, and
 // the cases that differ are written to target/prettier-tests/diffs as `<case>.prettier` and `<case>.plugin`.

@@ -153,8 +153,8 @@ deno task test:repos
 every parser and the options of its test, as Prettier's test runner makes them, compared with Prettier from npm,
 including the message of an error. At 3.9.10 all 21,650 cases give the same output. The cases that differ are written
 to `target/prettier-tests/diffs`. It leaves out the fixtures that mark a cursor or a range, the tests that give
-Prettier plugins, and the parsers of other packages (oxc, hermes, yuku). `test:repos` formats the files of many
-codebases with Prettier's default options.
+Prettier plugins, and the parsers of other packages (oxc, hermes, yuku). CI runs it after `deno task test`. `test:repos`
+formats the files of many codebases with Prettier's default options.
 
 A difference is one of these:
 
