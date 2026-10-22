@@ -90,6 +90,7 @@
     "graphql-ast-types": "./types/graphql-ast-types.ts"
   },
   "replace": {
+    "../prettier/node_modules/micromark/lib/create-tokenizer.js": "./vendor/micromark/create-tokenizer.js",
     "../prettier/src/language-css/languages.evaluate.js": "./generated/css-languages.js",
     "../prettier/src/language-css/print/css-units.evaluate.js": "./generated/css-css-units.js",
     "../prettier/src/language-css/visitor-keys.evaluate.js": "./generated/css-visitor-keys.js",
