@@ -26033,8 +26033,8 @@ var na;
     let o = tt();
     o && Ze(!1);
     let p = O(),
-      m = Vt(!0),
-      g;
+      m = Vt(!0);
+    /** @type {vh | undefined} */ let g;
     for (; (g = ft(28));) m = Is(m, g, Vt(!0), p);
     return (o && Ze(!0), m);
   }
@@ -27385,8 +27385,8 @@ var na;
   /** @returns {InstanceType<typeof Kf>} */ function Pa(/** @type {boolean | undefined} */ o) {
     let p = O(),
       m = qe(),
-      g = _i(E.Private_identifiers_are_not_allowed_in_variable_declarations),
-      x;
+      g = _i(E.Private_identifiers_are_not_allowed_in_variable_declarations);
+    /** @type {vh | undefined} */ let x;
     o && g.kind === 80 && u() === 54 && !t.hasPrecedingLineBreak() && (x = Gt());
     let P = wr(),
       Q = Yo(u()) ? void 0 : Er(),
@@ -27569,11 +27569,11 @@ var na;
     return D(ge(x), g);
   }
   function jn(/** @type {boolean} */ o, /** @type {boolean | undefined} */ p, /** @type {boolean | undefined} */ m) {
-    let g = O(),
-      x,
-      P,
-      Q,
-      _e = !1,
+    let g = O();
+    /** @type {(Kf | vh)[] | undefined} */ let x;
+    /** @type {Kf | undefined} */ let P;
+    /** @type {vh | undefined} */ let Q;
+    let _e = !1,
       ee = !1,
       te = !1;
     if (o && u() === 60) for (; (P = Vc());) x = An(x, P);
@@ -29220,7 +29220,7 @@ function c6(/** @type {InstanceType<typeof d6> | InstanceType<typeof Kf>} */ e, 
   let a = [];
   if (m2(e))
     return (
-      e.forEachChild((b) => {
+      e.forEachChild((/** @type {Kf | vh | xh | Th} */ b) => {
         a.push(b);
       }),
       a
@@ -29788,7 +29788,7 @@ function rr(/** @type {d6 | Kf | xh | vh | Th} */ e, t = !1) {
       }
       return;
     }
-    return e.modifiers?.filter((a) => !Ka(a));
+    return e.modifiers?.filter((/** @type {Kf | vh} */ a) => !Ka(a));
   }
 }
 function wi(/** @type {d6 | Kf | xh | vh | Th} */ e, t = !1) {

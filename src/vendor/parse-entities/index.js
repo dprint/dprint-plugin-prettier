@@ -57,6 +57,8 @@ bases[deci] = 10
 // Each type of character reference accepts different characters.
 // This test is used to detect whether a reference has ended (as the semicolon
 // is not strictly needed).
+/** @typedef {{line: number, column: number, offset: number}} Point */
+
 var tests = {}
 
 tests[name] = alphanumerical
@@ -132,22 +134,22 @@ messages[numericProhibited] =
   /** @type {string} */ var queue = ''
   var result = []
   /** @type {string | undefined} */ var entityCharacters
-  var namedEntity
+  /** @type {string | false} */ var namedEntity
   /** @type {boolean | undefined} */ var terminated
   /** @type {string | undefined} */ var characters
   /** @type {number | undefined} */ var character
   var reference
   /** @type {number | undefined} */ var following
-  var warning
+  /** @type {(code: number, offset: number) => void} */ var warning
   /** @type {number | undefined} */ var reason
   /** @type {string | undefined} */ var output
   /** @type {string | undefined | null} */ var entity
   /** @type {number | undefined} */ var begin
   /** @type {number | undefined} */ var start
   /** @type {string | undefined} */ var type
-  var test
-  var prev
-  var next
+  /** @type {(code: number) => boolean} */ var test
+  /** @type {Point} */ var prev
+  /** @type {Point} */ var next
   /** @type {number | undefined} */ var diff
   /** @type {number | undefined} */ var end
 
@@ -399,7 +401,7 @@ messages[numericProhibited] =
   return result.join('')
 
   // Get current position.
-  function now() {
+  /** @returns {Point} */ function now() {
     return {
       line: line,
       column: column,

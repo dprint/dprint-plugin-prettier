@@ -6442,12 +6442,12 @@ class Tokenizer extends CommentsParser {
     }
   }
   errorBuilder(error) {
-    return (pos, lineStart, curLine) => {
+    return (/** @type {number} */ pos, /** @type {number} */ lineStart, /** @type {number} */ curLine) => {
       this.raise(error, buildPosition(pos, lineStart, curLine));
     };
   }
   errorHandlers_readInt = {
-    invalidDigit: (pos, lineStart, curLine, radix) => {
+    invalidDigit: (/** @type {number} */ pos, /** @type {number} */ lineStart, /** @type {number} */ curLine, /** @type {number} */ radix) => {
       if (!(/** @type {Parser} */ (this).optionFlags & 4096)) return false;
       this.raise(Errors.InvalidDigit, buildPosition(pos, lineStart, curLine), {
         radix
@@ -6464,7 +6464,7 @@ class Tokenizer extends CommentsParser {
   };
   errorHandlers_readStringContents_string = {
     ...this.errorHandlers_readCodePoint,
-    strictNumericEscape: (pos, lineStart, curLine) => {
+    strictNumericEscape: (/** @type {number} */ pos, /** @type {number} */ lineStart, /** @type {number} */ curLine) => {
       this.recordStrictModeErrors(Errors.StrictNumericEscape, buildPosition(pos, lineStart, curLine));
     },
     unterminated: (/** @type {number} */ pos, /** @type {number} */ lineStart, /** @type {number} */ curLine) => {
@@ -6474,7 +6474,7 @@ class Tokenizer extends CommentsParser {
   errorHandlers_readStringContents_template = {
     ...this.errorHandlers_readCodePoint,
     strictNumericEscape: this.errorBuilder(Errors.StrictNumericEscape),
-    unterminated: (pos, lineStart, curLine) => {
+    unterminated: (/** @type {number} */ pos, /** @type {number} */ lineStart, /** @type {number} */ curLine) => {
       throw this.raise(Errors.UnterminatedTemplate, buildPosition(pos, lineStart, curLine));
     }
   };

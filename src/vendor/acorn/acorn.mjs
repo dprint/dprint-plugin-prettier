@@ -3301,7 +3301,7 @@ pp$5.parseImportMeta = /** @returns {Node} */ /** @this {Parser} */ function(/**
   return this.finishNode(node, "MetaProperty")
 };
 
-pp$5.parseLiteral = /** @returns {Node} */ /** @this {Parser} */ function(value) {
+pp$5.parseLiteral = /** @returns {Node} */ /** @this {Parser} */ function(/** @type {TokenValue} */ value) {
   var node = this.startNode();
   node.value = value;
   node.raw = this.input.slice(this.start, this.end);
@@ -3323,7 +3323,9 @@ pp$5.shouldParseArrow = /** @returns {boolean} */ /** @this {Parser} */ function
 };
 
 pp$5.parseParenAndDistinguishExpression = /** @returns {Node} */ /** @this {Parser} */ function(/** @type {boolean} */ canBeArrow, /** @type {boolean | string | undefined} */ forInit) {
-  var startPos = this.start, startLoc = this.startLoc, val, allowTrailingComma = this.options.ecmaVersion >= 8;
+  var startPos = this.start, startLoc = this.startLoc;
+  /** @type {Node} */ var val;
+  var allowTrailingComma = this.options.ecmaVersion >= 8;
   if (this.options.ecmaVersion >= 6) {
     this.next();
 
@@ -3747,7 +3749,7 @@ pp$5.parseExprList = /** @returns {any[]} */ /** @this {Parser} */ function(/** 
       if (allowTrailingComma && this.afterTrailingComma(close)) { break }
     } else { first = false; }
 
-    var elt = (void 0);
+    /** @type {Node | null | undefined} */ var elt = (void 0);
     if (allowEmpty && this.type === types$1.comma)
       { elt = null; }
     else if (this.type === types$1.ellipsis) {

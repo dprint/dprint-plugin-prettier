@@ -26,7 +26,9 @@ import { calculateRange } from "./range.js";
 
 const CURSOR = Symbol("cursor");
 
-async function coreFormat(/** @type {string} */ originalText, /** @type {import("../../../prettier/src/main/format-options.js").FormatOptions} */ opts, addAlignmentSize = 0) {
+/** @typedef {{formatted: string, cursorOffset: number, comments: any[]}} FormatResult */
+
+/** @returns {Promise<FormatResult>} */ async function coreFormat(/** @type {string} */ originalText, /** @type {import("../../../prettier/src/main/format-options.js").FormatOptions} */ opts, addAlignmentSize = 0) {
   if (!originalText || originalText.trim().length === 0) {
     return { formatted: "", cursorOffset: -1, comments: [] };
   }
@@ -184,7 +186,7 @@ async function coreFormat(/** @type {string} */ originalText, /** @type {import(
   return { formatted: result.formatted, cursorOffset: -1, comments };
 }
 
-async function formatRange(/** @type {string} */ originalText, /** @type {import("../../../prettier/src/main/format-options.js").FormatOptions} */ opts) {
+/** @returns {Promise<FormatResult>} */ async function formatRange(/** @type {string} */ originalText, /** @type {import("../../../prettier/src/main/format-options.js").FormatOptions} */ opts) {
   const { ast, text } = await parseText(originalText, opts);
   const [rangeStart, rangeEnd] = calculateRange(text, opts, ast) ?? [0, 0];
   const rangeString = text.slice(rangeStart, rangeEnd);
@@ -342,7 +344,7 @@ async function formatWithCursor(/** @type {string} */ originalText, originalOpti
     };
   }
 
-  let result;
+  /** @type {FormatResult} */ let result;
 
   if (options.rangeStart > 0 || options.rangeEnd < text.length) {
     result = await formatRange(text, options);
