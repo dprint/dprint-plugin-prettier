@@ -1984,7 +1984,8 @@ var parser = (/** @returns {JisonParser} */ function() {
 				return pre + this.upcomingInput() + "\n" + c + "^";
 			},
 			test_match: /** @this {JisonLexer} */ function(/** @type {RegExpMatchArray} */ match, /** @type {number} */ indexed_rule) {
-				var token, lines, backup;
+				var token, backup;
+				/** @type {RegExpMatchArray | null} */ var lines;
 				if (this.options.backtrack_lexer) {
 					backup = {
 						yylineno: this.yylineno,
@@ -2037,7 +2038,8 @@ var parser = (/** @returns {JisonParser} */ function() {
 			next: /** @this {JisonLexer} */ function() {
 				if (this.done) return this.EOF;
 				if (!this._input) this.done = true;
-				var token, match;
+				var token;
+				/** @type {RegExpMatchArray | false | undefined} */ var match;
 				/** @type {RegExpMatchArray | null} */ var tempMatch;
 				/** @type {number} */ var index;
 				if (!this._more) {

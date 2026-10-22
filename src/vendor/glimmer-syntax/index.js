@@ -769,7 +769,7 @@ class CharPositionSpan {
  * @property {HbsPositions} hbsPositions
  */
 class HbsSpan {
-    #charPosSpan;
+    /** @type {CharPositionSpan | "BROKEN" | null} */ #charPosSpan;
     // the source location from Handlebars + AST Plugins -- could be wrong
     #providedHbsLoc;
     constructor(/** @type {Source} */ source, /** @type {HbsPositions} */ hbsPositions, providedHbsLoc = null) {

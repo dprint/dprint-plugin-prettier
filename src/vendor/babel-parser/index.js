@@ -7363,7 +7363,7 @@ class LValParser extends NodeUtils {
       case "SpreadElement":
         return this.isAssignable(node.argument);
       case "ArrayExpression":
-        return node.elements.every(element => element === null || this.isAssignable(element));
+        return node.elements.every((/** @type {Node | null} */ element) => element === null || this.isAssignable(element));
       case "AssignmentExpression":
         return node.operator === "=";
       case "ParenthesizedExpression":
