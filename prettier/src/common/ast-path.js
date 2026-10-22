@@ -204,7 +204,7 @@ class AstPath {
   match(...predicates) {
     /** @type {number} */ let stackPointer = this.stack.length - 1;
 
-    let name = null;
+    /** @type {string | number | null} */ let name = null;
     let node = this.stack[stackPointer--];
 
     for (const predicate of predicates) {

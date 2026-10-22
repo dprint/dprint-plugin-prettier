@@ -25020,7 +25020,7 @@ var na;
     return m ? F_(m) : p();
   }
   function ma(/** @type {number} */ o, /** @type {number | undefined} */ p) {
-    var m;
+    /** @type {Kf[] | undefined} */ var m;
     if (!Jt || !z_(o) || sn) return;
     let g = Jt.currentNode(p ?? t.getTokenFullStart());
     if (!(ea(g) || Kv(g) || y1(g) || (g.flags & 101441536) !== it) && V_(g, o))
@@ -26358,8 +26358,8 @@ var na;
     return o;
   }
   /** @returns {Kf | xh | vh | Th} */ function Li() {
-    let o = O(),
-      p;
+    let o = O();
+    /** @type {Kf | xh | vh | Th} */ let p;
     return (
       u() === 102
         ? H(mo)
@@ -26619,8 +26619,8 @@ var na;
   }
   /** @returns {Kf | xh | vh | Th} */ function on(/** @type {number} */ o, /** @type {Kf | vh | xh | Th | undefined} */ p, m) {
     for (;;) {
-      let g,
-        x = !1;
+      /** @type {vh | undefined} */ let g;
+      let x = !1;
       if ((m && _c() ? ((g = Xn(29)), (x = kt(u()))) : (x = Je(25)), x)) {
         p = oc(o, p, g);
         continue;
@@ -26657,8 +26657,8 @@ var na;
   /** @returns {Kf | xh | vh | Th} */ function Js(/** @type {number} */ o, /** @type {Kf | vh | xh | Th} */ p) {
     for (;;) {
       p = on(o, p, !0);
-      let m,
-        g = ft(29);
+      /** @type {(Kf | vh | xh | Th)[] | undefined} */ let m;
+      let g = ft(29);
       if (g && ((m = le(Ea)), Sn())) {
         p = Wr(o, p, g, m);
         continue;
@@ -29230,7 +29230,7 @@ function c6(/** @type {InstanceType<typeof d6> | InstanceType<typeof Kf>} */ e, 
     f = (/** @type {Kf | vh | xh | Th | undefined} */ b) => {
       (f_(a, s, b.pos, e), a.push(b), (s = b.end));
     },
-    h = (b) => {
+    h = (/** @type {(Kf | vh | xh | Th)[]} */ b) => {
       (f_(a, s, b.pos, e), a.push(l6(b, e)), (s = b.end));
     };
   return (Bn(e.jsDoc, f), (s = e.pos), e.forEachChild(f, h), f_(a, s, e.end, e), p_.setText(void 0), a);

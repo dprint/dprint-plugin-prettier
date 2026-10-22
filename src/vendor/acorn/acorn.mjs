@@ -2815,7 +2815,7 @@ pp$5.parseExpression = /** @this {Parser} */ function(/** @type {boolean | strin
 // Parse an assignment expression. This includes applications of
 // operators like `+=`.
 
-pp$5.parseMaybeAssign = /** @returns {Node} */ /** @this {Parser} */ function(/** @type {boolean | string | undefined} */ forInit, /** @type {DestructuringErrors | null | undefined} */ refDestructuringErrors, afterLeftParse) {
+pp$5.parseMaybeAssign = /** @returns {Node} */ /** @this {Parser} */ function(/** @type {boolean | string | undefined} */ forInit, /** @type {DestructuringErrors | null | undefined} */ refDestructuringErrors, /** @type {((this: Parser, left: Node, startPos: number, startLoc: Position | undefined) => Node) | undefined} */ afterLeftParse) {
   if (this.isContextual("yield")) {
     if (this.inGenerator) { return this.parseYield(forInit) }
     // The tokenizer will assume an expression is allowed after

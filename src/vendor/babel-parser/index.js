@@ -5226,14 +5226,15 @@ const isAllowedNumericSeparatorSibling = {
   hex: /** @returns {boolean} */ (/** @type {number} */ ch) => ch >= 48 && ch <= 57 || ch >= 65 && ch <= 70 || ch >= 97 && ch <= 102
 };
 /**
-@typedef {Readonly<{ pos: number, str: string | null, firstInvalidLoc: any, lineStart: number, curLine: number }>} StringContents
+@typedef {{ pos: int, lineStart: int, curLine: int }} InvalidLoc
+@typedef {Readonly<{ pos: number, str: string | null, firstInvalidLoc: InvalidLoc | null, lineStart: number, curLine: number }>} StringContents
 */
 /** @returns {StringContents} */ function readStringContents(/** @type {string} */ type, /** @type {string} */ input, /** @type {int} */ pos, /** @type {int} */ lineStart, /** @type {int} */ curLine, errors) {
   const initialPos = pos;
   const initialLineStart = lineStart;
   const initialCurLine = curLine;
   let out = "";
-  let firstInvalidLoc = null;
+  /** @type {InvalidLoc | null} */ let firstInvalidLoc = null;
   /** @type {int} */ let chunkStart = pos;
   const {
     length
