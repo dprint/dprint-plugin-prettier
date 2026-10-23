@@ -30,11 +30,17 @@ const bytesPerCharacter: number = 160;
 // there is (300 MB): its three files of 0.2-0.7 MB took 1,634 ms through dprint rather than 1,864 with 240 MB at the
 // most, and 1,493-1,585 with 300 (wasm/Plugin.csproj)
 const yamlBytesPerCharacter: number = 1000;
-// CSS's of 50,000 characters or more create about 320, and were collected while they were formatted with room for
-// 160: CSS 3.4% faster with 400, and the same with 1,000. Its smaller files are not given room by the characters, as
-// the collection of everything that keeping room starts with costs more than what they create
-const cssBytesPerCharacter: number = 400;
-const cssLeastRoomLength: number = 50000;
+// the files of 50,000 characters or more of languages whose parsers create more than JSON's, which were collected
+// while they were formatted with room for 160: CSS's create about 320 (CSS 3.4% faster with 400, and the same with
+// 1,000) and JavaScript's about 220 (JavaScript 12% faster with 300-450), TypeScript's about 380 (1% faster with
+// 700). Their smaller files are not given room by the characters, as the collection of everything that keeping room
+// starts with costs more than what they create
+const largeFileBytesPerCharacter: [RegExp, number][] = [
+  [/\.(css|scss|less)$/i, 400],
+  [/\.(js|jsx|mjs|cjs)$/i, 400],
+  [/\.(ts|tsx|mts|cts)$/i, 600],
+];
+const largeFileLength: number = 50000;
 
 /** Keeps the configuration of an id, which dprint gives as JSON, until it is released. */
 export function registerConfig(id: number, json: string): void {
@@ -186,8 +192,12 @@ function bytesPerCharacterOf(path: string, length: number): number {
   if (/\.ya?ml$/i.test(path)) {
     return yamlBytesPerCharacter;
   }
-  if (length >= cssLeastRoomLength && /\.(css|scss|less)$/i.test(path)) {
-    return cssBytesPerCharacter;
+  if (length >= largeFileLength) {
+    for (const [extensions, bytes] of largeFileBytesPerCharacter) {
+      if (extensions.test(path)) {
+        return bytes;
+      }
+    }
   }
   return bytesPerCharacter;
 }
