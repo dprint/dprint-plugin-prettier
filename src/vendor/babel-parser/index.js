@@ -1,8 +1,8 @@
 // @nts-check
 class Position {
   constructor(/** @type {int} */ line, /** @type {int} */ col, /** @type {int} */ index) {
-    /** @type {number | undefined} */ this.line = undefined;
-    /** @type {number | undefined} */ this.column = undefined;
+    /** @type {int} */ this.line = undefined;
+    /** @type {int} */ this.column = undefined;
     if (index !== undefined) this.index = undefined;
     this.line = line;
     this.column = col;
