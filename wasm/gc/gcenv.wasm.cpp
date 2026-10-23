@@ -16,10 +16,14 @@
 extern uint32_t g_pageSizeUnixInl;
 #define OS_PAGE_SIZE g_pageSizeUnixInl
 
-// What was reserved, and where in it starts what has never been written to, which reads as zero as a module's memory
-// does when it grows. Zeroing that when it is committed made formatting YAML's large files 3% slower, as the collector
-// commits the memory of a segment as it grows into it. There are only a few reservations at once (the segments and
-// the collector's tables); memory of any others is zeroed when it is committed
+// What was reserved, and where in it starts what the module's memory did not reach when it was reserved, which has
+// never been written to and reads as zero, as a module's memory does when it grows. Zeroing that when it is committed
+// made formatting YAML's large files 3% slower, as the collector commits the memory of a segment as it grows into it.
+// The collector never commits the same memory of a reservation twice, as it is never decommitted, so only what was
+// written to before it was reserved is zeroed: one reservation holds the segments of all three heaps at once, and
+// taking what was committed of one to be written to zeroed what another committed below it, 625 MB for each pass over
+// the JSON files. There are only a few reservations at once (the segments and the collector's tables); memory of any
+// others is zeroed when it is committed
 struct Reservation
 {
     uint8_t* start;
@@ -88,10 +92,6 @@ bool GCToOSInterface::VirtualCommit(void* address, size_t size, uint16_t node)
     if (start < reservation->untouched)
     {
         memset(start, 0, (end < reservation->untouched ? end : reservation->untouched) - start);
-    }
-    if (end > reservation->untouched)
-    {
-        reservation->untouched = end;
     }
     return true;
 }
