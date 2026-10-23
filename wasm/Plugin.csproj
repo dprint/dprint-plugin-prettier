@@ -17,8 +17,9 @@
          method with (https://github.com/dotnet/runtimelab/pull/3319) -->
     <IlcPgoOptimize>false</IlcPgoOptimize>
     <!-- all of the program in one module for LLVM rather than 16 compiled in parallel, so that it inlines and optimizes
-         across what were the modules' borders: formatting 2.5-4% faster, the module 4 MB larger and compiling it a few
-         minutes longer -->
+         across what were the modules' borders: formatting 2.5-6% faster, the module 4 MB larger, and compiling it takes
+         about 6 minutes rather than 2 and 13 GB of memory for clang rather than 2.6 (two modules: 10.5 GB, half the
+         gain) -->
     <IlcMaxLlvmModuleCount>1</IlcMaxLlvmModuleCount>
     <!-- Wasm's own exceptions rather than ones made of returned flags, which makes formatting 5-6% faster and the
          module 16% smaller, and which dprint loads from 0.64.0 -->
