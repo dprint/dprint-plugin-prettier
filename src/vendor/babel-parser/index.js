@@ -5068,9 +5068,9 @@ class State {
   set strict(/** @type {boolean} */ v) {
     if (v) this.flags |= 1;else this.flags &= -2;
   }
-  /** @type {int | undefined} */ startIndex;
-  /** @type {int | undefined} */ curLine;
-  /** @type {int | undefined} */ lineStart;
+  /** @type {int} */ startIndex;
+  /** @type {int} */ curLine;
+  /** @type {int} */ lineStart;
   /** @type {Position | undefined} */ startLoc;
   /** @type {Position | undefined} */ endLoc;
   init({
@@ -5227,7 +5227,8 @@ const isAllowedNumericSeparatorSibling = {
 };
 /**
 @typedef {{ pos: int, lineStart: int, curLine: int }} InvalidLoc
-@typedef {Readonly<{ pos: number, str: string | null, firstInvalidLoc: InvalidLoc | null, lineStart: number, curLine: number }>} StringContents
+@typedef {Readonly<{ pos: int, str: string | null, firstInvalidLoc: InvalidLoc | null, lineStart: int, curLine: int }>} StringContents
+@typedef {Readonly<{ pos: int, ch: string | null, lineStart: int, curLine: int }>} EscapedChar
 */
 /** @returns {StringContents} */ function readStringContents(/** @type {string} */ type, /** @type {string} */ input, /** @type {int} */ pos, /** @type {int} */ lineStart, /** @type {int} */ curLine, errors) {
   const initialPos = pos;
@@ -5271,7 +5272,7 @@ const isAllowedNumericSeparatorSibling = {
     } else if (ch === 8232 || ch === 8233) {
       ++pos;
       ++curLine;
-      /** @type {int | undefined} */ lineStart = pos;
+      /** @type {int} */ lineStart = pos;
     } else if (ch === 10 || ch === 13) {
       if (type === "template") {
         out += input.slice(chunkStart, pos) + "\n";
@@ -5302,10 +5303,10 @@ const isAllowedNumericSeparatorSibling = {
   }
   return ch === (type === "double" ? 34 : 39);
 }
-function readEscapedChar(/** @type {string} */ input, /** @type {int} */ pos, /** @type {int} */ lineStart, /** @type {int} */ curLine, /** @type {boolean} */ inTemplate, errors) {
+/** @returns {EscapedChar} */ function readEscapedChar(/** @type {string} */ input, /** @type {int} */ pos, /** @type {int} */ lineStart, /** @type {int} */ curLine, /** @type {boolean} */ inTemplate, errors) {
   const throwOnInvalid = !inTemplate;
   pos++;
-  const res = (/** @type {string} */ ch) => ({
+  const res = /** @returns {EscapedChar} */ (/** @type {string | null} */ ch) => ({
     pos,
     ch,
     lineStart,
@@ -5348,7 +5349,7 @@ function readEscapedChar(/** @type {string} */ input, /** @type {int} */ pos, /*
         ++pos;
       }
     case 10:
-      /** @type {int | undefined} */ lineStart = pos;
+      /** @type {int} */ lineStart = pos;
       ++curLine;
     case 8232:
     case 8233:
@@ -5384,7 +5385,7 @@ function readEscapedChar(/** @type {string} */ input, /** @type {int} */ pos, /*
       return res(String.fromCharCode(ch));
   }
 }
-/** @returns {{ code: number | null, pos: number }} */ function readHexChar(/** @type {string} */ input, /** @type {int} */ pos, /** @type {int} */ lineStart, /** @type {int} */ curLine, /** @type {int} */ len, /** @type {boolean} */ forceLen, /** @type {boolean} */ throwOnInvalid, errors) {
+/** @returns {Readonly<{ code: number | null, pos: int }>} */ function readHexChar(/** @type {string} */ input, /** @type {int} */ pos, /** @type {int} */ lineStart, /** @type {int} */ curLine, /** @type {int} */ len, /** @type {boolean} */ forceLen, /** @type {boolean} */ throwOnInvalid, errors) {
   const initialPos = pos;
   /** @type {number | null} */ let n;
   ({
@@ -5403,7 +5404,7 @@ function readEscapedChar(/** @type {string} */ input, /** @type {int} */ pos, /*
     pos
   };
 }
-/** @returns {{ n: number | null, pos: number }} */ function readInt(/** @type {string} */ input, /** @type {int} */ pos, /** @type {int} */ lineStart, /** @type {int} */ curLine, /** @type {int} */ radix, /** @type {int | undefined} */ len, /** @type {boolean} */ forceLen, allowNumSeparator, errors, /** @type {boolean} */ bailOnError) {
+/** @returns {Readonly<{ n: number | null, pos: int }>} */ function readInt(/** @type {string} */ input, /** @type {int} */ pos, /** @type {int} */ lineStart, /** @type {int} */ curLine, /** @type {int} */ radix, /** @type {int | undefined} */ len, /** @type {boolean} */ forceLen, allowNumSeparator, errors, /** @type {boolean} */ bailOnError) {
   const start = pos;
   const forbiddenSiblings = radix === 16 ? forbiddenNumericSeparatorSiblings.hex : forbiddenNumericSeparatorSiblings.decBinOct;
   const isAllowedSibling = radix === 16 ? isAllowedNumericSeparatorSibling.hex : radix === 10 ? isAllowedNumericSeparatorSibling.dec : radix === 8 ? isAllowedNumericSeparatorSibling.oct : isAllowedNumericSeparatorSibling.bin;
@@ -5469,7 +5470,7 @@ function readEscapedChar(/** @type {string} */ input, /** @type {int} */ pos, /*
     pos
   };
 }
-/** @returns {{ code: number | null, pos: number }} */ function readCodePoint(/** @type {string | undefined} */ input, /** @type {int} */ pos, /** @type {int} */ lineStart, /** @type {int} */ curLine, /** @type {boolean} */ throwOnInvalid, errors) {
+/** @returns {Readonly<{ code: number | null, pos: int }>} */ function readCodePoint(/** @type {string | undefined} */ input, /** @type {int} */ pos, /** @type {int} */ lineStart, /** @type {int} */ curLine, /** @type {boolean} */ throwOnInvalid, errors) {
   const ch = input.charCodeAt(pos);
   let code;
   if (ch === 123) {
