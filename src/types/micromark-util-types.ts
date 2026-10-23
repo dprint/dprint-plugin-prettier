@@ -102,12 +102,12 @@ export interface Point {
   /**
    * Position in a list of chunks.
    */
-  _index: number
+  _index: int
 
   /**
    * 1-indexed line number.
    */
-  line: number
+  line: int
 
   /**
    * 1-indexed column number.
