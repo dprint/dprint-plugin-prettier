@@ -87,7 +87,7 @@ static unsafe partial class Program
     }
 
     /// <summary>A view of the parser's memory as an array of numbers that can only be read.</summary>
-    sealed class FlowHeap : IJsArray
+    sealed class FlowHeap : JsArrayBase
     {
         private readonly byte* _memory;
         private readonly int _count;
@@ -100,11 +100,11 @@ static unsafe partial class Program
             _elementSize = elementSize;
         }
 
-        public int Count { get => _count; set => throw new Error("The memory of the parser cannot be resized"); }
+        public override int Count { get => _count; set => throw new Error("The memory of the parser cannot be resized"); }
 
-        public bool HasObjectElements => false;
+        public override bool HasObjectElements => false;
 
-        public object GetItem(int index)
+        public override object GetItem(int index)
         {
             if ((uint)index >= (uint)_count) return null;
             return _elementSize switch
@@ -115,8 +115,8 @@ static unsafe partial class Program
             };
         }
 
-        public void SetItem(int index, object value) => throw new Error("The memory of the parser cannot be written");
+        public override void SetItem(int index, object value) => throw new Error("The memory of the parser cannot be written");
 
-        public void Add(object value) => throw new Error("The memory of the parser cannot be resized");
+        public override void AddValue(object value) => throw new Error("The memory of the parser cannot be resized");
     }
 }
