@@ -29227,13 +29227,13 @@ function c6(/** @type {InstanceType<typeof d6> | InstanceType<typeof Kf>} */ e, 
       a
     );
   p_.setText((t || e.getSourceFile()).text);
-  let s = e.pos,
-    f = (/** @type {Kf | vh | xh | Th | undefined} */ b) => {
+  let s = /** @type {number} */ (e.pos),
+    f = /** @type {TsNodeVisitor} */ ((/** @type {Kf | vh | xh | Th | undefined} */ b) => {
       (f_(a, s, b.pos, e), a.push(b), (s = b.end));
-    },
-    h = (/** @type {(Kf | vh | xh | Th)[]} */ b) => {
+    }),
+    h = /** @type {TsNodesVisitor} */ ((/** @type {(Kf | vh | xh | Th)[]} */ b) => {
       (f_(a, s, b.pos, e), a.push(l6(b, e)), (s = b.end));
-    };
+    });
   return (Bn(e.jsDoc, f), (s = e.pos), e.forEachChild(f, h), f_(a, s, e.end, e), p_.setText(void 0), a);
 }
 function f_(/** @type {any[]} */ e, /** @type {number} */ t, /** @type {number} */ a, /** @type {Kf | d6} */ s) {
