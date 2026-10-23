@@ -30,6 +30,11 @@ const bytesPerCharacter: number = 160;
 // there is (300 MB): its three files of 0.2-0.7 MB took 1,634 ms through dprint rather than 1,864 with 240 MB at the
 // most, and 1,493-1,585 with 300 (wasm/Plugin.csproj)
 const yamlBytesPerCharacter: number = 1000;
+// CSS's of 50,000 characters or more create about 320, and were collected while they were formatted with room for
+// 160: CSS 3.4% faster with 400, and the same with 1,000. Its smaller files are not given room by the characters, as
+// the collection of everything that keeping room starts with costs more than what they create
+const cssBytesPerCharacter: number = 400;
+const cssLeastRoomLength: number = 50000;
 
 /** Keeps the configuration of an id, which dprint gives as JSON, until it is released. */
 export function registerConfig(id: number, json: string): void {
@@ -74,7 +79,7 @@ export async function formatFile(id: number, overrideJson: string, path: string,
   // as bytesPerCharacter says, which nothing is collected during when that is a lot (a file of 50,000 characters or
   // more), as most of it is in use until the file is formatted: JSON 5.7% faster, for a peak of 925 MB rather than
   // 315 MB on one thread, which each thread keeps
-  sys.settle(text.length * (/\.ya?ml$/i.test(path) ? yamlBytesPerCharacter : bytesPerCharacter));
+  sys.settle(text.length * bytesPerCharacterOf(path, text.length));
   const config = overrideJson.length > 0
     ? resolveOverridden(id, JSON.parse(overrideJson) as any).config
     : getResolved(id).config;
@@ -174,4 +179,15 @@ function optionsFor(config: ResolvedConfig, path: string): any {
   const dot = path.lastIndexOf(".");
   const overrides = dot < 0 ? undefined : config.extensionOverrides[path.slice(dot + 1).toLowerCase()];
   return overrides == null ? config.main : { ...config.main, ...overrides };
+}
+
+// about how many bytes formatting a file of a language creates for each of its characters
+function bytesPerCharacterOf(path: string, length: number): number {
+  if (/\.ya?ml$/i.test(path)) {
+    return yamlBytesPerCharacter;
+  }
+  if (length >= cssLeastRoomLength && /\.(css|scss|less)$/i.test(path)) {
+    return cssBytesPerCharacter;
+  }
+  return bytesPerCharacter;
 }
