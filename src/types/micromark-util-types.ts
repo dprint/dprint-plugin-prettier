@@ -12,7 +12,7 @@ import type {Event} from './micromark-events.js'
  * Negative integers are used instead of certain sequences of characters (such
  * as line endings and tabs).
  */
-export type Code = number | null
+export type Code = int | null
 
 /**
  * A chunk is either a character code or a slice of a buffer in the form of a

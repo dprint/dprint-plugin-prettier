@@ -103,7 +103,7 @@ function liquidSyntax() {
     return start;
 
     /** @type {State} */
-    function start(/** @type {number | null} */ code) {
+    function start(/** @type {int | null} */ code) {
       effects.enter("liquidNode");
       effects.enter(types.data);
       effects.consume(code);

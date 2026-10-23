@@ -55,7 +55,7 @@ function tokenizeHtmlText(effects, ok, nok) {
    *
    * @type {State}
    */
-  function start(/** @type {number | null} */ code) {
+  function start(/** @type {int | null} */ code) {
     assert(code === codes.lessThan, "expected `<`");
     effects.enter(types.htmlText);
     effects.enter(types.htmlTextData);
@@ -77,7 +77,7 @@ function tokenizeHtmlText(effects, ok, nok) {
    *
    * @type {State}
    */
-  function open(/** @type {number | null} */ code) {
+  function open(/** @type {int | null} */ code) {
     if (code === codes.exclamationMark) {
       effects.consume(code);
       return declarationOpen;
@@ -116,7 +116,7 @@ function tokenizeHtmlText(effects, ok, nok) {
    *
    * @type {State}
    */
-  function declarationOpen(/** @type {number | null} */ code) {
+  function declarationOpen(/** @type {int | null} */ code) {
     if (code === codes.dash) {
       effects.consume(code);
       return commentOpenInside;
@@ -146,7 +146,7 @@ function tokenizeHtmlText(effects, ok, nok) {
    *
    * @type {State}
    */
-  function commentOpenInside(/** @type {number | null} */ code) {
+  function commentOpenInside(/** @type {int | null} */ code) {
     if (code === codes.dash) {
       effects.consume(code);
       return commentEnd;
@@ -194,7 +194,7 @@ function tokenizeHtmlText(effects, ok, nok) {
    *
    * @type {State}
    */
-  function commentClose(/** @type {number | null} */ code) {
+  function commentClose(/** @type {int | null} */ code) {
     if (code === codes.dash) {
       effects.consume(code);
       return commentEnd;
@@ -213,7 +213,7 @@ function tokenizeHtmlText(effects, ok, nok) {
    *
    * @type {State}
    */
-  function commentEnd(/** @type {number | null} */ code) {
+  function commentEnd(/** @type {int | null} */ code) {
     return code === codes.greaterThan
       ? end(code)
       : code === codes.dash
@@ -390,7 +390,7 @@ function tokenizeHtmlText(effects, ok, nok) {
    *
    * @type {State}
    */
-  function tagCloseStart(/** @type {number | null} */ code) {
+  function tagCloseStart(/** @type {int | null} */ code) {
     // ASCII alphabetical.
     if (asciiAlpha(code)) {
       effects.consume(code);
@@ -410,7 +410,7 @@ function tokenizeHtmlText(effects, ok, nok) {
    *
    * @type {State}
    */
-  function tagClose(/** @type {number | null} */ code) {
+  function tagClose(/** @type {int | null} */ code) {
     // ASCII alphanumerical and `-`.
     if (code === codes.dash || asciiAlphanumeric(code)) {
       effects.consume(code);
@@ -430,7 +430,7 @@ function tokenizeHtmlText(effects, ok, nok) {
    *
    * @type {State}
    */
-  function tagCloseBetween(/** @type {number | null} */ code) {
+  function tagCloseBetween(/** @type {int | null} */ code) {
     if (markdownLineEnding(code)) {
       returnState = tagCloseBetween;
       return lineEndingBefore(code);
@@ -482,7 +482,7 @@ function tokenizeHtmlText(effects, ok, nok) {
    *
    * @type {State}
    */
-  function tagOpenBetween(/** @type {number | null} */ code) {
+  function tagOpenBetween(/** @type {int | null} */ code) {
     if (code === codes.slash) {
       effects.consume(code);
       return end;
@@ -517,7 +517,7 @@ function tokenizeHtmlText(effects, ok, nok) {
    *
    * @type {State}
    */
-  function tagOpenAttributeName(/** @type {number | null} */ code) {
+  function tagOpenAttributeName(/** @type {int | null} */ code) {
     // ASCII alphabetical and `-`, `.`, `:`, and `_`.
     if (
       code === codes.dash ||
@@ -544,7 +544,7 @@ function tokenizeHtmlText(effects, ok, nok) {
    *
    * @type {State}
    */
-  function tagOpenAttributeNameAfter(/** @type {number | null} */ code) {
+  function tagOpenAttributeNameAfter(/** @type {int | null} */ code) {
     if (code === codes.equalsTo) {
       effects.consume(code);
       return tagOpenAttributeValueBefore;
@@ -574,7 +574,7 @@ function tokenizeHtmlText(effects, ok, nok) {
    *
    * @type {State}
    */
-  function tagOpenAttributeValueBefore(/** @type {number | null} */ code) {
+  function tagOpenAttributeValueBefore(/** @type {int | null} */ code) {
     if (
       code === codes.eof ||
       code === codes.lessThan ||
@@ -615,7 +615,7 @@ function tokenizeHtmlText(effects, ok, nok) {
    *
    * @type {State}
    */
-  function tagOpenAttributeValueQuoted(/** @type {number | null} */ code) {
+  function tagOpenAttributeValueQuoted(/** @type {int | null} */ code) {
     if (code === marker) {
       effects.consume(code);
       marker = undefined;
@@ -680,7 +680,7 @@ function tokenizeHtmlText(effects, ok, nok) {
    *
    * @type {State}
    */
-  function tagOpenAttributeValueQuotedAfter(/** @type {number | null} */ code) {
+  function tagOpenAttributeValueQuotedAfter(/** @type {int | null} */ code) {
     if (
       code === codes.slash ||
       code === codes.greaterThan ||
@@ -727,7 +727,7 @@ function tokenizeHtmlText(effects, ok, nok) {
    *
    * @type {State}
    */
-  function lineEndingBefore(/** @type {number | null} */ code) {
+  function lineEndingBefore(/** @type {int | null} */ code) {
     assert(returnState, "expected return state");
     assert(markdownLineEnding(code), "expected eol");
     effects.exit(types.htmlTextData);
@@ -751,7 +751,7 @@ function tokenizeHtmlText(effects, ok, nok) {
    *
    * @type {State}
    */
-  function lineEndingAfter(/** @type {number | null} */ code) {
+  function lineEndingAfter(/** @type {int | null} */ code) {
     // Always populated by defaults.
     assert(
       self.parser.constructs.disable.null,
@@ -775,7 +775,7 @@ function tokenizeHtmlText(effects, ok, nok) {
    *
    * @type {State}
    */
-  function lineEndingAfterPrefix(/** @type {number | null} */ code) {
+  function lineEndingAfterPrefix(/** @type {int | null} */ code) {
     effects.enter(types.htmlTextData);
     return returnState(code);
   }
