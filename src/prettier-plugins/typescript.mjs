@@ -14417,7 +14417,8 @@ function $m(e, t) {
   let a = cf.exec(e)[0];
   return ((t = t + a.length), t);
 }
-function Nl(/** @type {boolean} */ e, /** @type {string} */ t, /** @type {number} */ a, /** @type {boolean} */ s, f, h, b) {
+/** @typedef {(pos: number, end: number, kind: number, hasTrailingNewLine: boolean, state: any, memo: any) => any} CommentRangeCallback */
+function Nl(/** @type {boolean} */ e, /** @type {string} */ t, /** @type {int} */ a, /** @type {boolean} */ s, /** @type {CommentRangeCallback} */ f, h, b) {
   let v,
     l,
     G,
@@ -14484,16 +14485,16 @@ function Nl(/** @type {boolean} */ e, /** @type {string} */ t, /** @type {number
   }
   return (W && (C = f(v, l, G, y, h, C)), C);
 }
-function Qm(/** @type {string} */ e, /** @type {number} */ t, a, s) {
+function Qm(/** @type {string} */ e, /** @type {int} */ t, /** @type {CommentRangeCallback} */ a, s) {
   return Nl(!1, e, t, !1, a, s);
 }
-function Km(/** @type {string} */ e, /** @type {number} */ t, a, s) {
+function Km(/** @type {string} */ e, /** @type {int} */ t, /** @type {CommentRangeCallback} */ a, s) {
   return Nl(!1, e, t, !0, a, s);
 }
-function xg(/** @type {string} */ e, /** @type {number} */ t, a, s, f) {
+function xg(/** @type {string} */ e, /** @type {int} */ t, /** @type {CommentRangeCallback} */ a, s, f) {
   return Nl(!0, e, t, !1, a, s, f);
 }
-function Tg(e, t, a, s, f) {
+function Tg(/** @type {string} */ e, /** @type {int} */ t, /** @type {CommentRangeCallback} */ a, s, f) {
   return Nl(!0, e, t, !0, a, s, f);
 }
 function Zm(/** @type {number} */ e, /** @type {number} */ t, /** @type {number} */ a, /** @type {boolean} */ s, f, h = []) {
@@ -32402,7 +32403,7 @@ function* Hh(/** @type {d6} */ e, /** @type {d6} */ t = e.getSourceFile()) {
   }
   return !0;
 }
-function Yh(/** @type {(cb: (pos: number, end: number, kind: number) => void) => void} */ e, /** @type {string} */ t) {
+function Yh(/** @type {(cb: CommentRangeCallback) => void} */ e, /** @type {string} */ t) {
   let a = [];
   return (
     e((/** @type {number} */ s, /** @type {number} */ f, /** @type {number} */ h) => {
