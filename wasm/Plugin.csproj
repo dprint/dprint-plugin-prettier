@@ -11,6 +11,9 @@
     <!-- otherwise the module includes DWARF debug info, which is over half its size. Stack traces in error messages don't use it. -->
     <DebugType>none</DebugType>
     <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
+    <!-- the module only ever runs on one thread (WASI preview 1), so what the runtime keeps for each thread is kept once,
+         as reading a value of a thread is a call in Wasm, which generators did several times for each item -->
+    <DefineConstants>$(DefineConstants);NTS_SINGLE_THREADED</DefineConstants>
     <!-- ILC inlines more for speed, which makes formatting 7-10% faster for a module 3 MB larger -->
     <OptimizationPreference>Speed</OptimizationPreference>
     <!-- Speed also gives ILC the runtime's profile data, which NativeAOT-LLVM 10.0.0-rc.1.26357.1 fails every
