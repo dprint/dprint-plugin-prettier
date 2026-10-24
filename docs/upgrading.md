@@ -207,6 +207,14 @@ Every parser that Prettier uses is compiled with types, in one of two ways:
   its copy, and a type in `prettier/src` that imports one of them by path imports the copy (as
   `prettier/src/language-html/parse/parse.js` does with angular-html-parser).
 
+The plugins that `src/plugins.ts` adds are compiled the same way. prettier-plugin-svelte (its `browser.js`),
+prettier-plugin-jsdoc (its `dist`) and comment-parser are copies with recorded types. Svelte's compiler is used
+from `node_modules` and is listed under `checked`. It takes two parsers from copies through `scopes` in
+`src/nts.json`: `src/vendor/acorn-svelte` is the acorn version that svelte depends on, with the types of
+`src/vendor/acorn` carried over, and `src/vendor/acorn-typescript` is @sveltejs/acorn-typescript. Upgrading one of
+these plugins is the same as upgrading a package in `prettier`. Its versions are pinned in `plugins/package.json`,
+and `deno task test:plugins` runs its tests.
+
 To give a package types that only `node_modules` has, copy it into `src/vendor`, point `paths` at the copy, and annotate
 the copy. A recording made before it was copied still holds for the copy when its keys are renamed to the copy's paths,
 since the files are the same. Flow's parser is recorded with flow-parser from npm in Node, which runs its Wasm module,

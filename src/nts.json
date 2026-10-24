@@ -95,11 +95,19 @@
     "prettier/plugins/typescript": "./prettier-plugins/typescript.mjs",
     "svelte/compiler": "./shims/svelte-compiler.js",
     "zimmerframe": "../plugins/node_modules/zimmerframe/src/walk.js",
-    "comment-parser": "../plugins/node_modules/comment-parser/es6/index.js"
+    "comment-parser": "./vendor/comment-parser/index.js"
   },
   "scopes": {
-    "../plugins/node_modules/": {
-      "acorn": "../plugins/node_modules/acorn/dist/acorn.mjs"
+    "../plugins/node_modules/svelte/": {
+      "acorn": "./vendor/acorn-svelte/acorn.mjs",
+      "@sveltejs/acorn-typescript": "./vendor/acorn-typescript/index.js"
+    },
+    "./vendor/acorn-typescript/": {
+      "acorn": "./vendor/acorn-svelte/acorn.mjs"
+    },
+    "./vendor/prettier-plugin-jsdoc/": {
+      "mdast-util-from-markdown": "../plugins/node_modules/mdast-util-from-markdown/index.js",
+      "binary-searching": "../plugins/node_modules/binary-searching/search-bounds.js"
     },
     "../plugins/node_modules/mdast-util-from-markdown/": {
       "micromark": "../prettier/node_modules/micromark/index.js",

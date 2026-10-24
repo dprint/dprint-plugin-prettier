@@ -270,5 +270,129 @@
   {
     "pattern": "(?:\\s|\\/\\/.*|\\/\\*[^]*?\\*\\/)*",
     "flags": "g"
+  },
+  {
+    "pattern": "\\r\\n?|\\n",
+    "flags": "g"
+  },
+  {
+    "pattern": "<!--[^]*?-->|<script((?:\\s+[^=>'\"\\/\\s]+=(?:\"[^\"]*\"|'[^']*'|[^>\\s]+)|\\s+[^=>'\"\\/\\s]+)*\\s*)>([^]*?)<\\/script\\s*>",
+    "flags": "g"
+  },
+  {
+    "pattern": "%[A-Z]",
+    "flags": ""
+  },
+  {
+    "pattern": "^\\s*",
+    "flags": "g"
+  },
+  {
+    "pattern": "<!--[^]*?-->|<script\\s+(?:[^>]*|(?:[^=>'\"/]+=(?:\"[^\"]*\"|'[^']*'|[^>\\s]+)\\s+)*)lang=([\"'])?([^\"' >]+)\\1[^>]*>",
+    "flags": "g"
+  },
+  {
+    "pattern": "^\\s+",
+    "flags": ""
+  },
+  {
+    "pattern": "\\s*(@(\\S+))(\\s*)",
+    "flags": ""
+  },
+  {
+    "pattern": "[;\\n]*$",
+    "flags": "g"
+  },
+  {
+    "pattern": "\\.ya?ml$",
+    "flags": "i"
+  },
+  {
+    "pattern": "<!--[^]*?-->|<style((?:\\s+[^=>'\"\\/\\s]+=(?:\"[^\"]*\"|'[^']*'|[^>\\s]+)|\\s+[^=>'\"\\/\\s]+)*\\s*)>([^]*?)<\\/style\\s*>",
+    "flags": "g"
+  },
+  {
+    "pattern": "^\\/\\*\\*[\\s\\S]+?\\*\\/$",
+    "flags": ""
+  },
+  {
+    "pattern": "\n",
+    "flags": "g"
+  },
+  {
+    "pattern": "\\.(?:mjs|mts)$",
+    "flags": "i"
+  },
+  {
+    "pattern": "^([*]+)",
+    "flags": "g"
+  },
+  {
+    "pattern": "(^|[^$\\w\\xA0-\\uFFFF])Array\\s*<((?:[^<>=]|=>|=(?!>)|<(?:[^<>=]|=>|=(?!>))+>)+)>",
+    "flags": "g"
+  },
+  {
+    "pattern": "^#!.*",
+    "flags": ""
+  },
+  {
+    "pattern": "^[\\t\\n\\f\\r ]+",
+    "flags": ""
+  },
+  {
+    "pattern": "^[\\t\\n\\f\\r ]*$",
+    "flags": ""
+  },
+  {
+    "pattern": "\\r(?!\\n)|[\\u2028\\u2029]",
+    "flags": ""
+  },
+  {
+    "pattern": "^\\s*function\\s+\\w*\\s*\\(([^)]*)\\)",
+    "flags": ""
+  },
+  {
+    "pattern": "^(?:break|case|catch|continue|debugger|default|do|else|finally|for|function|if|return|switch|throw|try|var|while|with|null|true|false|instanceof|typeof|void|delete|new|in|this|const|class|extends|export|import|super)$",
+    "flags": ""
+  },
+  {
+    "pattern": "^\\?\\s*(\\w+)$",
+    "flags": ""
+  },
+  {
+    "pattern": "\\.(?:js|mjs|cjs|jsx|ts|mts|cts|tsx)$",
+    "flags": "i"
+  },
+  {
+    "pattern": "(\\n(?!$))",
+    "flags": "g"
+  },
+  {
+    "pattern": "\\/\\/|(?:^|\\/)\\.\\.?(?:$|\\/)",
+    "flags": ""
+  },
+  {
+    "pattern": "^@[^\\s/]+(?=\\s|$)",
+    "flags": ""
+  },
+  {
+    "pattern": "in(?:stanceof)?",
+    "flags": "y"
+  },
+  {
+    "pattern": "^\\s+$",
+    "flags": ""
+  },
+  {
+    "pattern": "(?:\"([^\"]*)\"|'([^'])*'|([^>\\s]+))",
+    "flags": "y"
+  },
+  {
+    "pattern": "[\\t\\n\\f\\r ]+$",
+    "flags": ""
+  },
+  {
+    "pattern": "([\"'])(?:\\\\(?:\\r\\n|[\\s\\S])|(?!\\1)[^\\\\\\r\\n])*\\1",
+    "flags": "g"
   }
 ]
