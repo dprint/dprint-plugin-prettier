@@ -42,8 +42,22 @@ Deno.test("takes the global configuration", () => {
 });
 
 Deno.test("reports what is wrong with the configuration", () => {
-  formatter.setConfig({}, { lineWidth: "wide", "plugin.jsDoc": true });
+  formatter.setConfig({}, { lineWidth: "wide", "plugin.jsDoc": "yes" });
   assertEquals(formatter.getConfigDiagnostics().map(d => d.propertyName), ["plugin.jsDoc", "lineWidth"]);
+});
+
+Deno.test("formats jsdoc comments with prettier-plugin-jsdoc when it is turned on", () => {
+  const text = "/**\n* adds  numbers\n* @param {number} a the first\n*/\nfunction add(a) {}\n";
+  formatter.setConfig({}, { "plugin.jsDoc": true });
+  assertEquals(
+    formatter.formatText({ filePath: "file.js", fileText: text }),
+    "/**\n * Adds numbers\n *\n * @param {number} a The first\n */\nfunction add(a) {}\n",
+  );
+  formatter.setConfig({}, {});
+  assertEquals(
+    formatter.formatText({ filePath: "file.js", fileText: text }),
+    "/**\n * adds  numbers\n * @param {number} a the first\n */\nfunction add(a) {}\n",
+  );
 });
 
 Deno.test("formats the languages of prettier", () => {
@@ -59,6 +73,7 @@ Deno.test("formats the languages of prettier", () => {
     ["file.html", "<div><p>a</p></div>", "<div><p>a</p></div>\n"],
     ["file.vue", "<script>\nconst   a=1\n</script>\n", "<script>\nconst a = 1;\n</script>\n"],
     ["file.hbs", "<div   class=\"a\"></div>", "<div class=\"a\"></div>"],
+    ["file.svelte", "<script>\nlet   a=1\n</script>\n<p>{a}</p>", "<script>\n  let a = 1;\n</script>\n\n<p>{a}</p>\n"],
     ["file.ts", "const a = css`a{b:c}`;", "const a = css`\n  a {\n    b: c;\n  }\n`;\n"],
     ["file.ts", "const f = <T,>(a: T) => a;", "const f = <T>(a: T) => a;\n"],
     ["file.tsx", "const f = <T,>(a: T) => a;", "const f = <T,>(a: T) => a;\n"],

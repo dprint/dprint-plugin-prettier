@@ -1,10 +1,11 @@
 {
   "tasks": {
-    "setup": "cd prettier && npm ci --ignore-scripts",
+    "setup": "cd prettier && npm ci --ignore-scripts && cd ../plugins && npm ci --ignore-scripts",
     "build": "deno run -A scripts/build.ts",
     "test": "deno test -A tests/spec_test.ts",
     "test:repos": "deno test -A tests/repos_test.ts",
-    "test:prettier": "deno test -A tests/prettier_tests_test.ts"
+    "test:prettier": "deno test -A tests/prettier_tests_test.ts",
+    "test:plugins": "deno test -A tests/plugin_tests_test.ts"
   },
   "imports": {
     "@david/gagen": "jsr:@david/gagen@^0.5.0",

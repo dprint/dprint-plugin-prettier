@@ -25,6 +25,11 @@ if (!rootDir.join("prettier/node_modules").existsSync()) {
   $.logStep("Installing", "prettier's dependencies");
   await $`npm ci --ignore-scripts`.cwd(rootDir.join("prettier"));
 }
+// and the Prettier plugins that the plugin includes, with what they import
+if (!rootDir.join("plugins/node_modules").existsSync()) {
+  $.logStep("Installing", "the Prettier plugins");
+  await $`npm ci --ignore-scripts`.cwd(rootDir.join("plugins"));
+}
 
 $.logStep("Compiling", "src/main.ts with nts");
 ntsOutDir.mkdirSync({ recursive: true });

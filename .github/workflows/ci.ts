@@ -72,13 +72,19 @@ workflow({
           "./.github/workflows/release.ts --lint",
         ],
       },
-      { name: "Install prettier's dependencies", run: "deno task setup" },
+      { name: "Install prettier's and the prettier plugins' dependencies", run: "deno task setup" },
       { name: "Build", run: "deno task build" },
       { name: "Test", run: "deno task test" },
       {
         // formats the tests of prettier's repository with the plugin and with prettier, which must come out the same
         name: "Test prettier's tests",
         run: "deno task test:prettier",
+      },
+      {
+        // formats the tests of the prettier plugins that the plugin includes, and prettier's tests of javascript with
+        // prettier-plugin-jsdoc, with the plugin and with prettier, which must come out the same
+        name: "Test the prettier plugins' tests",
+        run: "deno task test:plugins",
       },
       {
         name: "Setup and test npm deployment",

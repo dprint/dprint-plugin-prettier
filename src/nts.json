@@ -87,7 +87,27 @@
     "handlebars-parser-types": "./types/handlebars-parser-types.ts",
     "glimmer-parser-types": "./types/glimmer-parser-types.ts",
     "angular-html-parser-types": "./types/angular-html-parser-types.ts",
-    "graphql-ast-types": "./types/graphql-ast-types.ts"
+    "graphql-ast-types": "./types/graphql-ast-types.ts",
+    "prettier": "./shims/prettier.js",
+    "prettier/standalone": "../prettier/src/standalone.js",
+    "prettier/plugins/babel": "./shims/prettier-plugin-babel.js",
+    "prettier/plugins/flow": "./shims/prettier-plugin-flow.js",
+    "prettier/plugins/typescript": "./prettier-plugins/typescript.mjs",
+    "svelte/compiler": "./shims/svelte-compiler.js",
+    "zimmerframe": "../plugins/node_modules/zimmerframe/src/walk.js",
+    "comment-parser": "../plugins/node_modules/comment-parser/es6/index.js"
+  },
+  "scopes": {
+    "../plugins/node_modules/": {
+      "acorn": "../plugins/node_modules/acorn/dist/acorn.mjs"
+    },
+    "../plugins/node_modules/mdast-util-from-markdown/": {
+      "micromark": "../prettier/node_modules/micromark/index.js",
+      "micromark-util-decode-numeric-character-reference": "../prettier/node_modules/micromark-util-decode-numeric-character-reference/index.js",
+      "micromark-util-decode-string": "../prettier/node_modules/micromark-util-decode-string/index.js",
+      "micromark-util-normalize-identifier": "../prettier/node_modules/micromark-util-normalize-identifier/index.js",
+      "mdast-util-to-string": "../prettier/node_modules/mdast-util-to-string/index.js"
+    }
   },
   "replace": {
     "../prettier/node_modules/micromark/lib/create-tokenizer.js": "./vendor/micromark/create-tokenizer.js",
@@ -261,7 +281,9 @@
     "./vendor/yaml/browser/dist/stringify/foldFlowLines.js",
     "./vendor/yaml/browser/dist/stringify/stringifyNumber.js",
     "./vendor/yaml/browser/dist/stringify/stringifyString.js",
-    "./vendor/graphql/language/printLocation.mjs"
+    "./vendor/graphql/language/printLocation.mjs",
+    "../plugins/node_modules/svelte/src/compiler",
+    "../plugins/node_modules/zimmerframe/src"
   ],
   "mixinsComplete": [
     "./vendor/babel-parser/index.js"

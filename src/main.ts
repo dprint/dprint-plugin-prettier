@@ -2,12 +2,16 @@
 // What the dprint plugin does, which `wasm/WasmExports.cs` calls for the functions that dprint calls on the
 // Wasm module: resolving dprint's configuration into prettier's options and formatting a file with them.
 import { formatWithCursor } from "../prettier/src/main/core.js";
-import { plugins } from "./plugins.ts";
+import { jsDocPlugins, plugins } from "./plugins.ts";
 
-/** Prettier's options for every file, and the ones that differ for the files of an extension. */
+/**
+ * Prettier's options for every file, the ones that differ for the files of an extension, and whether
+ * prettier-plugin-jsdoc formats JSDoc comments.
+ */
 interface ResolvedConfig {
   main: any;
   extensionOverrides: any;
+  jsDoc: boolean;
 }
 
 interface ConfigDiagnostic {
@@ -90,7 +94,11 @@ export async function formatFile(id: number, overrideJson: string, path: string,
     ? resolveOverridden(id, JSON.parse(overrideJson) as any).config
     : getResolved(id).config;
   try {
-    const result: any = await formatWithCursor(text, { ...optionsFor(config, path), filepath: path, plugins });
+    const result: any = await formatWithCursor(text, {
+      ...optionsFor(config, path),
+      filepath: path,
+      plugins: config.jsDoc ? jsDocPlugins : plugins,
+    });
     const formatted: string = result.formatted;
     return "0" + formatted;
   } catch (error) {
@@ -127,13 +135,7 @@ function resolveConfig(given: any, global: any): { config: ResolvedConfig; diagn
   const main: any = {};
   const extensionOverrides: any = {};
 
-  // the plugins of prettier that the plugin that ran prettier on Deno had are not in this one
-  if (take(config, "plugin.jsDoc", "boolean", false, diagnostics)) {
-    diagnostics.push({
-      propertyName: "plugin.jsDoc",
-      message: "prettier-plugin-jsdoc is not included in this version of the plugin.",
-    });
-  }
+  const jsDoc: boolean = take(config, "plugin.jsDoc", "boolean", false, diagnostics);
 
   const lineWidth = take(config, "lineWidth", "number", global.lineWidth ?? 80, diagnostics);
   main.printWidth = take(config, "printWidth", "number", lineWidth, diagnostics);
@@ -163,7 +165,7 @@ function resolveConfig(given: any, global: any): { config: ResolvedConfig; diagn
     }
   }
 
-  return { config: { main, extensionOverrides }, diagnostics };
+  return { config: { main, extensionOverrides, jsDoc }, diagnostics };
 }
 
 // takes a setting out of the configuration, or gives the default when it is not there or not of the type
