@@ -497,6 +497,8 @@ interface Boolean {
 interface Number {
     toString(radix?: int): string;
     toFixed(digits?: int): string;
+    toExponential(digits?: int): string;
+    toPrecision(precision?: int): string;
 }
 interface Object {
     toString(): string;
