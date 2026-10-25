@@ -33,6 +33,8 @@ const repos: Repo[] = [
     ref: "d6b8cd27eacb51e651a1aa6f7c190a28713eff6e",
   },
   { name: "typescript", url: "https://github.com/microsoft/TypeScript", ref: "v5.7.2" },
+  // the svelte compiler's tests have components of every kind, at the version that the plugin includes
+  { name: "svelte", url: "https://github.com/sveltejs/svelte", ref: "svelte@5.57.2" },
   {
     name: "definitely-typed",
     url: "https://github.com/DefinitelyTyped/DefinitelyTyped",
