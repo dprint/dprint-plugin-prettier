@@ -4,6 +4,7 @@
     "**/node_modules",
     "**/*-lock.json",
     "**/target",
+    "nts",
     "prettier",
     "src/vendor",
     "src/shims",

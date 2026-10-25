@@ -1,4 +1,4 @@
-/// <reference path="../../nts/lib.d.ts" />
+/// <reference path="../nts/lib.d.ts" />
 // the plugins that prettier has built in, put together from prettier's source as its own build does
 import * as cssPlugin from "../prettier/src/language-css/index.js";
 import * as graphqlPlugin from "../prettier/src/language-graphql/index.js";

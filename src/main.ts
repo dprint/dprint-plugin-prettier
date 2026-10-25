@@ -1,4 +1,4 @@
-/// <reference path="../../nts/lib.d.ts" />
+/// <reference path="../nts/lib.d.ts" />
 // What the dprint plugin does, which `wasm/WasmExports.cs` calls for the functions that dprint calls on the
 // Wasm module: resolving dprint's configuration into prettier's options and formatting a file with them.
 import { formatWithCursor } from "../prettier/src/main/core.js";

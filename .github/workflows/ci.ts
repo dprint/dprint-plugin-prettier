@@ -39,11 +39,6 @@ workflow({
     permissions: { contents: "write", "id-token": "write" },
     steps: [
       { name: "Checkout", uses: "actions/checkout@v6" },
-      {
-        // the plugin is compiled with nts, which is expected beside this repository
-        name: "Checkout nts",
-        run: "git clone --depth 1 https://github.com/dsherret/nts ../nts",
-      },
       { uses: "denoland/setup-deno@v2" },
       {
         uses: "actions/setup-dotnet@v5",

@@ -4,7 +4,7 @@
 
 [Prettier](https://prettier.io/) as a dprint Wasm plugin.
 
-Prettier's JavaScript source is compiled ahead of time with [nts](https://github.com/dsherret/nts) to C#, which [NativeAOT-LLVM](https://github.com/dotnet/runtimelab/tree/feature/NativeAOT-LLVM) compiles to a Wasm module. The output is the same as Prettier's on Node.js, without a JavaScript engine, and dprint runs it in a sandbox like any other Wasm plugin.
+Prettier's JavaScript source is compiled ahead of time with nts to C#, which [NativeAOT-LLVM](https://github.com/dotnet/runtimelab/tree/feature/NativeAOT-LLVM) compiles to a Wasm module. The output is the same as Prettier's on Node.js, without a JavaScript engine, and dprint runs it in a sandbox like any other Wasm plugin.
 
 The plugin has Prettier 3.9.10, with the versions of the packages that Prettier 3.9.10 is released with.
 
@@ -59,10 +59,11 @@ The source is in these folders:
 
 - `prettier` - Prettier 3.9.10's source with type annotations in JSDoc comments that make the compiled code fast. They are comments only, so the code is Prettier's as it is. `package.json` lists the packages that the source imports, at the versions that Prettier 3.9.10 has.
 - `plugins` - the Prettier plugins that the plugin includes, with the packages that they import (`package.json`), which are compiled from `node_modules`.
+- `nts` - a bundle of nts, which compiles TypeScript and JavaScript to C#, with the declarations that `src` is checked with (`lib.d.ts`). `deno task build` bundles it again first when nts is checked out beside this repository (`../nts`), and `COMMIT` says what it was bundled from.
 - `src` - the entry point that dprint calls (`main.ts`), Prettier's own plugins (`builtin-plugins.ts`) and those that it formats with (`plugins.ts`), with the libraries that are compiled along with Prettier (`vendor`, `shims`), what Prettier's `*.evaluate.js` files give (`generated`, made by `node scripts/generate.mjs`) and Prettier's TypeScript parser as npm has it (`prettier-plugins`).
 - `wasm` - the C# project that compiles what nts makes of `src/main.ts` to the Wasm module, with the functions that dprint calls. Flow's parser is a Wasm module in the flow-parser package, which [wasm2c](https://github.com/WebAssembly/wabt) makes C of to compile into the plugin (`wasm/flow`).
 
-To build, check out [nts](https://github.com/dsherret/nts) beside this repository (`../nts`), and install Deno, Node.js, the .NET 10 SDK, the [WASI SDK](https://github.com/WebAssembly/wasi-sdk), [Binaryen](https://github.com/WebAssembly/binaryen) and [WABT](https://github.com/WebAssembly/wabt). Then:
+To build, install Deno, Node.js, the .NET 10 SDK, the [WASI SDK](https://github.com/WebAssembly/wasi-sdk), [Binaryen](https://github.com/WebAssembly/binaryen) and [WABT](https://github.com/WebAssembly/wabt). Then:
 
 ```sh
 deno task setup

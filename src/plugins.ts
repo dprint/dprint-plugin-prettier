@@ -1,4 +1,4 @@
-/// <reference path="../../nts/lib.d.ts" />
+/// <reference path="../nts/lib.d.ts" />
 // the plugins that the plugin formats with: prettier's own and the Prettier plugins that the plugin includes, after
 // prettier's as they would be given to it
 import * as jsDocPlugin from "./vendor/prettier-plugin-jsdoc/index.js";

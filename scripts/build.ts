@@ -1,21 +1,21 @@
 // Builds the plugin into target/plugin.wasm: nts compiles src/main.ts to C#, which NativeAOT-LLVM compiles
 // to a Wasm module that is then given a larger shadow stack and made smaller.
 //
-// Needs nts checked out beside this repository (../nts), Deno, Node.js, the .NET 10 SDK, and the
-// WASI SDK and Binaryen, whose folders are given by the WASI_SDK_PATH and BINARYEN environment
-// variables (BINARYEN may be left out when wasm-opt is on the path).
-import $ from "dax";
+// Needs Deno, Node.js, the .NET 10 SDK, and the WASI SDK and Binaryen, whose folders are given by the WASI_SDK_PATH
+// and BINARYEN environment variables (BINARYEN may be left out when wasm-opt is on the path).
+//
+// nts is the bundle of it in nts/. When nts is checked out beside this repository (../nts), it is bundled from there
+// first, and nts/COMMIT says what it was bundled from.
+import $, { type Path } from "dax";
 
 const rootDir = $.path(import.meta.dirname!).parentOrThrow();
-const ntsDir = rootDir.parentOrThrow().join("nts");
+const ntsDir = rootDir.join("nts");
+const ntsCheckoutDir = rootDir.parentOrThrow().join("nts");
 const targetDir = rootDir.join("target");
 const ntsOutDir = targetDir.join("nts");
 const wasmDir = rootDir.join("wasm");
 const outPath = targetDir.join("plugin.wasm");
 
-if (!ntsDir.join("main.ts").existsSync()) {
-  throw new Error(`Expected nts to be checked out at ${ntsDir}.`);
-}
 if (Deno.env.get("WASI_SDK_PATH") == null) {
   throw new Error("Expected the WASI_SDK_PATH environment variable to give the folder of the WASI SDK.");
 }
@@ -31,10 +31,16 @@ if (!rootDir.join("plugins/node_modules").existsSync()) {
   await $`npm ci --ignore-scripts`.cwd(rootDir.join("plugins"));
 }
 
+if (ntsCheckoutDir.join("main.ts").existsSync()) {
+  $.logStep("Bundling", `nts from ${ntsCheckoutDir}`);
+  await $`deno run -A ${ntsCheckoutDir.join("tools/bundle.ts")} ${ntsDir}`;
+  ntsDir.join("COMMIT").writeTextSync(await describeCommit(ntsCheckoutDir));
+}
+
 $.logStep("Compiling", "src/main.ts with nts");
 ntsOutDir.mkdirSync({ recursive: true });
 // the C# is only compiled by the Wasm project, which also has what it calls of the plugin (wasm/FlowParser.cs)
-await $`deno run -A ${ntsDir.join("main.ts")} ${rootDir.join("src/main.ts")} --no-aot --no-build`
+await $`deno run -A ${ntsDir.join("nts.js")} ${rootDir.join("src/main.ts")} --no-aot --no-build`
   .cwd(ntsOutDir)
   .stderr(ntsOutDir.join("nts.log"));
 
@@ -64,6 +70,13 @@ const wasmOpt = binaryen == null ? wasmOptName : $.path(binaryen).join(wasmOptNa
 await $`${wasmOpt} -O3 --enable-bulk-memory --enable-nontrapping-float-to-int --enable-sign-ext --enable-mutable-globals --enable-multivalue --enable-reference-types --enable-exception-handling --translate-to-exnref --reorder-functions-by-name ${orderedPath} -o ${outPath}`;
 
 $.logStep("Built", outPath.toString());
+
+/** The commit that a checkout is at, and whether it has changes that aren't committed. */
+async function describeCommit(dir: Path) {
+  const commit = await $`git rev-parse HEAD`.cwd(dir).text();
+  const changes = await $`git status --porcelain`.cwd(dir).text();
+  return `${commit}${changes.length > 0 ? " with uncommitted changes" : ""}\n`;
+}
 
 /**
  * Compiles Flow's parser, the Wasm module of the flow-parser package, into a library for WASI: wasm2c makes C of
