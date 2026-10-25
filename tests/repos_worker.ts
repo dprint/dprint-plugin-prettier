@@ -26,6 +26,8 @@ export interface FileResult {
 
 let wasmModule: WebAssembly.Module;
 let formatter: Formatter;
+// if the formatter is to be created again before the next file, which is not counted in the time of a file
+let isFormatterSpent = false;
 
 self.onmessage = async (event: MessageEvent<{ wasmModule: WebAssembly.Module } | FileRequest>) => {
   if ("wasmModule" in event.data) {
@@ -39,6 +41,10 @@ self.onmessage = async (event: MessageEvent<{ wasmModule: WebAssembly.Module } |
 async function formatFile(filePath: string): Promise<FileResult> {
   // without a BOM, as dprint gives a file to a plugin, and @dprint/formatter would drop it from the result
   const fileText = Deno.readTextFileSync(filePath).replace(/^\uFEFF/, "");
+  if (isFormatterSpent) {
+    formatter = createFormatter();
+    isFormatterSpent = false;
+  }
   const prettierStart = performance.now();
   const expected = await formatWithPrettier(filePath, fileText);
   const pluginStart = performance.now();
@@ -68,8 +74,14 @@ function formatWithPlugin(filePath: string, fileText: string) {
   } catch (error) {
     if (error instanceof WebAssembly.RuntimeError) {
       // the module trapped, so its state can't be trusted for the next file
-      formatter = createFormatter();
+      isFormatterSpent = true;
       return "error: crashed: " + String(error);
+    }
+    if (error instanceof RangeError) {
+      // the stack of the engine ran out in the module, which is left as it was in the middle of a call, and which
+      // prettier runs out of the same way
+      isFormatterSpent = true;
+      return "error: " + String(error);
     }
     return "error: " + (error as Error).message;
   }
@@ -79,7 +91,8 @@ function formatWithPlugin(filePath: string, fileText: string) {
 // prettier adds after the first line is not what is being compared
 function isSame(expected: string, actual: string) {
   if (expected.startsWith("error: ") && actual.startsWith("error: ")) {
-    return firstLine(expected) === firstLine(actual);
+    // the plugin's messages come as UTF-8, where half of a surrogate pair that prettier quotes has no place
+    return firstLine(expected).toWellFormed() === firstLine(actual);
   }
   return expected === actual;
 }

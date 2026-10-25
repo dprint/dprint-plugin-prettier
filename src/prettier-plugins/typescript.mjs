@@ -18523,7 +18523,7 @@ function Jb(e, /** @type {number} */ t) {
 function vi(e, /** @type {number} */ t, /** @type {number} */ a) {
   return Jb(Wp(e, t), a);
 }
-function Hd(/** @type {d6} */ e, /** @type {number} */ t, /** @type {number} */ a) {
+function Hd(/** @type {d6 | vh} */ e, /** @type {number} */ t, /** @type {number} */ a) {
   return vi(e, t, t + a);
 }
 /** @returns {Kf | xh | vh | Th} */ function Df(/** @type {Kf | xh | vh | Th} */ e, /** @type {d6 | Kf} */ t) {
@@ -23401,7 +23401,7 @@ function yn(e, t) {
     t === 279
   );
 }
-/** @returns {boolean} */ function Qf(/** @type {InstanceType<typeof Kf>} */ e) {
+/** @returns {boolean} */ function Qf(/** @type {Kf | xh | vh | Th} */ e) {
   let t = e.kind;
   return t === 170 || t === 173 || t === 175 || t === 178 || t === 179 || t === 232 || t === 264;
 }

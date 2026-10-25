@@ -32,6 +32,13 @@ declare namespace console {
 }
 declare namespace Math {
     const PI: number;
+    const E: number;
+    const LN2: number;
+    const LN10: number;
+    const LOG2E: number;
+    const LOG10E: number;
+    const SQRT2: number;
+    const SQRT1_2: number;
     function floor(value: number): number;
     function ceil(value: number): number;
     function trunc(value: number): number;
@@ -48,6 +55,25 @@ declare namespace Math {
     function log2(value: number): number;
     function log10(value: number): number;
     function exp(value: number): number;
+    function expm1(value: number): number;
+    function log1p(value: number): number;
+    function cbrt(value: number): number;
+    function hypot(...values: number[]): number;
+    function sin(value: number): number;
+    function cos(value: number): number;
+    function tan(value: number): number;
+    function asin(value: number): number;
+    function acos(value: number): number;
+    function atan(value: number): number;
+    function atan2(y: number, x: number): number;
+    function sinh(value: number): number;
+    function cosh(value: number): number;
+    function tanh(value: number): number;
+    function asinh(value: number): number;
+    function acosh(value: number): number;
+    function atanh(value: number): number;
+    function clz32(value: number): number;
+    function fround(value: number): number;
 }
 declare class Date {
     static now(): number;
@@ -66,8 +92,10 @@ declare class SyntaxError extends Error {
 }
 declare class ReferenceError extends Error {
 }
+declare class URIError extends Error {
+}
 declare function parallel<TIn, TResult>(values: TIn[], withValue: (value: TIn) => TResult): TResult[];
-declare function parseInt(text: string, radix?: int): number;
+declare function parseInt(text: string, radix?: number): number;
 declare function parseFloat(text: string): number;
 declare function isNaN(value: number): boolean;
 declare function isFinite(value: number): boolean;
@@ -80,15 +108,18 @@ declare function setTimeout(callback: () => void, delay?: number): number;
 declare function atob(data: string): string;
 declare function btoa(data: string): string;
 declare function structuredClone<T>(value: T): T;
-declare function String(value: unknown): string;
+declare function String(value?: unknown): string;
 declare namespace String {
-    function fromCharCode(code: int): string;
-    function fromCodePoint(...codes: int[]): string;
+    function fromCharCode(...codes: number[]): string;
+    function fromCodePoint(...codes: number[]): string;
     function raw(strings: string[], ...values: unknown[]): string;
 }
 declare function Number(value: unknown): number;
 declare namespace Number {
     const MAX_SAFE_INTEGER: number;
+    const MAX_VALUE: number;
+    const MIN_VALUE: number;
+    const EPSILON: number;
     const MIN_SAFE_INTEGER: number;
     const POSITIVE_INFINITY: number;
     const NEGATIVE_INFINITY: number;
@@ -97,7 +128,7 @@ declare namespace Number {
     function isFinite(value: number): boolean;
     function isInteger(value: number): boolean;
     function isSafeInteger(value: unknown): boolean;
-    function parseInt(text: string, radix?: int): number;
+    function parseInt(text: string, radix?: number): number;
     function parseFloat(text: string): number;
 }
 declare function Boolean(value: unknown): boolean;
@@ -147,6 +178,8 @@ interface String {
     toWellFormed(): string;
     toUpperCase(): string;
     toLowerCase(): string;
+    toLocaleUpperCase(): string;
+    toLocaleLowerCase(): string;
     padStart(length: int, fill?: string): string;
     padEnd(length: int, fill?: string): string;
     replaceAll(search: string | RegExp, replacement: string): string;
