@@ -4,12 +4,22 @@
 // of JavaScript with prettier-plugin-jsdoc, which `deno task test:prettier` collects first. The repositories go in
 // target/plugin-tests, and the cases that differ are written to target/plugin-tests/diffs as `<case>.prettier` and
 // `<case>.plugin`.
-import { assert } from "@std/assert";
+import { assert, assertEquals } from "@std/assert";
 import $ from "dax";
 import type { PluginCaseResult, PluginTestCase } from "./plugin_tests_worker.ts";
 
 const rootDir = $.path(import.meta.dirname!).parentOrThrow();
 const testsDir = rootDir.join("target/plugin-tests");
+// the plugins' tests that fail on Prettier from npm, as the packages in plugins/package-lock.json are newer than those
+// that the tests were written with (all pass with those of prettier-plugin-jsdoc's yarn.lock)
+const knownFailedTests = [
+  // Prettier 3.9 prints a `for` without an update as `;)`, not `; )`
+  "jsdoc files.test.ts: File: prism-core.js",
+  // with Prettier 3.9, the spaces that align a tag without a description stay at the end of its line
+  "jsdoc main.test.ts: Should align vertically param|property|returns|yields|throws if option set to true, and amount of spaces is different than default",
+  // comment-parser 1.4.9 doesn't take a type right after a tag, as in `@type{...}`
+  "jsdoc main.test.ts: Bad defined name",
+];
 const lock = rootDir.join("plugins/package-lock.json").readJsonSync<{
   packages: Record<string, { version: string }>;
 }>();
@@ -45,7 +55,12 @@ Deno.test({
     const casesPath = testsDir.join("cases.json");
     $.logStep("Collecting", "the plugins' tests with what Prettier gives for them");
     await $`node ${rootDir.join("tests/plugin_tests_collect.mjs")} ${testsDir} ${prettierCases} ${casesPath}`.quiet();
-    const cases = casesPath.readJsonSync<PluginTestCase[]>();
+    const { cases, failedTests } = casesPath.readJsonSync<{ cases: PluginTestCase[]; failedTests: string[] }>();
+    assertEquals(
+      failedTests,
+      knownFailedTests,
+      "The plugins' tests that fail on Prettier from npm changed, so giving what it gives isn't the same as passing them.",
+    );
     const pool = new WorkerPool();
     let results: PluginCaseResult[];
     try {

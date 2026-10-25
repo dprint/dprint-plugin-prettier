@@ -213,7 +213,10 @@ from `node_modules` and is listed under `checked`. It takes two parsers from cop
 `src/nts.json`: `src/vendor/acorn-svelte` is the acorn version that svelte depends on, with the types of
 `src/vendor/acorn` carried over, and `src/vendor/acorn-typescript` is @sveltejs/acorn-typescript. Upgrading one of
 these plugins is the same as upgrading a package in `prettier`. Its versions are pinned in `plugins/package.json`,
-and `deno task test:plugins` runs its tests.
+and `deno task test:plugins` runs its tests. That also runs the plugins' tests on Prettier from npm and fails when the
+tests that don't pass there change (`knownFailedTests` in `tests/plugin_tests_test.ts`), since giving what Prettier
+gives only formats as the tests expect where they pass. After an upgrade, find why a test started or stopped failing
+(a newer dependency than the plugin's own lockfile has, say) and update the list.
 
 To give a package types that only `node_modules` has, copy it into `src/vendor`, point `paths` at the copy, and annotate
 the copy. A recording made before it was copied still holds for the copy when its keys are renamed to the copy's paths,
