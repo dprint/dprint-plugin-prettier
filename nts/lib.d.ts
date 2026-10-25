@@ -217,6 +217,8 @@ interface Array<T> {
     flat<U>(this: U[][]): U[];
     reduce(callbackfn: (previous: T, current: T) => T): T;
     reduce<U>(callbackfn: (previous: U, current: T, index: int) => U, initial: U): U;
+    reduceRight(callbackfn: (previous: T, current: T) => T): T;
+    reduceRight<U>(callbackfn: (previous: U, current: T, index: int) => U, initial: U): U;
     sort(compare?: (a: T, b: T) => number): T[];
     fill(value: T): T[];
     splice(start: int, deleteCount?: int, ...items: T[]): T[];
