@@ -3,7 +3,11 @@
 /// <reference no-default-lib="true" />
 /// <reference lib="deno.worker" />
 import { createFromWasmModule, type Formatter } from "@dprint/formatter";
+import { createRequire } from "node:module";
 import * as prettier from "prettier";
+
+// prettier-plugin-svelte at the version that the plugin includes, for the .svelte files that the plugin formats
+const sveltePlugin = createRequire(import.meta.url)("../plugins/node_modules/prettier-plugin-svelte/plugin.js");
 
 export interface FileRequest {
   filePath: string;
@@ -52,7 +56,7 @@ async function formatFile(filePath: string): Promise<FileResult> {
 
 async function formatWithPrettier(filePath: string, fileText: string) {
   try {
-    return await prettier.format(fileText, { filepath: filePath });
+    return await prettier.format(fileText, { filepath: filePath, plugins: [sveltePlugin] });
   } catch (error) {
     return "error: " + String(error);
   }
