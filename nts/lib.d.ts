@@ -130,9 +130,9 @@ interface String {
     substr(start: int, length?: int): string;
     indexOf(search: string, position?: int): int;
     lastIndexOf(search: string, position?: number): int;
-    includes(search: string): boolean;
+    includes(search: string, position?: number): boolean;
     startsWith(search: string, position?: number): boolean;
-    endsWith(search: string): boolean;
+    endsWith(search: string, endPosition?: number): boolean;
     repeat(count: int): string;
     split(separator: string | RegExp, limit?: number): string[];
     match(regex: RegExp): RegExpMatchArray | null;
