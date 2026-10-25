@@ -106,16 +106,14 @@ workflow({
       {
         name: "Release",
         if: isTag,
-        uses: "softprops/action-gh-release@v2",
-        env: { GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}" },
-        with: {
-          files: [
-            "deployment/npm/plugin.wasm",
-            "deployment/schema.json",
-          ].join("\n"),
-          body_path: "${{ github.workspace }}-CHANGELOG.txt",
-          draft: false,
-        },
+        // gh uploads the assets to a draft and then publishes it, which immutable releases require
+        env: { GH_TOKEN: "${{ secrets.GITHUB_TOKEN }}" },
+        run: [
+          `gh release create "$GITHUB_REF_NAME" --verify-tag --title "$GITHUB_REF_NAME"`,
+          "--notes-file ${{ github.workspace }}-CHANGELOG.txt",
+          "deployment/npm/plugin.wasm",
+          "deployment/schema.json",
+        ].join(" \\\n  "),
       },
       {
         // npm trusted publishing (OIDC) requires npm >= 11.5.1.

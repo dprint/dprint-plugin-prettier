@@ -74,16 +74,14 @@ jobs:
           # create release notes
           deno run -A ./scripts/generate_release_notes.ts 3.9.10 > ${{ github.workspace }}-CHANGELOG.txt
       - name: Release
-        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2
         if: 'startsWith(github.ref, ''refs/tags/'')'
         env:
-          GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
-        with:
-          files: |-
-            deployment/npm/plugin.wasm
+          GH_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
+        run: |-
+          gh release create "$GITHUB_REF_NAME" --verify-tag --title "$GITHUB_REF_NAME" \
+            --notes-file ${{ github.workspace }}-CHANGELOG.txt \
+            deployment/npm/plugin.wasm \
             deployment/schema.json
-          body_path: '${{ github.workspace }}-CHANGELOG.txt'
-          draft: false
       - name: Upgrade npm
         if: 'startsWith(github.ref, ''refs/tags/'')'
         run: npm install --global npm@latest
