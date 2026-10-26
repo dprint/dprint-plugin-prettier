@@ -134,6 +134,7 @@ declare namespace Number {
 declare function Boolean(value: unknown): boolean;
 declare namespace JSON {
     function stringify(value: unknown): string;
+    function stringify(value: unknown, replacer: ((key: string, value: any) => any) | (string | number)[] | null, space?: string | number): string;
     function parse(text: string): unknown;
 }
 interface StringView {
@@ -291,6 +292,7 @@ interface ObjectConstructor {
         unknown
     ][];
     hasOwn(value: object, key: string): boolean;
+    is(first: unknown, second: unknown): boolean;
     getOwnPropertySymbols(value: object): symbol[];
     assign<T>(target: Record<string, T>, ...sources: Record<string, T>[]): Record<string, T>;
     assign<T extends object>(target: T, ...sources: unknown[]): T;
