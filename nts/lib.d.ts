@@ -196,7 +196,7 @@ interface Array<T> {
     concat(other: T[]): T[];
     join(separator?: string): string;
     indexOf(item: T, fromIndex?: int): int;
-    includes(item: T): boolean;
+    includes(item: T, fromIndex?: int): boolean;
     reverse(): T[];
     toReversed(): T[];
     toSorted(compare?: (a: T, b: T) => number): T[];
@@ -208,7 +208,7 @@ interface Array<T> {
     some(predicate: (value: T, index: int) => boolean): boolean;
     every(predicate: (value: T, index: int) => boolean): boolean;
     at(index: int): T | undefined;
-    lastIndexOf(item: T): int;
+    lastIndexOf(item: T, fromIndex?: int): int;
     find(predicate: (value: T) => boolean): T | undefined;
     findLast(predicate: (value: T) => boolean): T | undefined;
     findIndex(predicate: (value: T) => boolean): int;
@@ -220,8 +220,8 @@ interface Array<T> {
     reduceRight(callbackfn: (previous: T, current: T) => T): T;
     reduceRight<U>(callbackfn: (previous: U, current: T, index: int) => U, initial: U): U;
     sort(compare?: (a: T, b: T) => number): T[];
-    fill(value: T): T[];
-    splice(start: int, deleteCount?: int, ...items: T[]): T[];
+    fill(value: T, start?: int, end?: int): T[];
+    splice(start?: int, deleteCount?: int, ...items: T[]): T[];
     entries(): Iterable<[
         int,
         T
@@ -237,8 +237,8 @@ interface ReadonlyArray<T> {
     concat(other: readonly T[]): T[];
     join(separator?: string): string;
     indexOf(item: T, fromIndex?: int): int;
-    lastIndexOf(item: T): int;
-    includes(item: T): boolean;
+    lastIndexOf(item: T, fromIndex?: int): int;
+    includes(item: T, fromIndex?: int): boolean;
     toReversed(): T[];
     map<U>(callbackfn: (value: T, index: int) => U): U[];
     filter(predicate: (value: T, index: int) => boolean): T[];
