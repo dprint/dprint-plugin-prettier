@@ -1,0 +1,137 @@
+// @nts-check
+import {
+  fileURLToPath,
+  getFileBasename,
+  getInterpreter,
+  isUrl,
+} from "#universal";
+import isNonEmptyArray from "./is-non-empty-array.js";
+
+/** @import {Options, SupportLanguage} from "../index.js" */
+
+/**
+ * @param {SupportLanguage[]} languages
+ * @param {string | URL | undefined} [file]
+ * @returns {SupportLanguage | undefined}
+ */
+function getLanguageByFileName(/** @type {SupportLanguage[]} */ languages, /** @type {string | undefined} */ file) {
+  if (!file) {
+    return;
+  }
+
+  /** @type {string} */ const basename = getFileBasename(file).toLowerCase();
+
+  return (
+    languages.find(/** @returns {boolean | undefined} */ (/** @type {SupportLanguage} */ { filenames }) =>
+      filenames?.some(/** @returns {boolean} */ (/** @type {string} */ name) => name.toLowerCase() === basename),
+    ) ??
+    languages.find(/** @returns {boolean} */ (/** @type {SupportLanguage} */ { extensions }) =>
+      extensions?.some(/** @returns {boolean} */ (/** @type {string} */ extension) => basename.endsWith(extension)),
+    )
+  );
+}
+
+/**
+ * @param {SupportLanguage[]} languages
+ * @param {string | undefined} [languageName]
+ * @returns {SupportLanguage | undefined}
+ */
+function getLanguageByLanguageName(/** @type {any[]} */ languages, /** @type {string | undefined} */ languageName) {
+  if (!languageName) {
+    return;
+  }
+
+  return (
+    languages.find(/** @returns {boolean} */ ({ name }) => name.toLowerCase() === languageName) ??
+    languages.find(/** @returns {boolean | undefined} */ ({ aliases }) => aliases?.includes(languageName)) ??
+    languages.find(/** @returns {boolean} */ ({ extensions }) => extensions?.includes(`.${languageName}`))
+  );
+}
+
+/**
+ * @param {SupportLanguage[]} languages
+ * @param {string | URL | undefined} [file]
+ * @returns {SupportLanguage | undefined}
+ */
+function getLanguageByInterpreterNodejs(languages, file) {
+  if (!file || getFileBasename(file).includes(".")) {
+    return;
+  }
+
+  const languagesWithInterpreters = languages.filter(({ interpreters }) =>
+    isNonEmptyArray(interpreters),
+  );
+
+  /* c8 ignore next 3 */
+  if (languagesWithInterpreters.length === 0) {
+    return;
+  }
+
+  const interpreter = getInterpreter(file);
+
+  if (!interpreter) {
+    return;
+  }
+
+  return languagesWithInterpreters.find(({ interpreters }) =>
+    interpreters.includes(interpreter),
+  );
+}
+
+const getLanguageByInterpreter =
+  process.env.PRETTIER_TARGET === "universal"
+    ? undefined
+    : getLanguageByInterpreterNodejs;
+
+/**
+ * @param {SupportLanguage[]} languages
+ * @param {string | URL | undefined} [file]
+ * @returns {SupportLanguage | undefined}
+ */
+function getLanguageByIsSupported(languages, file) {
+  if (!file) {
+    return;
+  }
+
+  if (isUrl(file)) {
+    try {
+      file = fileURLToPath(file);
+    } catch {
+      return;
+    }
+  }
+
+  if (typeof file !== "string") {
+    return;
+  }
+
+  return languages.find(({ isSupported }) => isSupported?.({ filepath: file }));
+}
+
+/**
+ * @param {Options} options
+ * @param {{physicalFile?: string | URL | undefined, file?: string | URL | undefined, language?: string | undefined}} fileInfo
+ * @returns {string | undefined} matched parser name if found
+ */
+function inferParser(options, fileInfo) {
+  const languages = options.plugins.toReversed().flatMap(
+    (plugin) =>
+      // @ts-expect-error -- Safe
+      plugin.languages ?? [],
+  );
+
+  // If the file has no extension, we can try to infer the language from the
+  // interpreter in the shebang line, if any; but since this requires FS access,
+  // do it last.
+  const language =
+    getLanguageByLanguageName(languages, fileInfo.language) ??
+    getLanguageByFileName(languages, fileInfo.physicalFile) ??
+    getLanguageByFileName(languages, fileInfo.file) ??
+    getLanguageByIsSupported(languages, fileInfo.physicalFile) ??
+    getLanguageByIsSupported(languages, fileInfo.file) ??
+    getLanguageByInterpreter?.(languages, fileInfo.physicalFile);
+
+  return language?.parsers[0];
+}
+
+export default inferParser;

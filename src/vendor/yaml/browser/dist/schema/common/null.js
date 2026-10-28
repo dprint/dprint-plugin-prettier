@@ -1,0 +1,17 @@
+// @nts-check
+import { Scalar } from '../../nodes/Scalar.js';
+
+/** @type {import("yaml-cst-types").SchemaTag} */
+const nullTag = {
+    identify: value => value == null,
+    createNode: () => new Scalar(null),
+    default: true,
+    tag: 'tag:yaml.org,2002:null',
+    test: /^(?:~|[Nn]ull|NULL)?$/,
+    resolve: /** @returns {Scalar} */ () => new Scalar(null),
+    stringify: ({ source }, ctx) => typeof source === 'string' && nullTag.test.test(source)
+        ? source
+        : ctx.options.nullStr
+};
+
+export { nullTag };

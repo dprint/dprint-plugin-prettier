@@ -1,0 +1,16 @@
+-- file.svelte --
+== should parse TypeScript in the markup when lang is not quoted ==
+<script lang=ts>
+  let a = 1;
+</script>
+
+<button on:click={(e: MouseEvent) => console.log(e as any)}>{a as number}</button>
+
+[expect]
+<script lang="ts">
+  let a = 1;
+</script>
+
+<button on:click={(e: MouseEvent) => console.log(e as any)}
+  >{a as number}</button
+>

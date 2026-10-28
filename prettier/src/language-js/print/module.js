@@ -1,0 +1,364 @@
+// @nts-check
+/** @import AstPath from "../../common/ast-path.js" */
+import {
+  group,
+  hardline,
+  indent,
+  join,
+  line,
+  removeLines,
+  softline,
+} from "../../document/index.js";
+import { printDanglingComments } from "../../main/comments/print.js";
+import isNonEmptyArray from "../../utilities/is-non-empty-array.js";
+import UnexpectedNodeError from "../../utilities/unexpected-node-error.js";
+import { locEnd, locStart } from "../location/index.js";
+import { CommentCheckFlags, hasComment } from "../utilities/comments.js";
+import { createTypeCheckFunction } from "../utilities/create-type-check-function.js";
+import { isShorthandSpecifier } from "../utilities/is-shorthand-specifier.js";
+import { needsHardlineAfterDanglingComment } from "../utilities/needs-hardline-after-dangling-comment.js";
+import { isStringLiteral } from "../utilities/node-types.js";
+import { stripComments } from "../utilities/strip-comments.js";
+import { printDecoratorsBeforeExport } from "./decorators.js";
+import {
+  printDeclareToken,
+  printSemicolon,
+  printTrailingComma,
+} from "./miscellaneous.js";
+import { printObject } from "./object.js";
+
+/**
+ * @import {Doc} from "../../document/index.js"
+ */
+
+/*
+- `ImportDeclaration`
+*/
+function printImportDeclaration(/** @type {AstPath} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
+  /** @type{Doc[]} */
+  return [
+    "import",
+    node.phase ? ` ${node.phase}` : "",
+    printImportKind(node),
+    printModuleSpecifiers(path, options, print),
+    printModuleSource(path, options, print),
+    printImportAttributes(path, options, print),
+    printSemicolon(options),
+  ];
+}
+
+const isDefaultExport = /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node) =>
+  node.type === "ExportDefaultDeclaration" ||
+  (node.type === "DeclareExportDeclaration" && node.default);
+
+/*
+- `ExportDefaultDeclaration`
+- `ExportNamedDeclaration`
+- `ExportAllDeclaration`
+- `DeclareExportDeclaration`(flow)
+- `DeclareExportAllDeclaration`(flow)
+*/
+/** @returns {any[]} */ function printExportDeclaration(/** @type {AstPath} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
+
+  /** @type{Doc[]} */
+  const parts = [
+    printDecoratorsBeforeExport(path, options, print),
+    printDeclareToken(path),
+    "export",
+    isDefaultExport(node) ? " default" : "",
+  ];
+
+  const { declaration, exported } = node;
+
+  if (hasComment(node, CommentCheckFlags.Dangling)) {
+    parts.push(" ", printDanglingComments(path, options));
+
+    if (needsHardlineAfterDanglingComment(node)) {
+      parts.push(hardline);
+    }
+  }
+
+  if (declaration) {
+    parts.push(" ", print("declaration"));
+  } else {
+    parts.push(printExportKind(node));
+
+    if (
+      node.type === "ExportAllDeclaration" ||
+      node.type === "DeclareExportAllDeclaration"
+    ) {
+      parts.push(" *");
+      if (exported) {
+        parts.push(" as ", print("exported"));
+      }
+    } else {
+      parts.push(printModuleSpecifiers(path, options, print));
+    }
+
+    parts.push(
+      printModuleSource(path, options, print),
+      printImportAttributes(path, options, print),
+    );
+  }
+
+  parts.push(printSemicolonAfterExportDeclaration(node, options));
+
+  return parts;
+}
+
+const shouldOmitSemicolon = createTypeCheckFunction([
+  "ClassDeclaration",
+  "ComponentDeclaration",
+  "FunctionDeclaration",
+  "TSInterfaceDeclaration",
+  "DeclareClass",
+  "DeclareComponent",
+  "DeclareFunction",
+  "DeclareHook",
+  "HookDeclaration",
+  "TSDeclareFunction",
+  "EnumDeclaration",
+]);
+/** @returns {string} */ function printSemicolonAfterExportDeclaration(/** @type {import("../types/estree.js").Node} */ node, options) {
+  if (
+    !node.declaration ||
+    (isDefaultExport(node) && !shouldOmitSemicolon(node.declaration))
+  ) {
+    return printSemicolon(options);
+  }
+
+  return "";
+}
+
+/** @returns {string} */ function printImportOrExportKind(/** @type {string | undefined | null} */ kind, spaceBeforeKind = true) {
+  return kind && kind !== "value"
+    ? `${spaceBeforeKind ? " " : ""}${kind}${spaceBeforeKind ? "" : " "}`
+    : "";
+}
+
+/** @returns {string} */ function printImportKind(/** @type {import("../types/estree.js").Node} */ node, /** @type {boolean | undefined} */ spaceBeforeKind) {
+  return printImportOrExportKind(node.importKind, spaceBeforeKind);
+}
+
+/** @returns {string} */ function printExportKind(/** @type {import("../types/estree.js").Node} */ node) {
+  return printImportOrExportKind(node.exportKind);
+}
+
+function printModuleSource(/** @type {AstPath} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../print-options.js").JsPrint} */ print) {
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
+
+  if (!node.source) {
+    return "";
+  }
+
+  return [
+    shouldPrintSpecifiers(node, options) ? " from" : "",
+    " ",
+    print("source"),
+  ];
+}
+
+function printModuleSpecifiers(/** @type {AstPath} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options, /** @type {import("../print-options.js").JsPrint} */ print) {
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
+
+  if (!shouldPrintSpecifiers(node, options)) {
+    return "";
+  }
+
+  /** @type{Doc[]} */
+  const parts = [" "];
+
+  if (isNonEmptyArray(node.specifiers)) {
+    const standaloneSpecifiers = [];
+    const groupedSpecifiers = [];
+
+    path.each(() => {
+      const specifierType = path.node.type;
+      if (
+        specifierType === "ExportNamespaceSpecifier" ||
+        specifierType === "ExportDefaultSpecifier" ||
+        specifierType === "ImportNamespaceSpecifier" ||
+        specifierType === "ImportDefaultSpecifier"
+      ) {
+        standaloneSpecifiers.push(print());
+      } else if (
+        specifierType === "ExportSpecifier" ||
+        specifierType === "ImportSpecifier"
+      ) {
+        groupedSpecifiers.push(print());
+      } else {
+        /* c8 ignore next 3 */
+        throw new UnexpectedNodeError(node, "specifier");
+      }
+    }, "specifiers");
+
+    parts.push(join(", ", standaloneSpecifiers));
+
+    if (groupedSpecifiers.length > 0) {
+      if (standaloneSpecifiers.length > 0) {
+        parts.push(", ");
+      }
+
+      const canBreak =
+        groupedSpecifiers.length > 1 ||
+        standaloneSpecifiers.length > 0 ||
+        /** @type {import("../types/estree.js").Node[]} */ (node.specifiers).some(/** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node) => hasComment(node));
+
+      if (canBreak) {
+        parts.push(
+          group([
+            "{",
+            indent([
+              options.bracketSpacing ? line : softline,
+              join([",", line], groupedSpecifiers),
+            ]),
+            printTrailingComma(options),
+            options.bracketSpacing ? line : softline,
+            "}",
+          ]),
+        );
+      } else {
+        parts.push([
+          "{",
+          options.bracketSpacing ? " " : "",
+          ...groupedSpecifiers,
+          options.bracketSpacing ? " " : "",
+          "}",
+        ]);
+      }
+    }
+  } else {
+    parts.push("{}");
+  }
+  return parts;
+}
+
+/** @returns {boolean} */ function shouldPrintSpecifiers(/** @type {import("../types/estree.js").Node} */ node, options) {
+  if (
+    node.type !== "ImportDeclaration" ||
+    isNonEmptyArray(node.specifiers) ||
+    node.importKind === "type"
+  ) {
+    return true;
+  }
+
+  const text = stripComments(options).slice(
+    locStart(node),
+    locStart(node.source),
+  );
+
+  return text.trimEnd().endsWith("from");
+}
+
+/** @returns {string | undefined} */ function getImportAttributesKeyword(/** @type {import("../types/estree.js").Node} */ node, options) {
+  const textBetweenSourceAndAttributes = stripComments(options)
+    .slice(
+      locEnd(node.source),
+      node.attributes?.[0] ? locStart(node.attributes[0]) : locEnd(node),
+    )
+    .trimStart();
+
+  if (textBetweenSourceAndAttributes.startsWith("assert")) {
+    return "assert";
+  }
+
+  if (textBetweenSourceAndAttributes.startsWith("with")) {
+    return "with";
+  }
+
+  return isNonEmptyArray(node.attributes) ? "with" : undefined;
+}
+
+const isSingleTypeImportAttributes = (/** @type {import("../types/estree.js").Node} */ node) => {
+  const { attributes } = node;
+
+  if (attributes.length !== 1) {
+    return false;
+  }
+
+  const [attribute] = attributes;
+  const { type, key, value } = attribute;
+  return (
+    type === "ImportAttribute" &&
+    ((key.type === "Identifier" && key.name === "type") ||
+      (isStringLiteral(key) && key.value === "type")) &&
+    isStringLiteral(value) &&
+    !hasComment(attribute) &&
+    !hasComment(key) &&
+    !hasComment(value)
+  );
+};
+
+/*
+- `ImportDeclaration`
+- `ExportDefaultDeclaration`
+- `ExportNamedDeclaration`
+- `ExportAllDeclaration`
+- `DeclareExportDeclaration` (Flow)
+- `DeclareExportAllDeclaration` (Flow)
+*/
+function printImportAttributes(/** @type {AstPath} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
+
+  if (!node.source) {
+    return "";
+  }
+
+  /** @type {string | undefined} */ const keyword = getImportAttributesKeyword(node, options);
+  if (!keyword) {
+    return "";
+  }
+
+  let attributesDoc = printObject(path, options, print);
+  if (isSingleTypeImportAttributes(node)) {
+    attributesDoc = removeLines(attributesDoc);
+  }
+
+  return [` ${keyword} `, attributesDoc];
+}
+
+/** @returns {any[]} */ function printModuleSpecifier(/** @type {AstPath} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../print-options.js").JsPrint} */ print) {
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
+  const { type } = node;
+
+  const isImportSpecifier = type.startsWith("Import");
+  /** @type {string} */ const leftSideProperty = isImportSpecifier ? "imported" : "local";
+  /** @type {string} */ const rightSideProperty = isImportSpecifier ? "local" : "exported";
+  const leftSideNode = node[leftSideProperty];
+  const rightSideNode = node[rightSideProperty];
+  /** @type {import("../../document/index.js").Doc} */
+  let left = "";
+  /** @type {import("../../document/index.js").Doc} */
+  let right = "";
+  if (
+    type === "ExportNamespaceSpecifier" ||
+    type === "ImportNamespaceSpecifier"
+  ) {
+    left = "*";
+  } else if (leftSideNode) {
+    left = print(leftSideProperty);
+  }
+
+  if (rightSideNode && !isShorthandSpecifier(node)) {
+    right = print(rightSideProperty);
+  }
+
+  return [
+    printImportOrExportKind(
+      type === "ImportSpecifier" ? node.importKind : node.exportKind,
+      /* spaceBeforeKind */ false,
+    ),
+    left,
+    left && right ? " as " : "",
+    right,
+  ];
+}
+
+export {
+  printExportDeclaration,
+  printImportDeclaration,
+  printImportKind,
+  printModuleSpecifier,
+};

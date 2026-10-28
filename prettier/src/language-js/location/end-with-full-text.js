@@ -1,0 +1,24 @@
+// @nts-check
+import { isIndex } from "./is-index.js";
+
+/**
+@import {Node, Comment} from "../types/estree.js";
+*/
+
+/**
+@param {import("../types/estree.js").Node} node
+@return {number}
+*/
+function locEndWithFullText(node) {
+  // @ts-expect-error -- safe
+  const end = node.range?.[1] ?? node.end;
+
+  /* c8 ignore next 3 */
+  if (process.env.NODE_ENV !== "production" && !isIndex(end)) {
+    throw new TypeError("Can't not locate node.");
+  }
+
+  return end;
+}
+
+export { locEndWithFullText };

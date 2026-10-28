@@ -1,0 +1,95 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>dprint-plugin-prettier</AssemblyName>
+    <!-- the version of the plugin, which dprint is told -->
+    <Version>0.72.0</Version>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <!-- otherwise the module includes DWARF debug info, which is over half its size. Stack traces in error messages don't use it. -->
+    <DebugType>none</DebugType>
+    <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
+    <!-- the module only ever runs on one thread (WASI preview 1), so what the runtime keeps for each thread is kept once,
+         as reading a value of a thread is a call in Wasm, which generators did several times for each item -->
+    <DefineConstants>$(DefineConstants);NTS_SINGLE_THREADED</DefineConstants>
+    <!-- ILC inlines more for speed, which makes formatting 7-10% faster for a module 3 MB larger -->
+    <OptimizationPreference>Speed</OptimizationPreference>
+    <!-- Speed also gives ILC the runtime's profile data, which NativeAOT-LLVM 10.0.0-rc.1.26357.1 fails every
+         method with (https://github.com/dotnet/runtimelab/pull/3319) -->
+    <IlcPgoOptimize>false</IlcPgoOptimize>
+    <!-- all of the program in one module for LLVM rather than 16 compiled in parallel, so that it inlines and optimizes
+         across what were the modules' borders: formatting 2.5-6% faster, the module 4 MB larger, and compiling it takes
+         about 6 minutes rather than 2 and 13 GB of memory for clang rather than 2.6 (two modules: 10.5 GB, half the
+         gain) -->
+    <IlcMaxLlvmModuleCount>1</IlcMaxLlvmModuleCount>
+    <!-- Wasm's own exceptions rather than ones made of returned flags, which makes formatting 5-6% faster and the
+         module 16% smaller, and which dprint loads from 0.64.0 -->
+    <WasmEnableExceptionHandling>true</WasmEnableExceptionHandling>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <IlcLlvmVersion>10.0.0-rc.1.26357.1</IlcLlvmVersion>
+    <!-- compiles to a Wasm module with NativeAOT-LLVM, as dprint-plugin-roslyn does -->
+    <NativeLib>Shared</NativeLib>
+    <!-- the stack that is kept in the memory of the module, which deep code runs out of when it is small -->
+    <EmccStackSize>134217728</EmccStackSize>
+    <PublishTrimmed>true</PublishTrimmed>
+    <SelfContained>true</SelfContained>
+    <UseAppHost>false</UseAppHost>
+    <MSBuildEnableWorkloadResolver>false</MSBuildEnableWorkloadResolver>
+    <!-- a core Wasm module instead of a component, because dprint calls the module's exports directly -->
+    <LinkerFlavor>lld</LinkerFlavor>
+    <SuppressTrimAnalysisWarnings>true</SuppressTrimAnalysisWarnings>
+    <!-- the C# that nts makes of src/main.ts -->
+    <NtsOutDir Condition="'$(NtsOutDir)' == ''">$(MSBuildThisFileDirectory)../target/nts/dist</NtsOutDir>
+    <!-- the linker's map of the module, which names its functions for order-functions.mjs -->
+    <LinkMapPath Condition="'$(LinkMapPath)' == ''">$(MSBuildThisFileDirectory)../target/link.map</LinkMapPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- what the collector works with, in hexadecimal: 32 MB for new objects and 512 MB a segment, which makes
+         formatting 3% faster than 4 and 64 MB. Without these it collects far too often. New objects need a segment
+         that has room for them several times over, or each collection is of everything, and one of 512 MB has room
+         for the 300 MB that a large file is given at the most (src/main.ts) rather than 240: YAML 10% faster on one
+         thread and 17% on all of them, the rest the same, and JSON's peak 290 MB higher on all threads. Only as much
+         of a segment is written to as the collector uses (wasm/gc), so a large one takes no more memory -->
+    <IlcArg Include="--runtimeopt:GCgen0size=2000000" />
+    <IlcArg Include="--runtimeopt:GCSegmentSize=20000000" />
+    <IlcArg Include="--runtimeopt:GCgen0MaxBudget=2000000" />
+    <!-- objects of up to 16 MB are new objects rather than large ones. remark's parser gives what is left of a
+         markdown file to the next part each time it reads one, which is a copy here, and with the default of
+         85 KB each copy was a large object and collecting them was a full collection every few of them -->
+    <IlcArg Include="--runtimeopt:GCLOHThreshold=1000000" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="$(NtsOutDir)/*.cs" />
+    <Compile Include="WasmExports.cs" />
+    <Compile Include="FlowParser.cs" />
+    <EmbeddedResource Include="../LICENSE" LogicalName="LICENSE" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- Flow's parser, which scripts/build.ts compiles from the Wasm module of the flow-parser package -->
+    <NativeLibrary Include="$(FlowParserLib)" />
+    <DirectPInvoke Include="flowparser" />
+    <!-- the collector's memory functions (wasm/gc), which scripts/build.ts compiles, in place of the runtime's -->
+    <NativeLibrary Include="$(GcEnvObject)" />
+    <LinkerArg Include="-Wl,--Map=&quot;$(LinkMapPath.Replace('\', '/'))&quot;" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.DotNet.ILCompiler.LLVM" Version="$(IlcLlvmVersion)" />
+    <PackageReference Include="runtime.$(NETCoreSdkPortableRuntimeIdentifier).Microsoft.DotNet.ILCompiler.LLVM" Version="$(IlcLlvmVersion)" />
+  </ItemGroup>
+  <!-- the compiler targets WASI preview 2 by default, but dprint provides preview 1 -->
+  <Target Name="UseWasiPreview1" BeforeTargets="SetupProperties">
+    <PropertyGroup>
+      <IlcLlvmTarget>wasm32-wasip1</IlcLlvmTarget>
+    </PropertyGroup>
+  </Target>
+  <!-- LLVM moves the parts of functions that only lead to throwing into functions of their own, which leaves less
+       code between the parts that run, making formatting about 1% faster. The targets set this property where a
+       project cannot, so it is set again here before it is used -->
+  <Target Name="SplitColdCode" BeforeTargets="CompileWasmObjects">
+    <PropertyGroup>
+      <WasmOptimizationSetting>-O2 -mllvm -hot-cold-split=true</WasmOptimizationSetting>
+    </PropertyGroup>
+  </Target>
+</Project>

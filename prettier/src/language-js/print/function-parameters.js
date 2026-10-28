@@ -1,0 +1,344 @@
+// @nts-check
+import { ArgExpansionBailout } from "../../common/errors.js";
+import {
+  group,
+  hardline,
+  indent,
+  line,
+  removeLines,
+  softline,
+  willBreak,
+} from "../../document/index.js";
+import isNonEmptyArray from "../../utilities/is-non-empty-array.js";
+import { hasComment } from "../utilities/comments.js";
+import {
+  getFunctionParameters,
+  hasRestParameter,
+  iterateFunctionParametersPath,
+} from "../utilities/function-parameters.js";
+import { isFlowObjectTypePropertyAFunction } from "../utilities/is-flow-object-type-property-a-function.js";
+import { isNextLineEmpty } from "../utilities/is-next-line-empty.js";
+import { isSimpleType } from "../utilities/is-simple-type.js";
+import { isTypeAnnotationAFunction } from "../utilities/is-type-annotation-a-function.js";
+import {
+  isArrayExpression,
+  isObjectExpression,
+  isObjectType,
+} from "../utilities/node-types.js";
+import { isTestCall } from "../utilities/test-libraries.js";
+import {
+  printDanglingCommentsInList,
+  printTrailingComma,
+} from "./miscellaneous.js";
+
+/** @import AstPath from "../../common/ast-path.js" */
+
+// `ArrowFunctionExpression` has other dangling comments
+const functionParameterDanglingCommentFilter = (/** @type {import("../types/estree.js").Comment} */ comment) =>
+  comment.mark !== "commentBeforeArrow";
+
+/*
+- `ArrowFunctionExpression`
+- `FunctionDeclaration`
+- `FunctionExpression`
+- `ObjectMethod`
+- `Property`
+- `ObjectProperty`
+- `ClassMethod`
+- `ClassPrivateMethod`
+- `MethodDefinition
+- `TSFunctionType` (TypeScript)
+- `TSCallSignatureDeclaration` (TypeScript)
+- `TSConstructorType` (TypeScript)
+- `TSConstructSignatureDeclaration` (TypeScript)
+- `TSDeclareFunction`(TypeScript)
+- `TSAbstractMethodDefinition` (TypeScript)
+- `TSDeclareMethod` (TypeScript)
+- `TSEmptyBodyFunctionExpression` (TypeScript)
+- `TSMethodSignature` (TypeScript)
+- `FunctionTypeAnnotation` (Flow)
+- `HookDeclaration` (Flow)
+- `HookTypeAnnotation` (Flow)
+- `ComponentDeclaration` (Flow)
+- `DeclareComponent` (Flow)
+- `ComponentTypeAnnotation` (Flow)
+*/
+function printFunctionParameters(
+  /** @type {AstPath} */ path,
+  /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options,
+  /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print,
+  /** @type {boolean | undefined} */ shouldExpandParameters,
+  /** @type {boolean | undefined} */ shouldPrintTypeParameters,
+) {
+  /** @type {import("../types/estree.js").Node} */ const functionNode = path.node;
+  const parameters = getFunctionParameters(functionNode);
+  const typeParametersDoc =
+    shouldPrintTypeParameters && functionNode.typeParameters
+      ? print("typeParameters")
+      : "";
+
+  if (parameters.length === 0) {
+    return [
+      typeParametersDoc,
+      "(",
+      printDanglingCommentsInList(
+        /** @type {AstPath} */ path,
+        options,
+        functionParameterDanglingCommentFilter,
+      ),
+      ")",
+    ];
+  }
+
+  /** @type {{ parent: import("../types/estree.js").Node }} */ const { parent } = path;
+  /** @type {boolean} */ const isParametersInTestCall = isTestCall(parent);
+  /** @type {boolean} */ const shouldHugParameters = shouldHugTheOnlyFunctionParameter(functionNode);
+  const printed = [];
+  iterateFunctionParametersPath(path, (parameterPath, index) => {
+    /** @type {boolean} */ const isLastParameter = index === parameters.length - 1;
+    if (isLastParameter && functionNode.rest) {
+      printed.push("...");
+    }
+    printed.push(print());
+    if (isLastParameter) {
+      return;
+    }
+    printed.push(",");
+    if (isParametersInTestCall || shouldHugParameters) {
+      printed.push(" ");
+    } else if (isNextLineEmpty(parameters[index], options)) {
+      printed.push(hardline, hardline);
+    } else {
+      printed.push(line);
+    }
+  });
+
+  // If the parent is a call with the first/last argument expansion and this is the
+  // params of the first/last argument, we don't want the arguments to break and instead
+  // want the whole expression to be on a new line.
+  //
+  // Good:                 Bad:
+  //   verylongcall(         verylongcall((
+  //     (a, b) => {           a,
+  //     }                     b,
+  //   )                     ) => {
+  //                         })
+  if (shouldExpandParameters && !isDecoratedFunction(path)) {
+    if (willBreak(typeParametersDoc) || willBreak(printed)) {
+      // Removing lines in this case leads to broken or ugly output
+      throw new ArgExpansionBailout();
+    }
+    return group([
+      removeLines(typeParametersDoc),
+      "(",
+      removeLines(printed),
+      ")",
+    ]);
+  }
+
+  // Single object destructuring should hug
+  //
+  // function({
+  //   a,
+  //   b,
+  //   c
+  // }) {}
+  const hasNotParameterDecorator = parameters.every(
+    /** @returns {boolean} */ (node) => !isNonEmptyArray(node.decorators),
+  );
+  if (shouldHugParameters && hasNotParameterDecorator) {
+    return [typeParametersDoc, "(", ...printed, ")"];
+  }
+
+  // don't break in specs, eg; `it("should maintain parens around done even when long", (done) => {})`
+  if (isParametersInTestCall) {
+    return [typeParametersDoc, "(", ...printed, ")"];
+  }
+
+  const isFlowShorthandWithOneArg =
+    (isFlowObjectTypePropertyAFunction(parent) ||
+      isTypeAnnotationAFunction(parent) ||
+      parent.type === "TypeAlias" ||
+      parent.type === "UnionTypeAnnotation" ||
+      parent.type === "IntersectionTypeAnnotation" ||
+      (parent.type === "FunctionTypeAnnotation" &&
+        parent.returnType === functionNode)) &&
+    parameters.length === 1 &&
+    parameters[0].name === null &&
+    // `type q = (this: string) => void;`
+    functionNode.this !== parameters[0] &&
+    parameters[0].typeAnnotation &&
+    functionNode.typeParameters === null &&
+    isSimpleType(parameters[0].typeAnnotation) &&
+    !functionNode.rest;
+
+  if (isFlowShorthandWithOneArg) {
+    if (
+      options.arrowParens === "always" ||
+      functionNode.type === "HookTypeAnnotation"
+    ) {
+      return ["(", ...printed, ")"];
+    }
+    return printed;
+  }
+
+  return [
+    typeParametersDoc,
+    "(",
+    indent([softline, ...printed]),
+    !hasRestParameter(functionNode) &&
+    // Angular does not allow trailing comma
+    path.root.type !== "NGRoot"
+      ? printTrailingComma(options, "all")
+      : "",
+    softline,
+    ")",
+  ];
+}
+
+/** @returns {boolean} */ function shouldHugTheOnlyFunctionParameter(/** @type {import("../types/estree.js").Node} */ node) {
+  if (!node) {
+    return false;
+  }
+  const parameters = getFunctionParameters(node);
+  if (parameters.length !== 1) {
+    return false;
+  }
+  const [parameter] = parameters;
+  return (
+    !hasComment(parameter) &&
+    (parameter.type === "ObjectPattern" ||
+      parameter.type === "ArrayPattern" ||
+      (parameter.type === "Identifier" &&
+        parameter.typeAnnotation &&
+        (parameter.typeAnnotation.type === "TypeAnnotation" ||
+          parameter.typeAnnotation.type === "TSTypeAnnotation") &&
+        isObjectType(parameter.typeAnnotation.typeAnnotation)) ||
+      (parameter.type === "FunctionTypeParam" &&
+        isObjectType(parameter.typeAnnotation) &&
+        parameter !== node.rest) ||
+      (parameter.type === "AssignmentPattern" &&
+        (parameter.left.type === "ObjectPattern" ||
+          parameter.left.type === "ArrayPattern") &&
+        (parameter.right.type === "Identifier" ||
+          (isObjectExpression(parameter.right) &&
+            parameter.right.properties.length === 0) ||
+          (isArrayExpression(parameter.right) &&
+            parameter.right.elements.length === 0))))
+  );
+}
+
+function getReturnTypeNode(/** @type {import("../types/estree.js").Node} */ functionNode) {
+  /** @type {any} */ let returnTypeNode;
+  if (functionNode.returnType) {
+    returnTypeNode = functionNode.returnType;
+    if (returnTypeNode.typeAnnotation) {
+      returnTypeNode = returnTypeNode.typeAnnotation;
+    }
+  } else if (functionNode.typeAnnotation) {
+    returnTypeNode = functionNode.typeAnnotation;
+  }
+  return returnTypeNode;
+}
+
+// When parameters are grouped, the return type annotation breaks first.
+/** @returns {boolean} */ function shouldGroupFunctionParameters(/** @type {import("../types/estree.js").Node} */ functionNode, returnTypeDoc) {
+  const returnTypeNode = getReturnTypeNode(functionNode);
+  if (!returnTypeNode) {
+    return false;
+  }
+
+  const typeParameters = functionNode.typeParameters?.params;
+  if (typeParameters) {
+    if (typeParameters.length > 1) {
+      return false;
+    }
+    if (typeParameters.length === 1) {
+      const typeParameter = typeParameters[0];
+      if (typeParameter.constraint || typeParameter.default) {
+        return false;
+      }
+    }
+  }
+
+  return (
+    getFunctionParameters(functionNode).length === 1 &&
+    (isObjectType(returnTypeNode) || willBreak(returnTypeDoc))
+  );
+}
+
+/**
+ * The "decorated function" pattern.
+ * The arrow function should be kept hugged even if its signature breaks.
+ *
+ * ```
+ * const decoratedFn = decorator(param1, param2)((
+ *   ...
+ * ) => {
+ *   ...
+ * });
+ * ```
+ * @param {AstPath} path
+ * @returns {boolean}
+ */
+function isDecoratedFunction(path) {
+  return path.match(
+    /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node) =>
+      node.type === "ArrowFunctionExpression" &&
+      node.body.type === "BlockStatement",
+    /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node, name) => {
+      if (
+        node.type === "CallExpression" &&
+        name === "arguments" &&
+        node.arguments.length === 1 &&
+        node.callee.type === "CallExpression"
+      ) {
+        const decorator = node.callee.callee;
+        return (
+          decorator.type === "Identifier" ||
+          (decorator.type === "MemberExpression" &&
+            !decorator.computed &&
+            decorator.object.type === "Identifier" &&
+            decorator.property.type === "Identifier")
+        );
+      }
+      return false;
+    },
+    /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node, name) =>
+      (node.type === "VariableDeclarator" && name === "init") ||
+      (node.type === "ExportDefaultDeclaration" && name === "declaration") ||
+      (node.type === "TSExportAssignment" && name === "expression") ||
+      (node.type === "AssignmentExpression" &&
+        name === "right" &&
+        node.left.type === "MemberExpression" &&
+        node.left.object.type === "Identifier" &&
+        node.left.object.name === "module" &&
+        node.left.property.type === "Identifier" &&
+        node.left.property.name === "exports"),
+    /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node) =>
+      node.type !== "VariableDeclaration" ||
+      (node.kind === "const" && node.declarations.length === 1),
+  );
+}
+
+/** @returns {boolean} */ function shouldBreakFunctionParameters(/** @type {import("../types/estree.js").Node} */ functionNode) {
+  const parameters = getFunctionParameters(functionNode);
+  return (
+    parameters.length > 1 &&
+    parameters.some(/** @returns {boolean} */ (parameter) => parameter.type === "TSParameterProperty")
+  );
+}
+
+/** @returns {boolean} */ function shouldHugTheOnlyParameter(/** @type {import("../types/estree.js").Node} */ node, /** @type {string} */ name) {
+  return (
+    (name === "params" || name === "this" || name === "rest") &&
+    shouldHugTheOnlyFunctionParameter(node)
+  );
+}
+
+export {
+  printFunctionParameters,
+  shouldBreakFunctionParameters,
+  shouldGroupFunctionParameters,
+  shouldHugTheOnlyParameter,
+};

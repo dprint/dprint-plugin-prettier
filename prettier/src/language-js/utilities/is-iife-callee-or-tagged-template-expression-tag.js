@@ -1,0 +1,14 @@
+// @nts-check
+import { isCallExpression } from "./node-types.js";
+
+/** @returns {boolean} */ function isIifeCalleeOrTaggedTemplateExpressionTag(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path) {
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
+  return (
+    (node.type === "FunctionExpression" ||
+      node.type === "ArrowFunctionExpression") &&
+    ((path.key === "callee" && isCallExpression(path.parent)) ||
+      (path.key === "tag" && path.parent.type === "TaggedTemplateExpression"))
+  );
+}
+
+export { isIifeCalleeOrTaggedTemplateExpressionTag };

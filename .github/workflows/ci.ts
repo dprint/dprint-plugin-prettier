@@ -1,286 +1,22 @@
 #!/usr/bin/env -S deno run -A
-import { conditions, expr, job, step, workflow } from "@david/gagen";
+import { conditions, step, workflow } from "@david/gagen";
 
-enum OperatingSystem {
-  Macx86 = "macos-15-intel",
-  MacArm = "macos-latest",
-  Windows = "windows-latest",
-  // uses an older version of ubuntu because of issue dprint/#483
-  Linux = "ubuntu-22.04",
-  LinuxArm = "ubuntu-24.04-arm",
-}
-
-interface ProfileData {
-  os: OperatingSystem;
-  target: string;
-  runTests?: boolean;
-  cross?: boolean;
-}
-
-const profileDataItems: ProfileData[] = [{
-  os: OperatingSystem.Macx86,
-  target: "x86_64-apple-darwin",
-  runTests: true,
-}, {
-  os: OperatingSystem.MacArm,
-  target: "aarch64-apple-darwin",
-  runTests: true,
-}, {
-  os: OperatingSystem.Windows,
-  target: "x86_64-pc-windows-msvc",
-  runTests: true,
-}, {
-  os: OperatingSystem.Linux,
-  target: "x86_64-unknown-linux-gnu",
-  runTests: true,
-}, {
-  os: OperatingSystem.LinuxArm,
-  target: "aarch64-unknown-linux-gnu",
-  runTests: true,
-}];
-
-const profiles = profileDataItems.map((profile) => {
-  return {
-    ...profile,
-    artifactsName: `${profile.target}-artifacts`,
-    zipFileName: `dprint-plugin-prettier-${profile.target}.zip`,
-    zipChecksumEnvVarName: `ZIP_CHECKSUM_${profile.target.toUpperCase().replaceAll("-", "_")}`,
-  };
-});
-
-const matrix = {
-  config: profiles.map((profile) => ({
-    os: profile.os,
-    run_tests: (profile.runTests ?? false).toString(),
-    cross: (profile.cross ?? false).toString(),
-    target: profile.target,
-  })),
-};
-
-const target = expr("matrix.config.target");
-const os = expr("matrix.config.os");
-const cross = expr("matrix.config.cross");
-const runTests = expr("matrix.config.run_tests");
+// the version of prettier whose typed source is in ./prettier
+const prettierVersion = "3.9.10";
+const wasiSdkVersion = "29";
+const wasiSdkDir = `wasi-sdk-${wasiSdkVersion}.0-x86_64-linux`;
+const binaryenVersion = "version_133";
+// for wasm2c, which makes C of Flow's parser
+const wabtVersion = "1.0.42";
 
 const isTag = conditions.isTag();
-const isNotTag = isTag.not();
-const isMain = conditions.isBranch("main");
-const isCross = cross.equals("true");
-const isNotCross = cross.notEquals("true");
-// only run aarch64 linux on main or tags to save CI time
-const runsOnThisRef = target.notEquals("aarch64-unknown-linux-gnu").or(isMain)
-  .or(isTag);
 
-function getPreReleaseRunSteps(profile: typeof profiles[number]) {
-  switch (profile.os) {
-    case OperatingSystem.MacArm:
-    case OperatingSystem.Macx86:
-    case OperatingSystem.Linux:
-    case OperatingSystem.LinuxArm:
-      return [
-        `cd target/${profile.target}/release`,
-        `zip -r ${profile.zipFileName} dprint-plugin-prettier`,
-        `echo "ZIP_CHECKSUM=$(shasum -a 256 ${profile.zipFileName} | awk '{print $1}')" >> $GITHUB_OUTPUT`,
-      ];
-    case OperatingSystem.Windows:
-      return [
-        `Compress-Archive -CompressionLevel Optimal -Force -Path target/${profile.target}/release/dprint-plugin-prettier.exe -DestinationPath target/${profile.target}/release/${profile.zipFileName}`,
-        `echo "ZIP_CHECKSUM=$(shasum -a 256 target/${profile.target}/release/${profile.zipFileName} | awk '{print $1}')" >> $GITHUB_OUTPUT`,
-      ];
-  }
-}
-
-const preReleaseStepIds = profiles.map((profile) => `pre_release_${profile.target.replaceAll("-", "_")}`);
-
-const preReleaseSteps = profiles.map((profile, i) => ({
-  id: preReleaseStepIds[i],
-  name: `Pre-release (${profile.target})`,
-  if: target.equals(profile.target).and(isTag),
-  run: getPreReleaseRunSteps(profile).join("\n"),
-}));
-
-// deno-lint-ignore no-explicit-any
-const buildSteps: any[] = [
-  { uses: "actions/checkout@v6" },
-  { uses: "dsherret/rust-toolchain-file@v1" },
-  {
-    name: "Cache cargo",
-    uses: "Swatinem/rust-cache@v2",
-    with: {
-      "prefix-key": "v3-${{matrix.config.target}}",
-      "save-if": "${{ github.ref == 'refs/heads/main' }}",
-    },
-  },
-  {
-    name: "Setup Rust (aarch64-apple-darwin)",
-    if: target.equals("aarch64-apple-darwin"),
-    run: "rustup target add aarch64-apple-darwin",
-  },
-  { uses: "denoland/setup-deno@v2" },
-  {
-    uses: "actions/setup-node@v6",
-    with: { "node-version": "24.x" },
-  },
-  {
-    name: "npm install",
-    run: "cd js/node && npm ci",
-  },
-  {
-    name: "Setup cross",
-    if: isCross,
-    run: [
-      "cd js/node && npm run build:script",
-      "cargo install cross --locked --git https://github.com/cross-rs/cross --rev 4090beca3cfffa44371a5bba524de3a578aa46c3",
-    ],
-  },
-  {
-    name: "Build (Debug)",
-    if: isNotCross.and(isNotTag),
-    run: "cargo build --locked --all-targets --target ${{matrix.config.target}}",
-  },
-  {
-    name: "Build release",
-    if: isNotCross.and(isTag),
-    run: "cargo build --locked --all-targets --target ${{matrix.config.target}} --release",
-  },
-  {
-    name: "Build cross (Debug)",
-    if: isCross.and(isNotTag),
-    run: "cross build --locked --target ${{matrix.config.target}}",
-  },
-  {
-    name: "Build cross (Release)",
-    if: isCross.and(isTag),
-    run: "cross build --locked --target ${{matrix.config.target}} --release",
-  },
-  {
-    name: "Lint",
-    if: isNotTag.and(target.equals("x86_64-unknown-linux-gnu")),
-    run: "cargo clippy",
-  },
-  {
-    name: "Lint workflow generation",
-    if: isNotTag.and(target.equals("x86_64-unknown-linux-gnu")),
-    run: [
-      "./.github/workflows/ci.ts --lint",
-      "./.github/workflows/release.ts --lint",
-    ],
-  },
-  {
-    name: "Test (Debug)",
-    if: runTests.equals("true").and(isNotTag),
-    run: "cargo test --locked --all-features",
-  },
-  {
-    name: "Test (Release)",
-    if: runTests.equals("true").and(isTag),
-    run: "cargo test --locked --all-features --release",
-  },
-  ...preReleaseSteps,
-  ...profiles.map((profile) => ({
-    name: `Upload artifacts (${profile.target})`,
-    if: target.equals(profile.target).and(isTag),
-    uses: "actions/upload-artifact@v7",
-    with: {
-      name: profile.artifactsName,
-      path: `target/${profile.target}/release/${profile.zipFileName}`,
-    },
-  })),
-];
-
-function withRunsOnThisRef<T extends { if?: unknown }>(s: T): T {
-  if (s.if != null) {
-    // deno-lint-ignore no-explicit-any
-    return { ...s, if: runsOnThisRef.and(s.if as any) };
-  }
-  return { ...s, if: runsOnThisRef };
-}
-
-const buildJob = job("build", {
-  name: target,
-  runsOn: os,
-  strategy: { matrix },
-  outputs: Object.fromEntries(
-    profiles.map((profile, i) => [
-      profile.zipChecksumEnvVarName,
-      expr(`steps.${preReleaseStepIds[i]}.outputs.ZIP_CHECKSUM`),
-    ]),
-  ),
-  env: {
-    // disabled to reduce ./target size and generally it's slower enabled
-    CARGO_INCREMENTAL: 0,
-    RUST_BACKTRACE: "full",
-  },
-  steps: buildSteps.map(withRunsOnThisRef),
-});
-
-const getPrettierVersion = step({
-  id: "get_prettier_version",
-  name: "Get prettier version",
-  run: "echo PRETTIER_VERSION=$(deno run --allow-read scripts/output_prettier_version.ts) >> $GITHUB_OUTPUT",
-  outputs: ["PRETTIER_VERSION"],
-});
-
-const draftReleaseJob = job("draft_release", {
-  name: "draft_release",
+const getTagVersion = step({
+  id: "get_tag_version",
+  name: "Get tag version",
   if: isTag,
-  needs: [buildJob],
-  runsOn: "ubuntu-latest",
-  // id-token: write is required for npm --provenance
-  permissions: { contents: "write", "id-token": "write" },
-  steps: [
-    { name: "Checkout", uses: "actions/checkout@v6" },
-    { name: "Download artifacts", uses: "actions/download-artifact@v8" },
-    { uses: "denoland/setup-deno@v2" },
-    {
-      uses: "actions/setup-node@v4",
-      with: { "node-version": "22.x", "registry-url": "https://registry.npmjs.org" },
-    },
-    {
-      name: "Move downloaded artifacts to root directory",
-      run: profiles.map((profile) => `mv ${profile.artifactsName}/${profile.zipFileName} .`),
-    },
-    {
-      name: "Output checksums",
-      run: profiles.map((profile) =>
-        `echo "${profile.zipFileName}: ${buildJob.outputs[profile.zipChecksumEnvVarName]}"`
-      ),
-    },
-    {
-      name: "Create plugin file",
-      run: "deno run -A scripts/create_plugin_file.ts",
-    },
-    getPrettierVersion,
-    {
-      name: "Build npm packages",
-      run: "deno run -A scripts/create_npm_packages.ts",
-    },
-    {
-      name: "Create release notes",
-      run:
-        `deno run -A ./scripts/generate_release_notes.ts ${getPrettierVersion.outputs.PRETTIER_VERSION} > \${{ github.workspace }}-CHANGELOG.txt`,
-    },
-    {
-      name: "Release",
-      // gh uploads the assets to a draft and then publishes it, which immutable releases require
-      env: { GH_TOKEN: "${{ secrets.GITHUB_TOKEN }}" },
-      run: [
-        `gh release create "$GITHUB_REF_NAME" --verify-tag --title "$GITHUB_REF_NAME"`,
-        "--notes-file ${{ github.workspace }}-CHANGELOG.txt",
-        ...profiles.map((profile) => profile.zipFileName),
-        "plugin.json",
-      ].join(" \\\n  "),
-    },
-    {
-      // npm trusted publishing (OIDC) requires npm >= 11.5.1.
-      name: "Upgrade npm",
-      run: "npm install --global npm@latest",
-    },
-    {
-      name: "Publish npm packages",
-      run: "deno run -A scripts/publish_npm_packages.ts",
-    },
-  ],
+  run: "echo TAG_VERSION=${GITHUB_REF/refs\\/tags\\//} >> $GITHUB_OUTPUT",
+  outputs: ["TAG_VERSION"],
 });
 
 workflow({
@@ -294,7 +30,109 @@ workflow({
     group: "${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}",
     cancelInProgress: true,
   },
-  jobs: [buildJob, draftReleaseJob],
+  jobs: [{
+    id: "build",
+    name: "build",
+    // the NativeAOT-LLVM compiler is only published for Linux and Windows hosts
+    runsOn: "ubuntu-latest",
+    // id-token: write is required for npm --provenance
+    permissions: { contents: "write", "id-token": "write" },
+    steps: [
+      { name: "Checkout", uses: "actions/checkout@v6" },
+      { uses: "denoland/setup-deno@v2" },
+      {
+        uses: "actions/setup-dotnet@v5",
+        with: { "dotnet-version": "10.0.x" },
+      },
+      {
+        uses: "actions/setup-node@v6",
+        with: { "node-version": "24.x", "registry-url": "https://registry.npmjs.org" },
+      },
+      {
+        name: "Install WASI SDK, Binaryen and WABT",
+        run: [
+          `curl -sSfL https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-${wasiSdkVersion}/${wasiSdkDir}.tar.gz | tar xz -C "$RUNNER_TEMP"`,
+          `echo "WASI_SDK_PATH=$RUNNER_TEMP/${wasiSdkDir}" >> "$GITHUB_ENV"`,
+          `curl -sSfL https://github.com/WebAssembly/binaryen/releases/download/${binaryenVersion}/binaryen-${binaryenVersion}-x86_64-linux.tar.gz | tar xz -C "$RUNNER_TEMP"`,
+          `echo "BINARYEN=$RUNNER_TEMP/binaryen-${binaryenVersion}/bin" >> "$GITHUB_ENV"`,
+          `curl -sSfL https://github.com/WebAssembly/wabt/releases/download/${wabtVersion}/wabt-${wabtVersion}-linux-x64.tar.gz | tar xz -C "$RUNNER_TEMP"`,
+          `echo "WABT=$RUNNER_TEMP/wabt-${wabtVersion}" >> "$GITHUB_ENV"`,
+        ],
+      },
+      {
+        name: "Lint workflow generation",
+        if: isTag.not(),
+        run: [
+          "./.github/workflows/ci.ts --lint",
+          "./.github/workflows/release.ts --lint",
+        ],
+      },
+      { name: "Install prettier's and the prettier plugins' dependencies", run: "deno task setup" },
+      { name: "Build", run: "deno task build" },
+      { name: "Test", run: "deno task test" },
+      {
+        // formats the tests of prettier's repository with the plugin and with prettier, which must come out the same
+        name: "Test prettier's tests",
+        run: "deno task test:prettier",
+      },
+      {
+        // formats the tests of the prettier plugins that the plugin includes, and prettier's tests of javascript with
+        // prettier-plugin-jsdoc, with the plugin and with prettier, which must come out the same
+        name: "Test the prettier plugins' tests",
+        run: "deno task test:plugins",
+      },
+      {
+        name: "Setup and test npm deployment",
+        run: [
+          "cd deployment/npm",
+          "npm install",
+          "node setup.js",
+          "npm run test",
+        ],
+      },
+      getTagVersion,
+      {
+        name: "Pre-release",
+        if: isTag,
+        run: [
+          "# update config schema to have version",
+          `sed -i 's/dprint-plugin-prettier\\/0.0.0/dprint-plugin-prettier\\/${getTagVersion.outputs.TAG_VERSION}/' deployment/schema.json`,
+          "# update the npm package to have version",
+          "(cd deployment/npm && node setup.js sync-version)",
+          "# create release notes",
+          `deno run -A ./scripts/generate_release_notes.ts ${prettierVersion} > \${{ github.workspace }}-CHANGELOG.txt`,
+        ],
+      },
+      {
+        name: "Release",
+        if: isTag,
+        // gh uploads the assets to a draft and then publishes it, which immutable releases require
+        env: { GH_TOKEN: "${{ secrets.GITHUB_TOKEN }}" },
+        run: [
+          `gh release create "$GITHUB_REF_NAME" --verify-tag --title "$GITHUB_REF_NAME"`,
+          "--notes-file ${{ github.workspace }}-CHANGELOG.txt",
+          "deployment/npm/plugin.wasm",
+          "deployment/schema.json",
+        ].join(" \\\n  "),
+      },
+      {
+        // npm trusted publishing (OIDC) requires npm >= 11.5.1.
+        name: "Upgrade npm",
+        if: isTag,
+        run: "npm install --global npm@latest",
+      },
+      {
+        name: "Publish npm package",
+        if: isTag,
+        // publish from within the directory because npm treats a path
+        // like "deployment/npm" as a GitHub repository
+        run: [
+          "cd deployment/npm",
+          "npm publish --access public --provenance",
+        ],
+      },
+    ],
+  }],
 }).writeOrLint({
   filePath: new URL("./ci.generated.yml", import.meta.url),
   header: "# GENERATED BY ./ci.ts -- DO NOT DIRECTLY EDIT",

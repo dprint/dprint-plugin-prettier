@@ -1,12 +1,17 @@
 {
   "tasks": {
-    "setup": "cd js/node && npm ci"
+    "setup": "cd prettier && npm ci --ignore-scripts && cd ../plugins && npm ci --ignore-scripts",
+    "build": "deno run -A scripts/build.ts",
+    "test": "deno test -A tests/spec_test.ts",
+    "test:repos": "deno test -A tests/repos_test.ts",
+    "test:prettier": "deno test -A tests/prettier_tests_test.ts",
+    "test:plugins": "deno test -A tests/plugin_tests_test.ts"
   },
   "imports": {
     "@david/gagen": "jsr:@david/gagen@^0.5.0",
-    "@dprint/automation": "jsr:@dprint/automation@^0.11.2",
+    "@dprint/formatter": "npm:@dprint/formatter@~0.6.0",
+    "@std/assert": "jsr:@std/assert@1",
     "dax": "jsr:@david/dax@0.45",
-    "@std/semver": "jsr:@std/semver@1",
-    "@std/yaml": "jsr:@std/yaml@1"
+    "prettier": "npm:prettier@3.9.10"
   }
 }

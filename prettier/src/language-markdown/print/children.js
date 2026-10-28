@@ -1,0 +1,178 @@
+// @nts-check
+import { hardline } from "../../document/index.js";
+import {
+  INLINE_NODE_TYPES,
+  INLINE_NODE_WRAPPER_TYPES,
+  isPrettierIgnore,
+  isSetextHeading,
+} from "../utilities.js";
+
+/**
+ * @import AstPath from "../../common/ast-path.js"
+ * @import {Doc} from "../../document/index.js"
+ * @import {MdastNode, MarkdownOptions} from "../utilities.js"
+ */
+
+/**
+ * @param {AstPath} path
+ * @param {MarkdownOptions} options
+ * @param {(selector?: any, args?: any) => any} print
+ * @param {{ processor?: (path: AstPath) => any }} [events]
+ * @returns {any[]}
+ */
+function printChildren(/** @type {AstPath} */ path, options, print, events = {}) {
+  const { processor = print } = events;
+
+  const parts = [];
+
+  path.each(() => {
+    const result = processor(path);
+    if (result !== false) {
+      if (parts.length > 0 && shouldPrePrintHardline(path)) {
+        parts.push(hardline);
+
+        if (shouldPrePrintDoubleHardline(path, options)) {
+          parts.push(hardline);
+        }
+      }
+
+      parts.push(result);
+    }
+  }, "children");
+
+  return parts;
+}
+
+/** @returns {boolean} */ function shouldPrePrintHardline(/** @type {AstPath & { node: MdastNode, parent: MdastNode }} */ { node, parent }) {
+  const isInlineNode =
+    INLINE_NODE_TYPES.has(node.type) &&
+    !(
+      node.type === "liquidNode" && !INLINE_NODE_WRAPPER_TYPES.has(parent.type)
+    );
+
+  /** @type {boolean} */ const isInlineHTML =
+    node.type === "html" && INLINE_NODE_WRAPPER_TYPES.has(parent.type);
+
+  return !isInlineNode && !isInlineHTML;
+}
+
+const SIBLING_NODE_TYPES = new Set(["listItem", "definition"]);
+
+/**
+ * @param {AstPath} path
+ * @returns {boolean}
+ */
+function shouldPrePrintDoubleHardline(path, /** @type {MarkdownOptions} */ options) {
+  /** @type {{ node: MdastNode, previous: MdastNode, parent: MdastNode }} */ const { node, previous, parent } = path;
+
+  if (options.parser === "mdx") {
+    if (
+      isLooseListItemLegacy(previous, options) ||
+      (node.type === "list" &&
+        parent.type === "listItem" &&
+        (previous.type === "code" ||
+          // Preserve blank line before nested list within listItem (issue #17746)
+          previous.type === "paragraph") &&
+        previous.position.end.line + 1 < node.position.start.line)
+    ) {
+      return true;
+    }
+  } else {
+    if (
+      isSetextHeading(node) &&
+      node.position.start.line < previous.position.end.line
+    ) {
+      return false;
+    }
+
+    if (
+      isPreviousNodeLooseListItem(path) ||
+      (node.type === "list" &&
+        parent.type === "listItem" &&
+        (previous.type === "code" ||
+          // Preserve blank line before nested list within listItem (issue #17746)
+          previous.type === "paragraph") &&
+        previous.position.end.line + 1 < node.position.start.line)
+    ) {
+      return true;
+    }
+  }
+
+  /** @type {boolean} */ const isSequence = previous.type === node.type;
+  /** @type {boolean} */ const isSiblingNode = isSequence && SIBLING_NODE_TYPES.has(node.type);
+  let isInTightListItem;
+  if (options.parser === "mdx") {
+    isInTightListItem =
+      parent.type === "listItem" &&
+      (node.type === "list" || !isLooseListItemLegacy(parent, options));
+  } else {
+    isInTightListItem =
+      parent.type === "listItem" &&
+      (node.type === "list" || !path.callParent(isLooseListItem));
+  }
+  /** @type {boolean} */ const isPrevNodePrettierIgnore = isPrettierIgnore(previous) === "next";
+  /** @type {boolean} */ const isBlockHtmlWithoutBlankLineBetweenPrevHtml =
+    node.type === "html" &&
+    previous.type === "html" &&
+    previous.position.end.line + 1 === node.position.start.line;
+  const isBlockHtmlWithoutBlankLineBetweenPrevParagraph =
+    options.parser !== "mdx" &&
+    node.type === "html" &&
+    previous.type === "paragraph" &&
+    previous.position.end.line + 1 === node.position.start.line;
+  /** @type {boolean} */ const isHtmlDirectAfterListItem =
+    node.type === "html" &&
+    parent.type === "listItem" &&
+    previous.type === "paragraph" &&
+    previous.position.end.line + 1 === node.position.start.line;
+  const isBlockLiquidWithoutBlankLine =
+    (node.type === "liquidNode" || previous.type === "liquidNode") &&
+    previous.position.end.line + 1 === node.position.start.line;
+
+  return !(
+    isSiblingNode ||
+    isInTightListItem ||
+    isPrevNodePrettierIgnore ||
+    isBlockHtmlWithoutBlankLineBetweenPrevHtml ||
+    isBlockHtmlWithoutBlankLineBetweenPrevParagraph ||
+    isHtmlDirectAfterListItem ||
+    isBlockLiquidWithoutBlankLine
+  );
+}
+
+function isLooseListItemLegacy(/** @type {MdastNode} */ node, /** @type {MarkdownOptions} */ options) {
+  return (
+    node.type === "listItem" &&
+    (node.spread ||
+      // Check if `listItem` ends with `\n`
+      // since it can't be empty, so we only need check the last character
+      options.originalText.charAt(node.position.end.offset - 1) === "\n")
+  );
+}
+
+/** @returns {boolean} */ function isLooseListItem(/** @type {{ node: MdastNode, parent: MdastNode, next: MdastNode | null }} */ { node, parent, next }) {
+  return (
+    node.type === "listItem" &&
+    (node.spread ||
+      (parent.type === "list" &&
+        next?.type === "listItem" &&
+        node.position.end.line + 1 < next.position.start.line))
+  );
+}
+
+/**
+ * @param {AstPath} path
+ * @returns {boolean}
+ */
+function isPreviousNodeLooseListItem(path) {
+  if (path.index === 0) {
+    return false;
+  }
+  return isLooseListItem({
+    node: path.previous,
+    parent: path.parent,
+    next: path.node,
+  });
+}
+
+export { printChildren };

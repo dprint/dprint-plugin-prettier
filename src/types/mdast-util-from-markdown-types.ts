@@ -1,0 +1,73 @@
+// mdast-util-from-markdown's lib/types.d.ts, which nts.json names under `types`, with its interfaces written as object
+// types: the compile context is an object that the compiler writes out and copies for each event, so it is a record
+// whose members have types rather than a class, and its functions are called as what they are rather than by name
+import type {Nodes, Parent, Root} from '../../prettier/node_modules/@types/mdast/index.js'
+import type {ParseOptions, Token} from './micromark-util-types.js'
+
+export type CompileContext = {
+  config: Config
+  data: CompileData
+  stack: Array<Nodes>
+  tokenStack: Array<TokenTuple>
+  buffer: (this: CompileContext) => undefined
+  enter: (
+    this: CompileContext,
+    node: Nodes,
+    token: Token,
+    onError?: OnEnterError | null | undefined
+  ) => undefined
+  exit: (this: CompileContext, token: Token, onError?: OnExitError | null | undefined) => undefined
+  resume: (this: CompileContext) => string
+  sliceSerialize: (token: Pick<Token, 'end' | 'start'>, expandTabs?: boolean | undefined) => string
+}
+
+export type CompileData = {
+  atHardBreak?: boolean | undefined
+  characterReferenceType?:
+    | 'characterReferenceMarkerHexadecimal'
+    | 'characterReferenceMarkerNumeric'
+    | undefined
+  expectingFirstListItemValue?: boolean | undefined
+  flowCodeInside?: boolean | undefined
+  // (dprint-plugin-prettier: what mdast-util-gfm-table and mdast-util-math add to it)
+  inTable?: boolean | undefined
+  mathFlowInside?: boolean | undefined
+  inReference?: boolean | undefined
+  setextHeadingSlurpLineEnding?: boolean | undefined
+  referenceType?: 'collapsed' | 'full' | undefined
+}
+
+export type Config = {
+  canContainEols: Array<string>
+  enter: Handles
+  exit: Handles
+  transforms: Array<Transform>
+}
+
+export type Extension = {
+  canContainEols?: Array<string> | null | undefined
+  enter?: Handles | null | undefined
+  exit?: Handles | null | undefined
+  transforms?: Array<Transform> | null | undefined
+}
+
+// (dprint-plugin-prettier: a node like any other, as mdast-types.ts makes every node one object type)
+export type Fragment = Parent
+
+export type Handles = Record<string, Handle>
+
+// a handler is called on the compile context with `call`, which nts gives it first
+export type Handle = (this: CompileContext, token: Token) => undefined
+
+export type OnEnterError = (this: CompileContext, left: Token | undefined, right: Token) => undefined
+
+export type OnExitError = (this: CompileContext, left: Token, right: Token) => undefined
+
+export type Options = ParseOptions & {
+  mdastExtensions?: Array<Extension | Array<Extension>> | null | undefined
+}
+
+// a token and what is done when it is not closed, which the compiler creates and reads as an array
+export type TokenTuple = any
+
+export type Transform = (tree: Root) => Root | null | undefined | void

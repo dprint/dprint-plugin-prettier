@@ -1,0 +1,1 @@
+export default [{ "name": "GraphQL", "type": "data", "aceMode": "graphqlschema", "extensions": [".graphql", ".gql", ".graphqls"], "tmScope": "source.graphql", "parsers": ["graphql"], "vscodeLanguageIds": ["graphql"], "linguistLanguageId": 139 }];

@@ -1,0 +1,26 @@
+import { printTypeAnnotationProperty } from "./type-annotation.js";
+
+/** @import AstPath from "../../common/ast-path.js" */
+
+/*
+- `TSTypePredicate` (TypeScript)
+- `TypePredicate` (flow)
+*/
+/** @returns {any[]} */ function printTypePredicate(/** @type {AstPath} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
+  const prefix =
+    node.type === "TSTypePredicate" && node.asserts
+      ? "asserts "
+      : node.type === "TypePredicate" && node.kind
+        ? `${node.kind} `
+        : "";
+  return [
+    prefix,
+    print("parameterName"),
+    node.typeAnnotation
+      ? [" is ", printTypeAnnotationProperty(path, print)]
+      : "",
+  ];
+}
+
+export { printTypePredicate };

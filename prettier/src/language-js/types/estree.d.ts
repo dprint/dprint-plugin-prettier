@@ -1,0 +1,85 @@
+import type { ESTree as MeriyahESTree } from "../../../node_modules/meriyah/dist/types/meriyah.d.ts";
+import type * as Babel from "@babel/types";
+import type { NGTree } from "../../../node_modules/angular-estree-parser/dist/index.d.ts";
+import type * as TSESTree from "./typescript-estree.js";
+import type * as FlowESTree from "./flow-estree.js";
+import type * as Babel from "./babel.js";
+
+type PrettierNodeAdditionalProperties = {
+  extra?: {
+    parenthesized?: boolean;
+    raw?: string;
+  };
+  comments?: Comment[];
+  prettierIgnore?: boolean;
+  __contentEnd?: number;
+};
+
+type PrettierCommentAdditionalProperties = {
+  printed?: boolean;
+  trailing?: boolean;
+  leading?: boolean;
+};
+
+type FlowAdditionalNode =
+  | {
+      type: "SatisfiesExpression";
+      expression: FlowESTree.Expression;
+      typeAnnotation: FlowESTree.TypeAnnotationType;
+    }
+  | ({
+      type: "EnumBody";
+    } & Omit<FlowESTree.EnumDeclaration["body"], "type">);
+
+type PrettierNode = { type: "JsExpressionRoot"; node: Babel.Expression };
+
+export type Comment = (
+  | Babel.InterpreterDirective
+  | Babel.Comment
+  | TSESTree.Comment
+  | MeriyahESTree.Comment
+  | { type: "Hashbang"; value: string }
+  | Babel.InterpreterDirective
+) &
+  PrettierCommentAdditionalProperties;
+
+type _Node =
+  | PrettierNode
+  | Exclude<Babel.Node, Babel.TupleTypeAnnotation>
+  | TSESTree.Node
+  | Exclude<NGTree.NGAst, Babel.Node>
+  | FlowESTree.ESNode
+  | FlowAdditionalNode;
+
+export type Node = ExtendNode<_Node>;
+
+export type NodeMap = CreateNodeMap<Node>;
+export type CommentMap = CreateNodeMap<Comment>;
+
+type CreateNodeMap<Input extends Node | Comment> = {
+  [NodeType in Input["type"]]: Extract<Input, { type: NodeType }>;
+};
+
+type ExtendNode<Input> = Input extends _Node
+  ? {
+      [Key in keyof Input]: ExtendNode<Input[Key]>;
+    } & PrettierNodeAdditionalProperties
+  : Input extends readonly any[]
+    ? ExtendNode<Input[number]>[]
+    : Input;
+
+export type NumericLiteral =
+  NodeMap["NumericLiteral"] | (NodeMap["Literal"] & { value: number });
+
+export type StringLiteral =
+  NodeMap["StringLiteral"] | (NodeMap["Literal"] & { value: string });
+
+export type RegExpLiteral =
+  | NodeMap["RegExpLiteral"]
+  | (NodeMap["Literal"] & { regexp: { pattern: string; flags: string } });
+
+export type BigIntLiteral =
+  NodeMap["BigIntLiteral"] | (NodeMap["Literal"] & { bigint: string });
+
+export type BooleanLiteral =
+  NodeMap["BigIntLiteral"] | (NodeMap["BooleanLiteral"] & { value: boolean });
