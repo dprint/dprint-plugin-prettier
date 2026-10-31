@@ -76,6 +76,7 @@ impl AsyncPluginHandler for PrettierPluginHandler {
       file_matching: FileMatchingInfo {
         file_extensions: get_supported_extensions().clone(),
         file_names: vec![],
+        additive: false,
       },
     }
   }
