@@ -34,7 +34,7 @@ static unsafe partial class Program
             "{\"name\":\"dprint-plugin-prettier\",\"version\":\"" + version + "\",\"configKey\":\"prettier\","
             + "\"helpUrl\":\"https://dprint.dev/plugins/prettier\","
             + "\"configSchemaUrl\":\"https://plugins.dprint.dev/dprint/dprint-plugin-prettier/" + version + "/schema.json\","
-            + "\"updateUrl\":\"https://plugins.dprint.dev/dprint/dprint-plugin-prettier/latest.json\"}"));
+            + "\"updateUrl\":\"https://plugins.dprint.dev/dprint/dprint-plugin-prettier/latest.json\",\"supportsRangeFormatting\":false}"));
     }
 
     [UnmanagedCallersOnly(EntryPoint = "get_license_text")]
