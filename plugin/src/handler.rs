@@ -57,6 +57,7 @@ impl AsyncPluginHandler for PrettierPluginHandler {
       update_url: Some(
         "https://plugins.dprint.dev/dprint/dprint-plugin-prettier/latest.json".to_string(),
       ),
+      supports_range_formatting: Some(false),
     }
   }
 
