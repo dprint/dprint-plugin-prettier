@@ -69,6 +69,12 @@ workflow({
       },
       { name: "Install prettier's and the prettier plugins' dependencies", run: "deno task setup" },
       { name: "Build", run: "deno task build" },
+      {
+        // adds the outputs of the schema's code examples, which the release uploads with the schema
+        name: "Generate config schema",
+        run:
+          "deno run -A --minimum-dependency-age=0 jsr:@dprint/automation@0.14.4/tasks/publish-schema target/plugin.wasm deployment/schema.json --extension ts",
+      },
       { name: "Test", run: "deno task test" },
       {
         // formats the tests of prettier's repository with the plugin and with prettier, which must come out the same

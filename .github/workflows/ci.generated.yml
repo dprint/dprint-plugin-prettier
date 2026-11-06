@@ -48,6 +48,8 @@ jobs:
         run: deno task setup
       - name: Build
         run: deno task build
+      - name: Generate config schema
+        run: 'deno run -A --minimum-dependency-age=0 jsr:@dprint/automation@0.14.4/tasks/publish-schema target/plugin.wasm deployment/schema.json --extension ts'
       - name: Test
         run: deno task test
       - name: Test prettier's tests

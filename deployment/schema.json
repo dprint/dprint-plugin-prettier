@@ -2,207 +2,386 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://plugins.dprint.dev/dprint/dprint-plugin-prettier/0.0.0/schema.json",
   "type": "object",
+  "x-playground": {
+    "input": [
+      "import {EventEmitter} from 'node:events'",
+      "interface Order{id:string;items:{sku:string,quantity:number,price:number}[];status:'open'|'shipped'}",
+      "",
+      "export class OrderBook extends EventEmitter{",
+      "    private orders:Map<string,Order>=new Map()",
+      "  add(order:Order){",
+      "    this.orders.set(order.id,order);this.emit('added',order)",
+      "  }",
+      "  totalOf(id:string):number{",
+      "      const order=this.orders.get(id)",
+      "    if(!order) throw new Error(`Unknown order ${id}`)",
+      "    return order.items.reduce((sum,item)=>sum+item.quantity*item.price,0)",
+      "  }",
+      "}",
+      "",
+      "const book=new OrderBook()",
+      "book.on('added',(order:Order)=>console.log(\"added\",order.id))",
+      "book.add({id:'a1',items:[{sku:'pen',quantity:3,price:1.5}],status:'open'})"
+    ]
+  },
+  "x-sections": [
+    {
+      "title": "General",
+      "description": "The width and indentation of lines, line endings, and what is formatted in all the languages.",
+      "properties": [
+        "lineWidth",
+        "printWidth",
+        "indentWidth",
+        "tabWidth",
+        "useTabs",
+        "newLineKind",
+        "endOfLine",
+        "embeddedLanguageFormatting"
+      ]
+    },
+    {
+      "title": "JavaScript and TypeScript",
+      "description": "The punctuation, spaces and line breaks of JavaScript and TypeScript.",
+      "properties": [
+        "semi",
+        "singleQuote",
+        "quoteProps",
+        "trailingComma",
+        "bracketSpacing",
+        "arrowParens",
+        "experimentalTernaries"
+      ]
+    },
+    {
+      "title": "JSX, HTML and Vue",
+      "description": "The quotes, attributes and white space of elements.",
+      "properties": [
+        "jsxSingleQuote",
+        "bracketSameLine",
+        "singleAttributePerLine",
+        "htmlWhitespaceSensitivity",
+        "vueIndentScriptAndStyle"
+      ]
+    },
+    {
+      "title": "Markdown",
+      "description": "The wrapping of prose.",
+      "properties": [
+        "proseWrap"
+      ]
+    }
+  ],
   "properties": {
     "lineWidth": {
-      "description": "The width of a line the printer will try to stay under. Defaults to the global `lineWidth`. Same as `printWidth`.",
-      "type": "number"
+      "description": "The line width that the formatter wraps at. Defaults to the `lineWidth` of the global configuration. Same as `printWidth`, which takes precedence.",
+      "type": "integer",
+      "minimum": 0
     },
     "indentWidth": {
-      "description": "The number of spaces for an indent. Defaults to the global `indentWidth`. Same as `tabWidth`.",
-      "type": "number"
+      "description": "The number of spaces per level of indentation. Defaults to the `indentWidth` of the global configuration. Same as `tabWidth`, which takes precedence.",
+      "type": "integer",
+      "minimum": 0
     },
     "newLineKind": {
-      "description": "The kind of newline to use. Defaults to the global `newLineKind`. Same as `endOfLine`.",
+      "description": "The kind of line ending. Defaults to the `newLineKind` of the global configuration. Same as `endOfLine`, which takes precedence.",
       "type": "string",
-      "enum": [
-        "auto",
-        "lf",
-        "crlf"
+      "oneOf": [
+        {
+          "const": "auto",
+          "description": "The line ending that the file has first."
+        },
+        {
+          "const": "lf",
+          "description": "Line feed."
+        },
+        {
+          "const": "crlf",
+          "description": "Carriage return, line feed."
+        }
       ]
     },
     "singleQuote": {
-      "description": "Use single quotes instead of double quotes.",
+      "description": "Whether to use single quotes instead of double quotes.",
       "type": "boolean",
-      "default": false
+      "default": false,
+      "x-example": {
+        "input": [
+          "const name = \"dprint\";",
+          "const text = 'plugin';"
+        ]
+      }
     },
     "bracketSpacing": {
-      "description": "Print spaces between brackets.",
+      "description": "Whether to print spaces between the brackets of object literals.",
       "type": "boolean",
-      "default": true
+      "default": true,
+      "x-example": {
+        "input": [
+          "import {readFile} from \"node:fs\";",
+          "const point = {x: 1, y: 2};"
+        ]
+      }
     },
     "bracketSameLine": {
-      "description": "Put > of opening tags on the last line instead of on a new line.",
+      "description": "Whether to put the `>` of a multi-line HTML or JSX element at the end of the last line instead of alone on the next line.",
       "type": "boolean",
-      "default": false
+      "default": false,
+      "x-example": {
+        "extension": "tsx",
+        "input": [
+          "const button = <button className=\"primary large\" type=\"submit\" onClick={() => save(form)} disabled={busy}>Save</button>;"
+        ]
+      }
     },
     "htmlWhitespaceSensitivity": {
-      "description": "How to handle whitespaces in HTML.",
+      "description": "How the white space of HTML, Vue and Handlebars is handled.",
       "type": "string",
       "oneOf": [
         {
           "const": "css",
-          "description": "Respect the default value of CSS display property."
+          "description": "Respect the default value of the CSS `display` property."
         },
         {
           "const": "strict",
-          "description": "Whitespaces are considered sensitive."
+          "description": "White space around all tags is significant."
         },
         {
           "const": "ignore",
-          "description": "Whitespaces are considered insensitive."
+          "description": "White space around all tags is insignificant."
         }
       ],
-      "default": "css"
+      "default": "css",
+      "x-example": {
+        "extension": "html",
+        "input": [
+          "<span class=\"badge badge-primary\">A label that is long enough to be wrapped</span>",
+          "<div class=\"card card-primary\">A paragraph that is long enough to be wrapped</div>"
+        ]
+      }
     },
     "singleAttributePerLine": {
-      "description": "Enforce single attribute per line in HTML, Vue and JSX.",
+      "description": "Whether to put each attribute of an HTML, Vue or JSX element on its own line when there is more than one.",
       "type": "boolean",
-      "default": false
+      "default": false,
+      "x-example": {
+        "extension": "tsx",
+        "input": [
+          "const input = <input type=\"text\" name=\"email\" required />;"
+        ]
+      }
     },
     "vueIndentScriptAndStyle": {
-      "description": "Indent script and style tags in Vue files.",
+      "description": "Whether to indent the code inside the `<script>` and `<style>` tags of Vue files.",
       "type": "boolean",
-      "default": false
+      "default": false,
+      "x-example": {
+        "extension": "vue",
+        "input": [
+          "<script>",
+          "export default { name: \"App\" };",
+          "</script>",
+          "",
+          "<template>",
+          "  <div>{{ name }}</div>",
+          "</template>"
+        ]
+      }
     },
     "arrowParens": {
-      "description": "Include parentheses around a sole arrow function parameter.",
+      "description": "Whether the only parameter of an arrow function has parentheses.",
       "type": "string",
       "oneOf": [
         {
           "const": "always",
-          "description": "Always include parens. Example: `(x) => x`"
+          "description": "Always have parentheses. Example: `(x) => x`"
         },
         {
           "const": "avoid",
-          "description": "Omit parens when possible. Example: `x => x`"
+          "description": "Omit the parentheses when possible. Example: `x => x`"
         }
       ],
-      "default": "always"
+      "default": "always",
+      "x-example": {
+        "input": [
+          "const double = (x) => x * 2;"
+        ]
+      }
     },
     "semi": {
-      "description": "Print semicolons.",
+      "description": "Whether to print semicolons at the ends of statements.",
       "type": "boolean",
-      "default": true
+      "default": true,
+      "x-example": {
+        "input": [
+          "const value = 5",
+          ";[1, 2].forEach(log)"
+        ]
+      }
     },
     "experimentalTernaries": {
-      "description": "Use curious ternaries, with the question mark after the condition.",
+      "description": "Whether to format ternaries with the question mark at the end of the line of the condition.",
       "type": "boolean",
-      "default": false
+      "default": false,
+      "x-example": {
+        "input": [
+          "const animal = isBird ? \"bird\" : isCat ? \"cat\" : isDog ? \"dog\" : \"some other kind of animal\";"
+        ]
+      }
     },
     "jsxSingleQuote": {
-      "description": "Use single quotes in JSX.",
+      "description": "Whether to use single quotes instead of double quotes in JSX.",
       "type": "boolean",
-      "default": false
+      "default": false,
+      "x-example": {
+        "extension": "tsx",
+        "input": [
+          "const logo = <img src=\"/logo.png\" alt='Logo' />;"
+        ]
+      }
     },
     "quoteProps": {
-      "description": "Change when properties in objects are quoted.",
+      "description": "When the properties of objects are quoted.",
       "type": "string",
       "oneOf": [
         {
           "const": "as-needed",
-          "description": "Only add quotes around object properties where required."
+          "description": "Only add quotes where they are required."
         },
         {
           "const": "consistent",
-          "description": "If at least one property in an object requires quotes, quote all properties."
+          "description": "If at least one property of an object requires quotes, quote all of them."
         },
         {
           "const": "preserve",
-          "description": "Respect the input use of quotes in object properties."
+          "description": "Keep the quotes as they are written."
         }
       ],
-      "default": "as-needed"
+      "default": "as-needed",
+      "x-example": {
+        "input": [
+          "const headers = { \"accept\": \"json\", timeout: 30, \"x-request-id\": id };"
+        ]
+      }
     },
     "trailingComma": {
-      "description": "Print trailing commas wherever possible when multi-line.",
+      "description": "Where trailing commas are printed in what is on multiple lines.",
       "type": "string",
       "oneOf": [
         {
           "const": "all",
-          "description": "Trailing commas wherever possible (including function arguments)."
+          "description": "Wherever possible, including the parameters and arguments of functions."
         },
         {
           "const": "es5",
-          "description": "Trailing commas where valid in ES5 (objects, arrays, etc.)"
+          "description": "Where they are valid in ES5 (objects, arrays, etc.)."
         },
         {
           "const": "none",
-          "description": "No trailing commas."
+          "description": "Nowhere."
         }
       ],
-      "default": "all"
+      "default": "all",
+      "x-example": {
+        "input": [
+          "function createUser(firstName: string, lastName: string, email: string, age: number) {",
+          "  return { firstName, lastName, email, age, createdAt: new Date(), updatedAt: new Date() };",
+          "}"
+        ]
+      }
     },
     "proseWrap": {
-      "description": "How to wrap prose.",
+      "description": "How the prose of Markdown is wrapped.",
       "type": "string",
       "oneOf": [
         {
           "const": "always",
-          "description": "Wrap prose if it exceeds the print width."
+          "description": "Wrap prose when it exceeds the print width."
         },
         {
           "const": "never",
-          "description": "Do not wrap prose."
+          "description": "Unwrap each block of prose into one line."
         },
         {
           "const": "preserve",
-          "description": "Wrap prose as-is."
+          "description": "Keep the prose as it is written."
         }
       ],
-      "default": "preserve"
+      "default": "preserve",
+      "x-example": {
+        "extension": "md",
+        "input": [
+          "A paragraph that is longer than the print width, which is eighty characters by default.",
+          "This line",
+          "is broken early."
+        ]
+      }
     },
     "endOfLine": {
-      "description": "Which end of line characters to apply.",
+      "description": "The kind of line ending. Defaults to `newLineKind`.",
       "type": "string",
       "oneOf": [
         {
           "const": "lf",
-          "description": "Line Feed only (\\n), common on Linux and macOS as well as inside git repos"
+          "description": "Line feed (`\\n`), common on Linux and macOS as well as inside git repos."
         },
         {
           "const": "crlf",
-          "description": "Carriage Return + Line Feed characters (\\r\\n), common on Windows"
+          "description": "Carriage return and line feed (`\\r\\n`), common on Windows."
         },
         {
           "const": "cr",
-          "description": "Carriage Return character only (\\r), used very rarely"
+          "description": "Carriage return (`\\r`), used very rarely."
         },
         {
           "const": "auto",
-          "description": "Maintain existing\n(mixed values within one file are normalised by looking at what's used after the first line)"
+          "description": "The line ending that the file has first."
         }
       ],
       "default": "lf"
     },
     "printWidth": {
-      "description": "The line length where Prettier will try wrap.",
-      "type": "number",
+      "description": "The line width that the formatter wraps at. Defaults to `lineWidth`.",
+      "type": "integer",
+      "minimum": 0,
       "default": 80
     },
     "tabWidth": {
-      "description": "Number of spaces per indentation level.",
-      "type": "number",
+      "description": "The number of spaces per level of indentation. Defaults to `indentWidth`.",
+      "type": "integer",
+      "minimum": 0,
       "default": 2
     },
     "useTabs": {
-      "description": "Indent with tabs instead of spaces.",
+      "description": "Whether to indent with tabs instead of spaces. Defaults to the `useTabs` of the global configuration.",
       "type": "boolean",
-      "default": false
+      "default": false,
+      "x-example": {
+        "input": [
+          "function run() {",
+          "  start();",
+          "}"
+        ]
+      }
     },
     "embeddedLanguageFormatting": {
-      "description": "Control how Prettier formats quoted code embedded in the file.",
+      "description": "Whether to format code that is embedded in a file. Example: CSS in a template literal of JavaScript.",
       "type": "string",
       "oneOf": [
         {
           "const": "auto",
-          "description": "Format embedded code if Prettier can automatically identify it."
+          "description": "Format embedded code if it can be identified."
         },
         {
           "const": "off",
-          "description": "Never automatically format embedded code."
+          "description": "Never format embedded code."
         }
       ],
-      "default": "auto"
+      "default": "auto",
+      "x-example": {
+        "input": [
+          "const button = css`color:white;background:blue`;"
+        ]
+      }
     }
   },
   "patternProperties": {
