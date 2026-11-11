@@ -1,7 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Library</OutputType>
+    <!-- the libraries and the runtime of the module are those of NativeAOT-LLVM (IlcLlvmVersion), which are .NET 10's
+         until it has a version for .NET 11, so the C# is compiled against .NET 10's as well. The .NET 11 SDK compiles
+         it, as nts writes C# 15 -->
     <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>15.0</LangVersion>
     <AssemblyName>dprint-plugin-prettier</AssemblyName>
     <!-- the version of the plugin, which dprint is told -->
     <Version>0.72.0</Version>

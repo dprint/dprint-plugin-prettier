@@ -61,7 +61,7 @@ The source is in these folders:
 - `src` - the entry point that dprint calls (`main.ts`), Prettier's own plugins (`builtin-plugins.ts`) and those that it formats with (`plugins.ts`), with the libraries that are compiled along with Prettier (`vendor`, `shims`), what Prettier's `*.evaluate.js` files give (`generated`, made by `node scripts/generate.mjs`) and Prettier's TypeScript parser as npm has it (`prettier-plugins`).
 - `wasm` - the C# project that compiles what nts makes of `src/main.ts` to the Wasm module, with the functions that dprint calls. Flow's parser is a Wasm module in the flow-parser package, which [wasm2c](https://github.com/WebAssembly/wabt) makes C of to compile into the plugin (`wasm/flow`).
 
-To build, install Deno, Node.js, the .NET 10 SDK, the [WASI SDK](https://github.com/WebAssembly/wasi-sdk), [Binaryen](https://github.com/WebAssembly/binaryen) and [WABT](https://github.com/WebAssembly/wabt). Then:
+To build, install Deno, Node.js, the .NET 11 SDK, the [WASI SDK](https://github.com/WebAssembly/wasi-sdk), [Binaryen](https://github.com/WebAssembly/binaryen) and [WABT](https://github.com/WebAssembly/wabt). Then:
 
 ```sh
 deno task setup

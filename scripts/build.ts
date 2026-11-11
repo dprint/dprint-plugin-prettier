@@ -1,7 +1,7 @@
 // Builds the plugin into target/plugin.wasm: nts compiles src/main.ts to C#, which NativeAOT-LLVM compiles
 // to a Wasm module that is then given a larger shadow stack and made smaller.
 //
-// Needs Deno, Node.js, the .NET 10 SDK, and the WASI SDK and Binaryen, whose folders are given by the WASI_SDK_PATH
+// Needs Deno, Node.js, the .NET 11 SDK, and the WASI SDK and Binaryen, whose folders are given by the WASI_SDK_PATH
 // and BINARYEN environment variables (BINARYEN may be left out when wasm-opt is on the path).
 //
 // nts is the bundle of it in nts/. When nts is checked out beside this repository (../nts), it is bundled from there

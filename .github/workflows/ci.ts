@@ -42,7 +42,7 @@ workflow({
       { uses: "denoland/setup-deno@v2" },
       {
         uses: "actions/setup-dotnet@v5",
-        with: { "dotnet-version": "10.0.x" },
+        with: { "dotnet-version": "11.0.x" },
       },
       {
         uses: "actions/setup-node@v6",
