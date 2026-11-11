@@ -1,0 +1,34 @@
+// @nts-check
+//#region src/ast-transform/transforms/transform-object-expression.ts
+const visitLiteralMap = /** @returns {import("../../source.js").NGNode} */ (/** @type {import("@angular/compiler").LiteralMap} */ node, /** @type {import("../node-transformer.js").NodeTransformer} */ transformer) => {
+	const { keys, values } = node;
+	const createChild = /** @returns {import("../../source.js").NGNode} */ (/** @type {import("../../source.js").NGNode} */ properties, /** @type {any} */ location = node) => transformer.create(properties, location, [node, ...transformer.ancestors]);
+	return {
+		type: "ObjectExpression",
+		properties: keys.map((/** @type {import("@angular/compiler").LiteralMapKey} */ keyNode, /** @type {number} */ index) => {
+			const valueNode = values[index];
+			const range = [keyNode.sourceSpan.start, valueNode.sourceSpan.end];
+			if (keyNode.kind === "spread") return createChild({
+				type: "SpreadElement",
+				argument: transformer.transformChild(valueNode)
+			}, range);
+			const shorthand = Boolean(keyNode.isShorthandInitialized);
+			return createChild({
+				type: "ObjectProperty",
+				key: createChild(keyNode.quoted ? {
+					type: "StringLiteral",
+					value: keyNode.key
+				} : {
+					type: "Identifier",
+					name: keyNode.key
+				}, keyNode.sourceSpan),
+				value: transformer.transformChild(valueNode),
+				shorthand,
+				computed: false,
+				method: false
+			}, range);
+		})
+	};
+};
+//#endregion
+export { visitLiteralMap };

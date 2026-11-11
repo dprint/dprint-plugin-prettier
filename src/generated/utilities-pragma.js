@@ -1,0 +1,12 @@
+export const FORMAT_IGNORE_PRAGMAS = ["noformat", "noprettier"];
+export const FORMAT_PRAGMAS = ["format", "prettier"];
+export const FORMAT_PRAGMA_TO_INSERT = "format";
+export const GRAPHQL_HAS_IGNORE_PRAGMA_REGEXP = /^\s*#[^\S\n]*@(?:noformat|noprettier)\s*(?:\n|$)/;
+export const GRAPHQL_HAS_PRAGMA_REGEXP = /^\s*#[^\S\n]*@(?:format|prettier)\s*(?:\n|$)/;
+export const HTML_HAS_IGNORE_PRAGMA_REGEXP = /^\s*<!--\s*@(?:noformat|noprettier)\s*-->/;
+export const HTML_HAS_PRAGMA_REGEXP = /^\s*<!--\s*@(?:format|prettier)\s*-->/;
+export const MARKDOWN_HAS_IGNORE_PRAGMA_REGEXP = /<!--\s*@(?:noformat|noprettier)\s*-->|\{\s*\/\*\s*@(?:noformat|noprettier)\s*\*\/\s*\}|<!--.*\r?\n[\s\S]*(^|\n)[^\S\n]*@(?:noformat|noprettier)[^\S\n]*($|\n)[\s\S]*\n.*-->/m;
+export const MARKDOWN_HAS_PRAGMA_REGEXP = /<!--\s*@(?:format|prettier)\s*-->|\{\s*\/\*\s*@(?:format|prettier)\s*\*\/\s*\}|<!--.*\r?\n[\s\S]*(^|\n)[^\S\n]*@(?:format|prettier)[^\S\n]*($|\n)[\s\S]*\n.*-->/m;
+export const YAML_HAS_IGNORE_PRAGMA_REGEXP = /^\s*#[^\S\n]*@(?:noformat|noprettier)\s*?(?:\n|$)/;
+export const YAML_HAS_PRAGMA_REGEXP = /^\s*#[^\S\n]*@(?:format|prettier)\s*?(?:\n|$)/;
+export const YAML_IS_PRAGMA_REGEXP = /^\s*@(?:format|prettier)\s*$/;

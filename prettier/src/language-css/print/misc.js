@@ -1,0 +1,92 @@
+// @nts-check
+/** @import { CssOptions } from "../utilities/index.js" */
+import printNumber from "../../utilities/print-number.js";
+import printString from "../../utilities/print-string.js";
+import CSS_UNITS from "./css-units.evaluate.js";
+
+/** @returns {string} */ function printUnit(/** @type {string} */ unit) {
+  const lowercased = unit.toLowerCase();
+  return CSS_UNITS.has(lowercased) ? CSS_UNITS.get(lowercased) : unit;
+}
+
+const STRING_REGEX = /(["'])(?:(?!\1)[^\\]|\\.)*\1/gs;
+const NUMBER_REGEX = /(?:\d*\.\d+|\d+\.?)(?:e[+-]?\d+)?/gi;
+const STANDARD_UNIT_REGEX = /[a-z]+/gi;
+const WORD_PART_REGEX = /[$@]?[_a-z\u0080-\uFFFF][\w\u0080-\uFFFF-]*/gi;
+/** @type {RegExp} */ const ADJUST_NUMBERS_REGEX = new RegExp(
+  STRING_REGEX.source +
+    "|" +
+    // eslint-disable-next-line regexp/no-misleading-capturing-group
+    `(${WORD_PART_REGEX.source})?` +
+    `(${NUMBER_REGEX.source})` +
+    `(${STANDARD_UNIT_REGEX.source})?`,
+  "gi",
+);
+
+/** @returns {string} */ function adjustStrings(/** @type {string} */ value, /** @type {CssOptions} */ options) {
+  return value.replaceAll(STRING_REGEX, /** @returns {string} */ (match) => printString(match, options));
+}
+
+/** @returns {string} */ function quoteAttributeValue(/** @type {string} */ value, /** @type {CssOptions} */ options) {
+  /** @type {string} */ const quote = options.singleQuote ? "'" : '"';
+
+  // The selector parser currently only understand `i` flag,
+  // but not `s`, `S`, and `I`
+  // To support future flags, we simply check if it's an alphabet letter
+  // https://github.com/prettier/prettier/pull/17865#discussion_r2332698101
+  let flag = "";
+  const match = value.match(/^(?<value>.+?)\s+(?<flag>[a-z])$/i);
+  if (match) {
+    ({ value, flag } = match.groups);
+  }
+
+  return (
+    (value.includes('"') || value.includes("'")
+      ? value
+      : quote + value + quote) + (flag ? ` ${flag}` : "")
+  );
+}
+
+/** @returns {string} */ function adjustNumbers(/** @type {string} */ value) {
+  return value.replaceAll(
+    ADJUST_NUMBERS_REGEX,
+    /** @returns {string} */ (/** @type {string} */ match, /** @type {string | undefined} */ quote, /** @type {string | undefined} */ wordPart, /** @type {string | undefined} */ number, /** @type {string | undefined} */ unit) => {
+      if (!wordPart && number) {
+        unit ??= "";
+        unit = unit.toLowerCase();
+
+        if (
+          !unit ||
+          // `2n + 1`
+          unit === "n" ||
+          CSS_UNITS.has(unit)
+        ) {
+          return printCssNumber(number) + (unit ? printUnit(unit) : "");
+        }
+      }
+
+      return match;
+    },
+  );
+}
+
+/** @returns {string} */ function printCssNumber(/** @type {string} */ rawNumber) {
+  return (
+    printNumber(rawNumber)
+      // Remove trailing `.0`.
+      .replace(/\.0(?=$|e)/, "")
+  );
+}
+
+/** @returns {boolean} */ function shouldPrintTrailingComma(/** @type {CssOptions} */ options) {
+  return options.trailingComma === "es5" || options.trailingComma === "all";
+}
+
+export {
+  adjustNumbers,
+  adjustStrings,
+  printCssNumber,
+  printUnit,
+  quoteAttributeValue,
+  shouldPrintTrailingComma,
+};

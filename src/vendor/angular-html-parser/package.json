@@ -1,0 +1,33 @@
+{
+  "name": "angular-html-parser",
+  "version": "10.12.0",
+  "description": "A HTML parser extracted from Angular with some modifications",
+  "repository": "https://github.com/prettier/angular-html-parser",
+  "homepage": "https://github.com/prettier/angular-html-parser/blob/HEAD/packages/angular-html-parser#readme",
+  "author": {
+    "name": "Ika",
+    "email": "ikatyang@gmail.com",
+    "url": "https://github.com/ikatyang"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "default": "./dist/index.mjs"
+    },
+    "./*": "./*"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">= 14"
+  },
+  "files": [
+    "dist",
+    "ThirdPartyNoticeText.txt"
+  ],
+  "type": "module",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "sideEffects": false
+}

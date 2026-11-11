@@ -1,0 +1,30 @@
+{
+  "name": "angular-estree-parser",
+  "version": "15.5.0",
+  "description": "A parser that converts Angular source code into an ESTree-compatible form",
+  "keywords": [],
+  "repository": "https://github.com/prettier/angular-estree-parser",
+  "homepage": "https://github.com/prettier/angular-estree-parser#readme",
+  "author": {
+    "name": "Ika",
+    "email": "ikatyang@gmail.com",
+    "url": "https://github.com/ikatyang"
+  },
+  "exports": "./dist/index.js",
+  "license": "MIT",
+  "peerDependencies": {
+    "@angular/compiler": ">=21"
+  },
+  "engines": {
+    "node": ">= 20"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  }
+}

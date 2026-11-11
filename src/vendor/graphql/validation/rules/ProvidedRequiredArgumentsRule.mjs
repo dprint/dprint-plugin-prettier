@@ -1,0 +1,84 @@
+import { inspect } from "../../jsutils/inspect.mjs";
+import { GraphQLError } from "../../error/GraphQLError.mjs";
+import { Kind } from "../../language/kinds.mjs";
+import { print } from "../../language/printer.mjs";
+import { isRequiredArgument, isType } from "../../type/definition.mjs";
+import { specifiedDirectives } from "../../type/directives.mjs";
+import { typeFromAST } from "../../utilities/typeFromAST.mjs";
+export function ProvidedRequiredArgumentsRule(context) {
+    return {
+        ...ProvidedRequiredArgumentsOnDirectivesRule(context),
+        Field: {
+            leave(fieldNode) {
+                const fieldDef = context.getFieldDef();
+                if (!fieldDef) {
+                    return false;
+                }
+                const providedArgs = new Set(fieldNode.arguments?.map((arg) => arg.name.value));
+                for (const argDef of fieldDef.args) {
+                    if (!providedArgs.has(argDef.name) && isRequiredArgument(argDef)) {
+                        context.reportError(new GraphQLError(`Argument "${argDef}" of type "${argDef.type}" is required, but it was not provided.`, { nodes: fieldNode }));
+                    }
+                }
+            },
+        },
+        FragmentSpread: {
+            leave(spreadNode) {
+                const fragmentSignature = context.getFragmentSignature();
+                if (!fragmentSignature) {
+                    return false;
+                }
+                const providedArgs = new Set(spreadNode.arguments?.map((arg) => arg.name.value));
+                for (const [varName, variableDefinition,] of fragmentSignature.variableDefinitions) {
+                    if (!providedArgs.has(varName) &&
+                        isRequiredArgumentNode(variableDefinition)) {
+                        const type = typeFromAST(context.getSchema(), variableDefinition.type);
+                        const argTypeStr = inspect(type);
+                        context.reportError(new GraphQLError(`Fragment "${spreadNode.name.value}" argument "${varName}" of type "${argTypeStr}" is required, but it was not provided.`, { nodes: spreadNode }));
+                    }
+                }
+            },
+        },
+    };
+}
+export function ProvidedRequiredArgumentsOnDirectivesRule(context) {
+    const requiredArgsMap = new Map();
+    const schema = context.getSchema();
+    const definedDirectives = schema?.getDirectives() ?? specifiedDirectives;
+    for (const directive of definedDirectives) {
+        requiredArgsMap.set(directive.name, new Map(directive.args.filter(isRequiredArgument).map((arg) => [arg.name, arg])));
+    }
+    const astDefinitions = context.getDocument().definitions;
+    for (const def of astDefinitions) {
+        if (def.kind === Kind.DIRECTIVE_DEFINITION) {
+            const argNodes = def.arguments ?? [];
+            requiredArgsMap.set(def.name.value, new Map(argNodes
+                .filter(isRequiredArgumentNode)
+                .map((arg) => [arg.name.value, arg])));
+        }
+    }
+    return {
+        Directive: {
+            leave(directiveNode) {
+                const directiveName = directiveNode.name.value;
+                const requiredArgs = requiredArgsMap.get(directiveName);
+                if (requiredArgs != null) {
+                    const argNodes = directiveNode.arguments ?? [];
+                    const argNodeMap = new Set(argNodes.map((arg) => arg.name.value));
+                    for (const [argName, argDef] of requiredArgs.entries()) {
+                        if (!argNodeMap.has(argName)) {
+                            const argType = isType(argDef.type)
+                                ? inspect(argDef.type)
+                                : print(argDef.type);
+                            context.reportError(new GraphQLError(`Argument "@${directiveName}(${argName}:)" of type "${argType}" is required, but it was not provided.`, { nodes: directiveNode }));
+                        }
+                    }
+                }
+            },
+        },
+    };
+}
+function isRequiredArgumentNode(arg) {
+    return arg.type.kind === Kind.NON_NULL_TYPE && arg.defaultValue == null;
+}
+//# sourceMappingURL=ProvidedRequiredArgumentsRule.js.map

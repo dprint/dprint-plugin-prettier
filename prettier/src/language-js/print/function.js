@@ -1,0 +1,228 @@
+// @nts-check
+import * as assert from "#universal/assert";
+import { group } from "../../document/index.js";
+import { getCallArguments } from "../utilities/call-arguments.js";
+import { CommentCheckFlags, hasComment } from "../utilities/comments.js";
+import { getFunctionParameters } from "../utilities/function-parameters.js";
+import { isMethod } from "../utilities/is-method.js";
+import { isCallExpression } from "../utilities/node-types.js";
+import {
+  printFunctionParameters,
+  shouldBreakFunctionParameters,
+  shouldGroupFunctionParameters,
+} from "./function-parameters.js";
+import { printKey } from "./key.js";
+import { printDeclareToken, printSemicolon } from "./miscellaneous.js";
+import { printTypeAnnotationProperty } from "./type-annotation.js";
+
+/**
+ * @import AstPath from "../../common/ast-path.js"
+ * @import {Doc} from "../../document/index.js"
+ */
+
+const isMethodValue = /** @returns {boolean} */ (/** @type {AstPath & { node: import("../types/estree.js").Node, parent: import("../types/estree.js").Node }} */ { node, key, parent }) =>
+  key === "value" &&
+  node.type === "FunctionExpression" &&
+  (parent.type === "ObjectMethod" ||
+    parent.type === "ClassMethod" ||
+    parent.type === "ClassPrivateMethod" ||
+    parent.type === "MethodDefinition" ||
+    parent.type === "TSAbstractMethodDefinition" ||
+    parent.type === "TSDeclareMethod" ||
+    (parent.type === "Property" && isMethod(parent)));
+
+/*
+- `FunctionDeclaration`
+- `FunctionExpression`
+- `HookDeclaration` (Flow)
+- `TSDeclareFunction`(TypeScript)
+*/
+function printFunction(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print, args) {
+  if (isMethodValue(path)) {
+    return printMethodValue(path, options, print);
+  }
+
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
+
+  let shouldExpandParameters = false;
+  if (node.type === "FunctionExpression" && args?.expandLastArg) {
+    /** @type {{ parent: import("../types/estree.js").Node }} */ const { parent } = path;
+    if (
+      isCallExpression(parent) &&
+      (getCallArguments(parent).length > 1 ||
+        getFunctionParameters(node).every(
+          /** @returns {boolean} */ (param) => param.type === "Identifier" && !param.typeAnnotation,
+        ))
+    ) {
+      shouldExpandParameters = true;
+    }
+  }
+
+  const parametersDoc = printFunctionParameters(
+    path,
+    options,
+    print,
+    shouldExpandParameters,
+  );
+  const returnTypeDoc = printReturnType(path, print);
+  /** @type {boolean} */ const shouldGroupParameters = shouldGroupFunctionParameters(
+    node,
+    returnTypeDoc,
+  );
+
+  const isFlowHookDeclaration = node.type === "HookDeclaration";
+  const keyword = isFlowHookDeclaration ? "hook" : "function";
+
+  return [
+    printDeclareToken(path),
+    node.async ? "async " : "",
+    keyword,
+    node.generator ? "*" : "",
+    " ",
+    node.id ? print("id") : "",
+    print("typeParameters"),
+    group([
+      shouldGroupParameters ? group(parametersDoc) : parametersDoc,
+      returnTypeDoc,
+    ]),
+    node.body ? " " : "",
+    print("body"),
+    node.declare || !node.body ? printSemicolon(options) : "",
+  ];
+}
+
+/*
+- `FunctionDeclaration`
+- `FunctionExpression`
+- `TSDeclareFunction`(TypeScript)
+- `ObjectMethod`
+- `Property`
+- `ObjectProperty`
+- `ClassMethod`
+- `ClassPrivateMethod`
+- `MethodDefinition
+- `TSAbstractMethodDefinition` (TypeScript)
+- `TSDeclareMethod` (TypeScript)
+*/
+/** @returns {any[]} */ function printMethod(/** @type {AstPath} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
+  const { kind } = node;
+  const value = node.value || node;
+  const parts = [];
+
+  if (!kind || kind === "init" || kind === "method" || kind === "constructor") {
+    if (value.async) {
+      parts.push("async ");
+    }
+  } else {
+    assert.ok(kind === "get" || kind === "set");
+
+    parts.push(kind, " ");
+  }
+
+  // A `getter`/`setter` can't be a generator, but it's recoverable
+  if (value.generator) {
+    parts.push("*");
+  }
+
+  parts.push(
+    printKey(path, options, print),
+    node.optional ? "?" : "",
+    node === value ? printMethodValue(path, options, print) : print("value"),
+  );
+
+  return parts;
+}
+
+/*
+- `ObjectMethod`
+- `Property`
+- `ObjectProperty`
+- `ClassMethod`
+- `ClassPrivateMethod`
+- `MethodDefinition
+- `TSAbstractMethodDefinition` (TypeScript)
+- `TSDeclareMethod` (TypeScript)
+- `TSEmptyBodyFunctionExpression` (TypeScript)
+*/
+/** @returns {any[]} */ function printMethodValue(/** @type {AstPath} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
+  const parametersDoc = printFunctionParameters(path, options, print);
+  const returnTypeDoc = printReturnType(path, print);
+  /** @type {boolean} */ const shouldBreakParameters = shouldBreakFunctionParameters(node);
+  /** @type {boolean} */ const shouldGroupParameters = shouldGroupFunctionParameters(
+    node,
+    returnTypeDoc,
+  );
+  const parts = [
+    print("typeParameters"),
+    group([
+      shouldBreakParameters
+        ? group(parametersDoc, { shouldBreak: true })
+        : shouldGroupParameters
+          ? group(parametersDoc)
+          : parametersDoc,
+      returnTypeDoc,
+    ]),
+  ];
+
+  if (node.body) {
+    parts.push(" ", print("body"));
+  } else {
+    parts.push(printSemicolon(options));
+  }
+
+  return parts;
+}
+
+/** @returns {boolean} */ function canPrintParamsWithoutParens(/** @type {import("../types/estree.js").Node} */ node) {
+  const parameters = getFunctionParameters(node);
+  return (
+    parameters.length === 1 &&
+    !node.typeParameters &&
+    !hasComment(node, CommentCheckFlags.Dangling) &&
+    parameters[0].type === "Identifier" &&
+    !parameters[0].typeAnnotation &&
+    !hasComment(parameters[0]) &&
+    !parameters[0].optional &&
+    !node.predicate &&
+    !node.returnType
+  );
+}
+
+/** @returns {boolean} */ function shouldPrintParamsWithoutParens(/** @type {AstPath} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options) {
+  if (options.arrowParens === "always") {
+    return false;
+  }
+
+  if (options.arrowParens === "avoid") {
+    /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
+    return canPrintParamsWithoutParens(node);
+  }
+
+  // Fallback default; should be unreachable
+  /* c8 ignore next */
+  return false;
+}
+
+/** @returns {Doc} */
+function printReturnType(/** @type {AstPath} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
+  const returnType = printTypeAnnotationProperty(path, print, "returnType");
+
+  const parts = [returnType];
+
+  if (node.predicate) {
+    parts.push(print("predicate"));
+  }
+
+  return parts;
+}
+
+export {
+  printFunction,
+  printMethod,
+  printMethodValue,
+  printReturnType,
+  shouldPrintParamsWithoutParens,
+};

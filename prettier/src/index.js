@@ -1,0 +1,144 @@
+/*
+The following are bundled here since they are used in API too
+- fast-glob
+- diff.createTwoFilesPatch
+- leven.closestMatch
+- picocolors
+*/
+import { createTwoFilesPatch } from "diff";
+import fastGlob from "fast-glob";
+import { closestMatch as closetLevenshteinMatch } from "leven";
+import picocolors from "picocolors";
+import * as vnopts from "vnopts";
+import * as errors from "./common/errors.js";
+import { mockable } from "./common/mockable.js";
+import {
+  clearCache as clearConfigCache,
+  resolveConfig,
+  resolveConfigFile,
+} from "./config/resolve-config.js";
+import * as core from "./main/core.js";
+import { formatOptionsHiddenDefaults } from "./main/normalize-format-options.js";
+import normalizeOptions from "./main/normalize-options.js";
+import * as optionCategories from "./main/option-categories.js";
+import {
+  clearCache as clearPluginCache,
+  loadBuiltinPlugins,
+  loadPlugins,
+} from "./main/plugins/index.js";
+import {
+  getSupportInfo as getSupportInfoWithoutPlugins,
+  normalizeOptionSettings,
+} from "./main/support.js";
+import createMockable from "./utilities/create-mockable.js";
+import { getOrInsertComputed } from "./utilities/get-or-insert.js";
+import { createIsIgnoredFunction } from "./utilities/ignore.js";
+import inferParserWithoutPlugins from "./utilities/infer-parser.js";
+import omit from "./utilities/object-omit.js";
+
+/**
+ * @param {*} fn
+ * @param {number} [optionsArgumentIndex]
+ * @returns {*}
+ */
+function withPlugins(
+  fn,
+  optionsArgumentIndex = 1, // Usually `options` is the 2nd argument
+) {
+  return async (...args) => {
+    const options = args[optionsArgumentIndex] ?? {};
+    const { plugins = [] } = options;
+
+    args[optionsArgumentIndex] = {
+      ...options,
+      plugins: (
+        await Promise.all([
+          loadBuiltinPlugins(),
+          // TODO: standalone version allow `plugins` to be `prettierPlugins` which is an object, should allow that too
+          loadPlugins(plugins),
+        ])
+      ).flat(),
+    };
+
+    return fn(...args);
+  };
+}
+
+const formatWithCursor = withPlugins(core.formatWithCursor);
+
+async function format(text, options) {
+  const { formatted } = await formatWithCursor(text, {
+    ...options,
+    cursorOffset: -1,
+  });
+  return formatted;
+}
+
+async function check(text, options) {
+  return (await format(text, options)) === text;
+}
+
+// eslint-disable-next-line require-await
+async function clearCache() {
+  clearConfigCache();
+  clearPluginCache();
+}
+
+/** @type {typeof getSupportInfoWithoutPlugins} */
+const getSupportInfo = withPlugins(getSupportInfoWithoutPlugins, 0);
+
+const inferParser = withPlugins((file, options) =>
+  inferParserWithoutPlugins(options, { physicalFile: file }),
+);
+
+// Internal shared with CLI
+const sharedWithCli = {
+  errors,
+  optionCategories,
+  createIsIgnoredFunction,
+  formatOptionsHiddenDefaults,
+  normalizeOptions,
+  getSupportInfoWithoutPlugins,
+  normalizeOptionSettings,
+  inferParser: (file, options) =>
+    Promise.resolve(options?.parser ?? inferParser(file, options)),
+  vnopts: {
+    ChoiceSchema: vnopts.ChoiceSchema,
+    apiDescriptor: vnopts.apiDescriptor,
+  },
+  fastGlob,
+  createTwoFilesPatch,
+  picocolors,
+  closetLevenshteinMatch,
+  utilities: {
+    omit,
+    createMockable,
+    getOrInsertComputed,
+  },
+};
+
+const debugApis = {
+  parse: withPlugins(core.parse),
+  formatAST: withPlugins(core.formatAst),
+  formatDoc: withPlugins(core.formatDoc),
+  printToDoc: withPlugins(core.printToDoc),
+  printDocToString: withPlugins(core.printDocToString),
+  // Exposed for tests
+  mockable,
+};
+
+export {
+  debugApis as __debug,
+  sharedWithCli as __internal,
+  check,
+  clearCache as clearConfigCache,
+  format,
+  formatWithCursor,
+  getSupportInfo,
+  resolveConfig,
+  resolveConfigFile,
+};
+export { default as getFileInfo } from "./common/get-file-info.js";
+export * as doc from "./document/public.js";
+export { default as version } from "./main/version.evaluate.js";
+export * as util from "./utilities/public.js";

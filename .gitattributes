@@ -12,3 +12,6 @@
 
 *.jpg binary
 *.png binary
+
+# the bundle of nts that the plugin is compiled with (scripts/build.ts)
+nts/** linguist-generated=true

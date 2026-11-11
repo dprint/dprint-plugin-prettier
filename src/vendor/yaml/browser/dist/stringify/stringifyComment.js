@@ -1,0 +1,20 @@
+/**
+ * Stringifies a comment.
+ *
+ * Empty comment lines are left empty,
+ * lines consisting of a single space are replaced by `#`,
+ * and all other lines are prefixed with a `#`.
+ */
+const stringifyComment = /** @returns {string} */ (/** @type {string} */ str) => str.replace(/^(?!$)(?: $)?/gm, '#');
+/** @returns {string} */ function indentComment(/** @type {string} */ comment, /** @type {string} */ indent) {
+    if (/^\n+$/.test(comment))
+        return comment.substring(1);
+    return indent ? comment.replace(/^(?! *$)/gm, indent) : comment;
+}
+const lineComment = /** @returns {string} */ (/** @type {string} */ str, /** @type {string} */ indent, /** @type {string} */ comment) => str.endsWith('\n')
+    ? indentComment(comment, indent)
+    : comment.includes('\n')
+        ? '\n' + indentComment(comment, indent)
+        : (str.endsWith(' ') ? '' : ' ') + comment;
+
+export { indentComment, lineComment, stringifyComment };

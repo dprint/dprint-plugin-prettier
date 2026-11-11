@@ -1,0 +1,190 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.BREAK = void 0;
+exports.visit = visit;
+exports.visitInParallel = visitInParallel;
+exports.getEnterLeaveForKind = getEnterLeaveForKind;
+const devAssert_ts_1 = require("../jsutils/devAssert.js");
+const inspect_ts_1 = require("../jsutils/inspect.js");
+const ast_ts_1 = require("./ast.js");
+const kinds_ts_1 = require("./kinds.js");
+exports.BREAK = Object.freeze({});
+function visit(root, visitor, visitorKeys = ast_ts_1.QueryDocumentKeys) {
+    const enterLeaveMap = new Map();
+    for (const kind of Object.values(kinds_ts_1.Kind)) {
+        enterLeaveMap.set(kind, getEnterLeaveForKind(visitor, kind));
+    }
+    let stack = undefined;
+    let inArray = Array.isArray(root);
+    let keys = [root];
+    let index = -1;
+    let edits = [];
+    let node = root;
+    let key = undefined;
+    let parent = undefined;
+    const path = [];
+    const ancestors = [];
+    do {
+        index++;
+        const isLeaving = index === keys.length;
+        const isEdited = isLeaving && edits.length !== 0;
+        if (isLeaving) {
+            key = ancestors.length === 0 ? undefined : path[path.length - 1];
+            node = parent;
+            parent = ancestors.pop();
+            if (isEdited) {
+                if (inArray) {
+                    node = node.slice();
+                    let editOffset = 0;
+                    for (const [editKey, editValue] of edits) {
+                        const arrayKey = editKey - editOffset;
+                        if (editValue === null) {
+                            node.splice(arrayKey, 1);
+                            editOffset++;
+                        }
+                        else {
+                            node[arrayKey] = editValue;
+                        }
+                    }
+                }
+                else {
+                    node = { ...node };
+                    for (const [editKey, editValue] of edits) {
+                        node[editKey] = editValue;
+                    }
+                }
+            }
+            index = stack.index;
+            keys = stack.keys;
+            edits = stack.edits;
+            inArray = stack.inArray;
+            stack = stack.prev;
+        }
+        else if (parent != null) {
+            key = inArray ? index : keys[index];
+            node = parent[key];
+            if (node === null || node === undefined) {
+                continue;
+            }
+            path.push(key);
+        }
+        let result;
+        if (!Array.isArray(node)) {
+            if (!((0, ast_ts_1.isNode)(node)))
+                (0, devAssert_ts_1.devAssert)(false, `Invalid AST Node: ${(0, inspect_ts_1.inspect)(node)}.`);
+            const visitFn = isLeaving
+                ? enterLeaveMap.get(node.kind)?.leave
+                : enterLeaveMap.get(node.kind)?.enter;
+            result = visitFn?.call(visitor, node, key, parent, path, ancestors);
+            if (result === exports.BREAK) {
+                break;
+            }
+            if (result === false) {
+                if (!isLeaving) {
+                    path.pop();
+                    continue;
+                }
+            }
+            else if (result !== undefined) {
+                edits.push([key, result]);
+                if (!isLeaving) {
+                    if ((0, ast_ts_1.isNode)(result)) {
+                        node = result;
+                    }
+                    else {
+                        path.pop();
+                        continue;
+                    }
+                }
+            }
+        }
+        if (result === undefined && isEdited) {
+            edits.push([key, node]);
+        }
+        if (isLeaving) {
+            path.pop();
+        }
+        else {
+            stack = { inArray, index, keys, edits, prev: stack };
+            inArray = Array.isArray(node);
+            keys = inArray ? node : (visitorKeys[node.kind] ?? []);
+            index = -1;
+            edits = [];
+            if (parent != null) {
+                ancestors.push(parent);
+            }
+            parent = node;
+        }
+    } while (stack !== undefined);
+    if (edits.length !== 0) {
+        return edits.at(-1)[1];
+    }
+    return root;
+}
+function visitInParallel(visitors) {
+    const skipping = new Array(visitors.length).fill(null);
+    const mergedVisitor = Object.create(null);
+    for (const kind of Object.values(kinds_ts_1.Kind)) {
+        let hasVisitor = false;
+        const enterList = new Array(visitors.length).fill(undefined);
+        const leaveList = new Array(visitors.length).fill(undefined);
+        for (let i = 0; i < visitors.length; ++i) {
+            const { enter, leave } = getEnterLeaveForKind(visitors[i], kind);
+            hasVisitor ||= enter != null || leave != null;
+            enterList[i] = enter;
+            leaveList[i] = leave;
+        }
+        if (!hasVisitor) {
+            continue;
+        }
+        const mergedEnterLeave = {
+            enter(...args) {
+                const node = args[0];
+                for (let i = 0; i < visitors.length; i++) {
+                    if (skipping[i] === null) {
+                        const result = enterList[i]?.apply(visitors[i], args);
+                        if (result === false) {
+                            skipping[i] = node;
+                        }
+                        else if (result === exports.BREAK) {
+                            skipping[i] = exports.BREAK;
+                        }
+                        else if (result !== undefined) {
+                            return result;
+                        }
+                    }
+                }
+            },
+            leave(...args) {
+                const node = args[0];
+                for (let i = 0; i < visitors.length; i++) {
+                    if (skipping[i] === null) {
+                        const result = leaveList[i]?.apply(visitors[i], args);
+                        if (result === exports.BREAK) {
+                            skipping[i] = exports.BREAK;
+                        }
+                        else if (result !== undefined && result !== false) {
+                            return result;
+                        }
+                    }
+                    else if (skipping[i] === node) {
+                        skipping[i] = null;
+                    }
+                }
+            },
+        };
+        mergedVisitor[kind] = mergedEnterLeave;
+    }
+    return mergedVisitor;
+}
+function getEnterLeaveForKind(visitor, kind) {
+    const kindVisitor = visitor[kind];
+    if (typeof kindVisitor === 'object') {
+        return kindVisitor;
+    }
+    else if (typeof kindVisitor === 'function') {
+        return { enter: kindVisitor, leave: undefined };
+    }
+    return { enter: visitor.enter, leave: visitor.leave };
+}
+//# sourceMappingURL=visitor.js.map

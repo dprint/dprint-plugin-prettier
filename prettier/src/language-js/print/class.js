@@ -1,0 +1,368 @@
+// @nts-check
+/** @import AstPath from "../../common/ast-path.js" */
+import {
+  group,
+  hardline,
+  ifBreak,
+  indent,
+  join,
+  line,
+  softline,
+} from "../../document/index.js";
+import {
+  printComments,
+  printCommentsSeparately,
+  printDanglingComments,
+} from "../../main/comments/print.js";
+import createGroupIdMapper from "../../utilities/create-group-id-mapper.js";
+import { getOrInsertComputed } from "../../utilities/get-or-insert.js";
+import isNonEmptyArray from "../../utilities/is-non-empty-array.js";
+import needsParentheses from "../parentheses/needs-parentheses.js";
+import { isNonEmptyClassBody } from "../utilities/class-members.js";
+import { CommentCheckFlags, hasComment } from "../utilities/comments.js";
+import { createTypeCheckFunction } from "../utilities/create-type-check-function.js";
+import { isMemberExpression } from "../utilities/node-types.js";
+import { stripChainElementWrappers } from "../utilities/strip-chain-element-wrappers.js";
+import { printAssignment } from "./assignment.js";
+import { printClassMemberDecorators, printDecorators } from "./decorators.js";
+import { printMethod } from "./function.js";
+import { printKey } from "./key.js";
+import {
+  printAbstractToken,
+  printDeclareToken,
+  printDefiniteToken,
+  printOptionalToken,
+  printSemicolon,
+  printTypeScriptAccessibilityToken,
+} from "./miscellaneous.js";
+import { printTypeAnnotationProperty } from "./type-annotation.js";
+
+/**
+ * @import {Doc} from "../../document/index.js"
+ */
+
+const getHeritageGroupId = createGroupIdMapper("heritageGroup");
+
+const isInterface = createTypeCheckFunction([
+  "TSInterfaceDeclaration",
+  "DeclareInterface",
+  "InterfaceDeclaration",
+  "InterfaceTypeAnnotation",
+]);
+
+/*
+- `ClassDeclaration`
+- `ClassExpression`
+- `DeclareClass`(flow)
+- `DeclareInterface`(flow)
+- `InterfaceDeclaration`(flow)
+- `InterfaceTypeAnnotation`(flow)
+- `RecordDeclaration`(flow)
+- `TSInterfaceDeclaration`(TypeScript)
+*/
+/** @returns {any[]} */ function printClass(/** @type {AstPath} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
+  const doc = printClassWithoutDecorators(path, options, print);
+
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
+  if (node.type === "ClassExpression" && isNonEmptyArray(node.decorators)) {
+    const decoratorsDoc = printDecorators(path, options, print);
+    const needsParens = needsParentheses(path, options);
+    return needsParens
+      ? [indent([softline, decoratorsDoc, doc]), softline]
+      : [decoratorsDoc, doc];
+  }
+
+  return doc;
+}
+
+function printClassWithoutDecorators(/** @type {AstPath} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
+  const isPrintingInterface = isInterface(node);
+  const isPrintingRecord = node.type === "RecordDeclaration";
+
+  const keyword = isPrintingInterface
+    ? "interface"
+    : isPrintingRecord
+      ? "record"
+      : "class";
+
+  /** @type {Doc[]} */
+  const parts = [printDeclareToken(path), printAbstractToken(path), keyword];
+
+  // Keep old behaviour of extends in same line
+  // If there is only on extends and there are not comments
+  const groupMode = shouldPrintClassInGroupMode(path);
+
+  const partsGroup = [];
+  const extendsParts = [];
+
+  if (node.type !== "InterfaceTypeAnnotation") {
+    if (node.id) {
+      partsGroup.push(" ");
+    }
+
+    for (const property of ["id", "typeParameters"]) {
+      if (node[property]) {
+        const { leading, trailing } = path.call(
+          () => printCommentsSeparately(path, options),
+          property,
+        );
+        partsGroup.push(leading, print(property), indent(trailing));
+      }
+    }
+  }
+
+  if (node.superClass) {
+    const printed = [
+      printSuperClass(path, options, print),
+      print("superTypeArguments"),
+    ];
+    const printedWithComments = path.call(
+      () => ["extends ", printComments(path, printed, options)],
+      "superClass",
+    );
+    if (groupMode) {
+      extendsParts.push(line, group(printedWithComments));
+    } else {
+      extendsParts.push(" ", printedWithComments);
+    }
+  } else {
+    extendsParts.push(printHeritageClauses(path, options, print, "extends"));
+  }
+
+  extendsParts.push(
+    printHeritageClauses(path, options, print, "mixins"),
+    printHeritageClauses(path, options, print, "implements"),
+  );
+
+  /** @type {symbol | undefined} */ let heritageGroupId;
+  if (groupMode) {
+    heritageGroupId = getHeritageGroupId(node);
+    parts.push(
+      group([...partsGroup, indent(extendsParts)], { id: heritageGroupId }),
+    );
+  } else {
+    parts.push(...partsGroup, ...extendsParts);
+  }
+
+  /*
+  To improve visual separation between class head and body https://github.com/prettier/prettier/issues/10018
+  we introduced https://github.com/prettier/prettier/pull/10085
+  However, users complaint.
+  We decide to defer to solve the inconsistency to a major release (V4)
+  Meanwhile, we are not going to put the `{` of interface body on a new line
+  https://github.com/prettier/prettier/issues/18115
+  */
+  if (!isPrintingInterface && groupMode && isNonEmptyClassBody(node.body)) {
+    parts.push(ifBreak(hardline, " ", { groupId: heritageGroupId }));
+  } else {
+    parts.push(" ");
+  }
+
+  parts.push(print("body"));
+
+  return parts;
+}
+
+/** @returns {boolean} */ function hasMultipleHeritage(/** @type {import("../types/estree.js").Node} */ node) {
+  let count = node.superClass ? 1 : 0;
+  for (const listName of ["extends", "mixins", "implements"]) {
+    if (Array.isArray(node[listName])) {
+      count += node[listName].length;
+    }
+    if (count > 1) {
+      return true;
+    }
+  }
+  return count > 1;
+}
+
+/**
+@returns {boolean}
+*/
+function shouldPrintClassInGroupModeWithoutCache(/** @type {AstPath} */ path) {
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
+  if (
+    hasComment(node.id, CommentCheckFlags.Trailing) ||
+    hasComment(node.typeParameters, CommentCheckFlags.Trailing) ||
+    hasComment(node.superClass) ||
+    hasMultipleHeritage(node)
+  ) {
+    return true;
+  }
+
+  if (node.superClass) {
+    if (path.parent.type === "AssignmentExpression") {
+      return false;
+    }
+
+    return (
+      !node.superTypeArguments &&
+      isMemberExpression(stripChainElementWrappers(node.superClass))
+    );
+  }
+
+  /** @type {import("../types/estree.js").Node} */ const heritage =
+    node.extends?.[0] ?? node.mixins?.[0] ?? node.implements?.[0];
+
+  if (!heritage) {
+    return false;
+  }
+
+  /** @type {boolean} */ const groupMode =
+    // `ClassImplements` seem not allow `QualifiedTypeIdentifier`
+    (heritage.type === "InterfaceExtends" &&
+      heritage.id.type === "QualifiedTypeIdentifier" &&
+      !heritage.typeParameters) ||
+    ((heritage.type === "TSClassImplements" ||
+      heritage.type === "TSInterfaceHeritage") &&
+      isMemberExpression(heritage.expression) &&
+      !heritage.typeArguments);
+
+  return groupMode;
+}
+
+const shouldPrintClassInGroupModeCache = new WeakMap();
+/** @returns {boolean} */ function shouldPrintClassInGroupMode(/** @type {AstPath} */ path) {
+  return getOrInsertComputed(shouldPrintClassInGroupModeCache, path.node, /** @returns {boolean} */ () =>
+    shouldPrintClassInGroupModeWithoutCache(path),
+  );
+}
+
+function printHeritageClauses(/** @type {AstPath} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print, /** @type {string} */ listName) {
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
+  if (!isNonEmptyArray(node[listName])) {
+    return "";
+  }
+
+  const printedLeadingComments = printDanglingComments(path, options, {
+    marker: listName,
+  });
+
+  const heritageClausesDoc = join([",", line], path.map(print, listName));
+
+  // Make it print like `superClass`
+  if (!hasMultipleHeritage(node)) {
+    const printed = [
+      `${listName} `,
+      printedLeadingComments,
+      heritageClausesDoc,
+    ];
+    if (shouldPrintClassInGroupMode(path)) {
+      return [line, group(printed)];
+    }
+    return [" ", printed];
+  }
+
+  return [
+    line,
+    printedLeadingComments,
+    printedLeadingComments && hardline,
+    listName,
+    group(indent([line, heritageClausesDoc])),
+  ];
+}
+
+function printSuperClass(/** @type {AstPath} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../print-options.js").JsPrint} */ print) {
+  const printed = print("superClass");
+  /** @type {{ parent: import("../types/estree.js").Node }} */ const { parent } = path;
+  if (parent.type === "AssignmentExpression") {
+    return group(
+      ifBreak(["(", indent([softline, printed]), softline, ")"], printed),
+    );
+  }
+  return printed;
+}
+
+/** @returns {any[]} */ function printClassMethod(/** @type {AstPath} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
+  const parts = [];
+
+  if (isNonEmptyArray(node.decorators)) {
+    parts.push(printClassMemberDecorators(path, options, print));
+  }
+
+  parts.push(printTypeScriptAccessibilityToken(node));
+
+  if (node.static) {
+    parts.push("static ");
+  }
+
+  parts.push(printAbstractToken(path));
+
+  if (node.override) {
+    parts.push("override ");
+  }
+
+  parts.push(printMethod(path, options, print));
+
+  return parts;
+}
+
+/*
+- `ClassProperty`
+- `PropertyDefinition`
+- `ClassPrivateProperty`
+- `ClassAccessorProperty`
+- `AccessorProperty`
+- `TSAbstractAccessorProperty` (TypeScript)
+- `TSAbstractPropertyDefinition` (TypeScript)
+*/
+/** @returns {any[]} */ function printClassProperty(/** @type {AstPath} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
+  const parts = [];
+
+  if (isNonEmptyArray(node.decorators)) {
+    parts.push(printClassMemberDecorators(path, options, print));
+  }
+
+  parts.push(printDeclareToken(path), printTypeScriptAccessibilityToken(node));
+
+  if (node.static) {
+    parts.push("static ");
+  }
+
+  parts.push(printAbstractToken(path));
+
+  if (node.override) {
+    parts.push("override ");
+  }
+  if (node.readonly) {
+    parts.push("readonly ");
+  }
+  if (node.variance) {
+    parts.push(print("variance"));
+  }
+  if (
+    node.type === "ClassAccessorProperty" ||
+    node.type === "AccessorProperty" ||
+    node.type === "TSAbstractAccessorProperty"
+  ) {
+    parts.push("accessor ");
+  }
+  parts.push(
+    printKey(path, options, print),
+    printOptionalToken(path),
+    printDefiniteToken(path),
+    printTypeAnnotationProperty(path, print),
+  );
+
+  /** @type {boolean} */ const isAbstractProperty =
+    node.type === "TSAbstractPropertyDefinition" ||
+    node.type === "TSAbstractAccessorProperty";
+
+  return [
+    printAssignment(
+      path,
+      options,
+      print,
+      parts,
+      " =",
+      isAbstractProperty ? undefined : "value",
+    ),
+    printSemicolon(options),
+  ];
+}
+
+export { printClass, printClassMethod, printClassProperty };
+export { printClassBody, printClassMemberSemicolon } from "./class-body.js";

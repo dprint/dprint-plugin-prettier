@@ -1,24 +1,24 @@
 {
   "indentWidth": 2,
-  "exec": {
-    "commands": [{
-      "command": "rustfmt",
-      "exts": ["rs"]
-    }]
-  },
   "excludes": [
-    "js/node/startup.js",
-    "**/dist",
     "**/node_modules",
     "**/*-lock.json",
-    "**/target"
+    "**/target",
+    "nts",
+    "prettier",
+    "src/vendor",
+    "src/shims",
+    "src/generated",
+    "src/prettier-plugins",
+    "tests/specs",
+    "wasm/bin",
+    "wasm/obj",
+    ".github/workflows/*.generated.yml"
   ],
   "plugins": [
     "npm:@dprint/typescript@0.96.1",
     "npm:@dprint/json@0.23.0",
     "npm:@dprint/markdown@0.22.1",
-    "npm:@dprint/exec@0.7.3/plugin.json@704701df449dd7e942a71144773778ac529d68c2e4657bfc236d393b898b9a67",
-    "npm:@dprint/prettier@0.70.0/plugin.json@97c0dccf54ed5b7343e7a3f6418e77bd80afcd2b74beed3a632689d47e392ddc",
-    "npm:@dprint/toml@0.8.0"
+    "npm:@dprint/prettier@0.70.0/plugin.json@97c0dccf54ed5b7343e7a3f6418e77bd80afcd2b74beed3a632689d47e392ddc"
   ]
 }

@@ -1,0 +1,12 @@
+{
+  "name": "prettier-plugins-dependencies",
+  "private": true,
+  "description": "The Prettier plugins that the plugin includes, the packages that they import, which the plugin is compiled from, and the Prettier that they are given (Prettier's own source is in ../prettier).",
+  "type": "module",
+  "dependencies": {
+    "prettier": "3.9.10",
+    "prettier-plugin-jsdoc": "1.8.1",
+    "prettier-plugin-svelte": "4.1.1",
+    "svelte": "5.57.2"
+  }
+}

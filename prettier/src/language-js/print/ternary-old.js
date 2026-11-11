@@ -1,0 +1,352 @@
+// @nts-check
+import {
+  align,
+  dedent,
+  group,
+  ifBreak,
+  indent,
+  line,
+  softline,
+} from "../../document/index.js";
+import {
+  isBinaryCastExpression,
+  isCallExpression,
+  isChainElementWrapper,
+  isJsxElement,
+  isMemberExpression,
+} from "../utilities/node-types.js";
+
+/**
+ * @import {Doc} from "../../document/index.js"
+ * @import AstPath from "../../common/ast-path.js"
+ *
+ * @typedef {any} Options - Prettier options (TBD ...)
+ * @returns {boolean}
+ */
+
+// If we have nested conditional expressions, we want to print them in JSX mode
+// if there's at least one JSXElement somewhere in the tree.
+//
+// A conditional expression chain like this should be printed in normal mode,
+// because there aren't JSXElements anywhere in it:
+//
+// isA ? "A" : isB ? "B" : isC ? "C" : "Unknown";
+//
+// But a conditional expression chain like this should be printed in JSX mode,
+// because there is a JSXElement in the last ConditionalExpression:
+//
+// isA ? "A" : isB ? "B" : isC ? "C" : <span className="warning">Unknown</span>;
+//
+// This type of ConditionalExpression chain is structured like this in the AST:
+//
+// ConditionalExpression {
+//   test: ...,
+//   consequent: ...,
+//   alternate: ConditionalExpression {
+//     test: ...,
+//     consequent: ...,
+//     alternate: ConditionalExpression {
+//       test: ...,
+//       consequent: ...,
+//       alternate: ...,
+//     }
+//   }
+// }
+function conditionalExpressionChainContainsJsx(/** @type {import("../types/estree.js").Node} */ node) {
+  // Given this code:
+  //
+  // // Using a ConditionalExpression as the consequent is uncommon, but should
+  // // be handled.
+  // A ? B : C ? D : E ? F ? G : H : I
+  //
+  // which has this AST:
+  //
+  // ConditionalExpression {
+  //   test: Identifier(A),
+  //   consequent: Identifier(B),
+  //   alternate: ConditionalExpression {
+  //     test: Identifier(C),
+  //     consequent: Identifier(D),
+  //     alternate: ConditionalExpression {
+  //       test: Identifier(E),
+  //       consequent: ConditionalExpression {
+  //         test: Identifier(F),
+  //         consequent: Identifier(G),
+  //         alternate: Identifier(H),
+  //       },
+  //       alternate: Identifier(I),
+  //     }
+  //   }
+  // }
+  //
+  // We don't care about whether each node was the test, consequent, or alternate
+  // We are only checking if there's any JSXElements inside.
+  const conditionalExpressions = [node];
+  for (let index = 0; index < conditionalExpressions.length; index++) {
+    const conditionalExpression = conditionalExpressions[index];
+    for (const property of ["test", "consequent", "alternate"]) {
+      const node = conditionalExpression[property];
+
+      if (isJsxElement(node)) {
+        return true;
+      }
+
+      if (node.type === "ConditionalExpression") {
+        conditionalExpressions.push(node);
+      }
+    }
+  }
+
+  return false;
+}
+
+function printTernaryTest(/** @type {AstPath} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../print-options.js").JsPrint} */ print) {
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
+  /** @type {boolean} */ const isConditionalExpression = node.type === "ConditionalExpression";
+  /** @type {string} */ const alternateNodePropertyName = isConditionalExpression
+    ? "alternate"
+    : "falseType";
+
+  /** @type {{ parent: import("../types/estree.js").Node }} */ const { parent } = path;
+
+  const printed = isConditionalExpression
+    ? print("test")
+    : [print("checkType"), " ", "extends", " ", print("extendsType")];
+  /**
+   *     a
+   *       ? b
+   *       : multiline
+   *         test
+   *         node
+   *       ^^ align(2)
+   *       ? d
+   *       : e
+   */
+  if (parent.type === node.type && parent[alternateNodePropertyName] === node) {
+    return align(2, printed);
+  }
+  return printed;
+}
+
+const ancestorNameMap = new Map([
+  ["AssignmentExpression", "right"],
+  ["VariableDeclarator", "init"],
+  ["ReturnStatement", "argument"],
+  ["ThrowStatement", "argument"],
+  ["UnaryExpression", "argument"],
+  ["YieldExpression", "argument"],
+  ["AwaitExpression", "argument"],
+]);
+/** @returns {boolean} */ function shouldExtraIndentForConditionalExpression(/** @type {AstPath} */ path) {
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
+  if (node.type !== "ConditionalExpression") {
+    return false;
+  }
+
+  /** @type {import("../types/estree.js").Node} */ let parent;
+  let child = node;
+  for (let ancestorCount = 0; !parent; ancestorCount++) {
+    /** @type {import("../types/estree.js").Node} */ const node = path.getParentNode(ancestorCount);
+
+    if (
+      (isChainElementWrapper(node) && node.expression === child) ||
+      (isCallExpression(node) && node.callee === child) ||
+      (isMemberExpression(node) && node.object === child)
+    ) {
+      child = node;
+      continue;
+    }
+
+    // Reached chain root
+
+    if (
+      (node.type === "NewExpression" && node.callee === child) ||
+      (isBinaryCastExpression(node) && node.expression === child)
+    ) {
+      parent = path.getParentNode(ancestorCount + 1);
+      child = node;
+    } else {
+      parent = node;
+    }
+  }
+
+  // Do not add indent to direct `ConditionalExpression`
+  if (child === node) {
+    return false;
+  }
+
+  return parent[ancestorNameMap.get(parent.type)] === child;
+}
+
+/**
+ * The following is the shared logic for
+ * ternary operators, namely ConditionalExpression,
+ * ConditionalTypeAnnotation and TSConditionalType
+ * @param {AstPath} path - The path to the ConditionalExpression/TSConditionalType node.
+ * @param {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} options - Prettier options
+ * @param {import("../../../../prettier/src/language-js/print-options.js").JsPrint} print - Print function to call recursively
+ * @returns {Doc}
+ */
+function printTernaryOld(path, options, print) {
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
+  /** @type {boolean} */ const isConditionalExpression = node.type === "ConditionalExpression";
+  /** @type {string} */ const consequentNodePropertyName = isConditionalExpression
+    ? "consequent"
+    : "trueType";
+  /** @type {string} */ const alternateNodePropertyName = isConditionalExpression
+    ? "alternate"
+    : "falseType";
+  const testNodePropertyNames = isConditionalExpression
+    ? ["test"]
+    : ["checkType", "extendsType"];
+  /** @type {import("../types/estree.js").Node} */ const consequentNode = node[consequentNodePropertyName];
+  const alternateNode = node[alternateNodePropertyName];
+  const parts = [];
+
+  // We print a ConditionalExpression in either "JSX mode" or "normal mode".
+  // See `tests/format/jsx/conditional-expression.js` for more info.
+  /** @type {boolean} */ let jsxMode = false;
+  /** @type {{ parent: import("../types/estree.js").Node }} */ const { parent } = path;
+  /** @type {boolean} */ const isParentTest =
+    parent.type === node.type &&
+    testNodePropertyNames.some(/** @returns {boolean} */ (prop) => parent[prop] === node);
+  /** @type {boolean} */ let forceNoIndent = parent.type === node.type && !isParentTest;
+
+  // Find the outermost non-ConditionalExpression parent, and the outermost
+  // ConditionalExpression parent. We'll use these to determine if we should
+  // print in JSX mode.
+  /** @type {import("../types/estree.js").Node} */ let currentParent;
+  /** @type {import("../types/estree.js").Node} */ let previousParent;
+  /** @type {number} */ let i = 0;
+  do {
+    previousParent = currentParent || node;
+    currentParent = path.getParentNode(i);
+    i++;
+  } while (
+    currentParent &&
+    currentParent.type === node.type &&
+    testNodePropertyNames.every(
+      /** @returns {boolean} */ (prop) => currentParent[prop] !== previousParent,
+    )
+  );
+  const firstNonConditionalParent = currentParent || parent;
+  const lastConditionalParent = previousParent;
+
+  if (
+    isConditionalExpression &&
+    (isJsxElement(node[testNodePropertyNames[0]]) ||
+      isJsxElement(consequentNode) ||
+      isJsxElement(alternateNode) ||
+      conditionalExpressionChainContainsJsx(lastConditionalParent))
+  ) {
+    jsxMode = true;
+    forceNoIndent = true;
+
+    // Even though they don't need parens, we wrap (almost) everything in
+    // parens when using ?: within JSX, because the parens are analogous to
+    // curly braces in an if statement.
+    const wrap = /** @returns {any[]} */ (/** @type {Doc} */ doc) => [
+      ifBreak("("),
+      indent([softline, doc]),
+      softline,
+      ifBreak(")"),
+    ];
+
+    // The only things we don't wrap are:
+    // * Nested conditional expressions in alternates
+    // * null
+    // * undefined
+    const isNil = /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node) =>
+      node.type === "NullLiteral" ||
+      (node.type === "Literal" && node.value === null) ||
+      (node.type === "Identifier" && node.name === "undefined");
+
+    parts.push(
+      " ? ",
+      isNil(consequentNode)
+        ? print(consequentNodePropertyName)
+        : wrap(print(consequentNodePropertyName)),
+      " : ",
+      alternateNode.type === node.type || isNil(alternateNode)
+        ? print(alternateNodePropertyName)
+        : wrap(print(alternateNodePropertyName)),
+    );
+  } else {
+    /*
+    This does not mean to indent, but make the doc aligned with the first character after `? ` or `: `,
+    so we use `2` instead of `options.tabWidth` here.
+
+    ```js
+    test
+     ? {
+         consequent
+       }
+     : alternate
+    ```
+
+    instead of
+
+    ```js
+    test
+     ? {
+       consequent
+     }
+     : alternate
+    ```
+    */
+    const printBranch = (/** @type {string} */ nodePropertyName) =>
+      options.useTabs
+        ? indent(print(nodePropertyName))
+        : align(2, print(nodePropertyName));
+    // normal mode
+    const part = [
+      line,
+      "? ",
+      consequentNode.type === node.type ? ifBreak("", "(") : "",
+      printBranch(consequentNodePropertyName),
+      consequentNode.type === node.type ? ifBreak("", ")") : "",
+      line,
+      ": ",
+      printBranch(alternateNodePropertyName),
+    ];
+    parts.push(
+      parent.type !== node.type ||
+        parent[alternateNodePropertyName] === node ||
+        isParentTest
+        ? part
+        : options.useTabs
+          ? dedent(indent(part))
+          : align(Math.max(0, options.tabWidth - 2), part),
+    );
+  }
+
+  const maybeGroup = (/** @type {any[]} */ doc) =>
+    parent === firstNonConditionalParent ? group(doc) : doc;
+
+  // Break the closing paren to keep the chain right after it:
+  // (a
+  //   ? b
+  //   : c
+  // ).call()
+  /** @type {boolean} */ const breakClosingParen =
+    !jsxMode &&
+    (isMemberExpression(parent) ||
+      (parent.type === "NGPipeExpression" && parent.left === node)) &&
+    !parent.computed;
+
+  /** @type {boolean} */ const shouldExtraIndent = shouldExtraIndentForConditionalExpression(path);
+
+  const result = maybeGroup([
+    printTernaryTest(path, options, print),
+    forceNoIndent ? parts : indent(parts),
+    isConditionalExpression && breakClosingParen && !shouldExtraIndent
+      ? softline
+      : "",
+  ]);
+
+  return isParentTest || shouldExtraIndent
+    ? group([indent([softline, result]), softline])
+    : result;
+}
+
+export { printTernaryOld };

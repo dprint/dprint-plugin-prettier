@@ -1,0 +1,209 @@
+// @nts-check
+/** @import { CssOptions } from "../utilities/index.js" */
+import PostcssValuesParser from "postcss-values-parser/lib/parser.js";
+import isObject from "../../utilities/is-object.js";
+import getFunctionArgumentsText from "../utilities/get-function-arguments-text.js";
+import getValueRoot from "../utilities/get-value-root.js";
+import hasSCSSInterpolation from "../utilities/has-scss-interpolation.js";
+import hasStringOrFunction from "../utilities/has-string-or-function.js";
+import isSCSSVariable from "../utilities/is-scss-variable.js";
+import parseSelector from "./parse-selector.js";
+import { addTypePrefix } from "./utilities.js";
+
+const isClosingParenthesis = /** @returns {boolean} */ (/** @type {import("../types.js").CssNode} */ node) =>
+  node.type === "paren" && node.value === ")";
+
+/**
+ * the groups that a value's nodes are put in, by its parentheses and by the commas between them
+ * @typedef {{ open: any, close: any, groups: any[], type: string }} ParenGroup
+ * @typedef {{ groups: any[], type: string }} CommaGroup
+ */
+
+/** @returns {ParenGroup} */ function parseValueNode(/** @type {import("../types.js").CssNode} */ valueNode, /** @type {CssOptions} */ options) {
+  const { nodes } = valueNode;
+  /** @type {ParenGroup} */ let parenGroup = {
+    open: null,
+    close: null,
+    groups: [],
+    type: "paren_group",
+  };
+  /** @type {ParenGroup[]} */ const parenGroupStack = [parenGroup];
+  const rootParenGroup = parenGroup;
+  /** @type {CommaGroup} */ let commaGroup = {
+    groups: [],
+    type: "comma_group",
+  };
+  /** @type {CommaGroup[]} */ const commaGroupStack = [commaGroup];
+
+  for (let i = 0; i < nodes.length; ++i) {
+    const node = nodes[i];
+
+    if (
+      options.parser === "scss" &&
+      node.type === "number" &&
+      node.unit === ".." &&
+      node.value.endsWith(".")
+    ) {
+      // Work around postcss bug parsing `50...` as `50.` with unit `..`
+      // Set the unit to `...` to "accidentally" have arbitrary arguments work in the same way that cases where the node already had a unit work.
+      // For example, 50px... is parsed as `50` with unit `px...` already by postcss-values-parser.
+      node.value = node.value.slice(0, -1);
+      node.unit = "...";
+    }
+
+    if (node.type === "func" && node.value === "selector") {
+      const selector = getValueRoot(valueNode).text.slice(
+        /** @type {number} */ (node.group.open.sourceIndex) + 1,
+        node.group.close.sourceIndex,
+      );
+      const parsedSelector = parseSelector(selector);
+      parsedSelector.sourceIndex = /** @type {number} */ (node.group.open.sourceIndex) + 1;
+      parsedSelector.raws ??= {};
+      parsedSelector.raws.selector = selector;
+      node.group.groups = [parsedSelector];
+    }
+
+    if (node.type === "func" && node.value === "url") {
+      const groups = node.group?.groups ?? [];
+
+      // Create a view with any top-level comma groups flattened.
+      let groupList = [];
+      for (let i = 0; i < groups.length; i++) {
+        const group = groups[i];
+        if (group.type === "comma_group") {
+          groupList = [...groupList, ...group.groups];
+        } else {
+          groupList.push(group);
+        }
+      }
+
+      // Stringify if the value parser can't handle the content.
+      if (
+        hasSCSSInterpolation(groupList) ||
+        (!hasStringOrFunction(groupList) &&
+          !isSCSSVariable(groupList[0], options))
+      ) {
+        node.group.groups = [getFunctionArgumentsText(node)];
+      }
+    }
+    if (node.type === "paren" && node.value === "(") {
+      parenGroup = {
+        open: node,
+        close: null,
+        groups: [],
+        type: "paren_group",
+      };
+      parenGroupStack.push(parenGroup);
+
+      commaGroup = {
+        groups: [],
+        type: "comma_group",
+      };
+      commaGroupStack.push(commaGroup);
+    } else if (isClosingParenthesis(node)) {
+      if (commaGroup.groups.length > 0) {
+        parenGroup.groups.push(commaGroup);
+      }
+      parenGroup.close = node;
+
+      /* c8 ignore next 3 */
+      if (commaGroupStack.length === 1) {
+        throw new Error("Unbalanced parenthesis");
+      }
+
+      commaGroupStack.pop();
+      commaGroup = commaGroupStack.at(-1);
+      commaGroup.groups.push(parenGroup);
+
+      parenGroupStack.pop();
+      parenGroup = parenGroupStack.at(-1);
+    } else if (node.type === "comma") {
+      // Trialing comma
+      if (
+        i === nodes.length - 3 &&
+        nodes[i + 1].type === "comment" &&
+        isClosingParenthesis(nodes[i + 2])
+      ) {
+        continue;
+      }
+
+      parenGroup.groups.push(commaGroup);
+      commaGroup = {
+        groups: [],
+        type: "comma_group",
+      };
+      commaGroupStack[commaGroupStack.length - 1] = commaGroup;
+    } else {
+      commaGroup.groups.push(node);
+    }
+  }
+  if (commaGroup.groups.length > 0) {
+    parenGroup.groups.push(commaGroup);
+  }
+
+  return rootParenGroup;
+}
+
+function flattenGroups(/** @type {import("../types.js").CssNode} */ node) {
+  if (
+    node.type === "paren_group" &&
+    !node.open &&
+    !node.close &&
+    node.groups.length === 1
+  ) {
+    return flattenGroups(node.groups[0]);
+  }
+
+  if (node.type === "comma_group" && node.groups.length === 1) {
+    return flattenGroups(node.groups[0]);
+  }
+
+  if (node.type === "paren_group" || node.type === "comma_group") {
+    return { ...node, groups: node.groups.map(flattenGroups) };
+  }
+
+  return node;
+}
+
+function parseNestedValue(/** @type {import("../types.js").CssNode} */ node, /** @type {CssOptions} */ options) {
+  if (isObject(node)) {
+    for (const key in node) {
+      if (key !== "parent") {
+        parseNestedValue(node[key], options);
+        if (key === "nodes") {
+          if (!(node.type === "atword" && node.nodes.length === 0)) {
+            node.group = flattenGroups(parseValueNode(node, options));
+          }
+          delete node[key];
+        }
+      }
+    }
+  }
+  return node;
+}
+
+function parseValue(/** @type {string} */ value, /** @type {CssOptions} */ options) {
+  // Inline JavaScript in Less
+  if (options.parser === "less" && value.startsWith("~`")) {
+    return { type: "value-unknown", value };
+  }
+
+  /** @type {any} */ let result;
+
+  try {
+    result = new PostcssValuesParser(value, { loose: true }).parse();
+  } catch {
+    return {
+      type: "value-unknown",
+      value,
+    };
+  }
+
+  result.text = value;
+
+  const parsedResult = parseNestedValue(result, options);
+
+  return addTypePrefix(parsedResult, "value-", /^selector-/);
+}
+
+export default parseValue;

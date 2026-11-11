@@ -1,0 +1,66 @@
+// @nts-check
+import { label } from "../../document/index.js";
+import { isEmbedCss, printEmbedCss } from "./css.js";
+import { isEmbedGraphQL, printEmbedGraphQL } from "./graphql.js";
+import {
+  isAngularComponentTemplate,
+  isEmbedHtml,
+  printEmbedAngular,
+  printEmbedHtml,
+} from "./html.js";
+import { isEmbedMarkdown, printEmbedMarkdown } from "./markdown.js";
+
+/** @import AstPath from "../../common/ast-path.js" */
+
+const printers = [
+  { test: isEmbedCss, print: printEmbedCss },
+  { test: isEmbedGraphQL, print: printEmbedGraphQL },
+  { test: isEmbedHtml, print: printEmbedHtml },
+  { test: isAngularComponentTemplate, print: printEmbedAngular },
+  { test: isEmbedMarkdown, print: printEmbedMarkdown },
+].map(({ test, print }) => ({
+  test,
+  print: createTemplateLiteralPrint(print),
+}));
+
+function embed(/** @type {AstPath} */ path) {
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
+
+  if (
+    node.type !== "TemplateLiteral" ||
+    // Bail out if any of the quasis have an invalid escape sequence
+    // (which would make the `cooked` value be `null`)
+    hasInvalidCookedValue(node)
+  ) {
+    return;
+  }
+
+  const printer = printers.find(/** @returns {boolean} */ ({ test }) => test(path));
+
+  if (!printer) {
+    return;
+  }
+
+  if (
+    // Special case: whitespace-only template literals
+    node.quasis.length === 1 &&
+    node.quasis[0].value.raw.trim() === ""
+  ) {
+    return "``";
+  }
+
+  return printer.print;
+}
+
+function createTemplateLiteralPrint(print) {
+  return async (...args) => {
+    const doc = await print(...args);
+    return doc && label({ embed: true, ...doc.label }, doc);
+  };
+}
+
+/** @returns {boolean} */ function hasInvalidCookedValue(/** @type {{ quasis: import("../types/estree.js").Node[] }} */ { quasis }) {
+  return quasis.some(/** @returns {boolean} */ ({ value: { cooked } }) => cooked === null);
+}
+
+export default embed;

@@ -1,0 +1,72 @@
+import {
+  group,
+  hardline,
+  indent,
+  join,
+  softline,
+} from "../../document/index.js";
+import { printDanglingComments } from "../../main/comments/print.js";
+import { CommentCheckFlags, hasComment } from "../utilities/comments.js";
+import { isNextLineEmpty } from "../utilities/is-next-line-empty.js";
+import { printStatementSequence } from "./statement-sequence.js";
+
+function printSwitchStatement(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
+  return [
+    group([
+      "switch (",
+      indent([softline, print("discriminant")]),
+      softline,
+      ")",
+    ]),
+    " {",
+    path.node.cases.length > 0
+      ? indent([
+          hardline,
+          join(
+            hardline,
+            path.map(
+              /** @returns {any[]} */ ({ node, isLast }) => [
+                print(),
+                !isLast && isNextLineEmpty(node, options) ? hardline : "",
+              ],
+              "cases",
+            ),
+          ),
+        ])
+      : printDanglingComments(path, options, { indent: true }),
+    hardline,
+    "}",
+  ];
+}
+
+function printSwitchCase(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
+  const parts = [];
+  if (node.test) {
+    parts.push("case ", print("test"), ":");
+  } else {
+    parts.push("default:");
+  }
+
+  if (hasComment(node, CommentCheckFlags.Dangling)) {
+    parts.push(" ", printDanglingComments(path, options));
+  }
+
+  const consequent = /** @type {import("../types/estree.js").Node[]} */ (node.consequent).filter(
+    /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node) => node.type !== "EmptyStatement",
+  );
+
+  if (consequent.length > 0) {
+    const cons = printStatementSequence(path, options, print, "consequent");
+
+    parts.push(
+      consequent.length === 1 && consequent[0].type === "BlockStatement"
+        ? [" ", cons]
+        : indent([hardline, cons]),
+    );
+  }
+
+  return parts;
+}
+
+export { printSwitchCase, printSwitchStatement };

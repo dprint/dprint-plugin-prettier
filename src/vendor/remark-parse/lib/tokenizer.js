@@ -1,0 +1,346 @@
+// @nts-check
+'use strict'
+
+module.exports = factory
+
+/**
+ * A node that the tokenizers write out, which the tokenizer gives a position and adds to its parent
+ * @typedef {{ type: string, value?: string, children?: RemarkNode[], position?: RemarkPosition }} RemarkNode
+ * Where a node is, with the indentation of each of its lines after the first
+ * @typedef {{ start: RemarkPoint, end: RemarkPoint, indent?: number[] }} RemarkPosition
+ * @typedef {{ line: number, column: number, offset?: number }} RemarkPoint
+ * What eating gives: a function that adds a node where the eaten text was, and that resets the text to before it was
+ * eaten (`reset`) or tells where the node would be (`test`)
+ * @typedef {{
+ *   (node: RemarkNode, parent?: RemarkNode): RemarkNode,
+ *   reset: (node: RemarkNode, parent?: RemarkNode) => RemarkNode,
+ *   test: () => RemarkPosition,
+ * }} RemarkApply
+ * What the tokenizers are given to eat the start of their text with, which also tells where they are
+ * @typedef {{ (subvalue: string): RemarkApply, now: () => RemarkPoint, file: any }} RemarkEat
+ * A tokenizer, which is called on the parser, and what the parser asks of it (`locator` finds where an inline one may
+ * start)
+ * @typedef {{
+ *   (this: import("./parser.js").RemarkParser, eat: RemarkEat, value: StringView, silent?: boolean): any,
+ *   locator?: (this: import("./parser.js").RemarkParser, value: StringView, fromIndex: number) => number,
+ *   onlyAtStart?: boolean,
+ *   notInList?: boolean,
+ *   notInBlock?: boolean,
+ *   notInLink?: boolean,
+ * }} RemarkTokenizer
+ */
+
+// Construct a tokenizer.  This creates both `tokenizeInline` and `tokenizeBlock`.
+function factory(/** @type {string} */ type) {
+  return tokenize
+
+  // Tokenizer for a bound `type`.
+  /** @returns {any[]} */ /** @this {import("./parser.js").RemarkParser} */ function tokenize(/** @type {StringView} */ value, /** @type {RemarkPoint} */ location) {
+    var self = this
+    var offset = self.offset
+    var tokens = []
+    /** @type {string[]} */ var methods = self[type + 'Methods']
+    /** @type {Record<string, RemarkTokenizer>} */ var tokenizers = self[type + 'Tokenizers']
+    /** @type {number} */ var line = location.line
+    /** @type {number} */ var column = location.column
+    /** @type {number} */ var index
+    /** @type {number} */ var length
+    /** @type {RemarkTokenizer} */ var method
+    /** @type {string} */ var name
+    /** @type {boolean} */ var matched
+    /** @type {number | undefined} */ var valueLength
+
+    // Trim white space only lines.
+    if (!value) {
+      return tokens
+    }
+
+    // Expose on `eat`.
+    eat.now = now
+    eat.file = self.file
+
+    // Sync initial offset.
+    updatePosition('')
+
+    // Iterate over `value`, and iterate over all tokenizers.  When one eats
+    // something, re-iterate with the remaining value.  If no tokenizer eats,
+    // something failed (should not happen) and an exception is thrown.
+    while (value) {
+      index = -1
+      length = methods.length
+      matched = false
+
+      while (++index < length) {
+        name = methods[index]
+        method = tokenizers[name]
+
+        // Previously, we had constructs such as footnotes and YAML that used
+        // these properties.
+        // Those are now external (plus there are userland extensions), that may
+        // still use them.
+        if (
+          method &&
+          /* istanbul ignore next */ (!method.onlyAtStart || self.atStart) &&
+          /* istanbul ignore next */ (!method.notInList || !self.inList) &&
+          /* istanbul ignore next */ (!method.notInBlock || !self.inBlock) &&
+          (!method.notInLink || !self.inLink)
+        ) {
+          valueLength = value.length
+
+          method.apply(self, [eat, value])
+
+          matched = valueLength !== value.length
+
+          if (matched) {
+            break
+          }
+        }
+      }
+
+      /* istanbul ignore if */
+      if (!matched) {
+        self.file.fail(new Error('Infinite loop'), eat.now())
+      }
+    }
+
+    self.eof = now()
+
+    return tokens
+
+    // Update line, column, and offset based on `value`.
+    function updatePosition(/** @type {string} */ subvalue) {
+      /** @type {number} */ var lastIndex = -1
+      /** @type {number} */ var index = subvalue.indexOf('\n')
+
+      while (index !== -1) {
+        line++
+        lastIndex = index
+        index = subvalue.indexOf('\n', index + 1)
+      }
+
+      if (lastIndex === -1) {
+        column += subvalue.length
+      } else {
+        column = subvalue.length - lastIndex
+      }
+
+      if (line in offset) {
+        if (lastIndex !== -1) {
+          column += offset[line]
+        } else if (column <= offset[line]) {
+          column = offset[line] + 1
+        }
+      }
+    }
+
+    // Get offset.  Called before the first character is eaten to retrieve the
+    // range’s offsets.
+    function getOffset() {
+      /** @type {number[]} */ var indentation = []
+      /** @type {number} */ var pos = line + 1
+
+      // Done.  Called when the last character is eaten to retrieve the range’s
+      // offsets.
+      return /** @returns {any[]} */ function () {
+        /** @type {number} */ var last = line + 1
+
+        while (pos < last) {
+          indentation.push((offset[pos] || 0) + 1)
+
+          pos++
+        }
+
+        return indentation
+      }
+    }
+
+    // Get the current position.
+    /** @returns {RemarkPoint} */ function now() {
+      /** @type {RemarkPoint} */ var pos = {line: line, column: column}
+
+      pos.offset = self.toOffset(pos)
+
+      return pos
+    }
+
+    // Store position information for a node.
+    function Position(start) {
+      this.start = start
+      this.end = now()
+    }
+
+    // Throw when a value is incorrectly eaten.  This shouldn’t happen but will
+    // throw on new, incorrect rules.
+    function validateEat(/** @type {string} */ subvalue) {
+      /* istanbul ignore if */
+      if (value.slice(0, subvalue.length) !== subvalue) {
+        // Capture stack-trace.
+        self.file.fail(
+          new Error(
+            'Incorrectly eaten value: please report this warning on https://git.io/vg5Ft'
+          ),
+          now()
+        )
+      }
+    }
+
+    // Mark position and patch `node.position`.
+    function position() {
+      var before = now()
+
+      return update
+
+      // Add the position to a node.
+      function update(/** @type {RemarkNode} */ node, /** @type {any[] | undefined} */ indent) {
+        /** @type {RemarkPosition | undefined} */ var previous = node.position
+        /** @type {RemarkPoint} */ var start = previous ? previous.start : before
+        /** @type {any[]} */ var combined = []
+        /** @type {number | undefined} */ var n = previous && previous.end.line
+        /** @type {number} */ var l = before.line
+
+        node.position = new Position(start)
+
+        // If there was already a `position`, this node was merged.  Fixing
+        // `start` wasn’t hard, but the indent is different.  Especially
+        // because some information, the indent between `n` and `l` wasn’t
+        // tracked.  Luckily, that space is (should be?) empty, so we can
+        // safely check for it now.
+        if (previous && indent && previous.indent) {
+          combined = previous.indent
+
+          if (n < l) {
+            while (++n < l) {
+              combined.push((offset[n] || 0) + 1)
+            }
+
+            combined.push(before.column)
+          }
+
+          indent = combined.concat(indent)
+        }
+
+        node.position.indent = indent || []
+
+        return node
+      }
+    }
+
+    // Add `node` to `parent`s children or to `tokens`.  Performs merges where
+    // possible.
+    function add(/** @type {RemarkNode} */ node, /** @type {RemarkNode | undefined} */ parent) {
+      /** @type {any[]} */ var children = parent ? parent.children : tokens
+      /** @type {RemarkNode | undefined} */ var previous = children[children.length - 1]
+      /** @type {(this: import("./parser.js").RemarkParser, previous: RemarkNode, node: RemarkNode) => RemarkNode} */ var fn
+
+      if (
+        previous &&
+        node.type === previous.type &&
+        (node.type === 'text' || node.type === 'blockquote') &&
+        mergeable(previous) &&
+        mergeable(node)
+      ) {
+        fn = node.type === 'text' ? mergeText : mergeBlockquote
+        node = fn.call(self, previous, node)
+      }
+
+      if (node !== previous) {
+        children.push(node)
+      }
+
+      if (self.atStart && tokens.length !== 0) {
+        self.exitStart()
+      }
+
+      return node
+    }
+
+    // Remove `subvalue` from `value`.  `subvalue` must be at the start of
+    // `value`.
+    function eat(/** @type {string} */ subvalue) {
+      var indent = getOffset()
+      var pos = position()
+      var current = now()
+
+      validateEat(subvalue)
+
+      apply.reset = reset
+      reset.test = test
+      apply.test = test
+
+      value = value.slice(subvalue.length)
+
+      updatePosition(subvalue)
+
+      indent = indent()
+
+      return apply
+
+      // Add the given arguments, add `position` to the returned node, and
+      // return the node.
+      function apply(node, parent) {
+        return pos(add(pos(node), parent), indent)
+      }
+
+      // Functions just like apply, but resets the content: the line and
+      // column are reversed, and the eaten value is re-added.   This is
+      // useful for nodes with a single type of content, such as lists and
+      // tables.  See `apply` above for what parameters are expected.
+      function reset() {
+        var node = apply.apply(null, arguments)
+
+        line = current.line
+        column = current.column
+        value = subvalue + value
+
+        return node
+      }
+
+      // Test the position, after eating, and reverse to a not-eaten state.
+      function test() {
+        var result = pos({})
+
+        line = current.line
+        column = current.column
+        value = subvalue + value
+
+        return result.position
+      }
+    }
+  }
+}
+
+// Check whether a node is mergeable with adjacent nodes.
+/** @returns {boolean} */ function mergeable(/** @type {RemarkNode} */ node) {
+  /** @type {RemarkPoint} */ var start
+  /** @type {RemarkPoint} */ var end
+
+  if (node.type !== 'text' || !node.position) {
+    return true
+  }
+
+  start = node.position.start
+  end = node.position.end
+
+  // Only merge nodes which occupy the same size as their `value`.
+  return (
+    start.line !== end.line || end.column - start.column === node.value.length
+  )
+}
+
+// Merge two text nodes: `node` into `prev`.
+/** @returns {RemarkNode} */ function mergeText(/** @type {RemarkNode} */ previous, /** @type {RemarkNode} */ node) {
+  previous.value += node.value
+
+  return previous
+}
+
+// Merge two blockquotes: `node` into `prev`, unless in CommonMark or gfm modes.
+/** @returns {RemarkNode} */ /** @this {import("./parser.js").RemarkParser} */ function mergeBlockquote(/** @type {RemarkNode} */ previous, /** @type {RemarkNode} */ node) {
+  if (this.options.commonmark || this.options.gfm) {
+    return node
+  }
+
+  previous.children = previous.children.concat(node.children)
+
+  return previous
+}

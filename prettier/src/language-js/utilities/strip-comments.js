@@ -1,0 +1,49 @@
+// @nts-check
+import { commentsPropertyInOptions } from "../../constants.js";
+import { getOrInsertComputed } from "../../utilities/get-or-insert.js";
+import replaceNonLineBreaksWithSpace from "../../utilities/replace-non-line-breaks-with-space.js";
+import { locEnd, locStart } from "../location/index.js";
+
+/**
+@import {Node, Comment} from "../types/estree.js"
+@typedef {Comment[]} Comments
+@typedef {{
+  originalText: string,
+  [commentsPropertyInOptions]: Comments
+}} Options
+*/
+
+/**
+@param {string} text
+@param {Comments} comments
+@returns {string}
+*/
+function stripCommentsFromText(text, comments) {
+  for (const comment of comments) {
+    const start = locStart(comment);
+    const end = locEnd(comment);
+
+    text =
+      text.slice(0, start) +
+      replaceNonLineBreaksWithSpace(text.slice(start, end)) +
+      text.slice(end);
+  }
+
+  return text;
+}
+
+/** @type {WeakMap<Comment[], string>} */
+const cache = new WeakMap();
+
+/**
+@param {Options} options
+@returns {string}
+*/
+function stripComments(options) {
+  const comments = options[commentsPropertyInOptions];
+  return getOrInsertComputed(cache, comments, /** @returns {string} */ (/** @type {any[]} */ comments) =>
+    stripCommentsFromText(options.originalText, comments),
+  );
+}
+
+export { stripComments };
