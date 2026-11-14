@@ -65,7 +65,10 @@ Deno.test({
     } finally {
       pool.terminate();
     }
-    const differing = results.filter(result => !result.same);
+    // where prettier from npm runs out of stack in the worker and the plugin doesn't, which says nothing of the plugin:
+    // prettier only just runs out on the chain of 2,000 binary operators of js/binary-expression/long-chain
+    const prettierOverflowed = results.filter(result => !result.same && isPrettierOverflow(result));
+    const differing = results.filter(result => !result.same && !isPrettierOverflow(result));
     const diffsDir = testsDir.join("diffs");
     if (diffsDir.existsSync()) {
       diffsDir.removeSync({ recursive: true });
@@ -78,7 +81,12 @@ Deno.test({
     }
     $.log(
       `${cases.length} cases, ${results.length} with their variants, ${differing.length} differ, `
-        + `${summary.skipped} fixtures left out`,
+        + `${prettierOverflowed.length} ran out of stack in prettier only, ${summary.skipped} fixtures left out`,
+    );
+    assert(
+      prettierOverflowed.length <= 4,
+      `Prettier from npm ran out of stack on more cases than the long chain of binary operators:\n`
+        + prettierOverflowed.map(result => `  ${result.name} [${result.parser}]`).join("\n"),
     );
     assert(
       differing.length === 0,
@@ -190,4 +198,9 @@ async function installTestDependencies(repoDir: ReturnType<typeof testsDir.join>
   Deno.symlinkSync(depsDir.join("node_modules").toString(), linkPath.toString(), {
     type: Deno.build.os === "windows" ? "junction" : "dir",
   });
+}
+
+function isPrettierOverflow(result: CaseResult) {
+  return result.expected === "error: RangeError: Maximum call stack size exceeded"
+    && !result.actual.startsWith("error: ");
 }

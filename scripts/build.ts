@@ -60,14 +60,15 @@ const publishedPath = wasmDir.join("bin/Release/net10.0/wasi-wasm/publish/dprint
 const patchedPath = targetDir.join("patched.wasm");
 await $`node ${wasmDir.join("patch-shadow-stack.mjs")} ${publishedPath} ${patchedPath}`;
 const orderedPath = targetDir.join("ordered.wasm");
-await $`node ${wasmDir.join("order-functions.mjs")} ${patchedPath} ${targetDir.join("link.map")} ${wasmDir.join("hot-functions.txt")} ${orderedPath}`;
+await $`node ${wasmDir.join("order-functions.mjs")} ${patchedPath} ${targetDir.join("link.map")} ${wasmDir.join("hot-functions.txt")} ${wasmDir.join("kept-functions.txt")} ${orderedPath}`;
 const binaryen = Deno.env.get("BINARYEN");
 const wasmOptName = Deno.build.os === "windows" ? "wasm-opt.exe" : "wasm-opt";
 const wasmOpt = binaryen == null ? wasmOptName : $.path(binaryen).join(wasmOptName).toString();
 // -O3 inlines more than -O2, which is 1-2% faster. The compiler emits the legacy form of Wasm's exceptions, which
 // wasmtime only runs in the standard form that binaryen translates it to. Sorting the functions by the names that
-// order-functions.mjs gave them puts the ones that run most first
-await $`${wasmOpt} -O3 --enable-bulk-memory --enable-nontrapping-float-to-int --enable-sign-ext --enable-mutable-globals --enable-multivalue --enable-reference-types --enable-exception-handling --translate-to-exnref --reorder-functions-by-name ${orderedPath} -o ${outPath}`;
+// order-functions.mjs gave them puts the ones that run most first, and the ones that it marked as kept are not inlined
+// (kept-functions.txt says why)
+await $`${wasmOpt} --no-inline --pass-arg=no-inline@*#kept -O3 --enable-bulk-memory --enable-nontrapping-float-to-int --enable-sign-ext --enable-mutable-globals --enable-multivalue --enable-reference-types --enable-exception-handling --translate-to-exnref --reorder-functions-by-name ${orderedPath} -o ${outPath}`;
 
 $.logStep("Built", outPath.toString());
 

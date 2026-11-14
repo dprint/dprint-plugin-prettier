@@ -205,12 +205,22 @@ sample for a language that an upgrade adds.
 `test:prettier` runs Prettier's own format tests through `target/plugin.wasm`: every fixture of `tests/format` with
 every parser and the options of its test, as Prettier's test runner makes them, compared with Prettier from npm,
 including the message of an error. At 3.10.1 all 23,551 cases (79,853 with their CRLF, CR and second-format
-variants) give the same output. The cases that differ are written to `target/prettier-tests/diffs`. It leaves out
-the fixtures that mark a cursor or a range, the tests that give Prettier plugins, and the parsers of other packages
-(oxc, hermes, yuku). CI runs it after `deno task test`. `test:plugins` (after `test:prettier`, whose cases it uses)
-runs the tests of the Prettier plugins and Prettier's JavaScript tests with prettier-plugin-jsdoc: 38,086 cases at
-3.10.1, of which 4 are known to run out of stack in the plugin only (`knownStackOverflows`). `test:repos` formats the files of many codebases with
-Prettier's default options.
+variants) give the same output, apart from a few where Prettier from npm runs out of stack in the worker and the
+plugin doesn't (the chain of 2,000 binary operators of `js/binary-expression/long-chain`), which are counted apart.
+The cases that differ are written to `target/prettier-tests/diffs`. It leaves out the fixtures that mark a cursor or
+a range, the tests that give Prettier plugins, and the parsers of other packages (oxc, hermes, yuku). CI runs it
+after `deno task test`. `test:plugins` (after `test:prettier`, whose cases it uses) runs the tests of the Prettier
+plugins and Prettier's JavaScript tests with prettier-plugin-jsdoc: 38,086 cases at 3.10.1. `test:repos` formats
+the files of many codebases with Prettier's default options.
+
+How deep the code may be nested before the plugin runs out of stack depends on the frames of the functions that
+recurse for each level. wasm-opt inlines every function that has one caller, which made the frames of TypeScript's
+`converter` and `convertNode` hold their callees too: the plugin then ran out at a chain of 940 `+` in dprint
+(Prettier from npm in Node runs out at about 950). `wasm/kept-functions.txt` lists the functions that are not
+inlined for that reason, which made it 1,850 with no measurable difference in speed. Limiting what wasm-opt inlines
+everywhere (`--one-caller-inline-max-function-size=100`) gave about as much but was 2–6% slower. To see where the
+stack goes, make a build named with `wasm-opt -g`, make it overflow, and read the frame size of the functions that
+repeat in the stack with `wasmtime compile` and `wasmtime objdump --filter`.
 
 A difference is one of these:
 

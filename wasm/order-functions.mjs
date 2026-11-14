@@ -1,11 +1,12 @@
 // names the functions of a module that NativeAOT-LLVM linked so that sorting them by name, which wasm-opt does with
 // --reorder-functions-by-name, puts the ones that a profile gives (hot-functions.txt) first in the profile's order and
 // keeps the rest in the order they were linked in. Code that runs together is then together in the code that wasmtime
-// compiles, which makes formatting faster. The linker leaves out the names of functions, so they come from its map:
-//   node order-functions.mjs <in.wasm> <link map> <hot functions> <out.wasm>
+// compiles, which makes formatting faster. The functions that kept-functions.txt matches end with "#kept", which
+// wasm-opt's --no-inline is given. The linker leaves out the names of functions, so they come from its map:
+//   node order-functions.mjs <in.wasm> <link map> <hot functions> <kept functions> <out.wasm>
 import fs from "node:fs";
 
-const [inPath, mapPath, hotPath, outPath] = process.argv.slice(2);
+const [inPath, mapPath, hotPath, keptPath, outPath] = process.argv.slice(2);
 const bytes = fs.readFileSync(inPath);
 const sections = readSections(bytes);
 const importedCount = countImportedFunctions(bytes, sections.find(s => s.id === 2));
@@ -26,10 +27,18 @@ for (const name of hotLines.filter(line => line !== "" && !line.startsWith("#"))
   if (i != null && !rankByIndex.has(i)) rankByIndex.set(i, rankByIndex.size);
 }
 
+const keptPatterns = fs.readFileSync(keptPath, "utf8").split("\n").map(line => line.trimEnd())
+  .filter(line => line !== "" && !line.startsWith("#")).map(line => new RegExp(line));
+let keptCount = 0;
 const entries = [];
 for (let i = 0; i < definedCount; i++) {
   const rank = rankByIndex.get(i);
-  const name = rank != null ? "!" + String(rank).padStart(6, "0") : "~" + String(i).padStart(7, "0");
+  let name = rank != null ? "!" + String(rank).padStart(6, "0") : "~" + String(i).padStart(7, "0");
+  if (linkedNames[i].some(linked => keptPatterns.some(pattern => pattern.test(linked)))) {
+    // after the part that orders it
+    name += "#kept";
+    keptCount++;
+  }
   entries.push(u32(importedCount + i), vec(Buffer.from(name)));
 }
 const functionNames = Buffer.concat([u32(definedCount), ...entries]);
@@ -41,7 +50,7 @@ fs.writeFileSync(outPath, Buffer.concat([
   Buffer.from([0]),
   vec(nameContent),
 ]));
-console.log("functions", definedCount, "named first", rankByIndex.size);
+console.log("functions", definedCount, "named first", rankByIndex.size, "kept", keptCount);
 
 /** Gives the sections of a module: their id, the custom ones' name, and where their header, content and end are. */
 function readSections(bytes) {
