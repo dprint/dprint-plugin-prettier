@@ -23,7 +23,7 @@ function shouldAddParenthesesToChainExpression(/** @type {import("../../../../pr
   );
 }
 
-const isParenthesized = (/** @type {import("../types/estree.js").Node} */ node) => node.extra?.parenthesized;
+const isParenthesized = /** @returns {boolean | undefined} */ (/** @type {import("../types/estree.js").Node} */ node) => node.extra?.parenthesized;
 const isBabelOptionalChainElement = createTypeCheckFunction([
   "OptionalCallExpression",
   "OptionalMemberExpression",
@@ -60,7 +60,7 @@ function isBabelOptionalChainRoot(path) {
   );
 }
 
-function isChainExpressionRoot(path) {
+/** @returns {boolean} */ function isChainExpressionRoot(path) {
   return path.node.type === "ChainExpression" || isBabelOptionalChainRoot(path);
 }
 

@@ -329,10 +329,10 @@ class Parser {
     if (this.current.nodes && this.current.nodes.length) {
       this.current.raws.semicolon = this.semicolon
     }
-    this.semicolon = false
+    /** @type {boolean} */ this.semicolon = false
 
     this.current.raws.after = (this.current.raws.after || '') + this.spaces
-    this.spaces = ''
+    /** @type {string} */ this.spaces = ''
 
     if (this.current.parent) {
       this.current.source.end = this.getPosition(token[2])
@@ -358,7 +358,7 @@ class Parser {
       let prev = this.current.nodes[this.current.nodes.length - 1]
       if (prev && prev.type === 'rule' && !prev.raws.ownSemicolon) {
         prev.raws.ownSemicolon = this.spaces
-        this.spaces = ''
+        /** @type {string} */ this.spaces = ''
         // `ownSemicolon` also holds the spaces before the semicolon, but
         // the position above is the semicolon itself, so the node ends
         // right after it.
@@ -386,7 +386,7 @@ class Parser {
       start: this.getPosition(offset)
     }
     node.raws.before = this.spaces
-    this.spaces = ''
+    /** @type {string} */ this.spaces = ''
     if (node.type !== 'comment') this.semicolon = false
   }
 

@@ -12,7 +12,7 @@ let Rule = require('./rule')
 function hydrateInputs(json, inputs) {
   if (!json.inputs) return inputs
   return json.inputs.map(input => {
-    let inputHydrated = { ...input, __proto__: Input.prototype }
+    /** @type {any} */ let inputHydrated = { ...input, __proto__: Input.prototype }
     if (inputHydrated.map) {
       inputHydrated.map = {
         ...inputHydrated.map,
@@ -61,8 +61,8 @@ function constructNode(json, inputs, children) {
   return node
 }
 
-function fromJSON(json, inputs) {
-  if (Array.isArray(json)) return json.map(n => fromJSON(n))
+/** @returns {any} */ function fromJSON(/** @type {any} */ json, /** @type {any} */ inputs) {
+  if (Array.isArray(json)) return json.map(/** @returns {any} */ n => fromJSON(n))
 
   // An explicit stack instead of recursive calls to survive deeply
   // nested trees. Children are rehydrated before their parent node

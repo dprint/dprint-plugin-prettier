@@ -115,7 +115,7 @@ function findNodeAtOffset(
   }
 }
 
-function isForXStatementInitializer(node, parent) {
+/** @returns {boolean} */ function isForXStatementInitializer(node, parent) {
   return (
     (parent?.type === "ForStatement" && parent.init === node) ||
     ((parent?.type === "ForInStatement" || parent?.type === "ForOfStatement") &&
@@ -124,7 +124,7 @@ function isForXStatementInitializer(node, parent) {
 }
 
 // See https://www.ecma-international.org/ecma-262/5.1/#sec-A.5
-function isJsSourceElement(node, parent) {
+/** @returns {boolean} */ function isJsSourceElement(node, parent) {
   const { type } = node;
   return (
     parent?.type !== "DeclareExportDeclaration" &&

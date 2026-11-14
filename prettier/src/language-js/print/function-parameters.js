@@ -87,7 +87,7 @@ function printFunctionParameters(
       "(",
       printDanglingCommentsInList(
         /** @type {AstPath} */ path,
-        options,
+        /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options,
         functionParameterDanglingCommentFilter,
       ),
       ")",

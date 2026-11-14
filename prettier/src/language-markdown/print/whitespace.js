@@ -339,7 +339,7 @@ function isLineBreakAmbiguous(path) {
  * @param {AstPath} path
  * @returns {boolean}
  */
-function hasFakeWhitespaceAfterNextToken(path) {
+/** @returns {boolean} */ function hasFakeWhitespaceAfterNextToken(/** @type {AstPath} */ path) {
   const afterNext = path.siblings[path.index + 2];
   return afterNext?.type === "whitespace" && afterNext.value === "";
 }

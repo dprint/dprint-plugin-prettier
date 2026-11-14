@@ -473,7 +473,7 @@ module.exports = Container
 Container.default = Container
 
 /* c8 ignore start */
-Container.rebuild = node => {
+Container.rebuild = (/** @type {any} */ node) => {
   let stack = [node]
   while (stack.length > 0) {
     let next = stack.pop()

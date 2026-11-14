@@ -20,7 +20,7 @@ import { isSingleLineBlockComment } from "../attach/utilities.js";
   return false;
 }
 
-function addLeadingCommentToPossibleUnionType(/** @type {import("../../types/estree.js").Node} */ node, context) {
+/** @returns {boolean} */ function addLeadingCommentToPossibleUnionType(/** @type {import("../../types/estree.js").Node} */ node, context) {
   return addLeadingComment(
     shouldAttachToUnionTypeFirstElement(node, context) ? node.types[0] : node,
     context.comment,

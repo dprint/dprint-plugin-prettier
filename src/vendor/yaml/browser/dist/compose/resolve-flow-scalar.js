@@ -75,7 +75,7 @@ import { resolveEnd } from './resolve-end.js';
 }
 /** @returns {string} */ function unfoldLines(/** @type {string} */ source) {
     /** @type {RegExp} */ const line = /(.*?)\r?\n/sy;
-    let match = line.exec(source);
+    /** @type {RegExpExecArray | null} */ let match = line.exec(source);
     if (!match)
         return source;
     /**

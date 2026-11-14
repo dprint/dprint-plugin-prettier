@@ -101,7 +101,7 @@ function handleOwnLineComment(context) {
     handleBinaryCastExpressionComment,
     handleUnionTypeLeadingComments,
     handleSequenceExpressionLeadingComment,
-  ].some((fn) => fn(context));
+  ].some(/** @returns {boolean | undefined} */ (/** @type {(context: CommentContext) => boolean | undefined} */ fn) => fn(context));
 }
 
 /**
@@ -137,7 +137,7 @@ function handleEndOfLineComment(context) {
     handleBinaryCastExpressionComment,
     handleTaggedTemplateExpressionComments,
     handleSequenceExpressionLeadingComment,
-  ].some(/** @returns {boolean | undefined} */ (fn) => fn(context));
+  ].some(/** @returns {boolean | undefined} */ (/** @type {(context: CommentContext) => boolean | undefined} */ fn) => fn(context));
 }
 
 /**
@@ -165,10 +165,10 @@ function handleRemainingComment(context) {
     handleBinaryCastExpressionComment,
     handleUnionTypeLeadingComments,
     handleSequenceExpressionLeadingComment,
-  ].some(/** @returns {boolean | undefined} */ (fn) => fn(context));
+  ].some(/** @returns {boolean | undefined} */ (/** @type {(context: CommentContext) => boolean | undefined} */ fn) => fn(context));
 }
 
-function handleClosureTypeCastComments({
+/** @returns {boolean} */ function handleClosureTypeCastComments(/** @type {CommentContext} */ {
   comment,
   followingNode,
   enclosingNode,
@@ -825,7 +825,7 @@ function handleAssignmentLikeComments(context) {
   return false;
 }
 
-function handleTaggedTemplateExpressionComments({
+/** @returns {boolean} */ function handleTaggedTemplateExpressionComments(/** @type {CommentContext} */ {
   comment,
   enclosingNode,
   followingNode,
@@ -874,13 +874,14 @@ function handleTaggedTemplateExpressionComments({
 /**
 @param {NodeMap["TSMappedType"]} node
 @param {Comment} comment
+* @returns {boolean}
 */
 function isBeforeMappedTypeOpeningBracket(node, comment, options) {
   const bracketIndex = stripComments(options).indexOf("[", locStart(node));
   return locEnd(comment) < bracketIndex;
 }
 
-function handleTSMappedTypeComments(/** @type {CommentContext} */ { comment, enclosingNode, options }) {
+/** @returns {boolean | undefined} */ function handleTSMappedTypeComments(/** @type {CommentContext} */ { comment, enclosingNode, options }) {
   if (enclosingNode?.type !== "TSMappedType") {
     return;
   }
@@ -933,7 +934,7 @@ function handleTSMappedTypeComments(/** @type {CommentContext} */ { comment, enc
  * @param {CommentContext} context
  * @returns {boolean}
  */
-function handleLastUnionElementInExpression({
+function handleLastUnionElementInExpression(/** @type {CommentContext} */ {
   comment,
   precedingNode,
   enclosingNode,
@@ -1040,7 +1041,7 @@ function handleCommentsInDestructuringPattern(/** @type {CommentContext} */ {
   return false;
 }
 
-/** @param {CommentContext} context */
+/** @param {CommentContext} context @returns {boolean} */
 function handlePropertySignatureComments(context) {
   const { enclosingNode, followingNode, comment, options, placement } = context;
 
@@ -1097,7 +1098,7 @@ function handlePropertySignatureComments(context) {
   return false;
 }
 
-function handleBinaryCastExpressionComment(/** @type {CommentContext} */ {
+/** @returns {boolean | undefined} */ function handleBinaryCastExpressionComment(/** @type {CommentContext} */ {
   enclosingNode,
   precedingNode,
   followingNode,
@@ -1122,6 +1123,7 @@ function handleBinaryCastExpressionComment(/** @type {CommentContext} */ {
 /**
 @param {Comment} comment
 @param {NodeMap["ArrowFunctionExpression"]} arrowFunctionExpression
+* @returns {boolean}
 */
 function isCommentBeforeArrowFunctionExpressionArrow(
   comment,
@@ -1149,7 +1151,7 @@ null;
 @param {CommentContext} context
 @returns {boolean}
 */
-function handleArrowExpressionComments({
+function handleArrowExpressionComments(/** @type {CommentContext} */ {
   comment,
   enclosingNode,
   followingNode,
@@ -1196,7 +1198,7 @@ function getEnclosingAssignmentChainExpressionStatement(node, ancestors) {
   }
 }
 
-function handleSequenceExpressionLeadingComment({
+/** @returns {boolean} */ function handleSequenceExpressionLeadingComment(/** @type {CommentContext} */ {
   comment,
   enclosingNode,
   precedingNode,
@@ -1267,7 +1269,7 @@ function handleSequenceExpressionLeadingComment({
           enclosingNode.right === precedingNode))
     ) {
       return addTrailingComment(
-        isSequence ? precedingNode.expressions.at(-1) : precedingNode.right,
+        isSequence ? /** @type {import("../types/estree.js").Node[]} */ (precedingNode.expressions).at(-1) : precedingNode.right,
         comment,
       );
     }

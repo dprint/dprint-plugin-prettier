@@ -1,6 +1,15 @@
 // @nts-check
 import { defineParents } from "./utils/define-parents.mjs";
 import { getPointText } from "./utils/get-point-text.mjs";
+/** @import { YamlNode } from "./transforms/context.mjs" */
+/**
+ * @typedef {{
+ *   comment?: YamlNode,
+ *   leadingAttachableNode?: YamlNode,
+ *   trailingAttachableNode?: YamlNode,
+ *   trailingNode?: YamlNode,
+ * }} NodeTableEntry
+ */
 //#region src/attach.ts
 function attachComments(/** @type {YamlNode} */ root) {
 	defineParents(root);

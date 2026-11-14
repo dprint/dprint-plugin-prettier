@@ -1,4 +1,8 @@
 // @nts-check
+/** @typedef {{ index: number, line: number, column: number }} MeriyahLocation */
+/** @typedef {{ start: boolean, end: boolean, range: boolean }} MeriyahRanges */
+/** @typedef {{ type: string, start?: number, end?: number, range?: any[], loc?: any }} MeriyahNode */
+/** @typedef {{ validateRegex?: boolean, next?: boolean, ranges?: MeriyahRanges, webcompat?: boolean, loc?: boolean, raw?: boolean, impliedStrict?: boolean, preserveParens?: boolean, lexical?: boolean, jsx?: boolean, sourceType?: string, onComment?: any, onToken?: any, onInsertedSemicolon?: any, module?: boolean, globalReturn?: boolean, source?: string }} MeriyahOptions */
 var version$1 = "7.4.2";
 var packageJson = {
 	version: version$1};
@@ -800,7 +804,7 @@ class ParseError extends SyntaxError {
     /** @type {{ start: { line: number, column: number }, end: { line: number, column: number } }} */ loc;
     /** @type {string} */ description;
     constructor(/** @type {MeriyahLocation} */ start, /** @type {MeriyahLocation} */ end, /** @type {number} */ type, ...params) {
-        const description = errorMessages[type].replaceAll(/%(\d+)/g, (_, i) => params[i]);
+        const description = errorMessages[type].replaceAll(/%(\d+)/g, /** @returns {string} */ (_, i) => params[i]);
         const message = '[' + start.line + ':' + start.column + '-' + end.line + ':' + end.column + ']: ' + description;
         super(message);
         /** @type {number} */ this.start = start.index;
@@ -897,7 +901,7 @@ const descKeywordTable = new Map([
     ['meta', 209031],
     ['accessor', 209010],
 ]);
-const keywordLengths = [...descKeywordTable.keys()].map((keyword) => keyword.length);
+const keywordLengths = [...descKeywordTable.keys()].map(/** @returns {number} */ (keyword) => keyword.length);
 const minKeywordLength = Math.min(...keywordLengths);
 const maxKeywordLength = Math.max(...keywordLengths);
 
@@ -2584,7 +2588,7 @@ const entities = new Map(Object.entries({
     diams: '\u2666',
 }));
 /** @returns {string} */ function decodeHTMLStrict(/** @type {string} */ text) {
-    return text.replaceAll(/&(?:[\da-zA-Z]+|#x[\da-fA-F]+|#\d+);/g, (key) => {
+    return text.replaceAll(/&(?:[\da-zA-Z]+|#x[\da-fA-F]+|#\d+);/g, /** @returns {string | undefined} */ (key) => {
         if (key.charAt(1) === '#') {
             const secondChar = key.charAt(2);
             const codePoint = secondChar === 'x' ? parseInt(key.slice(3), 16) : parseInt(key.slice(2), 10);
@@ -2731,7 +2735,7 @@ const nextFeatures = 1 | 2 | 4;
     if (globalReturn && (!sourceType || sourceType === 'script')) {
         sourceType = 'commonjs';
     }
-    const options = {
+    /** @type {MeriyahOptions} */ const options = {
         ...restOptions,
         ranges,
         features,
@@ -2899,7 +2903,7 @@ class Parser {
     /** @type {MeriyahOptions} */ options;
     /** @type {number} */ token = 1048576;
     /** @type {number} */ flags = 0;
-    features = 0;
+    /** @type {number} */ features = 0;
     /** @type {number} */ index = 0;
     /** @type {number} */ line = 1;
     /** @type {number} */ column = 0;
@@ -3288,7 +3292,7 @@ function parseExpressionOrLabelledStatement(/** @type {Parser} */ parser, /** @t
     }
     return finishExpressionOrLabelledStatement(parser, context, scope, privateScope, labels, allowFuncDecl, expr, token, tokenValue, tokenStart, origin);
 }
-function finishExpressionOrLabelledStatement(parser, context, scope, privateScope, labels, allowFuncDecl, initialExpression, token, tokenValue, tokenStart, origin) {
+function finishExpressionOrLabelledStatement(/** @type {Parser} */ parser, /** @type {number} */ context, scope, privateScope, labels, /** @type {number} */ allowFuncDecl, initialExpression, /** @type {number} */ token, tokenValue, tokenStart, /** @type {number} */ origin) {
     if (token & 143360 && parser.getToken() === 21) {
         return parseLabelledStatement(parser, context, scope, privateScope, labels, tokenValue, initialExpression, token, allowFuncDecl, tokenStart, origin);
     }
@@ -3348,7 +3352,7 @@ function parseLabelledStatement(/** @type {Parser} */ parser, /** @type {number}
         body,
     }, start);
 }
-function parseAsyncArrowOrAsyncFunctionDeclaration(/** @type {Parser} */ parser, /** @type {number} */ context, /** @type {Scope | undefined} */ scope, /** @type {PrivateScope | undefined} */ privateScope, labels, allowAsyncFuncDecl, /** @type {number} */ allowFuncDecl, /** @type {number} */ origin) {
+function parseAsyncArrowOrAsyncFunctionDeclaration(/** @type {Parser} */ parser, /** @type {number} */ context, /** @type {Scope | undefined} */ scope, /** @type {PrivateScope | undefined} */ privateScope, labels, /** @type {number} */ allowAsyncFuncDecl, /** @type {number} */ allowFuncDecl, /** @type {number} */ origin) {
     const { tokenValue, tokenStart: start } = parser;
     const token = parser.getToken();
     let expr = parseIdentifier(parser, context);
@@ -3702,7 +3706,7 @@ function parseLetIdentOrVarDeclarationStatement(/** @type {Parser} */ parser, /*
     }
     return parseExpressionStatement(parser, context, expr, tokenStart);
 }
-function nextTokenIsUsingOnSameLine(parser) {
+/** @returns {boolean} */ function nextTokenIsUsingOnSameLine(/** @type {Parser | undefined} */ parser) {
     const { index: parserIndex, source } = parser;
     let index = parserIndex;
     while (index < parser.end) {
@@ -3735,10 +3739,10 @@ function nextTokenIsUsingOnSameLine(parser) {
     const following = source.codePointAt(index + 5);
     return following === undefined || (following !== 0x5c && !isIdentifierPart(following));
 }
-function isResourceBindingStart(token) {
+/** @returns {boolean} */ function isResourceBindingStart(/** @type {number} */ token) {
     return (token & 143360) === 143360 && (token & 20480) !== 20480;
 }
-function parseUsingDeclarationOrExpressionStatement(parser, context, scope, privateScope, labels, origin) {
+function parseUsingDeclarationOrExpressionStatement(/** @type {Parser | undefined} */ parser, /** @type {number} */ context, scope, privateScope, labels, /** @type {number} */ origin) {
     const { tokenStart, tokenValue, currentLocation } = parser;
     const token = parser.getToken();
     const expression = parseIdentifier(parser, context);
@@ -3762,7 +3766,7 @@ function parseUsingDeclarationOrExpressionStatement(parser, context, scope, priv
     }
     return finishExpressionOrLabelledStatement(parser, context, scope, privateScope, labels, 1, expression, token, tokenValue, tokenStart, origin);
 }
-function parseAwaitUsingDeclarationOrExpressionStatement(parser, context, scope, privateScope, labels, origin) {
+function parseAwaitUsingDeclarationOrExpressionStatement(/** @type {Parser | undefined} */ parser, /** @type {number} */ context, scope, privateScope, labels, /** @type {number} */ origin) {
     const start = parser.tokenStart;
     if (context & 524288)
         parser.report(179);
@@ -3788,7 +3792,7 @@ function parseAwaitUsingDeclarationOrExpressionStatement(parser, context, scope,
     }, start);
     return finishExpressionOrLabelledStatement(parser, context, scope, privateScope, labels, 0, expression, 1048576, '', start, origin);
 }
-function parseLexicalDeclaration(/** @type {Parser} */ parser, /** @type {number} */ context, /** @type {Scope | undefined} */ scope, /** @type {PrivateScope | undefined} */ privateScope, /** @type {number} */ kind, /** @type {number} */ origin = 0, declarationKind, declarationStart = parser.tokenStart, keywordConsumed = 0) {
+function parseLexicalDeclaration(/** @type {Parser} */ parser, /** @type {number} */ context, /** @type {Scope | undefined} */ scope, /** @type {PrivateScope | undefined} */ privateScope, /** @type {number} */ kind, /** @type {number} */ origin = 0, /** @type {string | undefined} */ declarationKind, declarationStart = parser.tokenStart, keywordConsumed = 0) {
     const start = declarationStart;
     if (!keywordConsumed)
         nextToken(parser, context);
@@ -3811,7 +3815,7 @@ function parseVariableStatement(/** @type {Parser} */ parser, /** @type {number}
         declarations,
     }, start);
 }
-/** @returns {any[]} */ function parseVariableDeclarationList(/** @type {Parser} */ parser, /** @type {number} */ context, /** @type {Scope | undefined} */ scope, /** @type {PrivateScope | undefined} */ privateScope, /** @type {number} */ kind, /** @type {number} */ origin = 0, declarationKind) {
+/** @returns {any[]} */ function parseVariableDeclarationList(/** @type {Parser} */ parser, /** @type {number} */ context, /** @type {Scope | undefined} */ scope, /** @type {PrivateScope | undefined} */ privateScope, /** @type {number} */ kind, /** @type {number} */ origin = 0, /** @type {string | undefined} */ declarationKind) {
     let bindingCount = 1;
     const firstDeclaration = parseVariableDeclaration(parser, context, scope, privateScope, kind, origin, declarationKind);
     const list = [firstDeclaration];
@@ -3832,7 +3836,7 @@ function parseVariableStatement(/** @type {Parser} */ parser, /** @type {number}
     }
     return list;
 }
-function parseVariableDeclaration(/** @type {Parser} */ parser, /** @type {number} */ context, /** @type {Scope | undefined} */ scope, /** @type {PrivateScope | undefined} */ privateScope, /** @type {number} */ kind, /** @type {number} */ origin, declarationKind) {
+function parseVariableDeclaration(/** @type {Parser} */ parser, /** @type {number} */ context, /** @type {Scope | undefined} */ scope, /** @type {PrivateScope | undefined} */ privateScope, /** @type {number} */ kind, /** @type {number} */ origin, /** @type {string | undefined} */ declarationKind) {
     const { tokenStart } = parser;
     const token = parser.getToken();
     /** @type {MeriyahNode | null} */ let init = null;
@@ -4761,7 +4765,7 @@ function parseYieldExpressionOrIdentifier(/** @type {Parser} */ parser, /** @typ
         parser.report(97, 'yield');
     return parseIdentifierOrArrow(parser, context, privateScope, 0, canAssign);
 }
-function parseAwaitExpressionOrIdentifier(/** @type {Parser} */ parser, /** @type {number} */ context, /** @type {PrivateScope | undefined} */ privateScope, /** @type {number} */ inNew, /** @type {number} */ inGroup, canAssign, /** @type {MeriyahLocation} */ start) {
+function parseAwaitExpressionOrIdentifier(/** @type {Parser} */ parser, /** @type {number} */ context, /** @type {PrivateScope | undefined} */ privateScope, /** @type {number} */ inNew, /** @type {number} */ inGroup, /** @type {number} */ canAssign, /** @type {MeriyahLocation} */ start) {
     if (inGroup) {
         if ((parser.destructible & 128) === 0) {
             parser.firstAwaitLocation ??= { start, end: parser.currentLocation };
@@ -7071,7 +7075,7 @@ function parseAsyncArrowOrCallExpression(/** @type {Parser} */ parser, /** @type
         }, start);
     }
     let destructible = 0;
-    let expr;
+    /** @type {MeriyahNode | undefined} */ let expr;
     let isNonSimpleParameterList = 0;
     parser.destructible =
         (parser.destructible | 256 | 128) ^
@@ -7135,7 +7139,7 @@ function parseAsyncArrowOrCallExpression(/** @type {Parser} */ parser, /** @type
         }
         else {
             expr = parseExpression(parser, context, privateScope, 1, 0, tokenStart);
-            destructible = 0;
+            /** @type {number} */ destructible = 0;
             params.push(expr);
             while (consumeOpt(parser, context | 32, 18)) {
                 params.push(parseExpression(parser, context, privateScope, 1, 0, tokenStart));
@@ -7322,7 +7326,7 @@ function parseClassExpression(/** @type {Parser} */ parser, /** @type {number} *
     }
     return list;
 }
-function parseDecorator(parser, context, privateScope) {
+function parseDecorator(/** @type {Parser | undefined} */ parser, context, privateScope) {
     const start = parser.tokenStart;
     nextToken(parser, context | 32);
     const expressionStart = parser.tokenStart;
@@ -7610,7 +7614,7 @@ function parsePropertyDefinition(/** @type {Parser} */ parser, /** @type {number
         ...(parser.features & 1 ? { decorators } : null),
     }, start);
 }
-function parseBindingPattern(/** @type {Parser} */ parser, /** @type {number} */ context, /** @type {Scope | undefined} */ scope, /** @type {PrivateScope | undefined} */ privateScope, kind, /** @type {number} */ origin = 0) {
+function parseBindingPattern(/** @type {Parser} */ parser, /** @type {number} */ context, /** @type {Scope | undefined} */ scope, /** @type {PrivateScope | undefined} */ privateScope, /** @type {number} */ kind, /** @type {number} */ origin = 0) {
     if (parser.getToken() & 143360 ||
         ((context & 1) === 0 && parser.getToken() === -2147483526))
         return parseAndClassifyIdentifier(parser, context, scope, kind, origin);

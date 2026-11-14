@@ -1,4 +1,5 @@
-function isForXStatementInitializer({ key, parent }) {
+// @nts-check
+/** @returns {boolean} */ function isForXStatementInitializer({ key, parent }) {
   return (
     (key === "init" && parent.type === "ForStatement") ||
     (key === "left" &&

@@ -7,12 +7,12 @@ import { hasEndComments, isNextLineEmpty, isNode } from "../utilities.js";
 /** @import { YamlNode } from "../../../../src/vendor/yaml-unist-parser/transforms/context.mjs" */
 
 const printedEmptyLineCache = new WeakMap();
-const getNextEmptyLinePrintedSet = (path) =>
-  getOrInsertComputed(printedEmptyLineCache, path.root, () => new Set());
-const markNextEmptyLinePrinted = (path, node = path.node) => {
+const getNextEmptyLinePrintedSet = /** @returns {Set<number>} */ (/** @type {AstPath} */ path) =>
+  getOrInsertComputed(printedEmptyLineCache, path.root, /** @returns {Set<number>} */ () => new Set());
+const markNextEmptyLinePrinted = (/** @type {AstPath} */ path, /** @type {YamlNode} */ node = path.node) => {
   getNextEmptyLinePrintedSet(path).add(node.position.end.offset);
 };
-const hasNextEmptyLineBeenPrinted = (path, node = path.node) =>
+const hasNextEmptyLineBeenPrinted = /** @returns {boolean} */ (/** @type {AstPath} */ path, /** @type {YamlNode} */ node = path.node) =>
   getNextEmptyLinePrintedSet(path).has(node.position.end.offset);
 
 function printNextEmptyLine(/** @type {AstPath} */ path, /** @type {string} */ originalText) {

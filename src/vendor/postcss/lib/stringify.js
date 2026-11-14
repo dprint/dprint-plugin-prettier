@@ -3,10 +3,10 @@
 
 let Stringifier = require('./stringifier')
 
-const STYLE_TAG = /(<)(\/?style\b)/gi
-const COMMENT_OPEN = /(<)(!--)/g
+/** @type {RegExp} */ const STYLE_TAG = /(<)(\/?style\b)/gi
+/** @type {RegExp} */ const COMMENT_OPEN = /(<)(!--)/g
 
-function escapeHTMLInCSS(str) {
+/** @returns {any} */ function escapeHTMLInCSS(/** @type {any} */ str) {
   if (!str.includes('<')) return str
   return str.replace(STYLE_TAG, '\\3c $2').replace(COMMENT_OPEN, '\\3c $2')
 }

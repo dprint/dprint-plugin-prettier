@@ -539,7 +539,7 @@ function needsParentheses(path, /** @type {import("../../../../prettier/src/lang
       if (
         path.match(
           undefined,
-          (/** @type {import("../types/estree.js").Node} */ node, key) =>
+          /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node, key) =>
             key === "typeAnnotation" && node.type === "NullableTypeAnnotation",
           (/** @type {import("../types/estree.js").Node} */ node, key) =>
             key === "typeAnnotation" && node.type === "TypeAnnotation",
@@ -672,7 +672,7 @@ function needsParentheses(path, /** @type {import("../../../../prettier/src/lang
         path.match(
           undefined,
           undefined,
-          (/** @type {import("../types/estree.js").Node} */ node, name) =>
+          /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node, name) =>
             name === "properties" && node.type === "ObjectPattern",
         )
       ) {

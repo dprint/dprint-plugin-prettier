@@ -24,9 +24,9 @@ const AT_NAME_END = /[\t\n\f\r "#'()/;[\\\]{}]/
   return str[0].toUpperCase() + str.slice(1)
 }
 
-function atruleStart(str, node) {
-  let name = '@' + node.name
-  let params = node.params ? str.rawValue(node, 'params') : ''
+/** @returns {string} */ function atruleStart(/** @type {Stringifier} */ str, /** @type {import("./node")} */ node) {
+  /** @type {string} */ let name = '@' + node.name
+  /** @type {string} */ let params = node.params ? str.rawValue(node, 'params') : ''
   let afterName = node.raws.afterName
 
   if (typeof afterName === 'undefined') {
@@ -41,13 +41,13 @@ function atruleStart(str, node) {
 // `*--x` is not a custom property: the parser checks the first token, and the
 // `*`/`_` hack prefix moves from `prop` into `before` only after that. A free
 // semicolon in front of the declaration also ends up in `before`.
-function isCustomProperty(node) {
+/** @returns {boolean} */ function isCustomProperty(/** @type {import("./node")} */ node) {
   if (!node.prop.startsWith('--')) return false
   let before = node.raws.before
   return typeof before === 'undefined' || !/[^\s;]$/.test(before)
 }
 
-function pushBody(str, stack, node) {
+function pushBody(/** @type {Stringifier} */ str, /** @type {any[]} */ stack, /** @type {import("./node")} */ node) {
   let nodes = node.nodes
   let last = nodes.length - 1
   while (last > 0) {
@@ -55,8 +55,8 @@ function pushBody(str, stack, node) {
     last -= 1
   }
 
-  let semicolon = str.raw(node, 'semicolon')
-  let isDocument = node.type === 'document'
+  /** @type {boolean} */ let semicolon = str.raw(node, 'semicolon')
+  /** @type {boolean} */ let isDocument = node.type === 'document'
   for (let i = nodes.length - 1; i >= 0; i--) {
     let child = nodes[i]
     let childSemicolon = last !== i || semicolon
@@ -80,13 +80,13 @@ function pushBody(str, stack, node) {
   }
 }
 
-function pushBlock(str, stack, node, start) {
+function pushBlock(/** @type {Stringifier} */ str, /** @type {any[]} */ stack, /** @type {import("./node")} */ node, /** @type {string} */ start) {
   let between = str.raw(node, 'between', 'beforeOpen')
   str.builder(start + between + '{', node, 'start')
 
   let hasNodes = node.nodes && node.nodes.length
   let close = () => {
-    let after = hasNodes
+    /** @type {string} */ let after = hasNodes
       ? str.raw(node, 'after')
       : str.raw(node, 'after', 'emptyBody')
     if (after) str.builder(after)
@@ -103,6 +103,11 @@ function pushBlock(str, stack, node, start) {
     close()
   }
 }
+
+/**
+ * what a node is written out to, with the node it is of and whether it is its start or its end
+ * @typedef {(str: string, node?: import("./node"), type?: string) => void} Builder
+ */
 
 class Stringifier {
   constructor(/** @type {Builder} */ builder) {
@@ -280,7 +285,7 @@ class Stringifier {
 
   /** @returns {undefined | string} */ rawBeforeClose(/** @type {import("./container")} */ root) {
     /** @type {string | undefined} */ let value
-    root.walk(i => {
+    root.walk((/** @type {import("./node")} */ i) => {
       if (i.nodes && i.nodes.length > 0) {
         if (typeof i.raws.after !== 'undefined') {
           value = i.raws.after
@@ -335,7 +340,7 @@ class Stringifier {
 
   /** @returns {undefined | string} */ rawBeforeOpen(/** @type {import("./container")} */ root) {
     /** @type {string | undefined} */ let value
-    root.walk(i => {
+    root.walk((/** @type {import("./node")} */ i) => {
       if (i.type !== 'decl') {
         value = i.raws.between
         if (typeof value !== 'undefined') return false
@@ -346,7 +351,7 @@ class Stringifier {
 
   /** @returns {undefined | string} */ rawBeforeRule(/** @type {import("./container")} */ root) {
     /** @type {string | undefined} */ let value
-    root.walk(i => {
+    root.walk((/** @type {import("./node")} */ i) => {
       if (i.nodes && (i.parent !== root || root.first !== i)) {
         if (typeof i.raws.before !== 'undefined') {
           value = i.raws.before
@@ -374,7 +379,7 @@ class Stringifier {
 
   /** @returns {undefined | string} */ rawEmptyBody(/** @type {import("./container")} */ root) {
     /** @type {string | undefined} */ let value
-    root.walk(i => {
+    root.walk((/** @type {import("./node")} */ i) => {
       if (i.nodes && i.nodes.length === 0) {
         value = i.raws.after
         if (typeof value !== 'undefined') return false
@@ -386,7 +391,7 @@ class Stringifier {
   /** @returns {undefined | string} */ rawIndent(/** @type {import("./container")} */ root) {
     if (root.raws.indent) return root.raws.indent
     /** @type {string | undefined} */ let value
-    root.walk(i => {
+    root.walk((/** @type {import("./node")} */ i) => {
       /** @type {import("./container") | undefined} */ let p = i.parent
       if (p && p !== root && p.parent && p.parent === root) {
         if (typeof i.raws.before !== 'undefined') {
@@ -402,7 +407,7 @@ class Stringifier {
 
   /** @returns {undefined | boolean} */ rawSemicolon(/** @type {import("./container")} */ root) {
     /** @type {boolean | undefined} */ let value
-    root.walk(i => {
+    root.walk((/** @type {import("./node")} */ i) => {
       if (i.nodes && i.nodes.length && i.last.type === 'decl') {
         value = i.raws.semicolon
         if (typeof value !== 'undefined') return false

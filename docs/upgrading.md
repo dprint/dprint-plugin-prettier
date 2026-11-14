@@ -11,7 +11,7 @@ went wrong then.
 1. [Update the version](#1-the-version) everywhere it is written.
 2. [Pin the packages](#2-the-packages) to the exact versions Prettier's release is built with, and update the copies
    in `src/vendor`.
-3. [Merge the source](#3-the-source) into `prettier/src`, keeping its types.
+3. [Merge the source](#3-the-source) into `prettier/src`, keeping its types, which `scripts/check-types.mjs` checks.
 4. [Carry the types of the TypeScript parser](#4-the-typescript-parser) over to the new bundle.
 5. [Check Flow's parser](#5-flows-parser), which is a Wasm module that the build makes C of.
 6. [Map new imports](#6-new-imports) in `src/nts.json`, and regenerate `src/generated`.
@@ -123,6 +123,22 @@ Files that are new upstream are copied as they are, and files that are gone are 
   first line drops it, and the file's types are then not used at all: at 3.9.10 this happened to 94 files, which
   made the plugin much slower without changing what it printed.
 - Where the code around a type changed, check that the type still fits; the build points out most of these.
+
+Then check that no types were lost, here and in `src/vendor`, against the commit before the upgrade:
+
+```sh
+node scripts/check-types.mjs <commit before the upgrade>
+node scripts/check-types.mjs HEAD --types-only   # after adding types, that only comments changed
+```
+
+It fails when a package has fewer type annotations than before, when a file lost `// @nts-check`, or when a new file
+of a checked package has none. At 3.10.1 the merges had lost about 330 annotations without anything failing:
+conflicts took the upstream side of typed lines, `@typedef` and `@import` blocks at the top of files were dropped
+(`yaml-unist-parser/attach.mjs` lost every type that way), and code that moved to a new file, such as
+`print/identifier.js`, came without its types. That file alone made formatting JavaScript about 10% slower, because
+calling `path.call` by name converts the function it is given each time. Most lost lines can be put back from the
+old copy where the code is the same, and the rest typed by hand or recorded again (section 8). The plugin is only as
+fast as before when every package has at least as many types as before.
 
 ## 4. The TypeScript parser
 

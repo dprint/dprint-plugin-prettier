@@ -320,7 +320,7 @@ async function hasPragma(/** @type {string} */ text, options) {
   return !selectedParser.hasPragma || selectedParser.hasPragma(text);
 }
 
-async function hasIgnorePragma(text, options) {
+async function hasIgnorePragma(/** @type {string} */ text, options) {
   const selectedParser = await resolveParser(options);
   return selectedParser.hasIgnorePragma?.(text);
 }

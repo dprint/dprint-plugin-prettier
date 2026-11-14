@@ -74,7 +74,7 @@ const isPrintingImportAttributes = createTypeCheckFunction([
       : isNamespaceSpecifier(node)
         ? "exportsFilter"
         : "properties";
-  const children = node[property];
+  const children = /** @type {import("../types/estree.js").Node[]} */ (node[property]);
 
   const shouldBreak =
     isEnumBody ||

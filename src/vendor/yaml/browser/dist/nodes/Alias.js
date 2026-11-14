@@ -46,7 +46,7 @@ class Alias extends NodeBase {
         }
         if (found && ctx) {
             const { anchors, doc, maxAliasCount } = ctx;
-            let data = anchors.get(found);
+            /** @type {import("yaml-cst-types").ToJSAnchor | undefined} */ let data = anchors.get(found);
             if (!data) {
                 // Resolve anchors for Node.prototype.toJS()
                 toJS(found, null, ctx);

@@ -3,6 +3,12 @@
 let Container = require('./container')
 let { my } = require('./symbols')
 
+/**
+ * @property {any} [node] given with the options
+ * @property {number} [index] given with the options
+ * @property {string} [plugin] given with the options
+ * @property {string} [word] given with the options
+ */
 class Warning {
   constructor(/** @type {string} */ text, /** @type {any} */ opts = {}) {
     /** @type {string} */ this.type = 'warning'

@@ -1,3 +1,4 @@
+// @nts-check
 import { isStringLiteral } from "./node-types.js";
 
 /**
@@ -6,10 +7,10 @@ import { isStringLiteral } from "./node-types.js";
 
 const isIdentifierNew = (node) =>
   node.type === "Identifier" && node.name === "new";
-const isStringLiteralNew = (node) =>
+const isStringLiteralNew = /** @returns {boolean} */ (node) =>
   isStringLiteral(node) && node.value === "new";
 
-function isFlowMethodSignatureWithNewKey(node) {
+/** @returns {boolean} */ function isFlowMethodSignatureWithNewKey(node) {
   return (
     node.type === "ObjectTypeProperty" &&
     node.method &&
@@ -18,7 +19,7 @@ function isFlowMethodSignatureWithNewKey(node) {
   );
 }
 
-function isTsMethodSignatureWithNewKey(node) {
+/** @returns {boolean} */ function isTsMethodSignatureWithNewKey(node) {
   return (
     node.type === "TSMethodSignature" &&
     !node.computed &&

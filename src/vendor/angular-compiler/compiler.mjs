@@ -1607,7 +1607,7 @@ class LiteralMapPropertyAssignment {
   /** @type {string} */ key;
   /** @type {Expression} */ value;
   /** @type {boolean} */ quoted;
-  leadingComments;
+  /** @type {LeadingComment[] | undefined} */ leadingComments;
   constructor(key, value, quoted, leadingComments) {
     this.key = key;
     this.value = value;
@@ -1620,7 +1620,7 @@ class LiteralMapPropertyAssignment {
   clone() {
     return new LiteralMapPropertyAssignment(this.key, this.value.clone(), this.quoted, this.leadingComments ? [...this.leadingComments] : undefined);
   }
-  isConstant() {
+  /** @returns {boolean} */ isConstant() {
     return this.value.isConstant();
   }
 }
@@ -2213,7 +2213,7 @@ class FixupExpression extends Expression {
   /** @returns {boolean} */ isEquivalent(/** @type {Expression} */ e) {
     return e instanceof FixupExpression && this.resolved.isEquivalent(e.resolved);
   }
-  isConstant() {
+  /** @returns {boolean} */ isConstant() {
     return true;
   }
   /** @returns {FixupExpression} */ clone() {
@@ -4121,17 +4121,17 @@ const $BT = 96;
 }
 
 class ParseLocation {
-  file;
-  offset;
-  line;
-  col;
-  constructor(file, offset, line, col) {
+  /** @type {ParseSourceFile} */ file;
+  /** @type {number} */ offset;
+  /** @type {number} */ line;
+  /** @type {number} */ col;
+  constructor(/** @type {ParseSourceFile} */ file, /** @type {number} */ offset, /** @type {number} */ line, /** @type {number} */ col) {
     this.file = file;
     this.offset = offset;
     this.line = line;
     this.col = col;
   }
-  toString() {
+  /** @returns {string} */ toString() {
     return this.offset != null ? `${this.file.url}@${this.line}:${this.col}` : this.file.url;
   }
   /** @returns {ParseLocation} */ moveBy(/** @type {number} */ delta) {
@@ -4204,19 +4204,19 @@ class ParseLocation {
   }
 }
 class ParseSourceFile {
-  content;
-  url;
-  constructor(content, url) {
+  /** @type {string} */ content;
+  /** @type {string} */ url;
+  constructor(/** @type {string} */ content, /** @type {string} */ url) {
     this.content = content;
     this.url = url;
   }
 }
 class ParseSourceSpan {
-  start;
-  end;
-  fullStart;
-  details;
-  constructor(start, end, fullStart = start, details = null) {
+  /** @type {ParseLocation} */ start;
+  /** @type {ParseLocation} */ end;
+  /** @type {ParseLocation} */ fullStart;
+  /** @type {string | null} */ details;
+  constructor(/** @type {ParseLocation} */ start, /** @type {ParseLocation} */ end, /** @type {ParseLocation} */ fullStart = start, /** @type {string | null} */ details = null) {
     this.start = start;
     this.end = end;
     this.fullStart = fullStart;
@@ -4232,11 +4232,11 @@ var ParseErrorLevel;
   ParseErrorLevel[ParseErrorLevel["ERROR"] = 1] = "ERROR";
 })(ParseErrorLevel || (ParseErrorLevel = {}));
 class ParseError extends Error {
-  span;
-  msg;
-  level;
+  /** @type {ParseSourceSpan} */ span;
+  /** @type {string} */ msg;
+  /** @type {number} */ level;
   relatedError;
-  constructor(span, msg, level = ParseErrorLevel.ERROR, relatedError) {
+  constructor(/** @type {ParseSourceSpan} */ span, /** @type {string} */ msg, /** @type {number} */ level = ParseErrorLevel.ERROR, relatedError) {
     super(msg);
     this.span = span;
     this.msg = msg;
@@ -4313,17 +4313,17 @@ class ASTWithName extends AST {
   }
 }
 let EmptyExpr$1 = class EmptyExpr extends AST {
-  visit(visitor, context = null) {
+  visit(visitor, /** @type {import("../angular-estree-parser/dist/ast-transform/node-transformer.js").NodeTransformer | null | undefined} */ context = null) {
     return visitor.visitEmptyExpr?.(this, context);
   }
 };
 class ImplicitReceiver extends AST {
-  visit(visitor, context = null) {
+  visit(visitor, /** @type {import("../angular-estree-parser/dist/ast-transform/node-transformer.js").NodeTransformer | null | undefined} */ context = null) {
     return visitor.visitImplicitReceiver(this, context);
   }
 }
 class ThisReceiver extends AST {
-  visit(visitor, context = null) {
+  visit(visitor, /** @type {import("../angular-estree-parser/dist/ast-transform/node-transformer.js").NodeTransformer | null | undefined} */ context = null) {
     return visitor.visitThisReceiver?.(this, context);
   }
 }
@@ -4333,7 +4333,7 @@ class Chain extends AST {
     super(span, sourceSpan);
     this.expressions = expressions;
   }
-  visit(visitor, context = null) {
+  visit(visitor, /** @type {import("../angular-estree-parser/dist/ast-transform/node-transformer.js").NodeTransformer | null | undefined} */ context = null) {
     return visitor.visitChain(this, context);
   }
 }
@@ -4347,7 +4347,7 @@ class Conditional extends AST {
     this.trueExp = trueExp;
     this.falseExp = falseExp;
   }
-  visit(visitor, context = null) {
+  visit(visitor, /** @type {import("../angular-estree-parser/dist/ast-transform/node-transformer.js").NodeTransformer | null | undefined} */ context = null) {
     return visitor.visitConditional(this, context);
   }
 }
@@ -4359,7 +4359,7 @@ class PropertyRead extends ASTWithName {
     this.receiver = receiver;
     this.name = name;
   }
-  visit(visitor, context = null) {
+  visit(visitor, /** @type {import("../angular-estree-parser/dist/ast-transform/node-transformer.js").NodeTransformer | null | undefined} */ context = null) {
     return visitor.visitPropertyRead(this, context);
   }
 }
@@ -4371,7 +4371,7 @@ class SafePropertyRead extends ASTWithName {
     this.receiver = receiver;
     this.name = name;
   }
-  visit(visitor, context = null) {
+  visit(visitor, /** @type {import("../angular-estree-parser/dist/ast-transform/node-transformer.js").NodeTransformer | null | undefined} */ context = null) {
     return visitor.visitSafePropertyRead(this, context);
   }
 }
@@ -4383,7 +4383,7 @@ class KeyedRead extends AST {
     this.receiver = receiver;
     this.key = key;
   }
-  visit(visitor, context = null) {
+  visit(visitor, /** @type {import("../angular-estree-parser/dist/ast-transform/node-transformer.js").NodeTransformer | null | undefined} */ context = null) {
     return visitor.visitKeyedRead(this, context);
   }
 }
@@ -4395,7 +4395,7 @@ class SafeKeyedRead extends AST {
     this.receiver = receiver;
     this.key = key;
   }
-  visit(visitor, context = null) {
+  visit(visitor, /** @type {import("../angular-estree-parser/dist/ast-transform/node-transformer.js").NodeTransformer | null | undefined} */ context = null) {
     return visitor.visitSafeKeyedRead(this, context);
   }
 }
@@ -4416,7 +4416,7 @@ class BindingPipe extends ASTWithName {
     this.args = args;
     this.type = type;
   }
-  visit(visitor, context = null) {
+  visit(visitor, /** @type {import("../angular-estree-parser/dist/ast-transform/node-transformer.js").NodeTransformer | null | undefined} */ context = null) {
     return visitor.visitPipe(this, context);
   }
 }
@@ -4426,7 +4426,7 @@ class LiteralPrimitive extends AST {
     super(span, sourceSpan);
     this.value = value;
   }
-  visit(visitor, context = null) {
+  visit(visitor, /** @type {import("../angular-estree-parser/dist/ast-transform/node-transformer.js").NodeTransformer | null | undefined} */ context = null) {
     return visitor.visitLiteralPrimitive(this, context);
   }
 }
@@ -4436,7 +4436,7 @@ class LiteralArray extends AST {
     super(span, sourceSpan);
     this.expressions = expressions;
   }
-  visit(visitor, context = null) {
+  visit(visitor, /** @type {import("../angular-estree-parser/dist/ast-transform/node-transformer.js").NodeTransformer | null | undefined} */ context = null) {
     return visitor.visitLiteralArray(this, context);
   }
 }
@@ -4446,10 +4446,13 @@ class SpreadElement extends AST {
     super(span, sourceSpan);
     this.expression = expression;
   }
-  visit(visitor, context = null) {
+  visit(visitor, /** @type {import("../angular-estree-parser/dist/ast-transform/node-transformer.js").NodeTransformer | null | undefined} */ context = null) {
     return visitor.visitSpreadElement(this, context);
   }
 }
+/**
+@typedef {{ kind: string, key?: string, quoted?: boolean, span: ParseSpan, sourceSpan: AbsoluteSourceSpan, isShorthandInitialized?: boolean }} LiteralMapKey
+*/
 class LiteralMap extends AST {
   /** @type {LiteralMapKey[]} */ keys;
   /** @type {AST[]} */ values;
@@ -4458,7 +4461,7 @@ class LiteralMap extends AST {
     this.keys = keys;
     this.values = values;
   }
-  visit(visitor, context = null) {
+  visit(visitor, /** @type {import("../angular-estree-parser/dist/ast-transform/node-transformer.js").NodeTransformer | null | undefined} */ context = null) {
     return visitor.visitLiteralMap(this, context);
   }
 }
@@ -4470,7 +4473,7 @@ let Interpolation$1 = class Interpolation extends AST {
     this.strings = strings;
     this.expressions = expressions;
   }
-  visit(visitor, context = null) {
+  visit(visitor, /** @type {import("../angular-estree-parser/dist/ast-transform/node-transformer.js").NodeTransformer | null | undefined} */ context = null) {
     return visitor.visitInterpolation(this, context);
   }
 };
@@ -4484,7 +4487,7 @@ class Binary extends AST {
     this.left = left;
     this.right = right;
   }
-  visit(visitor, context = null) {
+  visit(visitor, /** @type {import("../angular-estree-parser/dist/ast-transform/node-transformer.js").NodeTransformer | null | undefined} */ context = null) {
     return visitor.visitBinary(this, context);
   }
   /** @returns {boolean} */ static isAssignmentOperation(/** @type {string} */ op) {
@@ -4508,7 +4511,7 @@ class Unary extends Binary {
     this.operator = operator;
     this.expr = expr;
   }
-  visit(visitor, context = null) {
+  visit(visitor, /** @type {import("../angular-estree-parser/dist/ast-transform/node-transformer.js").NodeTransformer | null | undefined} */ context = null) {
     if (visitor.visitUnary !== undefined) {
       return visitor.visitUnary(this, context);
     }
@@ -4521,7 +4524,7 @@ class PrefixNot extends AST {
     super(span, sourceSpan);
     this.expression = expression;
   }
-  visit(visitor, context = null) {
+  visit(visitor, /** @type {import("../angular-estree-parser/dist/ast-transform/node-transformer.js").NodeTransformer | null | undefined} */ context = null) {
     return visitor.visitPrefixNot(this, context);
   }
 }
@@ -4531,7 +4534,7 @@ class TypeofExpression extends AST {
     super(span, sourceSpan);
     this.expression = expression;
   }
-  visit(visitor, context = null) {
+  visit(visitor, /** @type {import("../angular-estree-parser/dist/ast-transform/node-transformer.js").NodeTransformer | null | undefined} */ context = null) {
     return visitor.visitTypeofExpression(this, context);
   }
 }
@@ -4541,7 +4544,7 @@ class VoidExpression extends AST {
     super(span, sourceSpan);
     this.expression = expression;
   }
-  visit(visitor, context = null) {
+  visit(visitor, /** @type {import("../angular-estree-parser/dist/ast-transform/node-transformer.js").NodeTransformer | null | undefined} */ context = null) {
     return visitor.visitVoidExpression(this, context);
   }
 }
@@ -4551,7 +4554,7 @@ class NonNullAssert extends AST {
     super(span, sourceSpan);
     this.expression = expression;
   }
-  visit(visitor, context = null) {
+  visit(visitor, /** @type {import("../angular-estree-parser/dist/ast-transform/node-transformer.js").NodeTransformer | null | undefined} */ context = null) {
     return visitor.visitNonNullAssert(this, context);
   }
 }
@@ -4565,7 +4568,7 @@ class Call extends AST {
     this.args = args;
     this.argumentSpan = argumentSpan;
   }
-  visit(visitor, context = null) {
+  visit(visitor, /** @type {import("../angular-estree-parser/dist/ast-transform/node-transformer.js").NodeTransformer | null | undefined} */ context = null) {
     return visitor.visitCall(this, context);
   }
 }
@@ -4579,7 +4582,7 @@ class SafeCall extends AST {
     this.args = args;
     this.argumentSpan = argumentSpan;
   }
-  visit(visitor, context = null) {
+  visit(visitor, /** @type {import("../angular-estree-parser/dist/ast-transform/node-transformer.js").NodeTransformer | null | undefined} */ context = null) {
     return visitor.visitSafeCall(this, context);
   }
 }
@@ -4681,7 +4684,7 @@ class ASTWithSource extends AST {
     this.location = location;
     this.errors = errors;
   }
-  visit(visitor, context = null) {
+  visit(visitor, /** @type {import("../angular-estree-parser/dist/ast-transform/node-transformer.js").NodeTransformer | null | undefined} */ context = null) {
     if (visitor.visitASTWithSource) {
       return visitor.visitASTWithSource(this, context);
     }
@@ -4691,6 +4694,9 @@ class ASTWithSource extends AST {
     return `${this.source} in ${this.location}`;
   }
 }
+/**
+@typedef {{ source: string, span: AbsoluteSourceSpan }} TemplateBindingIdentifier
+*/
 class VariableBinding {
   /** @type {AbsoluteSourceSpan} */ sourceSpan;
   /** @type {TemplateBindingIdentifier} */ key;
@@ -5179,8 +5185,8 @@ class DeferredBlockError extends BlockNode {
 }
 class ContentBlock extends BlockNode {
   name;
-  variables;
-  children;
+  /** @type {Variable[]} */ variables;
+  /** @type {any[]} */ children;
   i18n;
   constructor(name, variables, children, nameSpan, sourceSpan, startSourceSpan, endSourceSpan, i18n) {
     super(nameSpan, sourceSpan, startSourceSpan, endSourceSpan);
@@ -5194,9 +5200,9 @@ class ContentBlock extends BlockNode {
   }
 }
 class BoundaryBlock extends BlockNode {
-  children;
+  /** @type {any[]} */ children;
   errorBlocks;
-  mainBlockSpan;
+  /** @type {ParseSourceSpan} */ mainBlockSpan;
   i18n;
   constructor(children, errorBlocks, nameSpan, sourceSpan, mainBlockSpan, startSourceSpan, endSourceSpan, i18n) {
     super(nameSpan, sourceSpan, startSourceSpan, endSourceSpan);
@@ -5210,8 +5216,8 @@ class BoundaryBlock extends BlockNode {
   }
 }
 class BoundaryErrorBlock extends BlockNode {
-  children;
-  contextVariables;
+  /** @type {any[]} */ children;
+  /** @type {Variable[]} */ contextVariables;
   expression;
   i18n;
   constructor(children, contextVariables, expression, nameSpan, sourceSpan, startSourceSpan, endSourceSpan, i18n) {
@@ -5402,7 +5408,7 @@ let LetDeclaration$1 = class LetDeclaration {
   value;
   sourceSpan;
   nameSpan;
-  valueSpan;
+  /** @type {ParseSourceSpan | undefined} */ valueSpan;
   constructor(name, value, sourceSpan, nameSpan, valueSpan) {
     this.name = name;
     this.value = value;
@@ -5793,7 +5799,7 @@ function createMayBeForwardRefExpression(expression, /** @type {number} */ forwa
     forwardRef
   };
 }
-function convertFromMaybeForwardRefExpression({
+/** @returns {Expression} */ function convertFromMaybeForwardRefExpression({
   expression,
   forwardRef
 }) {
@@ -6039,7 +6045,7 @@ let Text$2 = class Text {
     this.value = value;
     this.sourceSpan = sourceSpan;
   }
-  visit(visitor, context) {
+  visit(visitor, /** @type {import("../angular-estree-parser/dist/ast-transform/node-transformer.js").NodeTransformer | undefined} */ context) {
     return visitor.visitText(this, context);
   }
 };
@@ -6050,7 +6056,7 @@ class Container {
     this.children = children;
     this.sourceSpan = sourceSpan;
   }
-  visit(visitor, context) {
+  visit(visitor, /** @type {import("../angular-estree-parser/dist/ast-transform/node-transformer.js").NodeTransformer | undefined} */ context) {
     return visitor.visitContainer(this, context);
   }
 }
@@ -6067,7 +6073,7 @@ class Icu {
     this.sourceSpan = sourceSpan;
     this.expressionPlaceholder = expressionPlaceholder;
   }
-  visit(visitor, context) {
+  visit(visitor, /** @type {import("../angular-estree-parser/dist/ast-transform/node-transformer.js").NodeTransformer | undefined} */ context) {
     return visitor.visitIcu(this, context);
   }
 }
@@ -6092,7 +6098,7 @@ class TagPlaceholder {
     this.startSourceSpan = startSourceSpan;
     this.endSourceSpan = endSourceSpan;
   }
-  visit(visitor, context) {
+  visit(visitor, /** @type {import("../angular-estree-parser/dist/ast-transform/node-transformer.js").NodeTransformer | undefined} */ context) {
     return visitor.visitTagPlaceholder(this, context);
   }
 }
@@ -6105,7 +6111,7 @@ class Placeholder {
     this.name = name;
     this.sourceSpan = sourceSpan;
   }
-  visit(visitor, context) {
+  visit(visitor, /** @type {import("../angular-estree-parser/dist/ast-transform/node-transformer.js").NodeTransformer | undefined} */ context) {
     return visitor.visitPlaceholder(this, context);
   }
 }
@@ -6119,7 +6125,7 @@ class IcuPlaceholder {
     this.name = name;
     this.sourceSpan = sourceSpan;
   }
-  visit(visitor, context) {
+  visit(visitor, /** @type {import("../angular-estree-parser/dist/ast-transform/node-transformer.js").NodeTransformer | undefined} */ context) {
     return visitor.visitIcuPlaceholder(this, context);
   }
 }
@@ -6142,7 +6148,7 @@ class BlockPlaceholder {
     this.startSourceSpan = startSourceSpan;
     this.endSourceSpan = endSourceSpan;
   }
-  visit(visitor, context) {
+  visit(visitor, /** @type {import("../angular-estree-parser/dist/ast-transform/node-transformer.js").NodeTransformer | undefined} */ context) {
     return visitor.visitBlockPlaceholder(this, context);
   }
 }
@@ -6200,7 +6206,7 @@ class RecurseVisitor {
   return str;
 }
 class LocalizeMessageStringVisitor {
-  visitText(text) {
+  /** @returns {string} */ visitText(text) {
     return text.value;
   }
   visitContainer(/** @type {Container} */ container) {
@@ -7520,7 +7526,7 @@ class ShadowCss {
 }
 class SafeSelector {
   placeholders = [];
-  index = 0;
+  /** @type {number} */ index = 0;
   /** @type {string} */ _content;
   constructor(/** @type {string} */ selector) {
     selector = this._escapeRegexMatches(selector, /(\[[^\]]*\])/g);
@@ -8501,7 +8507,7 @@ class ForeignContentExpr extends ExpressionBase {
   isEquivalent(e) {
     return e instanceof ForeignContentExpr && e.childrenViewXref === this.childrenViewXref && e.foreignComponentConstIndex === this.foreignComponentConstIndex;
   }
-  isConstant() {
+  /** @returns {boolean} */ isConstant() {
     return false;
   }
   transformInternalExpressions() {}
@@ -8521,7 +8527,7 @@ class BoundaryStateExpr extends ExpressionBase {
   isEquivalent(other) {
     return other instanceof BoundaryStateExpr && other.xref === this.xref;
   }
-  isConstant() {
+  /** @returns {boolean} */ isConstant() {
     return false;
   }
   transformInternalExpressions() {}
@@ -8904,7 +8910,7 @@ class SafePropertyReadExpr extends ExpressionBase {
     this.receiver = receiver;
     this.name = name;
   }
-  get index() {
+  /** @returns {string} */ get index() {
     return this.name;
   }
   visitExpression(visitor, context) {
@@ -9006,7 +9012,7 @@ class EmptyExpr extends ExpressionBase {
   /** @returns {boolean} */ isEquivalent(e) {
     return e instanceof EmptyExpr;
   }
-  isConstant() {
+  /** @returns {boolean} */ isConstant() {
     return true;
   }
   /** @returns {EmptyExpr} */ clone() {
@@ -9075,7 +9081,7 @@ class SlotLiteralExpr extends ExpressionBase {
   /** @returns {boolean} */ isEquivalent(e) {
     return e instanceof SlotLiteralExpr && e.slot === this.slot;
   }
-  isConstant() {
+  /** @returns {boolean} */ isConstant() {
     return true;
   }
   /** @returns {SlotLiteralExpr} */ clone() {
@@ -9104,7 +9110,7 @@ class ConditionalCaseExpr extends ExpressionBase {
   /** @returns {boolean} */ isEquivalent(e) {
     return e instanceof ConditionalCaseExpr && e.expr === this.expr;
   }
-  isConstant() {
+  /** @returns {boolean} */ isConstant() {
     return true;
   }
   /** @returns {ConditionalCaseExpr} */ clone() {
@@ -11184,7 +11190,7 @@ function temporariesIn(/** @type {Expression} */ e) {
   return e;
 }
 /** @returns {SafeTernaryExpr} */ function safeTernaryWithTemporary(/** @type {Expression} */ guard, body, ctx) {
-  let result;
+  /** @type {AST} */ let result;
   if (needsTemporaryInSafeAccess(guard)) {
     const xref = ctx.job.allocateXrefId();
     result = [new AssignTemporaryExpr(guard, xref), new ReadTemporaryExpr(xref)];
@@ -11624,7 +11630,7 @@ function namespaceSVG() {
 function namespaceMath() {
   return call(Identifiers.namespaceMathML, [], null);
 }
-function advance(delta, sourceSpan) {
+function advance(/** @type {number} */ delta, /** @type {ParseSourceSpan} */ sourceSpan) {
   return call(Identifiers.advance, delta > 1 ? [literal(delta)] : [], sourceSpan);
 }
 /** @returns {Expression} */ function reference(/** @type {number} */ slot) {
@@ -12281,7 +12287,7 @@ function parseProperty(/** @type {string} */ name) {
 }
 
 class IcuSerializerVisitor {
-  visitText(text) {
+  /** @returns {string} */ visitText(text) {
     return text.value;
   }
   visitContainer(/** @type {Container} */ container) {
@@ -12329,7 +12335,7 @@ class Text extends NodeWithI18n {
     this.value = value;
     this.tokens = tokens;
   }
-  visit(visitor, context) {
+  visit(visitor, /** @type {import("../angular-estree-parser/dist/ast-transform/node-transformer.js").NodeTransformer | undefined} */ context) {
     return visitor.visitText(this, context);
   }
 }
@@ -12345,7 +12351,7 @@ class Expansion extends NodeWithI18n {
     this.cases = cases;
     this.switchValueSourceSpan = switchValueSourceSpan;
   }
-  visit(visitor, context) {
+  visit(visitor, /** @type {import("../angular-estree-parser/dist/ast-transform/node-transformer.js").NodeTransformer | undefined} */ context) {
     return visitor.visitExpansion(this, context);
   }
 }
@@ -12362,7 +12368,7 @@ class ExpansionCase {
     this.valueSourceSpan = valueSourceSpan;
     this.expSourceSpan = expSourceSpan;
   }
-  visit(visitor, context) {
+  visit(visitor, /** @type {import("../angular-estree-parser/dist/ast-transform/node-transformer.js").NodeTransformer | undefined} */ context) {
     return visitor.visitExpansionCase(this, context);
   }
 }
@@ -12380,7 +12386,7 @@ class Attribute extends NodeWithI18n {
     this.valueSpan = valueSpan;
     this.valueTokens = valueTokens;
   }
-  visit(visitor, context) {
+  visit(visitor, /** @type {import("../angular-estree-parser/dist/ast-transform/node-transformer.js").NodeTransformer | undefined} */ context) {
     return visitor.visitAttribute(this, context);
   }
 }
@@ -12393,7 +12399,7 @@ class StartTagComment {
     this.type = type;
     this.sourceSpan = sourceSpan;
   }
-  visit(visitor, context) {
+  visit(visitor, /** @type {import("../angular-estree-parser/dist/ast-transform/node-transformer.js").NodeTransformer | undefined} */ context) {
     return visitor.visitStartTagComment ? visitor.visitStartTagComment(this, context) : undefined;
   }
 }
@@ -12419,7 +12425,7 @@ class Element extends NodeWithI18n {
     this.isVoid = isVoid;
     this.comments = comments;
   }
-  visit(visitor, context) {
+  visit(visitor, /** @type {import("../angular-estree-parser/dist/ast-transform/node-transformer.js").NodeTransformer | undefined} */ context) {
     return visitor.visitElement(this, context);
   }
 }
@@ -12430,7 +12436,7 @@ class Comment {
     this.value = value;
     this.sourceSpan = sourceSpan;
   }
-  visit(visitor, context) {
+  visit(visitor, /** @type {import("../angular-estree-parser/dist/ast-transform/node-transformer.js").NodeTransformer | undefined} */ context) {
     return visitor.visitComment(this, context);
   }
 }
@@ -12450,7 +12456,7 @@ class Block extends NodeWithI18n {
     this.startSourceSpan = startSourceSpan;
     this.endSourceSpan = endSourceSpan;
   }
-  visit(visitor, context) {
+  visit(visitor, /** @type {import("../angular-estree-parser/dist/ast-transform/node-transformer.js").NodeTransformer | undefined} */ context) {
     return visitor.visitBlock(this, context);
   }
 }
@@ -12478,7 +12484,7 @@ class Component extends NodeWithI18n {
     this.endSourceSpan = endSourceSpan;
     this.comments = comments;
   }
-  visit(visitor, context) {
+  visit(visitor, /** @type {import("../angular-estree-parser/dist/ast-transform/node-transformer.js").NodeTransformer | undefined} */ context) {
     return visitor.visitComponent(this, context);
   }
 }
@@ -12495,7 +12501,7 @@ class Directive {
     this.startSourceSpan = startSourceSpan;
     this.endSourceSpan = endSourceSpan;
   }
-  visit(visitor, context) {
+  visit(visitor, /** @type {import("../angular-estree-parser/dist/ast-transform/node-transformer.js").NodeTransformer | undefined} */ context) {
     return visitor.visitDirective(this, context);
   }
 }
@@ -12506,7 +12512,7 @@ class BlockParameter {
     this.expression = expression;
     this.sourceSpan = sourceSpan;
   }
-  visit(visitor, context) {
+  visit(visitor, /** @type {import("../angular-estree-parser/dist/ast-transform/node-transformer.js").NodeTransformer | undefined} */ context) {
     return visitor.visitBlockParameter(this, context);
   }
 }
@@ -12515,7 +12521,7 @@ class LetDeclaration {
   value;
   sourceSpan;
   nameSpan;
-  valueSpan;
+  /** @type {ParseSourceSpan | undefined} */ valueSpan;
   constructor(name, value, sourceSpan, nameSpan, valueSpan) {
     this.name = name;
     this.value = value;
@@ -12523,7 +12529,7 @@ class LetDeclaration {
     this.nameSpan = nameSpan;
     this.valueSpan = valueSpan;
   }
-  visit(visitor, context) {
+  visit(visitor, /** @type {import("../angular-estree-parser/dist/ast-transform/node-transformer.js").NodeTransformer | undefined} */ context) {
     return visitor.visitLetDeclaration(this, context);
   }
 }
@@ -12646,7 +12652,7 @@ class _Tokenizer {
   /** @type {boolean} */ _tokenizeBlocks;
   /** @type {boolean} */ _tokenizeLet;
   /** @type {boolean} */ _selectorlessEnabled;
-  tokens = [];
+  /** @type {Token[]} */ tokens = [];
   errors = [];
   nonNormalizedIcuExpressions = [];
   constructor(/** @type {ParseSourceFile} */ _file, _getTagDefinition, options) {
@@ -15154,6 +15160,9 @@ class _Scanner {
   return result;
 }
 
+/**
+@typedef {{ text: string, start: number, end: number }} InterpolationPiece
+*/
 class SplitInterpolation {
   /** @type {InterpolationPiece[]} */ strings;
   /** @type {InterpolationPiece[]} */ expressions;
@@ -15177,6 +15186,9 @@ class TemplateBindingParseResult {
 /** @returns {string} */ function getLocation(/** @type {ParseSourceSpan} */ span) {
   return span.start.toString() || '(unknown)';
 }
+/**
+@typedef {Readonly<{ stripped: string, hasComments: boolean }>} StrippedInput
+*/
 class Parser {
   /** @type {Lexer} */ _lexer;
   /** @type {boolean} */ _supportsDirectPipeReferences;
@@ -16140,7 +16152,7 @@ class _ParseAST {
   }
   /** @returns {TemplateLiteral} */ parseTemplateLiteral() {
     const elements = [];
-    const expressions = [];
+    /** @type {InterpolationPiece[]} */ const expressions = [];
     const start = this.inputIndex;
     while (this.next !== EOF) {
       const token = this.next;
@@ -16306,7 +16318,7 @@ class _ParseAST {
 }
 class SimpleExpressionChecker extends RecursiveAstVisitor {
   errors = [];
-  visitPipe() {
+  /** @returns {boolean} */ visitPipe() {
     this.errors.push('pipes');
   }
 }
@@ -16423,7 +16435,7 @@ class SerializeExpressionVisitor {
     return `/${ast.body}/${ast.flags || ''}`;
   }
   visitArrowFunction(/** @type {ArrowFunction} */ ast, context) {
-    let params;
+    /** @type {ArrowFunctionIdentifierParameter[]} */ let params;
     if (ast.parameters.length === 1) {
       params = ast.parameters[0].name;
     } else {
@@ -17355,13 +17367,13 @@ class I18nMetaVisitor {
     expansion.i18n = message;
     return expansion;
   }
-  visitText(text) {
+  /** @returns {string} */ visitText(text) {
     return text;
   }
   visitAttribute(/** @type {Attribute} */ attribute) {
     return attribute;
   }
-  visitComment(comment) {
+  /** @returns {null} */ visitComment(comment) {
     return comment;
   }
   visitExpansionCase(/** @type {ExpansionCase} */ expansionCase) {
@@ -17515,7 +17527,7 @@ class GetMsgSerializerVisitor {
   /** @returns {string} */ formatPh(/** @type {string} */ value) {
     return `{$${formatI18nPlaceholderName(value)}}`;
   }
-  visitText(text) {
+  /** @returns {string} */ visitText(text) {
     return text.value;
   }
   visitContainer(/** @type {Container} */ container) {
@@ -17560,7 +17572,7 @@ class LocalizeSerializerVisitor {
     this.placeholderToMessage = placeholderToMessage;
     this.pieces = pieces;
   }
-  visitText(text) {
+  /** @returns {string} */ visitText(text) {
     if (this.pieces[this.pieces.length - 1] instanceof LiteralPiece) {
       this.pieces[this.pieces.length - 1].text += text.value;
     } else {
@@ -21008,10 +21020,10 @@ const STYLE_PREFIX = 'style';
 const TEMPLATE_ATTR_PREFIX$1 = '*';
 const LEGACY_ANIMATE_PROP_PREFIX = 'animate-';
 class BindingParser {
-  _exprParser;
-  _schemaRegistry;
+  /** @type {Parser} */ _exprParser;
+  /** @type {ElementSchemaRegistry} */ _schemaRegistry;
   errors;
-  constructor(_exprParser, _schemaRegistry, errors) {
+  constructor(/** @type {Parser} */ _exprParser, /** @type {ElementSchemaRegistry} */ _schemaRegistry, /** @type {ParseError[]} */ errors) {
     this._exprParser = _exprParser;
     this._schemaRegistry = _schemaRegistry;
     this.errors = errors;
@@ -23017,7 +23029,7 @@ function parseConditionalBlockParameters(/** @type {Block} */ block, /** @type {
 }
 class PipeVisitor extends RecursiveAstVisitor {
   hasPipe = false;
-  visitPipe() {
+  /** @returns {boolean} */ visitPipe() {
     this.hasPipe = true;
   }
 }
@@ -23106,7 +23118,7 @@ class OnTriggerParser {
   /** @type {ParseSourceSpan | null} */ prefetchSpan;
   /** @type {ParseSourceSpan} */ onSourceSpan;
   /** @type {ParseSourceSpan | null} */ hydrateSpan;
-  index = 0;
+  /** @type {number} */ index = 0;
   /** @type {Token[]} */ tokens;
   constructor(/** @type {string} */ expression, /** @type {BindingParser} */ bindingParser, /** @type {number} */ start, /** @type {ParseSourceSpan} */ span, triggers, /** @type {ParseError[]} */ errors, validator, /** @type {boolean} */ isHydrationTrigger, /** @type {ParseSourceSpan | null} */ prefetchSpan, /** @type {ParseSourceSpan} */ onSourceSpan, /** @type {ParseSourceSpan | null} */ hydrateSpan) {
     this.expression = expression;
@@ -23227,7 +23239,7 @@ class OnTriggerParser {
           start: tokens[0].index
         });
         this.advance();
-        tokens = [];
+        /** @type {Token[]} */ tokens = [];
         continue;
       }
       tokens.push(token);
@@ -23710,7 +23722,7 @@ class HtmlAstToIvyAst {
   /** @returns {TextAttribute} */ visitAttribute(/** @type {Attribute} */ attribute) {
     return new TextAttribute(attribute.name, attribute.value, attribute.sourceSpan, attribute.keySpan, attribute.valueSpan, attribute.i18n);
   }
-  visitText(text) {
+  /** @returns {string} */ visitText(text) {
     return this.processedNodes.has(text) ? null : this._visitTextWithInterpolation(text.value, text.sourceSpan, text.tokens, text.i18n);
   }
   /** @returns {Icu$1 | null} */ visitExpansion(/** @type {Expansion} */ expansion) {
@@ -24154,13 +24166,13 @@ class NonBindableVisitor {
     const children = visitAll(this, ast.children, null);
     return new Element$1(ast.name, visitAll(this, ast.attrs), [], [], [], children, [], ast.isSelfClosing, ast.sourceSpan, ast.startSourceSpan, ast.endSourceSpan, ast.isVoid);
   }
-  visitComment(comment) {
+  /** @returns {null} */ visitComment(comment) {
     return null;
   }
   /** @returns {TextAttribute} */ visitAttribute(/** @type {Attribute} */ attribute) {
     return new TextAttribute(attribute.name, attribute.value, attribute.sourceSpan, attribute.keySpan, attribute.valueSpan, attribute.i18n);
   }
-  visitText(text) {
+  /** @returns {string} */ visitText(text) {
     return new Text$3(text.value, text.sourceSpan);
   }
   visitExpansion(/** @type {Expansion} */ expansion) {
@@ -24646,7 +24658,7 @@ function validateNoEventBindings(bindings, /** @type {BindingParser} */ bindingP
   }]))));
 }
 /** @returns {Expression} */ function createHostDirectivesFeatureArg(hostDirectives) {
-  const expressions = [];
+  /** @type {InterpolationPiece[]} */ const expressions = [];
   let hasForwardRef = false;
   for (const current of hostDirectives) {
     if (!current.inputs && !current.outputs) {
@@ -25197,8 +25209,8 @@ class DirectiveBinder {
   foreignComponents;
   /** @type {any[]} */ eagerDirectives;
   missingDirectives;
-  bindings;
-  references;
+  /** @type {BoundAttribute[]} */ bindings;
+  /** @type {Reference[]} */ references;
   conflictingHostDirectiveBindings;
   isInDeferBlock = false;
   constructor(directiveMatcher, foreignMatcher, directives, foreignComponents, eagerDirectives, missingDirectives, bindings, references, conflictingHostDirectiveBindings) {
@@ -25477,7 +25489,7 @@ class DirectiveBinder {
   visitLetDeclaration(decl) {}
 }
 class TemplateBinder extends CombinedRecursiveAstVisitor {
-  bindings;
+  /** @type {BoundAttribute[]} */ bindings;
   symbols;
   usedPipes;
   eagerPipes;
@@ -25659,8 +25671,8 @@ class R3BoundTarget {
   foreignComponents;
   /** @type {any[]} */ eagerDirectives;
   missingDirectives;
-  bindings;
-  references;
+  /** @type {BoundAttribute[]} */ bindings;
+  /** @type {Reference[]} */ references;
   exprTargets;
   symbols;
   nestingLevel;
@@ -26900,7 +26912,7 @@ function _parseMessageMeta(/** @type {string | undefined} */ i18n) {
 }
 
 class XmlTagDefinition {
-  closedByParent = false;
+  /** @type {boolean} */ closedByParent = false;
   implicitNamespacePrefix = null;
   isVoid = false;
   ignoreFirstLf = false;
@@ -27094,7 +27106,7 @@ let _WriteVisitor$1 = class _WriteVisitor {
       'equiv-text': equivText
     })];
   }
-  serialize(nodes) {
+  /** @returns {any[]} */ serialize(/** @type {any[]} */ nodes) {
     return [].concat(...nodes.map(node => node.visit(this)));
   }
 };
@@ -27173,7 +27185,7 @@ class XliffParser {
   }
 }
 let XmlToI18n$2 = class XmlToI18n {
-  _errors;
+  /** @type {ParseError[]} */ _errors;
   convert(message, url) {
     const xmlIcu = new XmlParser().parse(message, url, {
       tokenizeExpansionForms: true
@@ -27210,24 +27222,24 @@ let XmlToI18n$2 = class XmlToI18n {
     });
     return new Icu(icu.switchValue, icu.type, caseMap, icu.sourceSpan);
   }
-  visitExpansionCase(icuCase, context) {
+  visitExpansionCase(/** @type {ExpansionCase} */ icuCase, context) {
     return {
       value: icuCase.value,
       nodes: visitAll(this, icuCase.expression)
     };
   }
   visitComment(comment, context) {}
-  visitAttribute(attribute, context) {}
-  visitBlock(block, context) {}
-  visitBlockParameter(parameter, context) {}
+  visitAttribute(/** @type {Attribute} */ attribute, context) {}
+  visitBlock(/** @type {Block} */ block, context) {}
+  visitBlockParameter(/** @type {BlockParameter} */ parameter, context) {}
   visitLetDeclaration(decl, context) {}
   visitComponent(component, context) {
     this._addError(component, 'Unexpected node');
   }
-  visitDirective(directive, context) {
+  visitDirective(/** @type {Directive} */ directive, context) {
     this._addError(directive, 'Unexpected node');
   }
-  _addError(node, message) {
+  _addError(node, /** @type {string} */ message) {
     this._errors.push(new ParseError(node.sourceSpan, message));
   }
 };
@@ -27407,7 +27419,7 @@ class _WriteVisitor {
       disp: `{${ph.value.expression}, ${ph.value.type}, ${cases}}`
     })];
   }
-  serialize(nodes) {
+  /** @returns {any[]} */ serialize(/** @type {any[]} */ nodes) {
     this._nextPlaceholderId = 0;
     return [].concat(...nodes.map(node => node.visit(this)));
   }
@@ -27493,7 +27505,7 @@ class Xliff2Parser {
   }
 }
 let XmlToI18n$1 = class XmlToI18n {
-  _errors;
+  /** @type {ParseError[]} */ _errors;
   convert(message, url) {
     const xmlIcu = new XmlParser().parse(message, url, {
       tokenizeExpansionForms: true
@@ -27545,24 +27557,24 @@ let XmlToI18n$1 = class XmlToI18n {
     });
     return new Icu(icu.switchValue, icu.type, caseMap, icu.sourceSpan);
   }
-  visitExpansionCase(icuCase, context) {
+  visitExpansionCase(/** @type {ExpansionCase} */ icuCase, context) {
     return {
       value: icuCase.value,
       nodes: [].concat(...visitAll(this, icuCase.expression))
     };
   }
   visitComment(comment, context) {}
-  visitAttribute(attribute, context) {}
-  visitBlock(block, context) {}
-  visitBlockParameter(parameter, context) {}
+  visitAttribute(/** @type {Attribute} */ attribute, context) {}
+  visitBlock(/** @type {Block} */ block, context) {}
+  visitBlockParameter(/** @type {BlockParameter} */ parameter, context) {}
   visitLetDeclaration(decl, context) {}
   visitComponent(component, context) {
     this._addError(component, 'Unexpected node');
   }
-  visitDirective(directive, context) {
+  visitDirective(/** @type {Directive} */ directive, context) {
     this._addError(directive, 'Unexpected node');
   }
-  _addError(node, message) {
+  _addError(node, /** @type {string} */ message) {
     this._errors.push(new ParseError(node.sourceSpan, message));
   }
 };
@@ -27714,7 +27726,7 @@ class XtbParser {
   }
 }
 class XmlToI18n {
-  _errors;
+  /** @type {ParseError[]} */ _errors;
   convert(message, url) {
     const xmlIcu = new XmlParser().parse(message, url, {
       tokenizeExpansionForms: true
@@ -27736,7 +27748,7 @@ class XmlToI18n {
     });
     return new Icu(icu.switchValue, icu.type, caseMap, icu.sourceSpan);
   }
-  visitExpansionCase(icuCase, context) {
+  visitExpansionCase(/** @type {ExpansionCase} */ icuCase, context) {
     return {
       value: icuCase.value,
       nodes: visitAll(this, icuCase.expression)
@@ -27755,17 +27767,17 @@ class XmlToI18n {
     return null;
   }
   visitComment(comment, context) {}
-  visitAttribute(attribute, context) {}
-  visitBlock(block, context) {}
-  visitBlockParameter(block, context) {}
+  visitAttribute(/** @type {Attribute} */ attribute, context) {}
+  visitBlock(/** @type {Block} */ block, context) {}
+  visitBlockParameter(/** @type {BlockParameter} */ block, context) {}
   visitLetDeclaration(decl, context) {}
   visitComponent(component, context) {
     this._addError(component, 'Unexpected node');
   }
-  visitDirective(directive, context) {
+  visitDirective(/** @type {Directive} */ directive, context) {
     this._addError(directive, 'Unexpected node');
   }
-  _addError(node, message) {
+  _addError(node, /** @type {string} */ message) {
     this._errors.push(new ParseError(node.sourceSpan, message));
   }
 }
@@ -28351,7 +28363,7 @@ function createDirectiveDefinitionMap(meta) {
     const value = inputs[declaredName];
     const publicName = value.bindingPropertyName;
     const differentDeclaringName = publicName !== declaredName;
-    let result;
+    /** @type {AST} */ let result;
     if (differentDeclaringName || value.transformFunction !== null) {
       const values = [asLiteral(publicName), asLiteral(declaredName)];
       if (value.transformFunction !== null) {
@@ -29084,7 +29096,7 @@ class TcbExpr {
 }
 
 class TcbOp {
-  circularFallback() {
+  /** @returns {TcbOp} */ circularFallback() {
     return new TcbExpr('null!');
   }
 }
@@ -29243,7 +29255,7 @@ class TcbExprTranslator {
       receiver.wrapForTypeChecker();
     }
     const node = new TcbExpr(`${receiver.print()}.${ast.name}`).addParseSpanInfo(ast.nameSpan);
-    let result;
+    /** @type {AST} */ let result;
     if (isSafeChain) {
       result = new TcbExpr(node.print());
     } else {
@@ -29312,7 +29324,7 @@ class TcbExprTranslator {
   /** @returns {TcbExpr} */ visitTemplateLiteral(/** @type {TemplateLiteral} */ ast) {
     const length = ast.elements.length;
     const head = ast.elements[0];
-    let result;
+    /** @type {AST} */ let result;
     if (length === 1) {
       result = `\`${this.escapeTemplateLiteral(head.text)}\``;
     } else {
@@ -29726,10 +29738,10 @@ class TcbComponentContextCompletionOp extends TcbOp {
 class TcbControlFlowContentProjectionOp extends TcbOp {
   /** @type {Context} */ tcb;
   element;
-  ngContentSelectors;
-  componentName;
-  category;
-  constructor(tcb, element, ngContentSelectors, componentName) {
+  /** @type {string[]} */ ngContentSelectors;
+  /** @type {string} */ componentName;
+  /** @type {number} */ category;
+  constructor(/** @type {Context} */ tcb, element, /** @type {string[]} */ ngContentSelectors, /** @type {string} */ componentName) {
     super();
     this.tcb = tcb;
     this.element = element;
@@ -30415,8 +30427,8 @@ class TcbDirectiveTypeOpBase extends TcbOp {
   /** @type {Scope} */ scope;
   node;
   dir;
-  directiveIndex;
-  constructor(tcb, scope, node, dir, directiveIndex) {
+  /** @type {number | undefined} */ directiveIndex;
+  constructor(/** @type {Context} */ tcb, /** @type {Scope} */ scope, node, dir, /** @type {number | undefined} */ directiveIndex) {
     super();
     this.tcb = tcb;
     this.scope = scope;
@@ -30501,9 +30513,9 @@ class TcbDirectiveOutputsOp extends TcbOp {
   scope;
   node;
   inputs;
-  outputs;
+  /** @type {BoundEvent[]} */ outputs;
   dir;
-  constructor(tcb, scope, node, inputs, outputs, dir) {
+  constructor(/** @type {Context} */ tcb, /** @type {Scope} */ scope, node, /** @type {BoundAttribute[] | null} */ inputs, /** @type {BoundEvent[]} */ outputs, dir) {
     super();
     this.tcb = tcb;
     this.scope = scope;
@@ -30550,7 +30562,7 @@ class TcbUnclaimedOutputsOp extends TcbOp {
   tcb;
   scope;
   target;
-  outputs;
+  /** @type {BoundEvent[]} */ outputs;
   inputs;
   claimedOutputs;
   hasDirectives;
@@ -30620,7 +30632,7 @@ class TcbUnclaimedOutputsOp extends TcbOp {
   }
 }
 class TcbEventHandlerTranslator extends TcbExpressionTranslator {
-  resolve(ast) {
+  /** @returns {TcbExpr | null} */ resolve(/** @type {AST} */ ast) {
     if (ast instanceof PropertyRead && ast.receiver instanceof ImplicitReceiver && ast.name === EVENT_PARAMETER) {
       return new TcbExpr(EVENT_PARAMETER).addParseSpanInfo(ast.nameSpan);
     }
@@ -30699,7 +30711,7 @@ class TcbForLoopTrackTranslator extends TcbExpressionTranslator {
       }
     }
   }
-  resolve(ast) {
+  /** @returns {TcbExpr | null} */ resolve(/** @type {AST} */ ast) {
     if (ast instanceof PropertyRead && (ast.receiver instanceof ImplicitReceiver || ast.receiver instanceof ThisReceiver)) {
       const target = this.tcb.boundTarget.getExpressionTarget(ast);
       if (target !== null && (!(target instanceof Variable) || !this.allowedVariables.has(target))) {
@@ -30808,7 +30820,7 @@ class TcbIntersectionObserverOp extends TcbOp {
   tcb;
   scope;
   options;
-  constructor(tcb, scope, options) {
+  constructor(/** @type {Context} */ tcb, /** @type {Scope} */ scope, /** @type {AST} */ options) {
     super();
     this.tcb = tcb;
     this.scope = scope;
@@ -30849,7 +30861,7 @@ class TcbReferenceOp extends TcbOp {
   node;
   host;
   target;
-  constructor(tcb, scope, node, host, target) {
+  constructor(/** @type {Context} */ tcb, /** @type {Scope} */ scope, /** @type {Reference} */ node, host, target) {
     super();
     this.tcb = tcb;
     this.scope = scope;
@@ -30876,7 +30888,7 @@ class TcbReferenceOp extends TcbOp {
 class TcbInvalidReferenceOp extends TcbOp {
   tcb;
   scope;
-  constructor(tcb, scope) {
+  constructor(/** @type {Context} */ tcb, /** @type {Scope} */ scope) {
     super();
     this.tcb = tcb;
     this.scope = scope;
@@ -30895,9 +30907,9 @@ class TcbInvalidReferenceOp extends TcbOp {
 class TcbComponentNodeOp extends TcbOp {
   tcb;
   scope;
-  component;
+  /** @type {Component$1} */ component;
   optional = true;
-  constructor(tcb, scope, component) {
+  constructor(/** @type {Context} */ tcb, /** @type {Scope} */ scope, /** @type {Component$1} */ component) {
     super();
     this.tcb = tcb;
     this.scope = scope;
@@ -30916,9 +30928,9 @@ const REGISTRY = new DomElementSchemaRegistry();
 class TcbDomSchemaCheckerOp extends TcbOp {
   tcb;
   element;
-  checkElement;
+  /** @type {boolean} */ checkElement;
   claimedInputs;
-  constructor(tcb, element, checkElement, claimedInputs) {
+  constructor(/** @type {Context} */ tcb, element, /** @type {boolean} */ checkElement, claimedInputs) {
     super();
     this.tcb = tcb;
     this.element = element;
@@ -31037,7 +31049,7 @@ class TcbSwitchOp extends TcbOp {
 class TcbTemplateContextOp extends TcbOp {
   tcb;
   scope;
-  constructor(tcb, scope) {
+  constructor(/** @type {Context} */ tcb, /** @type {Scope} */ scope) {
     super();
     this.tcb = tcb;
     this.scope = scope;
@@ -31053,7 +31065,7 @@ class TcbTemplateBodyOp extends TcbOp {
   tcb;
   scope;
   template;
-  constructor(tcb, scope, template) {
+  constructor(/** @type {Context} */ tcb, /** @type {Scope} */ scope, /** @type {Template} */ template) {
     super();
     this.tcb = tcb;
     this.scope = scope;
@@ -31125,8 +31137,8 @@ class TcbBlockImplicitVariableOp extends TcbOp {
   tcb;
   scope;
   type;
-  variable;
-  constructor(tcb, scope, type, variable) {
+  /** @type {Variable} */ variable;
+  constructor(/** @type {Context} */ tcb, /** @type {Scope} */ scope, /** @type {TcbExpr} */ type, /** @type {Variable} */ variable) {
     super();
     this.tcb = tcb;
     this.scope = scope;
@@ -31147,8 +31159,8 @@ class TcbTemplateVariableOp extends TcbOp {
   tcb;
   scope;
   template;
-  variable;
-  constructor(tcb, scope, template, variable) {
+  /** @type {Variable} */ variable;
+  constructor(/** @type {Context} */ tcb, /** @type {Scope} */ scope, /** @type {Template} */ template, /** @type {Variable} */ variable) {
     super();
     this.tcb = tcb;
     this.scope = scope;
@@ -31175,9 +31187,9 @@ class TcbTemplateVariableOp extends TcbOp {
 class TcbBlockVariableOp extends TcbOp {
   tcb;
   scope;
-  initializer;
-  variable;
-  constructor(tcb, scope, initializer, variable) {
+  /** @type {TcbExpr} */ initializer;
+  /** @type {Variable} */ variable;
+  constructor(/** @type {Context} */ tcb, /** @type {Scope} */ scope, /** @type {TcbExpr} */ initializer, /** @type {Variable} */ variable) {
     super();
     this.tcb = tcb;
     this.scope = scope;
@@ -31211,7 +31223,7 @@ class Scope {
   templateCtxOpMap = new Map();
   varMap = new Map();
   letDeclOpMap = new Map();
-  statements = [];
+  /** @type {Statement[]} */ statements = [];
   static getForLoopContextVariableTypes() {
     return new Map([['$first', 'boolean'], ['$last', 'boolean'], ['$even', 'boolean'], ['$odd', 'boolean'], ['$index', 'number'], ['$count', 'number']]);
   }
@@ -31858,21 +31870,21 @@ class IndexerVisitor extends CombinedRecursiveAstVisitor {
     }
     super.visitElement(element);
   }
-  visitTemplate(template) {
+  visitTemplate(/** @type {Template} */ template) {
     const templateIdentifier = this.directiveHostToIdentifier(template);
     if (templateIdentifier !== null) {
       this.identifiers.add(templateIdentifier);
     }
     super.visitTemplate(template);
   }
-  visitReference(reference) {
+  visitReference(/** @type {Reference} */ reference) {
     const referenceIdentifier = this.targetToIdentifier(reference);
     if (referenceIdentifier !== null) {
       this.identifiers.add(referenceIdentifier);
     }
     super.visitReference(reference);
   }
-  visitVariable(variable) {
+  visitVariable(/** @type {Variable} */ variable) {
     const variableIdentifier = this.targetToIdentifier(variable);
     if (variableIdentifier !== null) {
       this.identifiers.add(variableIdentifier);
@@ -31893,18 +31905,18 @@ class IndexerVisitor extends CombinedRecursiveAstVisitor {
     }
     super.visitComponent(component);
   }
-  visitDirective(directive) {
+  visitDirective(/** @type {Directive$1} */ directive) {
     const identifier = this.directiveHostToIdentifier(directive);
     if (identifier !== null) {
       this.identifiers.add(identifier);
     }
     super.visitDirective(directive);
   }
-  visitPropertyRead(ast) {
+  /** @returns {TcbExpr} */ visitPropertyRead(/** @type {PropertyRead} */ ast) {
     this.visitIdentifier(ast, IdentifierKind.Property);
     super.visitPropertyRead(ast, null);
   }
-  visitPipe(ast) {
+  visitPipe(/** @type {BindingPipe} */ ast) {
     this.visitPipeIdentifier(ast);
     super.visitPipe(ast, null);
   }
@@ -31934,7 +31946,7 @@ class IndexerVisitor extends CombinedRecursiveAstVisitor {
     };
     this.identifiers.add(identifier);
   }
-  visitBoundAttribute(attribute) {
+  visitBoundAttribute(/** @type {BoundAttribute} */ attribute) {
     const identifier = this.bindingToIdentifier(attribute, IdentifierKind.Input);
     if (identifier !== null) {
       this.identifiers.add(identifier);

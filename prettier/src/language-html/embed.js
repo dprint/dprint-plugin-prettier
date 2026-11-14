@@ -86,7 +86,7 @@ function embed(/** @type {AstPath} */ path, /** @type {import("./print-options.j
                 ? htmlWhitespace.dedentString(
                     node.value.replace(/^[^\S\n]*\n/, ""),
                   )
-                : node.value;
+                : /** @type {import("./parse/ast.js").Node} */ (node).value;
             const textToDocOptions = { parser, __embeddedInHtml: true };
             if (options.parser === "html" && parser === "babel") {
               /** @type {string} */ let sourceType = "script";

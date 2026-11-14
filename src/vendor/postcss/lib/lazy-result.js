@@ -222,7 +222,7 @@ class LazyResult {
     /** @type {any} */ let plugin = this.result.lastPlugin
     try {
       if (node) node.addToError(error)
-      this.error = error
+      /** @type {any} */ this.error = error
       if (error.name === 'CssSyntaxError' && !error.plugin) {
         error.plugin = plugin.postcssPlugin
         error.setMessage()
@@ -563,7 +563,7 @@ class LazyResult {
       let visitNode = visit.node
 
       if (visit.iterator !== 0) {
-        let iterator = visit.iterator
+        /** @type {number} */ let iterator = visit.iterator
         // Advance past the child we just finished visiting. Like
         // `Container#each`, the index is incremented only after a child has
         // been fully processed. Incrementing before (as this loop used to)
@@ -574,7 +574,7 @@ class LazyResult {
           visit.descending = false
           visitNode.indexes[iterator] += 1
         }
-        let child
+        /** @type {any} */ let child
         let descended = false
         while ((child = visitNode.nodes[visitNode.indexes[iterator]])) {
           if (!child[isClean]) {

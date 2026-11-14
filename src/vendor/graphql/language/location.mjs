@@ -1,3 +1,4 @@
+// @nts-check
 import { AccumulatorMap } from "../jsutils/AccumulatorMap.mjs";
 /** @type {RegExp} */ const LineRegExp = /\r\n|[\n\r]/g;
 export function getLocation(/** @type {import("./source.mjs").Source} */ source, /** @type {number} */ position) {

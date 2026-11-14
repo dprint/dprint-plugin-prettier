@@ -57,7 +57,7 @@ const nthPseudoClasses = new Set([
   ":nth-of-type",
   ":nth-last-of-type",
 ]);
-function isNthPseudoClassNode(node) {
+/** @returns {boolean} */ function isNthPseudoClassNode(/** @type {import("../types.js").CssNode | undefined} */ node) {
   return (
     node?.type === "selector-pseudo" &&
     nthPseudoClasses.has(node.value.toLowerCase())
@@ -262,8 +262,8 @@ function isDetachedRulesetCallNode(/** @type {import("../types.js").CssNode} */ 
 }
 
 // The SCSS parser attaches a comment before a map entry to that entry's group
-function skipLeadingComments(groups) {
-  const start = groups.findIndex((group) => group.type !== "value-comment");
+/** @returns {import("../types.js").CssNode[]} */ function skipLeadingComments(/** @type {import("../types.js").CssNode[]} */ groups) {
+  /** @type {number} */ const start = groups.findIndex(/** @returns {boolean} */ (/** @type {import("../types.js").CssNode} */ group) => group.type !== "value-comment");
   return start === -1 ? [] : groups.slice(start);
 }
 
@@ -277,7 +277,7 @@ function skipLeadingComments(groups) {
 
 // `key: (…)` in an open paren group: the paren group dedents the whole entry,
 // since its value is already indented by its own parentheses
-function isDedentedMapEntryNode(node, parentNode) {
+/** @returns {boolean} */ function isDedentedMapEntryNode(/** @type {import("../types.js").CssNode} */ node, /** @type {import("../types.js").CssNode | undefined} */ parentNode) {
   if (
     parentNode?.type !== "value-paren_group" ||
     !parentNode.open ||

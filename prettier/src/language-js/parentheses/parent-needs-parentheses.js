@@ -91,12 +91,12 @@ function parentNeedsParentheses(path, options, needsParentheses) {
         path.match(
           undefined,
           undefined,
-          (/** @type {import("../types/estree.js").Node} */ node, key) =>
+          /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node, key) =>
             key === "returnType" && node.type === "ArrowFunctionExpression",
         ) &&
         !(
           node.type === "NullableTypeAnnotation" &&
-          path.call(() => needsParentheses(path, options), "typeAnnotation")
+          path.call(/** @returns {boolean} */ () => needsParentheses(path, options), "typeAnnotation")
         ) &&
         includesFunctionTypeInObjectType(node)
       ) {
@@ -148,7 +148,7 @@ function parentNeedsParentheses(path, options, needsParentheses) {
   }
 }
 
-function endsWithInstantiationExpression(node) {
+/** @returns {boolean} */ function endsWithInstantiationExpression(node) {
   while (node) {
     if (
       node.type === "UnaryExpression" ||
@@ -166,7 +166,7 @@ function endsWithInstantiationExpression(node) {
   return node?.type === "TSInstantiationExpression";
 }
 
-function willArgumentBreakAndAddParentheses(path, options) {
+/** @returns {boolean} */ function willArgumentBreakAndAddParentheses(path, options) {
   /** @type {{ key: any, parent: import("../types/estree.js").Node }} */ const { key, parent } = path;
   if (!(
     key === "argument" &&
@@ -264,7 +264,7 @@ function shouldWrapFunctionForExportDefault(path, options, needsParentheses) {
 /** @returns {boolean} */ function includesFunctionTypeInObjectType(/** @type {import("../types/estree.js").Node} */ node) {
   return hasNode(
     node,
-    (node) =>
+    /** @returns {boolean} */ (node) =>
       node.type === "ObjectTypeAnnotation" &&
       hasNode(
         node,

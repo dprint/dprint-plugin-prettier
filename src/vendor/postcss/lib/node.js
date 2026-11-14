@@ -456,7 +456,7 @@ class Node {
 
     for (let step = 0; step < queue.length; step++) {
       let [node, holder, key] = queue[step]
-      let fixed = {}
+      /** @type {Record<string, any>} */ let fixed = {}
       holder[key] = fixed
 
       for (let name in node) {
@@ -490,7 +490,7 @@ class Node {
           }
         } else if (name === 'source') {
           if (value == null) continue
-          let inputId = inputs.get(value.input)
+          /** @type {number | undefined} */ let inputId = inputs.get(value.input)
           if (inputId == null) {
             inputId = inputs.size
             inputs.set(value.input, inputId)

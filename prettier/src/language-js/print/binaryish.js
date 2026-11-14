@@ -40,7 +40,7 @@ import { shouldFlatten } from "../utilities/should-flatten.js";
 
 /** @type {number} */ let uid = 0;
 
-function isInlineLogicalExpression(node) {
+/** @returns {boolean} */ function isInlineLogicalExpression(node) {
   if (node.type !== "LogicalExpression") {
     return false;
   }
@@ -60,11 +60,11 @@ function isInlineLogicalExpression(node) {
 }
 
 const topicReferenceCheckResult = new WeakMap();
-const isHackStylePipeline = (path) =>
+const isHackStylePipeline = /** @returns {boolean} */ (path) =>
   path.node.type === "BinaryExpression" &&
   path.node.operator === "|>" &&
-  getOrInsertComputed(topicReferenceCheckResult, path.root, () =>
-    hasNode(path.node, (node) => node.type === "TopicReference"),
+  getOrInsertComputed(topicReferenceCheckResult, path.root, /** @returns {boolean} */ () =>
+    hasNode(path.node, /** @returns {boolean} */ (node) => node.type === "TopicReference"),
   );
 
 /*
@@ -173,7 +173,7 @@ function printBinaryishExpression(/** @type {AstPath} */ path, /** @type {import
   /** @type {boolean} */ const hasJsx = isJsxElement(node.right);
 
   const firstGroupIndex = parts.findIndex(
-    (part) => getDocType(part) === DOC_TYPE_GROUP,
+    /** @returns {boolean} */ (part) => getDocType(part) === DOC_TYPE_GROUP,
   );
 
   // Separate the leftmost expression, possibly with its leading comments.

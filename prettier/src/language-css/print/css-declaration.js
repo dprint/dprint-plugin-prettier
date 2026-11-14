@@ -22,8 +22,8 @@ import {
 import { shouldBreakList } from "./parenthesized-value-group.js";
 import printSequence from "./sequence.js";
 
-function printCssDeclaration(/** @type {AstPath} */ path, /** @type {CssOptions} */ options, /** @type {CssPrint} */ print) {
-  const { node, parent } = path;
+/** @returns {any[]} */ function printCssDeclaration(/** @type {AstPath} */ path, /** @type {CssOptions} */ options, /** @type {CssPrint} */ print) {
+  /** @type {{ node: import("../types.js").CssNode, parent: import("../types.js").CssNode }} */ const { node, parent } = path;
 
   /** @type {{ between: string }} */ const { between: rawBetween } = node.raws;
   const trimmedBetween = rawBetween.trim();

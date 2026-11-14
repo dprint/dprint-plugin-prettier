@@ -90,7 +90,7 @@ function printMdast(
         node.value,
         options.proseWrap,
         true,
-        options,
+        /** @type {MarkdownOptions} */ options,
       );
       if (getDocType(doc) === DOC_TYPE_STRING) {
         parts.push([parts.pop(), doc]);

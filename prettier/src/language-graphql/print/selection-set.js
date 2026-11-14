@@ -1,3 +1,4 @@
+// @nts-check
 import { hardline, indent, join } from "../../document/index.js";
 import { printDanglingComments } from "../../main/comments/print.js";
 import { hasExplicitOperation } from "../utilities/has-explicit-operation.js";
@@ -7,8 +8,8 @@ import { printSequence } from "./sequence.js";
 @import {Doc} from "../../document/index.js"
 */
 
-function printSelectionSet(path, options, print) {
-  const { node } = path;
+/** @returns {Doc[]} */ function printSelectionSet(/** @type {import("../../common/ast-path.js").default} */ path, /** @type {import("../print-types.js").GraphqlOptions} */ options, /** @type {import("../print-types.js").GraphqlPrint} */ print) {
+  /** @type {{ node: import("../print-types.js").GraphqlNode }} */ const { node } = path;
 
   /** @type {Doc[]} */
   const parts = ["{"];
@@ -33,8 +34,8 @@ function printSelectionSet(path, options, print) {
   return parts;
 }
 
-function printSelectionSetField(path, options, print) {
-  const { node } = path;
+/** @returns {Doc} */ function printSelectionSetField(/** @type {import("../../common/ast-path.js").default} */ path, /** @type {import("../print-types.js").GraphqlOptions} */ options, /** @type {import("../print-types.js").GraphqlPrint} */ print) {
+  /** @type {{ node: import("../print-types.js").GraphqlNode }} */ const { node } = path;
   const { selectionSet } = node;
 
   if (!selectionSet) {

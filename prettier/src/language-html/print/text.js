@@ -35,7 +35,7 @@ import {
 function printText(/** @type {AstPath} */ path, /** @type {import("../print-options.js").HtmlPrintOptions} */ options /* , print*/) {
   /** @type {{ node: import("../parse/ast.js").Node }} */ const { node } = path;
 
-  if (node.parent.kind === "interpolation") {
+  if (/** @type {import("./parse/ast.js").Node} */ (node).parent.kind === "interpolation") {
     let { value } = node;
     // replace the trailing literalline with hardline for better readability
     const trailingNewlineRegex = /\n[^\S\n]*$/;

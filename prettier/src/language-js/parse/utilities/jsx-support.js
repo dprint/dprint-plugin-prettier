@@ -1,10 +1,11 @@
+// @nts-check
 /**
 Follow https://typescript-eslint.io/packages/parser/#jsx
 - `.js`, `.mjs`, `.cjs`, `.jsx`, `.tsx` files are always parsed as `{jsx: true}`.
 - `.ts`, `.mts`, `.cts` files are always parsed as `{jsx: false}`.
 */
 
-function shouldEnableJsx(filepath) {
+/** @returns {boolean | undefined} */ function shouldEnableJsx(/** @type {string | undefined} */ filepath) {
   if (typeof filepath !== "string") {
     return;
   }

@@ -47,8 +47,8 @@ const namesNeedParenthesesAsExpressionOfBinaryCastExpression = new Set([
   // `for ((let.a) of []);`
   // `for ((let.a) in []);`
   if (node.name === "let") {
-    const statement = path.findAncestor(
-      (/** @type {import("../types/estree.js").Node} */ node) =>
+    /** @type {import("../types/estree.js").Node | undefined} */ const statement = path.findAncestor(
+      /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node) =>
         node.type === "ForOfStatement" || node.type === "ForInStatement",
     );
     if (
@@ -71,7 +71,7 @@ const namesNeedParenthesesAsExpressionOfBinaryCastExpression = new Set([
     !parent.optional
   ) {
     /** @type {import("../types/estree.js").Node | undefined} */ const statement = path.findAncestor(
-      (/** @type {import("../types/estree.js").Node} */ node) =>
+      /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node) =>
         node.type === "ExpressionStatement" ||
         node.type === "ForStatement" ||
         node.type === "ForInStatement",
@@ -86,7 +86,7 @@ const namesNeedParenthesesAsExpressionOfBinaryCastExpression = new Set([
       if (
         startsWithNoLookaheadToken(
           expression,
-          (leftmostNode) => leftmostNode === node,
+          /** @returns {boolean} */ (leftmostNode) => leftmostNode === node,
         )
       ) {
         return true;
@@ -95,15 +95,15 @@ const namesNeedParenthesesAsExpressionOfBinaryCastExpression = new Set([
   }
 
   if (node.name === "await") {
-    const statement = path.findAncestor(
-      (node) => node.type === "ExpressionStatement",
+    /** @type {import("../types/estree.js").Node | undefined} */ const statement = path.findAncestor(
+      /** @returns {boolean} */ (node) => node.type === "ExpressionStatement",
     );
     if (statement) {
       const { expression } = statement;
       if (
         startsWithNoLookaheadToken(
           expression,
-          (leftmostNode) => leftmostNode === node,
+          /** @returns {boolean} */ (leftmostNode) => leftmostNode === node,
         )
       ) {
         return true;
@@ -116,7 +116,7 @@ const namesNeedParenthesesAsExpressionOfBinaryCastExpression = new Set([
     key === "expression" &&
     isBinaryCastExpression(parent) &&
     namesNeedParenthesesAsExpressionOfBinaryCastExpression.has(node.name) &&
-    path.findAncestor((node) => !isBinaryCastExpression(node)).type ===
+    path.findAncestor(/** @returns {boolean} */ (node) => !isBinaryCastExpression(node)).type ===
       "ExpressionStatement"
   ) {
     return true;

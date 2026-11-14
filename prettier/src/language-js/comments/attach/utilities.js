@@ -63,7 +63,7 @@ function addBlockFirstComment(node, comment) {
 
   // eslint-disable-next-line unicorn/prefer-switch
   if (node.type === "BlockStatement" || node.type === "TSModuleBlock") {
-    child = node.body.find(({ type }) => type !== "EmptyStatement");
+    child = node.body.find(/** @returns {boolean} */ ({ type }) => type !== "EmptyStatement");
   } else if (
     node.type === "ClassBody" ||
     node.type === "StructBody" ||

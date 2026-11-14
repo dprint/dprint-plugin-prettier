@@ -1,4 +1,5 @@
-const BOM = "\uFEFF";
+// @nts-check
+/** @type {string} */ const BOM = "\uFEFF";
 
 /** @type {(string: string) => boolean} */
 const hasBom = (string) => string.charAt(0) === BOM;

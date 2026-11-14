@@ -29766,8 +29766,8 @@ var y6 = [
   ];
 Tb(h6());
 var es =
-  (e, t) =>
-  (a, s, ...f) =>
+  (/** @type {string} */ e, t) =>
+  (/** @type {number} */ a, s, ...f) =>
     a | 1 && s == null ? void 0 : (t.call(s) ?? s[e]).apply(s, f);
 var g6 =
     String.prototype.replaceAll ??

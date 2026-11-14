@@ -8,7 +8,7 @@ function getLocation(source, position) {
     const matches = source.body.matchAll(LineRegExp);
     let match = matches.next().value;
     let line = 1;
-    let lastLineStart = 0;
+    /** @type {number} */ let lastLineStart = 0;
     while (match !== undefined && match.index < position) {
         lastLineStart = match.index + match[0].length;
         line++;
@@ -32,7 +32,7 @@ function getLocations(locations) {
         const matches = source.body.matchAll(LineRegExp);
         let match = matches.next().value;
         let line = 1;
-        let lastLineStart = 0;
+        /** @type {number} */ let lastLineStart = 0;
         for (const { position, index } of positions.toSorted((a, b) => a.position - b.position)) {
             while (match !== undefined && match.index < position) {
                 lastLineStart = match.index + match[0].length;

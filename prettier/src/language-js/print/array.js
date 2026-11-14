@@ -68,7 +68,7 @@ import { printTypeAnnotationProperty } from "./type-annotation.js";
 
     const groupId = Symbol("array");
 
-    const shouldBreak =
+    /** @type {boolean} */ const shouldBreak =
       (!options.__inJestEach &&
         elements.length > 1 &&
         elements.every(/** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ element, /** @type {number} */ i, /** @type {Node[]} */ elements) => {

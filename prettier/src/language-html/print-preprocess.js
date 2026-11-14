@@ -122,7 +122,7 @@ function convertAngularNonBindableNodesToText(ast, options) {
 }
 
 // TODO: Avoid recursive call
-function convertAngularNonBindableChildren(node, options) {
+function convertAngularNonBindableChildren(/** @type {import("./parse/ast.js").Node} */ node, options) {
   const { children } = node;
   if (!children) {
     return;
@@ -138,7 +138,7 @@ function convertAngularNonBindableChildren(node, options) {
       let { start } = child.sourceSpan;
       for (const blockChild of child.children) {
         if (start.offset < blockChild.sourceSpan.start.offset) {
-          const sourceSpan = new ParseSourceSpan(
+          /** @type {import("../../../src/vendor/angular-html-parser/dist/compiler/src/parse_util.mjs").ParseSourceSpan} */ const sourceSpan = new ParseSourceSpan(
             start,
             blockChild.sourceSpan.start,
           );
@@ -175,7 +175,7 @@ function convertAngularNonBindableChildren(node, options) {
   }
 }
 
-function createOriginalTextNode(sourceSpan, options) {
+function createOriginalTextNode(/** @type {import("../../../src/vendor/angular-html-parser/dist/compiler/src/parse_util.mjs").ParseSourceSpan} */ sourceSpan, options) {
   return {
     kind: "text",
     value: options.originalText.slice(
@@ -319,13 +319,13 @@ function extractInterpolation(/** @type {import("./parse/ast.js").Node} */ ast, 
   });
 }
 
-function splitInterpolation(node) {
+function splitInterpolation(/** @type {import("./parse/ast.js").Node} */ node) {
   const interpolationTokens = node.tokens?.filter(
-    (token) =>
+    /** @returns {boolean} */ (token) =>
       token.type === TokenType.INTERPOLATION && token.parts.length === 3,
   );
 
-  if (!interpolationTokens?.some((token) => token.parts[1].includes("}}"))) {
+  if (!interpolationTokens?.some(/** @returns {boolean} */ (token) => token.parts[1].includes("}}"))) {
     return node.value.split(/\{\{(.+?)\}\}/s);
   }
 

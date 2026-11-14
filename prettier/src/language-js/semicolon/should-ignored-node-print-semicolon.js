@@ -1,7 +1,8 @@
+// @nts-check
 import { shouldAddContentEnd } from "../location/index.js";
 import { isForXStatementInitializer } from "../utilities/is-for-x-statement-initializer.js";
 
-function shouldPrintSemicolon(node) {
+/** @returns {boolean} */ function shouldPrintSemicolon(node) {
   if (shouldAddContentEnd(node) && node.__contentEnd) {
     return true;
   }
@@ -35,7 +36,7 @@ function shouldPrintSemicolon(node) {
   return false;
 }
 
-function shouldIgnoredNodePrintSemicolon(path) {
+/** @returns {boolean} */ function shouldIgnoredNodePrintSemicolon(path) {
   return !isForXStatementInitializer(path) && shouldPrintSemicolon(path.node);
 }
 

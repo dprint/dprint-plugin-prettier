@@ -682,7 +682,7 @@ function printJsxOpeningElement(/** @type {AstPath} */ path, /** @type {import("
   );
 }
 
-function printJsxClosingElement(/** @type {AstPath} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
+/** @returns {any[]} */ function printJsxClosingElement(/** @type {AstPath} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../print-options.js").JsPrint} */ print) {
   return ["</", printJsxElementName(path, options, print), ">"];
 }
 
