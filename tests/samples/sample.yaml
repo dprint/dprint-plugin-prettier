@@ -1,0 +1,32 @@
+%YAML 1.2
+---
+# a comment
+key:   value
+'single': "double"
+list:
+- a
+-   b
+- - nested
+  - sequence
+- {inline: map, with: [flow, sequence], and_a_long_key: "with a long value that goes past the width of the line"}
+anchors:
+  base: &base
+    name: base
+    value: 1
+  derived:
+    <<: *base
+    value: 2
+multi: |
+  literal
+    block
+folded: >-
+  folded text that is long enough to be wrapped when prose is wrapped at the width of the line, as it goes on
+
+  second paragraph
+? complex key
+: complex value
+empty:
+"quoted key": 'it''s'
+...
+---
+second: document

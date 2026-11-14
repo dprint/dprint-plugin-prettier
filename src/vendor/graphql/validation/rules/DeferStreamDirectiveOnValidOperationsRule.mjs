@@ -44,30 +44,29 @@ function canBeSkippedViaIncludeDirective(node) {
     return true;
 }
 export function DeferStreamDirectiveOnValidOperationsRule(context) {
+    const checkedFragments = new Set();
     return {
         OperationDefinition(operation) {
             if (operation.operation !== OperationTypeNode.SUBSCRIPTION) {
                 return;
             }
-            const document = context.getDocument();
-            const fragments = new Map();
-            for (const definition of document.definitions) {
-                if (definition.kind === Kind.FRAGMENT_DEFINITION) {
-                    fragments.set(definition.name.value, definition);
-                }
-            }
             const visitedFragments = new Set();
-            forbidUnconditionalDeferStream({
+            if (forbidUnconditionalDeferStream({
                 context,
-                fragments,
+                checkedFragments,
                 selectionSet: operation.selectionSet,
                 parentNodes: [],
                 visitedFragments,
-            });
+            })) {
+                for (const name of visitedFragments) {
+                    checkedFragments.add(name);
+                }
+            }
         },
     };
 }
-function forbidUnconditionalDeferStream({ context, fragments, selectionSet, parentNodes, visitedFragments, }) {
+function forbidUnconditionalDeferStream({ context, checkedFragments, selectionSet, parentNodes, visitedFragments, }) {
+    let valid = true;
     for (const selection of selectionSet.selections) {
         const skip = selection.directives?.find((d) => d.name.value === GraphQLSkipDirective.name);
         if (skip && canBeSkippedViaSkipDirective(skip)) {
@@ -80,41 +79,49 @@ function forbidUnconditionalDeferStream({ context, fragments, selectionSet, pare
         for (const directive of selection.directives ?? []) {
             if (directive.name.value === GraphQLDeferDirective.name) {
                 if (!ifArgumentCanBeFalse(directive)) {
-                    context.reportError(new GraphQLError('Defer directive not supported on subscription operations. Disable `@defer` by setting the `if` argument to `false`.', { nodes: [directive, ...parentNodes] }));
+                    valid = false;
+                    context.reportError(new GraphQLError('Defer directive not supported on subscription operations. Disable `@defer` by setting the `if` argument to `false`.', { nodes: [directive, ...parentNodes.toReversed()] }));
                 }
             }
             else if (directive.name.value === GraphQLStreamDirective.name) {
                 if (!ifArgumentCanBeFalse(directive)) {
-                    context.reportError(new GraphQLError('Stream directive not supported on subscription operations. Disable `@stream` by setting the `if` argument to `false`.', { nodes: [directive, ...parentNodes] }));
+                    valid = false;
+                    context.reportError(new GraphQLError('Stream directive not supported on subscription operations. Disable `@stream` by setting the `if` argument to `false`.', { nodes: [directive, ...parentNodes.toReversed()] }));
                 }
             }
         }
         if (selection.kind === 'FragmentSpread') {
             const fragmentName = selection.name.value;
-            if (visitedFragments.has(fragmentName)) {
+            if (visitedFragments.has(fragmentName) ||
+                checkedFragments.has(fragmentName)) {
                 continue;
             }
             visitedFragments.add(fragmentName);
-            const fragment = fragments.get(fragmentName);
+            const fragment = context.getFragment(fragmentName);
             if (fragment) {
-                forbidUnconditionalDeferStream({
-                    context,
-                    fragments,
-                    parentNodes: [selection, ...parentNodes],
-                    selectionSet: fragment?.selectionSet,
-                    visitedFragments,
-                });
+                parentNodes.push(selection);
+                valid =
+                    forbidUnconditionalDeferStream({
+                        context,
+                        checkedFragments,
+                        parentNodes,
+                        selectionSet: fragment.selectionSet,
+                        visitedFragments,
+                    }) && valid;
+                parentNodes.pop();
             }
         }
         else if (selection.selectionSet) {
-            forbidUnconditionalDeferStream({
-                context,
-                fragments,
-                selectionSet: selection.selectionSet,
-                parentNodes,
-                visitedFragments,
-            });
+            valid =
+                forbidUnconditionalDeferStream({
+                    context,
+                    checkedFragments,
+                    selectionSet: selection.selectionSet,
+                    parentNodes,
+                    visitedFragments,
+                }) && valid;
         }
     }
+    return valid;
 }
-//# sourceMappingURL=DeferStreamDirectiveOnValidOperationsRule.js.map
+//# sourceMappingURL=DeferStreamDirectiveOnValidOperationsRule.mjs.map

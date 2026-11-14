@@ -48,8 +48,10 @@
         "quoteProps",
         "trailingComma",
         "bracketSpacing",
+        "objectWrap",
         "arrowParens",
-        "experimentalTernaries"
+        "experimentalTernaries",
+        "experimentalOperatorPosition"
       ]
     },
     {
@@ -68,6 +70,15 @@
       "description": "The wrapping of prose.",
       "properties": [
         "proseWrap"
+      ]
+    },
+    {
+      "title": "Markers",
+      "description": "The comments at the top of a file that say whether it is formatted.",
+      "properties": [
+        "insertPragma",
+        "requirePragma",
+        "checkIgnorePragma"
       ]
     }
   ],
@@ -119,6 +130,27 @@
         "input": [
           "import {readFile} from \"node:fs\";",
           "const point = {x: 1, y: 2};"
+        ]
+      }
+    },
+    "objectWrap": {
+      "description": "How object literals are wrapped onto several lines.",
+      "type": "string",
+      "oneOf": [
+        {
+          "const": "preserve",
+          "description": "Keep an object on several lines if there is a line break between its opening brace and its first key."
+        },
+        {
+          "const": "collapse",
+          "description": "Fit an object onto one line when it is short enough."
+        }
+      ],
+      "default": "preserve",
+      "x-example": {
+        "input": [
+          "const user = {",
+          "  name: \"Ada\", admin: true };"
         ]
       }
     },
@@ -225,6 +257,26 @@
       "x-example": {
         "input": [
           "const animal = isBird ? \"bird\" : isCat ? \"cat\" : isDog ? \"dog\" : \"some other kind of animal\";"
+        ]
+      }
+    },
+    "experimentalOperatorPosition": {
+      "description": "Where a binary operator is printed when its expression is wrapped onto several lines.",
+      "type": "string",
+      "oneOf": [
+        {
+          "const": "end",
+          "description": "Print the operator at the end of the line."
+        },
+        {
+          "const": "start",
+          "description": "Print the operator at the start of the next line."
+        }
+      ],
+      "default": "end",
+      "x-example": {
+        "input": [
+          "const total = firstOperandWithALongName + secondOperandWithALongName + thirdOperandWithALongName;"
         ]
       }
     },
@@ -380,6 +432,38 @@
       "x-example": {
         "input": [
           "const button = css`color:white;background:blue`;"
+        ]
+      }
+    },
+    "insertPragma": {
+      "description": "Whether to insert a `@format` marker in a comment at the top of the file, which says that the file has been formatted.",
+      "type": "boolean",
+      "default": false,
+      "x-example": {
+        "input": [
+          "const value = 5"
+        ]
+      }
+    },
+    "requirePragma": {
+      "description": "Whether to only format the files that have a `@format` or `@prettier` marker in a comment at the top of the file.",
+      "type": "boolean",
+      "default": false,
+      "x-example": {
+        "input": [
+          "/** @format */",
+          "const value   =   5"
+        ]
+      }
+    },
+    "checkIgnorePragma": {
+      "description": "Whether to leave the files alone that have a `@noformat` or `@noprettier` marker in a comment at the top of the file.",
+      "type": "boolean",
+      "default": false,
+      "x-example": {
+        "input": [
+          "/** @noformat */",
+          "const value   =   5"
         ]
       }
     }

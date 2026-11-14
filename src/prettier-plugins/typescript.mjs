@@ -5,36 +5,23 @@
 /** @typedef {{ column: number, line: number }} TsPosition */
 /** @typedef {{ end: TsPosition, start: TsPosition }} TsLocation */
 /** @typedef {{ onEnter?: (node: any) => any, onLeave?: (node: any) => any }} EstreeVisitor */
-var hy = Object.defineProperty;
-var Sd = (e, t) => {
-  for (var a in t) hy(e, a, { get: t[a], enumerable: !0 });
+var gy = Object.defineProperty;
+var Ed = (e, t) => {
+  for (var a in t) gy(e, a, { get: t[a], enumerable: !0 });
 };
-var Y0 = {};
-Sd(Y0, { parsers: () => yd });
-var yd = {};
-Sd(yd, { typescript: () => y3 });
-var yy = () => () => {},
-  La = yy;
-var ja =
-  (/** @type {string} */ e, t) =>
-  (/** @type {number} */ a, s, ...f) =>
-    a | 1 && s == null ? void 0 : (t.call(s) ?? s[e]).apply(s, f);
-var gy =
-    String.prototype.replaceAll ??
-    function (e, t) {
-      return e.global ? this.replace(e, t) : this.split(e).join(t);
-    },
-  by = ja("replaceAll", function () {
-    if (typeof this == "string") return gy;
-  }),
-  yr = by;
-var km = "6.0";
+var X0 = {};
+Ed(X0, { parsers: () => vd });
+var vd = {};
+Ed(vd, { typescript: () => g3 });
+var by = () => () => {},
+  La = by;
+var Cm = "6.0";
 var Tt = [],
   vy = new Map();
 function s_(e) {
   return e !== void 0 ? e.length : 0;
 }
-/** @returns {InstanceType<typeof Kf> | undefined} */ function Bn(e, t) {
+/** @returns {InstanceType<typeof ed> | undefined} */ function qn(e, t) {
   if (e !== void 0)
     for (let a = 0; a < e.length; a++) {
       let s = t(e[a], a);
@@ -48,37 +35,37 @@ function xy(e, t) {
       if (s !== void 0) return s;
     }
 }
-function wd(e, t, a) {
+function Ad(e, t, a) {
   let s = [];
   q.assertEqual(e.length, t.length);
   for (let f = 0; f < e.length; f++) s.push(a(e[f], t[f], f));
   return s;
 }
-function Qp(e, t) {
+function Zp(e, t) {
   if (e !== void 0) {
     for (let a = 0; a < e.length; a++) if (!t(e[a], a)) return !1;
   }
   return !0;
 }
-function Em(e, t, a) {
+function Dm(e, t, a) {
   if (e !== void 0)
     for (let s = a ?? 0; s < e.length; s++) {
       let f = e[s];
       if (t(f, s)) return f;
     }
 }
-function Sp(e, t, a) {
+function kp(e, t, a) {
   if (e === void 0) return -1;
   for (let s = a ?? 0; s < e.length; s++) if (t(e[s], s)) return s;
   return -1;
 }
-function Ty(e, t, a = ef) {
+function Ty(e, t, a = nf) {
   if (e !== void 0) {
     for (let s = 0; s < e.length; s++) if (a(e[s], t)) return !0;
   }
   return !1;
 }
-function $r(e, t) {
+function Qr(e, t) {
   if (e !== void 0) {
     let a = e.length,
       s = 0;
@@ -94,7 +81,7 @@ function $r(e, t) {
   }
   return e;
 }
-function Lp(e, t) {
+function Jp(e, t) {
   let a;
   if (e !== void 0) {
     a = [];
@@ -102,20 +89,20 @@ function Lp(e, t) {
   }
   return a;
 }
-function Am(e) {
+function Pm(e) {
   let t = [];
   for (let a = 0; a < e.length; a++) {
     let s = e[a];
-    s && (Kr(s) ? Dn(t, s) : t.push(s));
+    s && (Zr(s) ? Dn(t, s) : t.push(s));
   }
   return t;
 }
-function Cm(e, t) {
+function Nm(e, t) {
   let a;
   if (e !== void 0)
     for (let s = 0; s < e.length; s++) {
       let f = t(e[s], s);
-      f && (Kr(f) ? (a = Dn(a, f)) : (a = An(a, f)));
+      f && (Zr(f) ? (a = Dn(a, f)) : (a = An(a, f)));
     }
   return a ?? Tt;
 }
@@ -125,7 +112,7 @@ function Sy(e, t) {
     for (let s = 0; s < e.length; s++) {
       let f = e[s],
         h = t(f, s);
-      (a || f !== h || Kr(h)) && (a || (a = e.slice(0, s)), Kr(h) ? Dn(a, h) : a.push(h));
+      (a || f !== h || Zr(h)) && (a || (a = e.slice(0, s)), Zr(h) ? Dn(a, h) : a.push(h));
     }
   return a ?? e;
 }
@@ -145,25 +132,25 @@ function wy(e, t) {
     } else return e.length > 0;
   return !1;
 }
-function Kp(e, t) {
+function ef(e, t) {
   return t === void 0 || t.length === 0 ? e : e === void 0 || e.length === 0 ? t : [...e, ...t];
 }
-function ky(e, t, a = ef) {
+function ky(e, t, a = nf) {
   if (e === void 0 || t === void 0) return e === t;
   if (e.length !== t.length) return !1;
   for (let s = 0; s < e.length; s++) if (!a(e[s], t[s], s)) return !1;
   return !0;
 }
-function An(e, /** @type {vh | Kf | object} */ t) {
+function An(e, /** @type {Sh | ed | object} */ t) {
   return t === void 0 ? e : e === void 0 ? [t] : (e.push(t), e);
 }
-function jp(e, t) {
+function Rp(e, t) {
   return t < 0 ? e.length + t : t;
 }
 function Dn(e, t, a, s) {
   if (t === void 0 || t.length === 0) return e;
   if (e === void 0) return t.slice(a, s);
-  ((a = a === void 0 ? 0 : jp(t, a)), (s = s === void 0 ? t.length : jp(t, s)));
+  ((a = a === void 0 ? 0 : Rp(t, a)), (s = s === void 0 ? t.length : Rp(t, s)));
   for (let f = a; f < s && f < t.length; f++) t[f] !== void 0 && e.push(t[f]);
   return e;
 }
@@ -176,15 +163,15 @@ function Ay(e, t, a) {
 function Cy(e, t) {
   return e.length === 0 ? Tt : e.slice().sort(t);
 }
-var S3 = Array.prototype.at
+var x3 = Array.prototype.at
   ? (e, t) => e?.at(t)
   : (e, t) => {
-      if (e !== void 0 && ((t = jp(e, t)), t < e.length)) return e[t];
+      if (e !== void 0 && ((t = Rp(e, t)), t < e.length)) return e[t];
     };
-/** @returns {Kf | xh | vh | Th | undefined} */ function Zp(e) {
+/** @returns {ed | wh | Sh | kh | undefined} */ function tf(e) {
   return e === void 0 || e.length === 0 ? void 0 : e[0];
 }
-/** @returns {Kf | xh | object | vh | undefined} */ function Va(e) {
+/** @returns {ed | wh | object | Sh | undefined} */ function za(e) {
   return e === void 0 || e.length === 0 ? void 0 : e[e.length - 1];
 }
 function Dy(e) {
@@ -229,13 +216,13 @@ function Oy(e, t, a, s, f) {
   }
   return a;
 }
-var Dm = Object.prototype.hasOwnProperty;
+var Im = Object.prototype.hasOwnProperty;
 /** @returns {boolean} */ function Or(e, /** @type {string} */ t) {
-  return Dm.call(e, t);
+  return Im.call(e, t);
 }
 function My(e) {
   let t = [];
-  for (let a in e) Dm.call(e, a) && t.push(a);
+  for (let a in e) Im.call(e, a) && t.push(a);
   return t;
 }
 function Ly() {
@@ -250,11 +237,11 @@ function Jy(e, t) {
   let a = this.get(e);
   a !== void 0 && (Gy(a, t), a.length || this.delete(e));
 }
-/** @returns {boolean} */ function Kr(e) {
+/** @returns {boolean} */ function Zr(e) {
   return Array.isArray(e);
 }
-function wp(e) {
-  return Kr(e) ? e : [e];
+function Ep(e) {
+  return Zr(e) ? e : [e];
 }
 /** @returns {number | undefined} */ function Ry(/** @type {number} */ e, t) {
   return e !== void 0 && t(e) ? e : void 0;
@@ -264,18 +251,18 @@ function Pr(e, t) {
     ? e
     : q.fail(`Invalid cast. The supplied value ${e} did not pass the test '${q.getFunctionName(t)}'.`);
 }
-function Ha(e) {}
+function Ya(e) {}
 function Uy() {
   return !0;
 }
 function xt(e) {
   return e;
 }
-function kd(e) {
+function Cd(e) {
   let t;
   return () => (e && ((t = e()), (e = void 0)), t);
 }
-function er(e) {
+function tr(e) {
   let t = new Map();
   return (/** @type {number} */ a) => {
     let s = `${typeof a}:${a}`,
@@ -283,19 +270,19 @@ function er(e) {
     return (f === void 0 && !t.has(s) && ((f = e(a)), t.set(s, f)), f);
   };
 }
-/** @returns {boolean} */ function ef(/** @type {string} */ e, /** @type {string} */ t) {
+/** @returns {boolean} */ function nf(/** @type {string} */ e, /** @type {string} */ t) {
   return e === t;
 }
-function tf(e, t) {
+function rf(e, t) {
   return e === t || (e !== void 0 && t !== void 0 && e.toUpperCase() === t.toUpperCase());
 }
 /** @returns {boolean} */ function By(/** @type {string} */ e, /** @type {string} */ t) {
-  return ef(e, t);
+  return nf(e, t);
 }
 /** @returns {int} */ function qy(/** @type {number} */ e, /** @type {number} */ t) {
   return e === t ? 0 : e === void 0 ? -1 : t === void 0 ? 1 : e < t ? -1 : 1;
 }
-/** @returns {int} */ function Pm(/** @type {number} */ e, /** @type {number} */ t) {
+/** @returns {int} */ function Om(/** @type {number} */ e, /** @type {number} */ t) {
   return qy(e, t);
 }
 function Fy(e, t, a) {
@@ -324,18 +311,18 @@ function Fy(e, t, a) {
   for (let v = 0; v <= t.length; v++) s[v] = v;
   for (let v = 1; v <= e.length; v++) {
     let l = e.charCodeAt(v - 1),
-      G = Math.ceil(v > a ? v - a : 1),
+      W = Math.ceil(v > a ? v - a : 1),
       y = Math.floor(t.length > a + v ? a + v : t.length);
     f[0] = v;
-    let W = v;
-    for (let C = 1; C < G; C++) f[C] = h;
-    for (let C = G; C <= y; C++) {
-      let R = e[v - 1].toLowerCase() === t[C - 1].toLowerCase() ? s[C - 1] + 0.1 : s[C - 1] + 2,
-        pe = l === t.charCodeAt(C - 1) ? s[C - 1] : Math.min(s[C] + 1, f[C - 1] + 1, R);
-      ((f[C] = pe), (W = Math.min(W, pe)));
+    let G = v;
+    for (let A = 1; A < W; A++) f[A] = h;
+    for (let A = W; A <= y; A++) {
+      let R = e[v - 1].toLowerCase() === t[A - 1].toLowerCase() ? s[A - 1] + 0.1 : s[A - 1] + 2,
+        pe = l === t.charCodeAt(A - 1) ? s[A - 1] : Math.min(s[A] + 1, f[A - 1] + 1, R);
+      ((f[A] = pe), (G = Math.min(G, pe)));
     }
-    for (let C = y + 1; C <= t.length; C++) f[C] = h;
-    if (W > a) return;
+    for (let A = y + 1; A <= t.length; A++) f[A] = h;
+    if (G > a) return;
     let k = s;
     ((s = f), (f = k));
   }
@@ -344,7 +331,7 @@ function Fy(e, t, a) {
 }
 /** @returns {boolean} */ function Vy(/** @type {string} */ e, /** @type {string} */ t, a) {
   let s = e.length - t.length;
-  return s >= 0 && (a ? tf(e.slice(s), t) : e.indexOf(t, s) === s);
+  return s >= 0 && (a ? rf(e.slice(s), t) : e.indexOf(t, s) === s);
 }
 function Wy(e, t) {
   ((e[t] = e[e.length - 1]), e.pop());
@@ -357,9 +344,9 @@ function Yy(e, t) {
   return !1;
 }
 /** @returns {boolean} */ function xl(/** @type {string} */ e, /** @type {string} */ t, a) {
-  return a ? tf(e.slice(0, t.length), t) : e.lastIndexOf(t, 0) === 0;
+  return a ? rf(e.slice(0, t.length), t) : e.lastIndexOf(t, 0) === 0;
 }
-function Jp(e) {
+function Up(e) {
   return e === void 0 ? void 0 : [e];
 }
 var q;
@@ -413,8 +400,8 @@ var q;
     return t >= L;
   }
   e.shouldAssert = l;
-  function G(L, se) {
-    return l(L) ? !0 : ((h[se] = { level: L, assertion: e[se] }), (e[se] = Ha), !1);
+  function W(L, se) {
+    return l(L) ? !0 : ((h[se] = { level: L, assertion: e[se] }), (e[se] = Ya), !1);
   }
   function y(L, se) {
     debugger;
@@ -422,14 +409,14 @@ var q;
     throw (Error.captureStackTrace && Error.captureStackTrace(de, se || y), de);
   }
   e.fail = y;
-  function W(L, se, de) {
+  function G(L, se, de) {
     return y(
       `${se || "Unexpected node."}\r
-Node ${Lt(L.kind)} was unexpected.`,
-      de || W,
+Node ${jt(L.kind)} was unexpected.`,
+      de || G,
     );
   }
-  e.failBadSyntaxKind = W;
+  e.failBadSyntaxKind = G;
   function k(L, /** @type {string | undefined} */ se, de, Se) {
     L ||
       ((se = se ? `False expression: ${se}` : "False expression."),
@@ -440,13 +427,13 @@ Verbose Debug Information: ` + (typeof de == "string" ? de : de())),
       y(se, Se || k));
   }
   e.assert = k;
-  function C(L, se, de, Se, $e) {
+  function A(L, se, de, Se, $e) {
     if (L !== se) {
       let Ze = de ? (Se ? `${de} ${Se}` : de) : "";
-      y(`Expected ${L} === ${se}. ${Ze}`, $e || C);
+      y(`Expected ${L} === ${se}. ${Ze}`, $e || A);
     }
   }
-  e.assertEqual = C;
+  e.assertEqual = A;
   function R(L, se, de, Se) {
     L >= se && y(`Expected ${L} < ${se}. ${de || ""}`, Se || R);
   }
@@ -459,31 +446,31 @@ Verbose Debug Information: ` + (typeof de == "string" ? de : de())),
     L < se && y(`Expected ${L} >= ${se}`, de || xe);
   }
   e.assertGreaterThanOrEqual = xe;
-  function ge(L, se, de) {
-    L == null && y(se, de || ge);
+  function be(L, se, de) {
+    L == null && y(se, de || be);
   }
-  e.assertIsDefined = ge;
+  e.assertIsDefined = be;
   function me(L, se, de) {
-    return (ge(L, se, de || me), L);
+    return (be(L, se, de || me), L);
   }
   e.checkDefined = me;
-  function I(L, se, de) {
-    for (let Se of L) ge(Se, se, de || I);
+  function O(L, se, de) {
+    for (let Se of L) be(Se, se, de || O);
   }
-  e.assertEachIsDefined = I;
+  e.assertEachIsDefined = O;
   function ae(L, se, de) {
-    return (I(L, se, de || ae), L);
+    return (O(L, se, de || ae), L);
   }
   e.checkEachDefined = ae;
   function Le(L, se = "Illegal value:", de) {
-    let Se = typeof L == "object" && Or(L, "kind") && Or(L, "pos") ? "SyntaxKind: " + Lt(L.kind) : JSON.stringify(L);
+    let Se = typeof L == "object" && Or(L, "kind") && Or(L, "pos") ? "SyntaxKind: " + jt(L.kind) : JSON.stringify(L);
     return y(`${se} ${Se}`, de || Le);
   }
   e.assertNever = Le;
   function V(L, se, de, Se) {
-    G(1, "assertEachNode") &&
+    W(1, "assertEachNode") &&
       k(
-        se === void 0 || Qp(L, se),
+        se === void 0 || Zp(L, se),
         de || "Unexpected node.",
         () => `Node array did not pass test '${bn(se)}'.`,
         Se || V,
@@ -491,48 +478,48 @@ Verbose Debug Information: ` + (typeof de == "string" ? de : de())),
   }
   e.assertEachNode = V;
   function oe(L, se, de, Se) {
-    G(1, "assertNode") &&
+    W(1, "assertNode") &&
       k(
         L !== void 0 && (se === void 0 || se(L)),
         de || "Unexpected node.",
-        () => `Node ${Lt(L?.kind)} did not pass test '${bn(se)}'.`,
+        () => `Node ${jt(L?.kind)} did not pass test '${bn(se)}'.`,
         Se || oe,
       );
   }
   e.assertNode = oe;
   function Y(L, se, de, Se) {
-    G(1, "assertNotNode") &&
+    W(1, "assertNotNode") &&
       k(
         L === void 0 || se === void 0 || !se(L),
         de || "Unexpected node.",
-        () => `Node ${Lt(L.kind)} should not have passed test '${bn(se)}'.`,
+        () => `Node ${jt(L.kind)} should not have passed test '${bn(se)}'.`,
         Se || Y,
       );
   }
   e.assertNotNode = Y;
   function mt(L, se, de, Se) {
-    G(1, "assertOptionalNode") &&
+    W(1, "assertOptionalNode") &&
       k(
         se === void 0 || L === void 0 || se(L),
         de || "Unexpected node.",
-        () => `Node ${Lt(L?.kind)} did not pass test '${bn(se)}'.`,
+        () => `Node ${jt(L?.kind)} did not pass test '${bn(se)}'.`,
         Se || mt,
       );
   }
   e.assertOptionalNode = mt;
   function ar(L, se, de, Se) {
-    G(1, "assertOptionalToken") &&
+    W(1, "assertOptionalToken") &&
       k(
         se === void 0 || L === void 0 || L.kind === se,
         de || "Unexpected node.",
-        () => `Node ${Lt(L?.kind)} was not a '${Lt(se)}' token.`,
+        () => `Node ${jt(L?.kind)} was not a '${jt(se)}' token.`,
         Se || ar,
       );
   }
   e.assertOptionalToken = ar;
   function gn(L, se, de) {
-    G(1, "assertMissingNode") &&
-      k(L === void 0, se || "Unexpected node.", () => `Node ${Lt(L.kind)} was unexpected'.`, de || gn);
+    W(1, "assertMissingNode") &&
+      k(L === void 0, se || "Unexpected node.", () => `Node ${jt(L.kind)} was unexpected'.`, de || gn);
   }
   e.assertMissingNode = gn;
   function sr(L) {}
@@ -547,12 +534,12 @@ Verbose Debug Information: ` + (typeof de == "string" ? de : de())),
     }
   }
   e.getFunctionName = bn;
-  function In(L) {
-    return `{ name: ${h_(L.escapedName)}; flags: ${ct(L.flags)}; declarations: ${Lp(L.declarations, (se) => Lt(se.kind))} }`;
+  function On(L) {
+    return `{ name: ${h_(L.escapedName)}; flags: ${ct(L.flags)}; declarations: ${Jp(L.declarations, (se) => jt(se.kind))} }`;
   }
-  e.formatSymbol = In;
+  e.formatSymbol = On;
   function He(L = 0, se, de) {
-    let Se = jr(se);
+    let Se = Jr(se);
     if (L === 0) return Se.length > 0 && Se[0][0] === 0 ? Se[0][1] : "0";
     if (de) {
       let $e = [],
@@ -567,7 +554,7 @@ Verbose Debug Information: ` + (typeof de == "string" ? de : de())),
   }
   e.formatEnum = He;
   let _r = new Map();
-  function jr(L) {
+  function Jr(L) {
     let se = _r.get(L);
     if (se) return se;
     let de = [];
@@ -575,43 +562,43 @@ Verbose Debug Information: ` + (typeof de == "string" ? de : de())),
       let Ze = L[$e];
       typeof Ze == "number" && de.push([Ze, $e]);
     }
-    let Se = Cy(de, ($e, Ze) => Pm($e[0], Ze[0]));
+    let Se = Cy(de, ($e, Ze) => Om($e[0], Ze[0]));
     return (_r.set(L, Se), Se);
   }
-  function Lt(L) {
+  function jt(L) {
     return He(L, Ae, !1);
   }
-  e.formatSyntaxKind = Lt;
-  function Fn(L) {
-    return He(L, Lm, !1);
+  e.formatSyntaxKind = jt;
+  function zn(L) {
+    return He(L, Rm, !1);
   }
-  e.formatSnippetKind = Fn;
-  function On(L) {
+  e.formatSnippetKind = zn;
+  function Mn(L) {
     return He(L, Mr, !1);
   }
-  e.formatScriptKind = On;
-  function jt(L) {
+  e.formatScriptKind = Mn;
+  function Jt(L) {
     return He(L, rn, !0);
   }
-  e.formatNodeFlags = jt;
+  e.formatNodeFlags = Jt;
   function gt(L) {
-    return He(L, Im, !0);
+    return He(L, Lm, !0);
   }
   e.formatNodeCheckFlags = gt;
   function Ke(L) {
-    return He(L, nf, !0);
+    return He(L, af, !0);
   }
   e.formatModifierFlags = Ke;
-  function zn(L) {
-    return He(L, Mm, !0);
+  function Vn(L) {
+    return He(L, Jm, !0);
   }
-  e.formatTransformFlags = zn;
+  e.formatTransformFlags = Vn;
   function Zt(L) {
-    return He(L, jm, !0);
+    return He(L, Um, !0);
   }
   e.formatEmitFlags = Zt;
   function ct(L) {
-    return He(L, rf, !0);
+    return He(L, sf, !0);
   }
   e.formatSymbolFlags = ct;
   function st(L) {
@@ -619,19 +606,19 @@ Verbose Debug Information: ` + (typeof de == "string" ? de : de())),
   }
   e.formatTypeFlags = st;
   function qt(L) {
-    return He(L, Om, !0);
+    return He(L, jm, !0);
   }
   e.formatSignatureFlags = qt;
-  function Jt(L) {
-    return He(L, af, !0);
+  function Rt(L) {
+    return He(L, _f, !0);
   }
-  e.formatObjectFlags = Jt;
+  e.formatObjectFlags = Rt;
   function lt(L) {
-    return He(L, Rp, !0);
+    return He(L, Bp, !0);
   }
   e.formatFlowFlags = lt;
   function or(L) {
-    return He(L, Nm, !0);
+    return He(L, Mm, !0);
   }
   e.formatRelationComparisonResult = or;
   function ht(L) {
@@ -683,7 +670,7 @@ Verbose Debug Information: ` + (typeof de == "string" ? de : de())),
         },
         __debugFlowFlags: {
           get() {
-            return He(this.flags, Rp, !0);
+            return He(this.flags, Bp, !0);
           },
         },
         __debugToString: {
@@ -721,7 +708,7 @@ Verbose Debug Information: ` + (typeof de == "string" ? de : de())),
         : br(L));
   }
   e.attachNodeArrayDebugInfo = vr;
-  function Vn() {
+  function Wn() {
     if (ln) return;
     let L = new WeakMap(),
       se = new WeakMap();
@@ -730,7 +717,7 @@ Verbose Debug Information: ` + (typeof de == "string" ? de : de())),
         value() {
           let Se = this.flags & 33554432 ? "TransientSymbol" : "Symbol",
             $e = this.flags & -33554433;
-          return `${Se} '${qp(this)}'${$e ? ` (${ct($e)})` : ""}`;
+          return `${Se} '${zp(this)}'${$e ? ` (${ct($e)})` : ""}`;
         },
       },
       __debugFlags: {
@@ -787,7 +774,7 @@ Verbose Debug Information: ` + (typeof de == "string" ? de : de())),
                                                           : "ObjectType"
                                             : "Type",
               $e = this.flags & 1048576 ? this.objectFlags & -142607680 : 0;
-            return `${Se}${this.symbol ? ` '${qp(this.symbol)}'` : ""}${$e ? ` (${Jt($e)})` : ""}`;
+            return `${Se}${this.symbol ? ` '${zp(this.symbol)}'` : ""}${$e ? ` (${Rt($e)})` : ""}`;
           },
         },
         __debugFlags: {
@@ -797,7 +784,7 @@ Verbose Debug Information: ` + (typeof de == "string" ? de : de())),
         },
         __debugObjectFlags: {
           get() {
-            return this.flags & 1048576 ? Jt(this.objectFlags) : "";
+            return this.flags & 1048576 ? Rt(this.objectFlags) : "";
           },
         },
         __debugTypeToString: {
@@ -831,17 +818,17 @@ Verbose Debug Information: ` + (typeof de == "string" ? de : de())),
         Object.defineProperties(Se.prototype, {
           __tsDebuggerDisplay: {
             value() {
-              return `${za(this) ? "GeneratedIdentifier" : et(this) ? `Identifier '${Pn(this)}'` : xi(this) ? `PrivateIdentifier '${Pn(this)}'` : Lr(this) ? `StringLiteral ${JSON.stringify(this.text.length < 10 ? this.text : this.text.slice(10) + "...")}` : sa(this) ? `NumericLiteral ${this.text}` : N1(this) ? `BigIntLiteral ${this.text}n` : If(this) ? "TypeParameterDeclaration" : x_(this) ? "ParameterDeclaration" : Of(this) ? "ConstructorDeclaration" : Al(this) ? "GetAccessorDeclaration" : S_(this) ? "SetAccessorDeclaration" : j1(this) ? "CallSignatureDeclaration" : J1(this) ? "ConstructSignatureDeclaration" : Mf(this) ? "IndexSignatureDeclaration" : R1(this) ? "TypePredicateNode" : Lf(this) ? "TypeReferenceNode" : jf(this) ? "FunctionTypeNode" : Jf(this) ? "ConstructorTypeNode" : nv(this) ? "TypeQueryNode" : U1(this) ? "TypeLiteralNode" : rv(this) ? "ArrayTypeNode" : iv(this) ? "TupleTypeNode" : av(this) ? "OptionalTypeNode" : sv(this) ? "RestTypeNode" : q1(this) ? "UnionTypeNode" : F1(this) ? "IntersectionTypeNode" : _v(this) ? "ConditionalTypeNode" : ov(this) ? "InferTypeNode" : z1(this) ? "ParenthesizedTypeNode" : cv(this) ? "ThisTypeNode" : V1(this) ? "TypeOperatorNode" : lv(this) ? "IndexedAccessTypeNode" : W1(this) ? "MappedTypeNode" : uv(this) ? "LiteralTypeNode" : B1(this) ? "NamedTupleMember" : pv(this) ? "ImportTypeNode" : Lt(this.kind)}${this.flags ? ` (${jt(this.flags)})` : ""}`;
+              return `${Fa(this) ? "GeneratedIdentifier" : et(this) ? `Identifier '${Pn(this)}'` : xi(this) ? `PrivateIdentifier '${Pn(this)}'` : Lr(this) ? `StringLiteral ${JSON.stringify(this.text.length < 10 ? this.text : this.text.slice(10) + "...")}` : sa(this) ? `NumericLiteral ${this.text}` : M1(this) ? `BigIntLiteral ${this.text}n` : Mf(this) ? "TypeParameterDeclaration" : x_(this) ? "ParameterDeclaration" : Lf(this) ? "ConstructorDeclaration" : Al(this) ? "GetAccessorDeclaration" : S_(this) ? "SetAccessorDeclaration" : U1(this) ? "CallSignatureDeclaration" : B1(this) ? "ConstructSignatureDeclaration" : jf(this) ? "IndexSignatureDeclaration" : q1(this) ? "TypePredicateNode" : Jf(this) ? "TypeReferenceNode" : Rf(this) ? "FunctionTypeNode" : Uf(this) ? "ConstructorTypeNode" : nv(this) ? "TypeQueryNode" : F1(this) ? "TypeLiteralNode" : rv(this) ? "ArrayTypeNode" : iv(this) ? "TupleTypeNode" : av(this) ? "OptionalTypeNode" : sv(this) ? "RestTypeNode" : V1(this) ? "UnionTypeNode" : W1(this) ? "IntersectionTypeNode" : _v(this) ? "ConditionalTypeNode" : ov(this) ? "InferTypeNode" : G1(this) ? "ParenthesizedTypeNode" : cv(this) ? "ThisTypeNode" : Y1(this) ? "TypeOperatorNode" : lv(this) ? "IndexedAccessTypeNode" : H1(this) ? "MappedTypeNode" : uv(this) ? "LiteralTypeNode" : z1(this) ? "NamedTupleMember" : pv(this) ? "ImportTypeNode" : jt(this.kind)}${this.flags ? ` (${Jt(this.flags)})` : ""}`;
             },
           },
           __debugKind: {
             get() {
-              return Lt(this.kind);
+              return jt(this.kind);
             },
           },
           __debugNodeFlags: {
             get() {
-              return jt(this.flags);
+              return Jt(this.flags);
             },
           },
           __debugModifierFlags: {
@@ -851,7 +838,7 @@ Verbose Debug Information: ` + (typeof de == "string" ? de : de())),
           },
           __debugTransformFlags: {
             get() {
-              return zn(this.transformFlags);
+              return Vn(this.transformFlags);
             },
           },
           __debugIsParseTreeNode: {
@@ -861,17 +848,17 @@ Verbose Debug Information: ` + (typeof de == "string" ? de : de())),
           },
           __debugEmitFlags: {
             get() {
-              return Zt(Ya(this));
+              return Zt(Ga(this));
             },
           },
           __debugGetText: {
             value($e) {
-              if (Ba(this)) return "";
+              if (Ua(this)) return "";
               let Ze = se.get(this);
               if (Ze === void 0) {
                 let _t = Pg(this),
                   Pt = _t && bi(_t);
-                ((Ze = Pt ? Bd(Pt, _t, $e) : ""), se.set(this, Ze));
+                ((Ze = Pt ? zd(Pt, _t, $e) : ""), se.set(this, Ze));
               }
               return Ze;
             },
@@ -879,8 +866,8 @@ Verbose Debug Information: ` + (typeof de == "string" ? de : de())),
         });
     ln = !0;
   }
-  e.enableDebugInfo = Vn;
-  function Wn(L) {
+  e.enableDebugInfo = Wn;
+  function Gn(L) {
     let se = L & 7,
       de =
         se === 0
@@ -896,8 +883,8 @@ Verbose Debug Information: ` + (typeof de == "string" ? de : de())),
                   : "";
     return (L & 8 ? (de += " (unmeasurable)") : L & 16 && (de += " (unreliable)"), de);
   }
-  e.formatVariance = Wn;
-  class Jr {
+  e.formatVariance = Gn;
+  class Rr {
     __debugToString() {
       var se;
       switch (this.kind) {
@@ -906,13 +893,13 @@ Verbose Debug Information: ` + (typeof de == "string" ? de : de())),
         case 0:
           return `${this.source.__debugTypeToString()} -> ${this.target.__debugTypeToString()}`;
         case 1:
-          return wd(
+          return Ad(
             this.sources,
-            this.targets || Lp(this.sources, () => "any"),
+            this.targets || Jp(this.sources, () => "any"),
             (de, Se) => `${de.__debugTypeToString()} -> ${typeof Se == "string" ? Se : Se.__debugTypeToString()}`,
           ).join(", ");
         case 2:
-          return wd(
+          return Ad(
             this.sources,
             this.targets,
             (de, Se) => `${de.__debugTypeToString()} -> ${Se().__debugTypeToString()}`,
@@ -930,11 +917,11 @@ m2: ${this.mapper2.__debugToString().split(`
       }
     }
   }
-  e.DebugTypeMapper = Jr;
-  function Gn(L) {
-    return e.isDebugging ? Object.setPrototypeOf(L, Jr.prototype) : L;
+  e.DebugTypeMapper = Rr;
+  function Yn(L) {
+    return e.isDebugging ? Object.setPrototypeOf(L, Rr.prototype) : L;
   }
-  e.attachDebugPrototypeIfDebug = Gn;
+  e.attachDebugPrototypeIfDebug = Yn;
   function Pe(L) {
     return console.log(xr(L));
   }
@@ -983,12 +970,12 @@ m2: ${this.mapper2.__debugToString().split(`
       Pt = Object.create(null),
       St = [],
       ut = [],
-      Rr = ke(L, new Set());
-    for (let u of St) ((u.text = at(u.flowNode, u.circular)), he(u));
-    let Tr = Ye(Rr),
-      Mn = tt(Tr);
-    return (Xe(Rr, 0), un());
-    function Yn(u) {
+      Ur = ke(L, new Set());
+    for (let u of St) ((u.text = at(u.flowNode, u.circular)), ge(u));
+    let Tr = Ye(Ur),
+      Ln = tt(Tr);
+    return (Xe(Ur, 0), un());
+    function Hn(u) {
       return !!(u.flags & 128);
     }
     function Ei(u) {
@@ -1035,10 +1022,10 @@ m2: ${this.mapper2.__debugToString().split(`
         ze = { source: u, target: B };
       (ut.push(ze), u.edges.push(ze), B.edges.push(ze));
     }
-    function he(u) {
+    function ge(u) {
       if (u.level !== -1) return u.level;
       let Me = 0;
-      for (let je of we(u)) Me = Math.max(Me, he(je) + 1);
+      for (let je of we(u)) Me = Math.max(Me, ge(je) + 1);
       return (u.level = Me);
     }
     function Ye(u) {
@@ -1047,7 +1034,7 @@ m2: ${this.mapper2.__debugToString().split(`
       return Me + 1;
     }
     function tt(u) {
-      let Me = O(Array(u), 0);
+      let Me = M(Array(u), 0);
       for (let je of St) Me[je.level] = Math.max(Me[je.level], je.text.length);
       return Me;
     }
@@ -1079,11 +1066,11 @@ m2: ${this.mapper2.__debugToString().split(`
     }
     function xn(u) {
       let Me = bi(u);
-      return Bd(Me, u, !1);
+      return zd(Me, u, !1);
     }
     function at(u, Me) {
       let je = De(u.flags);
-      if ((Me && (je = `${je}#${de(u)}`), Yn(u))) {
+      if ((Me && (je = `${je}#${de(u)}`), Hn(u))) {
         let B = [],
           { switchStatement: ze, clauseStart: _n, clauseEnd: Ge } = u.node;
         for (let Qe = _n; Qe < Ge; Qe++) {
@@ -1095,11 +1082,11 @@ m2: ${this.mapper2.__debugToString().split(`
       return Me === "circularity" ? `Circular(${je})` : je;
     }
     function un() {
-      let u = Mn.length,
+      let u = Ln.length,
         Me = Fy(St, 0, (Ge) => Ge.lane) + 1,
-        je = O(Array(Me), ""),
-        B = Mn.map(() => Array(Me)),
-        ze = Mn.map(() => O(Array(Me), 0));
+        je = M(Array(Me), ""),
+        B = Ln.map(() => Array(Me)),
+        ze = Ln.map(() => M(Array(Me), 0));
       for (let Ge of St) {
         B[Ge.level][Ge.lane] = Ge;
         let Qe = Z(Ge);
@@ -1132,8 +1119,8 @@ m2: ${this.mapper2.__debugToString().split(`
             Et = Nt & 4 ? "\u2500" : " ",
             It = B[Ge][Qe];
           (It
-            ? (_n(Qe, It.text), Ge < u - 1 && (_n(Qe, " "), _n(Qe, qe(Et, Mn[Ge] - It.text.length))))
-            : Ge < u - 1 && _n(Qe, qe(Et, Mn[Ge] + 1)),
+            ? (_n(Qe, It.text), Ge < u - 1 && (_n(Qe, " "), _n(Qe, qe(Et, Ln[Ge] - It.text.length))))
+            : Ge < u - 1 && _n(Qe, qe(Et, Ln[Ge] + 1)),
             _n(Qe, ei(Nt)),
             _n(Qe, Nt & 8 && Ge < u - 1 && !B[Ge + 1][Qe] ? "\u2500" : " "));
         }
@@ -1172,7 +1159,7 @@ ${je.join(`
       }
       return " ";
     }
-    function O(u, Me) {
+    function M(u, Me) {
       if (u.fill) u.fill(Me);
       else for (let je = 0; je < u.length; je++) u[je] = Me;
       return u;
@@ -1186,8 +1173,8 @@ ${je.join(`
   }
   e.formatControlFlowGraph = xr;
 })(q || (q = {}));
-var w3 = Date.now,
-  Ed = () => {},
+var T3 = Date.now,
+  Dd = () => {},
   Hy = () => {},
   hl,
   Ae = ((e) => (
@@ -1634,7 +1621,7 @@ var w3 = Date.now,
     (e[(e.IdentifierIsInJSDocNamespace = 4096)] = "IdentifierIsInJSDocNamespace"),
     e
   ))(rn || {}),
-  nf = ((e) => (
+  af = ((e) => (
     (e[(e.None = 0)] = "None"),
     (e[(e.Public = 1)] = "Public"),
     (e[(e.Private = 2)] = "Private"),
@@ -1674,8 +1661,8 @@ var w3 = Date.now,
     (e[(e.All = 131071)] = "All"),
     (e[(e.Modifier = 98303)] = "Modifier"),
     e
-  ))(nf || {});
-var Nm = ((e) => (
+  ))(af || {});
+var Mm = ((e) => (
   (e[(e.None = 0)] = "None"),
   (e[(e.Succeeded = 1)] = "Succeeded"),
   (e[(e.Failed = 2)] = "Failed"),
@@ -1686,8 +1673,8 @@ var Nm = ((e) => (
   (e[(e.StackDepthOverflow = 64)] = "StackDepthOverflow"),
   (e[(e.Overflow = 96)] = "Overflow"),
   e
-))(Nm || {});
-var Rp = ((e) => (
+))(Mm || {});
+var Bp = ((e) => (
   (e[(e.Unreachable = 1)] = "Unreachable"),
   (e[(e.Start = 2)] = "Start"),
   (e[(e.BranchLabel = 4)] = "BranchLabel"),
@@ -1704,8 +1691,8 @@ var Rp = ((e) => (
   (e[(e.Label = 12)] = "Label"),
   (e[(e.Condition = 96)] = "Condition"),
   e
-))(Rp || {});
-var rf = ((e) => (
+))(Bp || {});
+var sf = ((e) => (
   (e[(e.None = 0)] = "None"),
   (e[(e.FunctionScopedVariable = 1)] = "FunctionScopedVariable"),
   (e[(e.BlockScopedVariable = 2)] = "BlockScopedVariable"),
@@ -1772,8 +1759,8 @@ var rf = ((e) => (
   (e[(e.Classifiable = 2885600)] = "Classifiable"),
   (e[(e.LateBindingContainer = 6256)] = "LateBindingContainer"),
   e
-))(rf || {});
-var Im = ((e) => (
+))(sf || {});
+var Lm = ((e) => (
     (e[(e.None = 0)] = "None"),
     (e[(e.TypeChecked = 1)] = "TypeChecked"),
     (e[(e.LexicalThis = 2)] = "LexicalThis"),
@@ -1801,7 +1788,7 @@ var Im = ((e) => (
     (e[(e.PartiallyTypeChecked = 8388608)] = "PartiallyTypeChecked"),
     (e[(e.LazyFlags = 539358128)] = "LazyFlags"),
     e
-  ))(Im || {}),
+  ))(Lm || {}),
   an = ((e) => (
     (e[(e.Any = 1)] = "Any"),
     (e[(e.Unknown = 2)] = "Unknown"),
@@ -1877,7 +1864,7 @@ var Im = ((e) => (
     (e[(e.NotPrimitiveUnion = 286523411)] = "NotPrimitiveUnion"),
     e
   ))(an || {}),
-  af = ((e) => (
+  _f = ((e) => (
     (e[(e.None = 0)] = "None"),
     (e[(e.Class = 1)] = "Class"),
     (e[(e.Interface = 2)] = "Interface"),
@@ -1923,8 +1910,8 @@ var Im = ((e) => (
     (e[(e.IsNeverIntersection = 33554432)] = "IsNeverIntersection"),
     (e[(e.IsConstrainedTypeVariable = 67108864)] = "IsConstrainedTypeVariable"),
     e
-  ))(af || {});
-var Om = ((e) => (
+  ))(_f || {});
+var jm = ((e) => (
   (e[(e.None = 0)] = "None"),
   (e[(e.HasRestParameter = 1)] = "HasRestParameter"),
   (e[(e.HasLiteralTypes = 2)] = "HasLiteralTypes"),
@@ -1937,7 +1924,7 @@ var Om = ((e) => (
   (e[(e.PropagatingFlags = 167)] = "PropagatingFlags"),
   (e[(e.CallChainFlags = 24)] = "CallChainFlags"),
   e
-))(Om || {});
+))(jm || {});
 var Mr = ((e) => (
     (e[(e.Unknown = 0)] = "Unknown"),
     (e[(e.JS = 1)] = "JS"),
@@ -1986,7 +1973,7 @@ var Nn = ((e) => (
     (e.Dcts = ".d.cts"),
     e
   ))(Nn || {}),
-  Mm = ((e) => (
+  Jm = ((e) => (
     (e[(e.None = 0)] = "None"),
     (e[(e.ContainsTypeScript = 1)] = "ContainsTypeScript"),
     (e[(e.ContainsJsx = 2)] = "ContainsJsx"),
@@ -2052,15 +2039,15 @@ var Nn = ((e) => (
     (e[(e.ContainsLexicalThisOrSuper = 134234112)] = "ContainsLexicalThisOrSuper"),
     (e[(e.PropertyNamePropagatingFlags = 134234112)] = "PropertyNamePropagatingFlags"),
     e
-  ))(Mm || {}),
-  Lm = ((e) => (
+  ))(Jm || {}),
+  Rm = ((e) => (
     (e[(e.TabStop = 0)] = "TabStop"),
     (e[(e.Placeholder = 1)] = "Placeholder"),
     (e[(e.Choice = 2)] = "Choice"),
     (e[(e.Variable = 3)] = "Variable"),
     e
-  ))(Lm || {}),
-  jm = ((e) => (
+  ))(Rm || {}),
+  Um = ((e) => (
     (e[(e.None = 0)] = "None"),
     (e[(e.SingleLine = 1)] = "SingleLine"),
     (e[(e.MultiLine = 2)] = "MultiLine"),
@@ -2091,7 +2078,7 @@ var Nn = ((e) => (
     (e[(e.Iterator = 8388608)] = "Iterator"),
     (e[(e.NoAsciiEscaping = 16777216)] = "NoAsciiEscaping"),
     e
-  ))(jm || {});
+  ))(Um || {});
 var n_ = {
   Classes: 2,
   ForOf: 2,
@@ -2128,7 +2115,7 @@ var n_ = {
   UsingAndAwaitUsing: 99,
   ClassAndClassElementDecorators: 99,
 };
-var Jm = {
+var Bm = {
     reference: {
       args: [
         { name: "types", optional: !0, captureSpan: !0 },
@@ -2149,16 +2136,16 @@ var Jm = {
     jsximportsource: { args: [{ name: "factory" }], kind: 4 },
     jsxruntime: { args: [{ name: "factory" }], kind: 4 },
   },
-  Qa = ((e) => (
+  $a = ((e) => (
     (e[(e.ParseAll = 0)] = "ParseAll"),
     (e[(e.ParseNone = 1)] = "ParseNone"),
     (e[(e.ParseForTypeErrors = 2)] = "ParseForTypeErrors"),
     (e[(e.ParseForTypeInfo = 3)] = "ParseForTypeInfo"),
     e
-  ))(Qa || {});
-var Qr = "/",
+  ))($a || {});
+var Kr = "/",
   Xy = "\\",
-  Ad = "://",
+  Pd = "://",
   $y = /\\/g;
 /** @returns {boolean} */ function Qy(/** @type {number} */ e) {
   return e === 47 || e === 92;
@@ -2166,10 +2153,10 @@ var Qr = "/",
 /** @returns {boolean} */ function Ky(/** @type {string} */ e, /** @type {string} */ t) {
   return e.length > t.length && Vy(e, t);
 }
-/** @returns {boolean} */ function sf(/** @type {string} */ e) {
+/** @returns {boolean} */ function of(/** @type {string} */ e) {
   return e.length > 0 && Qy(e.charCodeAt(e.length - 1));
 }
-/** @returns {boolean} */ function Cd(/** @type {number} */ e) {
+/** @returns {boolean} */ function Nd(/** @type {number} */ e) {
   return (e >= 97 && e <= 122) || (e >= 65 && e <= 90);
 }
 function Zy(e, t) {
@@ -2186,22 +2173,22 @@ function Zy(e, t) {
   let t = e.charCodeAt(0);
   if (t === 47 || t === 92) {
     if (e.charCodeAt(1) !== t) return 1;
-    let s = e.indexOf(t === 47 ? Qr : Xy, 2);
+    let s = e.indexOf(t === 47 ? Kr : Xy, 2);
     return s < 0 ? e.length : s + 1;
   }
-  if (Cd(t) && e.charCodeAt(1) === 58) {
+  if (Nd(t) && e.charCodeAt(1) === 58) {
     let s = e.charCodeAt(2);
     if (s === 47 || s === 92) return 3;
     if (e.length === 2) return 2;
   }
-  let a = e.indexOf(Ad);
+  let a = e.indexOf(Pd);
   if (a !== -1) {
-    let s = a + Ad.length,
-      f = e.indexOf(Qr, s);
+    let s = a + Pd.length,
+      f = e.indexOf(Kr, s);
     if (f !== -1) {
       let h = e.slice(0, a),
         b = e.slice(s, f);
-      if (h === "file" && (b === "" || b === "localhost") && Cd(e.charCodeAt(f + 1))) {
+      if (h === "file" && (b === "" || b === "localhost") && Nd(e.charCodeAt(f + 1))) {
         let v = Zy(e, f + 2);
         if (v !== -1) {
           if (e.charCodeAt(v) === 47) return ~(v + 1);
@@ -2218,92 +2205,92 @@ function Zy(e, t) {
   let t = eg(e);
   return t < 0 ? ~t : t;
 }
-/** @returns {string} */ function Rm(/** @type {string} */ e, t, a) {
+/** @returns {string} */ function qm(/** @type {string} */ e, t, a) {
   if (((e = m_(e)), d_(e) === e.length)) return "";
   e = Tl(e);
-  let f = e.slice(Math.max(d_(e), e.lastIndexOf(Qr) + 1)),
-    h = t !== void 0 && a !== void 0 ? Um(f, t, a) : void 0;
+  let f = e.slice(Math.max(d_(e), e.lastIndexOf(Kr) + 1)),
+    h = t !== void 0 && a !== void 0 ? Fm(f, t, a) : void 0;
   return h ? f.slice(0, f.length - h.length) : f;
 }
-/** @returns {string | undefined} */ function Dd(/** @type {string} */ e, /** @type {string} */ t, a) {
+/** @returns {string | undefined} */ function Id(/** @type {string} */ e, /** @type {string} */ t, a) {
   if ((xl(t, ".") || (t = "." + t), e.length >= t.length && e.charCodeAt(e.length - t.length) === 46)) {
     let s = e.slice(e.length - t.length);
     if (a(s, t)) return s;
   }
 }
 /** @returns {string} */ function tg(/** @type {string} */ e, t, a) {
-  if (typeof t == "string") return Dd(e, t, a) || "";
+  if (typeof t == "string") return Id(e, t, a) || "";
   for (let s of t) {
-    let f = Dd(e, s, a);
+    let f = Id(e, s, a);
     if (f) return f;
   }
   return "";
 }
-/** @returns {string} */ function Um(/** @type {string} */ e, t, /** @type {boolean} */ a) {
-  if (t) return tg(Tl(e), t, a ? tf : By);
-  let s = Rm(e),
+/** @returns {string} */ function Fm(/** @type {string} */ e, t, /** @type {boolean} */ a) {
+  if (t) return tg(Tl(e), t, a ? rf : By);
+  let s = qm(e),
     f = s.lastIndexOf(".");
   return f >= 0 ? s.substring(f) : "";
 }
 /** @returns {string} */ function m_(/** @type {string} */ e) {
-  return e.includes("\\") ? e.replace($y, Qr) : e;
+  return e.includes("\\") ? e.replace($y, Kr) : e;
 }
 function ng(e, ...t) {
   e && (e = m_(e));
-  for (let a of t) a && ((a = m_(a)), !e || d_(a) !== 0 ? (e = a) : (e = qm(e) + a));
+  for (let a of t) a && ((a = m_(a)), !e || d_(a) !== 0 ? (e = a) : (e = Vm(e) + a));
   return e;
 }
 function rg(e, t) {
   let a = d_(e);
   a === 0 && t ? ((e = ng(t, e)), (a = d_(e))) : (e = m_(e));
-  let s = Bm(e);
+  let s = zm(e);
   if (s !== void 0) return s.length > a ? Tl(s) : s;
   let f = e.length,
     h = e.substring(0, a),
     b,
     v = a,
     l = v,
-    G = v,
+    W = v,
     y = a !== 0;
   for (; v < f;) {
     l = v;
-    let W = e.charCodeAt(v);
-    for (; W === 47 && v + 1 < f;) (v++, (W = e.charCodeAt(v)));
+    let G = e.charCodeAt(v);
+    for (; G === 47 && v + 1 < f;) (v++, (G = e.charCodeAt(v)));
     v > l && (b ?? (b = e.substring(0, l - 1)), (l = v));
-    let k = e.indexOf(Qr, v + 1);
+    let k = e.indexOf(Kr, v + 1);
     k === -1 && (k = f);
-    let C = k - l;
-    if (C === 1 && e.charCodeAt(v) === 46) b ?? (b = e.substring(0, G));
-    else if (C === 2 && e.charCodeAt(v) === 46 && e.charCodeAt(v + 1) === 46)
-      if (!y) b !== void 0 ? (b += b.length === a ? ".." : "/..") : (G = v + 2);
+    let A = k - l;
+    if (A === 1 && e.charCodeAt(v) === 46) b ?? (b = e.substring(0, W));
+    else if (A === 2 && e.charCodeAt(v) === 46 && e.charCodeAt(v + 1) === 46)
+      if (!y) b !== void 0 ? (b += b.length === a ? ".." : "/..") : (W = v + 2);
       else if (b === void 0)
-        G - 2 >= 0 ? (b = e.substring(0, Math.max(a, e.lastIndexOf(Qr, G - 2)))) : (b = e.substring(0, G));
+        W - 2 >= 0 ? (b = e.substring(0, Math.max(a, e.lastIndexOf(Kr, W - 2)))) : (b = e.substring(0, W));
       else {
-        let R = b.lastIndexOf(Qr);
+        let R = b.lastIndexOf(Kr);
         (R !== -1 ? (b = b.substring(0, Math.max(a, R))) : (b = h), b.length === a && (y = a !== 0));
       }
-    else b !== void 0 ? (b.length !== a && (b += Qr), (y = !0), (b += e.substring(l, k))) : ((y = !0), (G = k));
+    else b !== void 0 ? (b.length !== a && (b += Kr), (y = !0), (b += e.substring(l, k))) : ((y = !0), (W = k));
     v = k + 1;
   }
   return b ?? (f > a ? Tl(e) : e);
 }
 /** @returns {string} */ function ig(/** @type {string} */ e) {
   e = m_(e);
-  let t = Bm(e);
-  return t !== void 0 ? t : ((t = rg(e, "")), t && sf(e) ? qm(t) : t);
+  let t = zm(e);
+  return t !== void 0 ? t : ((t = rg(e, "")), t && of(e) ? Vm(t) : t);
 }
-/** @returns {string} */ function Bm(/** @type {string} */ e) {
-  if (!Pd.test(e)) return e;
+/** @returns {string} */ function zm(/** @type {string} */ e) {
+  if (!Od.test(e)) return e;
   let t = e.replace(/\/\.\//g, "/");
-  if ((t.startsWith("./") && (t = t.slice(2)), t !== e && ((e = t), !Pd.test(e)))) return e;
+  if ((t.startsWith("./") && (t = t.slice(2)), t !== e && ((e = t), !Od.test(e)))) return e;
 }
 /** @returns {string} */ function Tl(/** @type {string} */ e) {
-  return sf(e) ? e.substr(0, e.length - 1) : e;
+  return of(e) ? e.substr(0, e.length - 1) : e;
 }
-function qm(e) {
-  return sf(e) ? e : e + Qr;
+function Vm(e) {
+  return of(e) ? e : e + Kr;
 }
-var Pd = /\/\/|(?:^|\/)\.\.?(?:$|\/)/;
+var Od = /\/\/|(?:^|\/)\.\.?(?:$|\/)/;
 function n(/** @type {number} */ e, /** @type {number} */ t, /** @type {string} */ a, /** @type {string} */ s, /** @type {boolean | undefined} */ f, /** @type {boolean | undefined} */ h, /** @type {boolean | undefined} */ b) {
   return {
     code: e,
@@ -13753,7 +13740,7 @@ var E = {
 /** @returns {boolean} */ function ag(/** @type {number} */ e) {
   return e === 32 || kt(e);
 }
-var _f = {
+var cf = {
     abstract: 128,
     accessor: 129,
     any: 133,
@@ -13839,10 +13826,10 @@ var _f = {
     await: 135,
     of: 165,
   },
-  sg = new Map(Object.entries(_f)),
-  Fm = new Map(
+  sg = new Map(Object.entries(cf)),
+  Wm = new Map(
     Object.entries({
-      ..._f,
+      ...cf,
       "{": 19,
       "}": 20,
       "(": 21,
@@ -13906,7 +13893,7 @@ var _f = {
       "`": 62,
     }),
   ),
-  zm = new Map([
+  Gm = new Map([
     [100, 1],
     [103, 2],
     [105, 4],
@@ -14210,7 +14197,7 @@ var _f = {
 function hg(e, t) {
   return t >= 2 ? Sl(e, ug) : Sl(e, cg);
 }
-function Vm(e) {
+function Ym(e) {
   let t = [];
   return (
     e.forEach((/** @type {number} */ a, s) => {
@@ -14219,18 +14206,18 @@ function Vm(e) {
     t
   );
 }
-var yg = Vm(Fm);
+var yg = Ym(Wm);
 /** @returns {string} */ function rt(/** @type {number} */ e) {
   return yg[e];
 }
-/** @returns {number | undefined} */ function Wm(/** @type {string} */ e) {
-  return Fm.get(e);
+/** @returns {number | undefined} */ function Hm(/** @type {string} */ e) {
+  return Wm.get(e);
 }
-var k3 = Vm(zm);
-function Nd(e) {
-  return zm.get(e);
+var S3 = Ym(Gm);
+function Md(e) {
+  return Gm.get(e);
 }
-/** @returns {number[]} */ function Gm(/** @type {string} */ e) {
+/** @returns {number[]} */ function Xm(/** @type {string} */ e) {
   /** @type {number[]} */
   let t = [],
     a = 0,
@@ -14255,7 +14242,7 @@ function gg(e, t, a, s, f) {
     (f
       ? (t = t < 0 ? 0 : t >= e.length ? e.length - 1 : t)
       : q.fail(
-          `Bad line number. Line: ${t}, lineStarts.length: ${e.length} , line map is correct? ${s !== void 0 ? ky(e, Gm(s)) : "unknown"}`,
+          `Bad line number. Line: ${t}, lineStarts.length: ${e.length} , line map is correct? ${s !== void 0 ? ky(e, Xm(s)) : "unknown"}`,
         ));
   let h = e[t] + a;
   return f
@@ -14266,21 +14253,21 @@ function gg(e, t, a, s, f) {
         : h
     : (t < e.length - 1 ? q.assert(h < e[t + 1]) : s !== void 0 && q.assert(h <= s.length), h);
 }
-/** @returns {number[]} */ function Up(/** @type {d6} */ e) {
-  return e.lineMap || (e.lineMap = Gm(e.text));
+/** @returns {number[]} */ function qp(/** @type {d6} */ e) {
+  return e.lineMap || (e.lineMap = Xm(e.text));
 }
 /** @returns {TsLineAndCharacter} */ function bg(/** @type {number[]} */ e, /** @type {number} */ t) {
   let a = vg(e, t);
   return { line: a, character: t - e[a] };
 }
 /** @returns {number} */ function vg(/** @type {number[]} */ e, /** @type {number} */ t, /** @type {number | undefined} */ a) {
-  let s = Ny(e, t, xt, Pm, a);
+  let s = Ny(e, t, xt, Om, a);
   return (s < 0 && ((s = ~s - 1), q.assert(s !== -1, "position cannot precede the beginning of the file")), s);
 }
-/** @returns {TsLineAndCharacter} */ function Ym(/** @type {d6 | m6} */ e, /** @type {number} */ t) {
-  return bg(Up(e), t);
+/** @returns {TsLineAndCharacter} */ function $m(/** @type {d6 | m6} */ e, /** @type {number} */ t) {
+  return bg(qp(e), t);
 }
-/** @returns {boolean} */ function Wa(/** @type {number} */ e) {
+/** @returns {boolean} */ function Va(/** @type {number} */ e) {
   return o_(e) || Cn(e);
 }
 /** @returns {boolean} */ function o_(/** @type {number} */ e) {
@@ -14305,16 +14292,16 @@ function gg(e, t, a, s, f) {
 /** @returns {boolean} */ function hi(/** @type {int} */ e) {
   return e >= 48 && e <= 57;
 }
-/** @returns {boolean} */ function kp(/** @type {number} */ e) {
+/** @returns {boolean} */ function Ap(/** @type {number} */ e) {
   return hi(e) || (e >= 65 && e <= 70) || (e >= 97 && e <= 102);
 }
-/** @returns {boolean} */ function of(/** @type {number} */ e) {
+/** @returns {boolean} */ function lf(/** @type {number} */ e) {
   return (e >= 65 && e <= 90) || (e >= 97 && e <= 122);
 }
-/** @returns {boolean} */ function Hm(/** @type {number} */ e) {
-  return of(e) || hi(e) || e === 95;
+/** @returns {boolean} */ function Qm(/** @type {number} */ e) {
+  return lf(e) || hi(e) || e === 95;
 }
-function Ep(e) {
+function Cp(e) {
   return e >= 48 && e <= 55;
 }
 /** @returns {number} */ function Ir(/** @type {string} */ e, /** @type {number} */ t, /** @type {boolean | undefined} */ a, /** @type {boolean | undefined} */ s, /** @type {boolean | undefined} */ f) {
@@ -14359,13 +14346,13 @@ function Ep(e) {
       case 61:
       case 62:
         if (Qi(e, t)) {
-          ((t = Ra(e, t)), (h = !1));
+          ((t = Ja(e, t)), (h = !1));
           continue;
         }
         break;
       case 35:
-        if (t === 0 && Xm(e, t)) {
-          ((t = $m(e, t)), (h = !1));
+        if (t === 0 && Km(e, t)) {
+          ((t = Zm(e, t)), (h = !1));
           continue;
         }
         break;
@@ -14376,7 +14363,7 @@ function Ep(e) {
         }
         break;
       default:
-        if (b > 127 && Wa(b)) {
+        if (b > 127 && Va(b)) {
           t++;
           continue;
         }
@@ -14396,7 +14383,7 @@ var yl = 7;
   }
   return !1;
 }
-function Ra(e, t, a) {
+function Ja(e, t, a) {
   a && a(E.Merge_conflict_marker_encountered, t, yl);
   let s = e.charCodeAt(t),
     f = e.length;
@@ -14409,26 +14396,26 @@ function Ra(e, t, a) {
     }
   return t;
 }
-var cf = /^#!.*/;
-function Xm(e, t) {
-  return (q.assert(t === 0), cf.test(e));
+var uf = /^#!.*/;
+function Km(e, t) {
+  return (q.assert(t === 0), uf.test(e));
 }
-function $m(e, t) {
-  let a = cf.exec(e)[0];
+function Zm(e, t) {
+  let a = uf.exec(e)[0];
   return ((t = t + a.length), t);
 }
 /** @typedef {(pos: number, end: number, kind: number, hasTrailingNewLine: boolean, state: any, memo: any) => any} CommentRangeCallback */
 function Nl(/** @type {boolean} */ e, /** @type {string} */ t, /** @type {int} */ a, /** @type {boolean} */ s, /** @type {CommentRangeCallback} */ f, h, b) {
   let v,
     l,
-    G,
+    W,
     y,
-    W = !1,
+    G = !1,
     k = s,
-    C = b;
+    A = b;
   if (a === 0) {
     k = !0;
-    let R = lf(t);
+    let R = pf(t);
     R && (a = R.length);
   }
   e: for (; a >= 0 && a < t.length;) {
@@ -14438,7 +14425,7 @@ function Nl(/** @type {boolean} */ e, /** @type {string} */ t, /** @type {int} *
         t.charCodeAt(a + 1) === 10 && a++;
       case 10:
         if ((a++, s)) break e;
-        ((k = !0), W && (y = !0));
+        ((k = !0), G && (y = !0));
         continue;
       case 9:
       case 11:
@@ -14450,7 +14437,7 @@ function Nl(/** @type {boolean} */ e, /** @type {string} */ t, /** @type {int} *
         let pe = t.charCodeAt(a + 1),
           xe = !1;
         if (pe === 47 || pe === 42) {
-          let ge = pe === 47 ? 2 : 3,
+          let be = pe === 47 ? 2 : 3,
             me = a;
           if (((a += 2), pe === 47))
             for (; a < t.length;) {
@@ -14469,26 +14456,26 @@ function Nl(/** @type {boolean} */ e, /** @type {string} */ t, /** @type {int} *
               a++;
             }
           if (k) {
-            if (W && ((C = f(v, l, G, y, h, C)), !e && C)) return C;
-            ((v = me), (l = a), (G = ge), (y = xe), (W = !0));
+            if (G && ((A = f(v, l, W, y, h, A)), !e && A)) return A;
+            ((v = me), (l = a), (W = be), (y = xe), (G = !0));
           }
           continue;
         }
         break e;
       default:
-        if (R > 127 && Wa(R)) {
-          (W && Cn(R) && (y = !0), a++);
+        if (R > 127 && Va(R)) {
+          (G && Cn(R) && (y = !0), a++);
           continue;
         }
         break e;
     }
   }
-  return (W && (C = f(v, l, G, y, h, C)), C);
+  return (G && (A = f(v, l, W, y, h, A)), A);
 }
-function Qm(/** @type {string} */ e, /** @type {int} */ t, /** @type {CommentRangeCallback} */ a, s) {
+function e1(/** @type {string} */ e, /** @type {int} */ t, /** @type {CommentRangeCallback} */ a, s) {
   return Nl(!1, e, t, !1, a, s);
 }
-function Km(/** @type {string} */ e, /** @type {int} */ t, /** @type {CommentRangeCallback} */ a, s) {
+function t1(/** @type {string} */ e, /** @type {int} */ t, /** @type {CommentRangeCallback} */ a, s) {
   return Nl(!1, e, t, !0, a, s);
 }
 function xg(/** @type {string} */ e, /** @type {int} */ t, /** @type {CommentRangeCallback} */ a, s, f) {
@@ -14497,55 +14484,55 @@ function xg(/** @type {string} */ e, /** @type {int} */ t, /** @type {CommentRan
 function Tg(/** @type {string} */ e, /** @type {int} */ t, /** @type {CommentRangeCallback} */ a, s, f) {
   return Nl(!0, e, t, !0, a, s, f);
 }
-function Zm(/** @type {number} */ e, /** @type {number} */ t, /** @type {number} */ a, /** @type {boolean} */ s, f, h = []) {
+function n1(/** @type {number} */ e, /** @type {number} */ t, /** @type {number} */ a, /** @type {boolean} */ s, f, h = []) {
   return (h.push({ kind: a, pos: e, end: t, hasTrailingNewLine: s }), h);
 }
-function Bp(/** @type {string} */ e, /** @type {number} */ t) {
-  return xg(e, t, Zm, void 0, void 0);
+function Fp(/** @type {string} */ e, /** @type {number} */ t) {
+  return xg(e, t, n1, void 0, void 0);
 }
 function Sg(e, t) {
-  return Tg(e, t, Zm, void 0, void 0);
+  return Tg(e, t, n1, void 0, void 0);
 }
-function lf(/** @type {string} */ e) {
-  let t = cf.exec(e);
+function pf(/** @type {string} */ e) {
+  let t = uf.exec(e);
   if (t) return t[0];
 }
-/** @returns {boolean} */ function tr(/** @type {number} */ e, /** @type {number} */ t) {
-  return of(e) || e === 36 || e === 95 || (e > 127 && mg(e, t));
+/** @returns {boolean} */ function nr(/** @type {number} */ e, /** @type {number} */ t) {
+  return lf(e) || e === 36 || e === 95 || (e > 127 && mg(e, t));
 }
 /** @returns {boolean} */ function Nr(/** @type {int} */ e, /** @type {number} */ t, /** @type {number | undefined} */ a) {
-  return Hm(e) || e === 36 || (a === 1 ? e === 45 || e === 58 : !1) || (e > 127 && hg(e, t));
+  return Qm(e) || e === 36 || (a === 1 ? e === 45 || e === 58 : !1) || (e > 127 && hg(e, t));
 }
 /** @returns {boolean} */ function wg(/** @type {string} */ e, /** @type {number} */ t, a) {
   let s = Ki(e, 0);
-  if (!tr(s, t)) return !1;
+  if (!nr(s, t)) return !1;
   for (let f = Wt(s); f < e.length; f += Wt(s)) if (!Nr((s = Ki(e, f)), t, a)) return !1;
   return !0;
 }
-function uf(/** @type {number} */ e, /** @type {boolean} */ t, a = 0, s, f, h, b) {
+function ff(/** @type {number} */ e, /** @type {boolean} */ t, a = 0, s, f, h, b) {
   var v = s,
     /** @type {int} */ l,
-    /** @type {int} */ G,
-    /** @type {int} */ y,
     /** @type {int} */ W,
+    /** @type {int} */ y,
+    /** @type {int} */ G,
     /** @type {int} */ k,
-    C,
+    A,
     /** @type {int} */ R,
     pe,
     xe = 0,
-    ge = 0,
+    be = 0,
     me = 0;
   Pt(v, h, b);
-  var I = {
+  var O = {
     getTokenFullStart: /** @returns {number} */ () => y,
     getStartPos: () => y,
     getTokenEnd: /** @returns {number} */ () => l,
     getTextPos: () => l,
     getToken: () => k,
-    getTokenStart: /** @returns {number} */ () => W,
-    getTokenPos: () => W,
-    getTokenText: /** @returns {string} */ () => v.substring(W, l),
-    getTokenValue: /** @returns {string} */ () => C,
+    getTokenStart: /** @returns {number} */ () => G,
+    getTokenPos: () => G,
+    getTokenText: /** @returns {string} */ () => v.substring(G, l),
+    getTokenValue: /** @returns {string} */ () => A,
     hasUnicodeEscape: /** @returns {boolean} */ () => (R & 1024) !== 0,
     hasExtendedUnicodeEscape: /** @returns {boolean} */ () => (R & 8) !== 0,
     hasPrecedingLineBreak: /** @returns {boolean} */ () => (R & 1) !== 0,
@@ -14562,15 +14549,15 @@ function uf(/** @type {number} */ e, /** @type {boolean} */ t, a = 0, s, f, h, b
     reScanSlashToken: ht,
     reScanTemplateToken: Ft,
     reScanTemplateHeadOrNoSubstitutionTemplate: sn,
-    scanJsxIdentifier: Jr,
-    scanJsxAttributeValue: Gn,
+    scanJsxIdentifier: Rr,
+    scanJsxAttributeValue: Yn,
     reScanJsxAttributeValue: Pe,
     reScanJsxToken: cr,
     reScanLessThanToken: br,
     reScanHashToken: vr,
-    reScanQuestionToken: Vn,
+    reScanQuestionToken: Wn,
     reScanInvalidIdentifier: qt,
-    scanJsxToken: Wn,
+    scanJsxToken: Gn,
     scanJsDocToken: L,
     scanJSDocCommentTextToken: xr,
     scan: ct,
@@ -14578,12 +14565,12 @@ function uf(/** @type {number} */ e, /** @type {boolean} */ t, a = 0, s, f, h, b
     clearCommentDirectives: _t,
     setText: Pt,
     setScriptTarget: ut,
-    setLanguageVariant: Rr,
+    setLanguageVariant: Ur,
     setScriptKind: Tr,
-    setJSDocParsingMode: Mn,
+    setJSDocParsingMode: Ln,
     setOnError: St,
-    resetTokenState: Yn,
-    setTextPos: Yn,
+    resetTokenState: Hn,
+    setTextPos: Hn,
     setSkipJsDocLeadingAsterisks: Ei,
     tryScan: $e,
     lookAhead: Se,
@@ -14591,25 +14578,25 @@ function uf(/** @type {number} */ e, /** @type {boolean} */ t, a = 0, s, f, h, b
   };
   return (
     q.isDebugging &&
-      Object.defineProperty(I, "__debugShowCurrentPositionInText", {
+      Object.defineProperty(O, "__debugShowCurrentPositionInText", {
         get: () => {
-          let U = I.getText();
-          return U.slice(0, I.getTokenFullStart()) + "\u2551" + U.slice(I.getTokenFullStart());
+          let U = O.getText();
+          return U.slice(0, O.getTokenFullStart()) + "\u2551" + U.slice(O.getTokenFullStart());
         },
       }),
-    I
+    O
   );
   /** @returns {int} */ function ae(/** @type {int} */ U) {
     return Ki(v, U);
   }
   /** @returns {int} */ function Le(/** @type {int} */ U) {
-    return U >= 0 && U < G ? ae(U) : -1;
+    return U >= 0 && U < W ? ae(U) : -1;
   }
   /** @returns {number} */ function V(/** @type {int} */ U) {
     return v.charCodeAt(U);
   }
   /** @returns {number} */ function oe(/** @type {int} */ U) {
-    return U >= 0 && U < G ? V(U) : -1;
+    return U >= 0 && U < W ? V(U) : -1;
   }
   function Y(U, /** @type {number} */ K = l, Z, we) {
     if (f) {
@@ -14656,13 +14643,13 @@ function uf(/** @type {number} */ e, /** @type {boolean} */ t, a = 0, s, f, h, b
       K;
     if (V(l) === 48)
       if ((l++, V(l) === 95)) ((R |= 16896), Y(E.Numeric_separators_are_not_allowed_here, l, 1), l--, (K = mt()));
-      else if (!sr()) ((R |= 8192), (K = "" + +C));
-      else if (!C) K = "0";
+      else if (!sr()) ((R |= 8192), (K = "" + +A));
+      else if (!A) K = "0";
       else {
-        ((C = "" + parseInt(C, 8)), (R |= 32));
-        let he = k === 41,
-          Ye = (he ? "-" : "") + "0o" + (+C).toString(8);
-        return (he && U--, Y(E.Octal_literals_are_not_allowed_Use_the_syntax_0, U, l - U, Ye), 9);
+        ((A = "" + parseInt(A, 8)), (R |= 32));
+        let ge = k === 41,
+          Ye = (ge ? "-" : "") + "0o" + (+A).toString(8);
+        return (ge && U--, Y(E.Octal_literals_are_not_allowed_Use_the_syntax_0, U, l - U, Ye), 9);
       }
     else K = mt();
     let Z, we;
@@ -14670,22 +14657,22 @@ function uf(/** @type {number} */ e, /** @type {boolean} */ t, a = 0, s, f, h, b
     let ke = l;
     if (V(l) === 69 || V(l) === 101) {
       (l++, (R |= 16), (V(l) === 43 || V(l) === 45) && l++);
-      let he = l,
+      let ge = l,
         Ye = mt();
-      Ye ? ((we = v.substring(ke, he) + Ye), (ke = l)) : Y(E.Digit_expected);
+      Ye ? ((we = v.substring(ke, ge) + Ye), (ke = l)) : Y(E.Digit_expected);
     }
     let Ee;
     if ((R & 512 ? ((Ee = K), Z && (Ee += "." + Z), we && (Ee += we)) : (Ee = v.substring(U, ke)), R & 8192))
-      return (Y(E.Decimals_with_leading_zeros_are_not_allowed, U, ke - U), (C = "" + +Ee), 9);
-    if (Z !== void 0 || R & 16) return (gn(U, Z === void 0 && !!(R & 16)), (C = "" + +Ee), 9);
+      return (Y(E.Decimals_with_leading_zeros_are_not_allowed, U, ke - U), (A = "" + +Ee), 9);
+    if (Z !== void 0 || R & 16) return (gn(U, Z === void 0 && !!(R & 16)), (A = "" + +Ee), 9);
     {
-      C = Ee;
-      let he = Zt();
-      return (gn(U), he);
+      A = Ee;
+      let ge = Zt();
+      return (gn(U), ge);
     }
   }
   function gn(/** @type {number} */ U, /** @type {boolean | undefined} */ K) {
-    if (!tr(ae(l), e)) return;
+    if (!nr(ae(l), e)) return;
     let Z = l,
       { length: we } = gt();
     we === 1 && v[Z] === "n"
@@ -14695,14 +14682,14 @@ function uf(/** @type {number} */ e, /** @type {boolean} */ t, a = 0, s, f, h, b
   /** @returns {boolean} */ function sr() {
     let U = l,
       K = !0;
-    for (; hi(oe(l));) (Ep(V(l)) || (K = !1), l++);
-    return ((C = v.substring(U, l)), K);
+    for (; hi(oe(l));) (Cp(V(l)) || (K = !1), l++);
+    return ((A = v.substring(U, l)), K);
   }
   function bn(U, K) {
     let Z = He(U, !1, K);
     return Z ? parseInt(Z, 16) : -1;
   }
-  /** @returns {string} */ function In(/** @type {number} */ U, K) {
+  /** @returns {string} */ function On(/** @type {number} */ U, K) {
     return He(U, !0, K);
   }
   /** @returns {string} */ function He(/** @type {number} */ U, K, Z) {
@@ -14710,8 +14697,8 @@ function uf(/** @type {number} */ e, /** @type {boolean} */ t, a = 0, s, f, h, b
       ke = !1,
       Ee = !1;
     for (; we.length < U || K;) {
-      let he = V(l);
-      if (Z && he === 95) {
+      let ge = V(l);
+      if (Z && ge === 95) {
         ((R |= 512),
           ke
             ? ((ke = !1), (Ee = !0))
@@ -14725,9 +14712,9 @@ function uf(/** @type {number} */ e, /** @type {boolean} */ t, a = 0, s, f, h, b
           l++);
         continue;
       }
-      if (((ke = Z), he >= 65 && he <= 70)) he += 32;
-      else if (!((he >= 48 && he <= 57) || (he >= 97 && he <= 102))) break;
-      (we.push(he), l++, (Ee = !1));
+      if (((ke = Z), ge >= 65 && ge <= 70)) ge += 32;
+      else if (!((ge >= 48 && ge <= 57) || (ge >= 97 && ge <= 102))) break;
+      (we.push(ge), l++, (Ee = !1));
     }
     return (
       we.length < U && (we = []),
@@ -14741,7 +14728,7 @@ function uf(/** @type {number} */ e, /** @type {boolean} */ t, a = 0, s, f, h, b
     let Z = "",
       we = l;
     for (;;) {
-      if (l >= G) {
+      if (l >= W) {
         ((Z += v.substring(we, l)), (R |= 4), Y(E.Unterminated_string_literal));
         break;
       }
@@ -14751,7 +14738,7 @@ function uf(/** @type {number} */ e, /** @type {boolean} */ t, a = 0, s, f, h, b
         break;
       }
       if (ke === 92 && !U) {
-        ((Z += v.substring(we, l)), (Z += Lt(3)), (we = l));
+        ((Z += v.substring(we, l)), (Z += jt(3)), (we = l));
         continue;
       }
       if ((ke === 10 || ke === 13) && !U) {
@@ -14762,14 +14749,14 @@ function uf(/** @type {number} */ e, /** @type {boolean} */ t, a = 0, s, f, h, b
     }
     return Z;
   }
-  /** @returns {number} */ function jr(/** @type {boolean} */ U) {
+  /** @returns {number} */ function Jr(/** @type {boolean} */ U) {
     let K = V(l) === 96;
     l++;
     let Z = l,
       we = "",
       ke;
     for (;;) {
-      if (l >= G) {
+      if (l >= W) {
         ((we += v.substring(Z, l)), (R |= 4), Y(E.Unterminated_template_literal), (ke = K ? 15 : 18));
         break;
       }
@@ -14778,18 +14765,18 @@ function uf(/** @type {number} */ e, /** @type {boolean} */ t, a = 0, s, f, h, b
         ((we += v.substring(Z, l)), l++, (ke = K ? 15 : 18));
         break;
       }
-      if (Ee === 36 && l + 1 < G && V(l + 1) === 123) {
+      if (Ee === 36 && l + 1 < W && V(l + 1) === 123) {
         ((we += v.substring(Z, l)), (l += 2), (ke = K ? 16 : 17));
         break;
       }
       if (Ee === 92) {
-        ((we += v.substring(Z, l)), (we += Lt(1 | (U ? 2 : 0))), (Z = l));
+        ((we += v.substring(Z, l)), (we += jt(1 | (U ? 2 : 0))), (Z = l));
         continue;
       }
       if (Ee === 13) {
         ((we += v.substring(Z, l)),
           l++,
-          l < G && V(l) === 10 && l++,
+          l < W && V(l) === 10 && l++,
           (we += `
 `),
           (Z = l));
@@ -14797,24 +14784,24 @@ function uf(/** @type {number} */ e, /** @type {boolean} */ t, a = 0, s, f, h, b
       }
       l++;
     }
-    return (q.assert(ke !== void 0), (C = we), ke);
+    return (q.assert(ke !== void 0), (A = we), ke);
   }
-  /** @returns {string} */ function Lt(/** @type {number} */ U) {
+  /** @returns {string} */ function jt(/** @type {number} */ U) {
     let K = l;
-    if ((l++, l >= G)) return (Y(E.Unexpected_end_of_text), "");
+    if ((l++, l >= W)) return (Y(E.Unexpected_end_of_text), "");
     let Z = V(l);
     switch ((l++, Z)) {
       case 48:
-        if (l >= G || !hi(V(l))) return "\0";
+        if (l >= W || !hi(V(l))) return "\0";
       case 49:
       case 50:
       case 51:
-        l < G && Ep(V(l)) && l++;
+        l < W && Cp(V(l)) && l++;
       case 52:
       case 53:
       case 54:
       case 55:
-        if ((l < G && Ep(V(l)) && l++, (R |= 2048), U & 6)) {
+        if ((l < W && Cp(V(l)) && l++, (R |= 2048), U & 6)) {
           let Ee = parseInt(v.substring(K + 1, l), 8);
           return (
             U & 4 && !(U & 32) && Z !== 48
@@ -14863,9 +14850,9 @@ function uf(/** @type {number} */ e, /** @type {boolean} */ t, a = 0, s, f, h, b
       case 34:
         return '"';
       case 117:
-        if (l < G && V(l) === 123) {
+        if (l < W && V(l) === 123) {
           l -= 2;
-          let Ee = Fn(!!(U & 6));
+          let Ee = zn(!!(U & 6));
           return (
             U & 17 ||
               ((R |= 2048),
@@ -14879,24 +14866,24 @@ function uf(/** @type {number} */ e, /** @type {boolean} */ t, a = 0, s, f, h, b
           );
         }
         for (; l < K + 6; l++)
-          if (!(l < G && kp(V(l)))) return ((R |= 2048), U & 6 && Y(E.Hexadecimal_digit_expected), v.substring(K, l));
+          if (!(l < W && Ap(V(l)))) return ((R |= 2048), U & 6 && Y(E.Hexadecimal_digit_expected), v.substring(K, l));
         R |= 1024;
         let we = parseInt(v.substring(K + 2, l), 16),
           ke = String.fromCharCode(we);
-        if (U & 16 && we >= 55296 && we <= 56319 && l + 6 < G && v.substring(l, l + 2) === "\\u" && V(l + 2) !== 123) {
+        if (U & 16 && we >= 55296 && we <= 56319 && l + 6 < W && v.substring(l, l + 2) === "\\u" && V(l + 2) !== 123) {
           let Ee = l,
-            he = l + 2;
-          for (; he < Ee + 6; he++) if (!kp(V(he))) return ke;
-          let Ye = parseInt(v.substring(Ee + 2, he), 16);
-          if (Ye >= 56320 && Ye <= 57343) return ((l = he), ke + String.fromCharCode(Ye));
+            ge = l + 2;
+          for (; ge < Ee + 6; ge++) if (!Ap(V(ge))) return ke;
+          let Ye = parseInt(v.substring(Ee + 2, ge), 16);
+          if (Ye >= 56320 && Ye <= 57343) return ((l = ge), ke + String.fromCharCode(Ye));
         }
         return ke;
       case 120:
         for (; l < K + 4; l++)
-          if (!(l < G && kp(V(l)))) return ((R |= 2048), U & 6 && Y(E.Hexadecimal_digit_expected), v.substring(K, l));
+          if (!(l < W && Ap(V(l)))) return ((R |= 2048), U & 6 && Y(E.Hexadecimal_digit_expected), v.substring(K, l));
         return ((R |= 4096), String.fromCharCode(parseInt(v.substring(K + 2, l), 16)));
       case 13:
-        l < G && V(l) === 10 && l++;
+        l < W && V(l) === 10 && l++;
       case 10:
       case 8232:
       case 8233:
@@ -14909,11 +14896,11 @@ function uf(/** @type {number} */ e, /** @type {boolean} */ t, a = 0, s, f, h, b
         );
     }
   }
-  /** @returns {string} */ function Fn(/** @type {boolean} */ U) {
+  /** @returns {string} */ function zn(/** @type {boolean} */ U) {
     let K = l;
     l += 3;
     let Z = l,
-      we = In(1, !1),
+      we = On(1, !1),
       ke = we ? parseInt(we, 16) : -1,
       Ee = !1;
     return (
@@ -14921,16 +14908,16 @@ function uf(/** @type {number} */ e, /** @type {boolean} */ t, a = 0, s, f, h, b
         ? (U && Y(E.Hexadecimal_digit_expected), (Ee = !0))
         : ke > 1114111 &&
           (U && Y(E.An_extended_Unicode_escape_value_must_be_between_0x0_and_0x10FFFF_inclusive, Z, l - Z), (Ee = !0)),
-      l >= G
+      l >= W
         ? (U && Y(E.Unexpected_end_of_text), (Ee = !0))
         : V(l) === 125
           ? l++
           : (U && Y(E.Unterminated_Unicode_escape_sequence), (Ee = !0)),
-      Ee ? ((R |= 2048), v.substring(K, l)) : ((R |= 8), Id(ke))
+      Ee ? ((R |= 2048), v.substring(K, l)) : ((R |= 8), Ld(ke))
     );
   }
-  function On() {
-    if (l + 5 < G && V(l + 1) === 117) {
+  function Mn() {
+    if (l + 5 < W && V(l + 1) === 117) {
       let U = l;
       l += 2;
       let K = bn(4, !1);
@@ -14938,11 +14925,11 @@ function uf(/** @type {number} */ e, /** @type {boolean} */ t, a = 0, s, f, h, b
     }
     return -1;
   }
-  function jt() {
+  function Jt() {
     if (ae(l + 1) === 117 && ae(l + 2) === 123) {
       let U = l;
       l += 3;
-      let K = In(1, !1),
+      let K = On(1, !1),
         Z = K ? parseInt(K, 16) : -1;
       return ((l = U), Z);
     }
@@ -14951,32 +14938,32 @@ function uf(/** @type {number} */ e, /** @type {boolean} */ t, a = 0, s, f, h, b
   /** @returns {string} */ function gt() {
     let U = "",
       K = l;
-    for (; l < G;) {
+    for (; l < W;) {
       let Z = ae(l);
       if (Nr(Z, e)) l += Wt(Z);
       else if (Z === 92) {
-        if (((Z = jt()), Z >= 0 && Nr(Z, e))) {
-          ((U += Fn(!0)), (K = l));
+        if (((Z = Jt()), Z >= 0 && Nr(Z, e))) {
+          ((U += zn(!0)), (K = l));
           continue;
         }
-        if (((Z = On()), !(Z >= 0 && Nr(Z, e)))) break;
-        ((R |= 1024), (U += v.substring(K, l)), (U += Id(Z)), (l += 6), (K = l));
+        if (((Z = Mn()), !(Z >= 0 && Nr(Z, e)))) break;
+        ((R |= 1024), (U += v.substring(K, l)), (U += Ld(Z)), (l += 6), (K = l));
       } else break;
     }
     return ((U += v.substring(K, l)), U);
   }
   /** @returns {number} */ function Ke() {
-    let U = C.length;
+    let U = A.length;
     if (U >= 2 && U <= 12) {
-      let K = C.charCodeAt(0);
+      let K = A.charCodeAt(0);
       if (K >= 97 && K <= 122) {
-        let Z = sg.get(C);
+        let Z = sg.get(A);
         if (Z !== void 0) return (k = Z);
       }
     }
     return (k = 80);
   }
-  /** @returns {string} */ function zn(/** @type {number} */ U) {
+  /** @returns {string} */ function Vn(/** @type {number} */ U) {
     let K = "",
       Z = !1,
       we = !1;
@@ -15003,15 +14990,15 @@ function uf(/** @type {number} */ e, /** @type {boolean} */ t, a = 0, s, f, h, b
   }
   /** @returns {number} */ function Zt() {
     return V(l) === 110
-      ? ((C += "n"), R & 384 && (C = Lb(C) + "n"), l++, 10)
-      : ((C = "" + (R & 128 ? parseInt(C.slice(2), 2) : R & 256 ? parseInt(C.slice(2), 8) : +C)), 9);
+      ? ((A += "n"), R & 384 && (A = Lb(A) + "n"), l++, 10)
+      : ((A = "" + (R & 128 ? parseInt(A.slice(2), 2) : R & 256 ? parseInt(A.slice(2), 8) : +A)), 9);
   }
   /** @returns {number} */ function ct() {
     for (y = l, R = 0; ;) {
-      if (((W = l), l >= G)) return (k = 1);
+      if (((G = l), l >= W)) return (k = 1);
       let U = ae(l);
-      if (l === 0 && U === 35 && Xm(v, l)) {
-        if (((l = $m(v, l)), t)) continue;
+      if (l === 0 && U === 35 && Km(v, l)) {
+        if (((l = Zm(v, l)), t)) continue;
         return (k = 6);
       }
       switch (U) {
@@ -15020,7 +15007,7 @@ function uf(/** @type {number} */ e, /** @type {boolean} */ t, a = 0, s, f, h, b
           if (((R |= 1), t)) {
             l++;
             continue;
-          } else return (U === 13 && l + 1 < G && V(l + 1) === 10 ? (l += 2) : l++, (k = 4));
+          } else return (U === 13 && l + 1 < W && V(l + 1) === 10 ? (l += 2) : l++, (k = 4));
         case 9:
         case 11:
         case 12:
@@ -15047,16 +15034,16 @@ function uf(/** @type {number} */ e, /** @type {boolean} */ t, a = 0, s, f, h, b
             l++;
             continue;
           } else {
-            for (; l < G && o_(V(l));) l++;
+            for (; l < W && o_(V(l));) l++;
             return (k = 5);
           }
         case 33:
           return V(l + 1) === 61 ? (V(l + 2) === 61 ? ((l += 3), (k = 38)) : ((l += 2), (k = 36))) : (l++, (k = 54));
         case 34:
         case 39:
-          return ((C = _r()), (k = 11));
+          return ((A = _r()), (k = 11));
         case 96:
-          return (k = jr(!1));
+          return (k = Jr(!1));
         case 37:
           return V(l + 1) === 61 ? ((l += 2), (k = 70)) : (l++, (k = 45));
         case 38:
@@ -15093,16 +15080,16 @@ function uf(/** @type {number} */ e, /** @type {boolean} */ t, a = 0, s, f, h, b
               : (l++, (k = 25));
         case 47:
           if (V(l + 1) === 47) {
-            for (l += 2; l < G && !Cn(V(l));) l++;
-            if (((pe = ln(pe, v.slice(W, l), pg, W)), t)) continue;
+            for (l += 2; l < W && !Cn(V(l));) l++;
+            if (((pe = ln(pe, v.slice(G, l), pg, G)), t)) continue;
             return (k = 2);
           }
           if (V(l + 1) === 42) {
             l += 2;
-            let he = V(l) === 42 && V(l + 1) !== 47,
+            let ge = V(l) === 42 && V(l + 1) !== 47,
               Ye = !1,
-              tt = W;
-            for (; l < G;) {
+              tt = G;
+            for (; l < W;) {
               let Xe = V(l);
               if (Xe === 42 && V(l + 1) === 47) {
                 ((l += 2), (Ye = !0));
@@ -15110,36 +15097,36 @@ function uf(/** @type {number} */ e, /** @type {boolean} */ t, a = 0, s, f, h, b
               }
               (l++, Cn(Xe) && ((tt = l), (R |= 1)));
             }
-            if ((he && st() && (R |= 2), (pe = ln(pe, v.slice(tt, l), fg, tt)), Ye || Y(E.Asterisk_Slash_expected), t))
+            if ((ge && st() && (R |= 2), (pe = ln(pe, v.slice(tt, l), fg, tt)), Ye || Y(E.Asterisk_Slash_expected), t))
               continue;
             return (Ye || (R |= 4), (k = 3));
           }
           return V(l + 1) === 61 ? ((l += 2), (k = 69)) : (l++, (k = 44));
         case 48:
-          if (l + 2 < G && (V(l + 1) === 88 || V(l + 1) === 120))
+          if (l + 2 < W && (V(l + 1) === 88 || V(l + 1) === 120))
             return (
               (l += 2),
-              (C = In(1, !0)),
-              C || (Y(E.Hexadecimal_digit_expected), (C = "0")),
-              (C = "0x" + C),
+              (A = On(1, !0)),
+              A || (Y(E.Hexadecimal_digit_expected), (A = "0")),
+              (A = "0x" + A),
               (R |= 64),
               (k = Zt())
             );
-          if (l + 2 < G && (V(l + 1) === 66 || V(l + 1) === 98))
+          if (l + 2 < W && (V(l + 1) === 66 || V(l + 1) === 98))
             return (
               (l += 2),
-              (C = zn(2)),
-              C || (Y(E.Binary_digit_expected), (C = "0")),
-              (C = "0b" + C),
+              (A = Vn(2)),
+              A || (Y(E.Binary_digit_expected), (A = "0")),
+              (A = "0b" + A),
               (R |= 128),
               (k = Zt())
             );
-          if (l + 2 < G && (V(l + 1) === 79 || V(l + 1) === 111))
+          if (l + 2 < W && (V(l + 1) === 79 || V(l + 1) === 111))
             return (
               (l += 2),
-              (C = zn(8)),
-              C || (Y(E.Octal_digit_expected), (C = "0")),
-              (C = "0o" + C),
+              (A = Vn(8)),
+              A || (Y(E.Octal_digit_expected), (A = "0")),
+              (A = "0o" + A),
               (R |= 256),
               (k = Zt())
             );
@@ -15159,7 +15146,7 @@ function uf(/** @type {number} */ e, /** @type {boolean} */ t, a = 0, s, f, h, b
           return (l++, (k = 27));
         case 60:
           if (Qi(v, l)) {
-            if (((l = Ra(v, l, Y)), t)) continue;
+            if (((l = Ja(v, l, Y)), t)) continue;
             return (k = 7);
           }
           return V(l + 1) === 60
@@ -15173,7 +15160,7 @@ function uf(/** @type {number} */ e, /** @type {boolean} */ t, a = 0, s, f, h, b
                 : (l++, (k = 30));
         case 61:
           if (Qi(v, l)) {
-            if (((l = Ra(v, l, Y)), t)) continue;
+            if (((l = Ja(v, l, Y)), t)) continue;
             return (k = 7);
           }
           return V(l + 1) === 61
@@ -15185,7 +15172,7 @@ function uf(/** @type {number} */ e, /** @type {boolean} */ t, a = 0, s, f, h, b
               : (l++, (k = 64));
         case 62:
           if (Qi(v, l)) {
-            if (((l = Ra(v, l, Y)), t)) continue;
+            if (((l = Ja(v, l, Y)), t)) continue;
             return (k = 7);
           }
           return (l++, (k = 32));
@@ -15207,7 +15194,7 @@ function uf(/** @type {number} */ e, /** @type {boolean} */ t, a = 0, s, f, h, b
           return (l++, (k = 19));
         case 124:
           if (Qi(v, l)) {
-            if (((l = Ra(v, l, Y)), t)) continue;
+            if (((l = Ja(v, l, Y)), t)) continue;
             return (k = 7);
           }
           return V(l + 1) === 124
@@ -15224,29 +15211,29 @@ function uf(/** @type {number} */ e, /** @type {boolean} */ t, a = 0, s, f, h, b
         case 64:
           return (l++, (k = 60));
         case 92:
-          let K = jt();
-          if (K >= 0 && tr(K, e)) return ((C = Fn(!0) + gt()), (k = Ke()));
-          let Z = On();
-          return Z >= 0 && tr(Z, e)
-            ? ((l += 6), (R |= 1024), (C = String.fromCharCode(Z) + gt()), (k = Ke()))
+          let K = Jt();
+          if (K >= 0 && nr(K, e)) return ((A = zn(!0) + gt()), (k = Ke()));
+          let Z = Mn();
+          return Z >= 0 && nr(Z, e)
+            ? ((l += 6), (R |= 1024), (A = String.fromCharCode(Z) + gt()), (k = Ke()))
             : (Y(E.Invalid_character), l++, (k = 0));
         case 35:
           if (l !== 0 && v[l + 1] === "!") return (Y(E.can_only_be_used_at_the_start_of_a_file, l, 2), l++, (k = 0));
           let we = ae(l + 1);
           if (we === 92) {
             l++;
-            let he = jt();
-            if (he >= 0 && tr(he, e)) return ((C = "#" + Fn(!0) + gt()), (k = 81));
-            let Ye = On();
-            if (Ye >= 0 && tr(Ye, e))
-              return ((l += 6), (R |= 1024), (C = "#" + String.fromCharCode(Ye) + gt()), (k = 81));
+            let ge = Jt();
+            if (ge >= 0 && nr(ge, e)) return ((A = "#" + zn(!0) + gt()), (k = 81));
+            let Ye = Mn();
+            if (Ye >= 0 && nr(Ye, e))
+              return ((l += 6), (R |= 1024), (A = "#" + String.fromCharCode(Ye) + gt()), (k = 81));
             l--;
           }
-          return (tr(we, e) ? (l++, Jt(we, e)) : ((C = "#"), Y(E.Invalid_character, l++, Wt(U))), (k = 81));
+          return (nr(we, e) ? (l++, Rt(we, e)) : ((A = "#"), Y(E.Invalid_character, l++, Wt(U))), (k = 81));
         case 65533:
-          return (Y(E.File_appears_to_be_binary, 0, 0), (l = G), (k = 8));
+          return (Y(E.File_appears_to_be_binary, 0, 0), (l = W), (k = 8));
         default:
-          let ke = Jt(U, e);
+          let ke = Rt(U, e);
           if (ke) return (k = ke);
           if (o_(U)) {
             l += Wt(U);
@@ -15267,24 +15254,24 @@ function uf(/** @type {number} */ e, /** @type {boolean} */ t, a = 0, s, f, h, b
       case 1:
         return !1;
     }
-    return ge !== 3 && ge !== 4 ? !0 : me === 3 ? !1 : dg.test(v.slice(y, l));
+    return be !== 3 && be !== 4 ? !0 : me === 3 ? !1 : dg.test(v.slice(y, l));
   }
   function qt() {
     (q.assert(
       k === 0,
       "'reScanInvalidIdentifier' should only be called when the current token is 'SyntaxKind.Unknown'.",
     ),
-      (l = W = y),
+      (l = G = y),
       (R = 0));
     let U = ae(l),
-      K = Jt(U, 99);
+      K = Rt(U, 99);
     return K ? (k = K) : ((l += Wt(U)), k);
   }
-  /** @returns {number | undefined} */ function Jt(/** @type {int} */ U, K) {
+  /** @returns {number | undefined} */ function Rt(/** @type {int} */ U, K) {
     let Z = U;
-    if (tr(Z, K)) {
-      for (l += Wt(Z); l < G && Nr((Z = ae(l)), K);) l += Wt(Z);
-      return ((C = v.substring(W, l)), Z === 92 && (C += gt()), Ke());
+    if (nr(Z, K)) {
+      for (l += Wt(Z); l < W && Nr((Z = ae(l)), K);) l += Wt(Z);
+      return ((A = v.substring(G, l)), Z === 92 && (A += gt()), Ke());
     }
   }
   /** @returns {number} */ function lt() {
@@ -15302,32 +15289,32 @@ function uf(/** @type {number} */ e, /** @type {boolean} */ t, a = 0, s, f, h, b
     return k;
   }
   function or() {
-    return (q.assert(k === 67, "'reScanAsteriskEqualsToken' should only be called on a '*='"), (l = W + 1), (k = 64));
+    return (q.assert(k === 67, "'reScanAsteriskEqualsToken' should only be called on a '*='"), (l = G + 1), (k = 64));
   }
   /** @returns {number} */ function ht(U) {
     if (k === 44 || k === 69) {
-      let K = W + 1;
+      let K = G + 1;
       l = K;
       let Z = !1,
         we = !1,
         ke = !1;
       for (;;) {
-        let he = oe(l);
-        if (he === -1 || Cn(he)) {
+        let ge = oe(l);
+        if (ge === -1 || Cn(ge)) {
           R |= 4;
           break;
         }
         if (Z) Z = !1;
         else {
-          if (he === 47 && !ke) break;
-          he === 91
+          if (ge === 47 && !ke) break;
+          ge === 91
             ? (ke = !0)
-            : he === 92
+            : ge === 92
               ? (Z = !0)
-              : he === 93
+              : ge === 93
                 ? (ke = !1)
                 : !ke &&
-                  he === 40 &&
+                  ge === 40 &&
                   oe(l + 1) === 63 &&
                   oe(l + 2) === 60 &&
                   oe(l + 3) !== 61 &&
@@ -15339,16 +15326,16 @@ function uf(/** @type {number} */ e, /** @type {boolean} */ t, a = 0, s, f, h, b
       let Ee = l;
       if (R & 4) {
         ((l = K), (Z = !1));
-        let he = 0,
+        let ge = 0,
           Ye = !1,
           tt = 0;
         for (; l < Ee;) {
           let Xe = V(l);
           if (Z) Z = !1;
           else if (Xe === 92) Z = !0;
-          else if (Xe === 91) he++;
-          else if (Xe === 93 && he) he--;
-          else if (!he) {
+          else if (Xe === 91) ge++;
+          else if (Xe === 93 && ge) ge--;
+          else if (!ge) {
             if (Xe === 123) Ye = !0;
             else if (Xe === 125 && Ye) Ye = !1;
             else if (!Ye) {
@@ -15359,33 +15346,33 @@ function uf(/** @type {number} */ e, /** @type {boolean} */ t, a = 0, s, f, h, b
           }
           l++;
         }
-        for (; Wa(oe(l - 1)) || oe(l - 1) === 59;) l--;
-        Y(E.Unterminated_regular_expression_literal, W, l - W);
+        for (; Va(oe(l - 1)) || oe(l - 1) === 59;) l--;
+        Y(E.Unterminated_regular_expression_literal, G, l - G);
       } else {
         l++;
-        let he = 0;
+        let ge = 0;
         for (;;) {
           let Ye = Le(l);
           if (Ye === -1 || !Nr(Ye, e)) break;
           let tt = Wt(Ye);
           if (U) {
-            let Xe = Nd(Ye);
+            let Xe = Md(Ye);
             Xe === void 0
               ? Y(E.Unknown_regular_expression_flag, l, tt)
-              : he & Xe
+              : ge & Xe
                 ? Y(E.Duplicate_regular_expression_flag, l, tt)
-                : ((he | Xe) & 96) === 96
+                : ((ge | Xe) & 96) === 96
                   ? Y(E.The_Unicode_u_flag_and_the_Unicode_Sets_v_flag_cannot_be_set_simultaneously, l, tt)
-                  : ((he |= Xe), bt(Xe, tt));
+                  : ((ge |= Xe), bt(Xe, tt));
           }
           l += tt;
         }
         U &&
           de(K, Ee - K, () => {
-            vn(he, !0, we);
+            vn(ge, !0, we);
           });
       }
-      ((C = v.substring(W, l)), (k = 14));
+      ((A = v.substring(G, l)), (k = 14));
     }
     return k;
   }
@@ -15393,7 +15380,7 @@ function uf(/** @type {number} */ e, /** @type {boolean} */ t, a = 0, s, f, h, b
     var we = !!(U & 64),
       ke = !!(U & 96),
       Ee = ke || !K,
-      he = !1,
+      ge = !1,
       Ye = 0,
       tt,
       Xe,
@@ -15407,7 +15394,7 @@ function uf(/** @type {number} */ e, /** @type {boolean} */ t, a = 0, s, f, h, b
       }
     }
     function ei(H) {
-      let le = !1;
+      let ue = !1;
       for (;;) {
         let Ve = l,
           Te = oe(l);
@@ -15416,16 +15403,16 @@ function uf(/** @type {number} */ e, /** @type {boolean} */ t, a = 0, s, f, h, b
             return;
           case 94:
           case 36:
-            (l++, (le = !1));
+            (l++, (ue = !1));
             break;
           case 92:
             switch ((l++, oe(l))) {
               case 98:
               case 66:
-                (l++, (le = !1));
+                (l++, (ue = !1));
                 break;
               default:
-                (qe(), (le = !0));
+                (qe(), (ue = !0));
                 break;
             }
             break;
@@ -15434,14 +15421,14 @@ function uf(/** @type {number} */ e, /** @type {boolean} */ t, a = 0, s, f, h, b
               switch ((l++, oe(l))) {
                 case 61:
                 case 33:
-                  (l++, (le = !Ee));
+                  (l++, (ue = !Ee));
                   break;
                 case 60:
                   let wt = l;
                   switch ((l++, oe(l))) {
                     case 61:
                     case 33:
-                      (l++, (le = !1));
+                      (l++, (ue = !1));
                       break;
                     default:
                       (je(!1),
@@ -15449,36 +15436,36 @@ function uf(/** @type {number} */ e, /** @type {boolean} */ t, a = 0, s, f, h, b
                         e < 5 &&
                           Y(E.Named_capturing_groups_are_only_available_when_targeting_ES2018_or_later, wt, l - wt),
                         Ye++,
-                        (le = !0));
+                        (ue = !0));
                       break;
                   }
                   break;
                 default:
-                  let Rt = l,
-                    fn = O(0);
+                  let Ut = l,
+                    fn = M(0);
                   (oe(l) === 45 &&
                     (l++,
-                    O(fn),
-                    l === Rt + 1 && Y(E.Subpattern_flags_must_be_present_when_there_is_a_minus_sign, Rt, l - Rt)),
+                    M(fn),
+                    l === Ut + 1 && Y(E.Subpattern_flags_must_be_present_when_there_is_a_minus_sign, Ut, l - Ut)),
                     pn(58),
-                    (le = !0));
+                    (ue = !0));
                   break;
               }
-            else (Ye++, (le = !0));
+            else (Ye++, (ue = !0));
             (un(!0), pn(41));
             break;
           case 123:
             l++;
             let j = l;
             sr();
-            let yt = C;
+            let yt = A;
             if (!Ee && !yt) {
-              le = !0;
+              ue = !0;
               break;
             }
             if (oe(l) === 44) {
               (l++, sr());
-              let wt = C;
+              let wt = A;
               if (yt)
                 wt &&
                   Number.parseInt(yt) > Number.parseInt(wt) &&
@@ -15486,30 +15473,30 @@ function uf(/** @type {number} */ e, /** @type {boolean} */ t, a = 0, s, f, h, b
                   Y(E.Numbers_out_of_order_in_quantifier, j, l - j);
               else if (wt || oe(l) === 125) Y(E.Incomplete_quantifier_Digit_expected, j, 0);
               else {
-                (Y(E.Unexpected_0_Did_you_mean_to_escape_it_with_backslash, Ve, 1, String.fromCharCode(Te)), (le = !0));
+                (Y(E.Unexpected_0_Did_you_mean_to_escape_it_with_backslash, Ve, 1, String.fromCharCode(Te)), (ue = !0));
                 break;
               }
             } else if (!yt) {
               (Ee && Y(E.Unexpected_0_Did_you_mean_to_escape_it_with_backslash, Ve, 1, String.fromCharCode(Te)),
-                (le = !0));
+                (ue = !0));
               break;
             }
             if (oe(l) !== 125)
               if (Ee) (Y(E._0_expected, l, 0, "}"), l--);
               else {
-                le = !0;
+                ue = !0;
                 break;
               }
           case 42:
           case 43:
           case 63:
-            (l++, oe(l) === 63 && l++, le || Y(E.There_is_nothing_available_for_repetition, Ve, l - Ve), (le = !1));
+            (l++, oe(l) === 63 && l++, ue || Y(E.There_is_nothing_available_for_repetition, Ve, l - Ve), (ue = !1));
             break;
           case 46:
-            (l++, (le = !0));
+            (l++, (ue = !0));
             break;
           case 91:
-            (l++, we ? _n() : ze(), pn(93), (le = !0));
+            (l++, we ? _n() : ze(), pn(93), (ue = !0));
             break;
           case 41:
             if (H) return;
@@ -15518,23 +15505,23 @@ function uf(/** @type {number} */ e, /** @type {boolean} */ t, a = 0, s, f, h, b
             ((Ee || Te === 41) &&
               Y(E.Unexpected_0_Did_you_mean_to_escape_it_with_backslash, l, 1, String.fromCharCode(Te)),
               l++,
-              (le = !0));
+              (ue = !0));
             break;
           case 47:
           case 124:
             return;
           default:
-            (Ai(), (le = !0));
+            (Ai(), (ue = !0));
             break;
         }
       }
     }
-    function O(H) {
+    function M(H) {
       for (;;) {
-        let le = Le(l);
-        if (le === -1 || !Nr(le, e)) break;
-        let Ve = Wt(le),
-          Te = Nd(le);
+        let ue = Le(l);
+        if (ue === -1 || !Nr(ue, e)) break;
+        let Ve = Wt(ue),
+          Te = Md(ue);
         (Te === void 0
           ? Y(E.Unknown_regular_expression_flag, l, Ve)
           : H & Te
@@ -15568,22 +15555,22 @@ function uf(/** @type {number} */ e, /** @type {boolean} */ t, a = 0, s, f, h, b
       q.assertEqual(V(l - 1), 92);
       let H = oe(l);
       if (H >= 49 && H <= 57) {
-        let le = l;
-        return (sr(), (De = An(De, { pos: le, end: l, value: +C })), !0);
+        let ue = l;
+        return (sr(), (De = An(De, { pos: ue, end: l, value: +A })), !0);
       }
       return !1;
     }
     function Me(H) {
       q.assertEqual(V(l - 1), 92);
-      let le = oe(l);
-      switch (le) {
+      let ue = oe(l);
+      switch (ue) {
         case -1:
           return (Y(E.Undetermined_character_escape, l - 1, 1), "\\");
         case 99:
-          if ((l++, (le = oe(l)), of(le))) return (l++, String.fromCharCode(le & 31));
+          if ((l++, (ue = oe(l)), lf(ue))) return (l++, String.fromCharCode(ue & 31));
           if (Ee) Y(E.c_must_be_followed_by_an_ASCII_letter, l - 2, 2);
           else if (H) return (l--, "\\");
-          return String.fromCharCode(le);
+          return String.fromCharCode(ue);
         case 94:
         case 36:
         case 47:
@@ -15599,37 +15586,37 @@ function uf(/** @type {number} */ e, /** @type {boolean} */ t, a = 0, s, f, h, b
         case 123:
         case 125:
         case 124:
-          return (l++, String.fromCharCode(le));
+          return (l++, String.fromCharCode(ue));
         default:
-          return (l--, Lt(4 | (K ? 8 : 0) | (ke ? 16 : 0) | (H ? 32 : 0)));
+          return (l--, jt(4 | (K ? 8 : 0) | (ke ? 16 : 0) | (H ? 32 : 0)));
       }
     }
     function je(H) {
       (q.assertEqual(V(l - 1), 60),
-        (W = l),
-        Jt(Le(l), e),
-        l === W
+        (G = l),
+        Rt(Le(l), e),
+        l === G
           ? Y(E.Expected_a_capturing_group_name)
           : H
-            ? (Xe = An(Xe, { pos: W, end: l, name: C }))
-            : at?.has(C) || xn.some((le) => le?.has(C))
-              ? Y(E.Named_capturing_groups_with_the_same_name_must_be_mutually_exclusive_to_each_other, W, l - W)
-              : (at ?? (at = new Set()), at.add(C), tt ?? (tt = new Set()), tt.add(C)));
+            ? (Xe = An(Xe, { pos: G, end: l, name: A }))
+            : at?.has(A) || xn.some((ue) => ue?.has(A))
+              ? Y(E.Named_capturing_groups_with_the_same_name_must_be_mutually_exclusive_to_each_other, G, l - G)
+              : (at ?? (at = new Set()), at.add(A), tt ?? (tt = new Set()), tt.add(A)));
     }
     function B(H) {
-      return H === 93 || H === -1 || l >= G;
+      return H === 93 || H === -1 || l >= W;
     }
     function ze() {
       for (q.assertEqual(V(l - 1), 91), oe(l) === 94 && l++; ;) {
         let H = oe(l);
         if (B(H)) return;
-        let le = l,
+        let ue = l,
           Ve = It();
         if (oe(l) === 45) {
           l++;
           let Te = oe(l);
           if (B(Te)) return;
-          !Ve && Ee && Y(E.A_character_class_range_must_not_be_bounded_by_another_character_class, le, l - 1 - le);
+          !Ve && Ee && Y(E.A_character_class_range_must_not_be_bounded_by_another_character_class, ue, l - 1 - ue);
           let j = l,
             yt = It();
           if (!yt && Ee) {
@@ -15638,11 +15625,11 @@ function uf(/** @type {number} */ e, /** @type {boolean} */ t, a = 0, s, f, h, b
           }
           if (!Ve) continue;
           let wt = Ki(Ve, 0),
-            Rt = Ki(yt, 0);
+            Ut = Ki(yt, 0);
           Ve.length === Wt(wt) &&
-            yt.length === Wt(Rt) &&
-            wt > Rt &&
-            Y(E.Range_out_of_order_in_character_class, le, l - le);
+            yt.length === Wt(Ut) &&
+            wt > Ut &&
+            Y(E.Range_out_of_order_in_character_class, ue, l - ue);
         }
       }
     }
@@ -15650,7 +15637,7 @@ function uf(/** @type {number} */ e, /** @type {boolean} */ t, a = 0, s, f, h, b
       q.assertEqual(V(l - 1), 91);
       let H = !1;
       oe(l) === 94 && (l++, (H = !0));
-      let le = !1,
+      let ue = !1,
         Ve = oe(l);
       if (B(Ve)) return;
       let Te = l,
@@ -15658,7 +15645,7 @@ function uf(/** @type {number} */ e, /** @type {boolean} */ t, a = 0, s, f, h, b
       switch (v.slice(l, l + 2)) {
         case "--":
         case "&&":
-          (Y(E.Expected_a_class_set_operand), (he = !1));
+          (Y(E.Expected_a_class_set_operand), (ge = !1));
           break;
         default:
           j = Qe();
@@ -15668,15 +15655,15 @@ function uf(/** @type {number} */ e, /** @type {boolean} */ t, a = 0, s, f, h, b
         case 45:
           if (oe(l + 1) === 45) {
             (H &&
-              he &&
+              ge &&
               Y(
                 E.Anything_that_would_possibly_match_more_than_a_single_character_is_invalid_inside_a_negated_character_class,
                 Te,
                 l - Te,
               ),
-              (le = he),
+              (ue = ge),
               Ge(3),
-              (he = !H && le));
+              (ge = !H && ue));
             return;
           }
           break;
@@ -15684,33 +15671,33 @@ function uf(/** @type {number} */ e, /** @type {boolean} */ t, a = 0, s, f, h, b
           if (oe(l + 1) === 38) {
             (Ge(2),
               H &&
-                he &&
+                ge &&
                 Y(
                   E.Anything_that_would_possibly_match_more_than_a_single_character_is_invalid_inside_a_negated_character_class,
                   Te,
                   l - Te,
                 ),
-              (le = he),
-              (he = !H && le));
+              (ue = ge),
+              (ge = !H && ue));
             return;
           } else Y(E.Unexpected_0_Did_you_mean_to_escape_it_with_backslash, l, 1, String.fromCharCode(Ve));
           break;
         default:
           (H &&
-            he &&
+            ge &&
             Y(
               E.Anything_that_would_possibly_match_more_than_a_single_character_is_invalid_inside_a_negated_character_class,
               Te,
               l - Te,
             ),
-            (le = he));
+            (ue = ge));
           break;
       }
       for (; (Ve = oe(l)), Ve !== -1;) {
         switch (Ve) {
           case 45:
             if ((l++, (Ve = oe(l)), B(Ve))) {
-              he = !H && le;
+              ge = !H && ue;
               return;
             }
             if (Ve === 45) {
@@ -15725,24 +15712,24 @@ function uf(/** @type {number} */ e, /** @type {boolean} */ t, a = 0, s, f, h, b
                 wt = Qe();
               if (
                 (H &&
-                  he &&
+                  ge &&
                   Y(
                     E.Anything_that_would_possibly_match_more_than_a_single_character_is_invalid_inside_a_negated_character_class,
                     yt,
                     l - yt,
                   ),
-                le || (le = he),
+                ue || (ue = ge),
                 !wt)
               ) {
                 Y(E.A_character_class_range_must_not_be_bounded_by_another_character_class, yt, l - yt);
                 break;
               }
               if (!j) break;
-              let Rt = Ki(j, 0),
+              let Ut = Ki(j, 0),
                 fn = Ki(wt, 0);
-              j.length === Wt(Rt) &&
+              j.length === Wt(Ut) &&
                 wt.length === Wt(fn) &&
-                Rt > fn &&
+                Ut > fn &&
                 Y(E.Range_out_of_order_in_character_class, Te, l - Te);
             }
             break;
@@ -15771,10 +15758,10 @@ function uf(/** @type {number} */ e, /** @type {boolean} */ t, a = 0, s, f, h, b
             break;
         }
       }
-      he = !H && le;
+      ge = !H && ue;
     }
     function Ge(H) {
-      let le = he;
+      let ue = ge;
       for (;;) {
         let Ve = oe(l);
         if (B(Ve)) break;
@@ -15826,12 +15813,12 @@ function uf(/** @type {number} */ e, /** @type {boolean} */ t, a = 0, s, f, h, b
           Y(E.Expected_a_class_set_operand);
           break;
         }
-        (Qe(), le && (le = he));
+        (Qe(), ue && (ue = ge));
       }
-      he = le;
+      ge = ue;
     }
     function Qe() {
-      switch (((he = !1), oe(l))) {
+      switch (((ge = !1), oe(l))) {
         case -1:
           return "";
         case 91:
@@ -15858,10 +15845,10 @@ function uf(/** @type {number} */ e, /** @type {boolean} */ t, a = 0, s, f, h, b
           case -1:
             return;
           case 125:
-            H !== 1 && (he = !0);
+            H !== 1 && (ge = !0);
             return;
           case 124:
-            (H !== 1 && (he = !0), l++, (h = l), (H = 0));
+            (H !== 1 && (ge = !0), l++, (h = l), (H = 0));
             break;
           default:
             (Et(), H++);
@@ -15873,8 +15860,8 @@ function uf(/** @type {number} */ e, /** @type {boolean} */ t, a = 0, s, f, h, b
       if (H === -1) return "";
       if (H === 92) {
         l++;
-        let le = oe(l);
-        switch (le) {
+        let ue = oe(l);
+        switch (ue) {
           case 98:
             return (l++, "\b");
           case 38:
@@ -15891,7 +15878,7 @@ function uf(/** @type {number} */ e, /** @type {boolean} */ t, a = 0, s, f, h, b
           case 64:
           case 96:
           case 126:
-            return (l++, String.fromCharCode(le));
+            return (l++, String.fromCharCode(ue));
           default:
             return Me(!1);
         }
@@ -15959,7 +15946,7 @@ function uf(/** @type {number} */ e, /** @type {boolean} */ t, a = 0, s, f, h, b
     function zt() {
       q.assertEqual(V(l - 1), 92);
       let H = !1,
-        le = l - 1,
+        ue = l - 1,
         Ve = oe(l);
       switch (Ve) {
         case 100:
@@ -15975,26 +15962,26 @@ function uf(/** @type {number} */ e, /** @type {boolean} */ t, a = 0, s, f, h, b
           if ((l++, oe(l) === 123)) {
             l++;
             let Te = l,
-              j = Hn();
+              j = Xn();
             if (oe(l) === 61) {
-              let yt = Od.get(j);
+              let yt = jd.get(j);
               if (l === Te) Y(E.Expected_a_Unicode_property_name);
               else if (yt === void 0) {
                 Y(E.Unknown_Unicode_property_name, Te, l - Te);
-                let fn = __(j, Od.keys(), xt);
+                let fn = __(j, jd.keys(), xt);
                 fn && Y(E.Did_you_mean_0, Te, l - Te, fn);
               }
               l++;
               let wt = l,
-                Rt = Hn();
+                Ut = Xn();
               if (l === wt) Y(E.Expected_a_Unicode_property_value);
-              else if (yt !== void 0 && !Fa[yt].has(Rt)) {
+              else if (yt !== void 0 && !qa[yt].has(Ut)) {
                 Y(E.Unknown_Unicode_property_value, wt, l - wt);
-                let fn = __(Rt, Fa[yt], xt);
+                let fn = __(Ut, qa[yt], xt);
                 fn && Y(E.Did_you_mean_0, wt, l - wt, fn);
               }
             } else if (l === Te) Y(E.Expected_a_Unicode_property_name_or_value);
-            else if (Ld.has(j))
+            else if (Rd.has(j))
               we
                 ? H
                   ? Y(
@@ -16002,23 +15989,23 @@ function uf(/** @type {number} */ e, /** @type {boolean} */ t, a = 0, s, f, h, b
                       Te,
                       l - Te,
                     )
-                  : (he = !0)
+                  : (ge = !0)
                 : Y(
                     E.Any_Unicode_property_that_would_possibly_match_more_than_a_single_character_is_only_available_when_the_Unicode_Sets_v_flag_is_set,
                     Te,
                     l - Te,
                   );
-            else if (!Fa.General_Category.has(j) && !Md.has(j)) {
+            else if (!qa.General_Category.has(j) && !Jd.has(j)) {
               Y(E.Unknown_Unicode_property_name_or_value, Te, l - Te);
-              let yt = __(j, [...Fa.General_Category, ...Md, ...Ld], xt);
+              let yt = __(j, [...qa.General_Category, ...Jd, ...Rd], xt);
               yt && Y(E.Did_you_mean_0, Te, l - Te, yt);
             }
             (pn(125),
               ke ||
                 Y(
                   E.Unicode_property_value_expressions_are_only_available_when_the_Unicode_u_flag_or_the_Unicode_Sets_v_flag_is_set,
-                  le,
-                  l - le,
+                  ue,
+                  l - ue,
                 ));
           } else if (Ee)
             Y(
@@ -16032,12 +16019,12 @@ function uf(/** @type {number} */ e, /** @type {boolean} */ t, a = 0, s, f, h, b
       }
       return !1;
     }
-    function Hn() {
+    function Xn() {
       let H = "";
       for (;;) {
-        let le = oe(l);
-        if (le === -1 || !Hm(le)) break;
-        ((H += String.fromCharCode(le)), l++);
+        let ue = oe(l);
+        if (ue === -1 || !Qm(ue)) break;
+        ((H += String.fromCharCode(ue)), l++);
       }
       return H;
     }
@@ -16049,16 +16036,16 @@ function uf(/** @type {number} */ e, /** @type {boolean} */ t, a = 0, s, f, h, b
       oe(l) === H ? l++ : Y(E._0_expected, l, 0, String.fromCharCode(H));
     }
     (un(!1),
-      Bn(Xe, (H) => {
+      qn(Xe, (H) => {
         if (
           !tt?.has(H.name) &&
           (Y(E.There_is_no_capturing_group_named_0_in_this_regular_expression, H.pos, H.end - H.pos, H.name), tt)
         ) {
-          let le = __(H.name, tt, xt);
-          le && Y(E.Did_you_mean_0, H.pos, H.end - H.pos, le);
+          let ue = __(H.name, tt, xt);
+          ue && Y(E.Did_you_mean_0, H.pos, H.end - H.pos, ue);
         }
       }),
-      Bn(De, (H) => {
+      qn(De, (H) => {
         H.value > Ye &&
           (Ye
             ? Y(
@@ -16093,32 +16080,32 @@ function uf(/** @type {number} */ e, /** @type {boolean} */ t, a = 0, s, f, h, b
       }
   }
   /** @returns {number} */ function Ft(/** @type {boolean} */ U) {
-    return ((l = W), (k = jr(!U)));
+    return ((l = G), (k = Jr(!U)));
   }
   function sn() {
-    return ((l = W), (k = jr(!0)));
+    return ((l = G), (k = Jr(!0)));
   }
   /** @returns {number} */ function cr(U = !0) {
-    return ((l = W = y), (k = Wn(U)));
+    return ((l = G = y), (k = Gn(U)));
   }
   /** @returns {number} */ function br() {
-    return k === 48 ? ((l = W + 1), (k = 30)) : k;
+    return k === 48 ? ((l = G + 1), (k = 30)) : k;
   }
   function vr() {
-    return k === 81 ? ((l = W + 1), (k = 63)) : k;
+    return k === 81 ? ((l = G + 1), (k = 63)) : k;
   }
-  function Vn() {
-    return (q.assert(k === 61, "'reScanQuestionToken' should only be called on a '??'"), (l = W + 1), (k = 58));
+  function Wn() {
+    return (q.assert(k === 61, "'reScanQuestionToken' should only be called on a '??'"), (l = G + 1), (k = 58));
   }
-  /** @returns {number} */ function Wn(U = !0) {
-    if (((y = W = l), l >= G)) return (k = 1);
+  /** @returns {number} */ function Gn(U = !0) {
+    if (((y = G = l), l >= W)) return (k = 1);
     let K = V(l);
     if (K === 60) return V(l + 1) === 47 ? ((l += 2), (k = 31)) : (l++, (k = 30));
     if (K === 123) return (l++, (k = 19));
     let Z = 0;
-    for (; l < G && ((K = V(l)), K !== 123);) {
+    for (; l < W && ((K = V(l)), K !== 123);) {
       if (K === 60) {
-        if (Qi(v, l)) return ((l = Ra(v, l, Y)), (k = 7));
+        if (Qi(v, l)) return ((l = Ja(v, l, Y)), (k = 7));
         break;
       }
       if (
@@ -16129,56 +16116,56 @@ function uf(/** @type {number} */ e, /** @type {boolean} */ t, a = 0, s, f, h, b
         Z = -1;
       else {
         if (!U && Cn(K) && Z > 0) break;
-        Wa(K) || (Z = l);
+        Va(K) || (Z = l);
       }
       l++;
     }
-    return ((C = v.substring(y, l)), Z === -1 ? 13 : 12);
+    return ((A = v.substring(y, l)), Z === -1 ? 13 : 12);
   }
-  /** @returns {number} */ function Jr() {
+  /** @returns {number} */ function Rr() {
     if (kt(k)) {
-      for (; l < G;) {
+      for (; l < W;) {
         if (V(l) === 45) {
-          ((C += "-"), l++);
+          ((A += "-"), l++);
           continue;
         }
         let K = l;
-        if (((C += gt()), l === K)) break;
+        if (((A += gt()), l === K)) break;
       }
       return Ke();
     }
     return k;
   }
-  /** @returns {number} */ function Gn() {
+  /** @returns {number} */ function Yn() {
     switch (((y = l), V(l))) {
       case 34:
       case 39:
-        return ((C = _r(!0)), (k = 11));
+        return ((A = _r(!0)), (k = 11));
       default:
         return ct();
     }
   }
   function Pe() {
-    return ((l = W = y), Gn());
+    return ((l = G = y), Yn());
   }
   function xr(U) {
-    if (((y = W = l), (R = 0), l >= G)) return (k = 1);
-    for (let K = V(l); l < G && !Cn(K) && K !== 96; K = ae(++l))
+    if (((y = G = l), (R = 0), l >= W)) return (k = 1);
+    for (let K = V(l); l < W && !Cn(K) && K !== 96; K = ae(++l))
       if (!U) {
         if (K === 123) break;
-        if (K === 64 && l - 1 >= 0 && o_(V(l - 1)) && !(l + 1 < G && Wa(V(l + 1)))) break;
+        if (K === 64 && l - 1 >= 0 && o_(V(l - 1)) && !(l + 1 < W && Va(V(l + 1)))) break;
       }
-    return l === W ? L() : ((C = v.substring(W, l)), (k = 82));
+    return l === G ? L() : ((A = v.substring(G, l)), (k = 82));
   }
   function L() {
-    if (((y = W = l), (R = 0), l >= G)) return (k = 1);
+    if (((y = G = l), (R = 0), l >= W)) return (k = 1);
     let U = ae(l);
     switch (((l += Wt(U)), U)) {
       case 9:
       case 11:
       case 12:
       case 32:
-        for (; l < G && o_(V(l));) l++;
+        for (; l < W && o_(V(l));) l++;
         return (k = 5);
       case 64:
         return (k = 60);
@@ -16216,41 +16203,41 @@ function uf(/** @type {number} */ e, /** @type {boolean} */ t, a = 0, s, f, h, b
         return (k = 63);
       case 92:
         l--;
-        let K = jt();
-        if (K >= 0 && tr(K, e)) return ((C = Fn(!0) + gt()), (k = Ke()));
-        let Z = On();
-        return Z >= 0 && tr(Z, e)
-          ? ((l += 6), (R |= 1024), (C = String.fromCharCode(Z) + gt()), (k = Ke()))
+        let K = Jt();
+        if (K >= 0 && nr(K, e)) return ((A = zn(!0) + gt()), (k = Ke()));
+        let Z = Mn();
+        return Z >= 0 && nr(Z, e)
+          ? ((l += 6), (R |= 1024), (A = String.fromCharCode(Z) + gt()), (k = Ke()))
           : (l++, (k = 0));
     }
-    if (tr(U, e)) {
+    if (nr(U, e)) {
       let K = U;
-      for (; (l < G && Nr((K = ae(l)), e)) || K === 45;) l += Wt(K);
-      return ((C = v.substring(W, l)), K === 92 && (C += gt()), (k = Ke()));
+      for (; (l < W && Nr((K = ae(l)), e)) || K === 45;) l += Wt(K);
+      return ((A = v.substring(G, l)), K === 92 && (A += gt()), (k = Ke()));
     } else return (k = 0);
   }
   function se(U, K) {
     let Z = l,
       we = y,
-      ke = W,
+      ke = G,
       Ee = k,
-      he = C,
+      ge = A,
       Ye = R,
       tt = U();
-    return ((!tt || K) && ((l = Z), (y = we), (W = ke), (k = Ee), (C = he), (R = Ye)), tt);
+    return ((!tt || K) && ((l = Z), (y = we), (G = ke), (k = Ee), (A = ge), (R = Ye)), tt);
   }
   function de(/** @type {number} */ U, /** @type {number} */ K, Z) {
-    let we = G,
+    let we = W,
       ke = l,
       Ee = y,
-      he = W,
+      ge = G,
       Ye = k,
-      tt = C,
+      tt = A,
       Xe = R,
       De = pe;
     Pt(v, U, K);
     let xn = Z();
-    return ((G = we), (l = ke), (y = Ee), (W = he), (k = Ye), (C = tt), (R = Xe), (pe = De), xn);
+    return ((W = we), (l = ke), (y = Ee), (G = ge), (k = Ye), (A = tt), (R = Xe), (pe = De), xn);
   }
   function Se(U) {
     return se(U, !0);
@@ -16265,7 +16252,7 @@ function uf(/** @type {number} */ e, /** @type {boolean} */ t, a = 0, s, f, h, b
     pe = void 0;
   }
   function Pt(/** @type {string | undefined} */ U, K, Z) {
-    ((v = U || ""), (G = Z === void 0 ? v.length : K + Z), Yn(K || 0));
+    ((v = U || ""), (W = Z === void 0 ? v.length : K + Z), Hn(K || 0));
   }
   function St(U) {
     f = U;
@@ -16273,17 +16260,17 @@ function uf(/** @type {number} */ e, /** @type {boolean} */ t, a = 0, s, f, h, b
   function ut(/** @type {number} */ U) {
     e = U;
   }
-  function Rr(/** @type {number} */ U) {
+  function Ur(/** @type {number} */ U) {
     a = U;
   }
   function Tr(/** @type {number} */ U) {
-    ge = U;
+    be = U;
   }
-  function Mn(/** @type {number} */ U) {
+  function Ln(/** @type {number} */ U) {
     me = U;
   }
-  function Yn(/** @type {number} */ U) {
-    (q.assert(U >= 0), (l = U), (y = U), (W = U), (k = 0), (C = void 0), (R = 0));
+  function Hn(/** @type {number} */ U) {
+    (q.assert(U >= 0), (l = U), (y = U), (G = U), (k = 0), (A = void 0), (R = 0));
   }
   function Ei(U) {
     xe += U ? 1 : -1;
@@ -16302,10 +16289,10 @@ function kg(e) {
   return String.fromCharCode(t, a);
 }
 var Eg = String.fromCodePoint ? /** @returns {string} */ (/** @type {number} */ e) => String.fromCodePoint(e) : kg;
-/** @returns {string} */ function Id(/** @type {number} */ e) {
+/** @returns {string} */ function Ld(/** @type {number} */ e) {
   return Eg(e);
 }
-var Od = new Map(
+var jd = new Map(
     Object.entries({
       General_Category: "General_Category",
       gc: "General_Category",
@@ -16315,7 +16302,7 @@ var Od = new Map(
       scx: "Script_Extensions",
     }),
   ),
-  Md = new Set([
+  Jd = new Set([
     "ASCII",
     "ASCII_Hex_Digit",
     "AHex",
@@ -16415,7 +16402,7 @@ var Od = new Map(
     "XID_Start",
     "XIDS",
   ]),
-  Ld = new Set([
+  Rd = new Set([
     "Basic_Emoji",
     "Emoji_Keycap_Sequence",
     "RGI_Emoji_Modifier_Sequence",
@@ -16424,7 +16411,7 @@ var Od = new Map(
     "RGI_Emoji_ZWJ_Sequence",
     "RGI_Emoji",
   ]),
-  Fa = {
+  qa = {
     General_Category: new Set([
       "C",
       "Other",
@@ -16835,33 +16822,33 @@ var Od = new Map(
     ]),
     Script_Extensions: void 0,
   };
-Fa.Script_Extensions = Fa.Script;
+qa.Script_Extensions = qa.Script;
 function Dr(e) {
   return e.start + e.length;
 }
 function Ag(e) {
   return e.length === 0;
 }
-function pf(/** @type {number} */ e, /** @type {number} */ t) {
+function df(/** @type {number} */ e, /** @type {number} */ t) {
   if (e < 0) throw new Error("start < 0");
   if (t < 0) throw new Error("length < 0");
   return { start: e, length: t };
 }
 function Cg(e, t) {
-  return pf(e, t - e);
+  return df(e, t - e);
 }
 function r_(e) {
-  return pf(e.span.start, e.newLength);
+  return df(e.span.start, e.newLength);
 }
 function Dg(e) {
   return Ag(e.span) && e.newLength === 0;
 }
-function e1(e, /** @type {number} */ t) {
+function r1(e, /** @type {number} */ t) {
   if (t < 0) throw new Error("newLength < 0");
   return { span: e, newLength: t };
 }
-var E3 = e1(pf(0, 0), 0);
-function ff(/** @type {Kf | xh | vh | Th} */ e, t) {
+var w3 = r1(df(0, 0), 0);
+function mf(/** @type {ed | wh | Sh | kh} */ e, t) {
   for (; e;) {
     let a = t(e);
     if (a === "quit") return;
@@ -16879,27 +16866,27 @@ function Pg(e, t) {
     e = e.original;
   }
 }
-/** @returns {string} */ function Ua(/** @type {string} */ e) {
+/** @returns {string} */ function Ra(/** @type {string} */ e) {
   return e.length >= 2 && e.charCodeAt(0) === 95 && e.charCodeAt(1) === 95 ? "_" + e : e;
 }
 /** @returns {string} */ function h_(/** @type {string} */ e) {
   let t = e;
   return t.length >= 3 && t.charCodeAt(0) === 95 && t.charCodeAt(1) === 95 && t.charCodeAt(2) === 95 ? t.substr(1) : t;
 }
-/** @returns {string} */ function Pn(/** @type {xh | Th} */ e) {
+/** @returns {string} */ function Pn(/** @type {wh | kh} */ e) {
   return h_(e.escapedText);
 }
-/** @returns {number | undefined} */ function df(/** @type {InstanceType<typeof xh>} */ e) {
-  let t = Wm(e.escapedText);
+/** @returns {number | undefined} */ function hf(/** @type {InstanceType<typeof wh>} */ e) {
+  let t = Hm(e.escapedText);
   return t ? Ry(t, yi) : void 0;
 }
-function qp(e) {
+function zp(e) {
   return e.valueDeclaration && Kg(e.valueDeclaration) ? Pn(e.valueDeclaration.name) : h_(e.escapedName);
 }
-function t1(e) {
+function i1(e) {
   let t = e.parent.parent;
   if (t) {
-    if (Rd(t)) return cl(t);
+    if (qd(t)) return cl(t);
     switch (t.kind) {
       case 244:
         if (t.declarationList && t.declarationList.declarations[0]) return cl(t.declarationList.declarations[0]);
@@ -16917,23 +16904,23 @@ function t1(e) {
       case 218:
         return cl(t.expression);
       case 257: {
-        if (Rd(t.statement) || f1(t.statement)) return cl(t.statement);
+        if (qd(t.statement) || h1(t.statement)) return cl(t.statement);
         break;
       }
     }
   }
 }
 function cl(e) {
-  let t = n1(e);
+  let t = a1(e);
   return t && et(t) ? t : void 0;
 }
 function Ng(e) {
-  return e.name || t1(e);
+  return e.name || i1(e);
 }
-/** @returns {boolean} */ function Ig(/** @type {Kf | xh | vh | Th} */ e) {
+/** @returns {boolean} */ function Ig(/** @type {ed | wh | Sh | kh} */ e) {
   return !!e.name;
 }
-function mf(e) {
+function yf(e) {
   switch (e.kind) {
     case 80:
       return e;
@@ -16946,12 +16933,12 @@ function mf(e) {
     case 214:
     case 227: {
       let a = e;
-      switch (Sf(a)) {
+      switch (kf(a)) {
         case 1:
         case 4:
         case 5:
         case 3:
-          return wf(a.left);
+          return Ef(a.left);
         case 7:
         case 8:
         case 9:
@@ -16963,63 +16950,63 @@ function mf(e) {
     case 347:
       return Ng(e);
     case 341:
-      return t1(e);
+      return i1(e);
     case 278: {
       let { expression: a } = e;
       return et(a) ? a : void 0;
     }
     case 213:
       let t = e;
-      if (v1(t)) return t.argumentExpression;
+      if (S1(t)) return t.argumentExpression;
   }
   return e.name;
 }
-function n1(e) {
-  if (e !== void 0) return mf(e) || (Bf(e) || qf(e) || Cl(e) ? Og(e) : void 0);
+function a1(e) {
+  if (e !== void 0) return yf(e) || (Ff(e) || zf(e) || Cl(e) ? Og(e) : void 0);
 }
 function Og(e) {
   if (e.parent) {
-    if (ih(e.parent) || G1(e.parent)) return e.parent.name;
+    if (_h(e.parent) || X1(e.parent)) return e.parent.name;
     if (ra(e.parent) && e === e.parent.right) {
       if (et(e.parent.left)) return e.parent.left;
-      if (E1(e.parent.left)) return wf(e.parent.left);
-    } else if (Ff(e.parent) && et(e.parent.name)) return e.parent.name;
+      if (D1(e.parent.left)) return Ef(e.parent.left);
+    } else if (Vf(e.parent) && et(e.parent.name)) return e.parent.name;
   } else return;
 }
-function hf(/** @type {d6 | Kf | xh | vh | Th} */ e) {
-  if (rb(e)) return $r(e.modifiers, Ka);
+function gf(/** @type {d6 | ed | wh | Sh | kh} */ e) {
+  if (rb(e)) return Qr(e.modifiers, Qa);
 }
-function r1(/** @type {d6 | Kf | xh | vh | Th} */ e) {
-  if (E_(e, 98303)) return $r(e.modifiers, t2);
+function s1(/** @type {d6 | ed | wh | Sh | kh} */ e) {
+  if (E_(e, 98303)) return Qr(e.modifiers, t2);
 }
-function i1(e, t) {
+function _1(e, t) {
   if (e.name)
     if (et(e.name)) {
       let a = e.name.escapedText;
-      return y_(e.parent, t).filter((s) => Hp(s) && et(s.name) && s.name.escapedText === a);
+      return y_(e.parent, t).filter((s) => $p(s) && et(s.name) && s.name.escapedText === a);
     } else {
       let a = e.parent.parameters.indexOf(e);
       q.assert(a > -1, "Parameters should always be in their parents' parameter list");
-      let s = y_(e.parent, t).filter(Hp);
+      let s = y_(e.parent, t).filter($p);
       if (a < s.length) return [s[a]];
     }
   return Tt;
 }
 function Mg(e) {
-  return i1(e, !1);
+  return _1(e, !1);
 }
 function Lg(e) {
-  return i1(e, !0);
+  return _1(e, !0);
 }
-function a1(e, t) {
+function o1(e, t) {
   let a = e.name.escapedText;
-  return y_(e.parent, t).filter((s) => lh(s) && s.typeParameters.some((f) => f.name.escapedText === a));
+  return y_(e.parent, t).filter((s) => fh(s) && s.typeParameters.some((f) => f.name.escapedText === a));
 }
 function jg(e) {
-  return a1(e, !1);
+  return o1(e, !1);
 }
 function Jg(e) {
-  return a1(e, !0);
+  return o1(e, !0);
 }
 function Rg(e) {
   return Ti(e, vv);
@@ -17046,60 +17033,60 @@ function Wg(e) {
   return Ti(e, Av, !0);
 }
 function Gg(e) {
-  let t = Ti(e, Xf);
+  let t = Ti(e, Qf);
   if (t && t.typeExpression && t.typeExpression.type) return t;
 }
 function y_(e, t) {
   var a;
-  if (!kf(e)) return Tt;
+  if (!Af(e)) return Tt;
   let s = (a = e.jsDoc) == null ? void 0 : a.jsDocCache;
   if (s === void 0 || t) {
     let f = q2(e, t);
     (q.assert(f.length < 2 || f[0] !== f[1]),
-      (s = Cm(f, (h) => (ch(h) ? h.tags : h))),
+      (s = Nm(f, (h) => (ph(h) ? h.tags : h))),
       t || (e.jsDoc ?? (e.jsDoc = []), (e.jsDoc.jsDocCache = s)));
   }
   return s;
 }
-function s1(e) {
+function c1(e) {
   return y_(e, !1);
 }
 function Ti(e, t, a) {
-  return Em(y_(e, a), t);
+  return Dm(y_(e, a), t);
 }
 function Yg(e, t) {
-  return s1(e).filter(t);
+  return c1(e).filter(t);
 }
-function Fp(e) {
+function Vp(e) {
   return e.kind === 80 || e.kind === 81;
 }
 function Hg(e) {
-  return gr(e) && !!(e.flags & 64);
+  return yr(e) && !!(e.flags & 64);
 }
 function Xg(e) {
-  return Za(e) && !!(e.flags & 64);
+  return Ka(e) && !!(e.flags & 64);
 }
-function jd(e) {
-  return Uf(e) && !!(e.flags & 64);
+function Ud(e) {
+  return qf(e) && !!(e.flags & 64);
 }
-/** @returns {boolean} */ function yf(/** @type {Kf | vh | xh | Th} */ e) {
+/** @returns {boolean} */ function bf(/** @type {ed | Sh | wh | kh} */ e) {
   let t = e.kind;
   return !!(e.flags & 64) && (t === 212 || t === 213 || t === 214 || t === 236);
 }
-/** @returns {vh | Kf | xh} */ function gf(/** @type {Kf | vh | xh | Th} */ e) {
-  return $f(e, 8);
+/** @returns {Sh | ed | wh} */ function vf(/** @type {ed | Sh | wh | kh} */ e) {
+  return Kf(e, 8);
 }
 function $g(e) {
   return bl(e) && !!(e.flags & 64);
 }
-/** @returns {boolean} */ function bf(/** @type {number} */ e) {
+/** @returns {boolean} */ function xf(/** @type {number} */ e) {
   return e >= 167;
 }
-/** @returns {boolean} */ function vf(/** @type {number} */ e) {
+/** @returns {boolean} */ function Tf(/** @type {number} */ e) {
   return e >= 0 && e <= 166;
 }
-/** @returns {boolean} */ function _1(/** @type {d6 | Kf | xh | vh | Th} */ e) {
-  return vf(e.kind);
+/** @returns {boolean} */ function l1(/** @type {d6 | ed | wh | Sh | kh} */ e) {
+  return Tf(e.kind);
 }
 /** @returns {boolean} */ function gi(e) {
   return Or(e, "pos") && Or(e, "end");
@@ -17107,21 +17094,21 @@ function $g(e) {
 /** @returns {boolean} */ function Qg(/** @type {number} */ e) {
   return 9 <= e && e <= 15;
 }
-/** @returns {boolean} */ function Jd(/** @type {number} */ e) {
+/** @returns {boolean} */ function Bd(/** @type {number} */ e) {
   return 15 <= e && e <= 18;
 }
-/** @returns {boolean} */ function za(/** @type {InstanceType<typeof xh>} */ e) {
+/** @returns {boolean} */ function Fa(/** @type {InstanceType<typeof wh>} */ e) {
   var t;
   return et(e) && ((t = e.emitNode) == null ? void 0 : t.autoGenerate) !== void 0;
 }
-function o1(e) {
+function u1(e) {
   var t;
   return xi(e) && ((t = e.emitNode) == null ? void 0 : t.autoGenerate) !== void 0;
 }
 function Kg(e) {
-  return (Xa(e) || i2(e)) && xi(e.name);
+  return (Ha(e) || i2(e)) && xi(e.name);
 }
-/** @returns {boolean} */ function Xr(/** @type {number} */ e) {
+/** @returns {boolean} */ function $r(/** @type {number} */ e) {
   switch (e) {
     case 128:
     case 129:
@@ -17143,19 +17130,19 @@ function Kg(e) {
   return !1;
 }
 /** @returns {boolean} */ function Zg(/** @type {number} */ e) {
-  return !!(w1(e) & 31);
+  return !!(A1(e) & 31);
 }
 /** @returns {boolean} */ function e2(/** @type {number} */ e) {
   return Zg(e) || e === 126 || e === 164 || e === 129;
 }
-/** @returns {boolean} */ function t2(/** @type {Kf | vh | xh | Th} */ e) {
-  return Xr(e.kind);
+/** @returns {boolean} */ function t2(/** @type {ed | Sh | wh | kh} */ e) {
+  return $r(e.kind);
 }
-/** @returns {boolean} */ function c1(/** @type {Kf | xh | vh | Th} */ e) {
+/** @returns {boolean} */ function p1(/** @type {ed | wh | Sh | kh} */ e) {
   let t = e.kind;
   return t === 80 || t === 81 || t === 11 || t === 9 || t === 168;
 }
-/** @returns {boolean} */ function xf(/** @type {Kf | vh | xh | Th} */ e) {
+/** @returns {boolean} */ function Sf(/** @type {ed | Sh | wh | kh} */ e) {
   return !!e && r2(e.kind);
 }
 /** @returns {boolean} */ function n2(/** @type {number} */ e) {
@@ -17187,7 +17174,7 @@ function Kg(e) {
       return n2(e);
   }
 }
-/** @returns {boolean} */ function ia(/** @type {Kf | d6} */ e) {
+/** @returns {boolean} */ function ia(/** @type {ed | d6} */ e) {
   return e && (e.kind === 264 || e.kind === 232);
 }
 function i2(e) {
@@ -17204,7 +17191,7 @@ function a2(e) {
   let t = e.kind;
   return t === 304 || t === 305 || t === 306 || t === 175 || t === 178 || t === 179;
 }
-function l1(e) {
+function f1(e) {
   return db(e.kind);
 }
 function s2(e) {
@@ -17227,10 +17214,10 @@ function o2(e) {
   }
   return !1;
 }
-/** @returns {boolean} */ function Ga(/** @type {Kf | xh | vh | Th} */ e) {
-  return u1(gf(e).kind);
+/** @returns {boolean} */ function Wa(/** @type {ed | wh | Sh | kh} */ e) {
+  return d1(vf(e).kind);
 }
-/** @returns {boolean} */ function u1(/** @type {number} */ e) {
+/** @returns {boolean} */ function d1(/** @type {number} */ e) {
   switch (e) {
     case 212:
     case 213:
@@ -17268,10 +17255,10 @@ function o2(e) {
       return !1;
   }
 }
-/** @returns {boolean} */ function c2(/** @type {Kf | vh | xh | Th} */ e) {
-  return p1(gf(e).kind);
+/** @returns {boolean} */ function c2(/** @type {ed | Sh | wh | kh} */ e) {
+  return m1(vf(e).kind);
 }
-/** @returns {boolean} */ function p1(/** @type {number} */ e) {
+/** @returns {boolean} */ function m1(/** @type {number} */ e) {
   switch (e) {
     case 225:
     case 226:
@@ -17282,11 +17269,11 @@ function o2(e) {
     case 217:
       return !0;
     default:
-      return u1(e);
+      return d1(e);
   }
 }
-function f1(e) {
-  return l2(gf(e).kind);
+function h1(e) {
+  return l2(vf(e).kind);
 }
 function l2(e) {
   switch (e) {
@@ -17302,7 +17289,7 @@ function l2(e) {
     case 239:
       return !0;
     default:
-      return p1(e);
+      return m1(e);
   }
 }
 function u2(e) {
@@ -17345,7 +17332,7 @@ function u2(e) {
     e === 203
   );
 }
-function d1(e) {
+function y1(e) {
   return (
     e === 263 ||
     e === 283 ||
@@ -17361,7 +17348,7 @@ function d1(e) {
     e === 271
   );
 }
-function m1(e) {
+function g1(e) {
   return (
     e === 253 ||
     e === 252 ||
@@ -17384,27 +17371,27 @@ function m1(e) {
     e === 354
   );
 }
-function Rd(e) {
+function qd(e) {
   return e.kind === 169 ? (e.parent && e.parent.kind !== 346) || aa(e) : u2(e.kind);
 }
 function p2(e) {
   let t = e.kind;
-  return m1(t) || d1(t) || f2(e);
+  return g1(t) || y1(t) || f2(e);
 }
 function f2(e) {
   return e.kind !== 242 || (e.parent !== void 0 && (e.parent.kind === 259 || e.parent.kind === 300)) ? !1 : !C2(e);
 }
 function d2(e) {
   let t = e.kind;
-  return m1(t) || d1(t) || t === 242;
+  return g1(t) || y1(t) || t === 242;
 }
-/** @returns {boolean} */ function h1(/** @type {d6 | xh | vh | Kf | Th} */ e) {
+/** @returns {boolean} */ function b1(/** @type {d6 | wh | Sh | ed | kh} */ e) {
   return e.kind >= 310 && e.kind <= 352;
 }
-/** @returns {boolean} */ function m2(/** @type {Kf | d6} */ e) {
+/** @returns {boolean} */ function m2(/** @type {ed | d6} */ e) {
   return e.kind === 321 || e.kind === 320 || e.kind === 322 || g2(e) || h2(e) || bv(e) || Jl(e);
 }
-/** @returns {boolean} */ function h2(/** @type {Kf | d6} */ e) {
+/** @returns {boolean} */ function h2(/** @type {ed | d6} */ e) {
   return e.kind >= 328 && e.kind <= 352;
 }
 function ll(e) {
@@ -17413,24 +17400,24 @@ function ll(e) {
 function ul(e) {
   return e.kind === 178;
 }
-/** @returns {boolean} */ function Zi(/** @type {Kf | xh | vh | Th} */ e) {
-  if (!kf(e)) return !1;
+/** @returns {boolean} */ function Zi(/** @type {ed | wh | Sh | kh} */ e) {
+  if (!Af(e)) return !1;
   let { jsDoc: t } = e;
   return !!t && t.length > 0;
 }
 function y2(e) {
   return !!e.initializer;
 }
-/** @returns {boolean} */ function Il(/** @type {Kf | xh | vh | Th} */ e) {
+/** @returns {boolean} */ function Il(/** @type {ed | wh | Sh | kh} */ e) {
   return e.kind === 11 || e.kind === 15;
 }
-/** @returns {boolean} */ function g2(/** @type {Kf | d6} */ e) {
+/** @returns {boolean} */ function g2(/** @type {ed | d6} */ e) {
   return e.kind === 325 || e.kind === 326 || e.kind === 327;
 }
-function Ud(e) {
+function Fd(e) {
   return (e.flags & 33554432) !== 0;
 }
-var A3 = b2();
+var k3 = b2();
 function b2() {
   var e = "";
   let t = (a) => (e += a);
@@ -17455,10 +17442,10 @@ function b2() {
     getIndent: () => 0,
     isAtStartOfLine: () => !1,
     hasTrailingComment: () => !1,
-    hasTrailingWhitespace: () => !!e.length && Wa(e.charCodeAt(e.length - 1)),
+    hasTrailingWhitespace: () => !!e.length && Va(e.charCodeAt(e.length - 1)),
     writeLine: () => (e += " "),
-    increaseIndent: Ha,
-    decreaseIndent: Ha,
+    increaseIndent: Ya,
+    decreaseIndent: Ya,
     clear: () => (e = ""),
   };
 }
@@ -17469,41 +17456,41 @@ function v2(e, t) {
     if (h) return h;
   }
 }
-/** @returns {number} */ function x2(/** @type {Kf | xh | vh | Th} */ e) {
+/** @returns {number} */ function x2(/** @type {ed | wh | Sh | kh} */ e) {
   return e.end - e.pos;
 }
-function y1(e) {
+function v1(e) {
   return (T2(e), (e.flags & 1048576) !== 0);
 }
 function T2(e) {
-  e.flags & 2097152 || (((e.flags & 262144) !== 0 || $t(e, y1)) && (e.flags |= 1048576), (e.flags |= 2097152));
+  e.flags & 2097152 || (((e.flags & 262144) !== 0 || $t(e, v1)) && (e.flags |= 1048576), (e.flags |= 2097152));
 }
-/** @returns {d6} */ function bi(/** @type {Kf | d6 | xh | vh | Th} */ e) {
+/** @returns {d6} */ function bi(/** @type {ed | d6 | wh | Sh | kh} */ e) {
   for (; e && e.kind !== 308;) e = e.parent;
   return e;
 }
-/** @returns {boolean} */ function ea(/** @type {d6 | Kf | xh | vh | Th} */ e) {
+/** @returns {boolean} */ function ea(/** @type {d6 | ed | wh | Sh | kh} */ e) {
   return e === void 0 ? !0 : e.pos === e.end && e.pos >= 0 && e.kind !== 1;
 }
-/** @returns {boolean} */ function zp(/** @type {InstanceType<typeof vh>} */ e) {
+/** @returns {boolean} */ function Wp(/** @type {InstanceType<typeof Sh>} */ e) {
   return !ea(e);
 }
-/** @returns {number} */ function kl(/** @type {InstanceType<typeof d6> | InstanceType<typeof Kf> | InstanceType<typeof xh> | InstanceType<typeof vh>} */ e, /** @type {d6 | undefined} */ t, /** @type {boolean | undefined} */ a) {
+/** @returns {number} */ function kl(/** @type {InstanceType<typeof d6> | InstanceType<typeof ed> | InstanceType<typeof wh> | InstanceType<typeof Sh>} */ e, /** @type {d6 | undefined} */ t, /** @type {boolean | undefined} */ a) {
   if (ea(e)) return e.pos;
-  if (h1(e) || e.kind === 12) return Ir((t ?? bi(e)).text, e.pos, !1, !0);
+  if (b1(e) || e.kind === 12) return Ir((t ?? bi(e)).text, e.pos, !1, !0);
   if (a && Zi(e)) return kl(e.jsDoc[0], t);
   if (e.kind === 353) {
     t ?? (t = bi(e));
-    let s = Zp(uh(e, t));
+    let s = tf(dh(e, t));
     if (s) return kl(s, t, a);
   }
   return Ir((t ?? bi(e)).text, e.pos, !1, !1, D2(e));
 }
-function Bd(e, t, a = !1) {
+function zd(e, t, a = !1) {
   return c_(e.text, t, a);
 }
 function S2(e) {
-  return !!ff(e, sh);
+  return !!mf(e, ch);
 }
 function c_(e, t, a = !1) {
   if (ea(t)) return "";
@@ -17515,7 +17502,7 @@ function c_(e, t, a = !1) {
     s
   );
 }
-/** @returns {number} */ function Ya(/** @type {InstanceType<typeof xh>} */ e) {
+/** @returns {number} */ function Ga(/** @type {InstanceType<typeof wh>} */ e) {
   let t = e.emitNode;
   return (t && t.flags) || 0;
 }
@@ -17528,17 +17515,17 @@ function w2(/** @type {string} */ e, /** @type {number} */ t, /** @type {number}
 function gl(e) {
   return e.kind === 245 && e.expression.kind === 11;
 }
-function Tf(e) {
-  return !!(Ya(e) & 2097152);
+function wf(e) {
+  return !!(Ga(e) & 2097152);
 }
-function qd(e) {
-  return Tf(e) && zf(e);
+function Vd(e) {
+  return wf(e) && Wf(e);
 }
 function k2(e) {
   return et(e.name) && !e.initializer;
 }
-function Fd(e) {
-  return Tf(e) && es(e) && Qp(e.declarationList.declarations, k2);
+function Wd(e) {
+  return wf(e) && Za(e) && Zp(e.declarationList.declarations, k2);
 }
 function E2(e, t) {
   let a =
@@ -17549,9 +17536,9 @@ function E2(e, t) {
     e.kind === 218 ||
     e.kind === 261 ||
     e.kind === 282
-      ? Kp(Sg(t, e.pos), Bp(t, e.pos))
-      : Bp(t, e.pos);
-  return $r(
+      ? ef(Sg(t, e.pos), Fp(t, e.pos))
+      : Fp(t, e.pos);
+  return Qr(
     a,
     (s) =>
       s.end <= e.end &&
@@ -17576,16 +17563,16 @@ function A2(e) {
   return !1;
 }
 function C2(e) {
-  return e && e.kind === 242 && xf(e.parent);
+  return e && e.kind === 242 && Sf(e.parent);
 }
-/** @returns {boolean} */ function zd(/** @type {Kf | xh | vh | Th} */ e) {
+/** @returns {boolean} */ function Gd(/** @type {ed | wh | Sh | kh} */ e) {
   let t = e.kind;
   return (t === 212 || t === 213) && e.expression.kind === 108;
 }
 function aa(e) {
   return !!e && !!(e.flags & 524288);
 }
-/** @returns {boolean} */ function D2(/** @type {d6 | Kf | xh | vh | Th} */ e) {
+/** @returns {boolean} */ function D2(/** @type {d6 | ed | wh | Sh | kh} */ e) {
   return !!e && !!(e.flags & 16777216);
 }
 function P2(e) {
@@ -17598,17 +17585,17 @@ function N2(e) {
 function I2(e) {
   return et(e) && e.escapedText === "module";
 }
-function g1(e) {
-  return (gr(e) || b1(e)) && I2(e.expression) && b_(e) === "exports";
+function x1(e) {
+  return (yr(e) || T1(e)) && I2(e.expression) && b_(e) === "exports";
 }
-function Sf(e) {
+function kf(e) {
   let t = M2(e);
   return t === 5 || aa(e) ? t : 0;
 }
 function O2(e) {
   return (
     s_(e.arguments) === 3 &&
-    gr(e.expression) &&
+    yr(e.expression) &&
     et(e.expression.expression) &&
     Pn(e.expression.expression) === "Object" &&
     Pn(e.expression.name) === "defineProperty" &&
@@ -17616,55 +17603,55 @@ function O2(e) {
     g_(e.arguments[0], !0)
   );
 }
-function b1(e) {
-  return Za(e) && Ol(e.argumentExpression);
+function T1(e) {
+  return Ka(e) && Ol(e.argumentExpression);
 }
 function k_(e, t) {
-  return (gr(e) && ((!t && e.expression.kind === 110) || (et(e.name) && g_(e.expression, !0)))) || v1(e, t);
+  return (yr(e) && ((!t && e.expression.kind === 110) || (et(e.name) && g_(e.expression, !0)))) || S1(e, t);
 }
-function v1(e, t) {
-  return b1(e) && ((!t && e.expression.kind === 110) || Cf(e.expression) || k_(e.expression, !0));
+function S1(e, t) {
+  return T1(e) && ((!t && e.expression.kind === 110) || Pf(e.expression) || k_(e.expression, !0));
 }
 function g_(e, t) {
-  return Cf(e) || k_(e, t);
+  return Pf(e) || k_(e, t);
 }
 function M2(e) {
-  if (Uf(e)) {
+  if (qf(e)) {
     if (!O2(e)) return 0;
     let t = e.arguments[0];
-    return N2(t) || g1(t) ? 8 : k_(t) && b_(t) === "prototype" ? 9 : 7;
+    return N2(t) || x1(t) ? 8 : k_(t) && b_(t) === "prototype" ? 9 : 7;
   }
-  return e.operatorToken.kind !== 64 || !E1(e.left) || L2(P2(e))
+  return e.operatorToken.kind !== 64 || !D1(e.left) || L2(P2(e))
     ? 0
-    : g_(e.left.expression, !0) && b_(e.left) === "prototype" && Rf(J2(e))
+    : g_(e.left.expression, !0) && b_(e.left) === "prototype" && Bf(J2(e))
       ? 6
       : j2(e.left);
 }
 function L2(e) {
   return fv(e) && sa(e.expression) && e.expression.text === "0";
 }
-function wf(e) {
-  if (gr(e)) return e.name;
-  let t = Ef(e.argumentExpression);
+function Ef(e) {
+  if (yr(e)) return e.name;
+  let t = Cf(e.argumentExpression);
   return sa(t) || Il(t) ? t : e;
 }
 function b_(e) {
-  let t = wf(e);
+  let t = Ef(e);
   if (t) {
     if (et(t)) return t.escapedText;
-    if (Il(t) || sa(t)) return Ua(t.text);
+    if (Il(t) || sa(t)) return Ra(t.text);
   }
 }
 function j2(e) {
   if (e.expression.kind === 110) return 4;
-  if (g1(e)) return 2;
+  if (x1(e)) return 2;
   if (g_(e.expression, !0)) {
     if (pb(e.expression)) return 3;
     let t = e;
     for (; !et(t.expression);) t = t.expression;
     let a = t.expression;
     if ((a.escapedText === "exports" || (a.escapedText === "module" && b_(t) === "exports")) && k_(e)) return 1;
-    if (g_(e, !0) || (Za(e) && Q2(e))) return 5;
+    if (g_(e, !0) || (Ka(e) && Q2(e))) return 5;
   }
   return 0;
 }
@@ -17675,7 +17662,7 @@ function J2(e) {
 function R2(e) {
   return Ll(e) &&
     ra(e.expression) &&
-    Sf(e.expression) !== 0 &&
+    kf(e.expression) !== 0 &&
     ra(e.expression.right) &&
     (e.expression.right.operatorToken.kind === 57 || e.expression.right.operatorToken.kind === 61)
     ? e.expression.right.right
@@ -17684,7 +17671,7 @@ function R2(e) {
 function U2(e) {
   switch (e.kind) {
     case 244:
-      let t = Vp(e);
+      let t = Gp(e);
       return t && t.initializer;
     case 173:
       return e.initializer;
@@ -17692,13 +17679,13 @@ function U2(e) {
       return e.initializer;
   }
 }
-function Vp(e) {
-  return es(e) ? Zp(e.declarationList.declarations) : void 0;
+function Gp(e) {
+  return Za(e) ? tf(e.declarationList.declarations) : void 0;
 }
 function B2(e) {
   return Si(e) && e.body && e.body.kind === 268 ? e.body : void 0;
 }
-/** @returns {boolean} */ function kf(/** @type {Kf | xh | vh | Th} */ e) {
+/** @returns {boolean} */ function Af(/** @type {ed | wh | Sh | kh} */ e) {
   switch (e.kind) {
     case 220:
     case 227:
@@ -17773,10 +17760,10 @@ function B2(e) {
 }
 function q2(e, t) {
   let a;
-  A2(e) && y2(e) && Zi(e.initializer) && (a = Dn(a, Vd(e, e.initializer.jsDoc)));
+  A2(e) && y2(e) && Zi(e.initializer) && (a = Dn(a, Yd(e, e.initializer.jsDoc)));
   let s = e;
   for (; s && s.parent;) {
-    if ((Zi(s) && (a = Dn(a, Vd(e, s.jsDoc))), s.kind === 170)) {
+    if ((Zi(s) && (a = Dn(a, Yd(e, s.jsDoc))), s.kind === 170)) {
       a = Dn(a, (t ? Lg : Mg)(s));
       break;
     }
@@ -17788,17 +17775,17 @@ function q2(e, t) {
   }
   return a || Tt;
 }
-function Vd(e, t) {
+function Yd(e, t) {
   let a = Dy(t);
-  return Cm(t, (s) => {
+  return Nm(t, (s) => {
     if (s === a) {
-      let f = $r(s.tags, (h) => F2(e, h));
+      let f = Qr(s.tags, (h) => F2(e, h));
       return s.tags === f ? [s] : f;
-    } else return $r(s.tags, Ev);
+    } else return Qr(s.tags, Ev);
   });
 }
 function F2(e, t) {
-  return !(Xf(t) || Pv(t)) || !t.parent || !ch(t.parent) || !Ml(t.parent.parent) || t.parent.parent === e;
+  return !(Qf(t) || Pv(t)) || !t.parent || !ph(t.parent) || !Ml(t.parent.parent) || t.parent.parent === e;
 }
 function z2(e) {
   let t = e.parent;
@@ -17812,12 +17799,12 @@ function z2(e) {
     El(e)
   )
     return t;
-  if (t.parent && (Vp(t.parent) === e || El(t))) return t.parent;
-  if (t.parent && t.parent.parent && (Vp(t.parent.parent) || U2(t.parent.parent) === e || R2(t.parent.parent)))
+  if (t.parent && (Gp(t.parent) === e || El(t))) return t.parent;
+  if (t.parent && t.parent.parent && (Gp(t.parent.parent) || U2(t.parent.parent) === e || R2(t.parent.parent)))
     return t.parent.parent;
 }
-function Ef(e, t) {
-  return $f(e, t ? -2147483647 : 1);
+function Cf(e, t) {
+  return Kf(e, t ? -2147483647 : 1);
 }
 function V2(e) {
   let t = W2(e);
@@ -17828,24 +17815,24 @@ function V2(e) {
   return t;
 }
 function W2(e) {
-  let t = Af(e.heritageClauses, 96);
+  let t = Df(e.heritageClauses, 96);
   return t && t.types.length > 0 ? t.types[0] : void 0;
 }
 function G2(e) {
   if (aa(e)) return Ug(e).map((t) => t.class);
   {
-    let t = Af(e.heritageClauses, 119);
+    let t = Df(e.heritageClauses, 119);
     return t?.types;
   }
 }
 function Y2(e) {
-  return A_(e) ? H2(e) || Tt : (ia(e) && Kp(Jp(V2(e)), G2(e))) || Tt;
+  return A_(e) ? H2(e) || Tt : (ia(e) && ef(Up(V2(e)), G2(e))) || Tt;
 }
 function H2(e) {
-  let t = Af(e.heritageClauses, 96);
+  let t = Df(e.heritageClauses, 96);
   return t ? t.types : void 0;
 }
-function Af(e, t) {
+function Df(e, t) {
   if (e) {
     for (let a of e) if (a.token === t) return a;
   }
@@ -17856,27 +17843,27 @@ function Af(e, t) {
 function X2(e) {
   return 19 <= e && e <= 79;
 }
-function Ap(e) {
+function Dp(e) {
   return yi(e) || X2(e);
 }
-/** @returns {boolean} */ function Ol(/** @type {Kf | xh | vh | Th} */ e) {
+/** @returns {boolean} */ function Ol(/** @type {ed | wh | Sh | kh} */ e) {
   return Il(e) || sa(e);
 }
 function $2(e) {
-  return X1(e) && (e.operator === 40 || e.operator === 41) && sa(e.operand);
+  return K1(e) && (e.operator === 40 || e.operator === 41) && sa(e.operand);
 }
 function Q2(e) {
   if (!(e.kind === 168 || e.kind === 213)) return !1;
-  let t = Za(e) ? Ef(e.argumentExpression) : e.expression;
+  let t = Ka(e) ? Cf(e.argumentExpression) : e.expression;
   return !Ol(t) && !$2(t);
 }
 function K2(e) {
-  return Fp(e) ? Pn(e) : rh(e) ? qb(e) : e.text;
+  return Vp(e) ? Pn(e) : sh(e) ? qb(e) : e.text;
 }
-function Ba(e) {
+function Ua(e) {
   return v_(e.pos) || v_(e.end);
 }
-/** @returns {number} */ function Cp(/** @type {number} */ e) {
+/** @returns {number} */ function Pp(/** @type {number} */ e) {
   switch (e) {
     case 61:
       return 5;
@@ -17920,13 +17907,13 @@ function Ba(e) {
   }
   return -1;
 }
-/** @returns {boolean} */ function Dp(/** @type {Kf | vh | xh | Th} */ e) {
+/** @returns {boolean} */ function Np(/** @type {ed | Sh | wh | kh} */ e) {
   return !!((e.templateFlags || 0) & 2048);
 }
-/** @returns {boolean} */ function Z2(/** @type {Kf | vh | xh | Th} */ e) {
-  return e && !!(I1(e) ? Dp(e) : Dp(e.head) || nn(e.templateSpans, /** @returns {boolean} */ (/** @type {Kf} */ t) => Dp(t.literal)));
+/** @returns {boolean} */ function Z2(/** @type {ed | Sh | wh | kh} */ e) {
+  return e && !!(L1(e) ? Np(e) : Np(e.head) || nn(e.templateSpans, /** @returns {boolean} */ (/** @type {ed} */ t) => Np(t.literal)));
 }
-var C3 = new Map(
+var E3 = new Map(
   Object.entries({
     "	": "\\t",
     "\v": "\\v",
@@ -17944,38 +17931,38 @@ var C3 = new Map(
     "\r\n": "\\r\\n",
   }),
 );
-var D3 = new Map(Object.entries({ '"': "&quot;", "'": "&apos;" }));
-/** @returns {boolean} */ function eb(/** @type {Kf | xh | vh | Th} */ e) {
+var A3 = new Map(Object.entries({ '"': "&quot;", "'": "&apos;" }));
+/** @returns {boolean} */ function eb(/** @type {ed | wh | Sh | kh} */ e) {
   return !!e && e.kind === 80 && tb(e);
 }
-/** @returns {boolean} */ function tb(/** @type {InstanceType<typeof xh>} */ e) {
+/** @returns {boolean} */ function tb(/** @type {InstanceType<typeof wh>} */ e) {
   return e.escapedText === "this";
 }
-/** @returns {boolean} */ function E_(/** @type {d6 | Kf | xh | vh | Th} */ e, /** @type {number} */ t) {
+/** @returns {boolean} */ function E_(/** @type {d6 | ed | wh | Sh | kh} */ e, /** @type {number} */ t) {
   return !!ib(e, t);
 }
 function nb(e) {
   return E_(e, 256);
 }
-/** @returns {boolean} */ function rb(/** @type {d6 | Kf | xh | vh | Th} */ e) {
+/** @returns {boolean} */ function rb(/** @type {d6 | ed | wh | Sh | kh} */ e) {
   return E_(e, 32768);
 }
-/** @returns {number} */ function ib(/** @type {d6 | Kf | xh | vh | Th} */ e, /** @type {number} */ t) {
+/** @returns {number} */ function ib(/** @type {d6 | ed | wh | Sh | kh} */ e, /** @type {number} */ t) {
   return sb(e) & t;
 }
-/** @returns {number} */ function ab(/** @type {d6 | Kf | xh | vh | Th} */ e, /** @type {boolean} */ t, a) {
+/** @returns {number} */ function ab(/** @type {d6 | ed | wh | Sh | kh} */ e, /** @type {boolean} */ t, a) {
   return e.kind >= 0 && e.kind <= 166
     ? 0
-    : (e.modifierFlagsCache & 536870912 || (e.modifierFlagsCache = S1(e) | 536870912),
+    : (e.modifierFlagsCache & 536870912 || (e.modifierFlagsCache = E1(e) | 536870912),
       a || (t && aa(e))
-        ? (!(e.modifierFlagsCache & 268435456) && e.parent && (e.modifierFlagsCache |= x1(e) | 268435456),
-          T1(e.modifierFlagsCache))
+        ? (!(e.modifierFlagsCache & 268435456) && e.parent && (e.modifierFlagsCache |= w1(e) | 268435456),
+          k1(e.modifierFlagsCache))
         : _b(e.modifierFlagsCache));
 }
-/** @returns {number} */ function sb(/** @type {d6 | Kf | xh | vh | Th} */ e) {
+/** @returns {number} */ function sb(/** @type {d6 | ed | wh | Sh | kh} */ e) {
   return ab(e, !1);
 }
-function x1(e) {
+function w1(e) {
   let t = 0;
   return (
     e.parent &&
@@ -17993,25 +17980,25 @@ function x1(e) {
 /** @returns {number} */ function _b(/** @type {number} */ e) {
   return e & 65535;
 }
-function T1(e) {
+function k1(e) {
   return (e & 131071) | ((e & 260046848) >>> 23);
 }
 function ob(e) {
-  return T1(x1(e));
+  return k1(w1(e));
 }
 function cb(e) {
-  return S1(e) | ob(e);
+  return E1(e) | ob(e);
 }
-/** @returns {number} */ function S1(/** @type {d6 | Kf | xh | vh | Th} */ e) {
-  let t = Rl(e) ? Un(e.modifiers) : 0;
+/** @returns {number} */ function E1(/** @type {d6 | ed | wh | Sh | kh} */ e) {
+  let t = Rl(e) ? Bn(e.modifiers) : 0;
   return ((e.flags & 8 || (e.kind === 80 && e.flags & 4096)) && (t |= 32), t);
 }
-/** @returns {number} */ function Un(e) {
+/** @returns {number} */ function Bn(e) {
   let t = 0;
-  if (e) for (let a of e) t |= w1(a.kind);
+  if (e) for (let a of e) t |= A1(a.kind);
   return t;
 }
-/** @returns {number} */ function w1(/** @type {number} */ e) {
+/** @returns {number} */ function A1(/** @type {number} */ e) {
   switch (e) {
     case 126:
       return 256;
@@ -18051,22 +18038,22 @@ function cb(e) {
 /** @returns {boolean} */ function lb(/** @type {number} */ e) {
   return e === 76 || e === 77 || e === 78;
 }
-/** @returns {boolean} */ function k1(/** @type {number} */ e) {
+/** @returns {boolean} */ function C1(/** @type {number} */ e) {
   return e >= 64 && e <= 79;
 }
 function El(e, t) {
-  return ra(e) && (t ? e.operatorToken.kind === 64 : k1(e.operatorToken.kind)) && Ga(e.left);
+  return ra(e) && (t ? e.operatorToken.kind === 64 : C1(e.operatorToken.kind)) && Wa(e.left);
 }
-function Cf(e) {
+function Pf(e) {
   return e.kind === 80 || ub(e);
 }
 function ub(e) {
-  return gr(e) && et(e.name) && Cf(e.expression);
+  return yr(e) && et(e.name) && Pf(e.expression);
 }
 function pb(e) {
   return k_(e) && b_(e) === "prototype";
 }
-function Pp(e) {
+function Ip(e) {
   return e.flags & 403963917 ? e.objectFlags : 0;
 }
 function fb(e) {
@@ -18075,11 +18062,11 @@ function fb(e) {
     $t(
       e,
       (a) => {
-        zp(a) && (t = a);
+        Wp(a) && (t = a);
       },
       (a) => {
         for (let s = a.length - 1; s >= 0; s--)
-          if (zp(a[s])) {
+          if (Wp(a[s])) {
             t = a[s];
             break;
           }
@@ -18113,7 +18100,7 @@ function db(e) {
     e === 319
   );
 }
-function E1(e) {
+function D1(e) {
   return e.kind === 212 || e.kind === 213;
 }
 function mb(e, t) {
@@ -18138,7 +18125,7 @@ function hb(e, t) {
 function yb(e, t) {
   ((this.flags = t), q.isDebugging && (this.checker = e));
 }
-function Np(e, t, a) {
+function Op(e, t, a) {
   ((this.pos = t),
     (this.end = a),
     (this.kind = e),
@@ -18175,11 +18162,11 @@ function vb(e, t, a) {
   ((this.fileName = e), (this.text = t), (this.skipTrivia = a || ((s) => s)));
 }
 var Ct = {
-    getNodeConstructor: () => Np,
+    getNodeConstructor: () => Op,
     getTokenConstructor: () => gb,
     getIdentifierConstructor: () => bb,
-    getPrivateIdentifierConstructor: () => Np,
-    getSourceFileConstructor: () => Np,
+    getPrivateIdentifierConstructor: () => Op,
+    getSourceFileConstructor: () => Op,
     getSymbolConstructor: () => mb,
     getTypeConstructor: () => hb,
     getSignatureConstructor: () => yb,
@@ -18187,16 +18174,16 @@ var Ct = {
   },
   xb = [];
 function Tb(e) {
-  (Object.assign(Ct, e), Bn(xb, (t) => t(Ct)));
+  (Object.assign(Ct, e), qn(xb, (t) => t(Ct)));
 }
 /** @returns {string} */ function Sb(/** @type {string} */ e, t) {
   return e.replace(/\{(\d+)\}/g, /** @returns {string} */ (a, s) => "" + q.checkDefined(t[+s]));
 }
-var Wd;
+var Hd;
 /** @returns {string} */ function wb(e) {
-  return (Wd && Wd[e.key]) || e.message;
+  return (Hd && Hd[e.key]) || e.message;
 }
-function Ja(/** @type {string} */ e, /** @type {string} */ t, /** @type {number} */ a, /** @type {number} */ s, f, ...h) {
+function ja(/** @type {string} */ e, /** @type {string} */ t, /** @type {number} */ a, /** @type {number} */ s, f, ...h) {
   (a + s > t.length && (s = t.length - a), w2(t, a, s));
   let b = wb(f);
   return (
@@ -18216,7 +18203,7 @@ function Ja(/** @type {string} */ e, /** @type {string} */ t, /** @type {number}
 function kb(e) {
   return e.file === void 0 && e.start !== void 0 && e.length !== void 0 && typeof e.fileName == "string";
 }
-function A1(e, /** @type {InstanceType<typeof d6>} */ t) {
+function P1(e, /** @type {InstanceType<typeof d6>} */ t) {
   let a = t.fileName || "",
     s = t.text.length;
   (q.assertEqual(e.fileName, a), q.assertLessThanOrEqual(e.start, s), q.assertLessThanOrEqual(e.start + e.length, s));
@@ -18235,17 +18222,17 @@ function A1(e, /** @type {InstanceType<typeof d6>} */ t) {
       kb(h) && h.fileName === a
         ? (q.assertLessThanOrEqual(h.start, s),
           q.assertLessThanOrEqual(h.start + h.length, s),
-          f.relatedInformation.push(A1(h, t)))
+          f.relatedInformation.push(P1(h, t)))
         : f.relatedInformation.push(h);
   }
   return f;
 }
-function Hi(e, /** @type {d6 | Kf | xh | vh | Th} */ t) {
+function Hi(e, /** @type {d6 | ed | wh | Sh | kh} */ t) {
   let a = [];
-  for (let s of e) a.push(A1(s, t));
+  for (let s of e) a.push(P1(s, t));
   return a;
 }
-/** @returns {number} */ function Gd(/** @type {number} */ e) {
+/** @returns {number} */ function Xd(/** @type {number} */ e) {
   return e === 4 || e === 2 || e === 1 || e === 6 ? 1 : 0;
 }
 var dt = {
@@ -18300,7 +18287,7 @@ var dt = {
     dependencies: ["moduleResolution", "module", "target"],
     computeValue: (e) => {
       let t = dt.moduleResolution.computeValue(e);
-      if (!Yd(t)) return !1;
+      if (!$d(t)) return !1;
       if (e.resolvePackageJsonExports !== void 0) return e.resolvePackageJsonExports;
       switch (t) {
         case 3:
@@ -18315,7 +18302,7 @@ var dt = {
     dependencies: ["moduleResolution", "resolvePackageJsonExports", "module", "target"],
     computeValue: (e) => {
       let t = dt.moduleResolution.computeValue(e);
-      if (!Yd(t)) return !1;
+      if (!$d(t)) return !1;
       if (e.resolvePackageJsonImports !== void 0) return e.resolvePackageJsonImports;
       switch (t) {
         case 3:
@@ -18367,25 +18354,25 @@ var dt = {
   alwaysStrict: { dependencies: [], computeValue: (e) => e.alwaysStrict !== !1 },
   useUnknownInCatchVariables: { dependencies: ["strict"], computeValue: (e) => fi(e, "useUnknownInCatchVariables") },
 };
-var P3 = dt.allowImportingTsExtensions.computeValue,
-  N3 = dt.target.computeValue,
-  I3 = dt.module.computeValue,
-  O3 = dt.moduleResolution.computeValue,
-  M3 = dt.moduleDetection.computeValue,
-  L3 = dt.isolatedModules.computeValue,
-  j3 = dt.esModuleInterop.computeValue,
-  J3 = dt.allowSyntheticDefaultImports.computeValue,
-  R3 = dt.resolvePackageJsonExports.computeValue,
-  U3 = dt.resolvePackageJsonImports.computeValue,
-  B3 = dt.resolveJsonModule.computeValue,
-  q3 = dt.declaration.computeValue,
-  F3 = dt.preserveConstEnums.computeValue,
-  z3 = dt.incremental.computeValue,
-  V3 = dt.declarationMap.computeValue,
-  W3 = dt.allowJs.computeValue,
-  G3 = dt.useDefineForClassFields.computeValue,
-  Y3 = dt.alwaysStrict.computeValue;
-function Yd(e) {
+var C3 = dt.allowImportingTsExtensions.computeValue,
+  D3 = dt.target.computeValue,
+  P3 = dt.module.computeValue,
+  N3 = dt.moduleResolution.computeValue,
+  I3 = dt.moduleDetection.computeValue,
+  O3 = dt.isolatedModules.computeValue,
+  M3 = dt.esModuleInterop.computeValue,
+  L3 = dt.allowSyntheticDefaultImports.computeValue,
+  j3 = dt.resolvePackageJsonExports.computeValue,
+  J3 = dt.resolvePackageJsonImports.computeValue,
+  R3 = dt.resolveJsonModule.computeValue,
+  U3 = dt.declaration.computeValue,
+  B3 = dt.preserveConstEnums.computeValue,
+  q3 = dt.incremental.computeValue,
+  F3 = dt.declarationMap.computeValue,
+  z3 = dt.allowJs.computeValue,
+  V3 = dt.useDefineForClassFields.computeValue,
+  W3 = dt.alwaysStrict.computeValue;
+function $d(e) {
   return (e >= 3 && e <= 99) || e === 100;
 }
 function fi(e, t) {
@@ -18395,18 +18382,18 @@ function Eb(e) {
   return v2(targetOptionDeclaration.type, (t, a) => (t === e ? a : void 0));
 }
 var Ab = ["node_modules", "bower_components", "jspm_packages"],
-  C1 = `(?!(?:${Ab.join("|")})(?:/|$))`,
+  N1 = `(?!(?:${Ab.join("|")})(?:/|$))`,
   Cb = {
     singleAsteriskRegexFragment: "(?:[^./]|(?:\\.(?!min\\.js$))?)*",
-    doubleAsteriskRegexFragment: `(?:/${C1}[^/.][^/]*)*?`,
-    replaceWildcardCharacter: (e) => D1(e, Cb.singleAsteriskRegexFragment),
+    doubleAsteriskRegexFragment: `(?:/${N1}[^/.][^/]*)*?`,
+    replaceWildcardCharacter: (e) => I1(e, Cb.singleAsteriskRegexFragment),
   },
   Db = {
     singleAsteriskRegexFragment: "[^/]*",
-    doubleAsteriskRegexFragment: `(?:/${C1}[^/.][^/]*)*?`,
-    replaceWildcardCharacter: (e) => D1(e, Db.singleAsteriskRegexFragment),
+    doubleAsteriskRegexFragment: `(?:/${N1}[^/.][^/]*)*?`,
+    replaceWildcardCharacter: (e) => I1(e, Db.singleAsteriskRegexFragment),
   };
-function D1(e, t) {
+function I1(e, t) {
   return e === "*" ? t : e === "?" ? "[^/]" : "\\" + e;
 }
 /** @returns {number} */ function Pb(/** @type {string} */ e, /** @type {number} */ t) {
@@ -18432,21 +18419,21 @@ function Nb(e) {
       return 0;
   }
 }
-var P1 = [
+var O1 = [
     [".ts", ".tsx", ".d.ts"],
     [".cts", ".d.cts"],
     [".mts", ".d.mts"],
   ],
-  H3 = Am(P1),
-  X3 = [...P1, [".json"]];
+  G3 = Pm(O1),
+  Y3 = [...O1, [".json"]];
 var Ib = [[".js", ".jsx"], [".mjs"], [".cjs"]],
-  $3 = Am(Ib),
+  H3 = Pm(Ib),
   Ob = [
     [".ts", ".tsx", ".d.ts", ".js", ".jsx"],
     [".cts", ".d.cts", ".cjs"],
     [".mts", ".d.mts", ".mjs"],
   ],
-  Q3 = [...Ob, [".json"]],
+  X3 = [...Ob, [".json"]],
   Mb = [".d.ts", ".d.cts", ".d.mts"];
 /** @returns {boolean} */ function v_(/** @type {number} */ e) {
   return !(e >= 0);
@@ -18479,67 +18466,67 @@ function Lb(e) {
       t = 4;
       break;
     default:
-      let G = e.length - 1,
+      let W = e.length - 1,
         y = 0;
       for (; e.charCodeAt(y) === 48;) y++;
-      return e.slice(y, G) || "0";
+      return e.slice(y, W) || "0";
   }
   let a = 2,
     s = e.length - 1,
     f = (s - a) * t,
     h = new Uint16Array((f >>> 4) + (f & 15 ? 1 : 0));
-  for (let G = s - 1, y = 0; G >= a; G--, y += t) {
-    let W = y >>> 4,
-      k = e.charCodeAt(G),
+  for (let W = s - 1, y = 0; W >= a; W--, y += t) {
+    let G = y >>> 4,
+      k = e.charCodeAt(W),
       R = (k <= 57 ? k - 48 : 10 + k - (k <= 70 ? 65 : 97)) << (y & 15);
-    h[W] |= R;
+    h[G] |= R;
     let pe = R >>> 16;
-    pe && (h[W + 1] |= pe);
+    pe && (h[G + 1] |= pe);
   }
   let b = "",
     v = h.length - 1,
     l = !0;
   for (; l;) {
-    let G = 0;
+    let W = 0;
     l = !1;
     for (let y = v; y >= 0; y--) {
-      let W = (G << 16) | h[y],
-        k = (W / 10) | 0;
-      ((h[y] = k), (G = W - k * 10), k && !l && ((v = y), (l = !0)));
+      let G = (W << 16) | h[y],
+        k = (G / 10) | 0;
+      ((h[y] = k), (W = G - k * 10), k && !l && ((v = y), (l = !0)));
     }
-    b = G + b;
+    b = W + b;
   }
   return b;
 }
 function jb({ negative: e, base10Value: t }) {
   return (e && t !== "0" ? "-" : "") + t;
 }
-function Wp(e, /** @type {number} */ t) {
+function Yp(e, /** @type {number} */ t) {
   return ((e.pos = t), e);
 }
 function Jb(e, /** @type {number} */ t) {
   return ((e.end = t), e);
 }
 function vi(e, /** @type {number} */ t, /** @type {number} */ a) {
-  return Jb(Wp(e, t), a);
+  return Jb(Yp(e, t), a);
 }
-function Hd(/** @type {d6 | vh} */ e, /** @type {number} */ t, /** @type {number} */ a) {
+function Qd(/** @type {d6 | Sh} */ e, /** @type {number} */ t, /** @type {number} */ a) {
   return vi(e, t, t + a);
 }
-/** @returns {Kf | xh | vh | Th} */ function Df(/** @type {Kf | xh | vh | Th} */ e, /** @type {d6 | Kf} */ t) {
+/** @returns {ed | wh | Sh | kh} */ function Nf(/** @type {ed | wh | Sh | kh} */ e, /** @type {d6 | ed} */ t) {
   return (e && t && (e.parent = t), e);
 }
 /** @returns {InstanceType<typeof d6>} */ function Rb(/** @type {InstanceType<typeof d6>} */ e, /** @type {boolean} */ t) {
   if (!e) return e;
-  return (xm(e, h1(e) ? a : f), e);
-  function a(/** @type {Kf | xh | vh | Th | undefined} */ h, /** @type {d6 | Kf | undefined} */ b) {
+  return (wm(e, b1(e) ? a : f), e);
+  function a(/** @type {ed | wh | Sh | kh | undefined} */ h, /** @type {d6 | ed | undefined} */ b) {
     if (t && h.parent === b) return "skip";
-    Df(h, b);
+    Nf(h, b);
   }
-  function s(/** @type {Kf | xh | vh | Th | undefined} */ h) {
-    if (Zi(h)) for (let b of h.jsDoc) (a(b, h), xm(b, a));
+  function s(/** @type {ed | wh | Sh | kh | undefined} */ h) {
+    if (Zi(h)) for (let b of h.jsDoc) (a(b, h), wm(b, a));
   }
-  function f(/** @type {Kf | xh | vh | Th | undefined} */ h, /** @type {d6 | Kf | undefined} */ b) {
+  function f(/** @type {ed | wh | Sh | kh | undefined} */ h, /** @type {d6 | ed | undefined} */ b) {
     return a(h, b) || s(h);
   }
 }
@@ -18553,8 +18540,8 @@ function Bb(e) {
 function qb(e) {
   return `${Pn(e.namespace)}:${Pn(e.name)}`;
 }
-var K3 = String.prototype.replace;
-var Gp = [
+var $3 = String.prototype.replace;
+var Hp = [
     "assert",
     "assert/strict",
     "async_hooks",
@@ -18610,9 +18597,9 @@ var Gp = [
     "worker_threads",
     "zlib",
   ],
-  Z3 = new Set(Gp),
+  Q3 = new Set(Hp),
   Fb = new Set(["node:quic", "node:sea", "node:sqlite", "node:test", "node:test/reporters"]),
-  ex = new Set([...Gp, ...Gp.map(/** @returns {string} */ (e) => `node:${e}`), ...Fb]);
+  K3 = new Set([...Hp, ...Hp.map(/** @returns {string} */ (e) => `node:${e}`), ...Fb]);
 function zb() {
   let e, t, a, s, f;
   return {
@@ -18620,7 +18607,7 @@ function zb() {
     createBaseIdentifierNode: b,
     createBasePrivateIdentifierNode: v,
     createBaseTokenNode: l,
-    createBaseNode: G,
+    createBaseNode: W,
   };
   function h(y) {
     return new (f || (f = Ct.getSourceFileConstructor()))(y, -1, -1);
@@ -18634,23 +18621,23 @@ function zb() {
   function l(y) {
     return new (t || (t = Ct.getTokenConstructor()))(y, -1, -1);
   }
-  function G(y) {
+  function W(y) {
     return new (e || (e = Ct.getNodeConstructor()))(y, -1, -1);
   }
 }
 var Vb = {
     getParenthesizeLeftSideOfBinaryForOperator: (e) => xt,
     getParenthesizeRightSideOfBinaryForOperator: (e) => xt,
-    parenthesizeLeftSideOfBinary: /** @returns {Kf | xh | vh | Th} */ (/** @type {number} */ e, /** @type {Kf | xh | vh | Th} */ t) => t,
-    parenthesizeRightSideOfBinary: /** @returns {Kf | xh | vh | Th} */ (/** @type {number} */ e, /** @type {Kf | xh | vh | Th | undefined} */ t, /** @type {Kf | xh | vh | Th} */ a) => a,
+    parenthesizeLeftSideOfBinary: /** @returns {ed | wh | Sh | kh} */ (/** @type {number} */ e, /** @type {ed | wh | Sh | kh} */ t) => t,
+    parenthesizeRightSideOfBinary: /** @returns {ed | wh | Sh | kh} */ (/** @type {number} */ e, /** @type {ed | wh | Sh | kh | undefined} */ t, /** @type {ed | wh | Sh | kh} */ a) => a,
     parenthesizeExpressionOfComputedPropertyName: xt,
     parenthesizeConditionOfConditionalExpression: xt,
     parenthesizeBranchOfConditionalExpression: xt,
     parenthesizeExpressionOfExportDefault: xt,
-    parenthesizeExpressionOfNew: /** @returns {Kf | xh | vh | Th} */ (/** @type {Kf | xh | vh | Th} */ e) => Pr(e, Ga),
-    parenthesizeLeftSideOfAccess: /** @returns {Kf | xh | vh | Th} */ (/** @type {Kf | xh | vh | Th} */ e) => Pr(e, Ga),
-    parenthesizeOperandOfPostfixUnary: /** @returns {Kf | xh | vh | Th} */ (/** @type {Kf | xh | vh | Th} */ e) => Pr(e, Ga),
-    parenthesizeOperandOfPrefixUnary: /** @returns {Kf | xh | vh | Th} */ (/** @type {Kf | xh | vh | Th} */ e) => Pr(e, c2),
+    parenthesizeExpressionOfNew: /** @returns {ed | wh | Sh | kh} */ (/** @type {ed | wh | Sh | kh} */ e) => Pr(e, Wa),
+    parenthesizeLeftSideOfAccess: /** @returns {ed | wh | Sh | kh} */ (/** @type {ed | wh | Sh | kh} */ e) => Pr(e, Wa),
+    parenthesizeOperandOfPostfixUnary: /** @returns {ed | wh | Sh | kh} */ (/** @type {ed | wh | Sh | kh} */ e) => Pr(e, Wa),
+    parenthesizeOperandOfPrefixUnary: /** @returns {ed | wh | Sh | kh} */ (/** @type {ed | wh | Sh | kh} */ e) => Pr(e, c2),
     parenthesizeExpressionsOfCommaDelimitedList: (e) => Pr(e, gi),
     parenthesizeExpressionForDisallowedComma: xt,
     parenthesizeExpressionOfExpressionStatement: xt,
@@ -18672,23 +18659,23 @@ var Vb = {
   },
   fl = 0;
 var Wb = [];
-function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kind: number) => d6, createBaseIdentifierNode: (kind: number) => xh, createBasePrivateIdentifierNode: (kind: number) => Th, createBaseTokenNode: (kind: number) => vh, createBaseNode: (kind: number) => Kf }} */ t) {
+function If(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kind: number) => d6, createBaseIdentifierNode: (kind: number) => wh, createBasePrivateIdentifierNode: (kind: number) => kh, createBaseTokenNode: (kind: number) => Sh, createBaseNode: (kind: number) => ed }} */ t) {
   let a = e & 8 ? xt : $b,
-    s = kd(() => (e & 1 ? Vb : createParenthesizerRules(ge))),
-    f = kd(() => (e & 2 ? nullNodeConverters : createNodeConverters(ge))),
-    h = er((r) => (i, _) => ya(i, r, _)),
-    b = er((r) => (i) => zr(r, i)),
-    v = er((r) => (i) => ri(i, r)),
-    l = er((r) => () => rc(r)),
-    G = er((r) => (i) => Ls(r, i)),
-    y = er((r) => (i, _) => Du(r, i, _)),
-    W = er((r) => (i, /** @type {boolean} */ _) => ic(r, i, _)),
-    k = er((r) => (i, _) => Cu(r, i, _)),
-    C = er((r) => (i, _) => Tc(r, i, _)),
-    R = er((r) => (i, _, c) => Bu(r, i, _, c)),
-    pe = er((r) => (i, _, c) => Sc(r, i, _, c)),
-    xe = er((r) => (i, _, c, d) => qu(r, i, _, c, d)),
-    ge = {
+    s = Cd(() => (e & 1 ? Vb : createParenthesizerRules(be))),
+    f = Cd(() => (e & 2 ? nullNodeConverters : createNodeConverters(be))),
+    h = tr((r) => (i, _) => ya(i, r, _)),
+    b = tr((r) => (i) => Vr(r, i)),
+    v = tr((r) => (i) => ri(i, r)),
+    l = tr((r) => () => rc(r)),
+    W = tr((r) => (i) => Ls(r, i)),
+    y = tr((r) => (i, _) => Nu(r, i, _)),
+    G = tr((r) => (i, /** @type {boolean} */ _) => ic(r, i, _)),
+    k = tr((r) => (i, _) => Pu(r, i, _)),
+    A = tr((r) => (i, _) => Tc(r, i, _)),
+    R = tr((r) => (i, _, c) => Fu(r, i, _, c)),
+    pe = tr((r) => (i, _, c) => Sc(r, i, _, c)),
+    xe = tr((r) => (i, _, c, d) => zu(r, i, _, c, d)),
+    be = {
       get parenthesizer() {
         return s();
       },
@@ -18706,16 +18693,16 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       createLiteralLikeNode: sr,
       createIdentifier: He,
       createTempVariable: _r,
-      createLoopVariable: jr,
-      createUniqueName: Lt,
-      getGeneratedNameForNode: Fn,
-      createPrivateIdentifier: jt,
+      createLoopVariable: Jr,
+      createUniqueName: jt,
+      getGeneratedNameForNode: zn,
+      createPrivateIdentifier: Jt,
       createUniquePrivateName: Ke,
-      getGeneratedPrivateNameForNode: zn,
+      getGeneratedPrivateNameForNode: Vn,
       createToken: ct,
       createSuper: st,
       createThis: qt,
-      createNull: Jt,
+      createNull: Rt,
       createTrue: lt,
       createFalse: or,
       createModifier: ht,
@@ -18728,10 +18715,10 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       updateTypeParameterDeclaration: cr,
       createParameterDeclaration: br,
       updateParameterDeclaration: vr,
-      createDecorator: Vn,
-      updateDecorator: Wn,
-      createPropertySignature: Jr,
-      updatePropertySignature: Gn,
+      createDecorator: Wn,
+      updateDecorator: Gn,
+      createPropertySignature: Rr,
+      updatePropertySignature: Yn,
       createPropertyDeclaration: xr,
       updatePropertyDeclaration: L,
       createMethodSignature: se,
@@ -18739,15 +18726,15 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       createMethodDeclaration: Se,
       updateMethodDeclaration: $e,
       createConstructorDeclaration: ut,
-      updateConstructorDeclaration: Rr,
-      createGetAccessorDeclaration: Mn,
-      updateGetAccessorDeclaration: Yn,
+      updateConstructorDeclaration: Ur,
+      createGetAccessorDeclaration: Ln,
+      updateGetAccessorDeclaration: Hn,
       createSetAccessorDeclaration: U,
       updateSetAccessorDeclaration: K,
       createCallSignature: we,
       updateCallSignature: ke,
       createConstructSignature: Ee,
-      updateConstructSignature: he,
+      updateConstructSignature: ge,
       createIndexSignature: Ye,
       updateIndexSignature: tt,
       createClassStaticBlockDeclaration: _t,
@@ -18758,7 +18745,7 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       createTypePredicateNode: at,
       updateTypePredicateNode: un,
       createTypeReferenceNode: ei,
-      updateTypeReferenceNode: O,
+      updateTypeReferenceNode: M,
       createFunctionTypeNode: qe,
       updateFunctionTypeNode: u,
       createConstructorTypeNode: je,
@@ -18767,55 +18754,55 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       updateTypeQueryNode: Et,
       createTypeLiteralNode: It,
       updateTypeLiteralNode: zt,
-      createArrayTypeNode: Hn,
+      createArrayTypeNode: Xn,
       updateArrayTypeNode: Ai,
       createTupleTypeNode: pn,
       updateTupleTypeNode: H,
-      createNamedTupleMember: le,
+      createNamedTupleMember: ue,
       updateNamedTupleMember: Ve,
       createOptionalTypeNode: Te,
       updateOptionalTypeNode: j,
       createRestTypeNode: yt,
       updateRestTypeNode: wt,
-      createUnionTypeNode: Gl,
+      createUnionTypeNode: Hl,
       updateUnionTypeNode: M_,
-      createIntersectionTypeNode: Ur,
+      createIntersectionTypeNode: Br,
       updateIntersectionTypeNode: Je,
       createConditionalTypeNode: ft,
-      updateConditionalTypeNode: Yl,
-      createInferTypeNode: Xn,
-      updateInferTypeNode: Hl,
+      updateConditionalTypeNode: Xl,
+      createInferTypeNode: $n,
+      updateInferTypeNode: $l,
       createImportTypeNode: lr,
       updateImportTypeNode: ua,
       createParenthesizedType: en,
       updateParenthesizedType: Dt,
       createThisTypeNode: D,
       createTypeOperatorNode: Yt,
-      updateTypeOperatorNode: Br,
+      updateTypeOperatorNode: qr,
       createIndexedAccessTypeNode: ur,
       updateIndexedAccessTypeNode: as,
       createMappedTypeNode: vt,
-      updateMappedTypeNode: Ut,
+      updateMappedTypeNode: Bt,
       createLiteralTypeNode: ti,
       updateLiteralTypeNode: Sr,
       createTemplateLiteralType: Gt,
-      updateTemplateLiteralType: Xl,
+      updateTemplateLiteralType: Ql,
       createObjectBindingPattern: L_,
-      updateObjectBindingPattern: $l,
-      createArrayBindingPattern: qr,
-      updateArrayBindingPattern: Ql,
+      updateObjectBindingPattern: Kl,
+      createArrayBindingPattern: Fr,
+      updateArrayBindingPattern: Zl,
       createBindingElement: pa,
       updateBindingElement: ni,
       createArrayLiteralExpression: ss,
       updateArrayLiteralExpression: j_,
       createObjectLiteralExpression: Ci,
-      updateObjectLiteralExpression: Kl,
+      updateObjectLiteralExpression: eu,
       createPropertyAccessExpression: e & 4 ? (r, i) => setEmitFlags(pr(r, i), 262144) : pr,
-      updatePropertyAccessExpression: Zl,
+      updatePropertyAccessExpression: tu,
       createPropertyAccessChain: e & 4 ? (r, i, _) => setEmitFlags(Di(r, i, _), 262144) : Di,
       updatePropertyAccessChain: fa,
       createElementAccessExpression: Pi,
-      updateElementAccessExpression: eu,
+      updateElementAccessExpression: nu,
       createElementAccessChain: U_,
       updateElementAccessChain: _s,
       createCallExpression: Ni,
@@ -18841,26 +18828,26 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       createVoidExpression: fs,
       updateVoidExpression: fr,
       createAwaitExpression: $_,
-      updateAwaitExpression: Fr,
-      createPrefixUnaryExpression: zr,
-      updatePrefixUnaryExpression: tu,
+      updateAwaitExpression: zr,
+      createPrefixUnaryExpression: Vr,
+      updatePrefixUnaryExpression: ru,
       createPostfixUnaryExpression: ri,
-      updatePostfixUnaryExpression: nu,
+      updatePostfixUnaryExpression: iu,
       createBinaryExpression: ya,
-      updateBinaryExpression: ru,
+      updateBinaryExpression: au,
       createConditionalExpression: K_,
       updateConditionalExpression: Z_,
       createTemplateExpression: eo,
-      updateTemplateExpression: $n,
+      updateTemplateExpression: Qn,
       createTemplateHead: no,
       createTemplateMiddle: ga,
       createTemplateTail: ds,
-      createNoSubstitutionTemplateLiteral: au,
+      createNoSubstitutionTemplateLiteral: _u,
       createTemplateLiteralLikeNode: ai,
       createYieldExpression: ms,
-      updateYieldExpression: su,
+      updateYieldExpression: ou,
       createSpreadElement: ro,
-      updateSpreadElement: _u,
+      updateSpreadElement: cu,
       createClassExpression: io,
       updateClassExpression: hs,
       createOmittedExpression: ys,
@@ -18873,14 +18860,14 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       createSatisfiesExpression: gs,
       updateSatisfiesExpression: co,
       createNonNullChain: bs,
-      updateNonNullChain: Ln,
+      updateNonNullChain: jn,
       createMetaProperty: lo,
       updateMetaProperty: vs,
-      createTemplateSpan: Qn,
+      createTemplateSpan: Kn,
       updateTemplateSpan: va,
       createSemicolonClassElement: uo,
-      createBlock: Vr,
-      updateBlock: ou,
+      createBlock: Wr,
+      updateBlock: lu,
       createVariableStatement: xs,
       updateVariableStatement: po,
       createEmptyStatement: fo,
@@ -18891,19 +18878,19 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       createDoStatement: go,
       updateDoStatement: bo,
       createWhileStatement: vo,
-      updateWhileStatement: cu,
+      updateWhileStatement: uu,
       createForStatement: xo,
       updateForStatement: To,
       createForInStatement: Ts,
-      updateForInStatement: lu,
+      updateForInStatement: pu,
       createForOfStatement: So,
-      updateForOfStatement: uu,
+      updateForOfStatement: fu,
       createContinueStatement: wo,
-      updateContinueStatement: pu,
+      updateContinueStatement: du,
       createBreakStatement: Ss,
       updateBreakStatement: ko,
       createReturnStatement: ws,
-      updateReturnStatement: fu,
+      updateReturnStatement: mu,
       createWithStatement: ks,
       updateWithStatement: Eo,
       createSwitchStatement: Es,
@@ -18911,14 +18898,14 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       createLabeledStatement: Ao,
       updateLabeledStatement: Co,
       createThrowStatement: Do,
-      updateThrowStatement: du,
+      updateThrowStatement: hu,
       createTryStatement: Po,
-      updateTryStatement: mu,
+      updateTryStatement: yu,
       createDebuggerStatement: No,
       createVariableDeclaration: xa,
       updateVariableDeclaration: Io,
       createVariableDeclarationList: As,
-      updateVariableDeclarationList: hu,
+      updateVariableDeclarationList: gu,
       createFunctionDeclaration: Oo,
       updateFunctionDeclaration: Cs,
       createClassDeclaration: Mo,
@@ -18934,7 +18921,7 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       createModuleBlock: Er,
       updateModuleBlock: Vt,
       createCaseBlock: Ro,
-      updateCaseBlock: gu,
+      updateCaseBlock: vu,
       createNamespaceExportDeclaration: Uo,
       updateNamespaceExportDeclaration: Bo,
       createImportEqualsDeclaration: qo,
@@ -18944,7 +18931,7 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       createImportClause: Wo,
       updateImportClause: Go,
       createAssertClause: Ps,
-      updateAssertClause: vu,
+      updateAssertClause: Tu,
       createAssertEntry: Mi,
       updateAssertEntry: Yo,
       createImportTypeAssertionContainer: Ns,
@@ -18954,24 +18941,24 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       createImportAttribute: $o,
       updateImportAttribute: Qo,
       createNamespaceImport: Ko,
-      updateNamespaceImport: xu,
+      updateNamespaceImport: Su,
       createNamespaceExport: Zo,
-      updateNamespaceExport: Tu,
+      updateNamespaceExport: wu,
       createNamedImports: ec,
       updateNamedImports: tc,
       createImportSpecifier: Ar,
-      updateImportSpecifier: Su,
+      updateImportSpecifier: ku,
       createExportAssignment: Sa,
       updateExportAssignment: Li,
       createExportDeclaration: wa,
       updateExportDeclaration: nc,
       createNamedExports: Os,
-      updateNamedExports: wu,
+      updateNamedExports: Eu,
       createExportSpecifier: ka,
-      updateExportSpecifier: ku,
-      createMissingDeclaration: Eu,
+      updateExportSpecifier: Au,
+      createMissingDeclaration: Cu,
       createExternalModuleReference: Ms,
-      updateExternalModuleReference: Au,
+      updateExternalModuleReference: Du,
       get createJSDocAllType() {
         return l(313);
       },
@@ -18979,49 +18966,49 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
         return l(314);
       },
       get createJSDocNonNullableType() {
-        return W(316);
+        return G(316);
       },
       get updateJSDocNonNullableType() {
         return k(316);
       },
       get createJSDocNullableType() {
-        return W(315);
+        return G(315);
       },
       get updateJSDocNullableType() {
         return k(315);
       },
       get createJSDocOptionalType() {
-        return G(317);
+        return W(317);
       },
       get updateJSDocOptionalType() {
         return y(317);
       },
       get createJSDocVariadicType() {
-        return G(319);
+        return W(319);
       },
       get updateJSDocVariadicType() {
         return y(319);
       },
       get createJSDocNamepathType() {
-        return G(320);
+        return W(320);
       },
       get updateJSDocNamepathType() {
         return y(320);
       },
       createJSDocFunctionType: ac,
-      updateJSDocFunctionType: Pu,
+      updateJSDocFunctionType: Iu,
       createJSDocTypeLiteral: sc,
-      updateJSDocTypeLiteral: Nu,
+      updateJSDocTypeLiteral: Ou,
       createJSDocTypeExpression: _c,
       updateJSDocTypeExpression: js,
       createJSDocSignature: oc,
-      updateJSDocSignature: Iu,
+      updateJSDocSignature: Mu,
       createJSDocTemplateTag: Js,
       updateJSDocTemplateTag: cc,
       createJSDocTypedefTag: Ea,
-      updateJSDocTypedefTag: Ou,
+      updateJSDocTypedefTag: Lu,
       createJSDocParameterTag: Rs,
-      updateJSDocParameterTag: Mu,
+      updateJSDocParameterTag: ju,
       createJSDocPropertyTag: lc,
       updateJSDocPropertyTag: uc,
       createJSDocCallbackTag: pc,
@@ -19031,21 +19018,21 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       createJSDocAugmentsTag: Bs,
       updateJSDocAugmentsTag: Ji,
       createJSDocImplementsTag: mc,
-      updateJSDocImplementsTag: Uu,
-      createJSDocSeeTag: Gr,
+      updateJSDocImplementsTag: qu,
+      createJSDocSeeTag: Yr,
       updateJSDocSeeTag: Aa,
       createJSDocImportTag: Ec,
       updateJSDocImportTag: Ac,
       createJSDocNameReference: hc,
-      updateJSDocNameReference: Lu,
+      updateJSDocNameReference: Ju,
       createJSDocMemberName: yc,
-      updateJSDocMemberName: ju,
+      updateJSDocMemberName: Ru,
       createJSDocLink: gc,
       updateJSDocLink: bc,
       createJSDocLinkCode: vc,
-      updateJSDocLinkCode: Ju,
+      updateJSDocLinkCode: Uu,
       createJSDocLinkPlain: xc,
-      updateJSDocLinkPlain: Ru,
+      updateJSDocLinkPlain: Bu,
       get createJSDocTypeTag() {
         return pe(345);
       },
@@ -19065,49 +19052,49 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
         return xe(344);
       },
       get createJSDocAuthorTag() {
-        return C(331);
+        return A(331);
       },
       get updateJSDocAuthorTag() {
         return R(331);
       },
       get createJSDocClassTag() {
-        return C(333);
+        return A(333);
       },
       get updateJSDocClassTag() {
         return R(333);
       },
       get createJSDocPublicTag() {
-        return C(334);
+        return A(334);
       },
       get updateJSDocPublicTag() {
         return R(334);
       },
       get createJSDocPrivateTag() {
-        return C(335);
+        return A(335);
       },
       get updateJSDocPrivateTag() {
         return R(335);
       },
       get createJSDocProtectedTag() {
-        return C(336);
+        return A(336);
       },
       get updateJSDocProtectedTag() {
         return R(336);
       },
       get createJSDocReadonlyTag() {
-        return C(337);
+        return A(337);
       },
       get updateJSDocReadonlyTag() {
         return R(337);
       },
       get createJSDocOverrideTag() {
-        return C(338);
+        return A(338);
       },
       get updateJSDocOverrideTag() {
         return R(338);
       },
       get createJSDocDeprecatedTag() {
-        return C(332);
+        return A(332);
       },
       get updateJSDocDeprecatedTag() {
         return R(332);
@@ -19127,64 +19114,64 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       createJSDocEnumTag: kc,
       updateJSDocEnumTag: qs,
       createJSDocUnknownTag: wc,
-      updateJSDocUnknownTag: Fu,
+      updateJSDocUnknownTag: Vu,
       createJSDocText: Fs,
-      updateJSDocText: zu,
+      updateJSDocText: Wu,
       createJSDocComment: Ri,
       updateJSDocComment: Cc,
       createJsxElement: Dc,
-      updateJsxElement: Vu,
+      updateJsxElement: Gu,
       createJsxSelfClosingElement: Pc,
-      updateJsxSelfClosingElement: Wu,
+      updateJsxSelfClosingElement: Yu,
       createJsxOpeningElement: Ca,
       updateJsxOpeningElement: Nc,
       createJsxClosingElement: zs,
       updateJsxClosingElement: Da,
       createJsxFragment: Ht,
       createJsxText: Ui,
-      updateJsxText: Gu,
+      updateJsxText: Hu,
       createJsxOpeningFragment: Oc,
       createJsxJsxClosingFragment: Mc,
       updateJsxFragment: Ic,
       createJsxAttribute: Lc,
-      updateJsxAttribute: Yu,
+      updateJsxAttribute: Xu,
       createJsxAttributes: Bi,
-      updateJsxAttributes: Hu,
+      updateJsxAttributes: $u,
       createJsxSpreadAttribute: jc,
-      updateJsxSpreadAttribute: Xu,
+      updateJsxSpreadAttribute: Qu,
       createJsxExpression: Jc,
       updateJsxExpression: Vs,
       createJsxNamespacedName: _i,
-      updateJsxNamespacedName: $u,
+      updateJsxNamespacedName: Ku,
       createCaseClause: Pa,
       updateCaseClause: Rc,
       createDefaultClause: Uc,
       updateDefaultClause: oi,
       createHeritageClause: Ws,
-      updateHeritageClause: Qu,
+      updateHeritageClause: Zu,
       createCatchClause: Bc,
       updateCatchClause: qc,
       createPropertyAssignment: Na,
       updatePropertyAssignment: Gs,
       createShorthandPropertyAssignment: Fc,
-      updateShorthandPropertyAssignment: Ku,
+      updateShorthandPropertyAssignment: ep,
       createSpreadAssignment: zc,
       updateSpreadAssignment: Vc,
       createEnumMember: Ys,
-      updateEnumMember: jn,
+      updateEnumMember: Jn,
       createSourceFile: Wc,
-      updateSourceFile: np,
+      updateSourceFile: ip,
       createRedirectedSourceFile: Gc,
       createBundle: Yc,
       updateBundle: Hc,
-      createSyntheticExpression: rp,
-      createSyntaxList: ip,
+      createSyntheticExpression: ap,
+      createSyntaxList: sp,
       createNotEmittedStatement: Ia,
-      createNotEmittedTypeElement: ap,
+      createNotEmittedTypeElement: _p,
       createPartiallyEmittedExpression: $s,
       updatePartiallyEmittedExpression: Xc,
       createCommaListExpression: Qs,
-      updateCommaListExpression: _p,
+      updateCommaListExpression: cp,
       createSyntheticReferenceExpression: Ks,
       updateSyntheticReferenceExpression: $c,
       cloneNode: Oa,
@@ -19284,25 +19271,25 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       get createPostfixDecrement() {
         return v(47);
       },
-      createImmediatelyInvokedFunctionExpression: lp,
-      createImmediatelyInvokedArrowFunction: up,
+      createImmediatelyInvokedFunctionExpression: pp,
+      createImmediatelyInvokedArrowFunction: fp,
       createVoidZero: qi,
       createExportDefault: Zc,
       createExternalModuleExport: el,
-      createTypeCheck: pp,
+      createTypeCheck: dp,
       createIsNotTypeCheck: Zs,
-      createMethodCall: Yr,
+      createMethodCall: Hr,
       createGlobalMethodCall: Fi,
-      createFunctionBindCall: fp,
-      createFunctionCallCall: dp,
-      createFunctionApplyCall: mp,
-      createArraySliceCall: hp,
+      createFunctionBindCall: mp,
+      createFunctionCallCall: hp,
+      createFunctionApplyCall: yp,
+      createArraySliceCall: gp,
       createArrayConcatCall: zi,
-      createObjectDefinePropertyCall: yp,
+      createObjectDefinePropertyCall: bp,
       createObjectGetOwnPropertyDescriptorCall: e_,
       createReflectGetCall: li,
       createReflectSetCall: tl,
-      createPropertyDescriptor: gp,
+      createPropertyDescriptor: vp,
       createCallBinding: al,
       createAssignmentTargetWrapper: sl,
       inlineExpressions: o,
@@ -19322,15 +19309,15 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       liftToBlock: Xt,
       mergeLexicalEnvironment: dr,
       replaceModifiers: mr,
-      replaceDecoratorsAndModifiers: Jn,
-      replacePropertyName: Hr,
+      replaceDecoratorsAndModifiers: Rn,
+      replacePropertyName: Xr,
     };
-  return (Bn(Wb, (r) => r(ge)), ge);
+  return (qn(Wb, (r) => r(be)), be);
   function me(r, /** @type {boolean | undefined} */ i) {
     if (r === void 0 || r === Tt) r = [];
     else if (gi(r)) {
       if (i === void 0 || r.hasTrailingComma === i)
-        return (r.transformFlags === void 0 && $d(r), q.attachNodeArrayDebugInfo(r), r);
+        return (r.transformFlags === void 0 && Zd(r), q.attachNodeArrayDebugInfo(r), r);
       let d = r.slice();
       return (
         (d.pos = r.pos),
@@ -19348,48 +19335,48 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       (c.end = -1),
       (c.hasTrailingComma = !!i),
       (c.transformFlags = 0),
-      $d(c),
+      Zd(c),
       q.attachNodeArrayDebugInfo(c),
       c
     );
   }
-  /** @returns {InstanceType<typeof Kf>} */ function I(/** @type {number} */ r) {
+  /** @returns {InstanceType<typeof ed>} */ function O(/** @type {number} */ r) {
     return t.createBaseNode(r);
   }
-  /** @returns {InstanceType<typeof Kf>} */ function ae(/** @type {number} */ r) {
-    /** @type {Kf} */ let i = I(r);
+  /** @returns {InstanceType<typeof ed>} */ function ae(/** @type {number} */ r) {
+    /** @type {ed} */ let i = O(r);
     return ((i.symbol = void 0), (i.localSymbol = void 0), i);
   }
   function Le(r, i) {
     return (r !== i && (r.typeArguments = i.typeArguments), J(r, i));
   }
-  /** @returns {Kf} */ function V(/** @type {string} */ r, i = 0) {
+  /** @returns {ed} */ function V(/** @type {string} */ r, i = 0) {
     let _ = typeof r == "number" ? r + "" : r;
     q.assert(
       _.charCodeAt(0) !== 45,
       "Negative numbers should be created in combination with createPrefixUnaryExpression",
     );
-    /** @type {Kf | vh | xh | Th} */ let c = ae(9);
+    /** @type {ed | Sh | wh | kh} */ let c = ae(9);
     return ((c.text = _), (c.numericLiteralFlags = i), i & 384 && (c.transformFlags |= 1024), c);
   }
-  /** @returns {vh} */ function oe(r) {
-    /** @type {Kf | vh | xh | Th} */ let i = Zt(10);
+  /** @returns {Sh} */ function oe(r) {
+    /** @type {ed | Sh | wh | kh} */ let i = Zt(10);
     return ((i.text = typeof r == "string" ? r : jb(r) + "n"), (i.transformFlags |= 32), i);
   }
-  /** @returns {Kf} */ function Y(/** @type {string} */ r, i) {
-    /** @type {Kf | vh | xh | Th} */ let _ = ae(11);
+  /** @returns {ed} */ function Y(/** @type {string} */ r, i) {
+    /** @type {ed | Sh | wh | kh} */ let _ = ae(11);
     return ((_.text = r), (_.singleQuote = i), _);
   }
-  /** @returns {Kf} */ function mt(/** @type {string | undefined} */ r, i, _) {
-    /** @type {Kf | vh | xh | Th} */ let c = Y(r, i);
+  /** @returns {ed} */ function mt(/** @type {string | undefined} */ r, i, _) {
+    /** @type {ed | Sh | wh | kh} */ let c = Y(r, i);
     return ((c.hasExtendedUnicodeEscape = _), _ && (c.transformFlags |= 1024), c);
   }
   function ar(r) {
     let i = Y(K2(r), void 0);
     return ((i.textSourceNode = r), i);
   }
-  /** @returns {InstanceType<typeof vh>} */ function gn(/** @type {string} */ r) {
-    /** @type {Kf | vh | xh | Th} */ let i = Zt(14);
+  /** @returns {InstanceType<typeof Sh>} */ function gn(/** @type {string} */ r) {
+    /** @type {ed | Sh | wh | kh} */ let i = Zt(14);
     return ((i.text = r), i);
   }
   function sr(r, /** @type {string | undefined} */ i) {
@@ -19410,17 +19397,17 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
         return ai(r, i, void 0, 0);
     }
   }
-  /** @returns {InstanceType<typeof xh>} */ function bn(/** @type {string} */ r) {
-    /** @type {xh} */ let i = t.createBaseIdentifierNode(80);
+  /** @returns {InstanceType<typeof wh>} */ function bn(/** @type {string} */ r) {
+    /** @type {wh} */ let i = t.createBaseIdentifierNode(80);
     return ((i.escapedText = r), (i.jsDoc = void 0), (i.flowNode = void 0), (i.symbol = void 0), i);
   }
-  function In(r, i, _, c) {
-    let d = bn(Ua(r));
+  function On(r, i, _, c) {
+    let d = bn(Ra(r));
     return (setIdentifierAutoGenerate(d, { flags: i, id: fl, prefix: _, suffix: c }), fl++, d);
   }
-  /** @returns {xh} */ function He(r, i, _) {
-    (i === void 0 && r && (i = Wm(r)), i === 80 && (i = void 0));
-    /** @type {Kf | vh | xh | Th} */ let c = bn(Ua(r));
+  /** @returns {wh} */ function He(r, i, _) {
+    (i === void 0 && r && (i = Hm(r)), i === 80 && (i = void 0));
+    /** @type {ed | Sh | wh | kh} */ let c = bn(Ra(r));
     return (
       _ && (c.flags |= 256),
       c.escapedText === "await" && (c.transformFlags |= 67108864),
@@ -19431,39 +19418,39 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function _r(r, i, _, c) {
     let d = 1;
     i && (d |= 8);
-    let T = In("", d, _, c);
+    let T = On("", d, _, c);
     return (r && r(T), T);
   }
-  function jr(r) {
+  function Jr(r) {
     let i = 2;
-    return (r && (i |= 8), In("", i, void 0, void 0));
+    return (r && (i |= 8), On("", i, void 0, void 0));
   }
-  function Lt(r, i = 0, _, c) {
+  function jt(r, i = 0, _, c) {
     return (
       q.assert(!(i & 7), "Argument out of range: flags"),
       q.assert(
         (i & 48) !== 32,
         "GeneratedIdentifierFlags.FileLevel cannot be set without also setting GeneratedIdentifierFlags.Optimistic",
       ),
-      In(r, 3 | i, _, c)
+      On(r, 3 | i, _, c)
     );
   }
-  function Fn(r, i = 0, _, c) {
+  function zn(r, i = 0, _, c) {
     q.assert(!(i & 7), "Argument out of range: flags");
-    let d = r ? (Fp(r) ? Xp(!1, _, r, c, Pn) : `generated@${getNodeId(r)}`) : "";
+    let d = r ? (Vp(r) ? Qp(!1, _, r, c, Pn) : `generated@${getNodeId(r)}`) : "";
     (_ || c) && (i |= 16);
-    let T = In(d, 4 | i, _, c);
+    let T = On(d, 4 | i, _, c);
     return ((T.original = r), T);
   }
-  function On(/** @type {string | undefined} */ r) {
-    /** @type {Th} */ let i = t.createBasePrivateIdentifierNode(81);
+  function Mn(/** @type {string | undefined} */ r) {
+    /** @type {kh} */ let i = t.createBasePrivateIdentifierNode(81);
     return ((i.escapedText = r), (i.transformFlags |= 16777216), i);
   }
-  function jt(r) {
-    return (xl(r, "#") || q.fail("First character of private identifier must be #: " + r), On(Ua(r)));
+  function Jt(r) {
+    return (xl(r, "#") || q.fail("First character of private identifier must be #: " + r), Mn(Ra(r)));
   }
   function gt(r, i, _, c) {
-    let d = On(Ua(r));
+    let d = Mn(Ra(r));
     return (setIdentifierAutoGenerate(d, { flags: i, id: fl, prefix: _, suffix: c }), fl++, d);
   }
   function Ke(r, i, _) {
@@ -19471,15 +19458,15 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
     let c = 8 | (r ? 3 : 1);
     return gt(r ?? "", c, i, _);
   }
-  function zn(r, i, _) {
-    let c = Fp(r) ? Xp(!0, i, r, _, Pn) : `#generated@${getNodeId(r)}`,
+  function Vn(r, i, _) {
+    let c = Vp(r) ? Qp(!0, i, r, _, Pn) : `#generated@${getNodeId(r)}`,
       T = gt(c, 4 | (i || _ ? 16 : 0), i, _);
     return ((T.original = r), T);
   }
-  /** @returns {InstanceType<typeof vh>} */ function Zt(r) {
+  /** @returns {InstanceType<typeof Sh>} */ function Zt(r) {
     return t.createBaseTokenNode(r);
   }
-  /** @returns {vh} */ function ct(r) {
+  /** @returns {Sh} */ function ct(r) {
     (q.assert(r >= 0 && r <= 166, "Invalid token"),
       q.assert(r <= 15 || r >= 18, "Invalid token. Use 'createTemplateLiteralLikeNode' to create template literals."),
       q.assert(r <= 9 || r >= 15, "Invalid token. Use 'createLiteralLikeNode' to create literals."),
@@ -19537,7 +19524,7 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function qt() {
     return ct(110);
   }
-  function Jt() {
+  function Rt() {
     return ct(106);
   }
   function lt() {
@@ -19570,15 +19557,15 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       i.length ? i : void 0
     );
   }
-  /** @returns {Kf} */ function bt(/** @type {Kf | vh | xh | Th} */ r, /** @type {Kf | vh | xh | Th} */ i) {
-    /** @type {Kf | vh | xh | Th} */ let _ = I(167);
-    return ((_.left = r), (_.right = nt(i)), (_.transformFlags |= z(_.left) | qa(_.right)), (_.flowNode = void 0), _);
+  /** @returns {ed} */ function bt(/** @type {ed | Sh | wh | kh} */ r, /** @type {ed | Sh | wh | kh} */ i) {
+    /** @type {ed | Sh | wh | kh} */ let _ = O(167);
+    return ((_.left = r), (_.right = nt(i)), (_.transformFlags |= z(_.left) | Ba(_.right)), (_.flowNode = void 0), _);
   }
   function ln(r, i, _) {
     return r.left !== i || r.right !== _ ? J(bt(i, _), r) : r;
   }
-  /** @returns {Kf} */ function it(/** @type {Kf | vh | xh | Th} */ r) {
-    /** @type {Kf | vh | xh | Th} */ let i = I(168);
+  /** @returns {ed} */ function it(/** @type {ed | Sh | wh | kh} */ r) {
+    /** @type {ed | Sh | wh | kh} */ let i = O(168);
     return (
       (i.expression = s().parenthesizeExpressionOfComputedPropertyName(r)),
       (i.transformFlags |= z(i.expression) | 1024 | 131072),
@@ -19588,8 +19575,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function Ft(r, i) {
     return r.expression !== i ? J(it(i), r) : r;
   }
-  /** @returns {Kf} */ function sn(r, /** @type {Kf | vh | xh | Th} */ i, /** @type {Kf | vh | xh | Th | undefined} */ _, /** @type {Kf | vh | xh | Th | undefined} */ c) {
-    /** @type {Kf | vh | xh | Th} */ let d = ae(169);
+  /** @returns {ed} */ function sn(r, /** @type {ed | Sh | wh | kh} */ i, /** @type {ed | Sh | wh | kh | undefined} */ _, /** @type {ed | Sh | wh | kh | undefined} */ c) {
+    /** @type {ed | Sh | wh | kh} */ let d = ae(169);
     return (
       (d.modifiers = Ie(r)),
       (d.name = nt(i)),
@@ -19604,8 +19591,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function cr(r, i, _, c, d) {
     return r.modifiers !== i || r.name !== _ || r.constraint !== c || r.default !== d ? J(sn(i, _, c, d), r) : r;
   }
-  /** @returns {Kf} */ function br(r, /** @type {Kf | vh | xh | Th | undefined} */ i, /** @type {Kf | vh | xh | Th | undefined} */ _, /** @type {Kf | vh | xh | Th | undefined} */ c, /** @type {Kf | vh | xh | Th | undefined} */ d, /** @type {Kf | vh | xh | Th | undefined} */ T) {
-    /** @type {Kf | vh | xh | Th} */ let F = ae(170);
+  /** @returns {ed} */ function br(r, /** @type {ed | Sh | wh | kh | undefined} */ i, /** @type {ed | Sh | wh | kh | undefined} */ _, /** @type {ed | Sh | wh | kh | undefined} */ c, /** @type {ed | Sh | wh | kh | undefined} */ d, /** @type {ed | Sh | wh | kh | undefined} */ T) {
+    /** @type {ed | Sh | wh | kh} */ let F = ae(170);
     return (
       (F.modifiers = Ie(r)),
       (F.dotDotDotToken = i),
@@ -19618,12 +19605,12 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
         : (F.transformFlags =
             Ce(F.modifiers) |
             z(F.dotDotDotToken) |
-            Rn(F.name) |
+            Un(F.name) |
             z(F.questionToken) |
             z(F.initializer) |
             ((F.questionToken ?? F.type) ? 1 : 0) |
             ((F.dotDotDotToken ?? F.initializer) ? 1024 : 0) |
-            (Un(F.modifiers) & 31 ? 8192 : 0)),
+            (Bn(F.modifiers) & 31 ? 8192 : 0)),
       (F.jsDoc = void 0),
       F
     );
@@ -19638,19 +19625,19 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       ? J(br(i, _, c, d, T, F), r)
       : r;
   }
-  /** @returns {Kf} */ function Vn(/** @type {Kf | vh | xh | Th} */ r) {
-    /** @type {Kf | vh | xh | Th} */ let i = I(171);
+  /** @returns {ed} */ function Wn(/** @type {ed | Sh | wh | kh} */ r) {
+    /** @type {ed | Sh | wh | kh} */ let i = O(171);
     return (
       (i.expression = s().parenthesizeLeftSideOfAccess(r, !1)),
       (i.transformFlags |= z(i.expression) | 1 | 8192 | 33554432),
       i
     );
   }
-  function Wn(r, i) {
-    return r.expression !== i ? J(Vn(i), r) : r;
+  function Gn(r, i) {
+    return r.expression !== i ? J(Wn(i), r) : r;
   }
-  /** @returns {Kf} */ function Jr(r, /** @type {Kf | vh | xh | Th} */ i, /** @type {Kf | vh | xh | Th | undefined} */ _, /** @type {Kf | vh | xh | Th | undefined} */ c) {
-    /** @type {Kf | vh | xh | Th} */ let d = ae(172);
+  /** @returns {ed} */ function Rr(r, /** @type {ed | Sh | wh | kh} */ i, /** @type {ed | Sh | wh | kh | undefined} */ _, /** @type {ed | Sh | wh | kh | undefined} */ c) {
+    /** @type {ed | Sh | wh | kh} */ let d = ae(172);
     return (
       (d.modifiers = Ie(r)),
       (d.name = nt(i)),
@@ -19662,28 +19649,28 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       d
     );
   }
-  function Gn(r, i, _, c, d) {
-    return r.modifiers !== i || r.name !== _ || r.questionToken !== c || r.type !== d ? Pe(Jr(i, _, c, d), r) : r;
+  function Yn(r, i, _, c, d) {
+    return r.modifiers !== i || r.name !== _ || r.questionToken !== c || r.type !== d ? Pe(Rr(i, _, c, d), r) : r;
   }
   function Pe(r, i) {
     return (r !== i && (r.initializer = i.initializer), J(r, i));
   }
-  /** @returns {Kf} */ function xr(r, /** @type {Kf | vh | xh | Th | undefined} */ i, /** @type {Kf | vh | xh | Th | undefined} */ _, /** @type {Kf | vh | xh | Th | undefined} */ c, /** @type {Kf | vh | xh | Th | undefined} */ d) {
-    /** @type {Kf | vh | xh | Th} */ let T = ae(173);
+  /** @returns {ed} */ function xr(r, /** @type {ed | Sh | wh | kh | undefined} */ i, /** @type {ed | Sh | wh | kh | undefined} */ _, /** @type {ed | Sh | wh | kh | undefined} */ c, /** @type {ed | Sh | wh | kh | undefined} */ d) {
+    /** @type {ed | Sh | wh | kh} */ let T = ae(173);
     ((T.modifiers = Ie(r)),
       (T.name = nt(i)),
-      (T.questionToken = _ && Kd(_) ? _ : void 0),
-      (T.exclamationToken = _ && Qd(_) ? _ : void 0),
+      (T.questionToken = _ && tm(_) ? _ : void 0),
+      (T.exclamationToken = _ && em(_) ? _ : void 0),
       (T.type = c),
       (T.initializer = Vi(d)));
-    let F = T.flags & 33554432 || Un(T.modifiers) & 128;
+    let F = T.flags & 33554432 || Bn(T.modifiers) & 128;
     return (
       (T.transformFlags =
         Ce(T.modifiers) |
-        Rn(T.name) |
+        Un(T.name) |
         z(T.initializer) |
         (F || T.questionToken || T.exclamationToken || T.type ? 1 : 0) |
-        (Nf(T.name) || (Un(T.modifiers) & 256 && T.initializer) ? 8192 : 0) |
+        (Of(T.name) || (Bn(T.modifiers) & 256 && T.initializer) ? 8192 : 0) |
         16777216),
       (T.jsDoc = void 0),
       T
@@ -19692,15 +19679,15 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function L(r, i, _, c, d, T) {
     return r.modifiers !== i ||
       r.name !== _ ||
-      r.questionToken !== (c !== void 0 && Kd(c) ? c : void 0) ||
-      r.exclamationToken !== (c !== void 0 && Qd(c) ? c : void 0) ||
+      r.questionToken !== (c !== void 0 && tm(c) ? c : void 0) ||
+      r.exclamationToken !== (c !== void 0 && em(c) ? c : void 0) ||
       r.type !== d ||
       r.initializer !== T
       ? J(xr(i, _, c, d, T), r)
       : r;
   }
-  /** @returns {Kf} */ function se(r, /** @type {Kf | vh | xh | Th | undefined} */ i, _, c, d, /** @type {Kf | vh | xh | Th | undefined} */ T) {
-    /** @type {Kf | vh | xh | Th} */ let F = ae(174);
+  /** @returns {ed} */ function se(r, /** @type {ed | Sh | wh | kh | undefined} */ i, _, c, d, /** @type {ed | Sh | wh | kh | undefined} */ T) {
+    /** @type {ed | Sh | wh | kh} */ let F = ae(174);
     return (
       (F.modifiers = Ie(r)),
       (F.name = nt(i)),
@@ -19726,8 +19713,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       ? Le(se(i, _, c, d, T, F), r)
       : r;
   }
-  /** @returns {Kf} */ function Se(r, /** @type {Kf | vh | xh | Th | undefined} */ i, /** @type {Kf | vh | xh | Th | undefined} */ _, c, d, T, /** @type {Kf | vh | xh | Th | undefined} */ F, /** @type {Kf | vh | xh | Th | undefined} */ fe) {
-    /** @type {Kf | vh | xh | Th} */ let We = ae(175);
+  /** @returns {ed} */ function Se(r, /** @type {ed | Sh | wh | kh | undefined} */ i, /** @type {ed | Sh | wh | kh | undefined} */ _, c, d, T, /** @type {ed | Sh | wh | kh | undefined} */ F, /** @type {ed | Sh | wh | kh | undefined} */ fe) {
+    /** @type {ed | Sh | wh | kh} */ let We = ae(175);
     if (
       ((We.modifiers = Ie(r)),
       (We.asteriskToken = i),
@@ -19742,13 +19729,13 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
     )
       We.transformFlags = 1;
     else {
-      let Mt = Un(We.modifiers) & 1024,
+      let Mt = Bn(We.modifiers) & 1024,
         hr = !!We.asteriskToken,
         kn = Mt && hr;
       We.transformFlags =
         Ce(We.modifiers) |
         z(We.asteriskToken) |
-        Rn(We.name) |
+        Un(We.name) |
         z(We.questionToken) |
         Ce(We.typeParameters) |
         Ce(We.parameters) |
@@ -19784,7 +19771,7 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function Ze(r, i) {
     return (r !== i && (r.exclamationToken = i.exclamationToken), J(r, i));
   }
-  /** @returns {Kf} */ function _t(/** @type {Kf | xh | vh | Th} */ r) {
+  /** @returns {ed} */ function _t(/** @type {ed | wh | Sh | kh} */ r) {
     let i = ae(176);
     return (
       (i.body = r),
@@ -19804,8 +19791,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function St(r, i) {
     return (r !== i && (r.modifiers = i.modifiers), J(r, i));
   }
-  /** @returns {Kf} */ function ut(r, i, /** @type {Kf | vh | xh | Th | undefined} */ _) {
-    /** @type {Kf | vh | xh | Th} */ let c = ae(177);
+  /** @returns {ed} */ function ut(r, i, /** @type {ed | Sh | wh | kh | undefined} */ _) {
+    /** @type {ed | Sh | wh | kh} */ let c = ae(177);
     return (
       (c.modifiers = Ie(r)),
       (c.parameters = me(i)),
@@ -19824,14 +19811,14 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       c
     );
   }
-  function Rr(r, i, _, c) {
+  function Ur(r, i, _, c) {
     return r.modifiers !== i || r.parameters !== _ || r.body !== c ? Tr(ut(i, _, c), r) : r;
   }
   function Tr(r, i) {
     return (r !== i && ((r.typeParameters = i.typeParameters), (r.type = i.type)), Le(r, i));
   }
-  /** @returns {Kf} */ function Mn(r, /** @type {Kf | vh | xh | Th | undefined} */ i, _, /** @type {Kf | vh | xh | Th | undefined} */ c, /** @type {Kf | vh | xh | Th | undefined} */ d) {
-    /** @type {Kf | vh | xh | Th} */ let T = ae(178);
+  /** @returns {ed} */ function Ln(r, /** @type {ed | Sh | wh | kh | undefined} */ i, _, /** @type {ed | Sh | wh | kh | undefined} */ c, /** @type {ed | Sh | wh | kh | undefined} */ d) {
+    /** @type {ed | Sh | wh | kh} */ let T = ae(178);
     return (
       (T.modifiers = Ie(r)),
       (T.name = nt(i)),
@@ -19840,7 +19827,7 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       (T.body = d),
       T.body
         ? (T.transformFlags =
-            Ce(T.modifiers) | Rn(T.name) | Ce(T.parameters) | z(T.type) | (z(T.body) & -67108865) | (T.type ? 1 : 0))
+            Ce(T.modifiers) | Un(T.name) | Ce(T.parameters) | z(T.type) | (z(T.body) & -67108865) | (T.type ? 1 : 0))
         : (T.transformFlags = 1),
       (T.typeArguments = void 0),
       (T.typeParameters = void 0),
@@ -19853,16 +19840,16 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       T
     );
   }
-  function Yn(r, i, _, c, d, T) {
+  function Hn(r, i, _, c, d, T) {
     return r.modifiers !== i || r.name !== _ || r.parameters !== c || r.type !== d || r.body !== T
-      ? Ei(Mn(i, _, c, d, T), r)
+      ? Ei(Ln(i, _, c, d, T), r)
       : r;
   }
   function Ei(r, i) {
     return (r !== i && (r.typeParameters = i.typeParameters), Le(r, i));
   }
-  /** @returns {Kf} */ function U(r, /** @type {Kf | vh | xh | Th | undefined} */ i, _, /** @type {Kf | vh | xh | Th | undefined} */ c) {
-    /** @type {Kf | vh | xh | Th} */ let d = ae(179);
+  /** @returns {ed} */ function U(r, /** @type {ed | Sh | wh | kh | undefined} */ i, _, /** @type {ed | Sh | wh | kh | undefined} */ c) {
+    /** @type {ed | Sh | wh | kh} */ let d = ae(179);
     return (
       (d.modifiers = Ie(r)),
       (d.name = nt(i)),
@@ -19870,7 +19857,7 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       (d.body = c),
       d.body
         ? (d.transformFlags =
-            Ce(d.modifiers) | Rn(d.name) | Ce(d.parameters) | (z(d.body) & -67108865) | (d.type ? 1 : 0))
+            Ce(d.modifiers) | Un(d.name) | Ce(d.parameters) | (z(d.body) & -67108865) | (d.type ? 1 : 0))
         : (d.transformFlags = 1),
       (d.typeArguments = void 0),
       (d.typeParameters = void 0),
@@ -19890,8 +19877,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function Z(r, i) {
     return (r !== i && ((r.typeParameters = i.typeParameters), (r.type = i.type)), Le(r, i));
   }
-  /** @returns {Kf} */ function we(r, i, /** @type {Kf | vh | xh | Th | undefined} */ _) {
-    /** @type {Kf | vh | xh | Th} */ let c = ae(180);
+  /** @returns {ed} */ function we(r, i, /** @type {ed | Sh | wh | kh | undefined} */ _) {
+    /** @type {ed | Sh | wh | kh} */ let c = ae(180);
     return (
       (c.typeParameters = Ie(r)),
       (c.parameters = Ie(i)),
@@ -19907,8 +19894,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function ke(r, i, _, c) {
     return r.typeParameters !== i || r.parameters !== _ || r.type !== c ? Le(we(i, _, c), r) : r;
   }
-  /** @returns {Kf} */ function Ee(r, i, /** @type {Kf | vh | xh | Th | undefined} */ _) {
-    /** @type {Kf | vh | xh | Th} */ let c = ae(181);
+  /** @returns {ed} */ function Ee(r, i, /** @type {ed | Sh | wh | kh | undefined} */ _) {
+    /** @type {ed | Sh | wh | kh} */ let c = ae(181);
     return (
       (c.typeParameters = Ie(r)),
       (c.parameters = Ie(i)),
@@ -19921,11 +19908,11 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       c
     );
   }
-  function he(r, i, _, c) {
+  function ge(r, i, _, c) {
     return r.typeParameters !== i || r.parameters !== _ || r.type !== c ? Le(Ee(i, _, c), r) : r;
   }
-  /** @returns {Kf} */ function Ye(r, i, /** @type {Kf | vh | xh | Th | undefined} */ _) {
-    /** @type {Kf | vh | xh | Th} */ let c = ae(182);
+  /** @returns {ed} */ function Ye(r, i, /** @type {ed | Sh | wh | kh | undefined} */ _) {
+    /** @type {ed | Sh | wh | kh} */ let c = ae(182);
     return (
       (c.modifiers = Ie(r)),
       (c.parameters = Ie(i)),
@@ -19941,8 +19928,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function tt(r, i, _, c) {
     return r.parameters !== _ || r.type !== c || r.modifiers !== i ? Le(Ye(i, _, c), r) : r;
   }
-  /** @returns {Kf} */ function Xe(/** @type {Kf | vh | xh | Th | undefined} */ r, /** @type {Kf | vh | xh | Th | undefined} */ i) {
-    /** @type {Kf | vh | xh | Th} */ let _ = I(205);
+  /** @returns {ed} */ function Xe(/** @type {ed | Sh | wh | kh | undefined} */ r, /** @type {ed | Sh | wh | kh | undefined} */ i) {
+    /** @type {ed | Sh | wh | kh} */ let _ = O(205);
     return ((_.type = r), (_.literal = i), (_.transformFlags = 1), _);
   }
   function De(r, i, _) {
@@ -19951,15 +19938,15 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function xn(r) {
     return ct(r);
   }
-  /** @returns {Kf} */ function at(/** @type {Kf | vh | xh | Th | undefined} */ r, /** @type {Kf | vh | xh | Th | undefined} */ i, /** @type {Kf | vh | xh | Th | undefined} */ _) {
-    /** @type {Kf | vh | xh | Th} */ let c = I(183);
+  /** @returns {ed} */ function at(/** @type {ed | Sh | wh | kh | undefined} */ r, /** @type {ed | Sh | wh | kh | undefined} */ i, /** @type {ed | Sh | wh | kh | undefined} */ _) {
+    /** @type {ed | Sh | wh | kh} */ let c = O(183);
     return ((c.assertsModifier = r), (c.parameterName = nt(i)), (c.type = _), (c.transformFlags = 1), c);
   }
   function un(r, i, _, c) {
     return r.assertsModifier !== i || r.parameterName !== _ || r.type !== c ? J(at(i, _, c), r) : r;
   }
-  /** @returns {Kf} */ function ei(/** @type {Kf | vh | xh | Th} */ r, i) {
-    /** @type {Kf | vh | xh | Th} */ let _ = I(184);
+  /** @returns {ed} */ function ei(/** @type {ed | Sh | wh | kh} */ r, i) {
+    /** @type {ed | Sh | wh | kh} */ let _ = O(184);
     return (
       (_.typeName = nt(r)),
       (_.typeArguments = i && s().parenthesizeTypeArguments(me(i))),
@@ -19967,11 +19954,11 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       _
     );
   }
-  function O(r, i, _) {
+  function M(r, i, _) {
     return r.typeName !== i || r.typeArguments !== _ ? J(ei(i, _), r) : r;
   }
-  /** @returns {Kf} */ function qe(r, i, /** @type {Kf | vh | xh | Th | undefined} */ _) {
-    /** @type {Kf | vh | xh | Th} */ let c = ae(185);
+  /** @returns {ed} */ function qe(r, i, /** @type {ed | Sh | wh | kh | undefined} */ _) {
+    /** @type {ed | Sh | wh | kh} */ let c = ae(185);
     return (
       (c.typeParameters = Ie(r)),
       (c.parameters = Ie(i)),
@@ -19994,8 +19981,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function je(...r) {
     return r.length === 4 ? B(...r) : r.length === 3 ? ze(...r) : q.fail("Incorrect number of arguments specified.");
   }
-  /** @returns {Kf} */ function B(r, i, _, /** @type {Kf | vh | xh | Th | undefined} */ c) {
-    /** @type {Kf | vh | xh | Th} */ let d = ae(186);
+  /** @returns {ed} */ function B(r, i, _, /** @type {ed | Sh | wh | kh | undefined} */ c) {
+    /** @type {ed | Sh | wh | kh} */ let d = ae(186);
     return (
       (d.modifiers = Ie(r)),
       (d.typeParameters = Ie(i)),
@@ -20023,36 +20010,36 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function Qe(r, i, _, c) {
     return Ge(r, r.modifiers, i, _, c);
   }
-  /** @returns {Kf} */ function Nt(/** @type {Kf | vh | xh | Th | undefined} */ r, i) {
-    /** @type {Kf | vh | xh | Th} */ let _ = I(187);
+  /** @returns {ed} */ function Nt(/** @type {ed | Sh | wh | kh | undefined} */ r, i) {
+    /** @type {ed | Sh | wh | kh} */ let _ = O(187);
     return ((_.exprName = r), (_.typeArguments = i && s().parenthesizeTypeArguments(i)), (_.transformFlags = 1), _);
   }
   function Et(r, i, _) {
     return r.exprName !== i || r.typeArguments !== _ ? J(Nt(i, _), r) : r;
   }
-  /** @returns {Kf} */ function It(r) {
-    /** @type {Kf | vh | xh | Th} */ let i = ae(188);
+  /** @returns {ed} */ function It(r) {
+    /** @type {ed | Sh | wh | kh} */ let i = ae(188);
     return ((i.members = me(r)), (i.transformFlags = 1), i);
   }
   function zt(r, i) {
     return r.members !== i ? J(It(i), r) : r;
   }
-  /** @returns {Kf} */ function Hn(/** @type {Kf | vh | xh | Th | undefined} */ r) {
-    /** @type {Kf | vh | xh | Th} */ let i = I(189);
+  /** @returns {ed} */ function Xn(/** @type {ed | Sh | wh | kh | undefined} */ r) {
+    /** @type {ed | Sh | wh | kh} */ let i = O(189);
     return ((i.elementType = s().parenthesizeNonArrayTypeOfPostfixType(r)), (i.transformFlags = 1), i);
   }
   function Ai(r, i) {
-    return r.elementType !== i ? J(Hn(i), r) : r;
+    return r.elementType !== i ? J(Xn(i), r) : r;
   }
-  /** @returns {Kf} */ function pn(r) {
-    /** @type {Kf | vh | xh | Th} */ let i = I(190);
+  /** @returns {ed} */ function pn(r) {
+    /** @type {ed | Sh | wh | kh} */ let i = O(190);
     return ((i.elements = me(s().parenthesizeElementTypesOfTupleType(r))), (i.transformFlags = 1), i);
   }
   function H(r, i) {
     return r.elements !== i ? J(pn(i), r) : r;
   }
-  /** @returns {Kf} */ function le(r, /** @type {Kf | vh | xh | Th | undefined} */ i, _, /** @type {Kf | vh | xh | Th | undefined} */ c) {
-    /** @type {Kf | vh | xh | Th} */ let d = ae(203);
+  /** @returns {ed} */ function ue(r, /** @type {ed | Sh | wh | kh | undefined} */ i, _, /** @type {ed | Sh | wh | kh | undefined} */ c) {
+    /** @type {ed | Sh | wh | kh} */ let d = ae(203);
     return (
       (d.dotDotDotToken = r),
       (d.name = i),
@@ -20064,43 +20051,43 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
     );
   }
   function Ve(r, i, _, c, d) {
-    return r.dotDotDotToken !== i || r.name !== _ || r.questionToken !== c || r.type !== d ? J(le(i, _, c, d), r) : r;
+    return r.dotDotDotToken !== i || r.name !== _ || r.questionToken !== c || r.type !== d ? J(ue(i, _, c, d), r) : r;
   }
   function Te(r) {
-    let i = I(191);
+    let i = O(191);
     return ((i.type = s().parenthesizeTypeOfOptionalType(r)), (i.transformFlags = 1), i);
   }
   function j(r, i) {
     return r.type !== i ? J(Te(i), r) : r;
   }
-  /** @returns {Kf} */ function yt(/** @type {Kf | vh | xh | Th} */ r) {
-    /** @type {Kf | vh | xh | Th} */ let i = I(192);
+  /** @returns {ed} */ function yt(/** @type {ed | Sh | wh | kh} */ r) {
+    /** @type {ed | Sh | wh | kh} */ let i = O(192);
     return ((i.type = r), (i.transformFlags = 1), i);
   }
   function wt(r, i) {
     return r.type !== i ? J(yt(i), r) : r;
   }
-  /** @returns {InstanceType<typeof Kf>} */ function Rt(/** @type {number} */ r, i, _) {
-    /** @type {Kf | vh | xh | Th} */ let c = I(r);
-    return ((c.types = ge.createNodeArray(_(i))), (c.transformFlags = 1), c);
+  /** @returns {InstanceType<typeof ed>} */ function Ut(/** @type {number} */ r, i, _) {
+    /** @type {ed | Sh | wh | kh} */ let c = O(r);
+    return ((c.types = be.createNodeArray(_(i))), (c.transformFlags = 1), c);
   }
   function fn(r, i, _) {
-    return r.types !== i ? J(Rt(r.kind, i, _), r) : r;
+    return r.types !== i ? J(Ut(r.kind, i, _), r) : r;
   }
-  /** @returns {Kf} */ function Gl(r) {
-    return Rt(193, r, s().parenthesizeConstituentTypesOfUnionType);
+  /** @returns {ed} */ function Hl(r) {
+    return Ut(193, r, s().parenthesizeConstituentTypesOfUnionType);
   }
   function M_(r, i) {
     return fn(r, i, s().parenthesizeConstituentTypesOfUnionType);
   }
-  /** @returns {Kf} */ function Ur(r) {
-    return Rt(194, r, s().parenthesizeConstituentTypesOfIntersectionType);
+  /** @returns {ed} */ function Br(r) {
+    return Ut(194, r, s().parenthesizeConstituentTypesOfIntersectionType);
   }
   function Je(r, i) {
     return fn(r, i, s().parenthesizeConstituentTypesOfIntersectionType);
   }
-  /** @returns {Kf} */ function ft(/** @type {Kf | vh | xh | Th} */ r, /** @type {Kf | vh | xh | Th | undefined} */ i, /** @type {Kf | vh | xh | Th | undefined} */ _, /** @type {Kf | vh | xh | Th | undefined} */ c) {
-    /** @type {Kf | vh | xh | Th} */ let d = I(195);
+  /** @returns {ed} */ function ft(/** @type {ed | Sh | wh | kh} */ r, /** @type {ed | Sh | wh | kh | undefined} */ i, /** @type {ed | Sh | wh | kh | undefined} */ _, /** @type {ed | Sh | wh | kh | undefined} */ c) {
+    /** @type {ed | Sh | wh | kh} */ let d = O(195);
     return (
       (d.checkType = s().parenthesizeCheckTypeOfConditionalType(r)),
       (d.extendsType = s().parenthesizeExtendsTypeOfConditionalType(i)),
@@ -20112,25 +20099,25 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       d
     );
   }
-  function Yl(r, i, _, c, d) {
+  function Xl(r, i, _, c, d) {
     return r.checkType !== i || r.extendsType !== _ || r.trueType !== c || r.falseType !== d ? J(ft(i, _, c, d), r) : r;
   }
-  function Xn(r) {
-    let i = I(196);
+  function $n(r) {
+    let i = O(196);
     return ((i.typeParameter = r), (i.transformFlags = 1), i);
   }
-  function Hl(r, i) {
-    return r.typeParameter !== i ? J(Xn(i), r) : r;
+  function $l(r, i) {
+    return r.typeParameter !== i ? J($n(i), r) : r;
   }
-  /** @returns {Kf} */ function Gt(/** @type {Kf | vh | xh | Th | undefined} */ r, i) {
-    /** @type {Kf | vh | xh | Th} */ let _ = I(204);
+  /** @returns {ed} */ function Gt(/** @type {ed | Sh | wh | kh | undefined} */ r, i) {
+    /** @type {ed | Sh | wh | kh} */ let _ = O(204);
     return ((_.head = r), (_.templateSpans = me(i)), (_.transformFlags = 1), _);
   }
-  function Xl(r, i, _) {
+  function Ql(r, i, _) {
     return r.head !== i || r.templateSpans !== _ ? J(Gt(i, _), r) : r;
   }
-  /** @returns {Kf} */ function lr(/** @type {Kf | vh | xh | Th | undefined} */ r, i, /** @type {Kf | vh | xh | Th | undefined} */ _, c, d = !1) {
-    /** @type {Kf | vh | xh | Th} */ let T = I(206);
+  /** @returns {ed} */ function lr(/** @type {ed | Sh | wh | kh | undefined} */ r, i, /** @type {ed | Sh | wh | kh | undefined} */ _, c, d = !1) {
+    /** @type {ed | Sh | wh | kh} */ let T = O(206);
     return (
       (T.argument = r),
       (T.attributes = i),
@@ -20147,19 +20134,19 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       ? J(lr(i, _, c, d, T), r)
       : r;
   }
-  /** @returns {Kf} */ function en(/** @type {Kf | vh | xh | Th | undefined} */ r) {
-    /** @type {Kf | vh | xh | Th} */ let i = I(197);
+  /** @returns {ed} */ function en(/** @type {ed | Sh | wh | kh | undefined} */ r) {
+    /** @type {ed | Sh | wh | kh} */ let i = O(197);
     return ((i.type = r), (i.transformFlags = 1), i);
   }
   function Dt(r, i) {
     return r.type !== i ? J(en(i), r) : r;
   }
-  /** @returns {Kf} */ function D() {
-    /** @type {Kf | vh | xh | Th} */ let r = I(198);
+  /** @returns {ed} */ function D() {
+    /** @type {ed | Sh | wh | kh} */ let r = O(198);
     return ((r.transformFlags = 1), r);
   }
-  /** @returns {Kf} */ function Yt(r, /** @type {Kf | vh | xh | Th} */ i) {
-    /** @type {Kf | vh | xh | Th} */ let _ = I(199);
+  /** @returns {ed} */ function Yt(r, /** @type {ed | Sh | wh | kh} */ i) {
+    /** @type {ed | Sh | wh | kh} */ let _ = O(199);
     return (
       (_.operator = r),
       (_.type =
@@ -20168,11 +20155,11 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       _
     );
   }
-  function Br(r, i) {
+  function qr(r, i) {
     return r.type !== i ? J(Yt(r.operator, i), r) : r;
   }
-  /** @returns {Kf} */ function ur(/** @type {Kf | vh | xh | Th} */ r, /** @type {Kf | vh | xh | Th | undefined} */ i) {
-    /** @type {Kf | vh | xh | Th} */ let _ = I(200);
+  /** @returns {ed} */ function ur(/** @type {ed | Sh | wh | kh} */ r, /** @type {ed | Sh | wh | kh | undefined} */ i) {
+    /** @type {ed | Sh | wh | kh} */ let _ = O(200);
     return (
       (_.objectType = s().parenthesizeNonArrayTypeOfPostfixType(r)),
       (_.indexType = i),
@@ -20183,8 +20170,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function as(r, i, _) {
     return r.objectType !== i || r.indexType !== _ ? J(ur(i, _), r) : r;
   }
-  /** @returns {Kf} */ function vt(/** @type {Kf | vh | xh | Th | undefined} */ r, /** @type {Kf | vh | xh | Th | undefined} */ i, /** @type {Kf | vh | xh | Th | undefined} */ _, /** @type {Kf | vh | xh | Th | undefined} */ c, /** @type {Kf | vh | xh | Th | undefined} */ d, T) {
-    /** @type {Kf | vh | xh | Th} */ let F = ae(201);
+  /** @returns {ed} */ function vt(/** @type {ed | Sh | wh | kh | undefined} */ r, /** @type {ed | Sh | wh | kh | undefined} */ i, /** @type {ed | Sh | wh | kh | undefined} */ _, /** @type {ed | Sh | wh | kh | undefined} */ c, /** @type {ed | Sh | wh | kh | undefined} */ d, T) {
+    /** @type {ed | Sh | wh | kh} */ let F = ae(201);
     return (
       (F.readonlyToken = r),
       (F.typeParameter = i),
@@ -20198,7 +20185,7 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       F
     );
   }
-  function Ut(r, i, _, c, d, T, F) {
+  function Bt(r, i, _, c, d, T, F) {
     return r.readonlyToken !== i ||
       r.typeParameter !== _ ||
       r.nameType !== c ||
@@ -20208,15 +20195,15 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       ? J(vt(i, _, c, d, T, F), r)
       : r;
   }
-  /** @returns {Kf} */ function ti(/** @type {Kf | vh | xh | Th | undefined} */ r) {
-    /** @type {Kf | vh | xh | Th} */ let i = I(202);
+  /** @returns {ed} */ function ti(/** @type {ed | Sh | wh | kh | undefined} */ r) {
+    /** @type {ed | Sh | wh | kh} */ let i = O(202);
     return ((i.literal = r), (i.transformFlags = 1), i);
   }
   function Sr(r, i) {
     return r.literal !== i ? J(ti(i), r) : r;
   }
-  /** @returns {Kf} */ function L_(r) {
-    /** @type {Kf | vh | xh | Th} */ let i = I(207);
+  /** @returns {ed} */ function L_(r) {
+    /** @type {ed | Sh | wh | kh} */ let i = O(207);
     return (
       (i.elements = me(r)),
       (i.transformFlags |= Ce(i.elements) | 1024 | 524288),
@@ -20224,18 +20211,18 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       i
     );
   }
-  function $l(r, i) {
+  function Kl(r, i) {
     return r.elements !== i ? J(L_(i), r) : r;
   }
-  /** @returns {Kf} */ function qr(r) {
-    /** @type {Kf | vh | xh | Th} */ let i = I(208);
+  /** @returns {ed} */ function Fr(r) {
+    /** @type {ed | Sh | wh | kh} */ let i = O(208);
     return ((i.elements = me(r)), (i.transformFlags |= Ce(i.elements) | 1024 | 524288), i);
   }
-  function Ql(r, i) {
-    return r.elements !== i ? J(qr(i), r) : r;
+  function Zl(r, i) {
+    return r.elements !== i ? J(Fr(i), r) : r;
   }
-  /** @returns {Kf} */ function pa(/** @type {Kf | vh | xh | Th | undefined} */ r, /** @type {Kf | vh | xh | Th | undefined} */ i, /** @type {Kf | vh | xh | Th | undefined} */ _, /** @type {Kf | xh | vh | Th | undefined} */ c) {
-    /** @type {Kf | vh | xh | Th} */ let d = ae(209);
+  /** @returns {ed} */ function pa(/** @type {ed | Sh | wh | kh | undefined} */ r, /** @type {ed | Sh | wh | kh | undefined} */ i, /** @type {ed | Sh | wh | kh | undefined} */ _, /** @type {ed | wh | Sh | kh | undefined} */ c) {
+    /** @type {ed | Sh | wh | kh} */ let d = ae(209);
     return (
       (d.dotDotDotToken = r),
       (d.propertyName = nt(i)),
@@ -20243,8 +20230,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       (d.initializer = Vi(c)),
       (d.transformFlags |=
         z(d.dotDotDotToken) |
-        Rn(d.propertyName) |
-        Rn(d.name) |
+        Un(d.propertyName) |
+        Un(d.name) |
         z(d.initializer) |
         (d.dotDotDotToken ? 32768 : 0) |
         1024),
@@ -20257,10 +20244,10 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       ? J(pa(i, _, c, d), r)
       : r;
   }
-  /** @returns {Kf} */ function ss(r, i) {
-    let _ = I(210),
-      c = r && Va(r),
-      d = me(r, c && Q1(c) ? !0 : void 0);
+  /** @returns {ed} */ function ss(r, i) {
+    let _ = O(210),
+      c = r && za(r),
+      d = me(r, c && eh(c) ? !0 : void 0);
     return (
       (_.elements = s().parenthesizeExpressionsOfCommaDelimitedList(d)),
       (_.multiLine = i),
@@ -20271,34 +20258,34 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function j_(r, i) {
     return r.elements !== i ? J(ss(i, r.multiLine), r) : r;
   }
-  /** @returns {Kf} */ function Ci(r, i) {
-    /** @type {Kf | vh | xh | Th} */ let _ = ae(211);
+  /** @returns {ed} */ function Ci(r, i) {
+    /** @type {ed | Sh | wh | kh} */ let _ = ae(211);
     return ((_.properties = me(r)), (_.multiLine = i), (_.transformFlags |= Ce(_.properties)), (_.jsDoc = void 0), _);
   }
-  function Kl(r, i) {
+  function eu(r, i) {
     return r.properties !== i ? J(Ci(i, r.multiLine), r) : r;
   }
-  /** @returns {Kf} */ function J_(/** @type {Kf | vh | xh | Th | undefined} */ r, /** @type {Kf | vh | xh | Th | undefined} */ i, /** @type {Kf | vh | xh | Th | undefined} */ _) {
-    /** @type {Kf | vh | xh | Th} */ let c = ae(212);
+  /** @returns {ed} */ function J_(/** @type {ed | Sh | wh | kh | undefined} */ r, /** @type {ed | Sh | wh | kh | undefined} */ i, /** @type {ed | Sh | wh | kh | undefined} */ _) {
+    /** @type {ed | Sh | wh | kh} */ let c = ae(212);
     return (
       (c.expression = r),
       (c.questionDotToken = i),
       (c.name = _),
-      (c.transformFlags = z(c.expression) | z(c.questionDotToken) | (et(c.name) ? qa(c.name) : z(c.name) | 536870912)),
+      (c.transformFlags = z(c.expression) | z(c.questionDotToken) | (et(c.name) ? Ba(c.name) : z(c.name) | 536870912)),
       (c.jsDoc = void 0),
       (c.flowNode = void 0),
       c
     );
   }
-  /** @returns {InstanceType<typeof Kf>} */ function pr(/** @type {Kf | vh | xh | Th | undefined} */ r, /** @type {Kf | vh | xh | Th | undefined} */ i) {
-    /** @type {Kf | vh | xh | Th} */ let _ = J_(s().parenthesizeLeftSideOfAccess(r, !1), void 0, nt(i));
-    return (Ip(r) && (_.transformFlags |= 384), _);
+  /** @returns {InstanceType<typeof ed>} */ function pr(/** @type {ed | Sh | wh | kh | undefined} */ r, /** @type {ed | Sh | wh | kh | undefined} */ i) {
+    /** @type {ed | Sh | wh | kh} */ let _ = J_(s().parenthesizeLeftSideOfAccess(r, !1), void 0, nt(i));
+    return (Mp(r) && (_.transformFlags |= 384), _);
   }
-  function Zl(r, i, _) {
+  function tu(r, i, _) {
     return Hg(r) ? fa(r, i, r.questionDotToken, Pr(_, et)) : r.expression !== i || r.name !== _ ? J(pr(i, _), r) : r;
   }
-  /** @returns {InstanceType<typeof Kf>} */ function Di(/** @type {Kf | vh | xh | Th | undefined} */ r, /** @type {Kf | vh | xh | Th | undefined} */ i, /** @type {Kf | vh | xh | Th | undefined} */ _) {
-    /** @type {Kf | vh | xh | Th} */ let c = J_(s().parenthesizeLeftSideOfAccess(r, !0), i, nt(_));
+  /** @returns {InstanceType<typeof ed>} */ function Di(/** @type {ed | Sh | wh | kh | undefined} */ r, /** @type {ed | Sh | wh | kh | undefined} */ i, /** @type {ed | Sh | wh | kh | undefined} */ _) {
+    /** @type {ed | Sh | wh | kh} */ let c = J_(s().parenthesizeLeftSideOfAccess(r, !0), i, nt(_));
     return ((c.flags |= 64), (c.transformFlags |= 32), c);
   }
   function fa(r, i, _, c) {
@@ -20310,8 +20297,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       r.expression !== i || r.questionDotToken !== _ || r.name !== c ? J(Di(i, _, c), r) : r
     );
   }
-  /** @returns {Kf} */ function R_(/** @type {Kf | vh | xh | Th} */ r, /** @type {Kf | vh | xh | Th | undefined} */ i, /** @type {Kf | vh | xh | Th} */ _) {
-    /** @type {Kf | vh | xh | Th} */ let c = ae(213);
+  /** @returns {ed} */ function R_(/** @type {ed | Sh | wh | kh} */ r, /** @type {ed | Sh | wh | kh | undefined} */ i, /** @type {ed | Sh | wh | kh} */ _) {
+    /** @type {ed | Sh | wh | kh} */ let c = ae(213);
     return (
       (c.expression = r),
       (c.questionDotToken = i),
@@ -20322,19 +20309,19 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       c
     );
   }
-  /** @returns {Kf} */ function Pi(/** @type {Kf | vh | xh | Th | undefined} */ r, /** @type {Kf | vh | xh | Th | undefined} */ i) {
-    /** @type {Kf | vh | xh | Th} */ let _ = R_(s().parenthesizeLeftSideOfAccess(r, !1), void 0, Cr(i));
-    return (Ip(r) && (_.transformFlags |= 384), _);
+  /** @returns {ed} */ function Pi(/** @type {ed | Sh | wh | kh | undefined} */ r, /** @type {ed | Sh | wh | kh | undefined} */ i) {
+    /** @type {ed | Sh | wh | kh} */ let _ = R_(s().parenthesizeLeftSideOfAccess(r, !1), void 0, Cr(i));
+    return (Mp(r) && (_.transformFlags |= 384), _);
   }
-  function eu(r, i, _) {
+  function nu(r, i, _) {
     return Xg(r)
       ? _s(r, i, r.questionDotToken, _)
       : r.expression !== i || r.argumentExpression !== _
         ? J(Pi(i, _), r)
         : r;
   }
-  /** @returns {InstanceType<typeof Kf>} */ function U_(/** @type {Kf | vh | xh | Th} */ r, /** @type {Kf | vh | xh | Th} */ i, /** @type {Kf | vh | xh | Th} */ _) {
-    /** @type {Kf | vh | xh | Th} */ let c = R_(s().parenthesizeLeftSideOfAccess(r, !0), i, Cr(_));
+  /** @returns {InstanceType<typeof ed>} */ function U_(/** @type {ed | Sh | wh | kh} */ r, /** @type {ed | Sh | wh | kh} */ i, /** @type {ed | Sh | wh | kh} */ _) {
+    /** @type {ed | Sh | wh | kh} */ let c = R_(s().parenthesizeLeftSideOfAccess(r, !0), i, Cr(_));
     return ((c.flags |= 64), (c.transformFlags |= 32), c);
   }
   function _s(r, i, _, c) {
@@ -20346,8 +20333,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       r.expression !== i || r.questionDotToken !== _ || r.argumentExpression !== c ? J(U_(i, _, c), r) : r
     );
   }
-  /** @returns {Kf} */ function B_(/** @type {Kf | vh | xh | Th} */ r, /** @type {Kf | vh | xh | Th | undefined} */ i, _, c) {
-    /** @type {Kf | vh | xh | Th} */ let d = ae(214);
+  /** @returns {ed} */ function B_(/** @type {ed | Sh | wh | kh} */ r, /** @type {ed | Sh | wh | kh | undefined} */ i, _, c) {
+    /** @type {ed | Sh | wh | kh} */ let d = ae(214);
     return (
       (d.expression = r),
       (d.questionDotToken = i),
@@ -20355,12 +20342,12 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       (d.arguments = c),
       (d.transformFlags |= z(d.expression) | z(d.questionDotToken) | Ce(d.typeArguments) | Ce(d.arguments)),
       d.typeArguments && (d.transformFlags |= 1),
-      zd(d.expression) && (d.transformFlags |= 16384),
+      Gd(d.expression) && (d.transformFlags |= 16384),
       d
     );
   }
-  /** @returns {InstanceType<typeof Kf>} */ function Ni(/** @type {Kf | vh | xh | Th} */ r, i, _) {
-    /** @type {Kf | vh | xh | Th} */ let c = B_(
+  /** @returns {InstanceType<typeof ed>} */ function Ni(/** @type {ed | Sh | wh | kh} */ r, i, _) {
+    /** @type {ed | Sh | wh | kh} */ let c = B_(
       s().parenthesizeLeftSideOfAccess(r, !1),
       void 0,
       Ie(i),
@@ -20369,14 +20356,14 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
     return (tv(c.expression) && (c.transformFlags |= 8388608), c);
   }
   function da(r, i, _, c) {
-    return jd(r)
+    return Ud(r)
       ? q_(r, i, r.questionDotToken, _, c)
       : r.expression !== i || r.typeArguments !== _ || r.arguments !== c
         ? J(Ni(i, _, c), r)
         : r;
   }
-  /** @returns {Kf} */ function os(/** @type {Kf | vh | xh | Th | undefined} */ r, /** @type {Kf | vh | xh | Th | undefined} */ i, _, c) {
-    /** @type {Kf | vh | xh | Th} */ let d = B_(
+  /** @returns {ed} */ function os(/** @type {ed | Sh | wh | kh | undefined} */ r, /** @type {ed | Sh | wh | kh | undefined} */ i, _, c) {
+    /** @type {ed | Sh | wh | kh} */ let d = B_(
       s().parenthesizeLeftSideOfAccess(r, !0),
       i,
       Ie(_),
@@ -20392,8 +20379,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
         : r
     );
   }
-  /** @returns {Kf} */ function Tn(/** @type {Kf | vh | xh | Th} */ r, i, _) {
-    /** @type {Kf | vh | xh | Th} */ let c = ae(215);
+  /** @returns {ed} */ function Tn(/** @type {ed | Sh | wh | kh} */ r, i, _) {
+    /** @type {ed | Sh | wh | kh} */ let c = ae(215);
     return (
       (c.expression = s().parenthesizeExpressionOfNew(r)),
       (c.typeArguments = Ie(i)),
@@ -20406,8 +20393,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function cs(r, i, _, c) {
     return r.expression !== i || r.typeArguments !== _ || r.arguments !== c ? J(Tn(i, _, c), r) : r;
   }
-  /** @returns {Kf} */ function ma(/** @type {Kf | vh | xh | Th} */ r, i, /** @type {Kf | vh | xh | Th | undefined} */ _) {
-    /** @type {Kf | vh | xh | Th} */ let c = I(216);
+  /** @returns {ed} */ function ma(/** @type {ed | Sh | wh | kh} */ r, i, /** @type {ed | Sh | wh | kh | undefined} */ _) {
+    /** @type {ed | Sh | wh | kh} */ let c = O(216);
     return (
       (c.tag = s().parenthesizeLeftSideOfAccess(r, !1)),
       (c.typeArguments = Ie(i)),
@@ -20421,8 +20408,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function F_(r, i, _, c) {
     return r.tag !== i || r.typeArguments !== _ || r.template !== c ? J(ma(i, _, c), r) : r;
   }
-  /** @returns {Kf} */ function z_(/** @type {Kf | vh | xh | Th} */ r, /** @type {Kf | vh | xh | Th | undefined} */ i) {
-    /** @type {Kf | vh | xh | Th} */ let _ = I(217);
+  /** @returns {ed} */ function z_(/** @type {ed | Sh | wh | kh} */ r, /** @type {ed | Sh | wh | kh | undefined} */ i) {
+    /** @type {ed | Sh | wh | kh} */ let _ = O(217);
     return (
       (_.expression = s().parenthesizeOperandOfPrefixUnary(i)),
       (_.type = r),
@@ -20433,15 +20420,15 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function V_(r, i, _) {
     return r.type !== i || r.expression !== _ ? J(z_(i, _), r) : r;
   }
-  /** @returns {Kf} */ function ls(/** @type {Kf | vh | xh | Th} */ r) {
-    /** @type {Kf | vh | xh | Th} */ let i = I(218);
+  /** @returns {ed} */ function ls(/** @type {ed | Sh | wh | kh} */ r) {
+    /** @type {ed | Sh | wh | kh} */ let i = O(218);
     return ((i.expression = r), (i.transformFlags = z(i.expression)), (i.jsDoc = void 0), i);
   }
   function W_(r, i) {
     return r.expression !== i ? J(ls(i), r) : r;
   }
-  /** @returns {Kf} */ function us(r, /** @type {Kf | vh | xh | Th | undefined} */ i, /** @type {Kf | vh | xh | Th | undefined} */ _, c, d, /** @type {Kf | vh | xh | Th | undefined} */ T, /** @type {Kf | vh | xh | Th | undefined} */ F) {
-    /** @type {Kf | vh | xh | Th} */ let fe = ae(219);
+  /** @returns {ed} */ function us(r, /** @type {ed | Sh | wh | kh | undefined} */ i, /** @type {ed | Sh | wh | kh | undefined} */ _, c, d, /** @type {ed | Sh | wh | kh | undefined} */ T, /** @type {ed | Sh | wh | kh | undefined} */ F) {
+    /** @type {ed | Sh | wh | kh} */ let fe = ae(219);
     ((fe.modifiers = Ie(r)),
       (fe.asteriskToken = i),
       (fe.name = nt(_)),
@@ -20449,14 +20436,14 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       (fe.parameters = me(d)),
       (fe.type = T),
       (fe.body = F));
-    let We = Un(fe.modifiers) & 1024,
+    let We = Bn(fe.modifiers) & 1024,
       Mt = !!fe.asteriskToken,
       hr = We && Mt;
     return (
       (fe.transformFlags =
         Ce(fe.modifiers) |
         z(fe.asteriskToken) |
-        Rn(fe.name) |
+        Un(fe.name) |
         Ce(fe.typeParameters) |
         Ce(fe.parameters) |
         z(fe.type) |
@@ -20485,15 +20472,15 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       ? Le(us(i, _, c, d, T, F, fe), r)
       : r;
   }
-  /** @returns {Kf} */ function ps(r, i, _, /** @type {Kf | vh | xh | Th | undefined} */ c, /** @type {Kf | vh | xh | Th | undefined} */ d, /** @type {Kf | vh | xh | Th | undefined} */ T) {
-    /** @type {Kf | vh | xh | Th} */ let F = ae(220);
+  /** @returns {ed} */ function ps(r, i, _, /** @type {ed | Sh | wh | kh | undefined} */ c, /** @type {ed | Sh | wh | kh | undefined} */ d, /** @type {ed | Sh | wh | kh | undefined} */ T) {
+    /** @type {ed | Sh | wh | kh} */ let F = ae(220);
     ((F.modifiers = Ie(r)),
       (F.typeParameters = Ie(i)),
       (F.parameters = me(_)),
       (F.type = c),
       (F.equalsGreaterThanToken = d ?? ct(39)),
       (F.body = s().parenthesizeConciseBodyOfArrowFunction(T)));
-    let fe = Un(F.modifiers) & 1024;
+    let fe = Bn(F.modifiers) & 1024;
     return (
       (F.transformFlags =
         Ce(F.modifiers) |
@@ -20525,67 +20512,67 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       ? Le(ps(i, _, c, d, T, F), r)
       : r;
   }
-  /** @returns {Kf} */ function H_(/** @type {Kf | vh | xh | Th} */ r) {
-    /** @type {Kf | vh | xh | Th} */ let i = I(221);
+  /** @returns {ed} */ function H_(/** @type {ed | Sh | wh | kh} */ r) {
+    /** @type {ed | Sh | wh | kh} */ let i = O(221);
     return ((i.expression = s().parenthesizeOperandOfPrefixUnary(r)), (i.transformFlags |= z(i.expression)), i);
   }
   function X_(r, i) {
     return r.expression !== i ? J(H_(i), r) : r;
   }
-  /** @returns {InstanceType<typeof Kf>} */ function ha(/** @type {Kf | vh | xh | Th} */ r) {
-    /** @type {Kf | vh | xh | Th} */ let i = I(222);
+  /** @returns {InstanceType<typeof ed>} */ function ha(/** @type {ed | Sh | wh | kh} */ r) {
+    /** @type {ed | Sh | wh | kh} */ let i = O(222);
     return ((i.expression = s().parenthesizeOperandOfPrefixUnary(r)), (i.transformFlags |= z(i.expression)), i);
   }
   function dn(r, i) {
     return r.expression !== i ? J(ha(i), r) : r;
   }
-  /** @returns {InstanceType<typeof Kf>} */ function fs(/** @type {Kf | vh | xh | Th} */ r) {
-    /** @type {Kf | vh | xh | Th} */ let i = I(223);
+  /** @returns {InstanceType<typeof ed>} */ function fs(/** @type {ed | Sh | wh | kh} */ r) {
+    /** @type {ed | Sh | wh | kh} */ let i = O(223);
     return ((i.expression = s().parenthesizeOperandOfPrefixUnary(r)), (i.transformFlags |= z(i.expression)), i);
   }
   function fr(r, i) {
     return r.expression !== i ? J(fs(i), r) : r;
   }
-  /** @returns {Kf} */ function $_(/** @type {Kf | vh | xh | Th} */ r) {
-    /** @type {Kf | vh | xh | Th} */ let i = I(224);
+  /** @returns {ed} */ function $_(/** @type {ed | Sh | wh | kh} */ r) {
+    /** @type {ed | Sh | wh | kh} */ let i = O(224);
     return (
       (i.expression = s().parenthesizeOperandOfPrefixUnary(r)),
       (i.transformFlags |= z(i.expression) | 256 | 128 | 2097152),
       i
     );
   }
-  function Fr(r, i) {
+  function zr(r, i) {
     return r.expression !== i ? J($_(i), r) : r;
   }
-  /** @returns {Kf} */ function zr(r, /** @type {Kf | vh | xh | Th | undefined} */ i) {
-    /** @type {Kf | vh | xh | Th} */ let _ = I(225);
+  /** @returns {ed} */ function Vr(r, /** @type {ed | Sh | wh | kh | undefined} */ i) {
+    /** @type {ed | Sh | wh | kh} */ let _ = O(225);
     return (
       (_.operator = r),
       (_.operand = s().parenthesizeOperandOfPrefixUnary(i)),
       (_.transformFlags |= z(_.operand)),
-      (r === 46 || r === 47) && et(_.operand) && !za(_.operand) && !em(_.operand) && (_.transformFlags |= 268435456),
+      (r === 46 || r === 47) && et(_.operand) && !Fa(_.operand) && !rm(_.operand) && (_.transformFlags |= 268435456),
       _
     );
   }
-  function tu(r, i) {
-    return r.operand !== i ? J(zr(r.operator, i), r) : r;
+  function ru(r, i) {
+    return r.operand !== i ? J(Vr(r.operator, i), r) : r;
   }
-  /** @returns {Kf} */ function ri(/** @type {Kf | vh | xh | Th} */ r, i) {
-    /** @type {Kf | vh | xh | Th} */ let _ = I(226);
+  /** @returns {ed} */ function ri(/** @type {ed | Sh | wh | kh} */ r, i) {
+    /** @type {ed | Sh | wh | kh} */ let _ = O(226);
     return (
       (_.operator = i),
       (_.operand = s().parenthesizeOperandOfPostfixUnary(r)),
       (_.transformFlags |= z(_.operand)),
-      et(_.operand) && !za(_.operand) && !em(_.operand) && (_.transformFlags |= 268435456),
+      et(_.operand) && !Fa(_.operand) && !rm(_.operand) && (_.transformFlags |= 268435456),
       _
     );
   }
-  function nu(r, i) {
+  function iu(r, i) {
     return r.operand !== i ? J(ri(i, r.operator), r) : r;
   }
-  /** @returns {Kf} */ function ya(/** @type {Kf | vh | xh | Th} */ r, /** @type {Kf | vh | xh | Th | undefined} */ i, /** @type {Kf | vh | xh | Th | undefined} */ _) {
+  /** @returns {ed} */ function ya(/** @type {ed | Sh | wh | kh} */ r, /** @type {ed | Sh | wh | kh | undefined} */ i, /** @type {ed | Sh | wh | kh | undefined} */ _) {
     let c = ae(227),
-      d = vp(i),
+      d = Tp(i),
       T = d.kind;
     return (
       (c.left = s().parenthesizeLeftSideOfBinary(T, r)),
@@ -20595,9 +20582,9 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       T === 61
         ? (c.transformFlags |= 32)
         : T === 64
-          ? Rf(c.left)
+          ? Bf(c.left)
             ? (c.transformFlags |= 5248 | Q_(c.left))
-            : Y1(c.left) && (c.transformFlags |= 5120 | Q_(c.left))
+            : $1(c.left) && (c.transformFlags |= 5120 | Q_(c.left))
           : T === 43 || T === 68
             ? (c.transformFlags |= 512)
             : lb(T) && (c.transformFlags |= 16),
@@ -20606,14 +20593,14 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       c
     );
   }
-  /** @returns {number} */ function Q_(/** @type {Kf | vh | xh | Th | undefined} */ r) {
-    return fh(r) ? 65536 : 0;
+  /** @returns {number} */ function Q_(/** @type {ed | Sh | wh | kh | undefined} */ r) {
+    return hh(r) ? 65536 : 0;
   }
-  function ru(r, i, _, c) {
+  function au(r, i, _, c) {
     return r.left !== i || r.operatorToken !== _ || r.right !== c ? J(ya(i, _, c), r) : r;
   }
-  /** @returns {Kf} */ function K_(/** @type {Kf | vh | xh | Th | undefined} */ r, /** @type {Kf | vh | xh | Th | undefined} */ i, /** @type {Kf | vh | xh | Th | undefined} */ _, /** @type {Kf | vh | xh | Th | undefined} */ c, /** @type {Kf | vh | xh | Th | undefined} */ d) {
-    /** @type {Kf | vh | xh | Th} */ let T = I(228);
+  /** @returns {ed} */ function K_(/** @type {ed | Sh | wh | kh | undefined} */ r, /** @type {ed | Sh | wh | kh | undefined} */ i, /** @type {ed | Sh | wh | kh | undefined} */ _, /** @type {ed | Sh | wh | kh | undefined} */ c, /** @type {ed | Sh | wh | kh | undefined} */ d) {
+    /** @type {ed | Sh | wh | kh} */ let T = O(228);
     return (
       (T.condition = s().parenthesizeConditionOfConditionalExpression(r)),
       (T.questionToken = i ?? ct(58)),
@@ -20631,11 +20618,11 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       ? J(K_(i, _, c, d, T), r)
       : r;
   }
-  /** @returns {Kf} */ function eo(/** @type {Kf | vh | xh | Th} */ r, i) {
-    /** @type {Kf | vh | xh | Th} */ let _ = I(229);
+  /** @returns {ed} */ function eo(/** @type {ed | Sh | wh | kh} */ r, i) {
+    /** @type {ed | Sh | wh | kh} */ let _ = O(229);
     return ((_.head = r), (_.templateSpans = me(i)), (_.transformFlags |= z(_.head) | Ce(_.templateSpans) | 1024), _);
   }
-  function $n(r, i, _) {
+  function Qn(r, i, _) {
     return r.head !== i || r.templateSpans !== _ ? J(eo(i, _), r) : r;
   }
   function Ii(r, i, _, c = 0) {
@@ -20657,16 +20644,16 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
     let i = 1024;
     return (r && (i |= 128), i);
   }
-  /** @returns {InstanceType<typeof vh>} */ function iu(/** @type {number} */ r, /** @type {string | undefined} */ i, /** @type {string | undefined} */ _, /** @type {number | undefined} */ c) {
-    /** @type {Kf | vh | xh | Th} */ let d = Zt(r);
+  /** @returns {InstanceType<typeof Sh>} */ function su(/** @type {number} */ r, /** @type {string | undefined} */ i, /** @type {string | undefined} */ _, /** @type {number | undefined} */ c) {
+    /** @type {ed | Sh | wh | kh} */ let d = Zt(r);
     return ((d.text = i), (d.rawText = _), (d.templateFlags = c & 7176), (d.transformFlags = to(d.templateFlags)), d);
   }
-  /** @returns {InstanceType<typeof Kf>} */ function ii(/** @type {number} */ r, /** @type {string | undefined} */ i, /** @type {string | undefined} */ _, c) {
-    /** @type {Kf | vh | xh | Th} */ let d = ae(r);
+  /** @returns {InstanceType<typeof ed>} */ function ii(/** @type {number} */ r, /** @type {string | undefined} */ i, /** @type {string | undefined} */ _, c) {
+    /** @type {ed | Sh | wh | kh} */ let d = ae(r);
     return ((d.text = i), (d.rawText = _), (d.templateFlags = c & 7176), (d.transformFlags = to(d.templateFlags)), d);
   }
-  /** @returns {Kf | xh | vh | Th} */ function ai(r, /** @type {string | undefined} */ i, /** @type {string | undefined} */ _, /** @type {number | undefined} */ c) {
-    return r === 15 ? ii(r, i, _, c) : iu(r, i, _, c);
+  /** @returns {ed | wh | Sh | kh} */ function ai(r, /** @type {string | undefined} */ i, /** @type {string | undefined} */ _, /** @type {number | undefined} */ c) {
+    return r === 15 ? ii(r, i, _, c) : su(r, i, _, c);
   }
   function no(r, i, _) {
     return ((r = Ii(16, r, i, _)), ai(16, r, i, _));
@@ -20677,12 +20664,12 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function ds(r, i, _) {
     return ((r = Ii(16, r, i, _)), ai(18, r, i, _));
   }
-  function au(r, i, _) {
+  function _u(r, i, _) {
     return ((r = Ii(16, r, i, _)), ii(15, r, i, _));
   }
-  /** @returns {InstanceType<typeof Kf>} */ function ms(/** @type {Kf | xh | vh | Th | undefined} */ r, /** @type {Kf | vh | xh | Th | undefined} */ i) {
+  /** @returns {InstanceType<typeof ed>} */ function ms(/** @type {ed | wh | Sh | kh | undefined} */ r, /** @type {ed | Sh | wh | kh | undefined} */ i) {
     q.assert(!r || !!i, "A `YieldExpression` with an asteriskToken must have an expression.");
-    /** @type {Kf | vh | xh | Th} */ let _ = I(230);
+    /** @type {ed | Sh | wh | kh} */ let _ = O(230);
     return (
       (_.expression = i && s().parenthesizeExpressionForDisallowedComma(i)),
       (_.asteriskToken = r),
@@ -20690,22 +20677,22 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       _
     );
   }
-  function su(r, i, _) {
+  function ou(r, i, _) {
     return r.expression !== _ || r.asteriskToken !== i ? J(ms(i, _), r) : r;
   }
-  /** @returns {Kf} */ function ro(/** @type {Kf | vh | xh | Th | undefined} */ r) {
-    /** @type {Kf | vh | xh | Th} */ let i = I(231);
+  /** @returns {ed} */ function ro(/** @type {ed | Sh | wh | kh | undefined} */ r) {
+    /** @type {ed | Sh | wh | kh} */ let i = O(231);
     return (
       (i.expression = s().parenthesizeExpressionForDisallowedComma(r)),
       (i.transformFlags |= z(i.expression) | 1024 | 32768),
       i
     );
   }
-  function _u(r, i) {
+  function cu(r, i) {
     return r.expression !== i ? J(ro(i), r) : r;
   }
-  /** @returns {Kf} */ function io(r, /** @type {Kf | vh | xh | Th | undefined} */ i, _, c, d) {
-    /** @type {Kf | vh | xh | Th} */ let T = ae(232);
+  /** @returns {ed} */ function io(r, /** @type {ed | Sh | wh | kh | undefined} */ i, _, c, d) {
+    /** @type {ed | Sh | wh | kh} */ let T = ae(232);
     return (
       (T.modifiers = Ie(r)),
       (T.name = nt(i)),
@@ -20714,7 +20701,7 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       (T.members = me(d)),
       (T.transformFlags |=
         Ce(T.modifiers) |
-        Rn(T.name) |
+        Un(T.name) |
         Ce(T.typeParameters) |
         Ce(T.heritageClauses) |
         Ce(T.members) |
@@ -20729,11 +20716,11 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       ? J(io(i, _, c, d, T), r)
       : r;
   }
-  /** @returns {Kf} */ function ys() {
-    return I(233);
+  /** @returns {ed} */ function ys() {
+    return O(233);
   }
-  /** @returns {Kf} */ function ao(/** @type {Kf | vh | xh | Th | undefined} */ r, i) {
-    /** @type {Kf | vh | xh | Th} */ let _ = I(234);
+  /** @returns {ed} */ function ao(/** @type {ed | Sh | wh | kh | undefined} */ r, i) {
+    /** @type {ed | Sh | wh | kh} */ let _ = O(234);
     return (
       (_.expression = s().parenthesizeLeftSideOfAccess(r, !1)),
       (_.typeArguments = i && s().parenthesizeTypeArguments(i)),
@@ -20744,29 +20731,29 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function so(r, i, _) {
     return r.expression !== i || r.typeArguments !== _ ? J(ao(i, _), r) : r;
   }
-  /** @returns {Kf} */ function mn(/** @type {Kf | vh | xh | Th | undefined} */ r, /** @type {Kf | vh | xh | Th | undefined} */ i) {
-    /** @type {Kf | vh | xh | Th} */ let _ = I(235);
+  /** @returns {ed} */ function mn(/** @type {ed | Sh | wh | kh | undefined} */ r, /** @type {ed | Sh | wh | kh | undefined} */ i) {
+    /** @type {ed | Sh | wh | kh} */ let _ = O(235);
     return ((_.expression = r), (_.type = i), (_.transformFlags |= z(_.expression) | z(_.type) | 1), _);
   }
   function ba(r, i, _) {
     return r.expression !== i || r.type !== _ ? J(mn(i, _), r) : r;
   }
-  /** @returns {Kf} */ function _o(/** @type {Kf | vh | xh | Th} */ r) {
-    /** @type {Kf | vh | xh | Th} */ let i = I(236);
+  /** @returns {ed} */ function _o(/** @type {ed | Sh | wh | kh} */ r) {
+    /** @type {ed | Sh | wh | kh} */ let i = O(236);
     return ((i.expression = s().parenthesizeLeftSideOfAccess(r, !1)), (i.transformFlags |= z(i.expression) | 1), i);
   }
   function oo(r, i) {
-    return $g(r) ? Ln(r, i) : r.expression !== i ? J(_o(i), r) : r;
+    return $g(r) ? jn(r, i) : r.expression !== i ? J(_o(i), r) : r;
   }
-  /** @returns {Kf} */ function gs(/** @type {Kf | vh | xh | Th} */ r, /** @type {Kf | vh | xh | Th | undefined} */ i) {
-    /** @type {Kf | vh | xh | Th} */ let _ = I(239);
+  /** @returns {ed} */ function gs(/** @type {ed | Sh | wh | kh} */ r, /** @type {ed | Sh | wh | kh | undefined} */ i) {
+    /** @type {ed | Sh | wh | kh} */ let _ = O(239);
     return ((_.expression = r), (_.type = i), (_.transformFlags |= z(_.expression) | z(_.type) | 1), _);
   }
   function co(r, i, _) {
     return r.expression !== i || r.type !== _ ? J(gs(i, _), r) : r;
   }
   function bs(r) {
-    let i = I(236);
+    let i = O(236);
     return (
       (i.flags |= 64),
       (i.expression = s().parenthesizeLeftSideOfAccess(r, !0)),
@@ -20774,7 +20761,7 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       i
     );
   }
-  function Ln(r, i) {
+  function jn(r, i) {
     return (
       q.assert(
         !!(r.flags & 64),
@@ -20783,8 +20770,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       r.expression !== i ? J(bs(i), r) : r
     );
   }
-  function lo(r, /** @type {Kf | vh | xh | Th} */ i) {
-    /** @type {Kf | vh | xh | Th} */ let _ = I(237);
+  function lo(r, /** @type {ed | Sh | wh | kh} */ i) {
+    /** @type {ed | Sh | wh | kh} */ let _ = O(237);
     switch (((_.keywordToken = r), (_.name = i), (_.transformFlags |= z(_.name)), r)) {
       case 105:
         _.transformFlags |= 1024;
@@ -20800,19 +20787,19 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function vs(r, i) {
     return r.name !== i ? J(lo(r.keywordToken, i), r) : r;
   }
-  /** @returns {Kf} */ function Qn(/** @type {Kf | vh | xh | Th} */ r, /** @type {Kf | vh | xh | Th | undefined} */ i) {
-    /** @type {Kf | vh | xh | Th} */ let _ = I(240);
+  /** @returns {ed} */ function Kn(/** @type {ed | Sh | wh | kh} */ r, /** @type {ed | Sh | wh | kh | undefined} */ i) {
+    /** @type {ed | Sh | wh | kh} */ let _ = O(240);
     return ((_.expression = r), (_.literal = i), (_.transformFlags |= z(_.expression) | z(_.literal) | 1024), _);
   }
   function va(r, i, _) {
-    return r.expression !== i || r.literal !== _ ? J(Qn(i, _), r) : r;
+    return r.expression !== i || r.literal !== _ ? J(Kn(i, _), r) : r;
   }
   function uo() {
-    let r = I(241);
+    let r = O(241);
     return ((r.transformFlags |= 1024), r);
   }
-  /** @returns {Kf} */ function Vr(r, i) {
-    /** @type {Kf | vh | xh | Th} */ let _ = I(242);
+  /** @returns {ed} */ function Wr(r, i) {
+    /** @type {ed | Sh | wh | kh} */ let _ = O(242);
     return (
       (_.statements = me(r)),
       (_.multiLine = i),
@@ -20823,16 +20810,16 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       _
     );
   }
-  function ou(r, i) {
-    return r.statements !== i ? J(Vr(i, r.multiLine), r) : r;
+  function lu(r, i) {
+    return r.statements !== i ? J(Wr(i, r.multiLine), r) : r;
   }
-  /** @returns {Kf} */ function xs(r, /** @type {Kf | vh | xh | Th} */ i) {
-    /** @type {Kf | vh | xh | Th} */ let _ = I(244);
+  /** @returns {ed} */ function xs(r, /** @type {ed | Sh | wh | kh} */ i) {
+    /** @type {ed | Sh | wh | kh} */ let _ = O(244);
     return (
       (_.modifiers = Ie(r)),
-      (_.declarationList = Kr(i) ? As(i) : i),
+      (_.declarationList = Zr(i) ? As(i) : i),
       (_.transformFlags |= Ce(_.modifiers) | z(_.declarationList)),
-      Un(_.modifiers) & 128 && (_.transformFlags = 1),
+      Bn(_.modifiers) & 128 && (_.transformFlags = 1),
       (_.jsDoc = void 0),
       (_.flowNode = void 0),
       _
@@ -20841,12 +20828,12 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function po(r, i, _) {
     return r.modifiers !== i || r.declarationList !== _ ? J(xs(i, _), r) : r;
   }
-  /** @returns {Kf} */ function fo() {
-    /** @type {Kf | vh | xh | Th} */ let r = I(243);
+  /** @returns {ed} */ function fo() {
+    /** @type {ed | Sh | wh | kh} */ let r = O(243);
     return ((r.jsDoc = void 0), r);
   }
-  /** @returns {Kf} */ function Oi(/** @type {Kf | vh | xh | Th} */ r) {
-    /** @type {Kf | vh | xh | Th} */ let i = I(245);
+  /** @returns {ed} */ function Oi(/** @type {ed | Sh | wh | kh} */ r) {
+    /** @type {ed | Sh | wh | kh} */ let i = O(245);
     return (
       (i.expression = s().parenthesizeExpressionOfExpressionStatement(r)),
       (i.transformFlags |= z(i.expression)),
@@ -20858,12 +20845,12 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function mo(r, i) {
     return r.expression !== i ? J(Oi(i), r) : r;
   }
-  /** @returns {Kf} */ function ho(/** @type {Kf | vh | xh | Th} */ r, /** @type {Kf | vh | xh | Th} */ i, /** @type {Kf | vh | xh | Th | undefined} */ _) {
-    /** @type {Kf | vh | xh | Th} */ let c = I(246);
+  /** @returns {ed} */ function ho(/** @type {ed | Sh | wh | kh} */ r, /** @type {ed | Sh | wh | kh} */ i, /** @type {ed | Sh | wh | kh | undefined} */ _) {
+    /** @type {ed | Sh | wh | kh} */ let c = O(246);
     return (
       (c.expression = r),
-      (c.thenStatement = Kn(i)),
-      (c.elseStatement = Kn(_)),
+      (c.thenStatement = Zn(i)),
+      (c.elseStatement = Zn(_)),
       (c.transformFlags |= z(c.expression) | z(c.thenStatement) | z(c.elseStatement)),
       (c.jsDoc = void 0),
       (c.flowNode = void 0),
@@ -20873,10 +20860,10 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function yo(r, i, _, c) {
     return r.expression !== i || r.thenStatement !== _ || r.elseStatement !== c ? J(ho(i, _, c), r) : r;
   }
-  /** @returns {Kf} */ function go(/** @type {Kf | vh | xh | Th | undefined} */ r, /** @type {Kf | vh | xh | Th | undefined} */ i) {
-    /** @type {Kf | vh | xh | Th} */ let _ = I(247);
+  /** @returns {ed} */ function go(/** @type {ed | Sh | wh | kh | undefined} */ r, /** @type {ed | Sh | wh | kh | undefined} */ i) {
+    /** @type {ed | Sh | wh | kh} */ let _ = O(247);
     return (
-      (_.statement = Kn(r)),
+      (_.statement = Zn(r)),
       (_.expression = i),
       (_.transformFlags |= z(_.statement) | z(_.expression)),
       (_.jsDoc = void 0),
@@ -20887,27 +20874,27 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function bo(r, i, _) {
     return r.statement !== i || r.expression !== _ ? J(go(i, _), r) : r;
   }
-  /** @returns {Kf} */ function vo(/** @type {Kf | vh | xh | Th} */ r, /** @type {Kf | vh | xh | Th} */ i) {
-    /** @type {Kf | vh | xh | Th} */ let _ = I(248);
+  /** @returns {ed} */ function vo(/** @type {ed | Sh | wh | kh} */ r, /** @type {ed | Sh | wh | kh} */ i) {
+    /** @type {ed | Sh | wh | kh} */ let _ = O(248);
     return (
       (_.expression = r),
-      (_.statement = Kn(i)),
+      (_.statement = Zn(i)),
       (_.transformFlags |= z(_.expression) | z(_.statement)),
       (_.jsDoc = void 0),
       (_.flowNode = void 0),
       _
     );
   }
-  function cu(r, i, _) {
+  function uu(r, i, _) {
     return r.expression !== i || r.statement !== _ ? J(vo(i, _), r) : r;
   }
-  /** @returns {Kf} */ function xo(/** @type {Kf | vh | xh | Th | undefined} */ r, /** @type {Kf | vh | xh | Th | undefined} */ i, /** @type {Kf | vh | xh | Th | undefined} */ _, /** @type {Kf | vh | xh | Th | undefined} */ c) {
-    /** @type {Kf | vh | xh | Th} */ let d = I(249);
+  /** @returns {ed} */ function xo(/** @type {ed | Sh | wh | kh | undefined} */ r, /** @type {ed | Sh | wh | kh | undefined} */ i, /** @type {ed | Sh | wh | kh | undefined} */ _, /** @type {ed | Sh | wh | kh | undefined} */ c) {
+    /** @type {ed | Sh | wh | kh} */ let d = O(249);
     return (
       (d.initializer = r),
       (d.condition = i),
       (d.incrementor = _),
-      (d.statement = Kn(c)),
+      (d.statement = Zn(c)),
       (d.transformFlags |= z(d.initializer) | z(d.condition) | z(d.incrementor) | z(d.statement)),
       (d.jsDoc = void 0),
       (d.locals = void 0),
@@ -20921,12 +20908,12 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       ? J(xo(i, _, c, d), r)
       : r;
   }
-  /** @returns {Kf} */ function Ts(/** @type {Kf | vh | xh | Th | undefined} */ r, /** @type {Kf | vh | xh | Th | undefined} */ i, /** @type {Kf | vh | xh | Th | undefined} */ _) {
-    /** @type {Kf | vh | xh | Th} */ let c = I(250);
+  /** @returns {ed} */ function Ts(/** @type {ed | Sh | wh | kh | undefined} */ r, /** @type {ed | Sh | wh | kh | undefined} */ i, /** @type {ed | Sh | wh | kh | undefined} */ _) {
+    /** @type {ed | Sh | wh | kh} */ let c = O(250);
     return (
       (c.initializer = r),
       (c.expression = i),
-      (c.statement = Kn(_)),
+      (c.statement = Zn(_)),
       (c.transformFlags |= z(c.initializer) | z(c.expression) | z(c.statement)),
       (c.jsDoc = void 0),
       (c.locals = void 0),
@@ -20935,16 +20922,16 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       c
     );
   }
-  function lu(r, i, _, c) {
+  function pu(r, i, _, c) {
     return r.initializer !== i || r.expression !== _ || r.statement !== c ? J(Ts(i, _, c), r) : r;
   }
-  /** @returns {Kf} */ function So(/** @type {Kf | vh | xh | Th | undefined} */ r, /** @type {Kf | vh | xh | Th} */ i, /** @type {Kf | vh | xh | Th} */ _, /** @type {Kf | vh | xh | Th} */ c) {
-    /** @type {Kf | vh | xh | Th} */ let d = I(251);
+  /** @returns {ed} */ function So(/** @type {ed | Sh | wh | kh | undefined} */ r, /** @type {ed | Sh | wh | kh} */ i, /** @type {ed | Sh | wh | kh} */ _, /** @type {ed | Sh | wh | kh} */ c) {
+    /** @type {ed | Sh | wh | kh} */ let d = O(251);
     return (
       (d.awaitModifier = r),
       (d.initializer = i),
       (d.expression = s().parenthesizeExpressionForDisallowedComma(_)),
-      (d.statement = Kn(c)),
+      (d.statement = Zn(c)),
       (d.transformFlags |= z(d.awaitModifier) | z(d.initializer) | z(d.expression) | z(d.statement) | 1024),
       r && (d.transformFlags |= 128),
       (d.jsDoc = void 0),
@@ -20954,13 +20941,13 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       d
     );
   }
-  function uu(r, i, _, c, d) {
+  function fu(r, i, _, c, d) {
     return r.awaitModifier !== i || r.initializer !== _ || r.expression !== c || r.statement !== d
       ? J(So(i, _, c, d), r)
       : r;
   }
-  /** @returns {Kf} */ function wo(/** @type {Kf | xh | vh | Th | undefined} */ r) {
-    /** @type {Kf | vh | xh | Th} */ let i = I(252);
+  /** @returns {ed} */ function wo(/** @type {ed | wh | Sh | kh | undefined} */ r) {
+    /** @type {ed | Sh | wh | kh} */ let i = O(252);
     return (
       (i.label = nt(r)),
       (i.transformFlags |= z(i.label) | 4194304),
@@ -20969,11 +20956,11 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       i
     );
   }
-  function pu(r, i) {
+  function du(r, i) {
     return r.label !== i ? J(wo(i), r) : r;
   }
-  /** @returns {InstanceType<typeof Kf>} */ function Ss(/** @type {Kf | xh | vh | Th | undefined} */ r) {
-    /** @type {Kf | vh | xh | Th} */ let i = I(253);
+  /** @returns {InstanceType<typeof ed>} */ function Ss(/** @type {ed | wh | Sh | kh | undefined} */ r) {
+    /** @type {ed | Sh | wh | kh} */ let i = O(253);
     return (
       (i.label = nt(r)),
       (i.transformFlags |= z(i.label) | 4194304),
@@ -20985,8 +20972,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function ko(r, i) {
     return r.label !== i ? J(Ss(i), r) : r;
   }
-  /** @returns {Kf} */ function ws(/** @type {Kf | vh | xh | Th | undefined} */ r) {
-    /** @type {Kf | vh | xh | Th} */ let i = I(254);
+  /** @returns {ed} */ function ws(/** @type {ed | Sh | wh | kh | undefined} */ r) {
+    /** @type {ed | Sh | wh | kh} */ let i = O(254);
     return (
       (i.expression = r),
       (i.transformFlags |= z(i.expression) | 128 | 4194304),
@@ -20995,14 +20982,14 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       i
     );
   }
-  function fu(r, i) {
+  function mu(r, i) {
     return r.expression !== i ? J(ws(i), r) : r;
   }
   function ks(r, i) {
-    let _ = I(255);
+    let _ = O(255);
     return (
       (_.expression = r),
-      (_.statement = Kn(i)),
+      (_.statement = Zn(i)),
       (_.transformFlags |= z(_.expression) | z(_.statement)),
       (_.jsDoc = void 0),
       (_.flowNode = void 0),
@@ -21012,8 +20999,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function Eo(r, i, _) {
     return r.expression !== i || r.statement !== _ ? J(ks(i, _), r) : r;
   }
-  /** @returns {Kf} */ function Es(/** @type {Kf | vh | xh | Th | undefined} */ r, /** @type {Kf | vh | xh | Th | undefined} */ i) {
-    /** @type {Kf | vh | xh | Th} */ let _ = I(256);
+  /** @returns {ed} */ function Es(/** @type {ed | Sh | wh | kh | undefined} */ r, /** @type {ed | Sh | wh | kh | undefined} */ i) {
+    /** @type {ed | Sh | wh | kh} */ let _ = O(256);
     return (
       (_.expression = s().parenthesizeExpressionForDisallowedComma(r)),
       (_.caseBlock = i),
@@ -21027,11 +21014,11 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function si(r, i, _) {
     return r.expression !== i || r.caseBlock !== _ ? J(Es(i, _), r) : r;
   }
-  /** @returns {Kf} */ function Ao(/** @type {Kf | vh | xh | Th} */ r, /** @type {Kf | vh | xh | Th} */ i) {
-    /** @type {Kf | vh | xh | Th} */ let _ = I(257);
+  /** @returns {ed} */ function Ao(/** @type {ed | Sh | wh | kh} */ r, /** @type {ed | Sh | wh | kh} */ i) {
+    /** @type {ed | Sh | wh | kh} */ let _ = O(257);
     return (
       (_.label = nt(r)),
-      (_.statement = Kn(i)),
+      (_.statement = Zn(i)),
       (_.transformFlags |= z(_.label) | z(_.statement)),
       (_.jsDoc = void 0),
       (_.flowNode = void 0),
@@ -21041,15 +21028,15 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function Co(r, i, _) {
     return r.label !== i || r.statement !== _ ? J(Ao(i, _), r) : r;
   }
-  /** @returns {Kf} */ function Do(/** @type {Kf | vh | xh | Th} */ r) {
-    /** @type {Kf | vh | xh | Th} */ let i = I(258);
+  /** @returns {ed} */ function Do(/** @type {ed | Sh | wh | kh} */ r) {
+    /** @type {ed | Sh | wh | kh} */ let i = O(258);
     return ((i.expression = r), (i.transformFlags |= z(i.expression)), (i.jsDoc = void 0), (i.flowNode = void 0), i);
   }
-  function du(r, i) {
+  function hu(r, i) {
     return r.expression !== i ? J(Do(i), r) : r;
   }
-  /** @returns {Kf} */ function Po(/** @type {Kf | vh | xh | Th | undefined} */ r, /** @type {Kf | vh | xh | Th | undefined} */ i, /** @type {Kf | vh | xh | Th | undefined} */ _) {
-    /** @type {Kf | vh | xh | Th} */ let c = I(259);
+  /** @returns {ed} */ function Po(/** @type {ed | Sh | wh | kh | undefined} */ r, /** @type {ed | Sh | wh | kh | undefined} */ i, /** @type {ed | Sh | wh | kh | undefined} */ _) {
+    /** @type {ed | Sh | wh | kh} */ let c = O(259);
     return (
       (c.tryBlock = r),
       (c.catchClause = i),
@@ -21060,21 +21047,21 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       c
     );
   }
-  function mu(r, i, _, c) {
+  function yu(r, i, _, c) {
     return r.tryBlock !== i || r.catchClause !== _ || r.finallyBlock !== c ? J(Po(i, _, c), r) : r;
   }
-  /** @returns {Kf} */ function No() {
-    /** @type {Kf | vh | xh | Th} */ let r = I(260);
+  /** @returns {ed} */ function No() {
+    /** @type {ed | Sh | wh | kh} */ let r = O(260);
     return ((r.jsDoc = void 0), (r.flowNode = void 0), r);
   }
-  /** @returns {Kf} */ function xa(/** @type {Kf | vh | xh | Th} */ r, /** @type {Kf | vh | xh | Th | undefined} */ i, /** @type {Kf | vh | xh | Th | undefined} */ _, /** @type {Kf | vh | xh | Th | undefined} */ c) {
-    /** @type {Kf | vh | xh | Th} */ let d = ae(261);
+  /** @returns {ed} */ function xa(/** @type {ed | Sh | wh | kh} */ r, /** @type {ed | Sh | wh | kh | undefined} */ i, /** @type {ed | Sh | wh | kh | undefined} */ _, /** @type {ed | Sh | wh | kh | undefined} */ c) {
+    /** @type {ed | Sh | wh | kh} */ let d = ae(261);
     return (
       (d.name = nt(r)),
       (d.exclamationToken = i),
       (d.type = _),
       (d.initializer = Vi(c)),
-      (d.transformFlags |= Rn(d.name) | z(d.initializer) | ((d.exclamationToken ?? d.type) ? 1 : 0)),
+      (d.transformFlags |= Un(d.name) | z(d.initializer) | ((d.exclamationToken ?? d.type) ? 1 : 0)),
       (d.jsDoc = void 0),
       d
     );
@@ -21082,8 +21069,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function Io(r, i, _, c, d) {
     return r.name !== i || r.type !== c || r.exclamationToken !== _ || r.initializer !== d ? J(xa(i, _, c, d), r) : r;
   }
-  /** @returns {Kf} */ function As(r, i = 0) {
-    /** @type {Kf | vh | xh | Th} */ let _ = I(262);
+  /** @returns {ed} */ function As(r, i = 0) {
+    /** @type {ed | Sh | wh | kh} */ let _ = O(262);
     return (
       (_.flags |= i & 7),
       (_.declarations = me(r)),
@@ -21093,11 +21080,11 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       _
     );
   }
-  function hu(r, i) {
+  function gu(r, i) {
     return r.declarations !== i ? J(As(i, r.flags), r) : r;
   }
-  /** @returns {Kf} */ function Oo(r, /** @type {Kf | vh | xh | Th | undefined} */ i, /** @type {Kf | vh | xh | Th | undefined} */ _, c, d, /** @type {Kf | vh | xh | Th | undefined} */ T, /** @type {Kf | vh | xh | Th | undefined} */ F) {
-    /** @type {Kf | vh | xh | Th} */ let fe = ae(263);
+  /** @returns {ed} */ function Oo(r, /** @type {ed | Sh | wh | kh | undefined} */ i, /** @type {ed | Sh | wh | kh | undefined} */ _, c, d, /** @type {ed | Sh | wh | kh | undefined} */ T, /** @type {ed | Sh | wh | kh | undefined} */ F) {
+    /** @type {ed | Sh | wh | kh} */ let fe = ae(263);
     if (
       ((fe.modifiers = Ie(r)),
       (fe.asteriskToken = i),
@@ -21106,17 +21093,17 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       (fe.parameters = me(d)),
       (fe.type = T),
       (fe.body = F),
-      !fe.body || Un(fe.modifiers) & 128)
+      !fe.body || Bn(fe.modifiers) & 128)
     )
       fe.transformFlags = 1;
     else {
-      let We = Un(fe.modifiers) & 1024,
+      let We = Bn(fe.modifiers) & 1024,
         Mt = !!fe.asteriskToken,
         hr = We && Mt;
       fe.transformFlags =
         Ce(fe.modifiers) |
         z(fe.asteriskToken) |
-        Rn(fe.name) |
+        Un(fe.name) |
         Ce(fe.typeParameters) |
         Ce(fe.parameters) |
         z(fe.type) |
@@ -21143,25 +21130,25 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       r.parameters !== T ||
       r.type !== F ||
       r.body !== fe
-      ? yu(Oo(i, _, c, d, T, F, fe), r)
+      ? bu(Oo(i, _, c, d, T, F, fe), r)
       : r;
   }
-  function yu(r, i) {
+  function bu(r, i) {
     return (r !== i && r.modifiers === i.modifiers && (r.modifiers = i.modifiers), Le(r, i));
   }
-  /** @returns {Kf} */ function Mo(r, /** @type {Kf | vh | xh | Th} */ i, _, c, d) {
-    /** @type {Kf | vh | xh | Th} */ let T = ae(264);
+  /** @returns {ed} */ function Mo(r, /** @type {ed | Sh | wh | kh} */ i, _, c, d) {
+    /** @type {ed | Sh | wh | kh} */ let T = ae(264);
     return (
       (T.modifiers = Ie(r)),
       (T.name = nt(i)),
       (T.typeParameters = Ie(_)),
       (T.heritageClauses = Ie(c)),
       (T.members = me(d)),
-      Un(T.modifiers) & 128
+      Bn(T.modifiers) & 128
         ? (T.transformFlags = 1)
         : ((T.transformFlags |=
             Ce(T.modifiers) |
-            Rn(T.name) |
+            Un(T.name) |
             Ce(T.typeParameters) |
             Ce(T.heritageClauses) |
             Ce(T.members) |
@@ -21177,8 +21164,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       ? J(Mo(i, _, c, d, T), r)
       : r;
   }
-  /** @returns {Kf} */ function Lo(r, /** @type {Kf | vh | xh | Th} */ i, _, c, d) {
-    /** @type {Kf | vh | xh | Th} */ let T = ae(265);
+  /** @returns {ed} */ function Lo(r, /** @type {ed | Sh | wh | kh} */ i, _, c, d) {
+    /** @type {ed | Sh | wh | kh} */ let T = ae(265);
     return (
       (T.modifiers = Ie(r)),
       (T.name = nt(i)),
@@ -21195,8 +21182,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       ? J(Lo(i, _, c, d, T), r)
       : r;
   }
-  /** @returns {Kf} */ function ot(r, /** @type {Kf | vh | xh | Th | undefined} */ i, _, /** @type {Kf | vh | xh | Th | undefined} */ c) {
-    /** @type {Kf | vh | xh | Th} */ let d = ae(266);
+  /** @returns {ed} */ function ot(r, /** @type {ed | Sh | wh | kh | undefined} */ i, _, /** @type {ed | Sh | wh | kh | undefined} */ c) {
+    /** @type {ed | Sh | wh | kh} */ let d = ae(266);
     return (
       (d.modifiers = Ie(r)),
       (d.name = nt(i)),
@@ -21212,8 +21199,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function wr(r, i, _, c, d) {
     return r.modifiers !== i || r.name !== _ || r.typeParameters !== c || r.type !== d ? J(ot(i, _, c, d), r) : r;
   }
-  /** @returns {Kf} */ function Ds(r, /** @type {Kf | vh | xh | Th | undefined} */ i, _) {
-    /** @type {Kf | vh | xh | Th} */ let c = ae(267);
+  /** @returns {ed} */ function Ds(r, /** @type {ed | Sh | wh | kh | undefined} */ i, _) {
+    /** @type {ed | Sh | wh | kh} */ let c = ae(267);
     return (
       (c.modifiers = Ie(r)),
       (c.name = nt(i)),
@@ -21227,14 +21214,14 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function kr(r, i, _, c) {
     return r.modifiers !== i || r.name !== _ || r.members !== c ? J(Ds(i, _, c), r) : r;
   }
-  /** @returns {Kf} */ function Jo(r, /** @type {Kf | vh | xh | Th | undefined} */ i, /** @type {Kf | vh | xh | Th | undefined} */ _, c = 0) {
-    /** @type {Kf | vh | xh | Th} */ let d = ae(268);
+  /** @returns {ed} */ function Jo(r, /** @type {ed | Sh | wh | kh | undefined} */ i, /** @type {ed | Sh | wh | kh | undefined} */ _, c = 0) {
+    /** @type {ed | Sh | wh | kh} */ let d = ae(268);
     return (
       (d.modifiers = Ie(r)),
       (d.flags |= c & 2088),
       (d.name = i),
       (d.body = _),
-      Un(d.modifiers) & 128
+      Bn(d.modifiers) & 128
         ? (d.transformFlags = 1)
         : (d.transformFlags |= Ce(d.modifiers) | z(d.name) | z(d.body) | 1),
       (d.transformFlags &= -67108865),
@@ -21247,15 +21234,15 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function At(r, i, _, c) {
     return r.modifiers !== i || r.name !== _ || r.body !== c ? J(Jo(i, _, c, r.flags), r) : r;
   }
-  /** @returns {Kf} */ function Er(r) {
-    /** @type {Kf | vh | xh | Th} */ let i = I(269);
+  /** @returns {ed} */ function Er(r) {
+    /** @type {ed | Sh | wh | kh} */ let i = O(269);
     return ((i.statements = me(r)), (i.transformFlags |= Ce(i.statements)), (i.jsDoc = void 0), i);
   }
   function Vt(r, i) {
     return r.statements !== i ? J(Er(i), r) : r;
   }
-  /** @returns {Kf} */ function Ro(r) {
-    /** @type {Kf | vh | xh | Th} */ let i = I(270);
+  /** @returns {ed} */ function Ro(r) {
+    /** @type {ed | Sh | wh | kh} */ let i = O(270);
     return (
       (i.clauses = me(r)),
       (i.transformFlags |= Ce(i.clauses)),
@@ -21264,28 +21251,28 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       i
     );
   }
-  function gu(r, i) {
+  function vu(r, i) {
     return r.clauses !== i ? J(Ro(i), r) : r;
   }
   function Uo(r) {
     let i = ae(271);
-    return ((i.name = nt(r)), (i.transformFlags |= qa(i.name) | 1), (i.modifiers = void 0), (i.jsDoc = void 0), i);
+    return ((i.name = nt(r)), (i.transformFlags |= Ba(i.name) | 1), (i.modifiers = void 0), (i.jsDoc = void 0), i);
   }
   function Bo(r, i) {
-    return r.name !== i ? bu(Uo(i), r) : r;
+    return r.name !== i ? xu(Uo(i), r) : r;
   }
-  function bu(r, i) {
+  function xu(r, i) {
     return (r !== i && (r.modifiers = i.modifiers), J(r, i));
   }
-  /** @returns {Kf} */ function qo(r, i, /** @type {Kf | vh | xh | Th | undefined} */ _, /** @type {Kf | vh | xh | Th | undefined} */ c) {
-    /** @type {Kf | vh | xh | Th} */ let d = ae(272);
+  /** @returns {ed} */ function qo(r, i, /** @type {ed | Sh | wh | kh | undefined} */ _, /** @type {ed | Sh | wh | kh | undefined} */ c) {
+    /** @type {ed | Sh | wh | kh} */ let d = ae(272);
     return (
       (d.modifiers = Ie(r)),
       (d.name = nt(_)),
       (d.isTypeOnly = i),
       (d.moduleReference = c),
-      (d.transformFlags |= Ce(d.modifiers) | qa(d.name) | z(d.moduleReference)),
-      Hf(d.moduleReference) || (d.transformFlags |= 1),
+      (d.transformFlags |= Ce(d.modifiers) | Ba(d.name) | z(d.moduleReference)),
+      $f(d.moduleReference) || (d.transformFlags |= 1),
       (d.transformFlags &= -67108865),
       (d.jsDoc = void 0),
       d
@@ -21296,8 +21283,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       ? J(qo(i, _, c, d), r)
       : r;
   }
-  /** @returns {Kf} */ function zo(r, /** @type {Kf | vh | xh | Th | undefined} */ i, /** @type {Kf | vh | xh | Th | undefined} */ _, /** @type {Kf | vh | xh | Th | undefined} */ c) {
-    /** @type {Kf | vh | xh | Th} */ let d = I(273);
+  /** @returns {ed} */ function zo(r, /** @type {ed | Sh | wh | kh | undefined} */ i, /** @type {ed | Sh | wh | kh | undefined} */ _, /** @type {ed | Sh | wh | kh | undefined} */ c) {
+    /** @type {ed | Sh | wh | kh} */ let d = O(273);
     return (
       (d.modifiers = Ie(r)),
       (d.importClause = i),
@@ -21314,8 +21301,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       ? J(zo(i, _, c, d), r)
       : r;
   }
-  /** @returns {Kf} */ function Wo(r, /** @type {Kf | vh | xh | Th | undefined} */ i, /** @type {Kf | vh | xh | Th | undefined} */ _) {
-    /** @type {Kf | vh | xh | Th} */ let c = ae(274);
+  /** @returns {ed} */ function Wo(r, /** @type {ed | Sh | wh | kh | undefined} */ i, /** @type {ed | Sh | wh | kh | undefined} */ _) {
+    /** @type {ed | Sh | wh | kh} */ let c = ae(274);
     return (
       typeof r == "boolean" && (r = r ? 156 : void 0),
       (c.isTypeOnly = r === 156),
@@ -21335,63 +21322,63 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
     );
   }
   function Ps(r, i) {
-    let _ = I(301);
+    let _ = O(301);
     return ((_.elements = me(r)), (_.multiLine = i), (_.token = 132), (_.transformFlags |= 4), _);
   }
-  function vu(r, i, _) {
+  function Tu(r, i, _) {
     return r.elements !== i || r.multiLine !== _ ? J(Ps(i, _), r) : r;
   }
   function Mi(r, i) {
-    let _ = I(302);
+    let _ = O(302);
     return ((_.name = r), (_.value = i), (_.transformFlags |= 4), _);
   }
   function Yo(r, i, _) {
     return r.name !== i || r.value !== _ ? J(Mi(i, _), r) : r;
   }
   function Ns(r, i) {
-    let _ = I(303);
+    let _ = O(303);
     return ((_.assertClause = r), (_.multiLine = i), _);
   }
   function Ho(r, i, _) {
     return r.assertClause !== i || r.multiLine !== _ ? J(Ns(i, _), r) : r;
   }
-  /** @returns {Kf} */ function Xo(r, i, _) {
-    /** @type {Kf | vh | xh | Th} */ let c = I(301);
+  /** @returns {ed} */ function Xo(r, i, _) {
+    /** @type {ed | Sh | wh | kh} */ let c = O(301);
     return ((c.token = _ ?? 118), (c.elements = me(r)), (c.multiLine = i), (c.transformFlags |= 4), c);
   }
   function Is(r, i, _) {
     return r.elements !== i || r.multiLine !== _ ? J(Xo(i, _, r.token), r) : r;
   }
-  /** @returns {Kf} */ function $o(/** @type {Kf | vh | xh | Th} */ r, /** @type {Kf | vh | xh | Th} */ i) {
-    /** @type {Kf | vh | xh | Th} */ let _ = I(302);
+  /** @returns {ed} */ function $o(/** @type {ed | Sh | wh | kh} */ r, /** @type {ed | Sh | wh | kh} */ i) {
+    /** @type {ed | Sh | wh | kh} */ let _ = O(302);
     return ((_.name = r), (_.value = i), (_.transformFlags |= 4), _);
   }
   function Qo(r, i, _) {
     return r.name !== i || r.value !== _ ? J($o(i, _), r) : r;
   }
-  /** @returns {Kf} */ function Ko(/** @type {Kf | vh | xh | Th | undefined} */ r) {
-    /** @type {Kf | vh | xh | Th} */ let i = ae(275);
+  /** @returns {ed} */ function Ko(/** @type {ed | Sh | wh | kh | undefined} */ r) {
+    /** @type {ed | Sh | wh | kh} */ let i = ae(275);
     return ((i.name = r), (i.transformFlags |= z(i.name)), (i.transformFlags &= -67108865), i);
   }
-  function xu(r, i) {
+  function Su(r, i) {
     return r.name !== i ? J(Ko(i), r) : r;
   }
-  /** @returns {Kf} */ function Zo(/** @type {Kf | xh | vh | Th} */ r) {
+  /** @returns {ed} */ function Zo(/** @type {ed | wh | Sh | kh} */ r) {
     let i = ae(281);
     return ((i.name = r), (i.transformFlags |= z(i.name) | 32), (i.transformFlags &= -67108865), i);
   }
-  function Tu(r, i) {
+  function wu(r, i) {
     return r.name !== i ? J(Zo(i), r) : r;
   }
-  /** @returns {Kf} */ function ec(r) {
-    /** @type {Kf | vh | xh | Th} */ let i = I(276);
+  /** @returns {ed} */ function ec(r) {
+    /** @type {ed | Sh | wh | kh} */ let i = O(276);
     return ((i.elements = me(r)), (i.transformFlags |= Ce(i.elements)), (i.transformFlags &= -67108865), i);
   }
   function tc(r, i) {
     return r.elements !== i ? J(ec(i), r) : r;
   }
-  /** @returns {Kf} */ function Ar(r, /** @type {Kf | vh | xh | Th | undefined} */ i, /** @type {Kf | vh | xh | Th | undefined} */ _) {
-    /** @type {Kf | vh | xh | Th} */ let c = ae(277);
+  /** @returns {ed} */ function Ar(r, /** @type {ed | Sh | wh | kh | undefined} */ i, /** @type {ed | Sh | wh | kh | undefined} */ _) {
+    /** @type {ed | Sh | wh | kh} */ let c = ae(277);
     return (
       (c.isTypeOnly = r),
       (c.propertyName = i),
@@ -21401,11 +21388,11 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       c
     );
   }
-  function Su(r, i, _, c) {
+  function ku(r, i, _, c) {
     return r.isTypeOnly !== i || r.propertyName !== _ || r.name !== c ? J(Ar(i, _, c), r) : r;
   }
-  /** @returns {Kf} */ function Sa(r, i, /** @type {Kf | vh | xh | Th | undefined} */ _) {
-    /** @type {Kf | vh | xh | Th} */ let c = ae(278);
+  /** @returns {ed} */ function Sa(r, i, /** @type {ed | Sh | wh | kh | undefined} */ _) {
+    /** @type {ed | Sh | wh | kh} */ let c = ae(278);
     return (
       (c.modifiers = Ie(r)),
       (c.isExportEquals = i),
@@ -21421,8 +21408,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function Li(r, i, _) {
     return r.modifiers !== i || r.expression !== _ ? J(Sa(i, r.isExportEquals, _), r) : r;
   }
-  /** @returns {Kf} */ function wa(r, i, /** @type {Kf | vh | xh | Th | undefined} */ _, /** @type {Kf | vh | xh | Th | undefined} */ c, d) {
-    /** @type {Kf | vh | xh | Th} */ let T = ae(279);
+  /** @returns {ed} */ function wa(r, i, /** @type {ed | Sh | wh | kh | undefined} */ _, /** @type {ed | Sh | wh | kh | undefined} */ c, d) {
+    /** @type {ed | Sh | wh | kh} */ let T = ae(279);
     return (
       (T.modifiers = Ie(r)),
       (T.isTypeOnly = i),
@@ -21447,15 +21434,15 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function ji(r, i) {
     return (r !== i && r.modifiers === i.modifiers && (r.modifiers = i.modifiers), J(r, i));
   }
-  /** @returns {Kf} */ function Os(r) {
-    /** @type {Kf | vh | xh | Th} */ let i = I(280);
+  /** @returns {ed} */ function Os(r) {
+    /** @type {ed | Sh | wh | kh} */ let i = O(280);
     return ((i.elements = me(r)), (i.transformFlags |= Ce(i.elements)), (i.transformFlags &= -67108865), i);
   }
-  function wu(r, i) {
+  function Eu(r, i) {
     return r.elements !== i ? J(Os(i), r) : r;
   }
-  /** @returns {Kf} */ function ka(r, /** @type {Kf | vh | xh | Th | undefined} */ i, /** @type {Kf | vh | xh | Th | undefined} */ _) {
-    /** @type {Kf | vh | xh | Th} */ let c = I(282);
+  /** @returns {ed} */ function ka(r, /** @type {ed | Sh | wh | kh | undefined} */ i, /** @type {ed | Sh | wh | kh | undefined} */ _) {
+    /** @type {ed | Sh | wh | kh} */ let c = O(282);
     return (
       (c.isTypeOnly = r),
       (c.propertyName = nt(i)),
@@ -21466,35 +21453,35 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       c
     );
   }
-  function ku(r, i, _, c) {
+  function Au(r, i, _, c) {
     return r.isTypeOnly !== i || r.propertyName !== _ || r.name !== c ? J(ka(i, _, c), r) : r;
   }
-  /** @returns {Kf} */ function Eu() {
-    /** @type {Kf | vh | xh | Th} */ let r = ae(283);
+  /** @returns {ed} */ function Cu() {
+    /** @type {ed | Sh | wh | kh} */ let r = ae(283);
     return ((r.jsDoc = void 0), r);
   }
-  /** @returns {Kf} */ function Ms(/** @type {Kf | vh | xh | Th | undefined} */ r) {
-    /** @type {Kf | vh | xh | Th} */ let i = I(284);
+  /** @returns {ed} */ function Ms(/** @type {ed | Sh | wh | kh | undefined} */ r) {
+    /** @type {ed | Sh | wh | kh} */ let i = O(284);
     return ((i.expression = r), (i.transformFlags |= z(i.expression)), (i.transformFlags &= -67108865), i);
   }
-  function Au(r, i) {
+  function Du(r, i) {
     return r.expression !== i ? J(Ms(i), r) : r;
   }
   function rc(r) {
-    return I(r);
+    return O(r);
   }
-  /** @returns {InstanceType<typeof Kf>} */ function ic(/** @type {number} */ r, i, _ = !1) {
+  /** @returns {InstanceType<typeof ed>} */ function ic(/** @type {number} */ r, i, _ = !1) {
     let c = Ls(r, _ ? i && s().parenthesizeNonArrayTypeOfPostfixType(i) : i);
     return ((c.postfix = _), c);
   }
-  /** @returns {InstanceType<typeof Kf>} */ function Ls(r, i) {
-    let _ = I(r);
+  /** @returns {InstanceType<typeof ed>} */ function Ls(r, i) {
+    let _ = O(r);
     return ((_.type = i), _);
   }
-  function Cu(r, i, _) {
+  function Pu(r, i, _) {
     return i.type !== _ ? J(ic(r, _, i.postfix), i) : i;
   }
-  function Du(r, i, _) {
+  function Nu(r, i, _) {
     return i.type !== _ ? J(Ls(r, _), i) : i;
   }
   function ac(r, i) {
@@ -21510,18 +21497,18 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       _
     );
   }
-  function Pu(r, i, _) {
+  function Iu(r, i, _) {
     return r.parameters !== i || r.type !== _ ? J(ac(i, _), r) : r;
   }
   function sc(r, i = !1) {
     let _ = ae(323);
     return ((_.jsDocPropertyTags = Ie(r)), (_.isArrayType = i), _);
   }
-  function Nu(r, i, _) {
+  function Ou(r, i, _) {
     return r.jsDocPropertyTags !== i || r.isArrayType !== _ ? J(sc(i, _), r) : r;
   }
   function _c(r) {
-    let i = I(310);
+    let i = O(310);
     return ((i.type = r), i);
   }
   function js(r, i) {
@@ -21539,18 +21526,18 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       c
     );
   }
-  function Iu(r, i, _, c) {
+  function Mu(r, i, _, c) {
     return r.typeParameters !== i || r.parameters !== _ || r.type !== c ? J(oc(i, _, c), r) : r;
   }
   function on(r) {
     let i = dl(r.kind);
-    return r.tagName.escapedText === Ua(i) ? r.tagName : He(i);
+    return r.tagName.escapedText === Ra(i) ? r.tagName : He(i);
   }
   function Sn(r, i, _) {
-    let c = I(r);
+    let c = O(r);
     return ((c.tagName = i), (c.comment = _), c);
   }
-  function Wr(r, i, _) {
+  function Gr(r, i, _) {
     let c = ae(r);
     return ((c.tagName = i), (c.comment = _), c);
   }
@@ -21564,24 +21551,24 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       : r;
   }
   function Ea(r, i, _, c) {
-    let d = Wr(347, r ?? He("typedef"), c);
+    let d = Gr(347, r ?? He("typedef"), c);
     return (
       (d.typeExpression = i),
       (d.fullName = _),
-      (d.name = tm(_)),
+      (d.name = im(_)),
       (d.locals = void 0),
       (d.nextContainer = void 0),
       d
     );
   }
-  function Ou(r, i = on(r), _, c, d) {
+  function Lu(r, i = on(r), _, c, d) {
     return r.tagName !== i || r.typeExpression !== _ || r.fullName !== c || r.comment !== d ? J(Ea(i, _, c, d), r) : r;
   }
   function Rs(r, i, _, c, d, T) {
-    let F = Wr(342, r ?? He("param"), T);
+    let F = Gr(342, r ?? He("param"), T);
     return ((F.typeExpression = c), (F.name = i), (F.isNameFirst = !!d), (F.isBracketed = _), F);
   }
-  function Mu(r, i = on(r), _, c, d, T, F) {
+  function ju(r, i = on(r), _, c, d, T, F) {
     return r.tagName !== i ||
       r.name !== _ ||
       r.isBracketed !== c ||
@@ -21592,7 +21579,7 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       : r;
   }
   function lc(r, i, _, c, d, T) {
-    let F = Wr(349, r ?? He("prop"), T);
+    let F = Gr(349, r ?? He("prop"), T);
     return ((F.typeExpression = c), (F.name = i), (F.isNameFirst = !!d), (F.isBracketed = _), F);
   }
   function uc(r, i = on(r), _, c, d, T, F) {
@@ -21606,11 +21593,11 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       : r;
   }
   function pc(r, i, _, c) {
-    let d = Wr(339, r ?? He("callback"), c);
+    let d = Gr(339, r ?? He("callback"), c);
     return (
       (d.typeExpression = i),
       (d.fullName = _),
-      (d.name = tm(_)),
+      (d.name = im(_)),
       (d.locals = void 0),
       (d.nextContainer = void 0),
       d
@@ -21637,72 +21624,72 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
     let c = Sn(330, r ?? He("implements"), _);
     return ((c.class = i), c);
   }
-  function Gr(r, i, _) {
+  function Yr(r, i, _) {
     let c = Sn(348, r ?? He("see"), _);
     return ((c.name = i), c);
   }
   function Aa(r, i, _, c) {
-    return r.tagName !== i || r.name !== _ || r.comment !== c ? J(Gr(i, _, c), r) : r;
+    return r.tagName !== i || r.name !== _ || r.comment !== c ? J(Yr(i, _, c), r) : r;
   }
   function hc(r) {
-    let i = I(311);
+    let i = O(311);
     return ((i.name = r), i);
   }
-  function Lu(r, i) {
+  function Ju(r, i) {
     return r.name !== i ? J(hc(i), r) : r;
   }
   function yc(r, i) {
-    let _ = I(312);
+    let _ = O(312);
     return ((_.left = r), (_.right = i), (_.transformFlags |= z(_.left) | z(_.right)), _);
   }
-  function ju(r, i, _) {
+  function Ru(r, i, _) {
     return r.left !== i || r.right !== _ ? J(yc(i, _), r) : r;
   }
   function gc(r, i) {
-    let _ = I(325);
+    let _ = O(325);
     return ((_.name = r), (_.text = i), _);
   }
   function bc(r, i, _) {
     return r.name !== i ? J(gc(i, _), r) : r;
   }
   function vc(r, i) {
-    let _ = I(326);
+    let _ = O(326);
     return ((_.name = r), (_.text = i), _);
   }
-  function Ju(r, i, _) {
+  function Uu(r, i, _) {
     return r.name !== i ? J(vc(i, _), r) : r;
   }
   function xc(r, i) {
-    let _ = I(327);
+    let _ = O(327);
     return ((_.name = r), (_.text = i), _);
   }
-  function Ru(r, i, _) {
+  function Bu(r, i, _) {
     return r.name !== i ? J(xc(i, _), r) : r;
   }
-  function Uu(r, i = on(r), _, c) {
+  function qu(r, i = on(r), _, c) {
     return r.tagName !== i || r.class !== _ || r.comment !== c ? J(mc(i, _, c), r) : r;
   }
   function Tc(r, i, _) {
     return Sn(r, i ?? He(dl(r)), _);
   }
-  function Bu(r, i, _ = on(i), c) {
+  function Fu(r, i, _ = on(i), c) {
     return i.tagName !== _ || i.comment !== c ? J(Tc(r, _, c), i) : i;
   }
   function Sc(r, i, _, c) {
     let d = Sn(r, i ?? He(dl(r)), c);
     return ((d.typeExpression = _), d);
   }
-  function qu(r, i, _ = on(i), c, d) {
+  function zu(r, i, _ = on(i), c, d) {
     return i.tagName !== _ || i.typeExpression !== c || i.comment !== d ? J(Sc(r, _, c, d), i) : i;
   }
   function wc(r, i) {
     return Sn(328, r, i);
   }
-  function Fu(r, i, _) {
+  function Vu(r, i, _) {
     return r.tagName !== i || r.comment !== _ ? J(wc(i, _), r) : r;
   }
   function kc(r, i, _) {
-    let c = Wr(341, r ?? He(dl(341)), _);
+    let c = Gr(341, r ?? He(dl(341)), _);
     return ((c.typeExpression = i), (c.locals = void 0), (c.nextContainer = void 0), c);
   }
   function qs(r, i = on(r), _, c) {
@@ -21718,21 +21705,21 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       : r;
   }
   function Fs(r) {
-    let i = I(322);
+    let i = O(322);
     return ((i.text = r), i);
   }
-  function zu(r, i) {
+  function Wu(r, i) {
     return r.text !== i ? J(Fs(i), r) : r;
   }
   function Ri(r, i) {
-    let _ = I(321);
+    let _ = O(321);
     return ((_.comment = r), (_.tags = Ie(i)), _);
   }
   function Cc(r, i, _) {
     return r.comment !== i || r.tags !== _ ? J(Ri(i, _), r) : r;
   }
-  /** @returns {Kf} */ function Dc(/** @type {Kf | vh | xh | Th} */ r, i, /** @type {Kf | vh | xh | Th} */ _) {
-    /** @type {Kf | vh | xh | Th} */ let c = I(285);
+  /** @returns {ed} */ function Dc(/** @type {ed | Sh | wh | kh} */ r, i, /** @type {ed | Sh | wh | kh} */ _) {
+    /** @type {ed | Sh | wh | kh} */ let c = O(285);
     return (
       (c.openingElement = r),
       (c.children = me(i)),
@@ -21741,11 +21728,11 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       c
     );
   }
-  function Vu(r, i, _, c) {
+  function Gu(r, i, _, c) {
     return r.openingElement !== i || r.children !== _ || r.closingElement !== c ? J(Dc(i, _, c), r) : r;
   }
-  /** @returns {Kf} */ function Pc(/** @type {Kf | vh | xh | Th} */ r, i, /** @type {Kf | vh | xh | Th} */ _) {
-    /** @type {Kf | vh | xh | Th} */ let c = I(286);
+  /** @returns {ed} */ function Pc(/** @type {ed | Sh | wh | kh} */ r, i, /** @type {ed | Sh | wh | kh} */ _) {
+    /** @type {ed | Sh | wh | kh} */ let c = O(286);
     return (
       (c.tagName = r),
       (c.typeArguments = Ie(i)),
@@ -21755,11 +21742,11 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       c
     );
   }
-  function Wu(r, i, _, c) {
+  function Yu(r, i, _, c) {
     return r.tagName !== i || r.typeArguments !== _ || r.attributes !== c ? J(Pc(i, _, c), r) : r;
   }
-  /** @returns {Kf} */ function Ca(/** @type {Kf | vh | xh | Th} */ r, i, /** @type {Kf | vh | xh | Th | undefined} */ _) {
-    /** @type {Kf | vh | xh | Th} */ let c = I(287);
+  /** @returns {ed} */ function Ca(/** @type {ed | Sh | wh | kh} */ r, i, /** @type {ed | Sh | wh | kh | undefined} */ _) {
+    /** @type {ed | Sh | wh | kh} */ let c = O(287);
     return (
       (c.tagName = r),
       (c.typeArguments = Ie(i)),
@@ -21772,15 +21759,15 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function Nc(r, i, _, c) {
     return r.tagName !== i || r.typeArguments !== _ || r.attributes !== c ? J(Ca(i, _, c), r) : r;
   }
-  /** @returns {Kf} */ function zs(/** @type {Kf | vh | xh | Th} */ r) {
-    /** @type {Kf | vh | xh | Th} */ let i = I(288);
+  /** @returns {ed} */ function zs(/** @type {ed | Sh | wh | kh} */ r) {
+    /** @type {ed | Sh | wh | kh} */ let i = O(288);
     return ((i.tagName = r), (i.transformFlags |= z(i.tagName) | 2), i);
   }
   function Da(r, i) {
     return r.tagName !== i ? J(zs(i), r) : r;
   }
-  /** @returns {Kf} */ function Ht(/** @type {Kf | vh | xh | Th | undefined} */ r, i, /** @type {Kf | vh | xh | Th | undefined} */ _) {
-    /** @type {Kf | vh | xh | Th} */ let c = I(289);
+  /** @returns {ed} */ function Ht(/** @type {ed | Sh | wh | kh | undefined} */ r, i, /** @type {ed | Sh | wh | kh | undefined} */ _) {
+    /** @type {ed | Sh | wh | kh} */ let c = O(289);
     return (
       (c.openingFragment = r),
       (c.children = me(i)),
@@ -21792,44 +21779,44 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function Ic(r, i, _, c) {
     return r.openingFragment !== i || r.children !== _ || r.closingFragment !== c ? J(Ht(i, _, c), r) : r;
   }
-  /** @returns {Kf} */ function Ui(/** @type {string} */ r, i) {
-    /** @type {Kf | vh | xh | Th} */ let _ = I(12);
+  /** @returns {ed} */ function Ui(/** @type {string} */ r, i) {
+    /** @type {ed | Sh | wh | kh} */ let _ = O(12);
     return ((_.text = r), (_.containsOnlyTriviaWhiteSpaces = !!i), (_.transformFlags |= 2), _);
   }
-  function Gu(r, i, _) {
+  function Hu(r, i, _) {
     return r.text !== i || r.containsOnlyTriviaWhiteSpaces !== _ ? J(Ui(i, _), r) : r;
   }
-  /** @returns {Kf} */ function Oc() {
-    /** @type {Kf | vh | xh | Th} */ let r = I(290);
+  /** @returns {ed} */ function Oc() {
+    /** @type {ed | Sh | wh | kh} */ let r = O(290);
     return ((r.transformFlags |= 2), r);
   }
-  /** @returns {Kf} */ function Mc() {
-    /** @type {Kf | vh | xh | Th} */ let r = I(291);
+  /** @returns {ed} */ function Mc() {
+    /** @type {ed | Sh | wh | kh} */ let r = O(291);
     return ((r.transformFlags |= 2), r);
   }
-  /** @returns {Kf} */ function Lc(/** @type {Kf | vh | xh | Th} */ r, /** @type {Kf | vh | xh | Th | undefined} */ i) {
-    /** @type {Kf | vh | xh | Th} */ let _ = ae(292);
+  /** @returns {ed} */ function Lc(/** @type {ed | Sh | wh | kh} */ r, /** @type {ed | Sh | wh | kh | undefined} */ i) {
+    /** @type {ed | Sh | wh | kh} */ let _ = ae(292);
     return ((_.name = r), (_.initializer = i), (_.transformFlags |= z(_.name) | z(_.initializer) | 2), _);
   }
-  function Yu(r, i, _) {
+  function Xu(r, i, _) {
     return r.name !== i || r.initializer !== _ ? J(Lc(i, _), r) : r;
   }
-  /** @returns {Kf} */ function Bi(r) {
-    /** @type {Kf | vh | xh | Th} */ let i = ae(293);
+  /** @returns {ed} */ function Bi(r) {
+    /** @type {ed | Sh | wh | kh} */ let i = ae(293);
     return ((i.properties = me(r)), (i.transformFlags |= Ce(i.properties) | 2), i);
   }
-  function Hu(r, i) {
+  function $u(r, i) {
     return r.properties !== i ? J(Bi(i), r) : r;
   }
-  /** @returns {Kf} */ function jc(/** @type {Kf | xh | vh | Th} */ r) {
-    let i = I(294);
+  /** @returns {ed} */ function jc(/** @type {ed | wh | Sh | kh} */ r) {
+    let i = O(294);
     return ((i.expression = r), (i.transformFlags |= z(i.expression) | 2), i);
   }
-  function Xu(r, i) {
+  function Qu(r, i) {
     return r.expression !== i ? J(jc(i), r) : r;
   }
-  /** @returns {Kf} */ function Jc(r, /** @type {Kf | vh | xh | Th | undefined} */ i) {
-    /** @type {Kf | vh | xh | Th} */ let _ = I(295);
+  /** @returns {ed} */ function Jc(r, /** @type {ed | Sh | wh | kh | undefined} */ i) {
+    /** @type {ed | Sh | wh | kh} */ let _ = O(295);
     return (
       (_.dotDotDotToken = r),
       (_.expression = i),
@@ -21840,15 +21827,15 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function Vs(r, i) {
     return r.expression !== i ? J(Jc(r.dotDotDotToken, i), r) : r;
   }
-  /** @returns {Kf} */ function _i(/** @type {Kf | xh | vh | Th} */ r, /** @type {Kf | xh | vh | Th} */ i) {
-    let _ = I(296);
+  /** @returns {ed} */ function _i(/** @type {ed | wh | Sh | kh} */ r, /** @type {ed | wh | Sh | kh} */ i) {
+    let _ = O(296);
     return ((_.namespace = r), (_.name = i), (_.transformFlags |= z(_.namespace) | z(_.name) | 2), _);
   }
-  function $u(r, i, _) {
+  function Ku(r, i, _) {
     return r.namespace !== i || r.name !== _ ? J(_i(i, _), r) : r;
   }
-  /** @returns {Kf} */ function Pa(/** @type {Kf | vh | xh | Th | undefined} */ r, i) {
-    /** @type {Kf | vh | xh | Th} */ let _ = I(297);
+  /** @returns {ed} */ function Pa(/** @type {ed | Sh | wh | kh | undefined} */ r, i) {
+    /** @type {ed | Sh | wh | kh} */ let _ = O(297);
     return (
       (_.expression = s().parenthesizeExpressionForDisallowedComma(r)),
       (_.statements = me(i)),
@@ -21860,15 +21847,15 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function Rc(r, i, _) {
     return r.expression !== i || r.statements !== _ ? J(Pa(i, _), r) : r;
   }
-  /** @returns {Kf} */ function Uc(r) {
-    /** @type {Kf | vh | xh | Th} */ let i = I(298);
+  /** @returns {ed} */ function Uc(r) {
+    /** @type {ed | Sh | wh | kh} */ let i = O(298);
     return ((i.statements = me(r)), (i.transformFlags = Ce(i.statements)), i);
   }
   function oi(r, i) {
     return r.statements !== i ? J(Uc(i), r) : r;
   }
   function Ws(r, i) {
-    /** @type {Kf | vh | xh | Th} */ let _ = I(299);
+    /** @type {ed | Sh | wh | kh} */ let _ = O(299);
     switch (((_.token = r), (_.types = me(i)), (_.transformFlags |= Ce(_.types)), r)) {
       case 96:
         _.transformFlags |= 1024;
@@ -21881,11 +21868,11 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
     }
     return _;
   }
-  function Qu(r, i) {
+  function Zu(r, i) {
     return r.types !== i ? J(Ws(r.token, i), r) : r;
   }
-  /** @returns {Kf} */ function Bc(/** @type {Kf | vh | xh | Th | undefined} */ r, /** @type {Kf | vh | xh | Th} */ i) {
-    /** @type {Kf | vh | xh | Th} */ let _ = I(300);
+  /** @returns {ed} */ function Bc(/** @type {ed | Sh | wh | kh | undefined} */ r, /** @type {ed | Sh | wh | kh} */ i) {
+    /** @type {ed | Sh | wh | kh} */ let _ = O(300);
     return (
       (_.variableDeclaration = wn(r)),
       (_.block = i),
@@ -21898,12 +21885,12 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function qc(r, i, _) {
     return r.variableDeclaration !== i || r.block !== _ ? J(Bc(i, _), r) : r;
   }
-  /** @returns {Kf} */ function Na(/** @type {Kf | vh | xh | Th} */ r, /** @type {Kf | vh | xh | Th} */ i) {
-    /** @type {Kf | vh | xh | Th} */ let _ = ae(304);
+  /** @returns {ed} */ function Na(/** @type {ed | Sh | wh | kh} */ r, /** @type {ed | Sh | wh | kh} */ i) {
+    /** @type {ed | Sh | wh | kh} */ let _ = ae(304);
     return (
       (_.name = nt(r)),
       (_.initializer = s().parenthesizeExpressionForDisallowedComma(i)),
-      (_.transformFlags |= Rn(_.name) | z(_.initializer)),
+      (_.transformFlags |= Un(_.name) | z(_.initializer)),
       (_.modifiers = void 0),
       (_.questionToken = void 0),
       (_.exclamationToken = void 0),
@@ -21921,12 +21908,12 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       J(r, i)
     );
   }
-  /** @returns {Kf} */ function Fc(/** @type {Kf | vh | xh | Th} */ r, i) {
-    /** @type {Kf | vh | xh | Th} */ let _ = ae(305);
+  /** @returns {ed} */ function Fc(/** @type {ed | Sh | wh | kh} */ r, i) {
+    /** @type {ed | Sh | wh | kh} */ let _ = ae(305);
     return (
       (_.name = nt(r)),
       (_.objectAssignmentInitializer = i && s().parenthesizeExpressionForDisallowedComma(i)),
-      (_.transformFlags |= qa(_.name) | z(_.objectAssignmentInitializer) | 1024),
+      (_.transformFlags |= Ba(_.name) | z(_.objectAssignmentInitializer) | 1024),
       (_.equalsToken = void 0),
       (_.modifiers = void 0),
       (_.questionToken = void 0),
@@ -21935,10 +21922,10 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       _
     );
   }
-  function Ku(r, i, _) {
-    return r.name !== i || r.objectAssignmentInitializer !== _ ? Zu(Fc(i, _), r) : r;
+  function ep(r, i, _) {
+    return r.name !== i || r.objectAssignmentInitializer !== _ ? tp(Fc(i, _), r) : r;
   }
-  function Zu(r, i) {
+  function tp(r, i) {
     return (
       r !== i &&
         ((r.modifiers = i.modifiers),
@@ -21948,8 +21935,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       J(r, i)
     );
   }
-  /** @returns {Kf} */ function zc(/** @type {Kf | vh | xh | Th} */ r) {
-    /** @type {Kf | vh | xh | Th} */ let i = ae(306);
+  /** @returns {ed} */ function zc(/** @type {ed | Sh | wh | kh} */ r) {
+    /** @type {ed | Sh | wh | kh} */ let i = ae(306);
     return (
       (i.expression = s().parenthesizeExpressionForDisallowedComma(r)),
       (i.transformFlags |= z(i.expression) | 128 | 65536),
@@ -21960,8 +21947,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function Vc(r, i) {
     return r.expression !== i ? J(zc(i), r) : r;
   }
-  /** @returns {Kf} */ function Ys(/** @type {Kf | vh | xh | Th} */ r, /** @type {Kf | vh | xh | Th | undefined} */ i) {
-    /** @type {Kf | vh | xh | Th} */ let _ = ae(307);
+  /** @returns {ed} */ function Ys(/** @type {ed | Sh | wh | kh} */ r, /** @type {ed | Sh | wh | kh | undefined} */ i) {
+    /** @type {ed | Sh | wh | kh} */ let _ = ae(307);
     return (
       (_.name = nt(r)),
       (_.initializer = i && s().parenthesizeExpressionForDisallowedComma(i)),
@@ -21970,10 +21957,10 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       _
     );
   }
-  function jn(r, i, _) {
+  function Jn(r, i, _) {
     return r.name !== i || r.initializer !== _ ? J(Ys(i, _), r) : r;
   }
-  function Wc(r, /** @type {Kf | vh | xh | Th | undefined} */ i, _) {
+  function Wc(r, /** @type {ed | Sh | wh | kh | undefined} */ i, _) {
     let c = t.createBaseSourceFileNode(308);
     return (
       (c.statements = me(r)),
@@ -22045,7 +22032,7 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       i
     );
   }
-  function ep(r) {
+  function np(r) {
     let i = Gc(r.redirectInfo);
     return (
       (i.flags |= r.flags & -17),
@@ -22059,7 +22046,7 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       i
     );
   }
-  function tp(r) {
+  function rp(r) {
     let i = t.createBaseSourceFileNode(308);
     i.flags |= r.flags & -17;
     for (let _ in r)
@@ -22073,7 +22060,7 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
     return i;
   }
   function Hs(r) {
-    let i = r.redirectInfo ? ep(r) : tp(r);
+    let i = r.redirectInfo ? np(r) : rp(r);
     return (a(i, r), i);
   }
   function Xs(r, i, _, c, d, T, F) {
@@ -22089,7 +22076,7 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       fe
     );
   }
-  function np(
+  function ip(
     r,
     i,
     _ = r.isDeclarationFile,
@@ -22107,7 +22094,7 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       : r;
   }
   function Yc(r) {
-    let i = I(309);
+    let i = O(309);
     return (
       (i.sourceFiles = r),
       (i.syntheticFileReferences = void 0),
@@ -22119,44 +22106,44 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function Hc(r, i) {
     return r.sourceFiles !== i ? J(Yc(i), r) : r;
   }
-  function rp(r, i = !1, _) {
-    let c = I(238);
+  function ap(r, i = !1, _) {
+    let c = O(238);
     return ((c.type = r), (c.isSpread = i), (c.tupleNameSource = _), c);
   }
-  function ip(r) {
-    let i = I(353);
+  function sp(r) {
+    let i = O(353);
     return ((i._children = r), i);
   }
   function Ia(r) {
-    let i = I(354);
+    let i = O(354);
     return ((i.original = r), yn(i, r), i);
   }
   function $s(r, i) {
-    let _ = I(356);
+    let _ = O(356);
     return ((_.expression = r), (_.original = i), (_.transformFlags |= z(_.expression) | 1), yn(_, i), _);
   }
   function Xc(r, i) {
     return r.expression !== i ? J($s(i, r.original), r) : r;
   }
-  function ap() {
-    return I(355);
+  function _p() {
+    return O(355);
   }
-  function sp(r) {
-    if (Ba(r) && !wl(r) && !r.original && !r.emitNode && !r.id) {
+  function op(r) {
+    if (Ua(r) && !wl(r) && !r.original && !r.emitNode && !r.id) {
       if (mv(r)) return r.elements;
       if (ra(r) && Zb(r.operatorToken)) return [r.left, r.right];
     }
     return r;
   }
   function Qs(r) {
-    let i = I(357);
-    return ((i.elements = me(Sy(r, sp))), (i.transformFlags |= Ce(i.elements)), i);
+    let i = O(357);
+    return ((i.elements = me(Sy(r, op))), (i.transformFlags |= Ce(i.elements)), i);
   }
-  function _p(r, i) {
+  function cp(r, i) {
     return r.elements !== i ? J(Qs(i), r) : r;
   }
   function Ks(r, i) {
-    let _ = I(358);
+    let _ = O(358);
     return ((_.expression = r), (_.thisArg = i), (_.transformFlags |= z(_.expression) | z(_.thisArg)), _);
   }
   function $c(r, i, _) {
@@ -22172,7 +22159,7 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       i
     );
   }
-  function op(r) {
+  function lp(r) {
     let i = bn(r.escapedText);
     ((i.flags |= r.flags & -17),
       (i.jsDoc = r.jsDoc),
@@ -22183,8 +22170,8 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
     let _ = getIdentifierTypeArguments(r);
     return (_ && setIdentifierTypeArguments(i, _), i);
   }
-  function cp(r) {
-    let i = On(r.escapedText);
+  function up(r) {
+    let i = Mn(r.escapedText);
     return (
       (i.flags |= r.flags & -17),
       (i.transformFlags = r.transformFlags),
@@ -22194,26 +22181,26 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
     );
   }
   function Kc(r) {
-    let i = On(r.escapedText);
+    let i = Mn(r.escapedText);
     return ((i.flags |= r.flags & -17), (i.transformFlags = r.transformFlags), a(i, r), i);
   }
   function Oa(r) {
     if (r === void 0) return r;
-    if (ah(r)) return Hs(r);
-    if (za(r)) return Qc(r);
-    if (et(r)) return op(r);
-    if (o1(r)) return cp(r);
+    if (oh(r)) return Hs(r);
+    if (Fa(r)) return Qc(r);
+    if (et(r)) return lp(r);
+    if (u1(r)) return up(r);
     if (xi(r)) return Kc(r);
-    let i = bf(r.kind) ? t.createBaseNode(r.kind) : t.createBaseTokenNode(r.kind);
+    let i = xf(r.kind) ? t.createBaseNode(r.kind) : t.createBaseTokenNode(r.kind);
     ((i.flags |= r.flags & -17), (i.transformFlags = r.transformFlags), a(i, r));
     for (let _ in r) Or(i, _) || !Or(r, _) || (i[_] = r[_]);
     return i;
   }
-  function lp(r, i, _) {
-    return Ni(us(void 0, void 0, void 0, void 0, i ? [i] : [], void 0, Vr(r, !0)), void 0, _ ? [_] : []);
+  function pp(r, i, _) {
+    return Ni(us(void 0, void 0, void 0, void 0, i ? [i] : [], void 0, Wr(r, !0)), void 0, _ ? [_] : []);
   }
-  function up(r, i, _) {
-    return Ni(ps(void 0, void 0, i ? [i] : [], void 0, void 0, Vr(r, !0)), void 0, _ ? [_] : []);
+  function fp(r, i, _) {
+    return Ni(ps(void 0, void 0, i ? [i] : [], void 0, void 0, Wr(r, !0)), void 0, _ ? [_] : []);
   }
   function qi() {
     return fs(V("0"));
@@ -22224,42 +22211,42 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function el(r) {
     return wa(void 0, !1, Os([ka(!1, void 0, r)]));
   }
-  function pp(r, i) {
+  function dp(r, i) {
     return i === "null"
-      ? ge.createStrictEquality(r, Jt())
+      ? be.createStrictEquality(r, Rt())
       : i === "undefined"
-        ? ge.createStrictEquality(r, qi())
-        : ge.createStrictEquality(ha(r), mt(i));
+        ? be.createStrictEquality(r, qi())
+        : be.createStrictEquality(ha(r), mt(i));
   }
   function Zs(r, i) {
     return i === "null"
-      ? ge.createStrictInequality(r, Jt())
+      ? be.createStrictInequality(r, Rt())
       : i === "undefined"
-        ? ge.createStrictInequality(r, qi())
-        : ge.createStrictInequality(ha(r), mt(i));
+        ? be.createStrictInequality(r, qi())
+        : be.createStrictInequality(ha(r), mt(i));
   }
-  function Yr(r, i, _) {
-    return jd(r) ? os(Di(r, void 0, i), void 0, void 0, _) : Ni(pr(r, i), void 0, _);
-  }
-  function fp(r, i, _) {
-    return Yr(r, "bind", [i, ..._]);
-  }
-  function dp(r, i, _) {
-    return Yr(r, "call", [i, ..._]);
+  function Hr(r, i, _) {
+    return Ud(r) ? os(Di(r, void 0, i), void 0, void 0, _) : Ni(pr(r, i), void 0, _);
   }
   function mp(r, i, _) {
-    return Yr(r, "apply", [i, _]);
+    return Hr(r, "bind", [i, ..._]);
   }
-  function Fi(r, i, _) {
-    return Yr(He(r), i, _);
-  }
-  function hp(r, i) {
-    return Yr(r, "slice", i === void 0 ? [] : [Cr(i)]);
-  }
-  function zi(r, i) {
-    return Yr(r, "concat", i);
+  function hp(r, i, _) {
+    return Hr(r, "call", [i, ..._]);
   }
   function yp(r, i, _) {
+    return Hr(r, "apply", [i, _]);
+  }
+  function Fi(r, i, _) {
+    return Hr(He(r), i, _);
+  }
+  function gp(r, i) {
+    return Hr(r, "slice", i === void 0 ? [] : [Cr(i)]);
+  }
+  function zi(r, i) {
+    return Hr(r, "concat", i);
+  }
+  function bp(r, i, _) {
     return Fi("Object", "defineProperty", [r, Cr(i), _]);
   }
   function e_(r, i) {
@@ -22274,7 +22261,7 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function ui(r, i, _) {
     return _ ? (r.push(Na(i, _)), !0) : !1;
   }
-  function gp(r, i) {
+  function vp(r, i) {
     let _ = [];
     (ui(_, "enumerable", Cr(r.enumerable)), ui(_, "configurable", Cr(r.configurable)));
     let c = ui(_, "writable", Cr(r.writable));
@@ -22304,26 +22291,26 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
         return Xc(r, i);
     }
   }
-  function bp(r) {
+  function xp(r) {
     return (
       Ml(r) &&
-      Ba(r) &&
-      Ba(getSourceMapRange(r)) &&
-      Ba(getCommentRange(r)) &&
+      Ua(r) &&
+      Ua(getSourceMapRange(r)) &&
+      Ua(getCommentRange(r)) &&
       !nn(getSyntheticLeadingComments(r)) &&
       !nn(getSyntheticTrailingComments(r))
     );
   }
   function rl(r, i, _ = 63) {
-    return r && ph(r, _) && !bp(r) ? nl(r, rl(r.expression, i)) : i;
+    return r && mh(r, _) && !xp(r) ? nl(r, rl(r.expression, i)) : i;
   }
   function il(r, i, _) {
     if (!i) return r;
-    let c = Co(i, i.label, Z1(i.statement) ? il(r, i.statement) : r);
+    let c = Co(i, i.label, nh(i.statement) ? il(r, i.statement) : r);
     return (_ && _(i), c);
   }
   function t_(r, i) {
-    let _ = Ef(r);
+    let _ = Cf(r);
     switch (_.kind) {
       case 80:
         return i;
@@ -22341,24 +22328,24 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
     }
   }
   function al(r, i, _, c = !1) {
-    let d = $f(r, 63),
+    let d = Kf(r, 63),
       T,
       F;
     return (
-      zd(d)
+      Gd(d)
         ? ((T = qt()), (F = d))
-        : Ip(d)
+        : Mp(d)
           ? ((T = qt()), (F = _ !== void 0 && _ < 2 ? yn(He("_super"), d) : d))
-          : Ya(d) & 8192
+          : Ga(d) & 8192
             ? ((T = qi()), (F = s().parenthesizeLeftSideOfAccess(d, !1)))
-            : gr(d)
+            : yr(d)
               ? t_(d.expression, c)
-                ? ((T = _r(i)), (F = pr(yn(ge.createAssignment(T, d.expression), d.expression), d.name)), yn(F, d))
+                ? ((T = _r(i)), (F = pr(yn(be.createAssignment(T, d.expression), d.expression), d.name)), yn(F, d))
                 : ((T = d.expression), (F = d))
-              : Za(d)
+              : Ka(d)
                 ? t_(d.expression, c)
                   ? ((T = _r(i)),
-                    (F = Pi(yn(ge.createAssignment(T, d.expression), d.expression), d.argumentExpression)),
+                    (F = Pi(yn(be.createAssignment(T, d.expression), d.expression), d.argumentExpression)),
                     yn(F, d))
                   : ((T = d.expression), (F = d))
                 : ((T = qi()), (F = s().parenthesizeLeftSideOfAccess(r, !1))),
@@ -22366,18 +22353,18 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
     );
   }
   function sl(r, i) {
-    return pr(ls(Ci([U(void 0, "value", [br(void 0, void 0, r, void 0, void 0, void 0)], Vr([Oi(i)]))])), "value");
+    return pr(ls(Ci([U(void 0, "value", [br(void 0, void 0, r, void 0, void 0, void 0)], Wr([Oi(i)]))])), "value");
   }
   function o(r) {
-    return r.length > 10 ? Qs(r) : Oy(r, ge.createComma);
+    return r.length > 10 ? Qs(r) : Oy(r, be.createComma);
   }
   function p(r, i, _, c = 0, d) {
-    let T = d ? r && mf(r) : n1(r);
-    if (T && et(T) && !za(T)) {
-      let F = Df(yn(Oa(T), T), T.parent);
-      return ((c |= Ya(T)), _ || (c |= 96), i || (c |= 3072), c && setEmitFlags(F, c), F);
+    let T = d ? r && yf(r) : a1(r);
+    if (T && et(T) && !Fa(T)) {
+      let F = Nf(yn(Oa(T), T), T.parent);
+      return ((c |= Ga(T)), _ || (c |= 96), i || (c |= 3072), c && setEmitFlags(F, c), F);
     }
-    return Fn(r);
+    return zn(r);
   }
   function m(r, i, _) {
     return p(r, i, _, 98304);
@@ -22392,7 +22379,7 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
     return p(r, i, _);
   }
   function Q(r, i, _, c) {
-    let d = pr(r, Ba(i) ? i : Oa(i));
+    let d = pr(r, Ua(i) ? i : Oa(i));
     yn(d, i);
     let T = 0;
     return (c || (T |= 96), _ || (T |= 3072), T && setEmitFlags(d, T), d);
@@ -22426,7 +22413,7 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
     let T = r.length;
     for (; _ !== void 0 && _ < T;) {
       let F = r[_];
-      if (Ya(F) & 2097152 && d(F)) An(i, c ? visitNode(F, c, p2) : F);
+      if (Ga(F) & 2097152 && d(F)) An(i, c ? visitNode(F, c, p2) : F);
       else break;
       _++;
     }
@@ -22436,7 +22423,7 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
     return Mv(r) ? r : yn(me([ce(), ...r]), r);
   }
   function Xt(r) {
-    return (q.assert(Qp(r, d2), "Cannot lift nodes to a Block."), Py(r) || Vr(r));
+    return (q.assert(Zp(r, d2), "Cannot lift nodes to a Block."), Py(r) || Wr(r));
   }
   function Ot(r, i, _) {
     let c = _;
@@ -22446,12 +22433,12 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function dr(r, i) {
     if (!nn(i)) return r;
     let _ = Ot(r, gl, 0),
-      c = Ot(r, qd, _),
-      d = Ot(r, Fd, c),
+      c = Ot(r, Vd, _),
+      d = Ot(r, Wd, c),
       T = Ot(i, gl, 0),
-      F = Ot(i, qd, T),
-      fe = Ot(i, Fd, F),
-      We = Ot(i, Tf, fe);
+      F = Ot(i, Vd, T),
+      fe = Ot(i, Wd, F),
+      We = Ot(i, wf, fe);
     q.assert(We === i.length, "Expected declarations to be valid standard or custom prologues");
     let Mt = gi(r) ? r.slice() : r;
     if (
@@ -22478,37 +22465,37 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
     let _;
     return (
       typeof i == "number" ? (_ = vn(i)) : (_ = i),
-      If(r)
+      Mf(r)
         ? cr(r, _, r.name, r.constraint, r.default)
         : x_(r)
           ? vr(r, _, r.dotDotDotToken, r.name, r.questionToken, r.type, r.initializer)
-          : Jf(r)
+          : Uf(r)
             ? Ge(r, _, r.typeParameters, r.parameters, r.type)
-            : M1(r)
-              ? Gn(r, _, r.name, r.questionToken, r.type)
-              : Xa(r)
+            : J1(r)
+              ? Yn(r, _, r.name, r.questionToken, r.type)
+              : Ha(r)
                 ? L(r, _, r.name, r.questionToken ?? r.exclamationToken, r.type, r.initializer)
-                : L1(r)
+                : R1(r)
                   ? de(r, _, r.name, r.questionToken, r.typeParameters, r.parameters, r.type)
                   : T_(r)
                     ? $e(r, _, r.asteriskToken, r.name, r.questionToken, r.typeParameters, r.parameters, r.type, r.body)
-                    : Of(r)
-                      ? Rr(r, _, r.parameters, r.body)
+                    : Lf(r)
+                      ? Ur(r, _, r.parameters, r.body)
                       : Al(r)
-                        ? Yn(r, _, r.name, r.parameters, r.type, r.body)
+                        ? Hn(r, _, r.name, r.parameters, r.type, r.body)
                         : S_(r)
                           ? K(r, _, r.name, r.parameters, r.body)
-                          : Mf(r)
+                          : jf(r)
                             ? tt(r, _, r.parameters, r.type)
-                            : Bf(r)
+                            : Ff(r)
                               ? G_(r, _, r.asteriskToken, r.name, r.typeParameters, r.parameters, r.type, r.body)
-                              : qf(r)
+                              : zf(r)
                                 ? Y_(r, _, r.typeParameters, r.parameters, r.type, r.equalsGreaterThanToken, r.body)
                                 : Cl(r)
                                   ? hs(r, _, r.name, r.typeParameters, r.heritageClauses, r.members)
-                                  : es(r)
+                                  : Za(r)
                                     ? po(r, _, r.declarationList)
-                                    : zf(r)
+                                    : Wf(r)
                                       ? Cs(
                                           r,
                                           _,
@@ -22519,23 +22506,23 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
                                           r.type,
                                           r.body,
                                         )
-                                      : $a(r)
+                                      : Xa(r)
                                         ? Ta(r, _, r.name, r.typeParameters, r.heritageClauses, r.members)
                                         : A_(r)
                                           ? jo(r, _, r.name, r.typeParameters, r.heritageClauses, r.members)
                                           : jl(r)
                                             ? wr(r, _, r.name, r.typeParameters, r.type)
-                                            : th(r)
+                                            : ih(r)
                                               ? kr(r, _, r.name, r.members)
                                               : Si(r)
                                                 ? At(r, _, r.name, r.body)
-                                                : Vf(r)
+                                                : Gf(r)
                                                   ? Fo(r, _, r.isTypeOnly, r.name, r.moduleReference)
-                                                  : Wf(r)
+                                                  : Yf(r)
                                                     ? Vo(r, _, r.importClause, r.moduleSpecifier, r.attributes)
-                                                    : Gf(r)
+                                                    : Hf(r)
                                                       ? Li(r, _, r.expression)
-                                                      : Yf(r)
+                                                      : Xf(r)
                                                         ? nc(
                                                             r,
                                                             _,
@@ -22547,27 +22534,27 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
                                                         : q.assertNever(r)
     );
   }
-  function Jn(r, i) {
+  function Rn(r, i) {
     return x_(r)
       ? vr(r, i, r.dotDotDotToken, r.name, r.questionToken, r.type, r.initializer)
-      : Xa(r)
+      : Ha(r)
         ? L(r, i, r.name, r.questionToken ?? r.exclamationToken, r.type, r.initializer)
         : T_(r)
           ? $e(r, i, r.asteriskToken, r.name, r.questionToken, r.typeParameters, r.parameters, r.type, r.body)
           : Al(r)
-            ? Yn(r, i, r.name, r.parameters, r.type, r.body)
+            ? Hn(r, i, r.name, r.parameters, r.type, r.body)
             : S_(r)
               ? K(r, i, r.name, r.parameters, r.body)
               : Cl(r)
                 ? hs(r, i, r.name, r.typeParameters, r.heritageClauses, r.members)
-                : $a(r)
+                : Xa(r)
                   ? Ta(r, i, r.name, r.typeParameters, r.heritageClauses, r.members)
                   : q.assertNever(r);
   }
-  function Hr(r, i) {
+  function Xr(r, i) {
     switch (r.kind) {
       case 178:
-        return Yn(r, r.modifiers, i, r.parameters, r.type, r.body);
+        return Hn(r, r.modifiers, i, r.parameters, r.type, r.body);
       case 179:
         return K(r, r.modifiers, i, r.parameters, r.body);
       case 175:
@@ -22577,7 +22564,7 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
       case 173:
         return L(r, r.modifiers, i, r.questionToken ?? r.exclamationToken, r.type, r.initializer);
       case 172:
-        return Gn(r, r.modifiers, i, r.questionToken, r.type);
+        return Yn(r, r.modifiers, i, r.questionToken, r.type);
       case 304:
         return Gs(r, i, r.initializer);
     }
@@ -22585,23 +22572,23 @@ function Pf(/** @type {number} */ e, /** @type {{ createBaseSourceFileNode: (kin
   function Ie(r) {
     return r ? me(r) : void 0;
   }
-  /** @returns {Kf | xh | vh | Th | undefined} */ function nt(/** @type {Kf | vh | xh | Th | undefined} */ r) {
+  /** @returns {ed | wh | Sh | kh | undefined} */ function nt(/** @type {ed | Sh | wh | kh | undefined} */ r) {
     return typeof r == "string" ? He(r) : r;
   }
-  /** @returns {Kf | xh | vh | Th} */ function Cr(/** @type {Kf | xh | vh | Th} */ r) {
+  /** @returns {ed | wh | Sh | kh} */ function Cr(/** @type {ed | wh | Sh | kh} */ r) {
     return typeof r == "string" ? mt(r) : typeof r == "number" ? V(r) : typeof r == "boolean" ? (r ? lt() : or()) : r;
   }
-  /** @returns {Kf | xh | vh | Th | undefined} */ function Vi(/** @type {Kf | xh | vh | Th | undefined} */ r) {
+  /** @returns {ed | wh | Sh | kh | undefined} */ function Vi(/** @type {ed | wh | Sh | kh | undefined} */ r) {
     return r && s().parenthesizeExpressionForDisallowedComma(r);
   }
-  /** @returns {InstanceType<typeof vh>} */ function vp(/** @type {Kf | vh | xh | Th} */ r) {
+  /** @returns {InstanceType<typeof Sh>} */ function Tp(/** @type {ed | Sh | wh | kh} */ r) {
     return typeof r == "number" ? ct(r) : r;
   }
-  /** @returns {InstanceType<typeof Kf> | undefined} */ function Kn(/** @type {InstanceType<typeof Kf> | undefined} */ r) {
+  /** @returns {InstanceType<typeof ed> | undefined} */ function Zn(/** @type {InstanceType<typeof ed> | undefined} */ r) {
     return r && hv(r) ? yn(a(fo(), r), r) : r;
   }
-  /** @returns {InstanceType<typeof Kf> | undefined} */ function wn(/** @type {InstanceType<typeof Kf> | undefined} */ r) {
-    return typeof r == "string" || (r && !Ff(r)) ? xa(r, void 0, void 0, void 0) : r;
+  /** @returns {InstanceType<typeof ed> | undefined} */ function wn(/** @type {InstanceType<typeof ed> | undefined} */ r) {
+    return typeof r == "string" || (r && !Vf(r)) ? xa(r, void 0, void 0, void 0) : r;
   }
   function J(r, i) {
     return (r !== i && (a(r, i), yn(r, i)), r);
@@ -22654,9 +22641,9 @@ function dl(e) {
   }
 }
 var En,
-  Xd = {};
+  Kd = {};
 function Gb(e, t) {
-  switch ((En || (En = uf(99, !1, 0)), e)) {
+  switch ((En || (En = ff(99, !1, 0)), e)) {
     case 15:
       En.setText("`" + t + "`");
       break;
@@ -22671,7 +22658,7 @@ function Gb(e, t) {
       break;
   }
   let a = En.scan();
-  if ((a === 20 && (a = En.reScanTemplateToken(!1)), En.isUnterminated())) return (En.setText(void 0), Xd);
+  if ((a === 20 && (a = En.reScanTemplateToken(!1)), En.isUnterminated())) return (En.setText(void 0), Kd);
   let s;
   switch (a) {
     case 15:
@@ -22681,26 +22668,26 @@ function Gb(e, t) {
       s = En.getTokenValue();
       break;
   }
-  return s === void 0 || En.scan() !== 1 ? (En.setText(void 0), Xd) : (En.setText(void 0), s);
+  return s === void 0 || En.scan() !== 1 ? (En.setText(void 0), Kd) : (En.setText(void 0), s);
 }
-/** @returns {number} */ function Rn(/** @type {Kf | xh | vh | Th | undefined} */ e) {
-  return e && et(e) ? qa(e) : z(e);
+/** @returns {number} */ function Un(/** @type {ed | wh | Sh | kh | undefined} */ e) {
+  return e && et(e) ? Ba(e) : z(e);
 }
-/** @returns {number} */ function qa(/** @type {InstanceType<typeof xh>} */ e) {
+/** @returns {number} */ function Ba(/** @type {InstanceType<typeof wh>} */ e) {
   return z(e) & -67108865;
 }
-/** @returns {number} */ function Yb(/** @type {Kf | xh | vh | Th} */ e, /** @type {number} */ t) {
+/** @returns {number} */ function Yb(/** @type {ed | wh | Sh | kh} */ e, /** @type {number} */ t) {
   return t | (e.transformFlags & 134234112);
 }
-/** @returns {number} */ function z(/** @type {Kf | xh | vh | Th | undefined} */ e) {
+/** @returns {number} */ function z(/** @type {ed | wh | Sh | kh | undefined} */ e) {
   if (!e) return 0;
   let t = e.transformFlags & ~Hb(e.kind);
-  return Ig(e) && c1(e.name) ? Yb(e.name, t) : t;
+  return Ig(e) && p1(e.name) ? Yb(e.name, t) : t;
 }
 /** @returns {number} */ function Ce(/** @type {any} */ e) {
   return e ? e.transformFlags : 0;
 }
-function $d(/** @type {any[]} */ e) {
+function Zd(/** @type {any[]} */ e) {
   let t = 0;
   for (let a of e) t |= z(a);
   e.transformFlags = t;
@@ -22784,7 +22771,7 @@ var Xb = {
     createBaseTokenNode: (e) => a_(i_.createBaseTokenNode(e)),
     createBaseNode: (e) => a_(i_.createBaseNode(e)),
   },
-  tx = Pf(4, Xb);
+  Z3 = If(4, Xb);
 function $b(e, t) {
   if (e.original !== t && ((e.original = t), t)) {
     let a = t.emitNode;
@@ -22801,11 +22788,11 @@ function Qb(e, t) {
     commentRange: b,
     sourceMapRange: v,
     tokenSourceMapRanges: l,
-    constantValue: G,
+    constantValue: W,
     helpers: y,
-    startsOnNewLine: W,
+    startsOnNewLine: G,
     snippetElement: k,
-    classThis: C,
+    classThis: A,
     assignedName: R,
   } = e;
   if (
@@ -22817,14 +22804,14 @@ function Qb(e, t) {
     b && (t.commentRange = b),
     v && (t.sourceMapRange = v),
     l && (t.tokenSourceMapRanges = Kb(l, t.tokenSourceMapRanges)),
-    G !== void 0 && (t.constantValue = G),
+    W !== void 0 && (t.constantValue = W),
     y)
   )
     for (let pe of y) t.helpers = Ay(t.helpers, pe);
   return (
-    W !== void 0 && (t.startsOnNewLine = W),
+    G !== void 0 && (t.startsOnNewLine = G),
     k !== void 0 && (t.snippetElement = k),
-    C && (t.classThis = C),
+    A && (t.classThis = A),
     R && (t.assignedName = R),
     t
   );
@@ -22834,106 +22821,106 @@ function Kb(e, t) {
   for (let a in e) t[a] = e[a];
   return t;
 }
-/** @returns {boolean} */ function sa(/** @type {Kf | xh | vh | Th} */ e) {
+/** @returns {boolean} */ function sa(/** @type {ed | wh | Sh | kh} */ e) {
   return e.kind === 9;
 }
-function N1(e) {
+function M1(e) {
   return e.kind === 10;
 }
-/** @returns {boolean} */ function Lr(/** @type {Kf | xh | vh | Th} */ e) {
+/** @returns {boolean} */ function Lr(/** @type {ed | wh | Sh | kh} */ e) {
   return e.kind === 11;
 }
-/** @returns {boolean} */ function I1(/** @type {Kf | vh | xh | Th} */ e) {
+/** @returns {boolean} */ function L1(/** @type {ed | Sh | wh | kh} */ e) {
   return e.kind === 15;
 }
 function Zb(e) {
   return e.kind === 28;
 }
-/** @returns {boolean} */ function Qd(/** @type {InstanceType<typeof vh>} */ e) {
+/** @returns {boolean} */ function em(/** @type {InstanceType<typeof Sh>} */ e) {
   return e.kind === 54;
 }
-/** @returns {boolean} */ function Kd(/** @type {InstanceType<typeof vh>} */ e) {
+/** @returns {boolean} */ function tm(/** @type {InstanceType<typeof Sh>} */ e) {
   return e.kind === 58;
 }
-/** @returns {boolean} */ function et(/** @type {Kf | xh | vh | Th} */ e) {
+/** @returns {boolean} */ function et(/** @type {ed | wh | Sh | kh} */ e) {
   return e.kind === 80;
 }
-/** @returns {boolean} */ function xi(/** @type {Kf | xh | vh | Th} */ e) {
+/** @returns {boolean} */ function xi(/** @type {ed | wh | Sh | kh} */ e) {
   return e.kind === 81;
 }
-/** @returns {boolean} */ function ev(/** @type {Kf | vh | xh | Th} */ e) {
+/** @returns {boolean} */ function ev(/** @type {ed | Sh | wh | kh} */ e) {
   return e.kind === 95;
 }
-/** @returns {boolean} */ function ml(/** @type {Kf | vh | xh | Th} */ e) {
+/** @returns {boolean} */ function ml(/** @type {ed | Sh | wh | kh} */ e) {
   return e.kind === 134;
 }
-/** @returns {boolean} */ function Ip(/** @type {Kf | xh | vh | Th} */ e) {
+/** @returns {boolean} */ function Mp(/** @type {ed | wh | Sh | kh} */ e) {
   return e.kind === 108;
 }
-/** @returns {boolean} */ function tv(/** @type {Kf | xh | vh | Th} */ e) {
+/** @returns {boolean} */ function tv(/** @type {ed | wh | Sh | kh} */ e) {
   return e.kind === 102;
 }
-/** @returns {boolean} */ function O1(/** @type {Kf | vh | xh | Th} */ e) {
+/** @returns {boolean} */ function j1(/** @type {ed | Sh | wh | kh} */ e) {
   return e.kind === 167;
 }
-/** @returns {boolean} */ function Nf(/** @type {Kf | vh | xh | Th} */ e) {
+/** @returns {boolean} */ function Of(/** @type {ed | Sh | wh | kh} */ e) {
   return e.kind === 168;
 }
-function If(e) {
+function Mf(e) {
   return e.kind === 169;
 }
 /** @returns {boolean} */ function x_(e) {
   return e.kind === 170;
 }
-/** @returns {boolean} */ function Ka(/** @type {Kf | vh | xh | Th} */ e) {
+/** @returns {boolean} */ function Qa(/** @type {ed | Sh | wh | kh} */ e) {
   return e.kind === 171;
 }
-function M1(e) {
+function J1(e) {
   return e.kind === 172;
 }
-/** @returns {boolean} */ function Xa(/** @type {Kf | vh | xh | Th} */ e) {
+/** @returns {boolean} */ function Ha(/** @type {ed | Sh | wh | kh} */ e) {
   return e.kind === 173;
 }
-function L1(e) {
+function R1(e) {
   return e.kind === 174;
 }
 function T_(e) {
   return e.kind === 175;
 }
-function Of(e) {
+function Lf(e) {
   return e.kind === 177;
 }
-/** @returns {boolean} */ function Al(/** @type {InstanceType<typeof Kf>} */ e) {
+/** @returns {boolean} */ function Al(/** @type {InstanceType<typeof ed>} */ e) {
   return e.kind === 178;
 }
-/** @returns {boolean} */ function S_(/** @type {Kf | vh | xh | Th} */ e) {
+/** @returns {boolean} */ function S_(/** @type {ed | Sh | wh | kh} */ e) {
   return e.kind === 179;
 }
-function j1(e) {
+function U1(e) {
   return e.kind === 180;
 }
-function J1(e) {
+function B1(e) {
   return e.kind === 181;
 }
-function Mf(e) {
+function jf(e) {
   return e.kind === 182;
 }
-function R1(e) {
+function q1(e) {
   return e.kind === 183;
 }
-function Lf(e) {
+function Jf(e) {
   return e.kind === 184;
 }
-function jf(e) {
+function Rf(e) {
   return e.kind === 185;
 }
-function Jf(e) {
+function Uf(e) {
   return e.kind === 186;
 }
 function nv(e) {
   return e.kind === 187;
 }
-function U1(e) {
+function F1(e) {
   return e.kind === 188;
 }
 function rv(e) {
@@ -22942,7 +22929,7 @@ function rv(e) {
 function iv(e) {
   return e.kind === 190;
 }
-function B1(e) {
+function z1(e) {
   return e.kind === 203;
 }
 function av(e) {
@@ -22951,10 +22938,10 @@ function av(e) {
 function sv(e) {
   return e.kind === 192;
 }
-function q1(e) {
+function V1(e) {
   return e.kind === 193;
 }
-function F1(e) {
+function W1(e) {
   return e.kind === 194;
 }
 function _v(e) {
@@ -22963,19 +22950,19 @@ function _v(e) {
 function ov(e) {
   return e.kind === 196;
 }
-function z1(e) {
+function G1(e) {
   return e.kind === 197;
 }
 function cv(e) {
   return e.kind === 198;
 }
-function V1(e) {
+function Y1(e) {
   return e.kind === 199;
 }
 function lv(e) {
   return e.kind === 200;
 }
-function W1(e) {
+function H1(e) {
   return e.kind === 201;
 }
 function uv(e) {
@@ -22984,58 +22971,58 @@ function uv(e) {
 function pv(e) {
   return e.kind === 206;
 }
-/** @returns {boolean} */ function G1(/** @type {InstanceType<typeof xh> | InstanceType<typeof Kf>} */ e) {
+/** @returns {boolean} */ function X1(/** @type {InstanceType<typeof wh> | InstanceType<typeof ed>} */ e) {
   return e.kind === 209;
 }
-/** @returns {boolean} */ function Y1(/** @type {Kf | xh | vh | Th} */ e) {
+/** @returns {boolean} */ function $1(/** @type {ed | wh | Sh | kh} */ e) {
   return e.kind === 210;
 }
-/** @returns {boolean} */ function Rf(/** @type {Kf | vh | xh | Th} */ e) {
+/** @returns {boolean} */ function Bf(/** @type {ed | Sh | wh | kh} */ e) {
   return e.kind === 211;
 }
-/** @returns {boolean} */ function gr(/** @type {Kf | vh | xh | Th} */ e) {
+/** @returns {boolean} */ function yr(/** @type {ed | Sh | wh | kh} */ e) {
   return e.kind === 212;
 }
-function Za(e) {
+function Ka(e) {
   return e.kind === 213;
 }
-function Uf(e) {
+function qf(e) {
   return e.kind === 214;
 }
-/** @returns {boolean} */ function H1(/** @type {Kf | vh | xh | Th} */ e) {
+/** @returns {boolean} */ function Q1(/** @type {ed | Sh | wh | kh} */ e) {
   return e.kind === 216;
 }
 function Ml(e) {
   return e.kind === 218;
 }
-function Bf(e) {
+function Ff(e) {
   return e.kind === 219;
 }
-function qf(e) {
+function zf(e) {
   return e.kind === 220;
 }
 function fv(e) {
   return e.kind === 223;
 }
-function X1(e) {
+function K1(e) {
   return e.kind === 225;
 }
 function ra(e) {
   return e.kind === 227;
 }
-function $1(e) {
+function Z1(e) {
   return e.kind === 231;
 }
-/** @returns {boolean} */ function Cl(/** @type {InstanceType<typeof Kf> | InstanceType<typeof vh> | InstanceType<typeof xh>} */ e) {
+/** @returns {boolean} */ function Cl(/** @type {InstanceType<typeof ed> | InstanceType<typeof Sh> | InstanceType<typeof wh>} */ e) {
   return e.kind === 232;
 }
-/** @returns {boolean} */ function Q1(/** @type {Kf | xh | vh | Th} */ e) {
+/** @returns {boolean} */ function eh(/** @type {ed | wh | Sh | kh} */ e) {
   return e.kind === 233;
 }
-/** @returns {boolean} */ function K1(/** @type {Kf | vh | xh | Th} */ e) {
+/** @returns {boolean} */ function th(/** @type {ed | Sh | wh | kh} */ e) {
   return e.kind === 234;
 }
-/** @returns {boolean} */ function bl(/** @type {Kf | vh | xh | Th} */ e) {
+/** @returns {boolean} */ function bl(/** @type {ed | Sh | wh | kh} */ e) {
   return e.kind === 236;
 }
 function dv(e) {
@@ -23044,25 +23031,25 @@ function dv(e) {
 function mv(e) {
   return e.kind === 357;
 }
-/** @returns {boolean} */ function es(/** @type {InstanceType<typeof Kf>} */ e) {
+/** @returns {boolean} */ function Za(/** @type {InstanceType<typeof ed>} */ e) {
   return e.kind === 244;
 }
-/** @returns {boolean} */ function Ll(/** @type {Kf | vh | xh | Th} */ e) {
+/** @returns {boolean} */ function Ll(/** @type {ed | Sh | wh | kh} */ e) {
   return e.kind === 245;
 }
-function Z1(e) {
+function nh(e) {
   return e.kind === 257;
 }
-/** @returns {boolean} */ function Ff(/** @type {Kf | vh | xh | Th} */ e) {
+/** @returns {boolean} */ function Vf(/** @type {ed | Sh | wh | kh} */ e) {
   return e.kind === 261;
 }
-/** @returns {boolean} */ function eh(/** @type {Kf | vh | xh | Th} */ e) {
+/** @returns {boolean} */ function rh(/** @type {ed | Sh | wh | kh} */ e) {
   return e.kind === 262;
 }
-function zf(e) {
+function Wf(e) {
   return e.kind === 263;
 }
-/** @returns {boolean} */ function $a(/** @type {Kf | vh | xh | Th} */ e) {
+/** @returns {boolean} */ function Xa(/** @type {ed | Sh | wh | kh} */ e) {
   return e.kind === 264;
 }
 function A_(e) {
@@ -23071,67 +23058,67 @@ function A_(e) {
 function jl(e) {
   return e.kind === 266;
 }
-/** @returns {boolean} */ function th(/** @type {InstanceType<typeof Kf> | InstanceType<typeof d6>} */ e) {
+/** @returns {boolean} */ function ih(/** @type {InstanceType<typeof ed> | InstanceType<typeof d6>} */ e) {
   return e.kind === 267;
 }
-/** @returns {boolean} */ function Si(/** @type {Kf | d6} */ e) {
+/** @returns {boolean} */ function Si(/** @type {ed | d6} */ e) {
   return e.kind === 268;
 }
-/** @returns {boolean} */ function Vf(/** @type {InstanceType<typeof Kf>} */ e) {
+/** @returns {boolean} */ function Gf(/** @type {InstanceType<typeof ed>} */ e) {
   return e.kind === 272;
 }
-/** @returns {boolean} */ function Wf(/** @type {Kf | vh | xh | Th} */ e) {
+/** @returns {boolean} */ function Yf(/** @type {ed | Sh | wh | kh} */ e) {
   return e.kind === 273;
 }
-/** @returns {boolean} */ function Gf(/** @type {Kf | vh | xh | Th} */ e) {
+/** @returns {boolean} */ function Hf(/** @type {ed | Sh | wh | kh} */ e) {
   return e.kind === 278;
 }
-/** @returns {boolean} */ function Yf(/** @type {Kf | vh | xh | Th} */ e) {
+/** @returns {boolean} */ function Xf(/** @type {ed | Sh | wh | kh} */ e) {
   return e.kind === 279;
 }
-function nh(e) {
+function ah(e) {
   return e.kind === 280;
 }
-/** @returns {boolean} */ function hv(/** @type {Kf | vh | xh | Th} */ e) {
+/** @returns {boolean} */ function hv(/** @type {ed | Sh | wh | kh} */ e) {
   return e.kind === 354;
 }
-/** @returns {boolean} */ function Hf(/** @type {Kf | vh | xh | Th} */ e) {
+/** @returns {boolean} */ function $f(/** @type {ed | Sh | wh | kh} */ e) {
   return e.kind === 284;
 }
-/** @returns {boolean} */ function Yp(/** @type {Kf | vh | xh | Th} */ e) {
+/** @returns {boolean} */ function Xp(/** @type {ed | Sh | wh | kh} */ e) {
   return e.kind === 287;
 }
 function yv(e) {
   return e.kind === 290;
 }
-/** @returns {boolean} */ function rh(/** @type {Kf | vh | xh | Th} */ e) {
+/** @returns {boolean} */ function sh(/** @type {ed | Sh | wh | kh} */ e) {
   return e.kind === 296;
 }
 function gv(e) {
   return e.kind === 298;
 }
-function ih(e) {
+function _h(e) {
   return e.kind === 304;
 }
-function ah(e) {
+function oh(e) {
   return e.kind === 308;
 }
-function sh(e) {
+function ch(e) {
   return e.kind === 310;
 }
-/** @returns {boolean} */ function _h(/** @type {Kf | vh | xh | Th} */ e) {
+/** @returns {boolean} */ function lh(/** @type {ed | Sh | wh | kh} */ e) {
   return e.kind === 315;
 }
-/** @returns {boolean} */ function oh(/** @type {Kf | vh | xh | Th} */ e) {
+/** @returns {boolean} */ function uh(/** @type {ed | Sh | wh | kh} */ e) {
   return e.kind === 318;
 }
-function ch(e) {
+function ph(e) {
   return e.kind === 321;
 }
-/** @returns {boolean} */ function bv(/** @type {d6 | Kf | xh | vh | Th} */ e) {
+/** @returns {boolean} */ function bv(/** @type {d6 | ed | wh | Sh | kh} */ e) {
   return e.kind === 323;
 }
-/** @returns {boolean} */ function Jl(/** @type {Kf | d6} */ e) {
+/** @returns {boolean} */ function Jl(/** @type {ed | d6} */ e) {
   return e.kind === 324;
 }
 function vv(e) {
@@ -23158,16 +23145,16 @@ function Ev(e) {
 function Av(e) {
   return e.kind === 332;
 }
-function Hp(e) {
+function $p(e) {
   return e.kind === 342;
 }
 function Cv(e) {
   return e.kind === 343;
 }
-function Xf(e) {
+function Qf(e) {
   return e.kind === 345;
 }
-function lh(e) {
+function fh(e) {
   return e.kind === 346;
 }
 function Dv(e) {
@@ -23177,17 +23164,17 @@ function Pv(e) {
   return e.kind === 351;
 }
 /** @type {WeakMap<object, WeakMap<object, any>>} */ var ta = new WeakMap();
-function uh(/** @type {InstanceType<typeof d6> | InstanceType<typeof Kf>} */ e, /** @type {InstanceType<typeof d6>} */ t) {
+function dh(/** @type {InstanceType<typeof d6> | InstanceType<typeof ed>} */ e, /** @type {InstanceType<typeof d6>} */ t) {
   /** @type {WeakMap<object, any> | undefined} */ var a;
   let s = e.kind;
-  return bf(s) ? (s === 353 ? e._children : (a = ta.get(t)) == null ? void 0 : a.get(e)) : Tt;
+  return xf(s) ? (s === 353 ? e._children : (a = ta.get(t)) == null ? void 0 : a.get(e)) : Tt;
 }
-function Nv(/** @type {Kf | d6} */ e, /** @type {d6} */ t, a) {
+function Nv(/** @type {ed | d6} */ e, /** @type {d6} */ t, a) {
   e.kind === 353 && q.fail("Should not need to re-set the children of a SyntaxList.");
   let s = ta.get(t);
   return (s === void 0 && ((s = new WeakMap()), ta.set(t, s)), s.set(e, a), a);
 }
-function Zd(e, t) {
+function nm(e, t) {
   var a;
   (e.kind === 353 && q.fail("Did not expect to unset the children of a SyntaxList."),
     (a = ta.get(t)) == null || a.delete(e));
@@ -23196,8 +23183,8 @@ function Iv(e, t) {
   let a = ta.get(e);
   a !== void 0 && (ta.delete(e), ta.set(t, a));
 }
-/** @returns {boolean} */ function em(/** @type {InstanceType<typeof xh>} */ e) {
-  return (Ya(e) & 32768) !== 0;
+/** @returns {boolean} */ function rm(/** @type {InstanceType<typeof wh>} */ e) {
+  return (Ga(e) & 32768) !== 0;
 }
 function Ov(e) {
   return Lr(e.expression) && e.expression.text === "use strict";
@@ -23211,7 +23198,7 @@ function Mv(e) {
 function Lv(e) {
   return Ml(e) && aa(e) && !!Gg(e);
 }
-/** @returns {boolean} */ function ph(/** @type {Kf | vh | xh | Th} */ e, t = 63) {
+/** @returns {boolean} */ function mh(/** @type {ed | Sh | wh | kh} */ e, t = 63) {
   switch (e.kind) {
     case 218:
       return t & -2147483648 && Lv(e) ? !1 : (t & 1) !== 0;
@@ -23229,8 +23216,8 @@ function Lv(e) {
   }
   return !1;
 }
-/** @returns {vh | Kf | xh} */ function $f(/** @type {Kf | vh | xh | Th} */ e, t = 63) {
-  for (; ph(e, t);) e = e.expression;
+/** @returns {Sh | ed | wh} */ function Kf(/** @type {ed | Sh | wh | kh} */ e, t = 63) {
+  for (; mh(e, t);) e = e.expression;
   return e;
 }
 function jv(e) {
@@ -23249,7 +23236,7 @@ function l_(e) {
     }
     return;
   }
-  return El(e, !0) ? l_(e.left) : $1(e) ? l_(e.expression) : e;
+  return El(e, !0) ? l_(e.left) : Z1(e) ? l_(e.expression) : e;
 }
 function Jv(e) {
   switch (e.kind) {
@@ -23261,7 +23248,7 @@ function Jv(e) {
       return e.properties;
   }
 }
-function tm(e) {
+function im(e) {
   if (e) {
     let t = e;
     for (;;) {
@@ -23270,53 +23257,53 @@ function tm(e) {
     }
   }
 }
-var nm;
+var am;
 ((e) => {
-  function t(y, W, k, C, R, pe, xe) {
-    let ge = W > 0 ? R[W - 1] : void 0;
-    return (q.assertEqual(k[W], t), (R[W] = y.onEnter(C[W], ge, xe)), (k[W] = v(y, t)), W);
+  function t(y, G, k, A, R, pe, xe) {
+    let be = G > 0 ? R[G - 1] : void 0;
+    return (q.assertEqual(k[G], t), (R[G] = y.onEnter(A[G], be, xe)), (k[G] = v(y, t)), G);
   }
   e.enter = t;
-  function a(y, W, k, C, R, pe, xe) {
-    (q.assertEqual(k[W], a), q.assertIsDefined(y.onLeft), (k[W] = v(y, a)));
-    let ge = y.onLeft(C[W].left, R[W], C[W]);
-    return ge ? (G(W, C, ge), l(W, k, C, R, ge)) : W;
+  function a(y, G, k, A, R, pe, xe) {
+    (q.assertEqual(k[G], a), q.assertIsDefined(y.onLeft), (k[G] = v(y, a)));
+    let be = y.onLeft(A[G].left, R[G], A[G]);
+    return be ? (W(G, A, be), l(G, k, A, R, be)) : G;
   }
   e.left = a;
-  function s(y, W, k, C, R, pe, xe) {
+  function s(y, G, k, A, R, pe, xe) {
     return (
-      q.assertEqual(k[W], s),
+      q.assertEqual(k[G], s),
       q.assertIsDefined(y.onOperator),
-      (k[W] = v(y, s)),
-      y.onOperator(C[W].operatorToken, R[W], C[W]),
-      W
+      (k[G] = v(y, s)),
+      y.onOperator(A[G].operatorToken, R[G], A[G]),
+      G
     );
   }
   e.operator = s;
-  function f(y, W, k, C, R, pe, xe) {
-    (q.assertEqual(k[W], f), q.assertIsDefined(y.onRight), (k[W] = v(y, f)));
-    let ge = y.onRight(C[W].right, R[W], C[W]);
-    return ge ? (G(W, C, ge), l(W, k, C, R, ge)) : W;
+  function f(y, G, k, A, R, pe, xe) {
+    (q.assertEqual(k[G], f), q.assertIsDefined(y.onRight), (k[G] = v(y, f)));
+    let be = y.onRight(A[G].right, R[G], A[G]);
+    return be ? (W(G, A, be), l(G, k, A, R, be)) : G;
   }
   e.right = f;
-  function h(y, W, k, C, R, pe, xe) {
-    (q.assertEqual(k[W], h), (k[W] = v(y, h)));
-    let ge = y.onExit(C[W], R[W]);
-    if (W > 0) {
-      if ((W--, y.foldState)) {
-        let me = k[W] === h ? "right" : "left";
-        R[W] = y.foldState(R[W], ge, me);
+  function h(y, G, k, A, R, pe, xe) {
+    (q.assertEqual(k[G], h), (k[G] = v(y, h)));
+    let be = y.onExit(A[G], R[G]);
+    if (G > 0) {
+      if ((G--, y.foldState)) {
+        let me = k[G] === h ? "right" : "left";
+        R[G] = y.foldState(R[G], be, me);
       }
-    } else pe.value = ge;
-    return W;
+    } else pe.value = be;
+    return G;
   }
   e.exit = h;
-  function b(y, W, k, C, R, pe, xe) {
-    return (q.assertEqual(k[W], b), W);
+  function b(y, G, k, A, R, pe, xe) {
+    return (q.assertEqual(k[G], b), G);
   }
   e.done = b;
-  function v(y, W) {
-    switch (W) {
+  function v(y, G) {
+    switch (G) {
       case t:
         if (y.onLeft) return a;
       case a:
@@ -23334,16 +23321,16 @@ var nm;
     }
   }
   e.nextState = v;
-  function l(y, W, k, C, R) {
-    return (y++, (W[y] = t), (k[y] = R), (C[y] = void 0), y);
+  function l(y, G, k, A, R) {
+    return (y++, (G[y] = t), (k[y] = R), (A[y] = void 0), y);
   }
-  function G(y, W, k) {
-    if (q.shouldAssert(2)) for (; y >= 0;) (q.assert(W[y] !== k, "Circular traversal detected."), y--);
+  function W(y, G, k) {
+    if (q.shouldAssert(2)) for (; y >= 0;) (q.assert(G[y] !== k, "Circular traversal detected."), y--);
   }
-})(nm || (nm = {}));
-function rm(e, t) {
+})(am || (am = {}));
+function sm(e, t) {
   return typeof e == "object"
-    ? Xp(!1, e.prefix, e.node, e.suffix, t)
+    ? Qp(!1, e.prefix, e.node, e.suffix, t)
     : typeof e == "string"
       ? e.length > 0 && e.charCodeAt(0) === 35
         ? e.slice(1)
@@ -23354,24 +23341,24 @@ function Rv(e, t) {
   return typeof e == "string" ? e : Uv(e, q.checkDefined(t));
 }
 function Uv(e, t) {
-  return o1(e) ? t(e).slice(1) : za(e) ? t(e) : xi(e) ? e.escapedText.slice(1) : Pn(e);
+  return u1(e) ? t(e).slice(1) : Fa(e) ? t(e) : xi(e) ? e.escapedText.slice(1) : Pn(e);
 }
-function Xp(e, t, a, s, f) {
-  return ((t = rm(t, f)), (s = rm(s, f)), (a = Rv(a, f)), `${e ? "#" : ""}${t}${a}${s}`);
+function Qp(e, t, a, s, f) {
+  return ((t = sm(t, f)), (s = sm(s, f)), (a = Rv(a, f)), `${e ? "#" : ""}${t}${a}${s}`);
 }
-/** @returns {boolean} */ function fh(/** @type {Kf | vh | xh | Th} */ e) {
+/** @returns {boolean} */ function hh(/** @type {ed | Sh | wh | kh} */ e) {
   if (e.transformFlags & 65536) return !0;
   if (e.transformFlags & 128)
     for (let t of Jv(e)) {
       let a = l_(t);
-      if (a && _2(a) && (a.transformFlags & 65536 || (a.transformFlags & 128 && fh(a)))) return !0;
+      if (a && _2(a) && (a.transformFlags & 65536 || (a.transformFlags & 128 && hh(a)))) return !0;
     }
   return !1;
 }
 function yn(e, t) {
   return t ? vi(e, t.pos, t.end) : e;
 }
-/** @returns {boolean} */ function Rl(/** @type {d6 | Kf | xh | vh | Th} */ e) {
+/** @returns {boolean} */ function Rl(/** @type {d6 | ed | wh | Sh | kh} */ e) {
   let t = e.kind;
   return (
     t === 169 ||
@@ -23401,24 +23388,24 @@ function yn(e, t) {
     t === 279
   );
 }
-/** @returns {boolean} */ function Qf(/** @type {Kf | xh | vh | Th} */ e) {
+/** @returns {boolean} */ function Zf(/** @type {ed | wh | Sh | kh} */ e) {
   let t = e.kind;
   return t === 170 || t === 173 || t === 175 || t === 178 || t === 179 || t === 232 || t === 264;
 }
-var im,
-  am,
-  sm,
-  _m,
+var _m,
   om,
+  cm,
+  lm,
+  um,
   Bv = {
-    createBaseSourceFileNode: (e) => new (om || (om = Ct.getSourceFileConstructor()))(e, -1, -1),
-    createBaseIdentifierNode: (e) => new (sm || (sm = Ct.getIdentifierConstructor()))(e, -1, -1),
-    createBasePrivateIdentifierNode: (e) => new (_m || (_m = Ct.getPrivateIdentifierConstructor()))(e, -1, -1),
-    createBaseTokenNode: (e) => new (am || (am = Ct.getTokenConstructor()))(e, -1, -1),
-    createBaseNode: (e) => new (im || (im = Ct.getNodeConstructor()))(e, -1, -1),
+    createBaseSourceFileNode: (e) => new (um || (um = Ct.getSourceFileConstructor()))(e, -1, -1),
+    createBaseIdentifierNode: (e) => new (cm || (cm = Ct.getIdentifierConstructor()))(e, -1, -1),
+    createBasePrivateIdentifierNode: (e) => new (lm || (lm = Ct.getPrivateIdentifierConstructor()))(e, -1, -1),
+    createBaseTokenNode: (e) => new (om || (om = Ct.getTokenConstructor()))(e, -1, -1),
+    createBaseNode: (e) => new (_m || (_m = Ct.getNodeConstructor()))(e, -1, -1),
   },
-  nx = Pf(1, Bv);
-function S(/** @type {TsNodeVisitor} */ e, /** @type {Kf | xh | vh | Th | undefined} */ t) {
+  ex = If(1, Bv);
+function S(/** @type {TsNodeVisitor} */ e, /** @type {ed | wh | Sh | kh | undefined} */ t) {
   return t && e(t);
 }
 function ie(/** @type {TsNodeVisitor} */ e, /** @type {TsNodesVisitor | undefined} */ t, a) {
@@ -23433,33 +23420,33 @@ function ie(/** @type {TsNodeVisitor} */ e, /** @type {TsNodesVisitor | undefine
 function qv(e, t) {
   return e.charCodeAt(t + 1) === 42 && e.charCodeAt(t + 2) === 42 && e.charCodeAt(t + 3) !== 47;
 }
-/** @returns {InstanceType<typeof Kf>} */ function Fv(/** @type {InstanceType<typeof d6>} */ e) {
-  return Bn(e.statements, zv) || Vv(e);
+/** @returns {InstanceType<typeof ed>} */ function Fv(/** @type {InstanceType<typeof d6>} */ e) {
+  return qn(e.statements, zv) || Vv(e);
 }
-/** @returns {InstanceType<typeof Kf> | undefined} */ function zv(/** @type {Kf | vh | xh | Th} */ e) {
-  return (Rl(e) && Wv(e, 95)) || (Vf(e) && Hf(e.moduleReference)) || Wf(e) || Gf(e) || Yf(e) ? e : void 0;
+/** @returns {InstanceType<typeof ed> | undefined} */ function zv(/** @type {ed | Sh | wh | kh} */ e) {
+  return (Rl(e) && Wv(e, 95)) || (Gf(e) && $f(e.moduleReference)) || Yf(e) || Hf(e) || Xf(e) ? e : void 0;
 }
 function Vv(/** @type {d6} */ e) {
-  return e.flags & 8388608 ? dh(e) : void 0;
+  return e.flags & 8388608 ? yh(e) : void 0;
 }
-function dh(e) {
-  return Gv(e) ? e : $t(e, dh);
+function yh(e) {
+  return Gv(e) ? e : $t(e, yh);
 }
-/** @returns {boolean} */ function Wv(/** @type {InstanceType<typeof Kf>} */ e, /** @type {number} */ t) {
-  return nn(e.modifiers, /** @returns {boolean} */ (/** @type {Kf | vh} */ a) => a.kind === t);
+/** @returns {boolean} */ function Wv(/** @type {InstanceType<typeof ed>} */ e, /** @type {number} */ t) {
+  return nn(e.modifiers, /** @returns {boolean} */ (/** @type {ed | Sh} */ a) => a.kind === t);
 }
 function Gv(e) {
   return dv(e) && e.keywordToken === 102 && e.name.escapedText === "meta";
 }
-/** @type {Record<number, (node: Kf, cbNode: TsNodeVisitor, cbNodes: TsNodesVisitor | undefined) => unknown>} */
+/** @type {Record<number, (node: ed, cbNode: TsNodeVisitor, cbNodes: TsNodesVisitor | undefined) => unknown>} */
 var Yv = {
-  167: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  167: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.left) || S(a, t.right);
   },
-  169: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  169: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return ie(a, s, t.modifiers) || S(a, t.name) || S(a, t.constraint) || S(a, t.default) || S(a, t.expression);
   },
-  305: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  305: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return (
       ie(a, s, t.modifiers) ||
       S(a, t.name) ||
@@ -23469,10 +23456,10 @@ var Yv = {
       S(a, t.objectAssignmentInitializer)
     );
   },
-  306: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  306: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.expression);
   },
-  170: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  170: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return (
       ie(a, s, t.modifiers) ||
       S(a, t.dotDotDotToken) ||
@@ -23482,7 +23469,7 @@ var Yv = {
       S(a, t.initializer)
     );
   },
-  173: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  173: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return (
       ie(a, s, t.modifiers) ||
       S(a, t.name) ||
@@ -23492,32 +23479,32 @@ var Yv = {
       S(a, t.initializer)
     );
   },
-  172: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  172: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return ie(a, s, t.modifiers) || S(a, t.name) || S(a, t.questionToken) || S(a, t.type) || S(a, t.initializer);
   },
-  304: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  304: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return (
       ie(a, s, t.modifiers) || S(a, t.name) || S(a, t.questionToken) || S(a, t.exclamationToken) || S(a, t.initializer)
     );
   },
-  261: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  261: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.name) || S(a, t.exclamationToken) || S(a, t.type) || S(a, t.initializer);
   },
-  209: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  209: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.dotDotDotToken) || S(a, t.propertyName) || S(a, t.name) || S(a, t.initializer);
   },
-  182: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  182: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return ie(a, s, t.modifiers) || ie(a, s, t.typeParameters) || ie(a, s, t.parameters) || S(a, t.type);
   },
-  186: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  186: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return ie(a, s, t.modifiers) || ie(a, s, t.typeParameters) || ie(a, s, t.parameters) || S(a, t.type);
   },
-  185: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  185: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return ie(a, s, t.modifiers) || ie(a, s, t.typeParameters) || ie(a, s, t.parameters) || S(a, t.type);
   },
-  180: cm,
-  181: cm,
-  175: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  180: pm,
+  181: pm,
+  175: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return (
       ie(a, s, t.modifiers) ||
       S(a, t.asteriskToken) ||
@@ -23530,7 +23517,7 @@ var Yv = {
       S(a, t.body)
     );
   },
-  174: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  174: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return (
       ie(a, s, t.modifiers) ||
       S(a, t.name) ||
@@ -23540,7 +23527,7 @@ var Yv = {
       S(a, t.type)
     );
   },
-  177: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  177: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return (
       ie(a, s, t.modifiers) ||
       S(a, t.name) ||
@@ -23550,7 +23537,7 @@ var Yv = {
       S(a, t.body)
     );
   },
-  178: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  178: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return (
       ie(a, s, t.modifiers) ||
       S(a, t.name) ||
@@ -23560,7 +23547,7 @@ var Yv = {
       S(a, t.body)
     );
   },
-  179: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  179: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return (
       ie(a, s, t.modifiers) ||
       S(a, t.name) ||
@@ -23570,18 +23557,7 @@ var Yv = {
       S(a, t.body)
     );
   },
-  263: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
-    return (
-      ie(a, s, t.modifiers) ||
-      S(a, t.asteriskToken) ||
-      S(a, t.name) ||
-      ie(a, s, t.typeParameters) ||
-      ie(a, s, t.parameters) ||
-      S(a, t.type) ||
-      S(a, t.body)
-    );
-  },
-  219: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  263: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return (
       ie(a, s, t.modifiers) ||
       S(a, t.asteriskToken) ||
@@ -23592,7 +23568,18 @@ var Yv = {
       S(a, t.body)
     );
   },
-  220: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  219: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+    return (
+      ie(a, s, t.modifiers) ||
+      S(a, t.asteriskToken) ||
+      S(a, t.name) ||
+      ie(a, s, t.typeParameters) ||
+      ie(a, s, t.parameters) ||
+      S(a, t.type) ||
+      S(a, t.body)
+    );
+  },
+  220: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return (
       ie(a, s, t.modifiers) ||
       ie(a, s, t.typeParameters) ||
@@ -23602,47 +23589,47 @@ var Yv = {
       S(a, t.body)
     );
   },
-  176: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  176: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return ie(a, s, t.modifiers) || S(a, t.body);
   },
-  184: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  184: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.typeName) || ie(a, s, t.typeArguments);
   },
-  183: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  183: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.assertsModifier) || S(a, t.parameterName) || S(a, t.type);
   },
-  187: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  187: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.exprName) || ie(a, s, t.typeArguments);
   },
-  188: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  188: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return ie(a, s, t.members);
   },
-  189: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  189: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.elementType);
   },
-  190: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  190: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return ie(a, s, t.elements);
   },
-  193: lm,
-  194: lm,
-  195: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  193: fm,
+  194: fm,
+  195: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.checkType) || S(a, t.extendsType) || S(a, t.trueType) || S(a, t.falseType);
   },
-  196: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  196: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.typeParameter);
   },
-  206: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  206: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.argument) || S(a, t.attributes) || S(a, t.qualifier) || ie(a, s, t.typeArguments);
   },
-  303: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  303: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.assertClause);
   },
-  197: um,
-  199: um,
-  200: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  197: dm,
+  199: dm,
+  200: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.objectType) || S(a, t.indexType);
   },
-  201: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  201: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return (
       S(a, t.readonlyToken) ||
       S(a, t.typeParameter) ||
@@ -23652,149 +23639,149 @@ var Yv = {
       ie(a, s, t.members)
     );
   },
-  202: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  202: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.literal);
   },
-  203: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  203: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.dotDotDotToken) || S(a, t.name) || S(a, t.questionToken) || S(a, t.type);
   },
-  207: pm,
-  208: pm,
-  210: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  207: mm,
+  208: mm,
+  210: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return ie(a, s, t.elements);
   },
-  211: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  211: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return ie(a, s, t.properties);
   },
-  212: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  212: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.expression) || S(a, t.questionDotToken) || S(a, t.name);
   },
-  213: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  213: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.expression) || S(a, t.questionDotToken) || S(a, t.argumentExpression);
   },
-  214: fm,
-  215: fm,
-  216: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  214: hm,
+  215: hm,
+  216: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.tag) || S(a, t.questionDotToken) || ie(a, s, t.typeArguments) || S(a, t.template);
   },
-  217: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  217: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.type) || S(a, t.expression);
   },
-  218: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  218: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.expression);
   },
-  221: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  221: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.expression);
   },
-  222: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  222: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.expression);
   },
-  223: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  223: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.expression);
   },
-  225: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  225: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.operand);
   },
-  230: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  230: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.asteriskToken) || S(a, t.expression);
   },
-  224: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  224: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.expression);
   },
-  226: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  226: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.operand);
   },
-  227: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  227: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.left) || S(a, t.operatorToken) || S(a, t.right);
   },
-  235: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  235: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.expression) || S(a, t.type);
   },
-  236: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  236: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.expression);
   },
-  239: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  239: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.expression) || S(a, t.type);
   },
-  237: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  237: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.name);
   },
-  228: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  228: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.condition) || S(a, t.questionToken) || S(a, t.whenTrue) || S(a, t.colonToken) || S(a, t.whenFalse);
   },
-  231: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  231: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.expression);
   },
-  242: dm,
-  269: dm,
-  308: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  242: ym,
+  269: ym,
+  308: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return ie(a, s, t.statements) || S(a, t.endOfFileToken);
   },
-  244: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  244: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return ie(a, s, t.modifiers) || S(a, t.declarationList);
   },
-  262: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  262: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return ie(a, s, t.declarations);
   },
-  245: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  245: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.expression);
   },
-  246: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  246: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.expression) || S(a, t.thenStatement) || S(a, t.elseStatement);
   },
-  247: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  247: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.statement) || S(a, t.expression);
   },
-  248: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  248: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.expression) || S(a, t.statement);
   },
-  249: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  249: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.initializer) || S(a, t.condition) || S(a, t.incrementor) || S(a, t.statement);
   },
-  250: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  250: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.initializer) || S(a, t.expression) || S(a, t.statement);
   },
-  251: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  251: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.awaitModifier) || S(a, t.initializer) || S(a, t.expression) || S(a, t.statement);
   },
-  252: mm,
-  253: mm,
-  254: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  252: gm,
+  253: gm,
+  254: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.expression);
   },
-  255: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  255: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.expression) || S(a, t.statement);
   },
-  256: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  256: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.expression) || S(a, t.caseBlock);
   },
-  270: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  270: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return ie(a, s, t.clauses);
   },
-  297: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  297: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.expression) || ie(a, s, t.statements);
   },
-  298: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  298: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return ie(a, s, t.statements);
   },
-  257: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  257: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.label) || S(a, t.statement);
   },
-  258: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  258: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.expression);
   },
-  259: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  259: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.tryBlock) || S(a, t.catchClause) || S(a, t.finallyBlock);
   },
-  300: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  300: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.variableDeclaration) || S(a, t.block);
   },
-  171: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  171: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.expression);
   },
-  264: hm,
-  232: hm,
-  265: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  264: bm,
+  232: bm,
+  265: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return (
       ie(a, s, t.modifiers) ||
       S(a, t.name) ||
@@ -23803,106 +23790,106 @@ var Yv = {
       ie(a, s, t.members)
     );
   },
-  266: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  266: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return ie(a, s, t.modifiers) || S(a, t.name) || ie(a, s, t.typeParameters) || S(a, t.type);
   },
-  267: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  267: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return ie(a, s, t.modifiers) || S(a, t.name) || ie(a, s, t.members);
   },
-  307: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  307: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.name) || S(a, t.initializer);
   },
-  268: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  268: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return ie(a, s, t.modifiers) || S(a, t.name) || S(a, t.body);
   },
-  272: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  272: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return ie(a, s, t.modifiers) || S(a, t.name) || S(a, t.moduleReference);
   },
-  273: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  273: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return ie(a, s, t.modifiers) || S(a, t.importClause) || S(a, t.moduleSpecifier) || S(a, t.attributes);
   },
-  274: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  274: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.name) || S(a, t.namedBindings);
   },
-  301: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  301: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return ie(a, s, t.elements);
   },
-  302: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  302: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.name) || S(a, t.value);
   },
-  271: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  271: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return ie(a, s, t.modifiers) || S(a, t.name);
   },
-  275: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  275: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.name);
   },
-  281: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  281: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.name);
   },
-  276: ym,
-  280: ym,
-  279: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  276: vm,
+  280: vm,
+  279: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return ie(a, s, t.modifiers) || S(a, t.exportClause) || S(a, t.moduleSpecifier) || S(a, t.attributes);
   },
-  277: gm,
-  282: gm,
-  278: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  277: xm,
+  282: xm,
+  278: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return ie(a, s, t.modifiers) || S(a, t.expression);
   },
-  229: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  229: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.head) || ie(a, s, t.templateSpans);
   },
-  240: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  240: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.expression) || S(a, t.literal);
   },
-  204: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  204: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.head) || ie(a, s, t.templateSpans);
   },
-  205: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  205: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.type) || S(a, t.literal);
   },
-  168: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  168: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.expression);
   },
-  299: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  299: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return ie(a, s, t.types);
   },
-  234: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  234: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.expression) || ie(a, s, t.typeArguments);
   },
-  284: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  284: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.expression);
   },
-  283: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  283: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return ie(a, s, t.modifiers);
   },
-  357: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  357: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return ie(a, s, t.elements);
   },
-  285: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  285: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.openingElement) || ie(a, s, t.children) || S(a, t.closingElement);
   },
-  289: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  289: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.openingFragment) || ie(a, s, t.children) || S(a, t.closingFragment);
   },
-  286: bm,
-  287: bm,
-  293: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  286: Tm,
+  287: Tm,
+  293: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return ie(a, s, t.properties);
   },
-  292: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  292: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.name) || S(a, t.initializer);
   },
-  294: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  294: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.expression);
   },
-  295: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  295: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.dotDotDotToken) || S(a, t.expression);
   },
-  288: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  288: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.tagName);
   },
-  296: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  296: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.namespace) || S(a, t.name);
   },
   191: Xi,
@@ -23912,33 +23899,33 @@ var Yv = {
   315: Xi,
   317: Xi,
   319: Xi,
-  318: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  318: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return ie(a, s, t.parameters) || S(a, t.type);
   },
-  321: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  321: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return (typeof t.comment == "string" ? void 0 : ie(a, s, t.comment)) || ie(a, s, t.tags);
   },
-  348: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  348: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.tagName) || S(a, t.name) || (typeof t.comment == "string" ? void 0 : ie(a, s, t.comment));
   },
-  311: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  311: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.name);
   },
-  312: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  312: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.left) || S(a, t.right);
   },
-  342: vm,
-  349: vm,
-  331: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  342: Sm,
+  349: Sm,
+  331: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.tagName) || (typeof t.comment == "string" ? void 0 : ie(a, s, t.comment));
   },
-  330: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  330: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.tagName) || S(a, t.class) || (typeof t.comment == "string" ? void 0 : ie(a, s, t.comment));
   },
-  329: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  329: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return S(a, t.tagName) || S(a, t.class) || (typeof t.comment == "string" ? void 0 : ie(a, s, t.comment));
   },
-  346: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  346: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return (
       S(a, t.tagName) ||
       S(a, t.constraint) ||
@@ -23946,7 +23933,7 @@ var Yv = {
       (typeof t.comment == "string" ? void 0 : ie(a, s, t.comment))
     );
   },
-  347: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  347: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return (
       S(a, t.tagName) ||
       (t.typeExpression && t.typeExpression.kind === 310
@@ -23954,7 +23941,7 @@ var Yv = {
         : S(a, t.fullName) || S(a, t.typeExpression) || (typeof t.comment == "string" ? void 0 : ie(a, s, t.comment)))
     );
   },
-  339: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+  339: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
     return (
       S(a, t.tagName) ||
       S(a, t.fullName) ||
@@ -23969,14 +23956,14 @@ var Yv = {
   351: $i,
   350: $i,
   340: $i,
-  324: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
-    return Bn(t.typeParameters, a) || Bn(t.parameters, a) || S(a, t.type);
+  324: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+    return qn(t.typeParameters, a) || qn(t.parameters, a) || S(a, t.type);
   },
-  325: Op,
-  326: Op,
-  327: Op,
-  323: function (/** @type {Kf} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
-    return Bn(t.jsDocPropertyTags, a);
+  325: Lp,
+  326: Lp,
+  327: Lp,
+  323: function (/** @type {ed} */ t, /** @type {TsNodeVisitor} */ a, /** @type {TsNodesVisitor | undefined} */ s) {
+    return qn(t.jsDocPropertyTags, a);
   },
   328: di,
   333: di,
@@ -23989,28 +23976,28 @@ var Yv = {
   352: Hv,
   356: Xv,
 };
-function cm(/** @type {Kf} */ e, /** @type {TsNodeVisitor} */ t, /** @type {TsNodesVisitor | undefined} */ a) {
+function pm(/** @type {ed} */ e, /** @type {TsNodeVisitor} */ t, /** @type {TsNodesVisitor | undefined} */ a) {
   return ie(t, a, e.typeParameters) || ie(t, a, e.parameters) || S(t, e.type);
 }
-function lm(/** @type {Kf} */ e, /** @type {TsNodeVisitor} */ t, /** @type {TsNodesVisitor | undefined} */ a) {
+function fm(/** @type {ed} */ e, /** @type {TsNodeVisitor} */ t, /** @type {TsNodesVisitor | undefined} */ a) {
   return ie(t, a, e.types);
 }
-function um(/** @type {Kf} */ e, /** @type {TsNodeVisitor} */ t, /** @type {TsNodesVisitor | undefined} */ a) {
+function dm(/** @type {ed} */ e, /** @type {TsNodeVisitor} */ t, /** @type {TsNodesVisitor | undefined} */ a) {
   return S(t, e.type);
 }
-function pm(/** @type {Kf} */ e, /** @type {TsNodeVisitor} */ t, /** @type {TsNodesVisitor | undefined} */ a) {
+function mm(/** @type {ed} */ e, /** @type {TsNodeVisitor} */ t, /** @type {TsNodesVisitor | undefined} */ a) {
   return ie(t, a, e.elements);
 }
-function fm(/** @type {Kf} */ e, /** @type {TsNodeVisitor} */ t, /** @type {TsNodesVisitor | undefined} */ a) {
+function hm(/** @type {ed} */ e, /** @type {TsNodeVisitor} */ t, /** @type {TsNodesVisitor | undefined} */ a) {
   return S(t, e.expression) || S(t, e.questionDotToken) || ie(t, a, e.typeArguments) || ie(t, a, e.arguments);
 }
-function dm(/** @type {Kf} */ e, /** @type {TsNodeVisitor} */ t, /** @type {TsNodesVisitor | undefined} */ a) {
+function ym(/** @type {ed} */ e, /** @type {TsNodeVisitor} */ t, /** @type {TsNodesVisitor | undefined} */ a) {
   return ie(t, a, e.statements);
 }
-function mm(/** @type {Kf} */ e, /** @type {TsNodeVisitor} */ t, /** @type {TsNodesVisitor | undefined} */ a) {
+function gm(/** @type {ed} */ e, /** @type {TsNodeVisitor} */ t, /** @type {TsNodesVisitor | undefined} */ a) {
   return S(t, e.label);
 }
-function hm(/** @type {Kf} */ e, /** @type {TsNodeVisitor} */ t, /** @type {TsNodesVisitor | undefined} */ a) {
+function bm(/** @type {ed} */ e, /** @type {TsNodeVisitor} */ t, /** @type {TsNodesVisitor | undefined} */ a) {
   return (
     ie(t, a, e.modifiers) ||
     S(t, e.name) ||
@@ -24019,35 +24006,35 @@ function hm(/** @type {Kf} */ e, /** @type {TsNodeVisitor} */ t, /** @type {TsNo
     ie(t, a, e.members)
   );
 }
-function ym(/** @type {Kf} */ e, /** @type {TsNodeVisitor} */ t, /** @type {TsNodesVisitor | undefined} */ a) {
+function vm(/** @type {ed} */ e, /** @type {TsNodeVisitor} */ t, /** @type {TsNodesVisitor | undefined} */ a) {
   return ie(t, a, e.elements);
 }
-function gm(/** @type {Kf} */ e, /** @type {TsNodeVisitor} */ t, /** @type {TsNodesVisitor | undefined} */ a) {
+function xm(/** @type {ed} */ e, /** @type {TsNodeVisitor} */ t, /** @type {TsNodesVisitor | undefined} */ a) {
   return S(t, e.propertyName) || S(t, e.name);
 }
-function bm(/** @type {Kf} */ e, /** @type {TsNodeVisitor} */ t, /** @type {TsNodesVisitor | undefined} */ a) {
+function Tm(/** @type {ed} */ e, /** @type {TsNodeVisitor} */ t, /** @type {TsNodesVisitor | undefined} */ a) {
   return S(t, e.tagName) || ie(t, a, e.typeArguments) || S(t, e.attributes);
 }
-function Xi(/** @type {Kf} */ e, /** @type {TsNodeVisitor} */ t, /** @type {TsNodesVisitor | undefined} */ a) {
+function Xi(/** @type {ed} */ e, /** @type {TsNodeVisitor} */ t, /** @type {TsNodesVisitor | undefined} */ a) {
   return S(t, e.type);
 }
-function vm(/** @type {Kf} */ e, /** @type {TsNodeVisitor} */ t, /** @type {TsNodesVisitor | undefined} */ a) {
+function Sm(/** @type {ed} */ e, /** @type {TsNodeVisitor} */ t, /** @type {TsNodesVisitor | undefined} */ a) {
   return (
     S(t, e.tagName) ||
     (e.isNameFirst ? S(t, e.name) || S(t, e.typeExpression) : S(t, e.typeExpression) || S(t, e.name)) ||
     (typeof e.comment == "string" ? void 0 : ie(t, a, e.comment))
   );
 }
-function $i(/** @type {Kf} */ e, /** @type {TsNodeVisitor} */ t, /** @type {TsNodesVisitor | undefined} */ a) {
+function $i(/** @type {ed} */ e, /** @type {TsNodeVisitor} */ t, /** @type {TsNodesVisitor | undefined} */ a) {
   return S(t, e.tagName) || S(t, e.typeExpression) || (typeof e.comment == "string" ? void 0 : ie(t, a, e.comment));
 }
-function Op(/** @type {Kf} */ e, /** @type {TsNodeVisitor} */ t, /** @type {TsNodesVisitor | undefined} */ a) {
+function Lp(/** @type {ed} */ e, /** @type {TsNodeVisitor} */ t, /** @type {TsNodesVisitor | undefined} */ a) {
   return S(t, e.name);
 }
-function di(/** @type {Kf} */ e, /** @type {TsNodeVisitor} */ t, /** @type {TsNodesVisitor | undefined} */ a) {
+function di(/** @type {ed} */ e, /** @type {TsNodeVisitor} */ t, /** @type {TsNodesVisitor | undefined} */ a) {
   return S(t, e.tagName) || (typeof e.comment == "string" ? void 0 : ie(t, a, e.comment));
 }
-function Hv(/** @type {Kf} */ e, /** @type {TsNodeVisitor} */ t, /** @type {TsNodesVisitor | undefined} */ a) {
+function Hv(/** @type {ed} */ e, /** @type {TsNodeVisitor} */ t, /** @type {TsNodesVisitor | undefined} */ a) {
   return (
     S(t, e.tagName) ||
     S(t, e.importClause) ||
@@ -24056,22 +24043,22 @@ function Hv(/** @type {Kf} */ e, /** @type {TsNodeVisitor} */ t, /** @type {TsNo
     (typeof e.comment == "string" ? void 0 : ie(t, a, e.comment))
   );
 }
-function Xv(/** @type {Kf} */ e, /** @type {TsNodeVisitor} */ t, /** @type {TsNodesVisitor | undefined} */ a) {
+function Xv(/** @type {ed} */ e, /** @type {TsNodeVisitor} */ t, /** @type {TsNodesVisitor | undefined} */ a) {
   return S(t, e.expression);
 }
-function $t(/** @type {d6 | Kf} */ e, /** @type {TsNodeVisitor} */ t, /** @type {TsNodesVisitor | undefined} */ a) {
+function $t(/** @type {d6 | ed} */ e, /** @type {TsNodeVisitor} */ t, /** @type {TsNodesVisitor | undefined} */ a) {
   if (e === void 0 || e.kind <= 166) return;
   let s = Yv[e.kind];
   return s === void 0 ? void 0 : s(e, t, a);
 }
-function xm(/** @type {InstanceType<typeof d6>} */ e, /** @type {(node: any, parent: any) => any} */ t, /** @type {((nodes: any, parent: any) => any) | undefined} */ a) {
-  let s = Tm(e),
+function wm(/** @type {InstanceType<typeof d6>} */ e, /** @type {(node: any, parent: any) => any} */ t, /** @type {((nodes: any, parent: any) => any) | undefined} */ a) {
+  let s = km(e),
     f = [];
   for (; f.length < s.length;) f.push(e);
   for (; s.length !== 0;) {
     let h = s.pop(),
       b = f.pop();
-    if (Kr(h)) {
+    if (Zr(h)) {
       if (a) {
         let v = a(h, b);
         if (v) {
@@ -24086,38 +24073,38 @@ function xm(/** @type {InstanceType<typeof d6>} */ e, /** @type {(node: any, par
         if (v === "skip") continue;
         return v;
       }
-      if (h.kind >= 167) for (let l of Tm(h)) (s.push(l), f.push(h));
+      if (h.kind >= 167) for (let l of km(h)) (s.push(l), f.push(h));
     }
   }
 }
-/** @returns {any[]} */ function Tm(/** @type {d6 | Kf | xh | vh | Th} */ e) {
+/** @returns {any[]} */ function km(/** @type {d6 | ed | wh | Sh | kh} */ e) {
   let t = [];
   return ($t(e, a, a), t);
   function a(s) {
     t.unshift(s);
   }
 }
-function mh(/** @type {InstanceType<typeof d6>} */ e) {
+function gh(/** @type {InstanceType<typeof d6>} */ e) {
   e.externalModuleIndicator = Fv(e);
 }
-/** @returns {InstanceType<typeof d6>} */ function hh(/** @type {string} */ e, /** @type {string} */ t, a, s = !1, /** @type {number} */ f) {
+/** @returns {InstanceType<typeof d6>} */ function bh(/** @type {string} */ e, /** @type {string} */ t, a, s = !1, /** @type {number} */ f) {
   var h, b;
-  ((h = hl) == null || h.push(hl.Phase.Parse, "createSourceFile", { path: e }, !0), Ed("beforeParse"));
+  ((h = hl) == null || h.push(hl.Phase.Parse, "createSourceFile", { path: e }, !0), Dd("beforeParse"));
   let v,
     {
       languageVersion: l,
-      setExternalModuleIndicator: G,
+      setExternalModuleIndicator: W,
       impliedNodeFormat: y,
-      jsDocParsingMode: W,
+      jsDocParsingMode: G,
     } = typeof a == "object" ? a : { languageVersion: a };
-  if (l === 100) v = na.parseSourceFile(e, t, l, void 0, s, 6, Ha, W);
+  if (l === 100) v = na.parseSourceFile(e, t, l, void 0, s, 6, Ya, G);
   else {
-    let k = y === void 0 ? G : (C) => ((C.impliedNodeFormat = y), (G || mh)(C));
-    v = na.parseSourceFile(e, t, l, void 0, s, f, k, W);
+    let k = y === void 0 ? W : (A) => ((A.impliedNodeFormat = y), (W || gh)(A));
+    v = na.parseSourceFile(e, t, l, void 0, s, f, k, G);
   }
-  return (Ed("afterParse"), Hy("Parse", "beforeParse", "afterParse"), (b = hl) == null || b.pop(), v);
+  return (Dd("afterParse"), Hy("Parse", "beforeParse", "afterParse"), (b = hl) == null || b.pop(), v);
 }
-/** @returns {boolean} */ function yh(/** @type {InstanceType<typeof d6>} */ e) {
+/** @returns {boolean} */ function vh(/** @type {InstanceType<typeof d6>} */ e) {
   return e.externalModuleIndicator !== void 0;
 }
 function $v(e, t, a, s = !1) {
@@ -24126,34 +24113,34 @@ function $v(e, t, a, s = !1) {
 }
 var na;
 ((e) => {
-  var t = uf(99, !0),
+  var t = ff(99, !0),
     a = 40960,
-    /** @type {typeof Kf} */ s,
-    /** @type {typeof vh} */ f,
-    /** @type {typeof xh} */ h,
-    /** @type {typeof Th} */ b,
+    /** @type {typeof ed} */ s,
+    /** @type {typeof Sh} */ f,
+    /** @type {typeof wh} */ h,
+    /** @type {typeof kh} */ b,
     /** @type {typeof d6} */ v;
-  /** @returns {xh | vh | Kf | d6 | Th} */ function l(/** @type {xh | vh | Kf | d6 | Th} */ o) {
+  /** @returns {wh | Sh | ed | d6 | kh} */ function l(/** @type {wh | Sh | ed | d6 | kh} */ o) {
     return (or++, o);
   }
-  var G = {
+  var W = {
       createBaseSourceFileNode: /** @returns {InstanceType<typeof d6>} */ (/** @type {number} */ o) => l(new v(o, 0, 0)),
-      createBaseIdentifierNode: /** @returns {InstanceType<typeof xh>} */ (/** @type {number} */ o) => l(new h(o, 0, 0)),
-      createBasePrivateIdentifierNode: /** @returns {InstanceType<typeof Th>} */ (/** @type {number} */ o) => l(new b(o, 0, 0)),
-      createBaseTokenNode: /** @returns {InstanceType<typeof vh>} */ (/** @type {number} */ o) => l(new f(o, 0, 0)),
-      createBaseNode: /** @returns {InstanceType<typeof Kf>} */ (/** @type {number} */ o) => l(new s(o, 0, 0)),
+      createBaseIdentifierNode: /** @returns {InstanceType<typeof wh>} */ (/** @type {number} */ o) => l(new h(o, 0, 0)),
+      createBasePrivateIdentifierNode: /** @returns {InstanceType<typeof kh>} */ (/** @type {number} */ o) => l(new b(o, 0, 0)),
+      createBaseTokenNode: /** @returns {InstanceType<typeof Sh>} */ (/** @type {number} */ o) => l(new f(o, 0, 0)),
+      createBaseNode: /** @returns {InstanceType<typeof ed>} */ (/** @type {number} */ o) => l(new s(o, 0, 0)),
     },
-    y = Pf(11, G),
+    y = If(11, W),
     {
-      createNodeArray: W,
+      createNodeArray: G,
       createNumericLiteral: k,
-      createStringLiteral: C,
+      createStringLiteral: A,
       createLiteralLikeNode: R,
       createIdentifier: pe,
       createPrivateIdentifier: xe,
-      createToken: ge,
+      createToken: be,
       createArrayLiteralExpression: me,
-      createObjectLiteralExpression: I,
+      createObjectLiteralExpression: O,
       createPropertyAccessExpression: ae,
       createPropertyAccessChain: Le,
       createElementAccessExpression: V,
@@ -24164,23 +24151,23 @@ var na;
       createParenthesizedExpression: gn,
       createBlock: sr,
       createVariableStatement: bn,
-      createExpressionStatement: In,
+      createExpressionStatement: On,
       createIfStatement: He,
       createWhileStatement: _r,
-      createForStatement: jr,
-      createForOfStatement: Lt,
-      createVariableDeclaration: Fn,
-      createVariableDeclarationList: On,
+      createForStatement: Jr,
+      createForOfStatement: jt,
+      createVariableDeclaration: zn,
+      createVariableDeclarationList: Mn,
     } = y,
-    jt,
+    Jt,
     /** @type {number} */ gt,
     /** @type {string | undefined} */ Ke,
-    /** @type {number | undefined} */ zn,
+    /** @type {number | undefined} */ Vn,
     Zt,
     ct,
     /** @type {any[]} */ st,
     qt,
-    Jt,
+    Rt,
     /** @type {int} */ lt,
     /** @type {int} */ or,
     /** @type {Map<string, string>} */ ht,
@@ -24205,21 +24192,21 @@ var na;
         ce
       );
     }
-    Vn(o, p, m, g, P, _e);
-    /** @type {d6} */ let te = Jr(m, x, P, Q || mh, _e);
-    return (Wn(), te);
+    Wn(o, p, m, g, P, _e);
+    /** @type {d6} */ let te = Rr(m, x, P, Q || gh, _e);
+    return (Gn(), te);
   }
   e.parseSourceFile = cr;
   function br(o, p) {
-    (Vn("", o, p, void 0, 1, 0), B());
-    let m = zr(!0),
+    (Wn("", o, p, void 0, 1, 0), B());
+    let m = Vr(!0),
       g = u() === 1 && !st.length;
-    return (Wn(), g ? m : void 0);
+    return (Gn(), g ? m : void 0);
   }
   e.parseIsolatedEntityName = br;
   function vr(o, p, m = 2, g, x = !1) {
-    (Vn(o, p, m, g, 6, 0), (gt = it), B());
-    let P = O(),
+    (Wn(o, p, m, g, 6, 0), (gt = it), B());
+    let P = M(),
       Q,
       _e;
     if (u() === 1) ((Q = Dt([], P, P)), (_e = Gt()));
@@ -24242,20 +24229,20 @@ var na;
           case 9:
           case 11:
             if (H(() => B() !== 59)) {
-              Ne = $n();
+              Ne = Qn();
               break;
             }
           default:
             Ne = Us();
             break;
         }
-        ce && Kr(ce) ? ce.push(Ne) : ce ? (ce = [ce, Ne]) : ((ce = Ne), u() !== 1 && De(E.Unexpected_token));
+        ce && Zr(ce) ? ce.push(Ne) : ce ? (ce = [ce, Ne]) : ((ce = Ne), u() !== 1 && De(E.Unexpected_token));
       }
-      let Ue = Kr(ce) ? D(me(ce), P) : q.checkDefined(ce),
-        Re = In(Ue);
-      (D(Re, P), (Q = Dt([Re], P)), (_e = Xn(1, E.Unexpected_token)));
+      let Ue = Zr(ce) ? D(me(ce), P) : q.checkDefined(ce),
+        Re = On(Ue);
+      (D(Re, P), (Q = Dt([Re], P)), (_e = $n(1, E.Unexpected_token)));
     }
-    let ee = se(o, 2, 6, !1, Q, _e, gt, Ha);
+    let ee = se(o, 2, 6, !1, Q, _e, gt, Ya);
     (x && L(ee),
       (ee.nodeCount = or),
       (ee.identifierCount = vn),
@@ -24263,22 +24250,22 @@ var na;
       (ee.parseDiagnostics = Hi(st, ee)),
       qt && (ee.jsDocDiagnostics = Hi(qt, ee)));
     let te = ee;
-    return (Wn(), te);
+    return (Gn(), te);
   }
   e.parseJsonText = vr;
-  function Vn(/** @type {string} */ o, /** @type {string | undefined} */ p, m, g, x, P) {
+  function Wn(/** @type {string} */ o, /** @type {string | undefined} */ p, m, g, x, P) {
     switch (
       ((s = Ct.getNodeConstructor()),
       (f = Ct.getTokenConstructor()),
       (h = Ct.getIdentifierConstructor()),
       (b = Ct.getPrivateIdentifierConstructor()),
       (v = Ct.getSourceFileConstructor()),
-      (jt = ig(o)),
+      (Jt = ig(o)),
       (Ke = p),
-      (zn = m),
-      (Jt = g),
+      (Vn = m),
+      (Rt = g),
       (Zt = x),
-      (ct = Gd(x)),
+      (ct = Xd(x)),
       (st = []),
       (bt = 0),
       (ht = new Map()),
@@ -24302,20 +24289,20 @@ var na;
     ((sn = !1),
       t.setText(Ke),
       t.setOnError(ei),
-      t.setScriptTarget(zn),
+      t.setScriptTarget(Vn),
       t.setLanguageVariant(ct),
       t.setScriptKind(Zt),
       t.setJSDocParsingMode(P));
   }
-  function Wn() {
+  function Gn() {
     (t.clearCommentDirectives(),
       t.setText(""),
       t.setOnError(void 0),
       t.setScriptKind(0),
       t.setJSDocParsingMode(0),
       (Ke = void 0),
-      (zn = void 0),
-      (Jt = void 0),
+      (Vn = void 0),
+      (Rt = void 0),
       (Zt = void 0),
       (ct = void 0),
       (gt = 0),
@@ -24326,14 +24313,14 @@ var na;
       (ln = void 0),
       (Ft = !0));
   }
-  /** @returns {InstanceType<typeof d6>} */ function Jr(/** @type {number} */ o, /** @type {boolean} */ p, /** @type {number} */ m, g, x) {
-    let P = Zv(jt);
+  /** @returns {InstanceType<typeof d6>} */ function Rr(/** @type {number} */ o, /** @type {boolean} */ p, /** @type {number} */ m, g, x) {
+    let P = Zv(Jt);
     (P && (it |= 33554432), (gt = it), B());
     let Q = Tn(0, Ht);
     q.assert(u() === 1);
     let _e = qe(),
       ee = Pe(Gt(), _e),
-      te = se(jt, o, m, P, Q, ee, gt, g);
+      te = se(Jt, o, m, P, Q, ee, gt, g);
     return (
       n6(te, Ke),
       r6(te, ce),
@@ -24348,20 +24335,20 @@ var na;
       te
     );
     function ce(Ue, Re, Ne) {
-      st.push(Ja(jt, Ke, Ue, Re, Ne));
+      st.push(ja(Jt, Ke, Ue, Re, Ne));
     }
   }
-  let Gn = !1;
-  /** @returns {Kf | xh | vh | Th} */ function Pe(/** @type {Kf | vh | xh | Th} */ o, /** @type {boolean} */ p) {
+  let Yn = !1;
+  /** @returns {ed | wh | Sh | kh} */ function Pe(/** @type {ed | Sh | wh | kh} */ o, /** @type {boolean} */ p) {
     if (!p) return o;
     q.assert(!o.jsDoc);
     let m = wy(E2(o, Ke), (g) => sl.parseJSDocComment(o, g.pos, g.end - g.pos));
-    return (m.length && (o.jsDoc = m), Gn && ((Gn = !1), (o.flags |= 536870912)), o);
+    return (m.length && (o.jsDoc = m), Yn && ((Yn = !1), (o.flags |= 536870912)), o);
   }
   function xr(o) {
-    let p = Jt,
+    let p = Rt,
       m = Dl.createSyntaxCursor(o);
-    Jt = { currentNode: ce };
+    Rt = { currentNode: ce };
     let g = [],
       x = st;
     st = [];
@@ -24371,8 +24358,8 @@ var na;
       let Ue = o.statements[P],
         Re = o.statements[Q];
       (Dn(g, o.statements, P, Q), (P = te(o.statements, Q)));
-      let Ne = Sp(x, (Ot) => Ot.start >= Ue.pos),
-        Xt = Ne >= 0 ? Sp(x, (Ot) => Ot.start >= Re.pos, Ne) : -1;
+      let Ne = kp(x, (Ot) => Ot.start >= Ue.pos),
+        Xt = Ne >= 0 ? kp(x, (Ot) => Ot.start >= Re.pos, Ne) : -1;
       (Ne >= 0 && Dn(st, x, Ne, Xt >= 0 ? Xt : void 0),
         pn(() => {
           let Ot = it;
@@ -24380,9 +24367,9 @@ var na;
             let dr = t.getTokenFullStart(),
               mr = cs(0, Ht);
             if ((g.push(mr), dr === t.getTokenFullStart() && B(), P >= 0)) {
-              let Jn = o.statements[P];
-              if (mr.end === Jn.pos) break;
-              mr.end > Jn.pos && (P = te(o.statements, P + 1));
+              let Rn = o.statements[P];
+              if (mr.end === Rn.pos) break;
+              mr.end > Rn.pos && (P = te(o.statements, P + 1));
             }
           }
           it = Ot;
@@ -24392,10 +24379,10 @@ var na;
     if (P >= 0) {
       let Ue = o.statements[P];
       Dn(g, o.statements, P);
-      let Re = Sp(x, (Ne) => Ne.start >= Ue.pos);
+      let Re = kp(x, (Ne) => Ne.start >= Ue.pos);
       Re >= 0 && Dn(st, x, Re);
     }
-    return ((Jt = p), y.updateSourceFile(o, yn(W(g), o.statements)));
+    return ((Rt = p), y.updateSourceFile(o, yn(G(g), o.statements)));
     function _e(Ue) {
       return !(Ue.flags & 65536) && !!(Ue.transformFlags & 67108864);
     }
@@ -24409,16 +24396,16 @@ var na;
     }
     function ce(Ue) {
       let Re = m.currentNode(Ue);
-      return (Ft && Re && _e(Re) && $p(Re), Re);
+      return (Ft && Re && _e(Re) && Kp(Re), Re);
     }
   }
   function L(/** @type {d6 | undefined} */ o) {
     Rb(o, !0);
   }
   e.fixupParentReferences = L;
-  /** @returns {InstanceType<typeof d6>} */ function se(/** @type {string} */ o, p, m, g, x, /** @type {Kf | vh | xh | Th | undefined} */ P, Q, _e) {
+  /** @returns {InstanceType<typeof d6>} */ function se(/** @type {string} */ o, p, m, g, x, /** @type {ed | Sh | wh | kh | undefined} */ P, Q, _e) {
     let ee = y.createSourceFile(x, P, Q);
-    if ((Hd(ee, 0, Ke.length), te(ee), !g && yh(ee) && ee.transformFlags & 67108864)) {
+    if ((Qd(ee, 0, Ke.length), te(ee), !g && vh(ee) && ee.transformFlags & 67108864)) {
       let ce = ee;
       ((ee = xr(ee)), ce !== ee && te(ee));
     }
@@ -24429,7 +24416,7 @@ var na;
         (ce.bindSuggestionDiagnostics = void 0),
         (ce.languageVersion = p),
         (ce.fileName = o),
-        (ce.languageVariant = Gd(m)),
+        (ce.languageVariant = Xd(m)),
         (ce.isDeclarationFile = g),
         (ce.scriptKind = m),
         _e(ce),
@@ -24472,19 +24459,19 @@ var na;
   function ut(o) {
     return Pt(8192, o);
   }
-  /** @returns {xh | Kf} */ function Rr(o) {
+  /** @returns {wh | ed} */ function Ur(o) {
     return St(8192, o);
   }
-  /** @returns {Kf | xh | vh | Th} */ function Tr(o) {
+  /** @returns {ed | wh | Sh | kh} */ function Tr(o) {
     return Pt(131072, o);
   }
-  /** @returns {Kf | xh | vh | Th} */ function Mn(o) {
+  /** @returns {ed | wh | Sh | kh} */ function Ln(o) {
     return St(131072, o);
   }
-  function Yn(o) {
+  function Hn(o) {
     return St(16384, o);
   }
-  /** @returns {Kf | xh} */ function Ei(o) {
+  /** @returns {ed | wh} */ function Ei(o) {
     return St(32768, o);
   }
   function U(o) {
@@ -24505,7 +24492,7 @@ var na;
   /** @returns {boolean} */ function Ee() {
     return ke(16384);
   }
-  /** @returns {boolean} */ function he() {
+  /** @returns {boolean} */ function ge() {
     return ke(8192);
   }
   /** @returns {boolean} */ function Ye() {
@@ -24521,9 +24508,9 @@ var na;
     return at(t.getTokenStart(), t.getTokenEnd(), o, ...p);
   }
   function xn(/** @type {number} */ o, p, m, ...g) {
-    let x = Va(st),
+    let x = za(st),
       P;
-    return ((!x || o !== x.start) && ((P = Ja(jt, Ke, o, p, m, ...g)), st.push(P)), (sn = !0), P);
+    return ((!x || o !== x.start) && ((P = ja(Jt, Ke, o, p, m, ...g)), st.push(P)), (sn = !0), P);
   }
   function at(/** @type {number} */ o, p, m, ...g) {
     return xn(o, p - o, m, ...g);
@@ -24534,7 +24521,7 @@ var na;
   function ei(o, p, m) {
     xn(t.getTokenEnd(), p, o, m);
   }
-  /** @returns {number} */ function O() {
+  /** @returns {number} */ function M() {
     return t.getTokenFullStart();
   }
   /** @returns {boolean} */ function qe() {
@@ -24546,7 +24533,7 @@ var na;
   /** @returns {number} */ function Me() {
     return (lt = t.scan());
   }
-  /** @returns {xh | Kf | vh} */ function je(o) {
+  /** @returns {wh | ed | Sh} */ function je(o) {
     return (B(), o());
   }
   /** @returns {number} */ function B() {
@@ -24581,7 +24568,7 @@ var na;
   /** @returns {number} */ function zt() {
     return (lt = t.scanJsxIdentifier());
   }
-  /** @returns {number} */ function Hn() {
+  /** @returns {number} */ function Xn() {
     return (lt = t.scanJsxToken());
   }
   /** @returns {number} */ function Ai() {
@@ -24598,7 +24585,7 @@ var na;
   function H(o) {
     return pn(o, 1);
   }
-  function le(o) {
+  function ue(o) {
     return pn(o, 0);
   }
   /** @returns {boolean} */ function Ve() {
@@ -24610,14 +24597,14 @@ var na;
   /** @returns {boolean} */ function j(/** @type {number} */ o, p, m = !0) {
     return u() === o ? (m && B(), !0) : (p ? De(p) : De(E._0_expected, rt(o)), !1);
   }
-  let yt = Object.keys(_f).filter(/** @returns {boolean} */ (o) => o.length > 2);
-  function wt(/** @type {Kf | vh | xh | Th} */ o) {
-    if (H1(o)) {
+  let yt = Object.keys(cf).filter(/** @returns {boolean} */ (o) => o.length > 2);
+  function wt(/** @type {ed | Sh | wh | kh} */ o) {
+    if (Q1(o)) {
       at(Ir(Ke, o.template.pos), o.template.end, E.Module_declaration_names_may_only_use_or_quoted_strings);
       return;
     }
     let p = et(o) ? Pn(o) : void 0;
-    if (!p || !wg(p, zn)) {
+    if (!p || !wg(p, Vn)) {
       De(E._0_expected, rt(27));
       return;
     }
@@ -24631,17 +24618,17 @@ var na;
       case "declare":
         return;
       case "interface":
-        Rt(E.Interface_name_cannot_be_0, E.Interface_must_be_given_a_name, 19);
+        Ut(E.Interface_name_cannot_be_0, E.Interface_must_be_given_a_name, 19);
         return;
       case "is":
         at(m, t.getTokenStart(), E.A_type_predicate_is_only_allowed_in_return_type_position_for_functions_and_methods);
         return;
       case "module":
       case "namespace":
-        Rt(E.Namespace_name_cannot_be_0, E.Namespace_must_be_given_a_name, 19);
+        Ut(E.Namespace_name_cannot_be_0, E.Namespace_must_be_given_a_name, 19);
         return;
       case "type":
-        Rt(E.Type_alias_name_cannot_be_0, E.Type_alias_must_be_given_a_name, 64);
+        Ut(E.Type_alias_name_cannot_be_0, E.Type_alias_must_be_given_a_name, 64);
         return;
     }
     let g = __(p, yt, xt) ?? fn(p);
@@ -24651,13 +24638,13 @@ var na;
     }
     u() !== 0 && at(m, o.end, E.Unexpected_keyword_or_identifier);
   }
-  function Rt(o, p, /** @type {number} */ m) {
+  function Ut(o, p, /** @type {number} */ m) {
     u() === m ? De(p) : De(o, t.getTokenValue());
   }
   function fn(/** @type {string | undefined} */ o) {
     for (let p of yt) if (o.length > p.length + 2 && xl(o, p)) return `${p} ${o.slice(p.length)}`;
   }
-  function Gl(/** @type {Kf | vh | xh | Th} */ o, /** @type {Kf | vh | xh | Th | undefined} */ p, /** @type {Kf | vh | xh | Th | undefined} */ m) {
+  function Hl(/** @type {ed | Sh | wh | kh} */ o, /** @type {ed | Sh | wh | kh | undefined} */ p, /** @type {ed | Sh | wh | kh | undefined} */ m) {
     if (u() === 60 && !t.hasPrecedingLineBreak()) {
       De(E.Decorators_must_precede_the_name_and_all_keywords_of_property_declarations);
       return;
@@ -24679,41 +24666,41 @@ var na;
     }
   }
   function M_(o) {
-    return u() === o ? (ze(), !0) : (q.assert(Ap(o)), De(E._0_expected, rt(o)), !1);
+    return u() === o ? (ze(), !0) : (q.assert(Dp(o)), De(E._0_expected, rt(o)), !1);
   }
-  function Ur(/** @type {number} */ o, /** @type {number} */ p, /** @type {boolean} */ m, /** @type {number} */ g) {
+  function Br(/** @type {number} */ o, /** @type {number} */ p, /** @type {boolean} */ m, /** @type {number} */ g) {
     if (u() === p) {
       B();
       return;
     }
     let x = De(E._0_expected, rt(p));
-    m && x && pl(x, Ja(jt, Ke, g, 1, E.The_parser_expected_to_find_a_1_to_match_the_0_token_here, rt(o), rt(p)));
+    m && x && pl(x, ja(Jt, Ke, g, 1, E.The_parser_expected_to_find_a_1_to_match_the_0_token_here, rt(o), rt(p)));
   }
   /** @returns {boolean} */ function Je(/** @type {number} */ o) {
     return u() === o ? (B(), !0) : !1;
   }
-  /** @returns {InstanceType<typeof vh> | undefined} */ function ft(/** @type {number} */ o) {
+  /** @returns {InstanceType<typeof Sh> | undefined} */ function ft(/** @type {number} */ o) {
     if (u() === o) return Gt();
   }
-  function Yl(o) {
-    if (u() === o) return Xl();
+  function Xl(o) {
+    if (u() === o) return Ql();
   }
-  /** @returns {InstanceType<typeof vh>} */ function Xn(/** @type {number} */ o, p, /** @type {string | undefined} */ m) {
+  /** @returns {InstanceType<typeof Sh>} */ function $n(/** @type {number} */ o, p, /** @type {string | undefined} */ m) {
     return ft(o) || Yt(o, !1, p || E._0_expected, m || rt(o));
   }
-  function Hl(o) {
-    let p = Yl(o);
-    return p || (q.assert(Ap(o)), Yt(o, !1, E._0_expected, rt(o)));
+  function $l(o) {
+    let p = Xl(o);
+    return p || (q.assert(Dp(o)), Yt(o, !1, E._0_expected, rt(o)));
   }
-  /** @returns {InstanceType<typeof vh>} */ function Gt() {
-    let o = O(),
+  /** @returns {InstanceType<typeof Sh>} */ function Gt() {
+    let o = M(),
       p = u();
-    return (B(), D(ge(p), o));
+    return (B(), D(be(p), o));
   }
-  function Xl() {
-    let o = O(),
+  function Ql() {
+    let o = M(),
       p = u();
-    return (ze(), D(ge(p), o));
+    return (ze(), D(be(p), o));
   }
   /** @returns {boolean} */ function lr() {
     return u() === 27 ? !0 : u() === 20 || u() === 1 || t.hasPrecedingLineBreak();
@@ -24725,39 +24712,39 @@ var na;
     return ua() || j(27);
   }
   function Dt(o, /** @type {number} */ p, /** @type {number | undefined} */ m, /** @type {boolean | undefined} */ g) {
-    let x = W(o, g);
+    let x = G(o, g);
     return (vi(x, p, m ?? t.getTokenFullStart()), x);
   }
-  /** @returns {xh | vh | Kf | Th} */ function D(/** @type {xh | vh | Kf | Th} */ o, /** @type {number} */ p, m) {
+  /** @returns {wh | Sh | ed | kh} */ function D(/** @type {wh | Sh | ed | kh} */ o, /** @type {number} */ p, m) {
     return (vi(o, p, m ?? t.getTokenFullStart()), it && (o.flags |= it), sn && ((sn = !1), (o.flags |= 262144)), o);
   }
-  /** @returns {xh | Kf | vh} */ function Yt(/** @type {number} */ o, /** @type {boolean} */ p, m, ...g) {
+  /** @returns {wh | ed | Sh} */ function Yt(/** @type {number} */ o, /** @type {boolean} */ p, m, ...g) {
     p ? xn(t.getTokenFullStart(), 0, m, ...g) : m && De(m, ...g);
-    let x = O(),
+    let x = M(),
       P =
         o === 80
           ? pe("", void 0)
-          : Jd(o)
+          : Bd(o)
             ? y.createTemplateLiteralLikeNode(o, "", "", void 0)
             : o === 9
               ? k("", void 0)
               : o === 11
-                ? C("", void 0)
+                ? A("", void 0)
                 : o === 283
                   ? y.createMissingDeclaration()
-                  : ge(o);
+                  : be(o);
     return D(P, x);
   }
-  /** @returns {string} */ function Br(/** @type {string} */ o) {
+  /** @returns {string} */ function qr(/** @type {string} */ o) {
     let p = ht.get(o);
     return (p === void 0 && ht.set(o, (p = o)), p);
   }
-  /** @returns {InstanceType<typeof xh>} */ function ur(/** @type {boolean} */ o, p, m) {
+  /** @returns {InstanceType<typeof wh>} */ function ur(/** @type {boolean} */ o, p, m) {
     if (o) {
       vn++;
-      let _e = t.hasPrecedingJSDocLeadingAsterisks() ? t.getTokenStart() : O(),
+      let _e = t.hasPrecedingJSDocLeadingAsterisks() ? t.getTokenStart() : M(),
         ee = u(),
-        te = Br(t.getTokenValue()),
+        te = qr(t.getTokenValue()),
         ce = t.hasExtendedUnicodeEscape();
       return (Me(), D(pe(te, ee, ce), _e));
     }
@@ -24770,16 +24757,16 @@ var na;
       Q = x ? E.Identifier_expected_0_is_a_reserved_word_that_cannot_be_used_here : E.Identifier_expected;
     return Yt(80, g, p || Q, P);
   }
-  /** @returns {InstanceType<typeof xh>} */ function as(o) {
+  /** @returns {InstanceType<typeof wh>} */ function as(o) {
     return ur(Ve(), void 0, o);
   }
-  /** @returns {InstanceType<typeof xh>} */ function vt(o, p) {
+  /** @returns {InstanceType<typeof wh>} */ function vt(o, p) {
     return ur(Te(), o, p);
   }
-  /** @returns {InstanceType<typeof xh>} */ function Ut(o) {
+  /** @returns {InstanceType<typeof wh>} */ function Bt(o) {
     return ur(kt(u()), o);
   }
-  /** @returns {InstanceType<typeof xh>} */ function ti() {
+  /** @returns {InstanceType<typeof wh>} */ function ti() {
     return (
       (t.hasUnicodeEscape() || t.hasExtendedUnicodeEscape()) && De(E.Unicode_escape_sequence_cannot_appear_here),
       ur(kt(u()))
@@ -24791,29 +24778,29 @@ var na;
   /** @returns {boolean} */ function L_() {
     return kt(u()) || u() === 11;
   }
-  /** @returns {Kf | xh | vh | Th} */ function $l(/** @type {boolean} */ o) {
+  /** @returns {ed | wh | Sh | kh} */ function Kl(/** @type {boolean} */ o) {
     if (u() === 11 || u() === 9 || u() === 10) {
-      let p = $n();
-      return ((p.text = Br(p.text)), p);
+      let p = Qn();
+      return ((p.text = qr(p.text)), p);
     }
-    return o && u() === 23 ? Ql() : u() === 81 ? pa() : Ut();
+    return o && u() === 23 ? Zl() : u() === 81 ? pa() : Bt();
   }
-  /** @returns {Kf | xh | vh | Th} */ function qr() {
-    return $l(!0);
+  /** @returns {ed | wh | Sh | kh} */ function Fr() {
+    return Kl(!0);
   }
-  /** @returns {InstanceType<typeof Kf>} */ function Ql() {
-    let o = O();
+  /** @returns {InstanceType<typeof ed>} */ function Zl() {
+    let o = M();
     j(23);
     let p = ut(At);
     return (j(24), D(y.createComputedPropertyName(p), o));
   }
   function pa() {
-    let o = O(),
-      p = xe(Br(t.getTokenValue()));
+    let o = M(),
+      p = xe(qr(t.getTokenValue()));
     return (B(), D(p, o));
   }
   /** @returns {boolean} */ function ni(/** @type {number} */ o) {
-    return u() === o && le(j_);
+    return u() === o && ue(j_);
   }
   /** @returns {boolean} */ function ss() {
     return (B(), t.hasPrecedingLineBreak() ? !1 : pr());
@@ -24823,14 +24810,14 @@ var na;
       case 87:
         return B() === 94;
       case 95:
-        return (B(), u() === 90 ? H(Di) : u() === 156 ? H(Kl) : Ci());
+        return (B(), u() === 90 ? H(Di) : u() === 156 ? H(eu) : Ci());
       case 90:
         return Di();
       case 126:
         return (B(), pr());
       case 139:
       case 153:
-        return (B(), Zl());
+        return (B(), tu());
       default:
         return ss();
     }
@@ -24838,16 +24825,16 @@ var na;
   /** @returns {boolean} */ function Ci() {
     return u() === 60 || (u() !== 42 && u() !== 130 && u() !== 19 && pr());
   }
-  /** @returns {boolean} */ function Kl() {
+  /** @returns {boolean} */ function eu() {
     return (B(), Ci());
   }
   /** @returns {boolean} */ function J_() {
-    return Xr(u()) && le(j_);
+    return $r(u()) && ue(j_);
   }
   /** @returns {boolean} */ function pr() {
     return u() === 23 || u() === 19 || u() === 42 || u() === 26 || Sr();
   }
-  /** @returns {boolean} */ function Zl() {
+  /** @returns {boolean} */ function tu() {
     return u() === 23 || Sr();
   }
   /** @returns {boolean} */ function Di() {
@@ -24936,7 +24923,7 @@ var na;
   /** @returns {boolean} */ function Pi() {
     return (B(), Te());
   }
-  function eu() {
+  function nu() {
     return (B(), kt(u()));
   }
   /** @returns {boolean} */ function U_() {
@@ -24989,7 +24976,7 @@ var na;
       case 13:
         return u() === 32 || u() === 44;
       case 14:
-        return u() === 30 && H(lp);
+        return u() === 30 && H(pp);
       default:
         return !1;
     }
@@ -25006,7 +24993,7 @@ var na;
     let m = bt;
     bt |= 1 << o;
     let g = [],
-      x = O();
+      x = M();
     for (; !da(o);) {
       if (fa(o, !1)) {
         g.push(cs(o, p));
@@ -25016,16 +25003,16 @@ var na;
     }
     return ((bt = m), Dt(g, x));
   }
-  /** @returns {Kf | xh | vh | Th | undefined} */ function cs(/** @type {number} */ o, p) {
+  /** @returns {ed | wh | Sh | kh | undefined} */ function cs(/** @type {number} */ o, p) {
     let m = ma(o);
     return m ? F_(m) : p();
   }
   function ma(/** @type {number} */ o, /** @type {number | undefined} */ p) {
-    /** @type {Kf[] | undefined} */ var m;
-    if (!Jt || !z_(o) || sn) return;
-    let g = Jt.currentNode(p ?? t.getTokenFullStart());
-    if (!(ea(g) || Kv(g) || y1(g) || (g.flags & 101441536) !== it) && V_(g, o))
-      return (kf(g) && (m = g.jsDoc) != null && m.jsDocCache && (g.jsDoc.jsDocCache = void 0), g);
+    /** @type {ed[] | undefined} */ var m;
+    if (!Rt || !z_(o) || sn) return;
+    let g = Rt.currentNode(p ?? t.getTokenFullStart());
+    if (!(ea(g) || Kv(g) || v1(g) || (g.flags & 101441536) !== it) && V_(g, o))
+      return (Af(g) && (m = g.jsDoc) != null && m.jsDocCache && (g.jsDoc.jsDocCache = void 0), g);
   }
   function F_(o) {
     return (t.resetTokenState(o.end), B(), o);
@@ -25218,7 +25205,7 @@ var na;
     let g = bt;
     bt |= 1 << o;
     let x = [],
-      P = O(),
+      P = M(),
       Q = -1;
     for (;;) {
       if (fa(o, !1)) {
@@ -25241,96 +25228,96 @@ var na;
     return o === 6 ? E.An_enum_member_name_must_be_followed_by_a_or : void 0;
   }
   function fr() {
-    let o = Dt([], O());
+    let o = Dt([], M());
     return ((o.isMissingList = !0), o);
   }
   /** @returns {boolean} */ function $_(o) {
     return !!o.isMissingList;
   }
-  function Fr(/** @type {number} */ o, p, /** @type {number} */ m, /** @type {number} */ g) {
+  function zr(/** @type {number} */ o, p, /** @type {number} */ m, /** @type {number} */ g) {
     if (j(m)) {
       let x = dn(o, p);
       return (j(g), x);
     }
     return fr();
   }
-  /** @returns {Kf | xh | vh | Th} */ function zr(/** @type {boolean} */ o, p) {
-    let m = O(),
-      g = o ? Ut(p) : vt(p);
+  /** @returns {ed | wh | Sh | kh} */ function Vr(/** @type {boolean} */ o, p) {
+    let m = M(),
+      g = o ? Bt(p) : vt(p);
     for (; Je(25) && u() !== 30;) g = D(y.createQualifiedName(g, ri(o, !1, !0)), m);
     return g;
   }
-  function tu(o, p) {
+  function ru(o, p) {
     return D(y.createQualifiedName(o, p), o.pos);
   }
-  /** @returns {xh | Th} */ function ri(/** @type {boolean} */ o, /** @type {boolean} */ p, m) {
+  /** @returns {wh | kh} */ function ri(/** @type {boolean} */ o, /** @type {boolean} */ p, m) {
     if (t.hasPrecedingLineBreak() && kt(u()) && H(qs)) return Yt(80, !0, E.Identifier_expected);
     if (u() === 81) {
       let g = pa();
       return p ? g : Yt(80, !0, E.Identifier_expected);
     }
-    return o ? (m ? Ut() : ti()) : vt();
+    return o ? (m ? Bt() : ti()) : vt();
   }
-  function nu(/** @type {boolean} */ o) {
-    let p = O(),
+  function iu(/** @type {boolean} */ o) {
+    let p = M(),
       m = [],
       g;
     do ((g = eo(o)), m.push(g));
     while (g.literal.kind === 17);
     return Dt(m, p);
   }
-  /** @returns {InstanceType<typeof Kf>} */ function ya(/** @type {boolean} */ o) {
-    let p = O();
-    return D(y.createTemplateExpression(Ii(o), nu(o)), p);
+  /** @returns {InstanceType<typeof ed>} */ function ya(/** @type {boolean} */ o) {
+    let p = M();
+    return D(y.createTemplateExpression(Ii(o), iu(o)), p);
   }
-  /** @returns {InstanceType<typeof Kf>} */ function Q_() {
-    let o = O();
-    return D(y.createTemplateLiteralType(Ii(!1), ru()), o);
+  /** @returns {InstanceType<typeof ed>} */ function Q_() {
+    let o = M();
+    return D(y.createTemplateLiteralType(Ii(!1), au()), o);
   }
-  function ru() {
-    let o = O(),
+  function au() {
+    let o = M(),
       p = [],
       m;
     do ((m = K_()), p.push(m));
     while (m.literal.kind === 17);
     return Dt(p, o);
   }
-  /** @returns {InstanceType<typeof Kf>} */ function K_() {
-    let o = O();
+  /** @returns {InstanceType<typeof ed>} */ function K_() {
+    let o = M();
     return D(y.createTemplateLiteralTypeSpan(ot(), Z_(!1)), o);
   }
-  /** @returns {InstanceType<typeof vh>} */ function Z_(/** @type {boolean} */ o) {
-    return u() === 20 ? (Nt(o), to()) : Xn(18, E._0_expected, rt(20));
+  /** @returns {InstanceType<typeof Sh>} */ function Z_(/** @type {boolean} */ o) {
+    return u() === 20 ? (Nt(o), to()) : $n(18, E._0_expected, rt(20));
   }
-  /** @returns {InstanceType<typeof Kf>} */ function eo(/** @type {boolean} */ o) {
-    let p = O();
+  /** @returns {InstanceType<typeof ed>} */ function eo(/** @type {boolean} */ o) {
+    let p = M();
     return D(y.createTemplateSpan(ut(At), Z_(o)), p);
   }
-  /** @returns {Kf | xh | vh | Th} */ function $n() {
+  /** @returns {ed | wh | Sh | kh} */ function Qn() {
     return ii(u());
   }
-  /** @returns {InstanceType<typeof vh>} */ function Ii(/** @type {boolean} */ o) {
+  /** @returns {InstanceType<typeof Sh>} */ function Ii(/** @type {boolean} */ o) {
     !o && t.getTokenFlags() & 26656 && Nt(!1);
     let p = ii(u());
     return (q.assert(p.kind === 16, "Template head has wrong token kind"), p);
   }
-  /** @returns {InstanceType<typeof vh>} */ function to() {
+  /** @returns {InstanceType<typeof Sh>} */ function to() {
     let o = ii(u());
     return (q.assert(o.kind === 17 || o.kind === 18, "Template fragment has wrong token kind"), o);
   }
-  /** @returns {string} */ function iu(/** @type {number} */ o) {
+  /** @returns {string} */ function su(/** @type {number} */ o) {
     let p = o === 15 || o === 18,
       m = t.getTokenText();
     return m.substring(1, m.length - (t.isUnterminated() ? 0 : p ? 1 : 2));
   }
-  /** @returns {Kf | xh | vh | Th} */ function ii(/** @type {number} */ o) {
-    let p = O(),
-      m = Jd(o)
-        ? y.createTemplateLiteralLikeNode(o, t.getTokenValue(), iu(o), t.getTokenFlags() & 7176)
+  /** @returns {ed | wh | Sh | kh} */ function ii(/** @type {number} */ o) {
+    let p = M(),
+      m = Bd(o)
+        ? y.createTemplateLiteralLikeNode(o, t.getTokenValue(), su(o), t.getTokenFlags() & 7176)
         : o === 9
           ? k(t.getTokenValue(), t.getNumericLiteralFlags())
           : o === 11
-            ? C(t.getTokenValue(), void 0, t.hasExtendedUnicodeEscape())
+            ? A(t.getTokenValue(), void 0, t.hasExtendedUnicodeEscape())
             : Qg(o)
               ? R(o, t.getTokenValue())
               : q.fail();
@@ -25341,17 +25328,17 @@ var na;
       D(m, p)
     );
   }
-  /** @returns {Kf | xh | vh | Th} */ function ai() {
-    return zr(!0, E.Type_expected);
+  /** @returns {ed | wh | Sh | kh} */ function ai() {
+    return Vr(!0, E.Type_expected);
   }
   function no() {
-    if (!t.hasPrecedingLineBreak() && Et() === 30) return Fr(20, ot, 30, 32);
+    if (!t.hasPrecedingLineBreak() && Et() === 30) return zr(20, ot, 30, 32);
   }
-  /** @returns {InstanceType<typeof Kf>} */ function ga() {
-    let o = O();
+  /** @returns {InstanceType<typeof ed>} */ function ga() {
+    let o = M();
     return D(y.createTypeReferenceNode(ai(), no()), o);
   }
-  /** @returns {boolean} */ function ds(/** @type {Kf | vh | xh | Th} */ o) {
+  /** @returns {boolean} */ function ds(/** @type {ed | Sh | wh | kh} */ o) {
     switch (o.kind) {
       case 184:
         return ea(o.typeName);
@@ -25366,23 +25353,23 @@ var na;
         return !1;
     }
   }
-  function au(o) {
+  function _u(o) {
     return (B(), D(y.createTypePredicateNode(void 0, o, ot()), o.pos));
   }
-  /** @returns {InstanceType<typeof Kf>} */ function ms() {
-    let o = O();
+  /** @returns {InstanceType<typeof ed>} */ function ms() {
+    let o = M();
     return (B(), D(y.createThisTypeNode(), o));
   }
-  function su() {
-    let o = O();
+  function ou() {
+    let o = M();
     return (B(), D(y.createJSDocAllType(), o));
   }
   function ro() {
-    let o = O();
+    let o = M();
     return (B(), D(y.createJSDocNonNullableType(Es(), !1), o));
   }
-  function _u() {
-    let o = O();
+  function cu() {
+    let o = M();
     return (
       B(),
       u() === 28 || u() === 20 || u() === 22 || u() === 32 || u() === 64 || u() === 52
@@ -25391,26 +25378,26 @@ var na;
     );
   }
   function io() {
-    let o = O(),
+    let o = M(),
       p = qe();
-    if (le(Kc)) {
-      let m = Qn(36),
-        g = Ln(59, !1);
+    if (ue(Kc)) {
+      let m = Kn(36),
+        g = jn(59, !1);
       return Pe(D(y.createJSDocFunctionType(m, g), o), p);
     }
-    return D(y.createTypeReferenceNode(Ut(), void 0), o);
+    return D(y.createTypeReferenceNode(Bt(), void 0), o);
   }
   function hs() {
-    let o = O(),
+    let o = M(),
       p;
     return (
-      (u() === 110 || u() === 105) && ((p = Ut()), j(59)),
+      (u() === 110 || u() === 105) && ((p = Bt()), j(59)),
       D(y.createParameterDeclaration(void 0, void 0, p, void 0, ys(), void 0), o)
     );
   }
   function ys() {
     t.setSkipJsDocLeadingAsterisks(!0);
-    let o = O();
+    let o = M();
     if (Je(144)) {
       let g = y.createJSDocNamepathType(void 0);
       e: for (;;)
@@ -25433,16 +25420,16 @@ var na;
       u() === 64 ? (B(), D(y.createJSDocOptionalType(m), o)) : m
     );
   }
-  /** @returns {InstanceType<typeof Kf>} */ function ao() {
-    let o = O();
+  /** @returns {InstanceType<typeof ed>} */ function ao() {
+    let o = M();
     j(114);
-    let p = zr(!0),
+    let p = Vr(!0),
       m = t.hasPrecedingLineBreak() ? void 0 : Ia();
     return D(y.createTypeQueryNode(p, m), o);
   }
-  /** @returns {InstanceType<typeof Kf>} */ function so() {
-    let o = O(),
-      p = jn(!1, !0),
+  /** @returns {InstanceType<typeof ed>} */ function so() {
+    let o = M(),
+      p = Jn(!1, !0),
       m = vt(),
       g,
       x;
@@ -25452,41 +25439,41 @@ var na;
     return ((Q.expression = x), D(Q, o));
   }
   function mn() {
-    if (u() === 30) return Fr(19, so, 30, 32);
+    if (u() === 30) return zr(19, so, 30, 32);
   }
   /** @returns {boolean} */ function ba(/** @type {boolean} */ o) {
-    return u() === 26 || Vs() || Xr(u()) || u() === 60 || si(!o);
+    return u() === 26 || Vs() || $r(u()) || u() === 60 || si(!o);
   }
-  /** @returns {Kf | xh | vh | Th} */ function _o(o) {
+  /** @returns {ed | wh | Sh | kh} */ function _o(o) {
     let p = _i(E.Private_identifiers_cannot_be_used_as_parameters);
-    return (x2(p) === 0 && !nn(o) && Xr(u()) && B(), p);
+    return (x2(p) === 0 && !nn(o) && $r(u()) && B(), p);
   }
   /** @returns {boolean} */ function oo() {
     return Ve() || u() === 23 || u() === 19;
   }
-  /** @returns {InstanceType<typeof Kf>} */ function gs(/** @type {boolean} */ o) {
+  /** @returns {InstanceType<typeof ed>} */ function gs(/** @type {boolean} */ o) {
     return bs(o);
   }
-  /** @returns {InstanceType<typeof Kf> | undefined} */ function co(/** @type {boolean} */ o) {
+  /** @returns {InstanceType<typeof ed> | undefined} */ function co(/** @type {boolean} */ o) {
     return bs(o, !1);
   }
-  /** @returns {InstanceType<typeof Kf> | undefined} */ function bs(/** @type {boolean} */ o, p = !0) {
-    let m = O(),
+  /** @returns {InstanceType<typeof ed> | undefined} */ function bs(/** @type {boolean} */ o, p = !0) {
+    let m = M(),
       g = qe(),
-      x = o ? U(() => jn(!0)) : K(() => jn(!0));
+      x = o ? U(() => Jn(!0)) : K(() => Jn(!0));
     if (u() === 110) {
       let ee = y.createParameterDeclaration(x, void 0, ur(!0), void 0, wr(), void 0),
-        te = Zp(x);
+        te = tf(x);
       return (te && un(te, E.Neither_decorators_nor_modifiers_may_be_applied_to_this_parameters), Pe(D(ee, m), g));
     }
     let P = Ft;
     Ft = !1;
-    /** @type {vh | undefined} */ let Q = ft(26);
+    /** @type {Sh | undefined} */ let Q = ft(26);
     if (!p && !oo()) return;
     let _e = Pe(D(y.createParameterDeclaration(x, Q, _o(x), ft(58), wr(), Er()), m), g);
     return ((Ft = P), _e);
   }
-  /** @returns {Kf | xh | vh | Th | undefined} */ function Ln(/** @type {number} */ o, /** @type {boolean} */ p) {
+  /** @returns {ed | wh | Sh | kh | undefined} */ function jn(/** @type {number} */ o, /** @type {boolean} */ p) {
     if (lo(o, p)) return Tr(Ta);
   }
   /** @returns {boolean} */ function lo(/** @type {number} */ o, /** @type {boolean} */ p) {
@@ -25496,10 +25483,10 @@ var na;
     let m = Ee(),
       g = Xe();
     ($e(!!(o & 1)), _t(!!(o & 2)));
-    let x = o & 32 ? dn(17, hs) : dn(16, /** @returns {Kf | undefined} */ () => (p ? gs(g) : co(g)));
+    let x = o & 32 ? dn(17, hs) : dn(16, /** @returns {ed | undefined} */ () => (p ? gs(g) : co(g)));
     return ($e(m), _t(g), x);
   }
-  function Qn(/** @type {number} */ o) {
+  function Kn(/** @type {number} */ o) {
     if (!j(21)) return fr();
     let p = vs(o, !0);
     return (j(22), p);
@@ -25507,43 +25494,43 @@ var na;
   function va() {
     Je(28) || en();
   }
-  /** @returns {InstanceType<typeof Kf>} */ function uo(/** @type {number} */ o) {
-    let p = O(),
+  /** @returns {InstanceType<typeof ed>} */ function uo(/** @type {number} */ o) {
+    let p = M(),
       m = qe();
     o === 181 && j(105);
     let g = mn(),
-      x = Qn(4),
-      P = Ln(59, !0);
+      x = Kn(4),
+      P = jn(59, !0);
     va();
-    /** @type {Kf} */ let Q = o === 180 ? y.createCallSignature(g, x, P) : y.createConstructSignature(g, x, P);
+    /** @type {ed} */ let Q = o === 180 ? y.createCallSignature(g, x, P) : y.createConstructSignature(g, x, P);
     return Pe(D(Q, p), m);
   }
-  /** @returns {boolean} */ function Vr() {
-    return u() === 23 && H(ou);
+  /** @returns {boolean} */ function Wr() {
+    return u() === 23 && H(lu);
   }
-  /** @returns {boolean} */ function ou() {
+  /** @returns {boolean} */ function lu() {
     if ((B(), u() === 26 || u() === 24)) return !0;
-    if (Xr(u())) {
+    if ($r(u())) {
       if ((B(), Te())) return !0;
     } else if (Te()) B();
     else return !1;
     return u() === 59 || u() === 28 ? !0 : u() !== 58 ? !1 : (B(), u() === 59 || u() === 28 || u() === 24);
   }
-  /** @returns {InstanceType<typeof Kf>} */ function xs(/** @type {number} */ o, /** @type {boolean} */ p, m) {
-    let g = Fr(16, /** @returns {Kf} */ () => gs(!1), 23, 24),
+  /** @returns {InstanceType<typeof ed>} */ function xs(/** @type {number} */ o, /** @type {boolean} */ p, m) {
+    let g = zr(16, /** @returns {ed} */ () => gs(!1), 23, 24),
       x = wr();
     va();
-    /** @type {Kf} */ let P = y.createIndexSignature(m, g, x);
+    /** @type {ed} */ let P = y.createIndexSignature(m, g, x);
     return Pe(D(P, o), p);
   }
-  /** @returns {InstanceType<typeof Kf>} */ function po(/** @type {number} */ o, /** @type {boolean} */ p, m) {
-    let g = qr(),
+  /** @returns {InstanceType<typeof ed>} */ function po(/** @type {number} */ o, /** @type {boolean} */ p, m) {
+    let g = Fr(),
       x = ft(58),
       P;
     if (u() === 21 || u() === 30) {
       let Q = mn(),
-        _e = Qn(4),
-        ee = Ln(59, !0);
+        _e = Kn(4),
+        ee = jn(59, !0);
       P = y.createMethodSignature(m, g, x, Q, _e, ee);
     } else {
       let Q = wr();
@@ -25554,18 +25541,18 @@ var na;
   /** @returns {boolean} */ function fo() {
     if (u() === 21 || u() === 30 || u() === 139 || u() === 153) return !0;
     let o = !1;
-    for (; Xr(u());) ((o = !0), B());
+    for (; $r(u());) ((o = !0), B());
     return u() === 23
       ? !0
       : (Sr() && ((o = !0), B()), o ? u() === 21 || u() === 30 || u() === 58 || u() === 59 || u() === 28 || lr() : !1);
   }
-  /** @returns {Kf} */ function Oi() {
+  /** @returns {ed} */ function Oi() {
     if (u() === 21 || u() === 30) return uo(180);
     if (u() === 105 && H(mo)) return uo(181);
-    let o = O(),
+    let o = M(),
       p = qe(),
-      m = jn(!1);
-    return ni(139) ? ci(o, p, m, 178, 4) : ni(153) ? ci(o, p, m, 179, 4) : Vr() ? xs(o, p, m) : po(o, p, m);
+      m = Jn(!1);
+    return ni(139) ? ci(o, p, m, 178, 4) : ni(153) ? ci(o, p, m, 179, 4) : Wr() ? xs(o, p, m) : po(o, p, m);
   }
   /** @returns {boolean} */ function mo() {
     return (B(), u() === 21 || u() === 30);
@@ -25582,8 +25569,8 @@ var na;
     }
     return !1;
   }
-  /** @returns {InstanceType<typeof Kf>} */ function go() {
-    let o = O();
+  /** @returns {InstanceType<typeof ed>} */ function go() {
+    let o = M();
     return D(y.createTypeLiteralNode(bo()), o);
   }
   function bo() {
@@ -25593,33 +25580,33 @@ var na;
   /** @returns {boolean} */ function vo() {
     return (B(), u() === 40 || u() === 41 ? B() === 148 : (u() === 148 && B(), u() === 23 && Pi() && B() === 103));
   }
-  /** @returns {InstanceType<typeof Kf>} */ function cu() {
-    let o = O(),
-      p = Ut();
+  /** @returns {InstanceType<typeof ed>} */ function uu() {
+    let o = M(),
+      p = Bt();
     j(103);
     let m = ot();
     return D(y.createTypeParameterDeclaration(void 0, p, m, void 0), o);
   }
-  /** @returns {InstanceType<typeof Kf>} */ function xo() {
-    let o = O();
+  /** @returns {InstanceType<typeof ed>} */ function xo() {
+    let o = M();
     j(19);
-    /** @type {vh | undefined} */ let p;
+    /** @type {Sh | undefined} */ let p;
     ((u() === 148 || u() === 40 || u() === 41) && ((p = Gt()), p.kind !== 148 && j(148)), j(23));
-    let m = cu(),
+    let m = uu(),
       g = Je(130) ? ot() : void 0;
     j(24);
-    /** @type {vh | undefined} */ let x;
+    /** @type {Sh | undefined} */ let x;
     (u() === 58 || u() === 40 || u() === 41) && ((x = Gt()), x.kind !== 58 && j(58));
     let P = wr();
     en();
     let Q = Tn(4, Oi);
     return (j(20), D(y.createMappedTypeNode(p, m, g, x, P, Q), o));
   }
-  /** @returns {Kf | xh | vh | Th} */ function To() {
-    let o = O();
+  /** @returns {ed | wh | Sh | kh} */ function To() {
+    let o = M();
     if (Je(26)) return D(y.createRestTypeNode(ot()), o);
     let p = ot();
-    if (_h(p) && p.pos === p.type.pos) {
+    if (lh(p) && p.pos === p.type.pos) {
       let m = y.createOptionalTypeNode(p.type);
       return (yn(m, p), (m.flags = p.flags), m);
     }
@@ -25628,15 +25615,15 @@ var na;
   /** @returns {boolean} */ function Ts() {
     return B() === 59 || (u() === 58 && B() === 59);
   }
-  /** @returns {boolean} */ function lu() {
+  /** @returns {boolean} */ function pu() {
     return u() === 26 ? kt(B()) && Ts() : kt(u()) && Ts();
   }
-  /** @returns {Kf | xh | vh | Th} */ function So() {
-    if (H(lu)) {
-      let o = O(),
+  /** @returns {ed | wh | Sh | kh} */ function So() {
+    if (H(pu)) {
+      let o = M(),
         p = qe(),
         m = ft(26),
-        g = Ut(),
+        g = Bt(),
         x = ft(58);
       j(59);
       let P = To(),
@@ -25645,54 +25632,54 @@ var na;
     }
     return To();
   }
-  /** @returns {InstanceType<typeof Kf>} */ function uu() {
-    let o = O();
-    return D(y.createTupleTypeNode(Fr(21, So, 23, 24)), o);
+  /** @returns {InstanceType<typeof ed>} */ function fu() {
+    let o = M();
+    return D(y.createTupleTypeNode(zr(21, So, 23, 24)), o);
   }
-  /** @returns {InstanceType<typeof Kf>} */ function wo() {
-    let o = O();
+  /** @returns {InstanceType<typeof ed>} */ function wo() {
+    let o = M();
     j(21);
     let p = ot();
     return (j(22), D(y.createParenthesizedType(p), o));
   }
-  function pu() {
+  function du() {
     let o;
     if (u() === 128) {
-      let p = O();
+      let p = M();
       B();
-      let m = D(ge(128), p);
+      let m = D(be(128), p);
       o = Dt([m], p);
     }
     return o;
   }
-  /** @returns {InstanceType<typeof Kf>} */ function Ss() {
-    let o = O(),
+  /** @returns {InstanceType<typeof ed>} */ function Ss() {
+    let o = M(),
       p = qe(),
-      m = pu(),
+      m = du(),
       g = Je(105);
     q.assert(!m || g, "Per isStartOfFunctionOrConstructorType, a function type cannot have modifiers.");
     let x = mn(),
-      P = Qn(4),
-      Q = Ln(39, !1),
+      P = Kn(4),
+      Q = jn(39, !1),
       _e = g ? y.createConstructorTypeNode(m, x, P, Q) : y.createFunctionTypeNode(x, P, Q);
     return Pe(D(_e, o), p);
   }
-  /** @returns {InstanceType<typeof vh> | undefined} */ function ko() {
-    /** @type {vh} */ let o = Gt();
+  /** @returns {InstanceType<typeof Sh> | undefined} */ function ko() {
+    /** @type {Sh} */ let o = Gt();
     return u() === 25 ? void 0 : o;
   }
-  /** @returns {InstanceType<typeof Kf>} */ function ws(/** @type {boolean | undefined} */ o) {
-    let p = O();
+  /** @returns {InstanceType<typeof ed>} */ function ws(/** @type {boolean | undefined} */ o) {
+    let p = M();
     o && B();
     let m = u() === 112 || u() === 97 || u() === 106 ? Gt() : ii(u());
     return (o && (m = D(y.createPrefixUnaryExpression(41, m), p)), D(y.createLiteralTypeNode(m), p));
   }
-  /** @returns {boolean} */ function fu() {
+  /** @returns {boolean} */ function mu() {
     return (B(), u() === 102);
   }
-  /** @returns {InstanceType<typeof Kf>} */ function ks() {
+  /** @returns {InstanceType<typeof ed>} */ function ks() {
     gt |= 4194304;
-    let o = O(),
+    let o = M(),
       p = Je(114);
     (j(102), j(21));
     let m = ot(),
@@ -25702,10 +25689,10 @@ var na;
       j(19);
       let _e = u();
       if ((_e === 118 || _e === 132 ? B() : De(E._0_expected, rt(118)), j(59), (g = Zs(_e, !0)), Je(28), !j(20))) {
-        let ee = Va(st);
+        let ee = za(st);
         ee &&
           ee.code === E._0_expected.code &&
-          pl(ee, Ja(jt, Ke, Q, 1, E.The_parser_expected_to_find_a_1_to_match_the_0_token_here, "{", "}"));
+          pl(ee, ja(Jt, Ke, Q, 1, E.The_parser_expected_to_find_a_1_to_match_the_0_token_here, "{", "}"));
       }
     }
     j(22);
@@ -25716,7 +25703,7 @@ var na;
   /** @returns {boolean} */ function Eo() {
     return (B(), u() === 9 || u() === 10);
   }
-  /** @returns {Kf | xh | vh | Th} */ function Es() {
+  /** @returns {ed | wh | Sh | kh} */ function Es() {
     switch (u()) {
       case 133:
       case 159:
@@ -25728,15 +25715,15 @@ var na;
       case 157:
       case 146:
       case 151:
-        return le(ko) || ga();
+        return ue(ko) || ga();
       case 67:
         t.reScanAsteriskEqualsToken();
       case 42:
-        return su();
+        return ou();
       case 61:
         t.reScanQuestionToken();
       case 58:
-        return _u();
+        return cu();
       case 100:
         return io();
       case 54:
@@ -25754,15 +25741,15 @@ var na;
       case 116:
         return Gt();
       case 110: {
-        /** @type {Kf} */ let o = ms();
-        return u() === 142 && !t.hasPrecedingLineBreak() ? au(o) : o;
+        /** @type {ed} */ let o = ms();
+        return u() === 142 && !t.hasPrecedingLineBreak() ? _u(o) : o;
       }
       case 114:
-        return H(fu) ? ks() : ao();
+        return H(mu) ? ks() : ao();
       case 19:
         return H(vo) ? xo() : go();
       case 23:
-        return uu();
+        return fu();
       case 21:
         return wo();
       case 102:
@@ -25827,8 +25814,8 @@ var na;
   /** @returns {boolean} */ function Ao() {
     return (B(), u() === 22 || ba(!1) || si());
   }
-  /** @returns {Kf | xh | vh | Th} */ function Co() {
-    let o = O(),
+  /** @returns {ed | wh | Sh | kh} */ function Co() {
+    let o = M(),
       p = Es();
     for (; !t.hasPrecedingLineBreak();)
       switch (u()) {
@@ -25850,28 +25837,28 @@ var na;
       }
     return p;
   }
-  /** @returns {InstanceType<typeof Kf>} */ function Do(/** @type {number} */ o) {
-    let p = O();
+  /** @returns {InstanceType<typeof ed>} */ function Do(/** @type {number} */ o) {
+    let p = M();
     return (j(o), D(y.createTypeOperatorNode(o, No()), p));
   }
-  function du() {
+  function hu() {
     if (Je(96)) {
-      let o = Mn(ot);
+      let o = Ln(ot);
       if (Ye() || u() !== 58) return o;
     }
   }
-  /** @returns {InstanceType<typeof Kf>} */ function Po() {
-    let o = O(),
+  /** @returns {InstanceType<typeof ed>} */ function Po() {
+    let o = M(),
       p = vt(),
-      m = le(du),
+      m = ue(hu),
       g = y.createTypeParameterDeclaration(void 0, p, m);
     return D(g, o);
   }
-  /** @returns {InstanceType<typeof Kf>} */ function mu() {
-    let o = O();
+  /** @returns {InstanceType<typeof ed>} */ function yu() {
+    let o = M();
     return (j(140), D(y.createInferTypeNode(Po()), o));
   }
-  /** @returns {Kf | xh | vh | Th} */ function No() {
+  /** @returns {ed | wh | Sh | kh} */ function No() {
     let o = u();
     switch (o) {
       case 143:
@@ -25879,7 +25866,7 @@ var na;
       case 148:
         return Do(o);
       case 140:
-        return mu();
+        return yu();
     }
     return Tr(Co);
   }
@@ -25888,7 +25875,7 @@ var na;
       let p = Ss(),
         m;
       return (
-        jf(p)
+        Rf(p)
           ? (m = o
               ? E.Function_type_notation_must_be_parenthesized_when_used_in_a_union_type
               : E.Function_type_notation_must_be_parenthesized_when_used_in_an_intersection_type)
@@ -25900,8 +25887,8 @@ var na;
       );
     }
   }
-  /** @returns {Kf | xh | vh | Th} */ function Io(/** @type {number} */ o, p, m) {
-    let g = O(),
+  /** @returns {ed | wh | Sh | kh} */ function Io(/** @type {number} */ o, p, m) {
+    let g = M(),
       x = o === 52,
       P = Je(o),
       Q = (P && xa(x)) || p();
@@ -25912,10 +25899,10 @@ var na;
     }
     return Q;
   }
-  /** @returns {Kf | xh | vh | Th} */ function As() {
+  /** @returns {ed | wh | Sh | kh} */ function As() {
     return Io(51, No, y.createIntersectionTypeNode);
   }
-  /** @returns {Kf | xh | vh | Th} */ function hu() {
+  /** @returns {ed | wh | Sh | kh} */ function gu() {
     return Io(52, As, y.createUnionTypeNode);
   }
   /** @returns {boolean} */ function Oo() {
@@ -25924,8 +25911,8 @@ var na;
   /** @returns {boolean} */ function Cs() {
     return u() === 30 || (u() === 21 && H(Mo)) ? !0 : u() === 105 || (u() === 128 && H(Oo));
   }
-  /** @returns {boolean} */ function yu() {
-    if ((Xr(u()) && jn(!1), Te() || u() === 110)) return (B(), !0);
+  /** @returns {boolean} */ function bu() {
+    if (($r(u()) && Jn(!1), Te() || u() === 110)) return (B(), !0);
     if (u() === 23 || u() === 19) {
       let o = st.length;
       return (_i(), o === st.length);
@@ -25938,34 +25925,34 @@ var na;
       !!(
         u() === 22 ||
         u() === 26 ||
-        (yu() && (u() === 59 || u() === 28 || u() === 58 || u() === 64 || (u() === 22 && (B(), u() === 39))))
+        (bu() && (u() === 59 || u() === 28 || u() === 58 || u() === 64 || (u() === 22 && (B(), u() === 39))))
       )
     );
   }
-  /** @returns {Kf | xh | vh | Th} */ function Ta() {
-    let o = O(),
-      p = Te() && le(Lo),
+  /** @returns {ed | wh | Sh | kh} */ function Ta() {
+    let o = M(),
+      p = Te() && ue(Lo),
       m = ot();
     return p ? D(y.createTypePredicateNode(void 0, p, m), o) : m;
   }
-  /** @returns {InstanceType<typeof xh> | undefined} */ function Lo() {
-    /** @type {xh} */ let o = vt();
+  /** @returns {InstanceType<typeof wh> | undefined} */ function Lo() {
+    /** @type {wh} */ let o = vt();
     if (u() === 142 && !t.hasPrecedingLineBreak()) return (B(), o);
   }
-  /** @returns {InstanceType<typeof Kf>} */ function jo() {
-    let o = O(),
-      p = Xn(131),
+  /** @returns {InstanceType<typeof ed>} */ function jo() {
+    let o = M(),
+      p = $n(131),
       m = u() === 110 ? ms() : vt(),
       g = Je(142) ? ot() : void 0;
     return D(y.createTypePredicateNode(p, m, g), o);
   }
-  /** @returns {Kf | xh | vh | Th} */ function ot() {
+  /** @returns {ed | wh | Sh | kh} */ function ot() {
     if (it & 81920) return Pt(81920, ot);
     if (Cs()) return Ss();
-    let o = O(),
-      p = hu();
+    let o = M(),
+      p = gu();
     if (!Ye() && !t.hasPrecedingLineBreak() && Je(96)) {
-      let m = Mn(ot);
+      let m = Ln(ot);
       j(58);
       let g = Tr(ot);
       j(59);
@@ -25974,7 +25961,7 @@ var na;
     }
     return p;
   }
-  /** @returns {Kf | xh | vh | Th | undefined} */ function wr() {
+  /** @returns {ed | wh | Sh | kh | undefined} */ function wr() {
     return Je(59) ? ot() : void 0;
   }
   /** @returns {boolean} */ function Ds() {
@@ -26030,39 +26017,39 @@ var na;
   /** @returns {boolean} */ function Jo() {
     return u() !== 19 && u() !== 100 && u() !== 86 && u() !== 60 && kr();
   }
-  /** @returns {Kf | xh | vh | Th} */ function At() {
+  /** @returns {ed | wh | Sh | kh} */ function At() {
     let o = tt();
     o && Ze(!1);
-    let p = O(),
+    let p = M(),
       m = Vt(!0);
-    /** @type {vh | undefined} */ let g;
+    /** @type {Sh | undefined} */ let g;
     for (; (g = ft(28));) m = Is(m, g, Vt(!0), p);
     return (o && Ze(!0), m);
   }
-  /** @returns {Kf | xh | vh | Th | undefined} */ function Er() {
+  /** @returns {ed | wh | Sh | kh | undefined} */ function Er() {
     return Je(64) ? Vt(!0) : void 0;
   }
-  /** @returns {Kf | xh | vh | Th} */ function Vt(/** @type {boolean} */ o) {
+  /** @returns {ed | wh | Sh | kh} */ function Vt(/** @type {boolean} */ o) {
     if (Ro()) return Uo();
-    let p = bu(o) || Vo(o);
+    let p = xu(o) || Vo(o);
     if (p) return p;
-    let m = O(),
+    let m = M(),
       g = qe(),
       x = Mi(0);
     return x.kind === 80 && u() === 39
       ? Bo(m, x, o, g, void 0)
-      : Ga(x) && k1(Ge())
+      : Wa(x) && C1(Ge())
         ? Is(x, Gt(), Vt(o), m)
-        : vu(x, m, o);
+        : Tu(x, m, o);
   }
   /** @returns {boolean} */ function Ro() {
     return u() === 127 ? (Ee() ? !0 : H(Fs)) : !1;
   }
-  /** @returns {boolean} */ function gu() {
+  /** @returns {boolean} */ function vu() {
     return (B(), !t.hasPrecedingLineBreak() && Te());
   }
-  /** @returns {InstanceType<typeof Kf>} */ function Uo() {
-    let o = O();
+  /** @returns {InstanceType<typeof ed>} */ function Uo() {
+    let o = M();
     return (
       B(),
       !t.hasPrecedingLineBreak() && (u() === 42 || kr())
@@ -26070,19 +26057,19 @@ var na;
         : D(y.createYieldExpression(void 0, void 0), o)
     );
   }
-  function Bo(/** @type {number} */ o, /** @type {Kf | vh | xh | Th} */ p, /** @type {boolean} */ m, /** @type {boolean} */ g, x) {
+  function Bo(/** @type {number} */ o, /** @type {ed | Sh | wh | kh} */ p, /** @type {boolean} */ m, /** @type {boolean} */ g, x) {
     q.assert(u() === 39, "parseSimpleArrowFunctionExpression should only have been called if we had a =>");
-    /** @type {Kf} */ let P = y.createParameterDeclaration(void 0, void 0, p, void 0, void 0, void 0);
+    /** @type {ed} */ let P = y.createParameterDeclaration(void 0, void 0, p, void 0, void 0, void 0);
     D(P, p.pos);
     let Q = Dt([P], P.pos, P.end),
-      _e = Xn(39),
+      _e = $n(39),
       ee = Ps(!!x, m),
       te = y.createArrowFunction(x, void 0, Q, void 0, _e, ee);
     return Pe(D(te, o), g);
   }
-  /** @returns {InstanceType<typeof Kf> | undefined} */ function bu(/** @type {boolean} */ o) {
+  /** @returns {InstanceType<typeof ed> | undefined} */ function xu(/** @type {boolean} */ o) {
     let p = qo();
-    if (p !== 0) return p === 1 ? Go(!0, !0) : le(/** @returns {Kf | undefined} */ () => zo(o));
+    if (p !== 0) return p === 1 ? Go(!0, !0) : ue(/** @returns {ed | undefined} */ () => zo(o));
   }
   /** @returns {number} */ function qo() {
     return u() === 21 || u() === 30 || u() === 134 ? H(Fo) : u() === 39 ? 1 : 0;
@@ -26103,7 +26090,7 @@ var na;
         }
       if (p === 23 || p === 19) return 2;
       if (p === 26) return 1;
-      if (Xr(p) && p !== 134 && H(Pi)) return B() === 130 ? 0 : 1;
+      if ($r(p) && p !== 134 && H(Pi)) return B() === 130 ? 0 : 1;
       if (!Te() && p !== 110) return 0;
       switch (B()) {
         case 59:
@@ -26142,15 +26129,15 @@ var na;
             : 2
       );
   }
-  /** @returns {InstanceType<typeof Kf> | undefined} */ function zo(/** @type {boolean} */ o) {
+  /** @returns {InstanceType<typeof ed> | undefined} */ function zo(/** @type {boolean} */ o) {
     let p = t.getTokenStart();
     if (ln?.has(p)) return;
-    /** @type {Kf | undefined} */ let m = Go(!1, o);
+    /** @type {ed | undefined} */ let m = Go(!1, o);
     return (m || (ln || (ln = new Set())).add(p), m);
   }
   function Vo(/** @type {boolean} */ o) {
     if (u() === 134 && H(Wo) === 1) {
-      let p = O(),
+      let p = M(),
         m = qe(),
         g = Wc(),
         x = Mi(0);
@@ -26165,8 +26152,8 @@ var na;
     }
     return 0;
   }
-  /** @returns {InstanceType<typeof Kf> | undefined} */ function Go(/** @type {boolean} */ o, /** @type {boolean} */ p) {
-    let m = O(),
+  /** @returns {InstanceType<typeof ed> | undefined} */ function Go(/** @type {boolean} */ o, /** @type {boolean} */ p) {
+    let m = M(),
       g = qe(),
       x = Wc(),
       P = nn(x, ml) ? 2 : 0,
@@ -26185,57 +26172,57 @@ var na;
       _e = fr();
     }
     let ee = u() === 59,
-      te = Ln(59, !1);
+      te = jn(59, !1);
     if (te && !o && ds(te)) return;
     let ce = te;
     for (; ce?.kind === 197;) ce = ce.type;
-    let Ue = ce && oh(ce);
+    let Ue = ce && uh(ce);
     if (!o && u() !== 39 && (Ue || u() !== 19)) return;
     let Re = u(),
-      Ne = Xn(39),
+      Ne = $n(39),
       Xt = Re === 39 || Re === 19 ? Ps(nn(x, ml), p) : vt();
     if (!p && ee && u() !== 59) return;
-    /** @type {Kf} */ let Ot = y.createArrowFunction(x, Q, _e, te, Ne, Xt);
+    /** @type {ed} */ let Ot = y.createArrowFunction(x, Q, _e, te, Ne, Xt);
     return Pe(D(Ot, m), g);
   }
-  /** @returns {Kf | xh | vh | Th} */ function Ps(/** @type {boolean} */ o, /** @type {boolean} */ p) {
+  /** @returns {ed | wh | Sh | kh} */ function Ps(/** @type {boolean} */ o, /** @type {boolean} */ p) {
     if (u() === 19) return Aa(o ? 2 : 0);
     if (u() !== 27 && u() !== 100 && u() !== 86 && Cc() && !Jo()) return Aa(16 | (o ? 2 : 0));
     let m = Ee();
     $e(!1);
     let g = Ft;
     Ft = !1;
-    let x = o ? U(/** @returns {Kf | xh | vh} */ () => Vt(p)) : K(/** @returns {Kf | xh | vh} */ () => Vt(p));
+    let x = o ? U(/** @returns {ed | wh | Sh} */ () => Vt(p)) : K(/** @returns {ed | wh | Sh} */ () => Vt(p));
     return ((Ft = g), $e(m), x);
   }
-  /** @returns {Kf | xh | vh | Th} */ function vu(/** @type {Kf | vh | xh | Th} */ o, /** @type {number} */ p, /** @type {boolean} */ m) {
-    /** @type {vh | undefined} */ let g = ft(58);
+  /** @returns {ed | wh | Sh | kh} */ function Tu(/** @type {ed | Sh | wh | kh} */ o, /** @type {number} */ p, /** @type {boolean} */ m) {
+    /** @type {Sh | undefined} */ let g = ft(58);
     if (!g) return o;
-    /** @type {vh | undefined} */ let x;
+    /** @type {Sh | undefined} */ let x;
     return D(
       y.createConditionalExpression(
         o,
         g,
-        Pt(a, /** @returns {Kf | xh | vh} */ () => Vt(!1)),
-        (x = Xn(59)),
-        zp(x) ? Vt(m) : Yt(80, !1, E._0_expected, rt(59)),
+        Pt(a, /** @returns {ed | wh | Sh} */ () => Vt(!1)),
+        (x = $n(59)),
+        Wp(x) ? Vt(m) : Yt(80, !1, E._0_expected, rt(59)),
       ),
       p,
     );
   }
-  /** @returns {Kf | xh | vh | Th} */ function Mi(/** @type {number} */ o) {
-    let p = O(),
+  /** @returns {ed | wh | Sh | kh} */ function Mi(/** @type {number} */ o) {
+    let p = M(),
       m = tc();
     return Ns(o, m, p);
   }
   /** @returns {boolean} */ function Yo(/** @type {number} */ o) {
     return o === 103 || o === 165;
   }
-  /** @returns {Kf | xh | vh | Th} */ function Ns(/** @type {number} */ o, /** @type {Kf | vh | xh | Th} */ p, m) {
+  /** @returns {ed | wh | Sh | kh} */ function Ns(/** @type {number} */ o, /** @type {ed | Sh | wh | kh} */ p, m) {
     for (;;) {
       Ge();
-      let g = Cp(u());
-      if (!(u() === 43 ? g >= o : g > o) || (u() === 103 && he())) break;
+      let g = Pp(u());
+      if (!(u() === 43 ? g >= o : g > o) || (u() === 103 && ge())) break;
       if (u() === 130 || u() === 152) {
         if (t.hasPrecedingLineBreak()) break;
         {
@@ -26247,45 +26234,45 @@ var na;
     return p;
   }
   /** @returns {boolean} */ function Ho() {
-    return he() && u() === 103 ? !1 : Cp(u()) > 0;
+    return ge() && u() === 103 ? !1 : Pp(u()) > 0;
   }
-  /** @returns {InstanceType<typeof Kf>} */ function Xo(/** @type {Kf | vh | xh | Th} */ o, /** @type {Kf | vh | xh | Th} */ p) {
+  /** @returns {InstanceType<typeof ed>} */ function Xo(/** @type {ed | Sh | wh | kh} */ o, /** @type {ed | Sh | wh | kh} */ p) {
     return D(y.createSatisfiesExpression(o, p), o.pos);
   }
-  /** @returns {InstanceType<typeof Kf>} */ function Is(/** @type {Kf | vh | xh | Th} */ o, /** @type {Kf | vh | xh | Th} */ p, /** @type {Kf | vh | xh | Th} */ m, /** @type {number} */ g) {
+  /** @returns {InstanceType<typeof ed>} */ function Is(/** @type {ed | Sh | wh | kh} */ o, /** @type {ed | Sh | wh | kh} */ p, /** @type {ed | Sh | wh | kh} */ m, /** @type {number} */ g) {
     return D(y.createBinaryExpression(o, p, m), g);
   }
-  /** @returns {InstanceType<typeof Kf>} */ function $o(/** @type {Kf | vh | xh | Th} */ o, /** @type {Kf | vh | xh | Th} */ p) {
+  /** @returns {InstanceType<typeof ed>} */ function $o(/** @type {ed | Sh | wh | kh} */ o, /** @type {ed | Sh | wh | kh} */ p) {
     return D(y.createAsExpression(o, p), o.pos);
   }
-  /** @returns {InstanceType<typeof Kf>} */ function Qo() {
-    let o = O();
+  /** @returns {InstanceType<typeof ed>} */ function Qo() {
+    let o = M();
     return D(y.createPrefixUnaryExpression(u(), je(Ar)), o);
   }
-  /** @returns {InstanceType<typeof Kf>} */ function Ko() {
-    let o = O();
+  /** @returns {InstanceType<typeof ed>} */ function Ko() {
+    let o = M();
     return D(y.createDeleteExpression(je(Ar)), o);
   }
-  /** @returns {InstanceType<typeof Kf>} */ function xu() {
-    let o = O();
+  /** @returns {InstanceType<typeof ed>} */ function Su() {
+    let o = M();
     return D(y.createTypeOfExpression(je(Ar)), o);
   }
-  /** @returns {InstanceType<typeof Kf>} */ function Zo() {
-    let o = O();
+  /** @returns {InstanceType<typeof ed>} */ function Zo() {
+    let o = M();
     return D(y.createVoidExpression(je(Ar)), o);
   }
-  /** @returns {boolean} */ function Tu() {
+  /** @returns {boolean} */ function wu() {
     return u() === 135 ? (Xe() ? !0 : H(Fs)) : !1;
   }
-  /** @returns {InstanceType<typeof Kf>} */ function ec() {
-    let o = O();
+  /** @returns {InstanceType<typeof ed>} */ function ec() {
+    let o = M();
     return D(y.createAwaitExpression(je(Ar)), o);
   }
-  /** @returns {Kf | xh | vh | Th} */ function tc() {
-    if (Su()) {
-      let m = O(),
+  /** @returns {ed | wh | Sh | kh} */ function tc() {
+    if (ku()) {
+      let m = M(),
         g = Sa();
-      return u() === 43 ? Ns(Cp(u()), g, m) : g;
+      return u() === 43 ? Ns(Pp(u()), g, m) : g;
     }
     let o = u(),
       p = Ar();
@@ -26298,7 +26285,7 @@ var na;
             g,
             E.A_type_assertion_expression_is_not_allowed_in_the_left_hand_side_of_an_exponentiation_expression_Consider_enclosing_the_expression_in_parentheses,
           )
-        : (q.assert(Ap(o)),
+        : (q.assert(Dp(o)),
           at(
             m,
             g,
@@ -26308,7 +26295,7 @@ var na;
     }
     return p;
   }
-  /** @returns {Kf | xh | vh | Th} */ function Ar() {
+  /** @returns {ed | wh | Sh | kh} */ function Ar() {
     switch (u()) {
       case 40:
       case 41:
@@ -26318,18 +26305,18 @@ var na;
       case 91:
         return Ko();
       case 114:
-        return xu();
+        return Su();
       case 116:
         return Zo();
       case 30:
         return ct === 1 ? ji(!0, void 0, void 0, !0) : sc();
       case 135:
-        if (Tu()) return ec();
+        if (wu()) return ec();
       default:
         return Sa();
     }
   }
-  /** @returns {boolean} */ function Su() {
+  /** @returns {boolean} */ function ku() {
     switch (u()) {
       case 40:
       case 41:
@@ -26346,21 +26333,21 @@ var na;
         return !0;
     }
   }
-  /** @returns {Kf | xh | vh | Th} */ function Sa() {
+  /** @returns {ed | wh | Sh | kh} */ function Sa() {
     if (u() === 46 || u() === 47) {
-      let p = O();
+      let p = M();
       return D(y.createPrefixUnaryExpression(u(), je(Li)), p);
     } else if (ct === 1 && u() === 30 && H(U_)) return ji(!0);
     let o = Li();
-    if ((q.assert(Ga(o)), (u() === 46 || u() === 47) && !t.hasPrecedingLineBreak())) {
+    if ((q.assert(Wa(o)), (u() === 46 || u() === 47) && !t.hasPrecedingLineBreak())) {
       let p = u();
       return (B(), D(y.createPostfixUnaryExpression(o, p), o.pos));
     }
     return o;
   }
-  /** @returns {Kf | xh | vh | Th} */ function Li() {
-    let o = O();
-    /** @type {Kf | xh | vh | Th} */ let p;
+  /** @returns {ed | wh | Sh | kh} */ function Li() {
+    let o = M();
+    /** @type {ed | wh | Sh | kh} */ let p;
     return (
       u() === 102
         ? H(mo)
@@ -26368,34 +26355,34 @@ var na;
           : H(ho)
             ? (B(),
               B(),
-              (p = D(y.createMetaProperty(102, Ut()), o)),
+              (p = D(y.createMetaProperty(102, Bt()), o)),
               p.name.escapedText === "defer" ? (u() === 21 || u() === 30) && (gt |= 4194304) : (gt |= 8388608))
             : (p = wa())
         : (p = u() === 108 ? nc() : wa()),
       Js(o, p)
     );
   }
-  /** @returns {Kf | xh | vh | Th} */ function wa() {
-    let o = O(),
+  /** @returns {ed | wh | Sh | kh} */ function wa() {
+    let o = M(),
       p = Rs();
     return on(o, p, !0);
   }
-  /** @returns {InstanceType<typeof vh>} */ function nc() {
-    let o = O(),
+  /** @returns {InstanceType<typeof Sh>} */ function nc() {
+    let o = M(),
       p = Gt();
     if (u() === 30) {
-      let m = O(),
-        g = le(Ea);
+      let m = M(),
+        g = ue(Ea);
       g !== void 0 &&
-        (at(m, O(), E.super_may_not_use_type_arguments), Sn() || (p = y.createExpressionWithTypeArguments(p, g)));
+        (at(m, M(), E.super_may_not_use_type_arguments), Sn() || (p = y.createExpressionWithTypeArguments(p, g)));
     }
     return u() === 21 || u() === 25 || u() === 23
       ? p
-      : (Xn(25, E.super_must_be_followed_by_an_argument_list_or_member_access), D(ae(p, ri(!0, !0, !0)), o));
+      : ($n(25, E.super_must_be_followed_by_an_argument_list_or_member_access), D(ae(p, ri(!0, !0, !0)), o));
   }
-  /** @returns {InstanceType<typeof Kf>} */ function ji(/** @type {boolean} */ o, p, /** @type {InstanceType<typeof Kf> | undefined} */ m, g = !1) {
-    let x = O(),
-      P = Eu(o),
+  /** @returns {InstanceType<typeof ed>} */ function ji(/** @type {boolean} */ o, p, /** @type {InstanceType<typeof ed> | undefined} */ m, g = !1) {
+    let x = M(),
+      P = Cu(o),
       Q;
     if (P.kind === 287) {
       let _e = ka(P),
@@ -26416,18 +26403,18 @@ var na;
       } else
         ((ee = ac(P, o)),
           mi(P.tagName, ee.tagName) ||
-            (m && Yp(m) && mi(ee.tagName, m.tagName)
+            (m && Xp(m) && mi(ee.tagName, m.tagName)
               ? un(P.tagName, E.JSX_element_0_has_no_corresponding_closing_tag, c_(Ke, P.tagName))
               : un(ee.tagName, E.Expected_corresponding_JSX_closing_tag_for_0, c_(Ke, P.tagName))));
       Q = D(y.createJsxElement(P, _e, ee), x);
-    } else P.kind === 290 ? (Q = D(y.createJsxFragment(P, ka(P), Pu(o)), x)) : (q.assert(P.kind === 286), (Q = P));
+    } else P.kind === 290 ? (Q = D(y.createJsxFragment(P, ka(P), Iu(o)), x)) : (q.assert(P.kind === 286), (Q = P));
     if (!g && o && u() === 30) {
       let _e = typeof p > "u" ? Q.pos : p,
-        ee = le(() => ji(!0, _e));
+        ee = ue(() => ji(!0, _e));
       if (ee) {
         let te = Yt(28, !1);
         return (
-          Hd(te, ee.pos, 0),
+          Qd(te, ee.pos, 0),
           at(Ir(Ke, _e), ee.end, E.JSX_expressions_must_have_one_parent_element),
           D(y.createBinaryExpression(Q, te, ee), x)
         );
@@ -26435,12 +26422,12 @@ var na;
     }
     return Q;
   }
-  /** @returns {InstanceType<typeof Kf>} */ function Os() {
-    let o = O(),
+  /** @returns {InstanceType<typeof ed>} */ function Os() {
+    let o = M(),
       p = y.createJsxText(t.getTokenValue(), lt === 13);
     return ((lt = t.scanJsxToken()), D(p, o));
   }
-  /** @returns {InstanceType<typeof Kf> | undefined} */ function wu(/** @type {Kf | vh | xh | Th} */ o, /** @type {number} */ p) {
+  /** @returns {InstanceType<typeof ed> | undefined} */ function Eu(/** @type {ed | Sh | wh | kh} */ o, /** @type {number} */ p) {
     switch (p) {
       case 1:
         if (yv(o)) un(o, E.JSX_fragment_has_no_corresponding_closing_tag);
@@ -26464,16 +26451,16 @@ var na;
         return q.assertNever(p);
     }
   }
-  function ka(/** @type {Kf | vh | xh | Th} */ o) {
+  function ka(/** @type {ed | Sh | wh | kh} */ o) {
     let p = [],
-      m = O(),
+      m = M(),
       g = bt;
     for (bt |= 16384; ;) {
-      /** @type {Kf | undefined} */ let x = wu(o, (lt = t.reScanJsxToken()));
+      /** @type {ed | undefined} */ let x = Eu(o, (lt = t.reScanJsxToken()));
       if (
         !x ||
         (p.push(x),
-        Yp(o) &&
+        Xp(o) &&
           x?.kind === 285 &&
           !mi(x.openingElement.tagName, x.closingElement.tagName) &&
           mi(o.tagName, x.closingElement.tagName))
@@ -26482,107 +26469,107 @@ var na;
     }
     return ((bt = g), Dt(p, m));
   }
-  /** @returns {InstanceType<typeof Kf>} */ function ku() {
-    let o = O();
+  /** @returns {InstanceType<typeof ed>} */ function Au() {
+    let o = M();
     return D(y.createJsxAttributes(Tn(13, ic)), o);
   }
-  /** @returns {InstanceType<typeof Kf>} */ function Eu(/** @type {boolean} */ o) {
-    let p = O();
-    if ((j(30), u() === 32)) return (Hn(), D(y.createJsxOpeningFragment(), p));
+  /** @returns {InstanceType<typeof ed>} */ function Cu(/** @type {boolean} */ o) {
+    let p = M();
+    if ((j(30), u() === 32)) return (Xn(), D(y.createJsxOpeningFragment(), p));
     let m = Ms(),
       g = (it & 524288) === 0 ? Ia() : void 0,
-      x = ku(),
+      x = Au(),
       P;
     return (
       u() === 32
-        ? (Hn(), (P = y.createJsxOpeningElement(m, g, x)))
-        : (j(44), j(32, void 0, !1) && (o ? B() : Hn()), (P = y.createJsxSelfClosingElement(m, g, x))),
+        ? (Xn(), (P = y.createJsxOpeningElement(m, g, x)))
+        : (j(44), j(32, void 0, !1) && (o ? B() : Xn()), (P = y.createJsxSelfClosingElement(m, g, x))),
       D(P, p)
     );
   }
-  /** @returns {Kf | xh | vh | Th} */ function Ms() {
-    let o = O(),
-      p = Au();
-    if (rh(p)) return p;
+  /** @returns {ed | wh | Sh | kh} */ function Ms() {
+    let o = M(),
+      p = Du();
+    if (sh(p)) return p;
     let m = p;
     for (; Je(25);) m = D(ae(m, ri(!0, !1, !1)), o);
     return m;
   }
-  function Au() {
-    let o = O();
+  function Du() {
+    let o = M();
     zt();
     let p = u() === 110,
       m = ti();
     return Je(59) ? (zt(), D(y.createJsxNamespacedName(m, ti()), o)) : p ? D(y.createToken(110), o) : m;
   }
-  /** @returns {InstanceType<typeof Kf> | undefined} */ function rc(/** @type {boolean} */ o) {
-    let p = O();
+  /** @returns {InstanceType<typeof ed> | undefined} */ function rc(/** @type {boolean} */ o) {
+    let p = M();
     if (!j(19)) return;
     let m, g;
     return (
       u() !== 20 && (o || (m = ft(26)), (g = At())),
-      o ? j(20) : j(20, void 0, !1) && Hn(),
+      o ? j(20) : j(20, void 0, !1) && Xn(),
       D(y.createJsxExpression(m, g), p)
     );
   }
-  /** @returns {InstanceType<typeof Kf>} */ function ic() {
-    if (u() === 19) return Du();
-    let o = O();
-    return D(y.createJsxAttribute(Cu(), Ls()), o);
+  /** @returns {InstanceType<typeof ed>} */ function ic() {
+    if (u() === 19) return Nu();
+    let o = M();
+    return D(y.createJsxAttribute(Pu(), Ls()), o);
   }
-  /** @returns {InstanceType<typeof Kf> | undefined} */ function Ls() {
+  /** @returns {InstanceType<typeof ed> | undefined} */ function Ls() {
     if (u() === 64) {
-      if (Ai() === 11) return $n();
+      if (Ai() === 11) return Qn();
       if (u() === 19) return rc(!0);
       if (u() === 30) return ji(!0);
       De(E.or_JSX_element_expected);
     }
   }
-  /** @returns {InstanceType<typeof Kf> | InstanceType<typeof xh>} */ function Cu() {
-    let o = O();
+  /** @returns {InstanceType<typeof ed> | InstanceType<typeof wh>} */ function Pu() {
+    let o = M();
     zt();
-    /** @type {xh} */ let p = ti();
+    /** @type {wh} */ let p = ti();
     return Je(59) ? (zt(), D(y.createJsxNamespacedName(p, ti()), o)) : p;
   }
-  /** @returns {InstanceType<typeof Kf>} */ function Du() {
-    let o = O();
+  /** @returns {InstanceType<typeof ed>} */ function Nu() {
+    let o = M();
     (j(19), j(26));
     let p = At();
     return (j(20), D(y.createJsxSpreadAttribute(p), o));
   }
-  /** @returns {InstanceType<typeof Kf>} */ function ac(/** @type {Kf | vh | xh | Th} */ o, /** @type {boolean} */ p) {
-    let m = O();
+  /** @returns {InstanceType<typeof ed>} */ function ac(/** @type {ed | Sh | wh | kh} */ o, /** @type {boolean} */ p) {
+    let m = M();
     j(31);
     let g = Ms();
-    return (j(32, void 0, !1) && (p || !mi(o.tagName, g) ? B() : Hn()), D(y.createJsxClosingElement(g), m));
+    return (j(32, void 0, !1) && (p || !mi(o.tagName, g) ? B() : Xn()), D(y.createJsxClosingElement(g), m));
   }
-  /** @returns {InstanceType<typeof Kf>} */ function Pu(/** @type {boolean} */ o) {
-    let p = O();
+  /** @returns {InstanceType<typeof ed>} */ function Iu(/** @type {boolean} */ o) {
+    let p = M();
     return (
       j(31),
-      j(32, E.Expected_corresponding_closing_tag_for_JSX_fragment, !1) && (o ? B() : Hn()),
+      j(32, E.Expected_corresponding_closing_tag_for_JSX_fragment, !1) && (o ? B() : Xn()),
       D(y.createJsxJsxClosingFragment(), p)
     );
   }
-  /** @returns {InstanceType<typeof Kf>} */ function sc() {
+  /** @returns {InstanceType<typeof ed>} */ function sc() {
     q.assert(
       ct !== 1,
       "Type assertions should never be parsed in JSX; they should be parsed as comparisons or JSX elements/fragments.",
     );
-    let o = O();
+    let o = M();
     j(30);
     let p = ot();
     j(32);
     let m = Ar();
     return D(y.createTypeAssertion(p, m), o);
   }
-  /** @returns {boolean} */ function Nu() {
+  /** @returns {boolean} */ function Ou() {
     return (B(), kt(u()) || u() === 23 || Sn());
   }
   /** @returns {boolean} */ function _c() {
-    return u() === 29 && H(Nu);
+    return u() === 29 && H(Ou);
   }
-  /** @returns {boolean} */ function js(/** @type {Kf | xh | vh | Th} */ o) {
+  /** @returns {boolean} */ function js(/** @type {ed | wh | Sh | kh} */ o) {
     if (o.flags & 64) return !0;
     if (bl(o)) {
       let p = o.expression;
@@ -26594,12 +26581,12 @@ var na;
     }
     return !1;
   }
-  /** @returns {InstanceType<typeof Kf>} */ function oc(/** @type {number} */ o, /** @type {Kf | vh | xh | Th} */ p, /** @type {Kf | vh | xh | Th | undefined} */ m) {
+  /** @returns {InstanceType<typeof ed>} */ function oc(/** @type {number} */ o, /** @type {ed | Sh | wh | kh} */ p, /** @type {ed | Sh | wh | kh | undefined} */ m) {
     let g = ri(!0, !0, !0),
       x = m || js(p),
       P = x ? Le(p, m, g) : ae(p, g);
     if (
-      (x && xi(P.name) && un(P.name, E.An_optional_chain_cannot_contain_private_identifiers), K1(p) && p.typeArguments)
+      (x && xi(P.name) && un(P.name, E.An_optional_chain_cannot_contain_private_identifiers), th(p) && p.typeArguments)
     ) {
       let Q = p.typeArguments.pos - 1,
         _e = Ir(Ke, p.typeArguments.end) + 1;
@@ -26607,31 +26594,31 @@ var na;
     }
     return D(P, o);
   }
-  /** @returns {InstanceType<typeof Kf>} */ function Iu(/** @type {number} */ o, /** @type {Kf | vh | xh | Th} */ p, /** @type {Kf | vh | xh | Th | undefined} */ m) {
+  /** @returns {InstanceType<typeof ed>} */ function Mu(/** @type {number} */ o, /** @type {ed | Sh | wh | kh} */ p, /** @type {ed | Sh | wh | kh | undefined} */ m) {
     let g;
     if (u() === 24) g = Yt(80, !0, E.An_element_access_expression_should_take_an_argument);
     else {
       let P = ut(At);
-      (Ol(P) && (P.text = Br(P.text)), (g = P));
+      (Ol(P) && (P.text = qr(P.text)), (g = P));
     }
     j(24);
-    /** @type {Kf} */ let x = m || js(p) ? oe(p, m, g) : V(p, g);
+    /** @type {ed} */ let x = m || js(p) ? oe(p, m, g) : V(p, g);
     return D(x, o);
   }
-  /** @returns {Kf | xh | vh | Th} */ function on(/** @type {number} */ o, /** @type {Kf | vh | xh | Th | undefined} */ p, m) {
+  /** @returns {ed | wh | Sh | kh} */ function on(/** @type {number} */ o, /** @type {ed | Sh | wh | kh | undefined} */ p, m) {
     for (;;) {
-      /** @type {vh | undefined} */ let g;
+      /** @type {Sh | undefined} */ let g;
       let x = !1;
-      if ((m && _c() ? ((g = Xn(29)), (x = kt(u()))) : (x = Je(25)), x)) {
+      if ((m && _c() ? ((g = $n(29)), (x = kt(u()))) : (x = Je(25)), x)) {
         p = oc(o, p, g);
         continue;
       }
       if ((g || !tt()) && Je(23)) {
-        p = Iu(o, p, g);
+        p = Mu(o, p, g);
         continue;
       }
       if (Sn()) {
-        p = !g && p.kind === 234 ? Wr(o, p.expression, g, p.typeArguments) : Wr(o, p, g, void 0);
+        p = !g && p.kind === 234 ? Gr(o, p.expression, g, p.typeArguments) : Gr(o, p, g, void 0);
         continue;
       }
       if (!g) {
@@ -26639,7 +26626,7 @@ var na;
           (B(), (p = D(y.createNonNullExpression(p), o)));
           continue;
         }
-        let P = le(Ea);
+        let P = ue(Ea);
         if (P) {
           p = D(y.createExpressionWithTypeArguments(p, P), o);
           continue;
@@ -26651,17 +26638,17 @@ var na;
   /** @returns {boolean} */ function Sn() {
     return u() === 15 || u() === 16;
   }
-  function Wr(/** @type {number} */ o, /** @type {Kf | vh | xh | Th} */ p, m, g) {
-    /** @type {Kf} */ let x = y.createTaggedTemplateExpression(p, g, u() === 15 ? (Nt(!0), $n()) : ya(!0));
+  function Gr(/** @type {number} */ o, /** @type {ed | Sh | wh | kh} */ p, m, g) {
+    /** @type {ed} */ let x = y.createTaggedTemplateExpression(p, g, u() === 15 ? (Nt(!0), Qn()) : ya(!0));
     return ((m || p.flags & 64) && (x.flags |= 64), (x.questionDotToken = m), D(x, o));
   }
-  /** @returns {Kf | xh | vh | Th} */ function Js(/** @type {number} */ o, /** @type {Kf | vh | xh | Th} */ p) {
+  /** @returns {ed | wh | Sh | kh} */ function Js(/** @type {number} */ o, /** @type {ed | Sh | wh | kh} */ p) {
     for (;;) {
       p = on(o, p, !0);
-      /** @type {(Kf | vh | xh | Th)[] | undefined} */ let m;
+      /** @type {(ed | Sh | wh | kh)[] | undefined} */ let m;
       let g = ft(29);
-      if (g && ((m = le(Ea)), Sn())) {
-        p = Wr(o, p, g, m);
+      if (g && ((m = ue(Ea)), Sn())) {
+        p = Gr(o, p, g, m);
         continue;
       }
       if (m || u() === 21) {
@@ -26688,9 +26675,9 @@ var na;
     if ((it & 524288) !== 0 || Et() !== 30) return;
     B();
     let o = dn(20, ot);
-    if (Ge() === 32) return (B(), o && Ou() ? o : void 0);
+    if (Ge() === 32) return (B(), o && Lu() ? o : void 0);
   }
-  /** @returns {boolean} */ function Ou() {
+  /** @returns {boolean} */ function Lu() {
     switch (u()) {
       case 21:
       case 15:
@@ -26704,14 +26691,14 @@ var na;
     }
     return t.hasPrecedingLineBreak() || Ho() || !kr();
   }
-  /** @returns {Kf | xh | vh | Th} */ function Rs() {
+  /** @returns {ed | wh | Sh | kh} */ function Rs() {
     switch (u()) {
       case 15:
         t.getTokenFlags() & 26656 && Nt(!1);
       case 9:
       case 10:
       case 11:
-        return $n();
+        return Qn();
       case 110:
       case 108:
       case 106:
@@ -26719,7 +26706,7 @@ var na;
       case 97:
         return Gt();
       case 21:
-        return Mu();
+        return ju();
       case 23:
         return fc();
       case 19:
@@ -26728,16 +26715,16 @@ var na;
         if (!H(Ac)) break;
         return Bs();
       case 60:
-        return ep();
+        return np();
       case 86:
-        return tp();
+        return rp();
       case 100:
         return Bs();
       case 105:
         return mc();
       case 44:
       case 69:
-        if (Qe() === 14) return $n();
+        if (Qe() === 14) return Qn();
         break;
       case 16:
         return ya(!1);
@@ -26746,98 +26733,98 @@ var na;
     }
     return vt(E.Expression_expected);
   }
-  /** @returns {InstanceType<typeof Kf>} */ function Mu() {
-    let o = O(),
+  /** @returns {InstanceType<typeof ed>} */ function ju() {
+    let o = M(),
       p = qe();
     j(21);
     let m = ut(At);
     return (j(22), Pe(D(gn(m), o), p));
   }
-  /** @returns {InstanceType<typeof Kf>} */ function lc() {
-    let o = O();
+  /** @returns {InstanceType<typeof ed>} */ function lc() {
+    let o = M();
     j(26);
     let p = Vt(!0);
     return D(y.createSpreadElement(p), o);
   }
-  /** @returns {Kf | xh | vh | Th} */ function uc() {
-    return u() === 26 ? lc() : u() === 28 ? D(y.createOmittedExpression(), O()) : Vt(!0);
+  /** @returns {ed | wh | Sh | kh} */ function uc() {
+    return u() === 26 ? lc() : u() === 28 ? D(y.createOmittedExpression(), M()) : Vt(!0);
   }
-  /** @returns {Kf | xh | vh | Th} */ function pc() {
+  /** @returns {ed | wh | Sh | kh} */ function pc() {
     return Pt(a, uc);
   }
-  /** @returns {InstanceType<typeof Kf>} */ function fc() {
-    let o = O(),
+  /** @returns {InstanceType<typeof ed>} */ function fc() {
+    let o = M(),
       p = t.getTokenStart(),
       m = j(23),
       g = t.hasPrecedingLineBreak(),
       x = dn(15, uc);
-    return (Ur(23, 24, m, p), D(me(x, g), o));
+    return (Br(23, 24, m, p), D(me(x, g), o));
   }
-  /** @returns {InstanceType<typeof Kf>} */ function dc() {
-    let o = O(),
+  /** @returns {InstanceType<typeof ed>} */ function dc() {
+    let o = M(),
       p = qe();
     if (ft(26)) {
       let ce = Vt(!0);
       return Pe(D(y.createSpreadAssignment(ce), o), p);
     }
-    let m = jn(!0);
+    let m = Jn(!0);
     if (ni(139)) return ci(o, p, m, 178, 0);
     if (ni(153)) return ci(o, p, m, 179, 0);
     let g = ft(42),
       x = Te(),
-      P = qr(),
+      P = Fr(),
       Q = ft(58),
       _e = ft(54);
     if (g || u() === 21 || u() === 30) return qc(o, p, m, g, P, Q, _e);
-    /** @type {Kf | undefined} */ let ee;
+    /** @type {ed | undefined} */ let ee;
     if (x && u() !== 59) {
       let ce = ft(64),
         Ue = ce ? ut(() => Vt(!0)) : void 0;
       ((ee = y.createShorthandPropertyAssignment(P, Ue)), (ee.equalsToken = ce));
     } else {
       j(59);
-      let ce = ut(/** @returns {Kf | vh | xh} */ () => Vt(!0));
+      let ce = ut(/** @returns {ed | Sh | wh} */ () => Vt(!0));
       ee = y.createPropertyAssignment(P, ce);
     }
     return ((ee.modifiers = m), (ee.questionToken = Q), (ee.exclamationToken = _e), Pe(D(ee, o), p));
   }
-  /** @returns {InstanceType<typeof Kf>} */ function Us() {
-    let o = O(),
+  /** @returns {InstanceType<typeof ed>} */ function Us() {
+    let o = M(),
       p = t.getTokenStart(),
       m = j(19),
       g = t.hasPrecedingLineBreak(),
       x = dn(12, dc, !0);
-    return (Ur(19, 20, m, p), D(I(x, g), o));
+    return (Br(19, 20, m, p), D(O(x, g), o));
   }
-  /** @returns {InstanceType<typeof Kf>} */ function Bs() {
+  /** @returns {InstanceType<typeof ed>} */ function Bs() {
     let o = tt();
     Ze(!1);
-    let p = O(),
+    let p = M(),
       m = qe(),
-      g = jn(!1);
+      g = Jn(!1);
     j(100);
     let x = ft(42),
       P = x ? 1 : 0,
       Q = nn(g, ml) ? 2 : 0,
-      _e = P && Q ? Z(Ji) : P ? Yn(Ji) : Q ? U(Ji) : Ji(),
+      _e = P && Q ? Z(Ji) : P ? Hn(Ji) : Q ? U(Ji) : Ji(),
       ee = mn(),
-      te = Qn(P | Q),
-      ce = Ln(59, !1),
+      te = Kn(P | Q),
+      ce = jn(59, !1),
       Ue = Aa(P | Q);
     Ze(o);
-    /** @type {Kf} */ let Re = y.createFunctionExpression(g, x, _e, ee, te, ce, Ue);
+    /** @type {ed} */ let Re = y.createFunctionExpression(g, x, _e, ee, te, ce, Ue);
     return Pe(D(Re, p), m);
   }
-  /** @returns {InstanceType<typeof xh> | undefined} */ function Ji() {
+  /** @returns {InstanceType<typeof wh> | undefined} */ function Ji() {
     return Ve() ? as() : void 0;
   }
-  /** @returns {InstanceType<typeof Kf>} */ function mc() {
-    let o = O();
+  /** @returns {InstanceType<typeof ed>} */ function mc() {
+    let o = M();
     if ((j(105), Je(25))) {
-      let P = Ut();
+      let P = Bt();
       return D(y.createMetaProperty(105, P), o);
     }
-    let p = O(),
+    let p = M(),
       m = on(p, Rs(), !1),
       g;
     (m.kind === 234 && ((g = m.typeArguments), (m = m.expression)),
@@ -26845,15 +26832,15 @@ var na;
     let x = u() === 21 ? cc() : void 0;
     return D(ar(m, g, x), o);
   }
-  /** @returns {InstanceType<typeof Kf>} */ function Gr(/** @type {boolean} */ o, p) {
-    let m = O(),
+  /** @returns {InstanceType<typeof ed>} */ function Yr(/** @type {boolean} */ o, p) {
+    let m = M(),
       g = qe(),
       x = t.getTokenStart(),
       P = j(19, p);
     if (P || o) {
       let Q = t.hasPrecedingLineBreak(),
         _e = Tn(1, Ht);
-      Ur(19, 20, P, x);
+      Br(19, 20, P, x);
       let ee = Pe(D(sr(_e, Q), m), g);
       return (
         u() === 64 &&
@@ -26868,7 +26855,7 @@ var na;
       return Pe(D(sr(Q, void 0), m), g);
     }
   }
-  /** @returns {InstanceType<typeof Kf>} */ function Aa(/** @type {number} */ o, p) {
+  /** @returns {InstanceType<typeof ed>} */ function Aa(/** @type {number} */ o, p) {
     let m = Ee();
     $e(!!(o & 1));
     let g = Xe();
@@ -26877,63 +26864,63 @@ var na;
     Ft = !1;
     let P = tt();
     P && Ze(!1);
-    /** @type {Kf} */ let Q = Gr(!!(o & 16), p);
+    /** @type {ed} */ let Q = Yr(!!(o & 16), p);
     return (P && Ze(!0), (Ft = x), $e(m), _t(g), Q);
   }
   function hc() {
-    let o = O(),
+    let o = M(),
       p = qe();
     return (j(27), Pe(D(y.createEmptyStatement(), o), p));
   }
-  /** @returns {InstanceType<typeof Kf>} */ function Lu() {
-    let o = O(),
+  /** @returns {InstanceType<typeof ed>} */ function Ju() {
+    let o = M(),
       p = qe();
     j(101);
     let m = t.getTokenStart(),
       g = j(21),
       x = ut(At);
-    Ur(21, 22, g, m);
+    Br(21, 22, g, m);
     let P = Ht(),
       Q = Je(93) ? Ht() : void 0;
     return Pe(D(He(x, P, Q), o), p);
   }
   function yc() {
-    let o = O(),
+    let o = M(),
       p = qe();
     j(92);
-    /** @type {Kf} */ let m = Ht();
+    /** @type {ed} */ let m = Ht();
     j(117);
     let g = t.getTokenStart(),
       x = j(21),
       P = ut(At);
-    return (Ur(21, 22, x, g), Je(27), Pe(D(y.createDoStatement(m, P), o), p));
+    return (Br(21, 22, x, g), Je(27), Pe(D(y.createDoStatement(m, P), o), p));
   }
-  /** @returns {InstanceType<typeof Kf>} */ function ju() {
-    let o = O(),
+  /** @returns {InstanceType<typeof ed>} */ function Ru() {
+    let o = M(),
       p = qe();
     j(117);
     let m = t.getTokenStart(),
       g = j(21),
       x = ut(At);
-    Ur(21, 22, g, m);
-    /** @type {Kf} */ let P = Ht();
+    Br(21, 22, g, m);
+    /** @type {ed} */ let P = Ht();
     return Pe(D(_r(x, P), o), p);
   }
-  /** @returns {InstanceType<typeof Kf>} */ function gc() {
-    let o = O(),
+  /** @returns {InstanceType<typeof ed>} */ function gc() {
+    let o = M(),
       p = qe();
     j(99);
-    /** @type {vh | undefined} */ let m = ft(135);
+    /** @type {Sh | undefined} */ let m = ft(135);
     j(21);
-    /** @type {Kf | xh | undefined} */ let g;
+    /** @type {ed | wh | undefined} */ let g;
     u() !== 27 &&
       (u() === 115 || u() === 121 || u() === 87 || (u() === 160 && H(Pc)) || (u() === 135 && H(zs))
         ? (g = Rc(!0))
-        : (g = Rr(At)));
-    /** @type {Kf | undefined} */ let x;
+        : (g = Ur(At)));
+    /** @type {ed | undefined} */ let x;
     if (m ? j(165) : Je(165)) {
-      let P = ut(/** @returns {xh | Kf} */ () => Vt(!0));
-      (j(22), (x = Lt(m, g, P, Ht())));
+      let P = ut(/** @returns {wh | ed} */ () => Vt(!0));
+      (j(22), (x = jt(m, g, P, Ht())));
     } else if (Je(103)) {
       let P = ut(At);
       (j(22), (x = y.createForInStatement(g, P, Ht())));
@@ -26942,39 +26929,39 @@ var na;
       let P = u() !== 27 && u() !== 22 ? ut(At) : void 0;
       j(27);
       let Q = u() !== 22 ? ut(At) : void 0;
-      (j(22), (x = jr(g, P, Q, Ht())));
+      (j(22), (x = Jr(g, P, Q, Ht())));
     }
     return Pe(D(x, o), p);
   }
-  /** @returns {InstanceType<typeof Kf>} */ function bc(/** @type {number} */ o) {
-    let p = O(),
+  /** @returns {InstanceType<typeof ed>} */ function bc(/** @type {number} */ o) {
+    let p = M(),
       m = qe();
     j(o === 253 ? 83 : 88);
     let g = lr() ? void 0 : vt();
     en();
-    /** @type {Kf} */ let x = o === 253 ? y.createBreakStatement(g) : y.createContinueStatement(g);
+    /** @type {ed} */ let x = o === 253 ? y.createBreakStatement(g) : y.createContinueStatement(g);
     return Pe(D(x, p), m);
   }
-  /** @returns {InstanceType<typeof Kf>} */ function vc() {
-    let o = O(),
+  /** @returns {InstanceType<typeof ed>} */ function vc() {
+    let o = M(),
       p = qe();
     j(107);
     let m = lr() ? void 0 : ut(At);
     return (en(), Pe(D(y.createReturnStatement(m), o), p));
   }
-  function Ju() {
-    let o = O(),
+  function Uu() {
+    let o = M(),
       p = qe();
     j(118);
     let m = t.getTokenStart(),
       g = j(21),
       x = ut(At);
-    Ur(21, 22, g, m);
+    Br(21, 22, g, m);
     let P = St(67108864, Ht);
     return Pe(D(y.createWithStatement(x, P), o), p);
   }
-  /** @returns {InstanceType<typeof Kf>} */ function xc() {
-    let o = O(),
+  /** @returns {InstanceType<typeof ed>} */ function xc() {
+    let o = M(),
       p = qe();
     j(84);
     let m = ut(At);
@@ -26982,70 +26969,70 @@ var na;
     let g = Tn(3, Ht);
     return Pe(D(y.createCaseClause(m, g), o), p);
   }
-  /** @returns {InstanceType<typeof Kf>} */ function Ru() {
-    let o = O();
+  /** @returns {InstanceType<typeof ed>} */ function Bu() {
+    let o = M();
     (j(90), j(59));
     let p = Tn(3, Ht);
     return D(y.createDefaultClause(p), o);
   }
-  /** @returns {InstanceType<typeof Kf>} */ function Uu() {
-    return u() === 84 ? xc() : Ru();
+  /** @returns {InstanceType<typeof ed>} */ function qu() {
+    return u() === 84 ? xc() : Bu();
   }
-  /** @returns {InstanceType<typeof Kf>} */ function Tc() {
-    let o = O();
+  /** @returns {InstanceType<typeof ed>} */ function Tc() {
+    let o = M();
     j(19);
-    let p = Tn(2, Uu);
+    let p = Tn(2, qu);
     return (j(20), D(y.createCaseBlock(p), o));
   }
-  /** @returns {InstanceType<typeof Kf>} */ function Bu() {
-    let o = O(),
+  /** @returns {InstanceType<typeof ed>} */ function Fu() {
+    let o = M(),
       p = qe();
     (j(109), j(21));
     let m = ut(At);
     j(22);
-    /** @type {Kf} */ let g = Tc();
+    /** @type {ed} */ let g = Tc();
     return Pe(D(y.createSwitchStatement(m, g), o), p);
   }
-  /** @returns {InstanceType<typeof Kf>} */ function Sc() {
-    let o = O(),
+  /** @returns {InstanceType<typeof ed>} */ function Sc() {
+    let o = M(),
       p = qe();
     j(111);
     let m = t.hasPrecedingLineBreak() ? void 0 : ut(At);
-    return (m === void 0 && (vn++, (m = D(pe(""), O()))), ua() || wt(m), Pe(D(y.createThrowStatement(m), o), p));
+    return (m === void 0 && (vn++, (m = D(pe(""), M()))), ua() || wt(m), Pe(D(y.createThrowStatement(m), o), p));
   }
-  /** @returns {InstanceType<typeof Kf>} */ function qu() {
-    let o = O(),
+  /** @returns {InstanceType<typeof ed>} */ function zu() {
+    let o = M(),
       p = qe();
     j(113);
-    let m = Gr(!1),
+    let m = Yr(!1),
       g = u() === 85 ? wc() : void 0,
       x;
     return (
-      (!g || u() === 98) && (j(98, E.catch_or_finally_expected), (x = Gr(!1))),
+      (!g || u() === 98) && (j(98, E.catch_or_finally_expected), (x = Yr(!1))),
       Pe(D(y.createTryStatement(m, g, x), o), p)
     );
   }
-  /** @returns {InstanceType<typeof Kf>} */ function wc() {
-    let o = O();
+  /** @returns {InstanceType<typeof ed>} */ function wc() {
+    let o = M();
     j(85);
-    /** @type {Kf | undefined} */ let p;
+    /** @type {ed | undefined} */ let p;
     Je(21) ? ((p = Pa()), j(22)) : (p = void 0);
-    /** @type {Kf} */ let m = Gr(!1);
+    /** @type {ed} */ let m = Yr(!1);
     return D(y.createCatchClause(p, m), o);
   }
-  function Fu() {
-    let o = O(),
+  function Vu() {
+    let o = M(),
       p = qe();
     return (j(89), en(), Pe(D(y.createDebuggerStatement(), o), p));
   }
-  /** @returns {InstanceType<typeof Kf>} */ function kc() {
-    let o = O(),
+  /** @returns {InstanceType<typeof ed>} */ function kc() {
+    let o = M(),
       p = qe(),
       m,
       g = u() === 21,
       x = ut(At);
     return (
-      et(x) && Je(59) ? (m = y.createLabeledStatement(x, Ht())) : (ua() || wt(x), (m = In(x)), g && (p = !1)),
+      et(x) && Je(59) ? (m = y.createLabeledStatement(x, Ht())) : (ua() || wt(x), (m = On(x)), g && (p = !1)),
       Pe(D(m, o), p)
     );
   }
@@ -27061,7 +27048,7 @@ var na;
   /** @returns {boolean} */ function Fs() {
     return (B(), (kt(u()) || u() === 9 || u() === 10 || u() === 11) && !t.hasPrecedingLineBreak());
   }
-  /** @returns {boolean} */ function zu() {
+  /** @returns {boolean} */ function Wu() {
     for (;;)
       switch (u()) {
         case 115:
@@ -27078,10 +27065,10 @@ var na;
         case 120:
         case 156:
         case 166:
-          return gu();
+          return vu();
         case 144:
         case 145:
-          return Yu();
+          return Xu();
         case 128:
         case 129:
         case 134:
@@ -27111,7 +27098,7 @@ var na;
       }
   }
   /** @returns {boolean} */ function Ri() {
-    return H(zu);
+    return H(Wu);
   }
   /** @returns {boolean} */ function Cc() {
     switch (u()) {
@@ -27167,17 +27154,17 @@ var na;
   /** @returns {boolean} */ function Dc() {
     return (B(), Ve() || u() === 19 || u() === 23);
   }
-  /** @returns {boolean} */ function Vu() {
+  /** @returns {boolean} */ function Gu() {
     return H(Dc);
   }
   function Pc() {
     return Ca(!0);
   }
-  function Wu() {
+  function Yu() {
     return (B(), u() === 64 || u() === 27 || u() === 59);
   }
   function Ca(o) {
-    return (B(), o && u() === 165 ? H(Wu) : (Ve() || u() === 19) && !t.hasPrecedingLineBreak());
+    return (B(), o && u() === 165 ? H(Yu) : (Ve() || u() === 19) && !t.hasPrecedingLineBreak());
   }
   /** @returns {boolean} */ function Nc() {
     return H(Ca);
@@ -27188,33 +27175,33 @@ var na;
   /** @returns {boolean} */ function Da() {
     return H(zs);
   }
-  /** @returns {InstanceType<typeof Kf>} */ function Ht() {
+  /** @returns {InstanceType<typeof ed>} */ function Ht() {
     switch (u()) {
       case 27:
         return hc();
       case 19:
-        return Gr(!1);
+        return Yr(!1);
       case 115:
-        return oi(O(), qe(), void 0);
+        return oi(M(), qe(), void 0);
       case 121:
-        if (Vu()) return oi(O(), qe(), void 0);
+        if (Gu()) return oi(M(), qe(), void 0);
         break;
       case 135:
-        if (Da()) return oi(O(), qe(), void 0);
+        if (Da()) return oi(M(), qe(), void 0);
         break;
       case 160:
-        if (Nc()) return oi(O(), qe(), void 0);
+        if (Nc()) return oi(M(), qe(), void 0);
         break;
       case 100:
-        return Ws(O(), qe(), void 0);
+        return Ws(M(), qe(), void 0);
       case 86:
-        return Hs(O(), qe(), void 0);
+        return Hs(M(), qe(), void 0);
       case 101:
-        return Lu();
+        return Ju();
       case 92:
         return yc();
       case 117:
-        return ju();
+        return Ru();
       case 99:
         return gc();
       case 88:
@@ -27224,17 +27211,17 @@ var na;
       case 107:
         return vc();
       case 118:
-        return Ju();
+        return Uu();
       case 109:
-        return Bu();
+        return Fu();
       case 111:
         return Sc();
       case 113:
       case 85:
       case 98:
-        return qu();
+        return zu();
       case 89:
-        return Fu();
+        return Vu();
       case 60:
         return Ui();
       case 134:
@@ -27260,21 +27247,21 @@ var na;
     }
     return kc();
   }
-  /** @returns {boolean} */ function Ic(/** @type {Kf | vh | xh | Th} */ o) {
+  /** @returns {boolean} */ function Ic(/** @type {ed | Sh | wh | kh} */ o) {
     return o.kind === 138;
   }
-  /** @returns {InstanceType<typeof Kf>} */ function Ui() {
-    let o = O(),
+  /** @returns {InstanceType<typeof ed>} */ function Ui() {
+    let o = M(),
       p = qe(),
-      m = jn(!0);
+      m = Jn(!0);
     if (nn(m, Ic)) {
-      let x = Gu(o);
+      let x = Hu(o);
       if (x) return x;
       for (let P of m) P.flags |= 33554432;
       return St(33554432, () => Oc(o, p, m));
     } else return Oc(o, p, m);
   }
-  function Gu(/** @type {number} */ o) {
+  function Hu(/** @type {number} */ o) {
     return St(33554432, () => {
       let p = ma(bt, o);
       if (p) return F_(p);
@@ -27295,15 +27282,15 @@ var na;
       case 86:
         return Hs(o, p, m);
       case 120:
-        return ap(o, p, m);
-      case 156:
-        return sp(o, p, m);
-      case 94:
         return _p(o, p, m);
+      case 156:
+        return op(o, p, m);
+      case 94:
+        return cp(o, p, m);
       case 162:
       case 144:
       case 145:
-        return op(o, p, m);
+        return lp(o, p, m);
       case 102:
         return qi(o, p, m);
       case 95:
@@ -27312,14 +27299,14 @@ var na;
           case 64:
             return il(o, p, m);
           case 130:
-            return up(o, p, m);
+            return fp(o, p, m);
           default:
             return rl(o, p, m);
         }
     }
     if (m) {
       let g = Yt(283, !0, E.Declaration_expected);
-      return (Wp(g, o), (g.modifiers = m), g);
+      return (Yp(g, o), (g.modifiers = m), g);
     }
   }
   function Mc() {
@@ -27328,10 +27315,10 @@ var na;
   function Lc() {
     return (B(), u() === 161 || u() === 64);
   }
-  /** @returns {boolean} */ function Yu() {
+  /** @returns {boolean} */ function Xu() {
     return (B(), !t.hasPrecedingLineBreak() && (Te() || u() === 11));
   }
-  /** @returns {InstanceType<typeof Kf> | undefined} */ function Bi(/** @type {number} */ o, p) {
+  /** @returns {InstanceType<typeof ed> | undefined} */ function Bi(/** @type {number} */ o, p) {
     if (u() !== 19) {
       if (o & 4) {
         va();
@@ -27344,58 +27331,58 @@ var na;
     }
     return Aa(o, p);
   }
-  /** @returns {InstanceType<typeof Kf>} */ function Hu() {
-    let o = O();
+  /** @returns {InstanceType<typeof ed>} */ function $u() {
+    let o = M();
     if (u() === 28) return D(y.createOmittedExpression(), o);
     let p = ft(26),
       m = _i(),
       g = Er();
     return D(y.createBindingElement(p, void 0, m, g), o);
   }
-  /** @returns {InstanceType<typeof Kf>} */ function jc() {
-    let o = O(),
+  /** @returns {InstanceType<typeof ed>} */ function jc() {
+    let o = M(),
       p = ft(26),
       m = Ve(),
-      g = qr(),
+      g = Fr(),
       x;
     m && u() !== 59 ? ((x = g), (g = void 0)) : (j(59), (x = _i()));
     let P = Er();
     return D(y.createBindingElement(p, g, x, P), o);
   }
-  /** @returns {InstanceType<typeof Kf>} */ function Xu() {
-    let o = O();
+  /** @returns {InstanceType<typeof ed>} */ function Qu() {
+    let o = M();
     j(19);
     let p = ut(() => dn(9, jc));
     return (j(20), D(y.createObjectBindingPattern(p), o));
   }
-  /** @returns {InstanceType<typeof Kf>} */ function Jc() {
-    let o = O();
+  /** @returns {InstanceType<typeof ed>} */ function Jc() {
+    let o = M();
     j(23);
-    let p = ut(() => dn(10, Hu));
+    let p = ut(() => dn(10, $u));
     return (j(24), D(y.createArrayBindingPattern(p), o));
   }
   /** @returns {boolean} */ function Vs() {
     return u() === 19 || u() === 23 || u() === 81 || Ve();
   }
-  /** @returns {Kf | xh | vh | Th} */ function _i(o) {
-    return u() === 23 ? Jc() : u() === 19 ? Xu() : as(o);
+  /** @returns {ed | wh | Sh | kh} */ function _i(o) {
+    return u() === 23 ? Jc() : u() === 19 ? Qu() : as(o);
   }
-  /** @returns {InstanceType<typeof Kf>} */ function $u() {
+  /** @returns {InstanceType<typeof ed>} */ function Ku() {
     return Pa(!0);
   }
-  /** @returns {InstanceType<typeof Kf>} */ function Pa(/** @type {boolean | undefined} */ o) {
-    let p = O(),
+  /** @returns {InstanceType<typeof ed>} */ function Pa(/** @type {boolean | undefined} */ o) {
+    let p = M(),
       m = qe(),
       g = _i(E.Private_identifiers_are_not_allowed_in_variable_declarations);
-    /** @type {vh | undefined} */ let x;
+    /** @type {Sh | undefined} */ let x;
     o && g.kind === 80 && u() === 54 && !t.hasPrecedingLineBreak() && (x = Gt());
     let P = wr(),
       Q = Yo(u()) ? void 0 : Er(),
-      _e = Fn(g, x, P, Q);
+      _e = zn(g, x, P, Q);
     return Pe(D(_e, p), m);
   }
-  /** @returns {InstanceType<typeof Kf>} */ function Rc(/** @type {boolean} */ o) {
-    let p = O(),
+  /** @returns {InstanceType<typeof ed>} */ function Rc(/** @type {boolean} */ o) {
+    let p = M(),
       m = 0;
     switch (u()) {
       case 115:
@@ -27420,23 +27407,23 @@ var na;
     let g;
     if (u() === 165 && H(Uc)) g = fr();
     else {
-      let x = he();
-      (Se(o), (g = dn(8, o ? Pa : $u)), Se(x));
+      let x = ge();
+      (Se(o), (g = dn(8, o ? Pa : Ku)), Se(x));
     }
-    return D(On(g, m), p);
+    return D(Mn(g, m), p);
   }
   function Uc() {
     return Pi() && B() === 22;
   }
-  /** @returns {InstanceType<typeof Kf>} */ function oi(/** @type {number} */ o, /** @type {boolean} */ p, m) {
-    /** @type {Kf} */ let g = Rc(!1);
+  /** @returns {InstanceType<typeof ed>} */ function oi(/** @type {number} */ o, /** @type {boolean} */ p, m) {
+    /** @type {ed} */ let g = Rc(!1);
     en();
-    /** @type {Kf} */ let x = bn(m, g);
+    /** @type {ed} */ let x = bn(m, g);
     return Pe(D(x, o), p);
   }
-  /** @returns {InstanceType<typeof Kf>} */ function Ws(/** @type {number} */ o, /** @type {boolean} */ p, m) {
+  /** @returns {InstanceType<typeof ed>} */ function Ws(/** @type {number} */ o, /** @type {boolean} */ p, m) {
     let g = Xe(),
-      x = Un(m);
+      x = Bn(m);
     j(100);
     let P = ft(42),
       Q = x & 2048 ? Ji() : as(),
@@ -27444,62 +27431,62 @@ var na;
       ee = x & 1024 ? 2 : 0,
       te = mn();
     x & 32 && _t(!0);
-    let ce = Qn(_e | ee),
-      Ue = Ln(59, !1),
+    let ce = Kn(_e | ee),
+      Ue = jn(59, !1),
       Re = Bi(_e | ee, E.or_expected);
     _t(g);
-    /** @type {Kf} */ let Ne = y.createFunctionDeclaration(m, P, Q, te, ce, Ue, Re);
+    /** @type {ed} */ let Ne = y.createFunctionDeclaration(m, P, Q, te, ce, Ue, Re);
     return Pe(D(Ne, o), p);
   }
-  /** @returns {boolean | undefined} */ function Qu() {
+  /** @returns {boolean | undefined} */ function Zu() {
     if (u() === 137) return j(137);
     if (u() === 11 && H(B) === 21)
-      return le(() => {
-        let o = $n();
+      return ue(() => {
+        let o = Qn();
         return o.text === "constructor" ? o : void 0;
       });
   }
-  /** @returns {InstanceType<typeof Kf>} */ function Bc(/** @type {number} */ o, /** @type {boolean} */ p, m) {
-    return le(() => {
-      if (Qu()) {
+  /** @returns {InstanceType<typeof ed>} */ function Bc(/** @type {number} */ o, /** @type {boolean} */ p, m) {
+    return ue(() => {
+      if (Zu()) {
         let g = mn(),
-          x = Qn(0),
-          P = Ln(59, !1),
+          x = Kn(0),
+          P = jn(59, !1),
           Q = Bi(0, E.or_expected),
           _e = y.createConstructorDeclaration(m, x, Q);
         return ((_e.typeParameters = g), (_e.type = P), Pe(D(_e, o), p));
       }
     });
   }
-  /** @returns {InstanceType<typeof Kf>} */ function qc(/** @type {number} */ o, /** @type {boolean} */ p, m, /** @type {Kf | vh | xh | Th | undefined} */ g, /** @type {Kf | vh | xh | Th} */ x, P, Q, _e) {
+  /** @returns {InstanceType<typeof ed>} */ function qc(/** @type {number} */ o, /** @type {boolean} */ p, m, /** @type {ed | Sh | wh | kh | undefined} */ g, /** @type {ed | Sh | wh | kh} */ x, P, Q, _e) {
     let ee = g ? 1 : 0,
       te = nn(m, ml) ? 2 : 0,
       ce = mn(),
-      Ue = Qn(ee | te),
-      Re = Ln(59, !1),
+      Ue = Kn(ee | te),
+      Re = jn(59, !1),
       Ne = Bi(ee | te, _e),
       Xt = y.createMethodDeclaration(m, g, x, P, ce, Ue, Re, Ne);
     return ((Xt.exclamationToken = Q), Pe(D(Xt, o), p));
   }
-  /** @returns {InstanceType<typeof Kf>} */ function Na(/** @type {number} */ o, /** @type {boolean} */ p, m, /** @type {Kf | vh | xh | Th | undefined} */ g, /** @type {Kf | vh | xh | Th | undefined} */ x) {
+  /** @returns {InstanceType<typeof ed>} */ function Na(/** @type {number} */ o, /** @type {boolean} */ p, m, /** @type {ed | Sh | wh | kh | undefined} */ g, /** @type {ed | Sh | wh | kh | undefined} */ x) {
     let P = !x && !t.hasPrecedingLineBreak() ? ft(54) : void 0,
       Q = wr(),
       _e = Pt(90112, Er);
-    Gl(g, Q, _e);
-    /** @type {Kf} */ let ee = y.createPropertyDeclaration(m, g, x || P, Q, _e);
+    Hl(g, Q, _e);
+    /** @type {ed} */ let ee = y.createPropertyDeclaration(m, g, x || P, Q, _e);
     return Pe(D(ee, o), p);
   }
-  /** @returns {InstanceType<typeof Kf>} */ function Gs(/** @type {number} */ o, /** @type {boolean} */ p, m) {
+  /** @returns {InstanceType<typeof ed>} */ function Gs(/** @type {number} */ o, /** @type {boolean} */ p, m) {
     let g = ft(42),
-      x = qr(),
+      x = Fr(),
       P = ft(58);
     return g || u() === 21 || u() === 30 ? qc(o, p, m, g, x, P, void 0, E.or_expected) : Na(o, p, m, x, P);
   }
-  /** @returns {InstanceType<typeof Kf>} */ function ci(/** @type {number} */ o, /** @type {boolean} */ p, m, g, x) {
-    let P = qr(),
+  /** @returns {InstanceType<typeof ed>} */ function ci(/** @type {number} */ o, /** @type {boolean} */ p, m, g, x) {
+    let P = Fr(),
       Q = mn(),
-      _e = Qn(0),
-      ee = Ln(59, !1),
+      _e = Kn(0),
+      ee = jn(59, !1),
       te = Bi(x),
       ce = g === 178 ? y.createGetAccessorDeclaration(m, P, _e, ee, te) : y.createSetAccessorDeclaration(m, P, _e, te);
     return ((ce.typeParameters = Q), S_(ce) && (ce.type = ee), Pe(D(ce, o), p));
@@ -27507,7 +27494,7 @@ var na;
   /** @returns {boolean} */ function Fc() {
     /** @type {number | undefined} */ let o;
     if (u() === 60) return !0;
-    for (; Xr(u());) {
+    for (; $r(u());) {
       if (((o = u()), e2(o))) return !0;
       B();
     }
@@ -27528,22 +27515,22 @@ var na;
     }
     return !1;
   }
-  function Ku(/** @type {number} */ o, /** @type {boolean} */ p, m) {
-    Xn(126);
-    let g = Zu(),
+  function ep(/** @type {number} */ o, /** @type {boolean} */ p, m) {
+    $n(126);
+    let g = tp(),
       x = Pe(D(y.createClassStaticBlockDeclaration(g), o), p);
     return ((x.modifiers = m), x);
   }
-  /** @returns {Kf} */ function Zu() {
+  /** @returns {ed} */ function tp() {
     let o = Ee(),
       p = Xe();
     ($e(!1), _t(!0));
-    let m = Gr(!1);
+    let m = Yr(!1);
     return ($e(o), _t(p), m);
   }
-  /** @returns {Kf | xh} */ function zc() {
+  /** @returns {ed | wh} */ function zc() {
     if (Xe() && u() === 135) {
-      let o = O(),
+      let o = M(),
         p = vt(E.Expression_expected);
       B();
       let m = on(o, p, !0);
@@ -27551,29 +27538,29 @@ var na;
     }
     return Li();
   }
-  /** @returns {InstanceType<typeof Kf> | undefined} */ function Vc() {
-    let o = O();
+  /** @returns {InstanceType<typeof ed> | undefined} */ function Vc() {
+    let o = M();
     if (!Je(60)) return;
     let p = Ei(zc);
     return D(y.createDecorator(p), o);
   }
-  /** @returns {InstanceType<typeof vh> | undefined} */ function Ys(/** @type {boolean} */ o, /** @type {boolean | undefined} */ p, /** @type {boolean | undefined} */ m) {
-    let g = O(),
+  /** @returns {InstanceType<typeof Sh> | undefined} */ function Ys(/** @type {boolean} */ o, /** @type {boolean | undefined} */ p, /** @type {boolean | undefined} */ m) {
+    let g = M(),
       x = u();
     if (u() === 87 && p) {
-      if (!le(ss)) return;
+      if (!ue(ss)) return;
     } else {
       if (m && u() === 126 && H(Oa)) return;
       if (o && u() === 126) return;
       if (!J_()) return;
     }
-    return D(ge(x), g);
+    return D(be(x), g);
   }
-  function jn(/** @type {boolean} */ o, /** @type {boolean | undefined} */ p, /** @type {boolean | undefined} */ m) {
-    let g = O();
-    /** @type {(Kf | vh)[] | undefined} */ let x;
-    /** @type {Kf | undefined} */ let P;
-    /** @type {vh | undefined} */ let Q;
+  function Jn(/** @type {boolean} */ o, /** @type {boolean | undefined} */ p, /** @type {boolean | undefined} */ m) {
+    let g = M();
+    /** @type {(ed | Sh)[] | undefined} */ let x;
+    /** @type {ed | undefined} */ let P;
+    /** @type {Sh | undefined} */ let Q;
     let _e = !1,
       ee = !1,
       te = !1;
@@ -27586,30 +27573,30 @@ var na;
   function Wc() {
     let o;
     if (u() === 134) {
-      let p = O();
+      let p = M();
       B();
-      let m = D(ge(134), p);
+      let m = D(be(134), p);
       o = Dt([m], p);
     }
     return o;
   }
-  /** @returns {InstanceType<typeof Kf>} */ function Gc() {
-    let o = O(),
+  /** @returns {InstanceType<typeof ed>} */ function Gc() {
+    let o = M(),
       p = qe();
     if (u() === 27) return (B(), Pe(D(y.createSemicolonClassElement(), o), p));
-    let m = jn(!0, !0, !0);
-    if (u() === 126 && H(Oa)) return Ku(o, p, m);
+    let m = Jn(!0, !0, !0);
+    if (u() === 126 && H(Oa)) return ep(o, p, m);
     if (ni(139)) return ci(o, p, m, 178, 0);
     if (ni(153)) return ci(o, p, m, 179, 0);
     if (u() === 137 || u() === 11) {
-      /** @type {Kf} */ let g = Bc(o, p, m);
+      /** @type {ed} */ let g = Bc(o, p, m);
       if (g) return g;
     }
-    if (Vr()) return xs(o, p, m);
+    if (Wr()) return xs(o, p, m);
     if (kt(u()) || u() === 11 || u() === 9 || u() === 10 || u() === 42 || u() === 23)
       if (nn(m, Ic)) {
         for (let x of m) x.flags |= 33554432;
-        return St(33554432, /** @returns {Kf} */ () => Gs(o, p, m));
+        return St(33554432, /** @returns {ed} */ () => Gs(o, p, m));
       } else return Gs(o, p, m);
     if (m) {
       let g = Yt(80, !0, E.Declaration_expected);
@@ -27617,57 +27604,57 @@ var na;
     }
     return q.fail("Should not have attempted to parse class member declaration.");
   }
-  function ep() {
-    let o = O(),
+  function np() {
+    let o = M(),
       p = qe(),
-      m = jn(!0);
+      m = Jn(!0);
     if (u() === 86) return Xs(o, p, m, 232);
     let g = Yt(283, !0, E.Expression_expected);
-    return (Wp(g, o), (g.modifiers = m), g);
+    return (Yp(g, o), (g.modifiers = m), g);
   }
-  /** @returns {Kf} */ function tp() {
-    return Xs(O(), qe(), void 0, 232);
+  /** @returns {ed} */ function rp() {
+    return Xs(M(), qe(), void 0, 232);
   }
-  /** @returns {Kf} */ function Hs(/** @type {number} */ o, p, m) {
+  /** @returns {ed} */ function Hs(/** @type {number} */ o, p, m) {
     return Xs(o, p, m, 264);
   }
-  /** @returns {InstanceType<typeof Kf>} */ function Xs(/** @type {number} */ o, /** @type {boolean} */ p, m, /** @type {number} */ g) {
+  /** @returns {InstanceType<typeof ed>} */ function Xs(/** @type {number} */ o, /** @type {boolean} */ p, m, /** @type {number} */ g) {
     let x = Xe();
     j(86);
-    let P = np(),
+    let P = ip(),
       Q = mn();
     nn(m, ev) && _t(!0);
     let _e = Hc(),
       ee;
     (j(19) ? ((ee = Xc()), j(20)) : (ee = fr()), _t(x));
-    /** @type {Kf} */ let te = g === 264 ? y.createClassDeclaration(m, P, Q, _e, ee) : y.createClassExpression(m, P, Q, _e, ee);
+    /** @type {ed} */ let te = g === 264 ? y.createClassDeclaration(m, P, Q, _e, ee) : y.createClassExpression(m, P, Q, _e, ee);
     return Pe(D(te, o), p);
   }
-  /** @returns {InstanceType<typeof xh> | undefined} */ function np() {
+  /** @returns {InstanceType<typeof wh> | undefined} */ function ip() {
     return Ve() && !Yc() ? ur(Ve()) : void 0;
   }
   /** @returns {boolean} */ function Yc() {
-    return u() === 119 && H(eu);
+    return u() === 119 && H(nu);
   }
   function Hc() {
-    if ($s()) return Tn(22, rp);
+    if ($s()) return Tn(22, ap);
   }
-  /** @returns {InstanceType<typeof Kf>} */ function rp() {
-    let o = O(),
+  /** @returns {InstanceType<typeof ed>} */ function ap() {
+    let o = M(),
       p = u();
     (q.assert(p === 96 || p === 119), B());
-    let m = dn(7, ip);
+    let m = dn(7, sp);
     return D(y.createHeritageClause(p, m), o);
   }
-  /** @returns {InstanceType<typeof Kf>} */ function ip() {
-    let o = O(),
+  /** @returns {InstanceType<typeof ed>} */ function sp() {
+    let o = M(),
       p = Li();
     if (p.kind === 234) return p;
     let m = Ia();
     return D(y.createExpressionWithTypeArguments(p, m), o);
   }
   function Ia() {
-    return u() === 30 ? Fr(20, ot, 30, 32) : void 0;
+    return u() === 30 ? zr(20, ot, 30, 32) : void 0;
   }
   /** @returns {boolean} */ function $s() {
     return u() === 96 || u() === 119;
@@ -27675,7 +27662,7 @@ var na;
   function Xc() {
     return Tn(5, Gc);
   }
-  /** @returns {InstanceType<typeof Kf>} */ function ap(/** @type {number} */ o, /** @type {boolean} */ p, m) {
+  /** @returns {InstanceType<typeof ed>} */ function _p(/** @type {number} */ o, /** @type {boolean} */ p, m) {
     j(120);
     let g = vt(),
       x = mn(),
@@ -27684,60 +27671,60 @@ var na;
       _e = y.createInterfaceDeclaration(m, g, x, P, Q);
     return Pe(D(_e, o), p);
   }
-  function sp(/** @type {number} */ o, /** @type {boolean} */ p, m) {
+  function op(/** @type {number} */ o, /** @type {boolean} */ p, m) {
     (j(156), t.hasPrecedingLineBreak() && De(E.Line_break_not_permitted_here));
     let g = vt(),
       x = mn();
     j(64);
-    let P = (u() === 141 && le(ko)) || ot();
+    let P = (u() === 141 && ue(ko)) || ot();
     en();
-    /** @type {Kf} */ let Q = y.createTypeAliasDeclaration(m, g, x, P);
+    /** @type {ed} */ let Q = y.createTypeAliasDeclaration(m, g, x, P);
     return Pe(D(Q, o), p);
   }
-  /** @returns {InstanceType<typeof Kf>} */ function Qs() {
-    let o = O(),
+  /** @returns {InstanceType<typeof ed>} */ function Qs() {
+    let o = M(),
       p = qe(),
-      m = qr(),
+      m = Fr(),
       g = ut(Er);
     return Pe(D(y.createEnumMember(m, g), o), p);
   }
-  /** @returns {InstanceType<typeof Kf>} */ function _p(/** @type {number} */ o, /** @type {boolean} */ p, m) {
+  /** @returns {InstanceType<typeof ed>} */ function cp(/** @type {number} */ o, /** @type {boolean} */ p, m) {
     j(94);
     let g = vt(),
       x;
     j(19) ? ((x = we(() => dn(6, Qs))), j(20)) : (x = fr());
-    /** @type {Kf} */ let P = y.createEnumDeclaration(m, g, x);
+    /** @type {ed} */ let P = y.createEnumDeclaration(m, g, x);
     return Pe(D(P, o), p);
   }
-  /** @returns {InstanceType<typeof Kf>} */ function Ks() {
-    let o = O(),
+  /** @returns {InstanceType<typeof ed>} */ function Ks() {
+    let o = M(),
       p;
     return (j(19) ? ((p = Tn(1, Ht)), j(20)) : (p = fr()), D(y.createModuleBlock(p), o));
   }
-  /** @returns {InstanceType<typeof Kf>} */ function $c(/** @type {number} */ o, /** @type {boolean} */ p, m, /** @type {number} */ g) {
+  /** @returns {InstanceType<typeof ed>} */ function $c(/** @type {number} */ o, /** @type {boolean} */ p, m, /** @type {number} */ g) {
     let x = g & 32,
-      P = g & 8 ? Ut() : vt(),
-      Q = Je(25) ? $c(O(), !1, void 0, 8 | x) : Ks(),
+      P = g & 8 ? Bt() : vt(),
+      Q = Je(25) ? $c(M(), !1, void 0, 8 | x) : Ks(),
       _e = y.createModuleDeclaration(m, P, Q, g);
     return Pe(D(_e, o), p);
   }
-  /** @returns {InstanceType<typeof Kf>} */ function Qc(/** @type {number} */ o, /** @type {boolean} */ p, m) {
+  /** @returns {InstanceType<typeof ed>} */ function Qc(/** @type {number} */ o, /** @type {boolean} */ p, m) {
     let g = 0,
       x;
-    u() === 162 ? ((x = vt()), (g |= 2048)) : ((x = $n()), (x.text = Br(x.text)));
-    /** @type {Kf | undefined} */ let P;
+    u() === 162 ? ((x = vt()), (g |= 2048)) : ((x = Qn()), (x.text = qr(x.text)));
+    /** @type {ed | undefined} */ let P;
     u() === 19 ? (P = Ks()) : en();
-    /** @type {Kf} */ let Q = y.createModuleDeclaration(m, x, P, g);
+    /** @type {ed} */ let Q = y.createModuleDeclaration(m, x, P, g);
     return Pe(D(Q, o), p);
   }
-  /** @returns {InstanceType<typeof Kf>} */ function op(/** @type {number} */ o, p, m) {
+  /** @returns {InstanceType<typeof ed>} */ function lp(/** @type {number} */ o, p, m) {
     let g = 0;
     if (u() === 162) return Qc(o, p, m);
     if (Je(145)) g |= 32;
     else if ((j(144), u() === 11)) return Qc(o, p, m);
     return $c(o, p, m, g);
   }
-  /** @returns {boolean} */ function cp() {
+  /** @returns {boolean} */ function up() {
     return u() === 149 && H(Kc);
   }
   /** @returns {boolean} */ function Kc() {
@@ -27746,148 +27733,148 @@ var na;
   /** @returns {boolean} */ function Oa() {
     return B() === 19;
   }
-  function lp() {
+  function pp() {
     return B() === 44;
   }
-  function up(o, p, m) {
+  function fp(o, p, m) {
     (j(130), j(145));
     let g = vt();
     en();
     let x = y.createNamespaceExportDeclaration(g);
     return ((x.modifiers = m), Pe(D(x, o), p));
   }
-  /** @returns {InstanceType<typeof Kf>} */ function qi(/** @type {number} */ o, /** @type {boolean} */ p, m) {
+  /** @returns {InstanceType<typeof ed>} */ function qi(/** @type {number} */ o, /** @type {boolean} */ p, m) {
     j(102);
     let g = t.getTokenFullStart(),
       x;
     Te() && (x = vt());
     /** @type {number | undefined} */ let P;
     if (
-      (x?.escapedText === "type" && (u() !== 161 || (Te() && H(Lc))) && (Te() || Yr())
+      (x?.escapedText === "type" && (u() !== 161 || (Te() && H(Lc))) && (Te() || Hr())
         ? ((P = 156), (x = Te() ? vt() : void 0))
         : x?.escapedText === "defer" &&
           (u() === 161 ? !H(Mc) : u() !== 28 && u() !== 64) &&
           ((P = 166), (x = Te() ? vt() : void 0)),
-      x && !fp() && P !== 166)
+      x && !mp() && P !== 166)
     )
-      return dp(o, p, m, x, P === 156);
+      return hp(o, p, m, x, P === 156);
     let Q = Zc(x, g, P, void 0),
       _e = zi(),
       ee = el();
     en();
-    /** @type {Kf} */ let te = y.createImportDeclaration(m, Q, _e, ee);
+    /** @type {ed} */ let te = y.createImportDeclaration(m, Q, _e, ee);
     return Pe(D(te, o), p);
   }
-  /** @returns {InstanceType<typeof Kf> | undefined} */ function Zc(/** @type {Kf | vh | xh | Th | undefined} */ o, /** @type {number} */ p, /** @type {number | undefined} */ m, g = !1) {
-    /** @type {Kf | undefined} */ let x;
-    return ((o || u() === 42 || u() === 19) && ((x = mp(o, p, m, g)), j(161)), x);
+  /** @returns {InstanceType<typeof ed> | undefined} */ function Zc(/** @type {ed | Sh | wh | kh | undefined} */ o, /** @type {number} */ p, /** @type {number | undefined} */ m, g = !1) {
+    /** @type {ed | undefined} */ let x;
+    return ((o || u() === 42 || u() === 19) && ((x = yp(o, p, m, g)), j(161)), x);
   }
   function el() {
     let o = u();
     if (o === 118 || (o === 132 && !t.hasPrecedingLineBreak())) return Zs(o);
   }
-  function pp() {
-    let o = O(),
-      p = kt(u()) ? Ut() : ii(11);
+  function dp() {
+    let o = M(),
+      p = kt(u()) ? Bt() : ii(11);
     j(59);
     let m = Vt(!0);
     return D(y.createImportAttribute(p, m), o);
   }
   function Zs(/** @type {number} */ o, p) {
-    let m = O();
+    let m = M();
     p || j(o);
     let g = t.getTokenStart();
     if (j(19)) {
       let x = t.hasPrecedingLineBreak(),
-        P = dn(24, pp, !0);
+        P = dn(24, dp, !0);
       if (!j(20)) {
-        let Q = Va(st);
+        let Q = za(st);
         Q &&
           Q.code === E._0_expected.code &&
-          pl(Q, Ja(jt, Ke, g, 1, E.The_parser_expected_to_find_a_1_to_match_the_0_token_here, "{", "}"));
+          pl(Q, ja(Jt, Ke, g, 1, E.The_parser_expected_to_find_a_1_to_match_the_0_token_here, "{", "}"));
       }
       return D(y.createImportAttributes(P, x, o), m);
     } else {
-      let x = Dt([], O(), void 0, !1);
+      let x = Dt([], M(), void 0, !1);
       return D(y.createImportAttributes(x, !1, o), m);
     }
   }
-  /** @returns {boolean} */ function Yr() {
+  /** @returns {boolean} */ function Hr() {
     return u() === 42 || u() === 19;
   }
-  /** @returns {boolean} */ function fp() {
+  /** @returns {boolean} */ function mp() {
     return u() === 28 || u() === 161;
   }
-  /** @returns {InstanceType<typeof Kf>} */ function dp(/** @type {number} */ o, /** @type {boolean} */ p, m, /** @type {Kf | vh | xh | Th} */ g, /** @type {boolean} */ x) {
+  /** @returns {InstanceType<typeof ed>} */ function hp(/** @type {number} */ o, /** @type {boolean} */ p, m, /** @type {ed | Sh | wh | kh} */ g, /** @type {boolean} */ x) {
     j(64);
     let P = Fi();
     en();
-    /** @type {Kf} */ let Q = y.createImportEqualsDeclaration(m, x, g, P);
+    /** @type {ed} */ let Q = y.createImportEqualsDeclaration(m, x, g, P);
     return Pe(D(Q, o), p);
   }
-  /** @returns {InstanceType<typeof Kf>} */ function mp(/** @type {Kf | vh | xh | Th | undefined} */ o, /** @type {number} */ p, /** @type {number | undefined} */ m, /** @type {boolean} */ g) {
-    /** @type {Kf | undefined} */ let x;
+  /** @returns {InstanceType<typeof ed>} */ function yp(/** @type {ed | Sh | wh | kh | undefined} */ o, /** @type {number} */ p, /** @type {number | undefined} */ m, /** @type {boolean} */ g) {
+    /** @type {ed | undefined} */ let x;
     return (
       (!o || Je(28)) &&
         (g && t.setSkipJsDocLeadingAsterisks(!0),
-        u() === 42 ? (x = yp()) : (x = tl(276)),
+        u() === 42 ? (x = bp()) : (x = tl(276)),
         g && t.setSkipJsDocLeadingAsterisks(!1)),
       D(y.createImportClause(m, o, x), p)
     );
   }
-  /** @returns {Kf | xh | vh | Th} */ function Fi() {
-    return cp() ? hp() : zr(!1);
+  /** @returns {ed | wh | Sh | kh} */ function Fi() {
+    return up() ? gp() : Vr(!1);
   }
-  /** @returns {InstanceType<typeof Kf>} */ function hp() {
-    let o = O();
+  /** @returns {InstanceType<typeof ed>} */ function gp() {
+    let o = M();
     (j(149), j(21));
     let p = zi();
     return (j(22), D(y.createExternalModuleReference(p), o));
   }
-  /** @returns {InstanceType<typeof Kf> | InstanceType<typeof xh> | InstanceType<typeof vh>} */ function zi() {
+  /** @returns {InstanceType<typeof ed> | InstanceType<typeof wh> | InstanceType<typeof Sh>} */ function zi() {
     if (u() === 11) {
-      let o = $n();
-      return ((o.text = Br(o.text)), o);
+      let o = Qn();
+      return ((o.text = qr(o.text)), o);
     } else return At();
   }
-  /** @returns {InstanceType<typeof Kf>} */ function yp() {
-    let o = O();
+  /** @returns {InstanceType<typeof ed>} */ function bp() {
+    let o = M();
     (j(42), j(130));
-    /** @type {xh} */ let p = vt();
+    /** @type {wh} */ let p = vt();
     return D(y.createNamespaceImport(p), o);
   }
   /** @returns {boolean} */ function e_() {
     return kt(u()) || u() === 11;
   }
   function li(o) {
-    return u() === 11 ? $n() : o();
+    return u() === 11 ? Qn() : o();
   }
-  /** @returns {InstanceType<typeof Kf>} */ function tl(/** @type {number} */ o) {
-    let p = O(),
-      m = o === 276 ? y.createNamedImports(Fr(23, gp, 19, 20)) : y.createNamedExports(Fr(23, ui, 19, 20));
+  /** @returns {InstanceType<typeof ed>} */ function tl(/** @type {number} */ o) {
+    let p = M(),
+      m = o === 276 ? y.createNamedImports(zr(23, vp, 19, 20)) : y.createNamedExports(zr(23, ui, 19, 20));
     return D(m, p);
   }
-  /** @returns {InstanceType<typeof Kf>} */ function ui() {
+  /** @returns {InstanceType<typeof ed>} */ function ui() {
     let o = qe();
     return Pe(nl(282), o);
   }
-  /** @returns {Kf} */ function gp() {
+  /** @returns {ed} */ function vp() {
     return nl(277);
   }
-  /** @returns {InstanceType<typeof Kf>} */ function nl(/** @type {number} */ o) {
-    let p = O(),
+  /** @returns {InstanceType<typeof ed>} */ function nl(/** @type {number} */ o) {
+    let p = M(),
       m = yi(u()) && !Te(),
       g = t.getTokenStart(),
       x = t.getTokenEnd(),
       P = !1,
       Q,
       _e = !0,
-      ee = li(Ut);
+      ee = li(Bt);
     if (ee.kind === 80 && ee.escapedText === "type")
       if (u() === 130) {
-        let Ue = Ut();
+        let Ue = Bt();
         if (u() === 130) {
-          let Re = Ut();
+          let Re = Bt();
           e_() ? ((P = !0), (Q = Ue), (ee = li(ce)), (_e = !1)) : ((Q = ee), (ee = Re), (_e = !1));
         } else e_() ? ((Q = ee), (_e = !1), (ee = li(ce))) : ((P = !0), (ee = Ue));
       } else e_() && ((P = !0), (ee = li(ce)));
@@ -27896,39 +27883,39 @@ var na;
         (ee.kind !== 80
           ? (at(Ir(Ke, ee.pos), ee.end, E.Identifier_expected), (ee = vi(Yt(80, !1), ee.pos, ee.pos)))
           : m && at(g, x, E.Identifier_expected)));
-    /** @type {Kf} */ let te = o === 277 ? y.createImportSpecifier(P, Q, ee) : y.createExportSpecifier(P, Q, ee);
+    /** @type {ed} */ let te = o === 277 ? y.createImportSpecifier(P, Q, ee) : y.createExportSpecifier(P, Q, ee);
     return D(te, p);
-    /** @returns {xh} */ function ce() {
-      return ((m = yi(u()) && !Te()), (g = t.getTokenStart()), (x = t.getTokenEnd()), Ut());
+    /** @returns {wh} */ function ce() {
+      return ((m = yi(u()) && !Te()), (g = t.getTokenStart()), (x = t.getTokenEnd()), Bt());
     }
   }
-  function bp(/** @type {number} */ o) {
-    return D(y.createNamespaceExport(li(Ut)), o);
+  function xp(/** @type {number} */ o) {
+    return D(y.createNamespaceExport(li(Bt)), o);
   }
-  /** @returns {InstanceType<typeof Kf>} */ function rl(/** @type {number} */ o, /** @type {boolean} */ p, m) {
+  /** @returns {InstanceType<typeof ed>} */ function rl(/** @type {number} */ o, /** @type {boolean} */ p, m) {
     let g = Xe();
     _t(!0);
     let x,
       P,
       Q,
       _e = Je(156),
-      ee = O();
+      ee = M();
     Je(42)
-      ? (Je(130) && (x = bp(ee)), j(161), (P = zi()))
+      ? (Je(130) && (x = xp(ee)), j(161), (P = zi()))
       : ((x = tl(280)), (u() === 161 || (u() === 11 && !t.hasPrecedingLineBreak())) && (j(161), (P = zi())));
     let te = u();
     (P && (te === 118 || te === 132) && !t.hasPrecedingLineBreak() && (Q = Zs(te)), en(), _t(g));
-    /** @type {Kf} */ let ce = y.createExportDeclaration(m, _e, x, P, Q);
+    /** @type {ed} */ let ce = y.createExportDeclaration(m, _e, x, P, Q);
     return Pe(D(ce, o), p);
   }
-  /** @returns {InstanceType<typeof Kf>} */ function il(/** @type {number} */ o, /** @type {boolean} */ p, m) {
+  /** @returns {InstanceType<typeof ed>} */ function il(/** @type {number} */ o, /** @type {boolean} */ p, m) {
     let g = Xe();
     _t(!0);
     /** @type {boolean | undefined} */ let x;
     Je(64) ? (x = !0) : j(90);
     let P = Vt(!0);
     (en(), _t(g));
-    /** @type {Kf} */ let Q = y.createExportAssignment(m, x, P);
+    /** @type {ed} */ let Q = y.createExportAssignment(m, x, P);
     return Pe(D(Q, o), p);
   }
   let t_;
@@ -27968,19 +27955,19 @@ var na;
   let sl;
   ((o) => {
     function p(te, ce, Ue) {
-      (Vn("file.js", te, 99, void 0, 1, 0), t.setText(te, ce, Ue), (lt = t.scan()));
+      (Wn("file.js", te, 99, void 0, 1, 0), t.setText(te, ce, Ue), (lt = t.scan()));
       let Re = m(),
-        Ne = se("file.js", 99, 1, !1, [], ge(1), 0, Ha),
+        Ne = se("file.js", 99, 1, !1, [], be(1), 0, Ya),
         Xt = Hi(st, Ne);
       return (
         qt && (Ne.jsDocDiagnostics = Hi(qt, Ne)),
-        Wn(),
+        Gn(),
         Re ? { jsDocTypeExpression: Re, diagnostics: Xt } : void 0
       );
     }
     o.parseJSDocTypeExpressionForTests = p;
     function m(te) {
-      let ce = O(),
+      let ce = M(),
         Ue = (te ? Je : j)(19),
         Re = St(16777216, ys);
       (!te || Ue) && M_(20);
@@ -27989,10 +27976,10 @@ var na;
     }
     o.parseJSDocTypeExpression = m;
     function g() {
-      let te = O(),
+      let te = M(),
         ce = Je(19),
-        Ue = O(),
-        Re = zr(!1);
+        Ue = M(),
+        Re = Vr(!1);
       for (; u() === 81;) (It(), ze(), (Re = D(y.createJSDocMemberName(Re, vt()), Ue)));
       ce && M_(20);
       let Ne = y.createJSDocNameReference(Re);
@@ -28000,10 +27987,10 @@ var na;
     }
     o.parseJSDocNameReference = g;
     function x(te, ce, Ue) {
-      Vn("", te, 99, void 0, 1, 0);
+      Wn("", te, 99, void 0, 1, 0);
       let Re = St(16777216, () => ee(ce, Ue)),
         Xt = Hi(st, { languageVariant: 0, text: te });
-      return (Wn(), Re ? { jsDoc: Re, diagnostics: Xt } : void 0);
+      return (Gn(), Re ? { jsDoc: Re, diagnostics: Xt } : void 0);
     }
     o.parseIsolatedJSDocComment = x;
     function P(te, ce, Ue) {
@@ -28011,7 +27998,7 @@ var na;
         Ne = st.length,
         Xt = sn,
         Ot = St(16777216, () => ee(ce, Ue));
-      return (Df(Ot, te), it & 524288 && (qt || (qt = []), Dn(qt, st, Ne)), (lt = Re), (st.length = Ne), (sn = Xt), Ot);
+      return (Nf(Ot, te), it & 524288 && (qt || (qt = []), Dn(qt, st, Ne)), (lt = Re), (st.length = Ne), (sn = Xt), Ot);
     }
     o.parseJSDocComment = P;
     let Q;
@@ -28036,8 +28023,8 @@ var na;
         Ot,
         dr,
         mr,
-        Jn = [],
-        Hr = [],
+        Rn = [],
+        Xr = [],
         Ie = bt;
       bt |= 1 << 25;
       let nt = t.scanRange(te + 3, ce - 5, Cr);
@@ -28055,17 +28042,17 @@ var na;
               1) +
             4;
         function ne(Be) {
-          (X || (X = $), Jn.push(Be), ($ += Be.length));
+          (X || (X = $), Rn.push(Be), ($ += Be.length));
         }
         for (ze(); Yi(5););
         Yi(4) && ((N = 0), ($ = 0));
         e: for (;;) {
           switch (u()) {
             case 60:
-              (vp(Jn), mr || (mr = O()), We(r($)), (N = 0), (X = void 0));
+              (Tp(Rn), mr || (mr = M()), We(r($)), (N = 0), (X = void 0));
               break;
             case 4:
-              (Jn.push(t.getTokenText()), (N = 0), ($ = 0));
+              (Rn.push(t.getTokenText()), (N = 0), ($ = 0));
               break;
             case 42:
               let Be = t.getTokenText();
@@ -28074,7 +28061,7 @@ var na;
             case 5:
               q.assert(N !== 2, "whitespace shouldn't come from the scanner while saving top-level comment text");
               let pt = t.getTokenText();
-              (X !== void 0 && $ + pt.length > X && Jn.push(pt.slice(X - $)), ($ += pt.length));
+              (X !== void 0 && $ + pt.length > X && Rn.push(pt.slice(X - $)), ($ += pt.length));
               break;
             case 1:
               break e;
@@ -28087,10 +28074,10 @@ var na;
                 cn = t.getTokenEnd() - 1,
                 tn = c(cn);
               if (tn) {
-                (dr || Vi(Jn),
-                  Hr.push(D(y.createJSDocText(Jn.join("")), dr ?? te, hn)),
-                  Hr.push(tn),
-                  (Jn = []),
+                (dr || Vi(Rn),
+                  Xr.push(D(y.createJSDocText(Rn.join("")), dr ?? te, hn)),
+                  Xr.push(tn),
+                  (Rn = []),
                   (dr = t.getTokenEnd()));
                 break;
               }
@@ -28100,13 +28087,13 @@ var na;
           }
           N === 2 ? _n(!1) : ze();
         }
-        let re = Jn.join("").trimEnd();
-        (Hr.length && re.length && Hr.push(D(y.createJSDocText(re), dr ?? te, mr)),
-          Hr.length &&
+        let re = Rn.join("").trimEnd();
+        (Xr.length && re.length && Xr.push(D(y.createJSDocText(re), dr ?? te, mr)),
+          Xr.length &&
             Ne &&
             q.assertIsDefined(mr, "having parsed tags implies that the end of the comment span should be set"));
         let Oe = Ne && Dt(Ne, Xt, Ot);
-        return D(y.createJSDocComment(Hr.length ? Dt(Hr, te, mr) : re.length ? re : void 0, Oe), te, Re);
+        return D(y.createJSDocComment(Xr.length ? Dt(Xr, te, mr) : re.length ? re : void 0, Oe), te, Re);
       }
       function Vi(N) {
         for (
@@ -28119,7 +28106,7 @@ var na;
         )
           N.shift();
       }
-      function vp(N) {
+      function Tp(N) {
         for (; N.length;) {
           let X = N[N.length - 1].trimEnd();
           if (X === "") N.pop();
@@ -28129,17 +28116,17 @@ var na;
           } else break;
         }
       }
-      function Kn() {
+      function Zn() {
         for (;;) {
           if ((ze(), u() === 1)) return !0;
           if (!(u() === 5 || u() === 4)) return !1;
         }
       }
       function wn() {
-        if (!((u() === 5 || u() === 4) && H(Kn))) for (; u() === 5 || u() === 4;) ze();
+        if (!((u() === 5 || u() === 4) && H(Zn))) for (; u() === 5 || u() === 4;) ze();
       }
       function J() {
-        if ((u() === 5 || u() === 4) && H(Kn)) return "";
+        if ((u() === 5 || u() === 4) && H(Zn)) return "";
         let N = t.hasPrecedingLineBreak(),
           X = !1,
           $ = "";
@@ -28156,14 +28143,14 @@ var na;
           re;
         switch ($.escapedText) {
           case "author":
-            re = K0(X, $, N, ne);
+            re = ey(X, $, N, ne);
             break;
           case "implements":
-            re = ey(X, $, N, ne);
+            re = ny(X, $, N, ne);
             break;
           case "augments":
           case "extends":
-            re = ty(X, $, N, ne);
+            re = ry(X, $, N, ne);
             break;
           case "class":
           case "constructor":
@@ -28185,13 +28172,13 @@ var na;
             re = Gi(X, y.createJSDocOverrideTag, $, N, ne);
             break;
           case "deprecated":
-            ((Gn = !0), (re = Gi(X, y.createJSDocDeprecatedTag, $, N, ne)));
+            ((Yn = !0), (re = Gi(X, y.createJSDocDeprecatedTag, $, N, ne)));
             break;
           case "this":
-            re = vd(X, $, N, ne);
+            re = Sd(X, $, N, ne);
             break;
           case "enum":
-            re = ay(X, $, N, ne);
+            re = _y(X, $, N, ne);
             break;
           case "arg":
           case "argument":
@@ -28199,35 +28186,35 @@ var na;
             return Wi(X, $, 2, N);
           case "return":
           case "returns":
-            re = X0(X, $, N, ne);
+            re = Q0(X, $, N, ne);
             break;
           case "template":
-            re = Td(X, $, N, ne);
+            re = kd(X, $, N, ne);
             break;
           case "type":
-            re = gd(X, $, N, ne);
+            re = xd(X, $, N, ne);
             break;
           case "typedef":
-            re = sy(X, $, N, ne);
-            break;
-          case "callback":
             re = oy(X, $, N, ne);
             break;
+          case "callback":
+            re = ly(X, $, N, ne);
+            break;
           case "overload":
-            re = cy(X, $, N, ne);
+            re = uy(X, $, N, ne);
             break;
           case "satisfies":
-            re = ny(X, $, N, ne);
+            re = iy(X, $, N, ne);
             break;
           case "see":
-            re = $0(X, $, N, ne);
+            re = K0(X, $, N, ne);
             break;
           case "exception":
           case "throws":
-            re = Q0(X, $, N, ne);
+            re = Z0(X, $, N, ne);
             break;
           case "import":
-            re = ry(X, $, N, ne);
+            re = ay(X, $, N, ne);
             break;
           default:
             re = fe(X, $, N, ne);
@@ -28239,14 +28226,14 @@ var na;
         return (ne || ($ += X - N), _($, ne.slice($)));
       }
       function _(N, X) {
-        let $ = O(),
+        let $ = M(),
           ne = [],
           re = [],
           Oe,
           Be = 0,
           pt;
-        function hn(Zn) {
-          (pt || (pt = N), ne.push(Zn), (N += Zn.length));
+        function hn(er) {
+          (pt || (pt = N), ne.push(er), (N += er.length));
         }
         X !== void 0 && (X !== "" && hn(X), (Be = 1));
         let cn = u();
@@ -28262,8 +28249,8 @@ var na;
               break e;
             case 5:
               q.assert(Be !== 2 && Be !== 3, "whitespace shouldn't come from the scanner while saving comment text");
-              let Zn = t.getTokenText();
-              (pt !== void 0 && N + Zn.length > pt && (ne.push(Zn.slice(pt - N)), (Be = 2)), (N += Zn.length));
+              let er = t.getTokenText();
+              (pt !== void 0 && N + er.length > pt && (ne.push(er.slice(pt - N)), (Be = 2)), (N += er.length));
               break;
             case 19:
               Be = 2;
@@ -28300,7 +28287,7 @@ var na;
         if (tn.length) return tn;
       }
       function c(N) {
-        let X = le(T);
+        let X = ue(T);
         if (!X) return;
         (ze(), wn());
         let $ = d(),
@@ -28311,9 +28298,9 @@ var na;
       }
       function d() {
         if (kt(u())) {
-          let N = O(),
-            X = Ut();
-          for (; Je(25);) X = D(y.createQualifiedName(X, u() === 81 ? Yt(80, !1) : Ut()), N);
+          let N = M(),
+            X = Bt();
+          for (; Je(25);) X = D(y.createQualifiedName(X, u() === 81 ? Yt(80, !1) : Bt()), N);
           for (; u() === 81;) (It(), ze(), (X = D(y.createJSDocMemberName(X, vt()), N)));
           return X;
         }
@@ -28328,7 +28315,7 @@ var na;
         return N === "link" || N === "linkcode" || N === "linkplain";
       }
       function fe(N, X, $, ne) {
-        return D(y.createJSDocUnknownTag(X, i(N, O(), $, ne)), N);
+        return D(y.createJSDocUnknownTag(X, i(N, M(), $, ne)), N);
       }
       function We(N) {
         N && (Ne ? Ne.push(N) : ((Ne = [N]), (Xt = N.pos)), (Ot = N.end));
@@ -28340,8 +28327,8 @@ var na;
         let N = Yi(23);
         N && wn();
         let X = Yi(62),
-          $ = my();
-        return (X && Hl(62), N && (wn(), ft(64) && At(), j(24)), { name: $, isBracketed: N });
+          $ = yy();
+        return (X && $l(62), N && (wn(), ft(64) && At(), j(24)), { name: $, isBracketed: N });
       }
       function kn(N) {
         switch (N.kind) {
@@ -28350,7 +28337,7 @@ var na;
           case 189:
             return kn(N.elementType);
           default:
-            return Lf(N) && et(N.typeName) && N.typeName.escapedText === "Object" && !N.typeArguments;
+            return Jf(N) && et(N.typeName) && N.typeName.escapedText === "Object" && !N.typeArguments;
         }
       }
       function Wi(N, X, $, ne) {
@@ -28360,19 +28347,19 @@ var na;
         let { name: Be, isBracketed: pt } = hr(),
           hn = J();
         Oe && !H(T) && (re = Mt());
-        let cn = i(N, O(), ne, hn),
-          tn = H0(re, Be, $, ne);
+        let cn = i(N, M(), ne, hn),
+          tn = $0(re, Be, $, ne);
         tn && ((re = tn), (Oe = !0));
-        let Zn =
+        let er =
           $ === 1 ? y.createJSDocPropertyTag(X, Be, pt, re, Oe, cn) : y.createJSDocParameterTag(X, Be, pt, re, Oe, cn);
-        return D(Zn, N);
+        return D(er, N);
       }
-      function H0(N, X, $, ne) {
+      function $0(N, X, $, ne) {
         if (N && kn(N.type)) {
-          let re = O(),
+          let re = M(),
             Oe,
             Be;
-          for (; (Oe = le(() => Tp($, ne, X)));)
+          for (; (Oe = ue(() => wp($, ne, X)));)
             Oe.kind === 342 || Oe.kind === 349
               ? (Be = An(Be, Oe))
               : Oe.kind === 346 &&
@@ -28383,37 +28370,37 @@ var na;
           }
         }
       }
-      function X0(N, X, $, ne) {
+      function Q0(N, X, $, ne) {
         nn(Ne, Cv) && at(X.pos, t.getTokenStart(), E._0_tag_already_specified, h_(X.escapedText));
         let re = Mt();
-        return D(y.createJSDocReturnTag(X, re, i(N, O(), $, ne)), N);
+        return D(y.createJSDocReturnTag(X, re, i(N, M(), $, ne)), N);
       }
-      function gd(N, X, $, ne) {
-        nn(Ne, Xf) && at(X.pos, t.getTokenStart(), E._0_tag_already_specified, h_(X.escapedText));
+      function xd(N, X, $, ne) {
+        nn(Ne, Qf) && at(X.pos, t.getTokenStart(), E._0_tag_already_specified, h_(X.escapedText));
         let re = m(!0),
-          Oe = $ !== void 0 && ne !== void 0 ? i(N, O(), $, ne) : void 0;
+          Oe = $ !== void 0 && ne !== void 0 ? i(N, M(), $, ne) : void 0;
         return D(y.createJSDocTypeTag(X, re, Oe), N);
       }
-      function $0(N, X, $, ne) {
+      function K0(N, X, $, ne) {
         let Oe = u() === 23 || H(() => ze() === 60 && kt(ze()) && F(t.getTokenValue())) ? void 0 : g(),
-          Be = $ !== void 0 && ne !== void 0 ? i(N, O(), $, ne) : void 0;
+          Be = $ !== void 0 && ne !== void 0 ? i(N, M(), $, ne) : void 0;
         return D(y.createJSDocSeeTag(X, Oe, Be), N);
       }
-      function Q0(N, X, $, ne) {
+      function Z0(N, X, $, ne) {
         let re = Mt(),
-          Oe = i(N, O(), $, ne);
+          Oe = i(N, M(), $, ne);
         return D(y.createJSDocThrowsTag(X, re, Oe), N);
       }
-      function K0(N, X, $, ne) {
-        let re = O(),
-          Oe = Z0(),
+      function ey(N, X, $, ne) {
+        let re = M(),
+          Oe = ty(),
           Be = t.getTokenFullStart(),
           pt = i(N, Be, $, ne);
         pt || (Be = t.getTokenFullStart());
-        let hn = typeof pt != "string" ? Dt(Kp([D(Oe, re, Be)], pt), re) : Oe.text + pt;
+        let hn = typeof pt != "string" ? Dt(ef([D(Oe, re, Be)], pt), re) : Oe.text + pt;
         return D(y.createJSDocAuthorTag(X, hn), N);
       }
-      function Z0() {
+      function ty() {
         let N = [],
           X = !1,
           $ = t.getToken();
@@ -28430,33 +28417,33 @@ var na;
         }
         return y.createJSDocText(N.join(""));
       }
-      function ey(N, X, $, ne) {
-        let re = bd();
-        return D(y.createJSDocImplementsTag(X, re, i(N, O(), $, ne)), N);
-      }
-      function ty(N, X, $, ne) {
-        let re = bd();
-        return D(y.createJSDocAugmentsTag(X, re, i(N, O(), $, ne)), N);
-      }
       function ny(N, X, $, ne) {
-        let re = m(!1),
-          Oe = $ !== void 0 && ne !== void 0 ? i(N, O(), $, ne) : void 0;
-        return D(y.createJSDocSatisfiesTag(X, re, Oe), N);
+        let re = Td();
+        return D(y.createJSDocImplementsTag(X, re, i(N, M(), $, ne)), N);
       }
       function ry(N, X, $, ne) {
+        let re = Td();
+        return D(y.createJSDocAugmentsTag(X, re, i(N, M(), $, ne)), N);
+      }
+      function iy(N, X, $, ne) {
+        let re = m(!1),
+          Oe = $ !== void 0 && ne !== void 0 ? i(N, M(), $, ne) : void 0;
+        return D(y.createJSDocSatisfiesTag(X, re, Oe), N);
+      }
+      function ay(N, X, $, ne) {
         let re = t.getTokenFullStart(),
           Oe;
         Te() && (Oe = vt());
         let Be = Zc(Oe, re, 156, !0),
           pt = zi(),
           hn = el(),
-          cn = $ !== void 0 && ne !== void 0 ? i(N, O(), $, ne) : void 0;
+          cn = $ !== void 0 && ne !== void 0 ? i(N, M(), $, ne) : void 0;
         return D(y.createJSDocImportTag(X, Be, pt, hn, cn), N);
       }
-      function bd() {
+      function Td() {
         let N = Je(19),
-          X = O(),
-          $ = iy();
+          X = M(),
+          $ = sy();
         t.setSkipJsDocLeadingAsterisks(!0);
         let ne = Ia();
         t.setSkipJsDocLeadingAsterisks(!1);
@@ -28464,8 +28451,8 @@ var na;
           Oe = D(re, X);
         return (N && (wn(), j(20)), Oe);
       }
-      function iy() {
-        let N = O(),
+      function sy() {
+        let N = M(),
           X = pi();
         for (; Je(25);) {
           let $ = pi();
@@ -28474,63 +28461,63 @@ var na;
         return X;
       }
       function Gi(N, X, $, ne, re) {
-        return D(X($, i(N, O(), ne, re)), N);
+        return D(X($, i(N, M(), ne, re)), N);
       }
-      function vd(N, X, $, ne) {
+      function Sd(N, X, $, ne) {
         let re = m(!0);
-        return (wn(), D(y.createJSDocThisTag(X, re, i(N, O(), $, ne)), N));
+        return (wn(), D(y.createJSDocThisTag(X, re, i(N, M(), $, ne)), N));
       }
-      function ay(N, X, $, ne) {
+      function _y(N, X, $, ne) {
         let re = m(!0);
-        return (wn(), D(y.createJSDocEnumTag(X, re, i(N, O(), $, ne)), N));
+        return (wn(), D(y.createJSDocEnumTag(X, re, i(N, M(), $, ne)), N));
       }
-      function sy(N, X, $, ne) {
+      function oy(N, X, $, ne) {
         let re = Mt();
         J();
-        let Oe = xp();
+        let Oe = Sp();
         wn();
         let Be = _($),
           pt;
         if (!re || kn(re.type)) {
           let cn,
             tn,
-            Zn,
+            er,
             _l = !1;
-          for (; (cn = le(() => uy($))) && cn.kind !== 346;)
+          for (; (cn = ue(() => fy($))) && cn.kind !== 346;)
             if (((_l = !0), cn.kind === 345))
               if (tn) {
                 let Ma = De(E.A_JSDoc_typedef_comment_may_not_contain_multiple_type_tags);
-                Ma && pl(Ma, Ja(jt, Ke, 0, 0, E.The_tag_was_first_specified_here));
+                Ma && pl(Ma, ja(Jt, Ke, 0, 0, E.The_tag_was_first_specified_here));
                 break;
               } else tn = cn;
-            else Zn = An(Zn, cn);
+            else er = An(er, cn);
           if (_l) {
             let Ma = re && re.type.kind === 189,
-              ol = y.createJSDocTypeLiteral(Zn, Ma);
+              ol = y.createJSDocTypeLiteral(er, Ma);
             ((re = tn && tn.typeExpression && !kn(tn.typeExpression.type) ? tn.typeExpression : D(ol, N)),
               (pt = re.end));
           }
         }
-        ((pt = pt || Be !== void 0 ? O() : (Oe ?? re ?? X).end), Be || (Be = i(N, pt, $, ne)));
+        ((pt = pt || Be !== void 0 ? M() : (Oe ?? re ?? X).end), Be || (Be = i(N, pt, $, ne)));
         let hn = y.createJSDocTypedefTag(X, re, Oe, Be);
         return D(hn, N, pt);
       }
-      function xp(N) {
+      function Sp(N) {
         let X = t.getTokenStart();
         if (!kt(u())) return;
         let $ = pi();
         if (Je(25)) {
-          let ne = xp(!0),
+          let ne = Sp(!0),
             re = y.createModuleDeclaration(void 0, $, ne, N ? 8 : void 0);
           return D(re, X);
         }
         return (N && ($.flags |= 4096), $);
       }
-      function _y(N) {
-        let X = O(),
+      function cy(N) {
+        let X = M(),
           $,
           ne;
-        for (; ($ = le(() => Tp(4, N)));) {
+        for (; ($ = ue(() => wp(4, N)));) {
           if ($.kind === 346) {
             un($.tagName, E.A_JSDoc_template_tag_may_not_follow_a_typedef_callback_or_overload_tag);
             break;
@@ -28539,9 +28526,9 @@ var na;
         }
         return Dt(ne || [], X);
       }
-      function xd(N, X) {
-        let $ = _y(X),
-          ne = le(() => {
+      function wd(N, X) {
+        let $ = cy(X),
+          ne = ue(() => {
             if (Yi(60)) {
               let re = r(X);
               if (re && re.kind === 343) return re;
@@ -28549,41 +28536,41 @@ var na;
           });
         return D(y.createJSDocSignature(void 0, $, ne), N);
       }
-      function oy(N, X, $, ne) {
-        let re = xp();
+      function ly(N, X, $, ne) {
+        let re = Sp();
         wn();
         let Oe = _($),
-          Be = xd(N, $);
-        Oe || (Oe = i(N, O(), $, ne));
-        let pt = Oe !== void 0 ? O() : Be.end;
+          Be = wd(N, $);
+        Oe || (Oe = i(N, M(), $, ne));
+        let pt = Oe !== void 0 ? M() : Be.end;
         return D(y.createJSDocCallbackTag(X, Be, re, Oe), N, pt);
       }
-      function cy(N, X, $, ne) {
+      function uy(N, X, $, ne) {
         wn();
         let re = _($),
-          Oe = xd(N, $);
-        re || (re = i(N, O(), $, ne));
-        let Be = re !== void 0 ? O() : Oe.end;
+          Oe = wd(N, $);
+        re || (re = i(N, M(), $, ne));
+        let Be = re !== void 0 ? M() : Oe.end;
         return D(y.createJSDocOverloadTag(X, Oe, re), N, Be);
       }
-      function ly(N, X) {
+      function py(N, X) {
         for (; !et(N) || !et(X);)
           if (!et(N) && !et(X) && N.right.escapedText === X.right.escapedText) ((N = N.left), (X = X.left));
           else return !1;
         return N.escapedText === X.escapedText;
       }
-      function uy(N) {
-        return Tp(1, N);
+      function fy(N) {
+        return wp(1, N);
       }
-      function Tp(N, X, $) {
+      function wp(N, X, $) {
         let ne = !0,
           re = !1;
         for (;;)
           switch (ze()) {
             case 60:
               if (ne) {
-                let Oe = py(N, X);
-                return Oe && (Oe.kind === 342 || Oe.kind === 349) && $ && (et(Oe.name) || !ly($, Oe.name.left))
+                let Oe = dy(N, X);
+                return Oe && (Oe.kind === 342 || Oe.kind === 349) && $ && (et(Oe.name) || !py($, Oe.name.left))
                   ? !1
                   : Oe;
               }
@@ -28602,7 +28589,7 @@ var na;
               return !1;
           }
       }
-      function py(N, X) {
+      function dy(N, X) {
         q.assert(u() === 60);
         let $ = t.getTokenFullStart();
         ze();
@@ -28611,7 +28598,7 @@ var na;
           Oe;
         switch (ne.escapedText) {
           case "type":
-            return N === 1 && gd($, ne);
+            return N === 1 && xd($, ne);
           case "prop":
           case "property":
             Oe = 1;
@@ -28622,47 +28609,47 @@ var na;
             Oe = 6;
             break;
           case "template":
-            return Td($, ne, X, re);
+            return kd($, ne, X, re);
           case "this":
-            return vd($, ne, X, re);
+            return Sd($, ne, X, re);
           default:
             return !1;
         }
         return N & Oe ? Wi($, ne, N, X) : !1;
       }
-      function fy() {
-        let N = O(),
+      function my() {
+        let N = M(),
           X = Yi(23);
         X && wn();
-        let $ = jn(!1, !0),
+        let $ = Jn(!1, !0),
           ne = pi(E.Unexpected_token_A_type_parameter_name_was_expected_without_curly_braces),
           re;
         if ((X && (wn(), j(64), (re = St(16777216, ys)), j(24)), !ea(ne)))
           return D(y.createTypeParameterDeclaration($, ne, void 0, re), N);
       }
-      function dy() {
-        let N = O(),
+      function hy() {
+        let N = M(),
           X = [];
         do {
           wn();
-          let $ = fy();
+          let $ = my();
           ($ !== void 0 && X.push($), J());
         } while (Yi(28));
         return Dt(X, N);
       }
-      function Td(N, X, $, ne) {
+      function kd(N, X, $, ne) {
         let re = u() === 19 ? m() : void 0,
-          Oe = dy();
-        return D(y.createJSDocTemplateTag(X, re, Oe, i(N, O(), $, ne)), N);
+          Oe = hy();
+        return D(y.createJSDocTemplateTag(X, re, Oe, i(N, M(), $, ne)), N);
       }
       function Yi(N) {
         return u() === N ? (ze(), !0) : !1;
       }
-      function my() {
+      function yy() {
         let N = pi();
         for (Je(23) && j(24); Je(25);) {
           let X = pi();
-          (Je(23) && j(24), (N = tu(N, X)));
+          (Je(23) && j(24), (N = ru(N, X)));
         }
         return N;
       }
@@ -28672,78 +28659,78 @@ var na;
         let X = t.getTokenStart(),
           $ = t.getTokenEnd(),
           ne = u(),
-          re = Br(t.getTokenValue()),
+          re = qr(t.getTokenValue()),
           Oe = D(pe(re, ne), X, $);
         return (ze(), Oe);
       }
     }
   })((sl = e.JSDocParser || (e.JSDocParser = {})));
 })(na || (na = {}));
-var Sm = new WeakSet();
+var Em = new WeakSet();
 function Qv(e) {
-  (Sm.has(e) && q.fail("Source file has already been incrementally parsed"), Sm.add(e));
+  (Em.has(e) && q.fail("Source file has already been incrementally parsed"), Em.add(e));
 }
-var gh = new WeakSet();
+var xh = new WeakSet();
 function Kv(e) {
-  return gh.has(e);
+  return xh.has(e);
 }
-function $p(e) {
-  gh.add(e);
+function Kp(e) {
+  xh.add(e);
 }
 var Dl;
 ((e) => {
-  function t(C, R, pe, xe) {
-    if (((xe = xe || q.shouldAssert(2)), y(C, R, pe, xe), Dg(pe))) return C;
-    if (C.statements.length === 0)
+  function t(A, R, pe, xe) {
+    if (((xe = xe || q.shouldAssert(2)), y(A, R, pe, xe), Dg(pe))) return A;
+    if (A.statements.length === 0)
       return na.parseSourceFile(
-        C.fileName,
+        A.fileName,
         R,
-        C.languageVersion,
+        A.languageVersion,
         void 0,
         !0,
-        C.scriptKind,
-        C.setExternalModuleIndicator,
-        C.jsDocParsingMode,
+        A.scriptKind,
+        A.setExternalModuleIndicator,
+        A.jsDocParsingMode,
       );
-    (Qv(C), na.fixupParentReferences(C));
-    let ge = C.text,
-      me = W(C),
-      I = l(C, pe);
-    (y(C, R, I, xe),
-      q.assert(I.span.start <= pe.span.start),
-      q.assert(Dr(I.span) === Dr(pe.span)),
-      q.assert(Dr(r_(I)) === Dr(r_(pe))));
-    let ae = r_(I).length - I.span.length;
-    v(C, I.span.start, Dr(I.span), Dr(r_(I)), ae, ge, R, xe);
+    (Qv(A), na.fixupParentReferences(A));
+    let be = A.text,
+      me = G(A),
+      O = l(A, pe);
+    (y(A, R, O, xe),
+      q.assert(O.span.start <= pe.span.start),
+      q.assert(Dr(O.span) === Dr(pe.span)),
+      q.assert(Dr(r_(O)) === Dr(r_(pe))));
+    let ae = r_(O).length - O.span.length;
+    v(A, O.span.start, Dr(O.span), Dr(r_(O)), ae, be, R, xe);
     let Le = na.parseSourceFile(
-      C.fileName,
+      A.fileName,
       R,
-      C.languageVersion,
+      A.languageVersion,
       me,
       !0,
-      C.scriptKind,
-      C.setExternalModuleIndicator,
-      C.jsDocParsingMode,
+      A.scriptKind,
+      A.setExternalModuleIndicator,
+      A.jsDocParsingMode,
     );
     return (
-      (Le.commentDirectives = a(C.commentDirectives, Le.commentDirectives, I.span.start, Dr(I.span), ae, ge, R, xe)),
-      (Le.impliedNodeFormat = C.impliedNodeFormat),
-      Iv(C, Le),
+      (Le.commentDirectives = a(A.commentDirectives, Le.commentDirectives, O.span.start, Dr(O.span), ae, be, R, xe)),
+      (Le.impliedNodeFormat = A.impliedNodeFormat),
+      Iv(A, Le),
       Le
     );
   }
   e.updateSourceFile = t;
-  function a(C, R, pe, xe, ge, me, I, ae) {
-    if (!C) return R;
+  function a(A, R, pe, xe, be, me, O, ae) {
+    if (!A) return R;
     let Le,
       V = !1;
-    for (let Y of C) {
+    for (let Y of A) {
       let { range: mt, type: ar } = Y;
       if (mt.end < pe) Le = An(Le, Y);
       else if (mt.pos > xe) {
         oe();
-        let gn = { range: { pos: mt.pos + ge, end: mt.end + ge }, type: ar };
-        ((Le = An(Le, gn)), ae && q.assert(me.substring(mt.pos, mt.end) === I.substring(gn.range.pos, gn.range.end)));
+        let gn = { range: { pos: mt.pos + be, end: mt.end + be }, type: ar };
+        ((Le = An(Le, gn)), ae && q.assert(me.substring(mt.pos, mt.end) === O.substring(gn.range.pos, gn.range.end)));
       }
     }
     return (oe(), Le);
@@ -28751,29 +28738,29 @@ var Dl;
       V || ((V = !0), Le ? R && Le.push(...R) : (Le = R));
     }
   }
-  function s(C, R, pe, xe, ge, me, I) {
-    pe ? Le(C) : ae(C);
+  function s(A, R, pe, xe, be, me, O) {
+    pe ? Le(A) : ae(A);
     return;
     function ae(V) {
       let oe = "";
       if (
-        (I && f(V) && (oe = ge.substring(V.pos, V.end)),
-        Zd(V, R),
+        (O && f(V) && (oe = be.substring(V.pos, V.end)),
+        nm(V, R),
         vi(V, V.pos + xe, V.end + xe),
-        I && f(V) && q.assert(oe === me.substring(V.pos, V.end)),
+        O && f(V) && q.assert(oe === me.substring(V.pos, V.end)),
         $t(V, ae, Le),
         Zi(V))
       )
         for (let Y of V.jsDoc) ae(Y);
-      b(V, I);
+      b(V, O);
     }
     function Le(V) {
       vi(V, V.pos + xe, V.end + xe);
       for (let oe of V) ae(oe);
     }
   }
-  function f(C) {
-    switch (C.kind) {
+  function f(A) {
+    switch (A.kind) {
       case 11:
       case 9:
       case 80:
@@ -28781,39 +28768,39 @@ var Dl;
     }
     return !1;
   }
-  function h(C, R, pe, xe, ge) {
-    (q.assert(C.end >= R, "Adjusting an element that was entirely before the change range"),
-      q.assert(C.pos <= pe, "Adjusting an element that was entirely after the change range"),
-      q.assert(C.pos <= C.end));
-    let me = Math.min(C.pos, xe),
-      I = C.end >= pe ? C.end + ge : Math.min(C.end, xe);
-    if ((q.assert(me <= I), C.parent)) {
-      let ae = C.parent;
-      (q.assertGreaterThanOrEqual(me, ae.pos), q.assertLessThanOrEqual(I, ae.end));
+  function h(A, R, pe, xe, be) {
+    (q.assert(A.end >= R, "Adjusting an element that was entirely before the change range"),
+      q.assert(A.pos <= pe, "Adjusting an element that was entirely after the change range"),
+      q.assert(A.pos <= A.end));
+    let me = Math.min(A.pos, xe),
+      O = A.end >= pe ? A.end + be : Math.min(A.end, xe);
+    if ((q.assert(me <= O), A.parent)) {
+      let ae = A.parent;
+      (q.assertGreaterThanOrEqual(me, ae.pos), q.assertLessThanOrEqual(O, ae.end));
     }
-    vi(C, me, I);
+    vi(A, me, O);
   }
-  function b(C, R) {
+  function b(A, R) {
     if (R) {
-      let pe = C.pos,
-        xe = (ge) => {
-          (q.assert(ge.pos >= pe), (pe = ge.end));
+      let pe = A.pos,
+        xe = (be) => {
+          (q.assert(be.pos >= pe), (pe = be.end));
         };
-      if (Zi(C)) for (let ge of C.jsDoc) xe(ge);
-      ($t(C, xe), q.assert(pe <= C.end));
+      if (Zi(A)) for (let be of A.jsDoc) xe(be);
+      ($t(A, xe), q.assert(pe <= A.end));
     }
   }
-  function v(C, R, pe, xe, ge, me, I, ae) {
-    Le(C);
+  function v(A, R, pe, xe, be, me, O, ae) {
+    Le(A);
     return;
     function Le(oe) {
       if ((q.assert(oe.pos <= oe.end), oe.pos > pe)) {
-        s(oe, C, !1, ge, me, I, ae);
+        s(oe, A, !1, be, me, O, ae);
         return;
       }
       let Y = oe.end;
       if (Y >= R) {
-        if (($p(oe), Zd(oe, C), h(oe, R, pe, xe, ge), $t(oe, Le, V), Zi(oe))) for (let mt of oe.jsDoc) Le(mt);
+        if ((Kp(oe), nm(oe, A), h(oe, R, pe, xe, be), $t(oe, Le, V), Zi(oe))) for (let mt of oe.jsDoc) Le(mt);
         b(oe, ae);
         return;
       }
@@ -28821,113 +28808,113 @@ var Dl;
     }
     function V(oe) {
       if ((q.assert(oe.pos <= oe.end), oe.pos > pe)) {
-        s(oe, C, !0, ge, me, I, ae);
+        s(oe, A, !0, be, me, O, ae);
         return;
       }
       let Y = oe.end;
       if (Y >= R) {
-        ($p(oe), h(oe, R, pe, xe, ge));
+        (Kp(oe), h(oe, R, pe, xe, be));
         for (let mt of oe) Le(mt);
         return;
       }
       q.assert(Y < R);
     }
   }
-  function l(C, R) {
+  function l(A, R) {
     let xe = R.span.start;
-    for (let I = 0; xe > 0 && I <= 1; I++) {
-      let ae = G(C, xe);
+    for (let O = 0; xe > 0 && O <= 1; O++) {
+      let ae = W(A, xe);
       q.assert(ae.pos <= xe);
       let Le = ae.pos;
       xe = Math.max(0, Le - 1);
     }
-    let ge = Cg(xe, Dr(R.span)),
+    let be = Cg(xe, Dr(R.span)),
       me = R.newLength + (R.span.start - xe);
-    return e1(ge, me);
+    return r1(be, me);
   }
-  function G(C, R) {
-    let pe = C,
+  function W(A, R) {
+    let pe = A,
       xe;
-    if (($t(C, me), xe)) {
-      let I = ge(xe);
-      I.pos > pe.pos && (pe = I);
+    if (($t(A, me), xe)) {
+      let O = be(xe);
+      O.pos > pe.pos && (pe = O);
     }
     return pe;
-    function ge(I) {
+    function be(O) {
       for (;;) {
-        let ae = fb(I);
-        if (ae) I = ae;
-        else return I;
+        let ae = fb(O);
+        if (ae) O = ae;
+        else return O;
       }
     }
-    function me(I) {
-      if (!ea(I))
-        if (I.pos <= R) {
-          if ((I.pos >= pe.pos && (pe = I), R < I.end)) return ($t(I, me), !0);
-          (q.assert(I.end <= R), (xe = I));
-        } else return (q.assert(I.pos > R), !0);
+    function me(O) {
+      if (!ea(O))
+        if (O.pos <= R) {
+          if ((O.pos >= pe.pos && (pe = O), R < O.end)) return ($t(O, me), !0);
+          (q.assert(O.end <= R), (xe = O));
+        } else return (q.assert(O.pos > R), !0);
     }
   }
-  function y(C, R, pe, xe) {
-    let ge = C.text;
-    if (pe && (q.assert(ge.length - pe.span.length + pe.newLength === R.length), xe || q.shouldAssert(3))) {
-      let me = ge.substr(0, pe.span.start),
-        I = R.substr(0, pe.span.start);
-      q.assert(me === I);
-      let ae = ge.substring(Dr(pe.span), ge.length),
+  function y(A, R, pe, xe) {
+    let be = A.text;
+    if (pe && (q.assert(be.length - pe.span.length + pe.newLength === R.length), xe || q.shouldAssert(3))) {
+      let me = be.substr(0, pe.span.start),
+        O = R.substr(0, pe.span.start);
+      q.assert(me === O);
+      let ae = be.substring(Dr(pe.span), be.length),
         Le = R.substring(Dr(r_(pe)), R.length);
       q.assert(ae === Le);
     }
   }
-  function W(C) {
-    let R = C.statements,
+  function G(A) {
+    let R = A.statements,
       pe = 0;
     q.assert(pe < R.length);
     let xe = R[pe],
-      ge = -1;
+      be = -1;
     return {
-      currentNode(I) {
+      currentNode(O) {
         return (
-          I !== ge && (xe && xe.end === I && pe < R.length - 1 && (pe++, (xe = R[pe])), (!xe || xe.pos !== I) && me(I)),
-          (ge = I),
-          q.assert(!xe || xe.pos === I),
+          O !== be && (xe && xe.end === O && pe < R.length - 1 && (pe++, (xe = R[pe])), (!xe || xe.pos !== O) && me(O)),
+          (be = O),
+          q.assert(!xe || xe.pos === O),
           xe
         );
       },
     };
-    function me(I) {
-      ((R = void 0), (pe = -1), (xe = void 0), $t(C, ae, Le));
+    function me(O) {
+      ((R = void 0), (pe = -1), (xe = void 0), $t(A, ae, Le));
       return;
       function ae(V) {
-        return I >= V.pos && I < V.end ? ($t(V, ae, Le), !0) : !1;
+        return O >= V.pos && O < V.end ? ($t(V, ae, Le), !0) : !1;
       }
       function Le(V) {
-        if (I >= V.pos && I < V.end)
+        if (O >= V.pos && O < V.end)
           for (let oe = 0; oe < V.length; oe++) {
             let Y = V[oe];
             if (Y) {
-              if (Y.pos === I) return ((R = V), (pe = oe), (xe = Y), !0);
-              if (Y.pos < I && I < Y.end) return ($t(Y, ae, Le), !0);
+              if (Y.pos === O) return ((R = V), (pe = oe), (xe = Y), !0);
+              if (Y.pos < O && O < Y.end) return ($t(Y, ae, Le), !0);
             }
           }
         return !1;
       }
     }
   }
-  e.createSyntaxCursor = W;
+  e.createSyntaxCursor = G;
   let k;
-  ((C) => {
-    C[(C.Value = -1)] = "Value";
+  ((A) => {
+    A[(A.Value = -1)] = "Value";
   })(k || (k = {}));
 })(Dl || (Dl = {}));
 /** @returns {boolean} */ function Zv(/** @type {string} */ e) {
   return e6(e) !== void 0;
 }
 /** @returns {string | undefined} */ function e6(/** @type {string} */ e) {
-  let t = Um(e, Mb, !1);
+  let t = Fm(e, Mb, !1);
   if (t) return t;
   if (Ky(e, ".ts")) {
-    let a = Rm(e),
+    let a = qm(e),
       s = a.lastIndexOf(".d.");
     if (s >= 0) return a.substring(s);
   }
@@ -28941,7 +28928,7 @@ function t6(e, /** @type {number} */ t, /** @type {number} */ a, s) {
 }
 function n6(/** @type {InstanceType<typeof d6>} */ e, /** @type {string} */ t) {
   let a = [];
-  for (let s of Bp(t, 0) || Tt) {
+  for (let s of Fp(t, 0) || Tt) {
     let f = t.substring(s.pos, s.end);
     _6(a, s, f);
   }
@@ -28967,30 +28954,30 @@ function r6(/** @type {d6} */ e, t) {
           let f = e.referencedFiles,
             h = e.typeReferenceDirectives,
             b = e.libReferenceDirectives;
-          Bn(wp(a), (v) => {
-            let { types: l, lib: G, path: y, ["resolution-mode"]: W, preserve: k } = v.arguments,
-              C = k === "true" ? !0 : void 0;
+          qn(Ep(a), (v) => {
+            let { types: l, lib: W, path: y, ["resolution-mode"]: G, preserve: k } = v.arguments,
+              A = k === "true" ? !0 : void 0;
             if (v.arguments["no-default-lib"] !== "true")
               if (l) {
-                let R = t6(W, l.pos, l.end, t);
+                let R = t6(G, l.pos, l.end, t);
                 h.push({
                   pos: l.pos,
                   end: l.end,
                   fileName: l.value,
                   ...(R ? { resolutionMode: R } : {}),
-                  ...(C ? { preserve: C } : {}),
+                  ...(A ? { preserve: A } : {}),
                 });
               } else
-                G
-                  ? b.push({ pos: G.pos, end: G.end, fileName: G.value, ...(C ? { preserve: C } : {}) })
+                W
+                  ? b.push({ pos: W.pos, end: W.end, fileName: W.value, ...(A ? { preserve: A } : {}) })
                   : y
-                    ? f.push({ pos: y.pos, end: y.end, fileName: y.value, ...(C ? { preserve: C } : {}) })
+                    ? f.push({ pos: y.pos, end: y.end, fileName: y.value, ...(A ? { preserve: A } : {}) })
                     : t(v.range.pos, v.range.end - v.range.pos, E.Invalid_reference_directive_syntax);
           });
           break;
         }
         case "amd-dependency": {
-          e.amdDependencies = Lp(wp(a), (f) => ({ name: f.arguments.name, path: f.arguments.path }));
+          e.amdDependencies = Jp(Ep(a), (f) => ({ name: f.arguments.name, path: f.arguments.path }));
           break;
         }
         case "amd-module": {
@@ -29004,7 +28991,7 @@ function r6(/** @type {d6} */ e, t) {
         }
         case "ts-nocheck":
         case "ts-check": {
-          Bn(wp(a), (f) => {
+          qn(Ep(a), (f) => {
             (!e.checkJsDirective || f.range.pos > e.checkJsDirective.pos) &&
               (e.checkJsDirective = { enabled: s === "ts-check", end: f.range.end, pos: f.range.pos });
           });
@@ -29020,11 +29007,11 @@ function r6(/** @type {d6} */ e, t) {
       }
     }));
 }
-var Mp = new Map();
+var jp = new Map();
 /** @returns {RegExp} */ function i6(/** @type {string} */ e) {
-  if (Mp.has(e)) return Mp.get(e);
+  if (jp.has(e)) return jp.get(e);
   let t = new RegExp(`(\\s${e}\\s*=\\s*)(?:(?:'([^']*)')|(?:"([^"]*)"))`, "im");
-  return (Mp.set(e, t), t);
+  return (jp.set(e, t), t);
 }
 var a6 = /^\/\/\/\s*<(\S+)\s.*?\/>/m,
   s6 = /^\/\/\/?\s*@([^\s:]+)((?:[^\S\r\n]|:).*)?$/m;
@@ -29032,7 +29019,7 @@ function _6(e, t, /** @type {string} */ a) {
   let s = t.kind === 2 && a6.exec(a);
   if (s) {
     let h = s[1].toLowerCase(),
-      b = Jm[h];
+      b = Bm[h];
     if (!b || !(b.kind & 1)) return;
     if (b.args) {
       let v = {};
@@ -29040,11 +29027,11 @@ function _6(e, t, /** @type {string} */ a) {
         let y = i6(l.name).exec(a);
         if (!y && !l.optional) return;
         if (y) {
-          let W = y[2] || y[3];
+          let G = y[2] || y[3];
           if (l.captureSpan) {
             let k = t.pos + y.index + y[1].length + 1;
-            v[l.name] = { value: W, pos: k, end: k + W.length };
-          } else v[l.name] = W;
+            v[l.name] = { value: G, pos: k, end: k + G.length };
+          } else v[l.name] = G;
         }
       }
       e.push({ name: h, args: { arguments: v, range: t } });
@@ -29052,17 +29039,17 @@ function _6(e, t, /** @type {string} */ a) {
     return;
   }
   let f = t.kind === 2 && s6.exec(a);
-  if (f) return wm(e, t, 2, f);
+  if (f) return Am(e, t, 2, f);
   if (t.kind === 3) {
     let h = /@(\S+)(\s+(?:\S.*)?)?$/gm,
       b;
-    for (; (b = h.exec(a));) wm(e, t, 4, b);
+    for (; (b = h.exec(a));) Am(e, t, 4, b);
   }
 }
-function wm(e, t, /** @type {number} */ a, s) {
+function Am(e, t, /** @type {number} */ a, s) {
   if (!s) return;
   let f = s[1].toLowerCase(),
-    h = Jm[f];
+    h = Bm[f];
   if (!h || !(h.kind & a)) return;
   let b = s[2],
     v = o6(h, b);
@@ -29081,7 +29068,7 @@ function o6(e, /** @type {string} */ t) {
   }
   return s;
 }
-/** @returns {boolean} */ function mi(/** @type {Kf | vh | xh | Th} */ e, /** @type {Kf | vh | xh | Th} */ t) {
+/** @returns {boolean} */ function mi(/** @type {ed | Sh | wh | kh} */ e, /** @type {ed | Sh | wh | kh} */ t) {
   return e.kind !== t.kind
     ? !1
     : e.kind === 80
@@ -29092,54 +29079,54 @@ function o6(e, /** @type {string} */ t) {
           ? e.namespace.escapedText === t.namespace.escapedText && e.name.escapedText === t.name.escapedText
           : e.name.escapedText === t.name.escapedText && mi(e.expression, t.expression);
 }
-var p_ = uf(w_.Latest, !0);
-/** @returns {Kf | xh | vh | Th} */ function bh(/** @type {number} */ e, /** @type {number} */ t, /** @type {number} */ a, /** @type {d6 | Kf | xh | vh | Th} */ s) {
-  /** @type {Kf | vh | xh | Th} */ let f = bf(e) ? new Kf(e, t, a) : e === 80 ? new xh(80, t, a) : e === 81 ? new Th(81, t, a) : new vh(e, t, a);
+var p_ = ff(w_.Latest, !0);
+/** @returns {ed | wh | Sh | kh} */ function Th(/** @type {number} */ e, /** @type {number} */ t, /** @type {number} */ a, /** @type {d6 | ed | wh | Sh | kh} */ s) {
+  /** @type {ed | Sh | wh | kh} */ let f = xf(e) ? new ed(e, t, a) : e === 80 ? new wh(80, t, a) : e === 81 ? new kh(81, t, a) : new Sh(e, t, a);
   return ((f.parent = s), (f.flags = s.flags & 101441536), f);
 }
 /**
  * the parent that the parser gives each node, and the properties that it gives nodes of some kinds, which are
  * other nodes
- * @property {Kf} parent
- * @sideProperty {Kf | xh | vh | Th} [name]
- * @sideProperty {Kf | xh | vh | Th} [expression]
- * @sideProperty {Kf | xh | vh | Th} [questionDotToken]
- * @sideProperty {Kf | xh | vh | Th} [initializer]
- * @sideProperty {Kf | xh | vh | Th} [type]
- * @sideProperty {Kf | xh | vh | Th} [questionToken]
- * @sideProperty {Kf | xh | vh | Th} [exclamationToken]
- * @sideProperty {Kf | xh | vh | Th} [left]
- * @sideProperty {Kf | xh | vh | Th} [right]
- * @sideProperty {Kf | xh | vh | Th} [body]
- * @sideProperty {Kf | xh | vh | Th} [declarationList]
- * @sideProperty {Kf | xh | vh | Th} [operatorToken]
- * @sideProperty {Kf | xh | vh | Th} [dotDotDotToken]
- * @sideProperty {Kf | xh | vh | Th} [equalsGreaterThanToken]
- * @sideProperty {Kf | xh | vh | Th} [typeName]
- * @sideProperty {Kf | xh | vh | Th} [asteriskToken]
- * @sideProperty {Kf | xh | vh | Th} [importClause]
- * @sideProperty {Kf | xh | vh | Th} [propertyName]
- * @sideProperty {Kf | xh | vh | Th} [literal]
- * @sideProperty {Kf | xh | vh | Th} [moduleSpecifier]
- * @sideProperty {Kf | xh | vh | Th} [namedBindings]
- * @sideProperty {Kf | xh | vh | Th} [label]
- * @sideProperty {Kf | xh | vh | Th} [statement]
- * @sideProperty {Kf | xh | vh | Th} [thenStatement]
- * @sideProperty {Kf | xh | vh | Th} [elseStatement]
- * @sideProperty {Kf | xh | vh | Th} [condition]
- * @sideProperty {Kf | xh | vh | Th} [whenTrue]
- * @sideProperty {Kf | xh | vh | Th} [whenFalse]
- * @sideProperty {Kf | xh | vh | Th} [operand]
- * @sideProperty {Kf | xh | vh | Th} [argumentExpression]
- * @sideProperty {Kf | xh | vh | Th} [tagName]
- * @sideProperty {Kf | xh | vh | Th} [constraint]
- * @sideProperty {Kf | xh | vh | Th} [elementType]
- * @sideProperty {Kf | xh | vh | Th} [exprName]
- * @sideProperty {Kf | xh | vh | Th} [objectType]
- * @sideProperty {Kf | xh | vh | Th} [indexType]
- * @sideProperty {Kf | xh | vh | Th} [endOfFileToken]
+ * @property {ed} parent
+ * @sideProperty {ed | wh | Sh | kh} [name]
+ * @sideProperty {ed | wh | Sh | kh} [expression]
+ * @sideProperty {ed | wh | Sh | kh} [questionDotToken]
+ * @sideProperty {ed | wh | Sh | kh} [initializer]
+ * @sideProperty {ed | wh | Sh | kh} [type]
+ * @sideProperty {ed | wh | Sh | kh} [questionToken]
+ * @sideProperty {ed | wh | Sh | kh} [exclamationToken]
+ * @sideProperty {ed | wh | Sh | kh} [left]
+ * @sideProperty {ed | wh | Sh | kh} [right]
+ * @sideProperty {ed | wh | Sh | kh} [body]
+ * @sideProperty {ed | wh | Sh | kh} [declarationList]
+ * @sideProperty {ed | wh | Sh | kh} [operatorToken]
+ * @sideProperty {ed | wh | Sh | kh} [dotDotDotToken]
+ * @sideProperty {ed | wh | Sh | kh} [equalsGreaterThanToken]
+ * @sideProperty {ed | wh | Sh | kh} [typeName]
+ * @sideProperty {ed | wh | Sh | kh} [asteriskToken]
+ * @sideProperty {ed | wh | Sh | kh} [importClause]
+ * @sideProperty {ed | wh | Sh | kh} [propertyName]
+ * @sideProperty {ed | wh | Sh | kh} [literal]
+ * @sideProperty {ed | wh | Sh | kh} [moduleSpecifier]
+ * @sideProperty {ed | wh | Sh | kh} [namedBindings]
+ * @sideProperty {ed | wh | Sh | kh} [label]
+ * @sideProperty {ed | wh | Sh | kh} [statement]
+ * @sideProperty {ed | wh | Sh | kh} [thenStatement]
+ * @sideProperty {ed | wh | Sh | kh} [elseStatement]
+ * @sideProperty {ed | wh | Sh | kh} [condition]
+ * @sideProperty {ed | wh | Sh | kh} [whenTrue]
+ * @sideProperty {ed | wh | Sh | kh} [whenFalse]
+ * @sideProperty {ed | wh | Sh | kh} [operand]
+ * @sideProperty {ed | wh | Sh | kh} [argumentExpression]
+ * @sideProperty {ed | wh | Sh | kh} [tagName]
+ * @sideProperty {ed | wh | Sh | kh} [constraint]
+ * @sideProperty {ed | wh | Sh | kh} [elementType]
+ * @sideProperty {ed | wh | Sh | kh} [exprName]
+ * @sideProperty {ed | wh | Sh | kh} [objectType]
+ * @sideProperty {ed | wh | Sh | kh} [indexType]
+ * @sideProperty {ed | wh | Sh | kh} [endOfFileToken]
  */
-var Kf = class {
+var ed = class {
   constructor(/** @type {number} */ e, /** @type {number} */ t, /** @type {number} */ a) {
     ((this.pos = t),
       (this.end = a),
@@ -29197,46 +29184,46 @@ var Kf = class {
       this.assertHasRealPosition(
         "Node without a real position cannot be scanned and thus has no token nodes - use forEachChild and collect the result if that's fine",
       ),
-      uh(this, e) ?? Nv(this, e, c6(this, e))
+      dh(this, e) ?? Nv(this, e, c6(this, e))
     );
   }
   getFirstToken(e) {
     this.assertHasRealPosition();
     let t = this.getChildren(e);
     if (!t.length) return;
-    let a = Em(t, /** @returns {boolean} */ (/** @type {Kf | vh | xh | Th} */ s) => s.kind < 310 || s.kind > 352);
+    let a = Dm(t, /** @returns {boolean} */ (/** @type {ed | Sh | wh | kh} */ s) => s.kind < 310 || s.kind > 352);
     return a.kind < 167 ? a : a.getFirstToken(e);
   }
   getLastToken(e) {
     this.assertHasRealPosition();
     let t = this.getChildren(e),
-      a = Va(t);
+      a = za(t);
     if (a) return a.kind < 167 ? a : a.getLastToken(e);
   }
   forEachChild(/** @type {TsNodeVisitor} */ e, /** @type {TsNodesVisitor | undefined} */ t) {
     return $t(this, e, t);
   }
 };
-function c6(/** @type {InstanceType<typeof d6> | InstanceType<typeof Kf>} */ e, /** @type {InstanceType<typeof d6>} */ t) {
+function c6(/** @type {InstanceType<typeof d6> | InstanceType<typeof ed>} */ e, /** @type {InstanceType<typeof d6>} */ t) {
   let a = [];
   if (m2(e))
     return (
-      e.forEachChild((/** @type {Kf | vh | xh | Th} */ b) => {
+      e.forEachChild((/** @type {ed | Sh | wh | kh} */ b) => {
         a.push(b);
       }),
       a
     );
   p_.setText((t || e.getSourceFile()).text);
   let s = /** @type {number} */ (e.pos),
-    f = /** @type {TsNodeVisitor} */ ((/** @type {Kf | vh | xh | Th | undefined} */ b) => {
+    f = /** @type {TsNodeVisitor} */ ((/** @type {ed | Sh | wh | kh | undefined} */ b) => {
       (f_(a, s, b.pos, e), a.push(b), (s = b.end));
     }),
-    h = /** @type {TsNodesVisitor} */ ((/** @type {(Kf | vh | xh | Th)[]} */ b) => {
+    h = /** @type {TsNodesVisitor} */ ((/** @type {(ed | Sh | wh | kh)[]} */ b) => {
       (f_(a, s, b.pos, e), a.push(l6(b, e)), (s = b.end));
     });
-  return (Bn(e.jsDoc, f), (s = e.pos), e.forEachChild(f, h), f_(a, s, e.end, e), p_.setText(void 0), a);
+  return (qn(e.jsDoc, f), (s = e.pos), e.forEachChild(f, h), f_(a, s, e.end, e), p_.setText(void 0), a);
 }
-function f_(/** @type {any[]} */ e, /** @type {number} */ t, /** @type {number} */ a, /** @type {Kf | d6} */ s) {
+function f_(/** @type {any[]} */ e, /** @type {number} */ t, /** @type {number} */ a, /** @type {ed | d6} */ s) {
   for (p_.resetTokenState(t); t < a;) {
     let f = p_.scan(),
       h = p_.getTokenEnd();
@@ -29245,22 +29232,22 @@ function f_(/** @type {any[]} */ e, /** @type {number} */ t, /** @type {number} 
         if (Bb(s)) continue;
         q.fail(`Did not expect ${q.formatSyntaxKind(s.kind)} to have an Identifier in its trivia`);
       }
-      e.push(bh(f, t, h, s));
+      e.push(Th(f, t, h, s));
     }
     if (((t = h), f === 1)) break;
   }
 }
-function l6(e, /** @type {Kf | d6} */ t) {
-  let a = bh(353, e.pos, e.end, t),
+function l6(e, /** @type {ed | d6} */ t) {
+  let a = Th(353, e.pos, e.end, t),
     s = [],
     f = e.pos;
   for (let h of e) (f_(s, f, h.pos, t), s.push(h), (f = h.end));
   return (f_(s, f, e.end, t), (a._children = s), a);
 }
 /**
- * @property {Kf} parent
+ * @property {ed} parent
  */
-var Zf = class {
+var td = class {
     constructor(/** @type {number} */ e, /** @type {number} */ t, /** @type {number} */ a) {
       ((this.pos = t),
         (this.end = a),
@@ -29332,7 +29319,7 @@ var Zf = class {
       return this.flags;
     }
     get name() {
-      return qp(this);
+      return zp(this);
     }
     getEscapedName() {
       return this.escapedName;
@@ -29348,9 +29335,9 @@ var Zf = class {
         if (
           ((this.documentationComment = Tt),
           !this.declarations &&
-            Ud(this) &&
+            Fd(this) &&
             this.links.target &&
-            Ud(this.links.target) &&
+            Fd(this.links.target) &&
             this.links.target.links.tupleLabelDeclaration)
         ) {
           let t = this.links.target.links.tupleLabelDeclaration;
@@ -29364,7 +29351,7 @@ var Zf = class {
           ul(e) &&
           (this.contextualGetAccessorDocumentationComment ||
             ((this.contextualGetAccessorDocumentationComment = Tt),
-            (this.contextualGetAccessorDocumentationComment = u_($r(this.declarations, ul), t))),
+            (this.contextualGetAccessorDocumentationComment = u_(Qr(this.declarations, ul), t))),
           s_(this.contextualGetAccessorDocumentationComment))
         )
           return this.contextualGetAccessorDocumentationComment;
@@ -29372,7 +29359,7 @@ var Zf = class {
           ll(e) &&
           (this.contextualSetAccessorDocumentationComment ||
             ((this.contextualSetAccessorDocumentationComment = Tt),
-            (this.contextualSetAccessorDocumentationComment = u_($r(this.declarations, ll), t))),
+            (this.contextualSetAccessorDocumentationComment = u_(Qr(this.declarations, ll), t))),
           s_(this.contextualSetAccessorDocumentationComment))
         )
           return this.contextualSetAccessorDocumentationComment;
@@ -29388,7 +29375,7 @@ var Zf = class {
           ul(e) &&
           (this.contextualGetAccessorTags ||
             ((this.contextualGetAccessorTags = Tt),
-            (this.contextualGetAccessorTags = vl($r(this.declarations, ul), t))),
+            (this.contextualGetAccessorTags = vl(Qr(this.declarations, ul), t))),
           s_(this.contextualGetAccessorTags))
         )
           return this.contextualGetAccessorTags;
@@ -29396,7 +29383,7 @@ var Zf = class {
           ll(e) &&
           (this.contextualSetAccessorTags ||
             ((this.contextualSetAccessorTags = Tt),
-            (this.contextualSetAccessorTags = vl($r(this.declarations, ll), t))),
+            (this.contextualSetAccessorTags = vl(Qr(this.declarations, ll), t))),
           s_(this.contextualSetAccessorTags))
         )
           return this.contextualSetAccessorTags;
@@ -29404,12 +29391,12 @@ var Zf = class {
       return this.getJsDocTags(t);
     }
   },
-  vh = class extends Zf {
+  Sh = class extends td {
     constructor(/** @type {int} */ e, /** @type {number} */ t, /** @type {number} */ a) {
       super(e, t, a);
     }
   },
-  xh = class extends Zf {
+  wh = class extends td {
     constructor(/** @type {int} */ e, /** @type {number} */ t, /** @type {number} */ a) {
       super(e, t, a);
     }
@@ -29417,7 +29404,7 @@ var Zf = class {
       return Pn(this);
     }
   },
-  Th = class extends Zf {
+  kh = class extends td {
     constructor(/** @type {int} */ e, /** @type {number} */ t, /** @type {number} */ a) {
       super(e, t, a);
     }
@@ -29496,16 +29483,16 @@ var Zf = class {
       return !!(this.flags & 524288);
     }
     isClassOrInterface() {
-      return !!(Pp(this) & 3);
+      return !!(Ip(this) & 3);
     }
     isClass() {
-      return !!(Pp(this) & 1);
+      return !!(Ip(this) & 1);
     }
     isIndexType() {
       return !!(this.flags & 2097152);
     }
     get typeArguments() {
-      if (Pp(this) & 4) return this.checker.getTypeArguments(this);
+      if (Ip(this) & 4) return this.checker.getTypeArguments(this);
     }
   },
   f6 = class {
@@ -29533,22 +29520,22 @@ var Zf = class {
       return t;
     }
     getDocumentationComment() {
-      return this.documentationComment || (this.documentationComment = u_(Jp(this.declaration), this.checker));
+      return this.documentationComment || (this.documentationComment = u_(Up(this.declaration), this.checker));
     }
     getJsDocTags() {
-      return this.jsDocTags || (this.jsDocTags = vl(Jp(this.declaration), this.checker));
+      return this.jsDocTags || (this.jsDocTags = vl(Up(this.declaration), this.checker));
     }
   };
-function Sh(e) {
-  return s1(e).some((t) => t.tagName.text === "inheritDoc" || t.tagName.text === "inheritdoc");
+function Eh(e) {
+  return c1(e).some((t) => t.tagName.text === "inheritDoc" || t.tagName.text === "inheritdoc");
 }
 function vl(e, t) {
   if (!e) return Tt;
   let a = ts_JsDoc_exports.getJsDocTagsFromDeclarations(e, t);
-  if (t && (a.length === 0 || e.some(Sh))) {
+  if (t && (a.length === 0 || e.some(Eh))) {
     let s = new Set();
     for (let f of e) {
-      let h = wh(t, f, (b) => {
+      let h = Ah(t, f, (b) => {
         var v;
         if (!s.has(b))
           return (
@@ -29568,10 +29555,10 @@ function vl(e, t) {
 function u_(e, t) {
   if (!e) return Tt;
   let a = ts_JsDoc_exports.getJsDocCommentsFromDeclarations(e, t);
-  if (t && (a.length === 0 || e.some(Sh))) {
+  if (t && (a.length === 0 || e.some(Eh))) {
     let s = new Set();
     for (let f of e) {
-      let h = wh(t, f, (b) => {
+      let h = Ah(t, f, (b) => {
         if (!s.has(b))
           return (
             s.add(b),
@@ -29583,7 +29570,7 @@ function u_(e, t) {
   }
   return a;
 }
-function wh(e, t, a) {
+function Ah(e, t, a) {
   var s;
   let f = ((s = t.parent) == null ? void 0 : s.kind) === 177 ? t.parent.parent : t.parent;
   if (!f) return;
@@ -29591,15 +29578,15 @@ function wh(e, t, a) {
   return xy(Y2(f), (b) => {
     let v = e.getTypeAtLocation(b),
       l = h && v.symbol ? e.getTypeOfSymbol(v.symbol) : v,
-      G = e.getPropertyOfType(l, t.symbol.name);
-    return G ? a(G) : void 0;
+      W = e.getPropertyOfType(l, t.symbol.name);
+    return W ? a(W) : void 0;
   });
 }
 /**
  * @property {string} [text]
  * @property {number[]} [lineMap]
  */
-var d6 = class extends Kf {
+var d6 = class extends ed {
     constructor(/** @type {int} */ e, /** @type {number} */ t, /** @type {number} */ a) {
       super(e, t, a);
     }
@@ -29607,13 +29594,13 @@ var d6 = class extends Kf {
       return $v(this, e, t);
     }
     /** @returns {TsLineAndCharacter} */ getLineAndCharacterOfPosition(/** @type {number} */ e) {
-      return Ym(this, e);
+      return $m(this, e);
     }
     getLineStarts() {
-      return Up(this);
+      return qp(this);
     }
     getPositionOfLineAndCharacter(e, t, a) {
-      return gg(Up(this), e, t, this.text, a);
+      return gg(qp(this), e, t, this.text, a);
     }
     getLineEndOfPosition(e) {
       let { line: t } = this.getLineAndCharacterOfPosition(e),
@@ -29645,8 +29632,8 @@ var d6 = class extends Kf {
         return (b || e.set(h, (b = [])), b);
       }
       function s(h) {
-        let b = mf(h);
-        return b && (Nf(b) && gr(b.expression) ? b.expression.name.text : c1(b) ? getNameFromPropertyName(b) : void 0);
+        let b = yf(h);
+        return b && (Of(b) && yr(b.expression) ? b.expression.name.text : p1(b) ? getNameFromPropertyName(b) : void 0);
       }
       function f(h) {
         switch (h.kind) {
@@ -29658,9 +29645,9 @@ var d6 = class extends Kf {
               v = s(b);
             if (v) {
               let y = a(v),
-                W = Va(y);
-              W && b.parent === W.parent && b.symbol === W.symbol
-                ? b.body && !W.body && (y[y.length - 1] = b)
+                G = za(y);
+              G && b.parent === G.parent && b.symbol === G.symbol
+                ? b.body && !G.body && (y[y.length - 1] = b)
                 : y.push(b);
             }
             $t(h, f);
@@ -29699,16 +29686,16 @@ var d6 = class extends Kf {
             break;
           case 279:
             let l = h;
-            l.exportClause && (nh(l.exportClause) ? Bn(l.exportClause.elements, f) : f(l.exportClause.name));
+            l.exportClause && (ah(l.exportClause) ? qn(l.exportClause.elements, f) : f(l.exportClause.name));
             break;
           case 273:
-            let G = h.importClause;
-            G &&
-              (G.name && t(G.name),
-              G.namedBindings && (G.namedBindings.kind === 275 ? t(G.namedBindings) : Bn(G.namedBindings.elements, f)));
+            let W = h.importClause;
+            W &&
+              (W.name && t(W.name),
+              W.namedBindings && (W.namedBindings.kind === 275 ? t(W.namedBindings) : qn(W.namedBindings.elements, f)));
             break;
           case 227:
-            Sf(h) !== 0 && t(h);
+            kf(h) !== 0 && t(h);
           default:
             $t(h, f);
         }
@@ -29720,15 +29707,15 @@ var d6 = class extends Kf {
       ((this.fileName = e), (this.text = t), (this.skipTrivia = a || ((s) => s)));
     }
     /** @returns {TsLineAndCharacter} */ getLineAndCharacterOfPosition(/** @type {number} */ e) {
-      return Ym(this, e);
+      return $m(this, e);
     }
   };
 function h6() {
   return {
-    getNodeConstructor: () => Kf,
-    getTokenConstructor: () => vh,
-    getIdentifierConstructor: () => xh,
-    getPrivateIdentifierConstructor: () => Th,
+    getNodeConstructor: () => ed,
+    getTokenConstructor: () => Sh,
+    getIdentifierConstructor: () => wh,
+    getPrivateIdentifierConstructor: () => kh,
     getSourceFileConstructor: () => d6,
     getSymbolConstructor: () => u6,
     getTypeConstructor: () => p6,
@@ -29757,7 +29744,7 @@ var y6 = [
     "getSupportedCodeFixes",
     "getPasteEdits",
   ],
-  rx = [
+  tx = [
     ...y6,
     "getCompletionsAtPosition",
     "getCompletionEntryDetails",
@@ -29778,42 +29765,55 @@ var y6 = [
     "preparePasteEditsForFile",
   ];
 Tb(h6());
+var es =
+  (e, t) =>
+  (a, s, ...f) =>
+    a | 1 && s == null ? void 0 : (t.call(s) ?? s[e]).apply(s, f);
+var g6 =
+    String.prototype.replaceAll ??
+    function (e, t) {
+      return e.global ? this.replace(e, t) : this.split(e).join(t);
+    },
+  b6 = es("replaceAll", function () {
+    if (typeof this == "string") return g6;
+  }),
+  gr = b6;
 var ts = new Proxy({}, { get: /** @returns {boolean} */ () => !0 });
-var kh = ts["4.8"];
-function rr(/** @type {d6 | Kf | xh | vh | Th} */ e, t = !1) {
+var Ch = ts["4.8"];
+function rr(/** @type {d6 | ed | wh | Sh | kh} */ e, t = !1) {
   if (e != null) {
-    if (kh) {
+    if (Ch) {
       if (t || Rl(e)) {
-        let a = r1(e);
+        let a = s1(e);
         return a ? [...a] : void 0;
       }
       return;
     }
-    return e.modifiers?.filter((/** @type {Kf | vh} */ a) => !Ka(a));
+    return e.modifiers?.filter((/** @type {ed | Sh} */ a) => !Qa(a));
   }
 }
-function wi(/** @type {d6 | Kf | xh | vh | Th} */ e, t = !1) {
+function wi(/** @type {d6 | ed | wh | Sh | kh} */ e, t = !1) {
   if (e != null) {
-    if (kh) {
-      if (t || Qf(e)) {
-        let a = hf(e);
+    if (Ch) {
+      if (t || Zf(e)) {
+        let a = gf(e);
         return a ? [...a] : void 0;
       }
       return;
     }
-    return e.decorators?.filter(Ka);
+    return e.decorators?.filter(Qa);
   }
 }
-var Eh = {};
+var Dh = {};
 var Ul = new Proxy({}, { get: /** @returns {string} */ (e, t) => t });
-var Ah = Ul,
-  Ch = Ul;
-var A = Ah,
-  Bt = Ch;
-var v6 = ts["5.0"],
-  ye = Ae,
-  x6 = new Set([ye.AmpersandAmpersandToken, ye.BarBarToken, ye.QuestionQuestionToken]),
-  T6 = new Set([
+var Ph = Ul,
+  Nh = Ul;
+var C = Ph,
+  Lt = Nh;
+var T6 = ts["5.0"],
+  he = Ae,
+  S6 = new Set([he.AmpersandAmpersandToken, he.BarBarToken, he.QuestionQuestionToken]),
+  w6 = new Set([
     Ae.AmpersandAmpersandEqualsToken,
     Ae.AmpersandEqualsToken,
     Ae.AsteriskAsteriskEqualsToken,
@@ -29831,78 +29831,78 @@ var v6 = ts["5.0"],
     Ae.QuestionQuestionEqualsToken,
     Ae.SlashEqualsToken,
   ]),
-  S6 = new Set([
-    ye.AmpersandAmpersandToken,
-    ye.AmpersandToken,
-    ye.AsteriskAsteriskToken,
-    ye.AsteriskToken,
-    ye.BarBarToken,
-    ye.BarToken,
-    ye.CaretToken,
-    ye.EqualsEqualsEqualsToken,
-    ye.EqualsEqualsToken,
-    ye.ExclamationEqualsEqualsToken,
-    ye.ExclamationEqualsToken,
-    ye.GreaterThanEqualsToken,
-    ye.GreaterThanGreaterThanGreaterThanToken,
-    ye.GreaterThanGreaterThanToken,
-    ye.GreaterThanToken,
-    ye.InKeyword,
-    ye.InstanceOfKeyword,
-    ye.LessThanEqualsToken,
-    ye.LessThanLessThanToken,
-    ye.LessThanToken,
-    ye.MinusToken,
-    ye.PercentToken,
-    ye.PlusToken,
-    ye.SlashToken,
+  k6 = new Set([
+    he.AmpersandAmpersandToken,
+    he.AmpersandToken,
+    he.AsteriskAsteriskToken,
+    he.AsteriskToken,
+    he.BarBarToken,
+    he.BarToken,
+    he.CaretToken,
+    he.EqualsEqualsEqualsToken,
+    he.EqualsEqualsToken,
+    he.ExclamationEqualsEqualsToken,
+    he.ExclamationEqualsToken,
+    he.GreaterThanEqualsToken,
+    he.GreaterThanGreaterThanGreaterThanToken,
+    he.GreaterThanGreaterThanToken,
+    he.GreaterThanToken,
+    he.InKeyword,
+    he.InstanceOfKeyword,
+    he.LessThanEqualsToken,
+    he.LessThanLessThanToken,
+    he.LessThanToken,
+    he.MinusToken,
+    he.PercentToken,
+    he.PlusToken,
+    he.SlashToken,
   ]);
-/** @returns {boolean} */ function w6(/** @type {InstanceType<typeof vh>} */ e) {
-  return T6.has(e.kind);
+/** @returns {boolean} */ function E6(/** @type {InstanceType<typeof Sh>} */ e) {
+  return w6.has(e.kind);
 }
-/** @returns {boolean} */ function k6(/** @type {InstanceType<typeof vh>} */ e) {
-  return x6.has(e.kind);
-}
-/** @returns {boolean} */ function E6(/** @type {InstanceType<typeof vh>} */ e) {
+/** @returns {boolean} */ function A6(/** @type {InstanceType<typeof Sh>} */ e) {
   return S6.has(e.kind);
 }
-/** @returns {string} */ function qn(/** @type {number} */ e) {
+/** @returns {boolean} */ function C6(/** @type {InstanceType<typeof Sh>} */ e) {
+  return k6.has(e.kind);
+}
+/** @returns {string} */ function Fn(/** @type {number} */ e) {
   return rt(e);
 }
-/** @returns {boolean} */ function Dh(/** @type {Kf | vh | xh | Th} */ e) {
-  return e.kind !== ye.SemicolonClassElement;
+/** @returns {boolean} */ function Ih(/** @type {ed | Sh | wh | kh} */ e) {
+  return e.kind !== he.SemicolonClassElement;
 }
-/** @returns {boolean} */ function Fe(/** @type {number} */ e, /** @type {Kf | vh | xh | Th} */ t) {
-  return rr(t)?.some(/** @returns {boolean} */ (/** @type {Kf | vh | xh | Th} */ s) => s.kind === e) === !0;
+/** @returns {boolean} */ function Fe(/** @type {number} */ e, /** @type {ed | Sh | wh | kh} */ t) {
+  return rr(t)?.some(/** @returns {boolean} */ (/** @type {ed | Sh | wh | kh} */ s) => s.kind === e) === !0;
 }
-/** @returns {InstanceType<typeof vh> | null} */ function Ph(/** @type {InstanceType<typeof Kf>} */ e) {
+/** @returns {InstanceType<typeof Sh> | null} */ function Oh(/** @type {InstanceType<typeof ed>} */ e) {
   let t = rr(e);
   return t == null ? null : (t[t.length - 1] ?? null);
 }
-/** @returns {boolean} */ function Nh(/** @type {InstanceType<typeof vh>} */ e) {
-  return e.kind === ye.CommaToken;
+/** @returns {boolean} */ function Mh(/** @type {InstanceType<typeof Sh>} */ e) {
+  return e.kind === he.CommaToken;
 }
-/** @returns {boolean} */ function A6(/** @type {InstanceType<typeof d6> | InstanceType<typeof Kf> | InstanceType<typeof vh> | InstanceType<typeof xh>} */ e) {
-  return e.kind === ye.SingleLineCommentTrivia || e.kind === ye.MultiLineCommentTrivia;
+/** @returns {boolean} */ function D6(/** @type {InstanceType<typeof d6> | InstanceType<typeof ed> | InstanceType<typeof Sh> | InstanceType<typeof wh>} */ e) {
+  return e.kind === he.SingleLineCommentTrivia || e.kind === he.MultiLineCommentTrivia;
 }
-/** @returns {boolean} */ function C6(/** @type {InstanceType<typeof d6> | InstanceType<typeof Kf> | InstanceType<typeof vh> | InstanceType<typeof xh>} */ e) {
-  return e.kind === ye.JSDocComment;
+/** @returns {boolean} */ function P6(/** @type {InstanceType<typeof d6> | InstanceType<typeof ed> | InstanceType<typeof Sh> | InstanceType<typeof wh>} */ e) {
+  return e.kind === he.JSDocComment;
 }
-function Ih(/** @type {InstanceType<typeof vh>} */ e) {
-  if (w6(e)) return { type: A.AssignmentExpression, operator: qn(e.kind) };
-  if (k6(e)) return { type: A.LogicalExpression, operator: qn(e.kind) };
-  if (E6(e)) return { type: A.BinaryExpression, operator: qn(e.kind) };
+function Lh(/** @type {InstanceType<typeof Sh>} */ e) {
+  if (E6(e)) return { type: C.AssignmentExpression, operator: Fn(e.kind) };
+  if (A6(e)) return { type: C.LogicalExpression, operator: Fn(e.kind) };
+  if (C6(e)) return { type: C.BinaryExpression, operator: Fn(e.kind) };
   throw new Error(`Unexpected binary operator ${rt(e.kind)}`);
 }
 /** @returns {TsPosition} */ function C_(/** @type {number} */ e, /** @type {InstanceType<typeof d6>} */ t) {
   let a = t.getLineAndCharacterOfPosition(e);
   return { column: a.character, line: a.line + 1 };
 }
-/** @returns {TsLocation} */ function Zr(/** @type {any[]} */ e, /** @type {InstanceType<typeof d6>} */ t) {
+/** @returns {TsLocation} */ function jr(/** @type {any[]} */ e, /** @type {InstanceType<typeof d6>} */ t) {
   let [a, s] = e.map((/** @type {number} */ f) => C_(f, t));
   return { end: s, start: a };
 }
-/** @returns {boolean} */ function Oh(/** @type {d6 | Kf | xh | vh | Th} */ e) {
+/** @returns {boolean} */ function jh(/** @type {d6 | ed | wh | Sh | kh} */ e) {
   if (e.kind === Ae.Block)
     switch (e.parent.kind) {
       case Ae.Constructor:
@@ -29918,16 +29918,16 @@ function Ih(/** @type {InstanceType<typeof vh>} */ e) {
     }
   return !0;
 }
-function _a(/** @type {InstanceType<typeof Kf> | InstanceType<typeof xh> | InstanceType<typeof vh>} */ e, /** @type {InstanceType<typeof d6>} */ t) {
+function _a(/** @type {InstanceType<typeof ed> | InstanceType<typeof wh> | InstanceType<typeof Sh>} */ e, /** @type {InstanceType<typeof d6>} */ t) {
   return [e.getStart(t), e.getEnd()];
 }
-/** @returns {boolean} */ function D6(/** @type {InstanceType<typeof d6> | InstanceType<typeof Kf> | InstanceType<typeof vh> | InstanceType<typeof xh>} */ e) {
-  return e.kind >= ye.FirstToken && e.kind <= ye.LastToken;
+/** @returns {boolean} */ function N6(/** @type {InstanceType<typeof d6> | InstanceType<typeof ed> | InstanceType<typeof Sh> | InstanceType<typeof wh>} */ e) {
+  return e.kind >= he.FirstToken && e.kind <= he.LastToken;
 }
-/** @returns {boolean} */ function Mh(/** @type {InstanceType<typeof Kf> | InstanceType<typeof Zf>} */ e) {
-  return e.kind >= ye.JsxElement && e.kind <= ye.JsxAttribute;
+/** @returns {boolean} */ function Jh(/** @type {InstanceType<typeof ed> | InstanceType<typeof td>} */ e) {
+  return e.kind >= he.JsxElement && e.kind <= he.JsxAttribute;
 }
-/** @returns {string} */ function oa(/** @type {InstanceType<typeof Kf>} */ e) {
+/** @returns {string} */ function oa(/** @type {InstanceType<typeof ed>} */ e) {
   return e.flags & rn.Let
     ? "let"
     : (e.flags & rn.AwaitUsing) === rn.AwaitUsing
@@ -29938,101 +29938,101 @@ function _a(/** @type {InstanceType<typeof Kf> | InstanceType<typeof xh> | Insta
           ? "using"
           : "var";
 }
-/** @returns {string | undefined} */ function ki(/** @type {InstanceType<typeof Kf>} */ e) {
+/** @returns {string | undefined} */ function ki(/** @type {InstanceType<typeof ed>} */ e) {
   let t = rr(e);
   if (t != null)
     for (let a of t)
       switch (a.kind) {
-        case ye.PublicKeyword:
+        case he.PublicKeyword:
           return "public";
-        case ye.ProtectedKeyword:
+        case he.ProtectedKeyword:
           return "protected";
-        case ye.PrivateKeyword:
+        case he.PrivateKeyword:
           return "private";
         default:
           break;
       }
 }
-/** @returns {InstanceType<typeof vh>} */ function ir(/** @type {InstanceType<typeof Kf> | InstanceType<typeof Zf>} */ e, /** @type {InstanceType<typeof d6> | InstanceType<typeof Kf>} */ t, /** @type {InstanceType<typeof d6>} */ a) {
+/** @returns {InstanceType<typeof Sh>} */ function ir(/** @type {InstanceType<typeof ed> | InstanceType<typeof td>} */ e, /** @type {InstanceType<typeof d6> | InstanceType<typeof ed>} */ t, /** @type {InstanceType<typeof d6>} */ a) {
   return s(t);
-  function s(/** @type {InstanceType<typeof Kf> | InstanceType<typeof Zf>} */ f) {
-    return _1(f) && f.pos === e.end
+  function s(/** @type {InstanceType<typeof ed> | InstanceType<typeof td>} */ f) {
+    return l1(f) && f.pos === e.end
       ? f
-      : L6(f.getChildren(a), (/** @type {InstanceType<typeof Kf> | InstanceType<typeof Zf>} */ h) =>
-          ((h.pos <= e.pos && h.end > e.end) || h.pos === e.end) && M6(h, a) ? s(h) : void 0,
+      : R6(f.getChildren(a), (/** @type {InstanceType<typeof ed> | InstanceType<typeof td>} */ h) =>
+          ((h.pos <= e.pos && h.end > e.end) || h.pos === e.end) && J6(h, a) ? s(h) : void 0,
         );
   }
 }
-/** @returns {InstanceType<typeof Kf> | undefined} */ function P6(/** @type {InstanceType<typeof xh>} */ e, t) {
+/** @returns {InstanceType<typeof ed> | undefined} */ function I6(/** @type {InstanceType<typeof wh>} */ e, t) {
   let a = e;
   for (; a;) {
     if (t(a)) return a;
     a = a.parent;
   }
 }
-/** @returns {boolean} */ function N6(/** @type {InstanceType<typeof xh>} */ e) {
-  return !!P6(e, Mh);
+/** @returns {boolean} */ function O6(/** @type {InstanceType<typeof wh>} */ e) {
+  return !!I6(e, Jh);
 }
-/** @returns {string} */ function ad(/** @type {string} */ e) {
-  return yr(0, e, /&(?:#\d+|#x[\da-fA-F]+|[0-9a-zA-Z]+);/g, /** @returns {string} */ (/** @type {string} */ t) => {
+/** @returns {string} */ function _d(/** @type {string} */ e) {
+  return gr(0, e, /&(?:#\d+|#x[\da-fA-F]+|[0-9a-zA-Z]+);/g, /** @returns {string} */ (/** @type {string} */ t) => {
     let a = t.slice(1, -1);
     if (a[0] === "#") {
       let s = a[1] === "x" ? parseInt(a.slice(2), 16) : parseInt(a.slice(1), 10);
       return s > 1114111 ? t : String.fromCodePoint(s);
     }
-    return Eh[a] || t;
+    return Dh[a] || t;
   });
 }
-/** @returns {boolean} */ function ca(/** @type {Kf | xh | vh | Th} */ e) {
-  return e.kind === ye.ComputedPropertyName;
+/** @returns {boolean} */ function ca(/** @type {ed | wh | Sh | kh} */ e) {
+  return e.kind === he.ComputedPropertyName;
 }
-/** @returns {boolean} */ function sd(/** @type {InstanceType<typeof Kf>} */ e) {
+/** @returns {boolean} */ function od(/** @type {InstanceType<typeof ed>} */ e) {
   return !!e.questionToken;
 }
-/** @returns {boolean} */ function _d(e) {
-  return e.type === A.ChainExpression;
+/** @returns {boolean} */ function cd(e) {
+  return e.type === C.ChainExpression;
 }
-/** @returns {boolean} */ function Lh(/** @type {InstanceType<typeof Kf>} */ e, t) {
-  return _d(t) && e.expression.kind !== Ae.ParenthesizedExpression;
+/** @returns {boolean} */ function Rh(/** @type {InstanceType<typeof ed>} */ e, t) {
+  return cd(t) && e.expression.kind !== Ae.ParenthesizedExpression;
 }
-function I6(e) {
-  if (e.kind === ye.NullKeyword) return Bt.Null;
-  if (e.kind >= ye.FirstKeyword && e.kind <= ye.LastFutureReservedWord)
-    return e.kind === ye.FalseKeyword || e.kind === ye.TrueKeyword ? Bt.Boolean : Bt.Keyword;
-  if (e.kind >= ye.FirstPunctuation && e.kind <= ye.LastPunctuation) return Bt.Punctuator;
-  if (e.kind >= ye.NoSubstitutionTemplateLiteral && e.kind <= ye.TemplateTail) return Bt.Template;
+function M6(e) {
+  if (e.kind === he.NullKeyword) return Lt.Null;
+  if (e.kind >= he.FirstKeyword && e.kind <= he.LastFutureReservedWord)
+    return e.kind === he.FalseKeyword || e.kind === he.TrueKeyword ? Lt.Boolean : Lt.Keyword;
+  if (e.kind >= he.FirstPunctuation && e.kind <= he.LastPunctuation) return Lt.Punctuator;
+  if (e.kind >= he.NoSubstitutionTemplateLiteral && e.kind <= he.TemplateTail) return Lt.Template;
   switch (e.kind) {
-    case ye.NumericLiteral:
-    case ye.BigIntLiteral:
-      return Bt.Numeric;
-    case ye.PrivateIdentifier:
-      return Bt.PrivateIdentifier;
-    case ye.JsxText:
-      return Bt.JSXText;
-    case ye.StringLiteral:
-      return e.parent.kind === ye.JsxAttribute || e.parent.kind === ye.JsxElement ? Bt.JSXText : Bt.String;
-    case ye.RegularExpressionLiteral:
-      return Bt.RegularExpression;
-    case ye.Identifier:
-    case ye.ConstructorKeyword:
-    case ye.GetKeyword:
-    case ye.SetKeyword:
+    case he.NumericLiteral:
+    case he.BigIntLiteral:
+      return Lt.Numeric;
+    case he.PrivateIdentifier:
+      return Lt.PrivateIdentifier;
+    case he.JsxText:
+      return Lt.JSXText;
+    case he.StringLiteral:
+      return e.parent.kind === he.JsxAttribute || e.parent.kind === he.JsxElement ? Lt.JSXText : Lt.String;
+    case he.RegularExpressionLiteral:
+      return Lt.RegularExpression;
+    case he.Identifier:
+    case he.ConstructorKeyword:
+    case he.GetKeyword:
+    case he.SetKeyword:
     default:
   }
-  if (e.kind === ye.Identifier) {
-    if (Mh(e.parent)) return Bt.JSXIdentifier;
-    if (e.parent.kind === ye.PropertyAccessExpression && N6(e)) return Bt.JSXIdentifier;
+  if (e.kind === he.Identifier) {
+    if (Jh(e.parent)) return Lt.JSXIdentifier;
+    if (e.parent.kind === he.PropertyAccessExpression && O6(e)) return Lt.JSXIdentifier;
   }
-  return Bt.Identifier;
+  return Lt.Identifier;
 }
-function O6(/** @type {InstanceType<typeof vh> | InstanceType<typeof xh> | InstanceType<typeof Kf>} */ e, /** @type {InstanceType<typeof d6>} */ t) {
-  let a = e.kind === ye.JsxText ? e.getFullStart() : e.getStart(t),
+function L6(/** @type {InstanceType<typeof Sh> | InstanceType<typeof wh> | InstanceType<typeof ed>} */ e, /** @type {InstanceType<typeof d6>} */ t) {
+  let a = e.kind === he.JsxText ? e.getFullStart() : e.getStart(t),
     s = e.getEnd(),
     f = t.text.slice(a, s),
-    h = I6(e),
+    h = M6(e),
     b = [a, s],
-    v = Zr(b, t);
-  return h === Bt.RegularExpression
+    v = jr(b, t);
+  return h === Lt.RegularExpression
     ? {
         type: h,
         loc: v,
@@ -30040,18 +30040,32 @@ function O6(/** @type {InstanceType<typeof vh> | InstanceType<typeof xh> | Insta
         regex: { flags: f.slice(f.lastIndexOf("/") + 1), pattern: f.slice(1, f.lastIndexOf("/")) },
         value: f,
       }
-    : h === Bt.PrivateIdentifier
+    : h === Lt.PrivateIdentifier
       ? { type: h, loc: v, range: b, value: f.slice(1) }
       : { type: h, loc: v, range: b, value: f };
 }
-function jh(/** @type {InstanceType<typeof d6>} */ e) {
+function Uh(/** @type {InstanceType<typeof d6>} */ e) {
   let t = [];
-  function a(/** @type {InstanceType<typeof Kf> | InstanceType<typeof Zf>} */ s) {
-    A6(s) || C6(s) || (D6(s) && s.kind !== ye.EndOfFileToken ? t.push(O6(s, e)) : s.getChildren(e).forEach(a));
+  function a(/** @type {InstanceType<typeof ed> | InstanceType<typeof td>} */ s) {
+    if (D6(s) || P6(s)) return;
+    let { kind: f } = s;
+    if (N6(s) && f !== he.EndOfFileToken) {
+      let h = L6(s, e);
+      (f === he.LessThanToken && j6(t, h, e), t.push(h));
+    } else s.getChildren(e).forEach(a);
   }
   return (a(e), t);
 }
-var id = class extends Error {
+function j6(e, t, a) {
+  if (e.length === 0) return;
+  let s = t.range[0],
+    f = e[e.length - 1].range[1];
+  if (s > f && a.text[s - 1] === "<") {
+    let h = [s - 1, s];
+    e.push({ type: Lt.Punctuator, loc: jr(h, a), range: h, value: "<" });
+  }
+}
+var sd = class extends Error {
   /** @type {string} */ fileName;
   location;
   name = "TSError";
@@ -30068,7 +30082,7 @@ var id = class extends Error {
     return this.location.start.column;
   }
 };
-/** @returns {id} */ function ue(e, /** @type {string} */ t, /** @type {d6 | undefined} */ a) {
+/** @returns {id} */ function le(e, /** @type {string} */ t, /** @type {d6 | undefined} */ a) {
   let s, f;
   if (
     (Array.isArray(e)
@@ -30080,51 +30094,51 @@ var id = class extends Error {
   )
     throw new Error("`sourceFile` is required.");
   let [h, b] = [s, f].map((v) => {
-    let { character: l, line: G } = a.getLineAndCharacterOfPosition(v);
-    return { column: l, line: G + 1, offset: v };
+    let { character: l, line: W } = a.getLineAndCharacterOfPosition(v);
+    return { column: l, line: W + 1, offset: v };
   });
-  return new id(t, a.fileName, { end: b, start: h });
+  return new sd(t, a.fileName, { end: b, start: h });
 }
-/** @returns {boolean} */ function M6(/** @type {Kf | vh | xh | Th} */ e, /** @type {d6} */ t) {
-  return e.kind === ye.EndOfFileToken ? !!e.jsDoc : e.getWidth(t) !== 0;
+/** @returns {boolean} */ function J6(/** @type {ed | Sh | wh | kh} */ e, /** @type {d6} */ t) {
+  return e.kind === he.EndOfFileToken ? !!e.jsDoc : e.getWidth(t) !== 0;
 }
-/** @returns {InstanceType<typeof vh>} */ function L6(/** @type {any[] | undefined} */ e, /** @type {(node: any, index: number) => any} */ t) {
+/** @returns {InstanceType<typeof Sh>} */ function R6(/** @type {any[] | undefined} */ e, /** @type {(node: any, index: number) => any} */ t) {
   if (e !== void 0)
     for (let a = 0; a < e.length; a++) {
       let s = t(e[a], a);
       if (s !== void 0) return s;
     }
 }
-/** @returns {boolean} */ function j6(/** @type {InstanceType<typeof xh>} */ e) {
-  return (v6 ? df(e) : e.originalKeywordKind) === ye.ThisKeyword;
+/** @returns {boolean} */ function U6(/** @type {InstanceType<typeof wh>} */ e) {
+  return (T6 ? hf(e) : e.originalKeywordKind) === he.ThisKeyword;
 }
-/** @returns {boolean} */ function od(/** @type {InstanceType<typeof Kf> | InstanceType<typeof Zf> | undefined} */ e) {
-  return !!e && e.kind === ye.Identifier && j6(e);
+/** @returns {boolean} */ function ld(/** @type {InstanceType<typeof ed> | InstanceType<typeof td> | undefined} */ e) {
+  return !!e && e.kind === he.Identifier && U6(e);
 }
-/** @returns {boolean} */ function Jh(/** @type {Kf | xh | vh | Th} */ e) {
-  if (!od(e)) return !1;
-  for (; O1(e.parent) && e.parent.left === e;) e = e.parent;
-  return e.parent.kind === ye.TypeQuery;
+/** @returns {boolean} */ function Bh(/** @type {ed | wh | Sh | kh} */ e) {
+  if (!ld(e)) return !1;
+  for (; j1(e.parent) && e.parent.left === e;) e = e.parent;
+  return e.parent.kind === he.TypeQuery;
 }
-/** @returns {boolean} */ function Bl(/** @type {Kf | vh | xh | Th} */ e) {
+/** @returns {boolean} */ function Bl(/** @type {ed | Sh | wh | kh} */ e) {
   switch (e.kind) {
-    case ye.Identifier:
+    case he.Identifier:
       return !0;
-    case ye.PropertyAccessExpression:
-    case ye.ElementAccessExpression:
+    case he.PropertyAccessExpression:
+    case he.ElementAccessExpression:
       return !(e.flags & rn.OptionalChain);
-    case ye.ParenthesizedExpression:
-    case ye.TypeAssertionExpression:
-    case ye.AsExpression:
-    case ye.SatisfiesExpression:
-    case ye.ExpressionWithTypeArguments:
-    case ye.NonNullExpression:
+    case he.ParenthesizedExpression:
+    case he.TypeAssertionExpression:
+    case he.AsExpression:
+    case he.SatisfiesExpression:
+    case he.ExpressionWithTypeArguments:
+    case he.NonNullExpression:
       return Bl(e.expression);
     default:
       return !1;
   }
 }
-function Rh(/** @type {Kf | vh | xh | Th} */ e) {
+function qh(/** @type {ed | Sh | wh | kh} */ e) {
   let t = rr(e),
     a = e;
   for (; (!t || t.length === 0) && Si(a.parent);) {
@@ -30133,39 +30147,39 @@ function Rh(/** @type {Kf | vh | xh | Th} */ e) {
   }
   return t;
 }
-function Uh(e) {
+function Fh(e) {
   return e.getSourceFile().text.slice(e.pos, e.end).trimStart() || "(Missing)";
 }
-/** @returns {boolean} */ function J6(/** @type {Kf | vh | xh | Th} */ e) {
-  return gr(e) && et(e.name) && ql(e.expression);
+/** @returns {boolean} */ function B6(/** @type {ed | Sh | wh | kh} */ e) {
+  return yr(e) && et(e.name) && ql(e.expression);
 }
-/** @returns {boolean} */ function ql(/** @type {Kf | vh | xh | Th} */ e) {
-  return e.kind === ye.Identifier || J6(e);
+/** @returns {boolean} */ function ql(/** @type {ed | Sh | wh | kh} */ e) {
+  return e.kind === he.Identifier || B6(e);
 }
 var ve = Ae;
-/** @returns {boolean} */ function R6(/** @type {Kf | vh | xh | Th} */ e) {
+/** @returns {boolean} */ function q6(/** @type {ed | Sh | wh | kh} */ e) {
   return e == null ? !0 : e.pos === e.end && e.pos >= 0 && e.kind !== ve.EndOfFileToken;
 }
-/** @returns {boolean} */ function Bh(/** @type {InstanceType<typeof Kf>} */ e) {
-  return !R6(e);
+/** @returns {boolean} */ function zh(/** @type {InstanceType<typeof ed>} */ e) {
+  return !q6(e);
 }
-function U6(e) {
+function F6(e) {
   return Fe(ve.AbstractKeyword, e);
 }
-function B6(e) {
+function z6(e) {
   if (e.parameters.length && !Jl(e)) {
     let t = e.parameters[0];
-    if (q6(t)) return t;
+    if (V6(t)) return t;
   }
   return null;
 }
-function q6(e) {
-  return od(e.name);
+function V6(e) {
+  return ld(e.name);
 }
-function F6(/** @type {Kf | vh | xh | Th} */ e) {
-  return ff(e.parent, xf);
+function W6(/** @type {ed | Sh | wh | kh} */ e) {
+  return mf(e.parent, Sf);
 }
-/** @returns {boolean} */ function z6(/** @type {Kf | vh | xh | Th} */ e) {
+/** @returns {boolean} */ function G6(/** @type {ed | Sh | wh | kh} */ e) {
   switch (e.kind) {
     case ve.ClassDeclaration:
       return !0;
@@ -30173,13 +30187,13 @@ function F6(/** @type {Kf | vh | xh | Th} */ e) {
       return !0;
     case ve.PropertyDeclaration: {
       let { parent: t } = e;
-      return !!($a(t) || (ia(t) && !U6(e)));
+      return !!(Xa(t) || (ia(t) && !F6(e)));
     }
     case ve.GetAccessor:
     case ve.SetAccessor:
     case ve.MethodDeclaration: {
       let { parent: t } = e;
-      return !!e.body && ($a(t) || ia(t));
+      return !!e.body && (Xa(t) || ia(t));
     }
     case ve.Parameter: {
       let { parent: t } = e,
@@ -30189,7 +30203,7 @@ function F6(/** @type {Kf | vh | xh | Th} */ e) {
         "body" in t &&
         !!t.body &&
         (t.kind === ve.Constructor || t.kind === ve.MethodDeclaration || t.kind === ve.SetAccessor) &&
-        B6(t) !== e &&
+        z6(t) !== e &&
         !!a &&
         a.kind === ve.ClassDeclaration
       );
@@ -30197,23 +30211,23 @@ function F6(/** @type {Kf | vh | xh | Th} */ e) {
   }
   return !1;
 }
-/** @returns {boolean} */ function V6(/** @type {d6 | Kf | xh | vh | Th} */ e) {
+/** @returns {boolean} */ function Y6(/** @type {d6 | ed | wh | Sh | kh} */ e) {
   return !!("illegalDecorators" in e && e.illegalDecorators?.length);
 }
-function Fh(/** @type {d6 | Kf | xh | vh | Th} */ e) {
-  if (V6(e)) throw ue(e.illegalDecorators[0], "Decorators are not valid here.");
+function Wh(/** @type {d6 | ed | wh | Sh | kh} */ e) {
+  if (Y6(e)) throw le(e.illegalDecorators[0], "Decorators are not valid here.");
   for (let a of wi(e, !0) ?? [])
-    if (!z6(e))
-      throw T_(e) && !Bh(e.body)
-        ? ue(a, "A decorator can only decorate a method implementation, not an overload.")
-        : ue(a, "Decorators are not valid here.");
+    if (!G6(e))
+      throw T_(e) && !zh(e.body)
+        ? le(a, "A decorator can only decorate a method implementation, not an overload.")
+        : le(a, "Decorators are not valid here.");
   let t = rr(e, !0) ?? [];
   for (let a of t) {
     if (a.kind !== ve.ReadonlyKeyword) {
       if (e.kind === ve.PropertySignature || e.kind === ve.MethodSignature)
-        throw ue(a, `'${rt(a.kind)}' modifier cannot appear on a type member`);
+        throw le(a, `'${rt(a.kind)}' modifier cannot appear on a type member`);
       if (e.kind === ve.IndexSignature && (a.kind !== ve.StaticKeyword || !ia(e.parent)))
-        throw ue(a, `'${rt(a.kind)}' modifier cannot appear on an index signature`);
+        throw le(a, `'${rt(a.kind)}' modifier cannot appear on an index signature`);
     }
     if (
       a.kind !== ve.InKeyword &&
@@ -30221,12 +30235,12 @@ function Fh(/** @type {d6 | Kf | xh | vh | Th} */ e) {
       a.kind !== ve.ConstKeyword &&
       e.kind === ve.TypeParameter
     )
-      throw ue(a, `'${rt(a.kind)}' modifier cannot appear on a type parameter`);
+      throw le(a, `'${rt(a.kind)}' modifier cannot appear on a type parameter`);
     if (
       (a.kind === ve.InKeyword || a.kind === ve.OutKeyword) &&
       (e.kind !== ve.TypeParameter || !(A_(e.parent) || ia(e.parent) || jl(e.parent)))
     )
-      throw ue(a, `'${rt(a.kind)}' modifier can only appear on a type parameter of a class, interface or type alias`);
+      throw le(a, `'${rt(a.kind)}' modifier can only appear on a type parameter of a class, interface or type alias`);
     if (
       a.kind === ve.ReadonlyKeyword &&
       e.kind !== ve.PropertyDeclaration &&
@@ -30234,13 +30248,13 @@ function Fh(/** @type {d6 | Kf | xh | vh | Th} */ e) {
       e.kind !== ve.IndexSignature &&
       e.kind !== ve.Parameter
     )
-      throw ue(a, "'readonly' modifier can only appear on a property declaration or index signature.");
-    if (a.kind === ve.DeclareKeyword && ia(e.parent) && !Xa(e))
-      throw ue(a, `'${rt(a.kind)}' modifier cannot appear on class elements of this kind.`);
-    if (a.kind === ve.DeclareKeyword && es(e)) {
+      throw le(a, "'readonly' modifier can only appear on a property declaration or index signature.");
+    if (a.kind === ve.DeclareKeyword && ia(e.parent) && !Ha(e))
+      throw le(a, `'${rt(a.kind)}' modifier cannot appear on class elements of this kind.`);
+    if (a.kind === ve.DeclareKeyword && Za(e)) {
       let s = oa(e.declarationList);
       if (s === "using" || s === "await using")
-        throw ue(a, `'declare' modifier cannot appear on a '${s}' declaration.`);
+        throw le(a, `'declare' modifier cannot appear on a '${s}' declaration.`);
     }
     if (
       a.kind === ve.AbstractKeyword &&
@@ -30251,7 +30265,9 @@ function Fh(/** @type {d6 | Kf | xh | vh | Th} */ e) {
       e.kind !== ve.GetAccessor &&
       e.kind !== ve.SetAccessor
     )
-      throw ue(a, `'${rt(a.kind)}' modifier can only appear on a class, method, or property declaration.`);
+      throw le(a, `'${rt(a.kind)}' modifier can only appear on a class, method, or property declaration.`);
+    if (a.kind === ve.ExportKeyword && t.slice(0, t.indexOf(a)).some((s) => s.kind === ve.AbstractKeyword))
+      throw le(a, "'export' modifier must precede 'abstract' modifier.");
     if (
       (a.kind === ve.StaticKeyword ||
         a.kind === ve.PublicKeyword ||
@@ -30259,9 +30275,9 @@ function Fh(/** @type {d6 | Kf | xh | vh | Th} */ e) {
         a.kind === ve.PrivateKeyword) &&
       (e.parent.kind === ve.ModuleBlock || e.parent.kind === ve.SourceFile)
     )
-      throw ue(a, `'${rt(a.kind)}' modifier cannot appear on a module or namespace element.`);
+      throw le(a, `'${rt(a.kind)}' modifier cannot appear on a module or namespace element.`);
     if (a.kind === ve.AccessorKeyword && e.kind !== ve.PropertyDeclaration)
-      throw ue(a, "'accessor' modifier can only appear on a property declaration.");
+      throw le(a, "'accessor' modifier can only appear on a property declaration.");
     if (
       a.kind === ve.AsyncKeyword &&
       e.kind !== ve.MethodDeclaration &&
@@ -30269,7 +30285,7 @@ function Fh(/** @type {d6 | Kf | xh | vh | Th} */ e) {
       e.kind !== ve.FunctionExpression &&
       e.kind !== ve.ArrowFunction
     )
-      throw ue(a, "'async' modifier cannot be used here.");
+      throw le(a, "'async' modifier cannot be used here.");
     if (
       e.kind === ve.Parameter &&
       (a.kind === ve.StaticKeyword ||
@@ -30277,11 +30293,11 @@ function Fh(/** @type {d6 | Kf | xh | vh | Th} */ e) {
         a.kind === ve.DeclareKeyword ||
         a.kind === ve.AsyncKeyword)
     )
-      throw ue(a, `'${rt(a.kind)}' modifier cannot appear on a parameter.`);
+      throw le(a, `'${rt(a.kind)}' modifier cannot appear on a parameter.`);
     if (a.kind === ve.PublicKeyword || a.kind === ve.ProtectedKeyword || a.kind === ve.PrivateKeyword) {
       for (let s of t)
         if (s !== a && (s.kind === ve.PublicKeyword || s.kind === ve.ProtectedKeyword || s.kind === ve.PrivateKeyword))
-          throw ue(s, "Accessibility modifier already seen.");
+          throw le(s, "Accessibility modifier already seen.");
     }
     if (
       e.kind === ve.Parameter &&
@@ -30291,27 +30307,27 @@ function Fh(/** @type {d6 | Kf | xh | vh | Th} */ e) {
         a.kind === ve.ReadonlyKeyword ||
         a.kind === ve.OverrideKeyword)
     ) {
-      let s = F6(e);
-      if (!(s?.kind === ve.Constructor && Bh(s.body)))
-        throw ue(a, "A parameter property is only allowed in a constructor implementation.");
+      let s = W6(e);
+      if (!(s?.kind === ve.Constructor && zh(s.body)))
+        throw le(a, "A parameter property is only allowed in a constructor implementation.");
       let f = e;
-      if (f.dotDotDotToken) throw ue(a, "A parameter property cannot be a rest parameter.");
+      if (f.dotDotDotToken) throw le(a, "A parameter property cannot be a rest parameter.");
       if (f.name.kind === ve.ArrayBindingPattern || f.name.kind === ve.ObjectBindingPattern)
-        throw ue(a, "A parameter property may not be declared using a binding pattern.");
+        throw le(a, "A parameter property may not be declared using a binding pattern.");
     }
-    qh(e, a);
+    Vh(e, a);
   }
   if (e.parent?.kind === ve.ObjectLiteralExpression)
-    for (let a of e.modifiers ?? []) Ka(a) || t.includes(a) || qh(e, a);
+    for (let a of e.modifiers ?? []) Qa(a) || t.includes(a) || Vh(e, a);
 }
-function qh(/** @type {Kf | vh | xh | Th} */ e, /** @type {Kf | vh | xh | Th} */ t) {
+function Vh(/** @type {ed | Sh | wh | kh} */ e, /** @type {ed | Sh | wh | kh} */ t) {
   if ((t.kind !== ve.AsyncKeyword || e.kind !== ve.MethodDeclaration) && e.parent.kind === ve.ObjectLiteralExpression)
-    throw ue(t, `'${rt(t.kind)}' modifier cannot be used here.`);
+    throw le(t, `'${rt(t.kind)}' modifier cannot be used here.`);
 }
-var G6 = ts["5.9"];
-/** @returns {string | null} */ function P_(/** @type {Kf | vh | xh | Th | undefined} */ e) {
+var X6 = ts["5.9"];
+/** @returns {string | null} */ function P_(/** @type {ed | Sh | wh | kh | undefined} */ e) {
   return e
-    ? G6
+    ? X6
       ? e.phaseModifier === Ae.TypeKeyword
         ? "type"
         : e.phaseModifier === Ae.DeferKeyword
@@ -30322,283 +30338,287 @@ var G6 = ts["5.9"];
         : null
     : null;
 }
-var be = Ae;
-function Wh(/** @type {d6 | Kf | xh | vh | Th} */ e, /** @type {d6 | Kf | undefined} */ t, /** @type {boolean} */ a) {
-  Fh(e);
+var ye = Ae;
+function Hh(/** @type {d6 | ed | wh | Sh | kh} */ e, /** @type {d6 | ed | undefined} */ t, /** @type {boolean} */ a) {
+  Wh(e);
   let s = e;
   switch (s.kind) {
-    case be.SwitchStatement:
-      if (s.caseBlock.clauses.filter(/** @returns {boolean} */ (/** @type {Kf} */ f) => f.kind === be.DefaultClause).length > 1)
-        throw ue(s, "A 'default' clause cannot appear more than once in a 'switch' statement.");
+    case ye.SwitchStatement:
+      if (s.caseBlock.clauses.filter(/** @returns {boolean} */ (/** @type {ed} */ f) => f.kind === ye.DefaultClause).length > 1)
+        throw le(s, "A 'default' clause cannot appear more than once in a 'switch' statement.");
       break;
-    case be.ThrowStatement:
-      if (s.expression.end === s.expression.pos) throw ue(s, "A throw statement must throw an expression.");
+    case ye.ThrowStatement:
+      if (s.expression.end === s.expression.pos) throw le(s, "A throw statement must throw an expression.");
       break;
-    case be.CatchClause:
+    case ye.CatchClause:
       if (s.variableDeclaration?.initializer)
-        throw ue(s.variableDeclaration.initializer, "Catch clause variable cannot have an initializer.");
+        throw le(s.variableDeclaration.initializer, "Catch clause variable cannot have an initializer.");
       break;
-    case be.FunctionDeclaration: {
-      let f = Fe(be.DeclareKeyword, s),
-        h = Fe(be.AsyncKeyword, s),
+    case ye.FunctionDeclaration: {
+      let f = Fe(ye.DeclareKeyword, s),
+        h = Fe(ye.AsyncKeyword, s),
         b = !!s.asteriskToken;
       if (f) {
-        if (s.body) throw ue(s, "An implementation cannot be declared in ambient contexts.");
-        if (h) throw ue(s, "'async' modifier cannot be used in an ambient context.");
-        if (b) throw ue(s, "Generators are not allowed in an ambient context.");
-      } else if (!s.body && b) throw ue(s, "A function signature cannot be declared as a generator.");
+        if (s.body) throw le(s, "An implementation cannot be declared in ambient contexts.");
+        if (h) throw le(s, "'async' modifier cannot be used in an ambient context.");
+        if (b) throw le(s, "Generators are not allowed in an ambient context.");
+      } else if (!s.body && b) throw le(s, "A function signature cannot be declared as a generator.");
       break;
     }
-    case be.VariableDeclaration: {
+    case ye.VariableDeclaration: {
       let f = !!s.exclamationToken;
       if (f) {
         if (s.initializer)
-          throw ue(s, "Declarations with initializers cannot also have definite assignment assertions.");
-        if (s.name.kind !== be.Identifier || !s.type)
-          throw ue(s, "Declarations with definite assignment assertions must also have type annotations.");
+          throw le(s, "Declarations with initializers cannot also have definite assignment assertions.");
+        if (s.name.kind !== ye.Identifier || !s.type)
+          throw le(s, "Declarations with definite assignment assertions must also have type annotations.");
       }
-      if (s.parent.kind === be.VariableDeclarationList) {
+      if (s.parent.kind === ye.VariableDeclarationList) {
         let h = s.parent,
           b = oa(h);
         if (b === "using" || b === "await using") {
-          if (h.parent.kind === be.ForInStatement)
-            throw ue(h, `The left-hand side of a 'for...in' statement cannot be a '${b}' declaration.`);
-          if (h.parent.kind === be.ForStatement || h.parent.kind === be.VariableStatement) {
-            if (!s.initializer) throw ue(s, `'${b}' declarations must be initialized.`);
-            if (s.name.kind !== be.Identifier) throw ue(s.name, `'${b}' declarations may not have binding patterns.`);
+          if (h.parent.kind === ye.ForInStatement)
+            throw le(h, `The left-hand side of a 'for...in' statement cannot be a '${b}' declaration.`);
+          if (h.parent.kind === ye.ForStatement || h.parent.kind === ye.VariableStatement) {
+            if (!s.initializer) throw le(s, `'${b}' declarations must be initialized.`);
+            if (s.name.kind !== ye.Identifier) throw le(s.name, `'${b}' declarations may not have binding patterns.`);
           }
         }
-        if (h.parent.kind === be.VariableStatement) {
+        if (h.parent.kind === ye.VariableStatement) {
           let v = h.parent,
-            l = Fe(be.DeclareKeyword, v);
+            l = Fe(ye.DeclareKeyword, v);
           if ((l || ["await using", "const", "using"].includes(b)) && f)
-            throw ue(s, "A definite assignment assertion '!' is not permitted in this context.");
+            throw le(s, "A definite assignment assertion '!' is not permitted in this context.");
           if (l && s.initializer && (["let", "var"].includes(b) || s.type))
-            throw ue(s, "Initializers are not permitted in ambient contexts.");
+            throw le(s, "Initializers are not permitted in ambient contexts.");
         }
       }
       break;
     }
-    case be.VariableStatement: {
+    case ye.VariableStatement: {
       if (!s.declarationList.declarations.length)
-        throw ue(s, "A variable declaration list must have at least one variable declarator.");
+        throw le(s, "A variable declaration list must have at least one variable declarator.");
       break;
     }
-    case be.PropertyAssignment: {
+    case ye.PropertyAssignment: {
       let { exclamationToken: f, questionToken: h } = s;
-      if (h) throw ue(h, "A property assignment cannot have a question token.");
-      if (f) throw ue(f, "A property assignment cannot have an exclamation token.");
+      if (h) throw le(h, "A property assignment cannot have a question token.");
+      if (f) throw le(f, "A property assignment cannot have an exclamation token.");
       break;
     }
-    case be.ShorthandPropertyAssignment: {
+    case ye.ShorthandPropertyAssignment: {
       let { exclamationToken: f, modifiers: h, questionToken: b } = s;
-      if (h) throw ue(h[0], "A shorthand property assignment cannot have modifiers.");
-      if (b) throw ue(b, "A shorthand property assignment cannot have a question token.");
-      if (f) throw ue(f, "A shorthand property assignment cannot have an exclamation token.");
+      if (h) throw le(h[0], "A shorthand property assignment cannot have modifiers.");
+      if (b) throw le(b, "A shorthand property assignment cannot have a question token.");
+      if (f) throw le(f, "A shorthand property assignment cannot have an exclamation token.");
       break;
     }
-    case be.PropertyDeclaration: {
-      let f = Fe(be.AbstractKeyword, s);
-      if (f && s.initializer) throw ue(s.initializer, "Abstract property cannot have an initializer.");
+    case ye.PropertyDeclaration: {
+      let f = Fe(ye.AbstractKeyword, s);
+      if (f && s.initializer) throw le(s.initializer, "Abstract property cannot have an initializer.");
       let h = !!s.exclamationToken;
-      if (h && f) throw ue(s.exclamationToken, "A definite assignment assertion '!' is not permitted in this context.");
+      if (h && f) throw le(s.exclamationToken, "A definite assignment assertion '!' is not permitted in this context.");
       if (h && !s.type)
-        throw ue(s, "Declarations with definite assignment assertions must also have type annotations.");
+        throw le(s, "Declarations with definite assignment assertions must also have type annotations.");
       if (h && s.initializer)
-        throw ue(s, "Declarations with initializers cannot also have definite assignment assertions.");
-      if (s.name.kind === be.StringLiteral && s.name.text === "constructor")
-        throw ue(s.name, "Classes may not have a field named 'constructor'.");
+        throw le(s, "Declarations with initializers cannot also have definite assignment assertions.");
+      if (s.name.kind === ye.StringLiteral && s.name.text === "constructor")
+        throw le(s.name, "Classes may not have a field named 'constructor'.");
       break;
     }
-    case be.TaggedTemplateExpression:
+    case ye.TaggedTemplateExpression:
       if (s.tag.flags & rn.OptionalChain)
-        throw ue(s, "Tagged template expressions are not permitted in an optional chain.");
+        throw le(s, "Tagged template expressions are not permitted in an optional chain.");
       break;
-    case be.BinaryExpression:
-      if (s.operatorToken.kind !== be.InKeyword && s.left.kind === be.PrivateIdentifier)
-        throw ue(s.left, "Private identifiers cannot appear on the right-hand-side of an 'in' expression.");
-      if (s.right.kind === be.PrivateIdentifier)
-        throw ue(s.right, "Private identifiers are only allowed on the left-hand-side of an 'in' expression.");
+    case ye.BinaryExpression:
+      if (s.operatorToken.kind !== ye.InKeyword && s.left.kind === ye.PrivateIdentifier)
+        throw le(s.left, "Private identifiers cannot appear on the right-hand-side of an 'in' expression.");
+      if (s.right.kind === ye.PrivateIdentifier)
+        throw le(s.right, "Private identifiers are only allowed on the left-hand-side of an 'in' expression.");
       break;
-    case be.MappedType:
+    case ye.MappedType:
       if (s.members && s.members.length > 0)
-        throw ue(s.members[0], "A mapped type may not declare properties or methods.");
+        throw le(s.members[0], "A mapped type may not declare properties or methods.");
       break;
-    case be.PropertySignature: {
+    case ye.PropertySignature: {
       let { initializer: f } = s;
-      if (f) throw ue(f, "A property signature cannot have an initializer.");
+      if (f) throw le(f, "A property signature cannot have an initializer.");
       break;
     }
-    case be.FunctionType: {
+    case ye.FunctionType: {
       let { modifiers: f } = s;
-      if (f) throw ue(f[0], "A function type cannot have modifiers.");
+      if (f) throw le(f[0], "A function type cannot have modifiers.");
       break;
     }
-    case be.EnumMember: {
+    case ye.EnumMember: {
       if (s.name.kind === Ae.ComputedPropertyName)
-        throw ue(s.name, "Computed property names are not allowed in enums.");
-      if (s.name.kind === be.NumericLiteral || s.name.kind === be.BigIntLiteral)
-        throw ue(s.name, "An enum member cannot have a numeric name.");
+        throw le(s.name, "Computed property names are not allowed in enums.");
+      if (s.name.kind === ye.NumericLiteral || s.name.kind === ye.BigIntLiteral)
+        throw le(s.name, "An enum member cannot have a numeric name.");
       break;
     }
-    case be.ExternalModuleReference:
-      if (s.expression.kind !== be.StringLiteral) throw ue(s.expression, "String literal expected.");
+    case ye.AssertEntry:
+    case ye.ImportAttribute:
+      if (s.value.kind !== ye.StringLiteral) throw le(s.value, "String literal expected.");
       break;
-    case be.PrefixUnaryExpression:
-    case be.PostfixUnaryExpression: {
-      let f = qn(s.operator);
+    case ye.ExternalModuleReference:
+      if (s.expression.kind !== ye.StringLiteral) throw le(s.expression, "String literal expected.");
+      break;
+    case ye.PrefixUnaryExpression:
+    case ye.PostfixUnaryExpression: {
+      let f = Fn(s.operator);
       if ((f === "++" || f === "--") && !Bl(s.operand))
-        throw ue(s.operand, "Invalid left-hand side expression in unary operation");
+        throw le(s.operand, "Invalid left-hand side expression in unary operation");
       break;
     }
-    case be.ImportDeclaration: {
+    case ye.ImportDeclaration: {
       let { importClause: f } = s,
         h = P_(f);
       if (h === "type" && f?.name && f.namedBindings)
-        throw ue(f, "A type-only import can specify a default import or named bindings, but not both.");
-      let b = f?.namedBindings?.kind === be.NamedImports,
+        throw le(f, "A type-only import can specify a default import or named bindings, but not both.");
+      let b = f?.namedBindings?.kind === ye.NamedImports,
         v = !!f?.name;
-      if (h === "defer" && b) throw ue(f, "Named imports are not allowed in a deferred import.");
-      if (h === "defer" && v) throw ue(f, "Default imports are not allowed in a deferred import.");
-      Vh(s, !1);
+      if (h === "defer" && b) throw le(f, "Named imports are not allowed in a deferred import.");
+      if (h === "defer" && v) throw le(f, "Default imports are not allowed in a deferred import.");
+      Yh(s, !1);
       break;
     }
-    case be.ExportDeclaration:
-      Vh(s, s.exportClause?.kind === be.NamedExports);
+    case ye.ExportDeclaration:
+      Yh(s, s.exportClause?.kind === ye.NamedExports);
       break;
-    case be.ExportSpecifier: {
+    case ye.ExportSpecifier: {
       let f = s.propertyName ?? s.name;
       if (
-        f.kind === be.StringLiteral &&
-        t.kind === be.ExportDeclaration &&
-        t.moduleSpecifier?.kind !== be.StringLiteral
+        f.kind === ye.StringLiteral &&
+        t.kind === ye.ExportDeclaration &&
+        t.moduleSpecifier?.kind !== ye.StringLiteral
       )
-        throw ue(f, "A string literal cannot be used as a local exported binding without `from`.");
+        throw le(f, "A string literal cannot be used as a local exported binding without `from`.");
       break;
     }
-    case be.CallExpression:
-      if (s.expression.kind === be.ImportKeyword && s.arguments.length !== 1 && s.arguments.length !== 2)
-        throw ue(s.arguments.length > 1 ? s.arguments[2] : s, "Dynamic import requires exactly one or two arguments.");
+    case ye.CallExpression:
+      if (s.expression.kind === ye.ImportKeyword && s.arguments.length !== 1 && s.arguments.length !== 2)
+        throw le(s.arguments.length > 1 ? s.arguments[2] : s, "Dynamic import requires exactly one or two arguments.");
       break;
-    case be.ClassDeclaration:
+    case ye.ClassDeclaration:
       if (!s.name && (!Fe(Ae.ExportKeyword, s) || !Fe(Ae.DefaultKeyword, s)))
-        throw ue(s, "A class declaration without the 'default' modifier must have a name.");
-    case be.ClassExpression: {
+        throw le(s, "A class declaration without the 'default' modifier must have a name.");
+    case ye.ClassExpression: {
       let f = s.heritageClauses ?? [],
         h = !1,
         b = !1;
       for (let v of f) {
-        let { token: l, types: G } = v;
-        if (G.length === 0) throw ue(v, `'${rt(l)}' list cannot be empty.`);
-        if (l === be.ExtendsKeyword) {
-          if (h) throw ue(v, "'extends' clause already seen.");
-          if (b) throw ue(v, "'extends' clause must precede 'implements' clause.");
-          if (G.length > 1) throw ue(G[1], "Classes can only extend a single class.");
+        let { token: l, types: W } = v;
+        if (W.length === 0) throw le(v, `'${rt(l)}' list cannot be empty.`);
+        if (l === ye.ExtendsKeyword) {
+          if (h) throw le(v, "'extends' clause already seen.");
+          if (b) throw le(v, "'extends' clause must precede 'implements' clause.");
+          if (W.length > 1) throw le(W[1], "Classes can only extend a single class.");
           h = !0;
         } else {
-          if (b) throw ue(v, "'implements' clause already seen.");
+          if (b) throw le(v, "'implements' clause already seen.");
           for (let y of v.types)
-            if (!ql(y.expression) || yf(y.expression))
-              throw ue(y, "A class can only implement an identifier/qualified-name with optional type arguments.");
+            if (!ql(y.expression) || bf(y.expression))
+              throw le(y, "A class can only implement an identifier/qualified-name with optional type arguments.");
           b = !0;
         }
       }
       break;
     }
-    case be.InterfaceDeclaration: {
+    case ye.InterfaceDeclaration: {
       let f = s.heritageClauses ?? [],
         h = !1;
       for (let b of f) {
         let { token: v, types: l } = b;
-        if (v === be.ImplementsKeyword) throw ue(b, "Interface declaration cannot have 'implements' clause.");
-        if (v !== be.ExtendsKeyword) throw ue(b, "Unexpected token.");
-        if (l.length === 0) throw ue(b, `'${rt(v)}' list cannot be empty.`);
-        if (h) throw ue(b, "'extends' clause already seen.");
+        if (v === ye.ImplementsKeyword) throw le(b, "Interface declaration cannot have 'implements' clause.");
+        if (v !== ye.ExtendsKeyword) throw le(b, "Unexpected token.");
+        if (l.length === 0) throw le(b, `'${rt(v)}' list cannot be empty.`);
+        if (h) throw le(b, "'extends' clause already seen.");
         h = !0;
-        for (let G of b.types)
-          if (!ql(G.expression) || yf(G.expression))
-            throw ue(
-              G,
+        for (let W of b.types)
+          if (!ql(W.expression) || bf(W.expression))
+            throw le(
+              W,
               "Interface declaration can only extend an identifier/qualified name with optional type arguments.",
             );
       }
       break;
     }
-    case be.GetAccessor:
-    case be.SetAccessor:
-      if (s.parent.kind === be.InterfaceDeclaration || s.parent.kind === be.TypeLiteral) return;
-    case be.MethodDeclaration: {
-      if (Fe(be.AbstractKeyword, s) && s.body)
-        throw ue(
+    case ye.GetAccessor:
+    case ye.SetAccessor:
+      if (s.parent.kind === ye.InterfaceDeclaration || s.parent.kind === ye.TypeLiteral) return;
+    case ye.MethodDeclaration: {
+      if (Fe(ye.AbstractKeyword, s) && s.body)
+        throw le(
           s.name,
-          s.kind === be.GetAccessor || s.kind === be.SetAccessor
+          s.kind === ye.GetAccessor || s.kind === ye.SetAccessor
             ? "An abstract accessor cannot have an implementation."
-            : `Method '${Uh(s.name)}' cannot have an implementation because it is marked abstract.`,
+            : `Method '${Fh(s.name)}' cannot have an implementation because it is marked abstract.`,
         );
       break;
     }
-    case be.MetaProperty: {
-      let f = qn(s.keywordToken),
+    case ye.MetaProperty: {
+      let f = Fn(s.keywordToken),
         h = s.name.text;
       if (f === "import") {
-        if (h === "defer" && s.parent.kind !== be.CallExpression)
-          throw ue(s, "'import.defer' is only valid when called. Use 'import.defer()' instead.");
-        if (h !== "meta") throw ue(s, `'${h}' is not a valid meta-property for keyword 'import'.`);
+        if (h === "defer" && s.parent.kind !== ye.CallExpression)
+          throw le(s, "'import.defer' is only valid when called. Use 'import.defer()' instead.");
+        if (h !== "meta") throw le(s, `'${h}' is not a valid meta-property for keyword 'import'.`);
       }
       break;
     }
-    case be.ObjectLiteralExpression: {
+    case ye.ObjectLiteralExpression: {
       if (!a) {
         for (let f of s.properties)
-          if ((f.kind === be.GetAccessor || f.kind === be.SetAccessor || f.kind === be.MethodDeclaration) && !f.body)
-            throw ue(f.end - 1, "'{' expected.", s.getSourceFile());
+          if ((f.kind === ye.GetAccessor || f.kind === ye.SetAccessor || f.kind === ye.MethodDeclaration) && !f.body)
+            throw le(f.end - 1, "'{' expected.", s.getSourceFile());
       }
       break;
     }
-    case be.ImportEqualsDeclaration:
-      if (s.isTypeOnly && s.moduleReference.kind !== be.ExternalModuleReference)
-        throw ue(s, "An import alias cannot use 'import type'");
+    case ye.ImportEqualsDeclaration:
+      if (s.isTypeOnly && s.moduleReference.kind !== ye.ExternalModuleReference)
+        throw le(s, "An import alias cannot use 'import type'");
       break;
-    case be.ModuleDeclaration: {
+    case ye.ModuleDeclaration: {
       if (s.flags & rn.GlobalAugmentation) {
         let { body: f } = s;
-        if (f == null || f.kind === be.ModuleDeclaration) throw ue(s.body ?? s, "Expected a valid module body");
+        if (f == null || f.kind === ye.ModuleDeclaration) throw le(s.body ?? s, "Expected a valid module body");
         let { name: h } = s;
-        if (h.kind !== Ae.Identifier) throw ue(h, "global module augmentation must have an Identifier id");
+        if (h.kind !== Ae.Identifier) throw le(h, "global module augmentation must have an Identifier id");
         return;
       }
       if (Lr(s.name)) return;
-      if (s.body == null) throw ue(s, "Expected a module body");
-      if (s.name.kind !== Ae.Identifier) throw ue(s.name, "`namespace`s must have an Identifier id");
+      if (s.body == null) throw le(s, "Expected a module body");
+      if (s.name.kind !== Ae.Identifier) throw le(s.name, "`namespace`s must have an Identifier id");
       break;
     }
-    case be.ForInStatement:
-    case be.ForOfStatement: {
-      Y6(s);
+    case ye.ForInStatement:
+    case ye.ForOfStatement: {
+      $6(s);
       break;
     }
   }
 }
-function Y6(/** @type {Kf | vh | xh | Th} */ e) {
+function $6(/** @type {ed | Sh | wh | kh} */ e) {
   let { initializer: t, kind: a } = e,
-    s = a === be.ForInStatement ? "for...in" : "for...of";
-  if (eh(t)) {
+    s = a === ye.ForInStatement ? "for...in" : "for...of";
+  if (rh(t)) {
     if (t.declarations.length !== 1)
-      throw ue(t, `Only a single variable declaration is allowed in a '${s}' statement.`);
+      throw le(t, `Only a single variable declaration is allowed in a '${s}' statement.`);
     let f = t.declarations[0];
-    if (f.initializer) throw ue(f, `The variable declaration of a '${s}' statement cannot have an initializer.`);
-    if (f.type) throw ue(f, `The variable declaration of a '${s}' statement cannot have a type annotation.`);
-  } else if (!Bl(t) && t.kind !== be.ObjectLiteralExpression && t.kind !== be.ArrayLiteralExpression)
-    throw ue(t, `The left-hand side of a '${s}' statement must be a variable or a property access.`);
+    if (f.initializer) throw le(f, `The variable declaration of a '${s}' statement cannot have an initializer.`);
+    if (f.type) throw le(f, `The variable declaration of a '${s}' statement cannot have a type annotation.`);
+  } else if (!Bl(t) && t.kind !== ye.ObjectLiteralExpression && t.kind !== ye.ArrayLiteralExpression)
+    throw le(t, `The left-hand side of a '${s}' statement must be a variable or a property access.`);
 }
-function Vh(/** @type {Kf | vh | xh | Th} */ e, /** @type {boolean} */ t) {
-  if (!t && e.moduleSpecifier == null) throw ue(e, "Module specifier must be a string literal.");
-  if (e.moduleSpecifier && e.moduleSpecifier.kind !== be.StringLiteral)
-    throw ue(e.moduleSpecifier, "Module specifier must be a string literal.");
+function Yh(/** @type {ed | Sh | wh | kh} */ e, /** @type {boolean} */ t) {
+  if (!t && e.moduleSpecifier == null) throw le(e, "Module specifier must be a string literal.");
+  if (e.moduleSpecifier && e.moduleSpecifier.kind !== ye.StringLiteral)
+    throw le(e.moduleSpecifier, "Module specifier must be a string literal.");
 }
 var w = Ae;
-/** @returns {id} */ function cd(e) {
-  return ue(e.start, ("message" in e && e.message) || e.messageText, e.file);
+/** @returns {id} */ function ud(e) {
+  return le(e.start, ("message" in e && e.message) || e.messageText, e.file);
 }
 var Fl = class {
   /** @type {boolean} */ allowPattern = !1;
@@ -30609,8 +30629,8 @@ var Fl = class {
   constructor(/** @type {d6} */ t, a) {
     ((this.ast = t), (this.options = { ...a }));
   }
-  #i(/** @type {d6 | Kf | xh | vh | Th} */ t, /** @type {d6 | Kf | xh | vh | Th | undefined} */ a) {
-    this.options.allowInvalidAST || Wh(t, a, this.allowPattern);
+  #i(/** @type {d6 | ed | wh | Sh | kh} */ t, /** @type {d6 | ed | wh | Sh | kh | undefined} */ a) {
+    this.options.allowInvalidAST || Hh(t, a, this.allowPattern);
   }
   #r(t) {
     if (/\\[xu]/.test(t)) {
@@ -30621,7 +30641,7 @@ var Fl = class {
     return !0;
   }
   #e(t, a) {
-    if (!this.options.allowInvalidAST) throw ue(t, a, this.ast);
+    if (!this.options.allowInvalidAST) throw le(t, a, this.ast);
   }
   #t(t, a, s, f = !1) {
     let h = f;
@@ -30670,17 +30690,17 @@ var Fl = class {
       t
     );
   }
-  convertBindingNameWithTypeAnnotation(/** @type {Kf | vh | xh | Th} */ t, /** @type {Kf | vh | xh | Th | undefined} */ a, /** @type {Kf | vh | xh | Th | undefined} */ s) {
+  convertBindingNameWithTypeAnnotation(/** @type {ed | Sh | wh | kh} */ t, /** @type {ed | Sh | wh | kh | undefined} */ a, /** @type {ed | Sh | wh | kh | undefined} */ s) {
     let f = this.convertPattern(t);
     return (
       a && ((f.typeAnnotation = this.convertTypeAnnotation(a, s)), this.fixParentLocation(f, f.typeAnnotation.range)),
       f
     );
   }
-  convertBodyExpressions(t, /** @type {d6 | Kf} */ a) {
-    let s = Oh(a);
+  convertBodyExpressions(t, /** @type {d6 | ed} */ a) {
+    let s = jh(a);
     return t
-      .map((/** @type {Kf | vh | xh | Th} */ f) => {
+      .map((/** @type {ed | Sh | wh | kh} */ f) => {
         let h = this.convertChild(f);
         if (s) {
           if (h?.expression && Ll(f) && Lr(f.expression)) {
@@ -30693,69 +30713,69 @@ var Fl = class {
       })
       .filter((f) => f);
   }
-  convertChainExpression(t, /** @type {Kf | vh | xh | Th} */ a) {
+  convertChainExpression(t, /** @type {ed | Sh | wh | kh} */ a) {
     let { child: s, isOptional: f } =
-        t.type === A.MemberExpression
+        t.type === C.MemberExpression
           ? { child: t.object, isOptional: t.optional }
-          : t.type === A.CallExpression
+          : t.type === C.CallExpression
             ? { child: t.callee, isOptional: t.optional }
             : { child: t.expression, isOptional: !1 },
-      h = Lh(a, s);
+      h = Rh(a, s);
     if (!h && !f) return t;
-    if (h && _d(s)) {
+    if (h && cd(s)) {
       let b = s.expression;
-      t.type === A.MemberExpression
+      t.type === C.MemberExpression
         ? (t.object = b)
-        : t.type === A.CallExpression
+        : t.type === C.CallExpression
           ? (t.callee = b)
           : (t.expression = b);
     }
-    return this.createNode(a, { type: A.ChainExpression, expression: t });
+    return this.createNode(a, { type: C.ChainExpression, expression: t });
   }
-  convertChild(/** @type {Kf | xh | vh | Th | undefined} */ t, /** @type {Kf | vh | xh | Th | undefined} */ a) {
+  convertChild(/** @type {ed | wh | Sh | kh | undefined} */ t, /** @type {ed | Sh | wh | kh | undefined} */ a) {
     return this.converter(t, a, !1);
   }
-  convertChildren(/** @type {any[]} */ t, /** @type {Kf | vh | xh | Th | undefined} */ a) {
-    return t.map((/** @type {Kf | vh | xh | Th} */ s) => this.converter(s, a, !1));
+  convertChildren(/** @type {any[]} */ t, /** @type {ed | Sh | wh | kh | undefined} */ a) {
+    return t.map((/** @type {ed | Sh | wh | kh} */ s) => this.converter(s, a, !1));
   }
-  convertPattern(/** @type {Kf | vh | xh | Th} */ t, a) {
+  convertPattern(/** @type {ed | Sh | wh | kh} */ t, a) {
     return this.converter(t, a, !0);
   }
-  convertTypeAnnotation(/** @type {Kf | vh | xh | Th} */ t, /** @type {Kf | vh | xh | Th | undefined} */ a) {
+  convertTypeAnnotation(/** @type {ed | Sh | wh | kh} */ t, /** @type {ed | Sh | wh | kh | undefined} */ a) {
     let s = a?.kind === w.FunctionType || a?.kind === w.ConstructorType ? 2 : 1,
       h = [t.getFullStart() - s, t.end],
-      b = Zr(h, this.ast);
-    return { type: A.TSTypeAnnotation, loc: b, range: h, typeAnnotation: this.convertChild(t) };
+      b = jr(h, this.ast);
+    return { type: C.TSTypeAnnotation, loc: b, range: h, typeAnnotation: this.convertChild(t) };
   }
-  convertTypeArguments(/** @type {Kf | vh | xh | Th} */ t) {
+  convertTypeArguments(/** @type {ed | Sh | wh | kh} */ t) {
     let { typeArguments: a } = t;
     if (!a) return;
     let s = ir(a, this.ast, this.ast),
       f = [a.pos - 1, s.end];
     return (
       a.length === 0 && this.#e(f, "Type argument list cannot be empty."),
-      this.createNode(t, { type: A.TSTypeParameterInstantiation, range: f, params: this.convertChildren(a) })
+      this.createNode(t, { type: C.TSTypeParameterInstantiation, range: f, params: this.convertChildren(a) })
     );
   }
-  convertTypeParameters(/** @type {Kf | vh | xh | Th} */ t) {
+  convertTypeParameters(/** @type {ed | Sh | wh | kh} */ t) {
     let { typeParameters: a } = t;
     if (!a) return;
     let s = ir(a, this.ast, this.ast),
       f = [a.pos - 1, s.end];
     return (
       a.length === 0 && this.#e(f, "Type parameter list cannot be empty."),
-      { type: A.TSTypeParameterDeclaration, loc: Zr(f, this.ast), range: f, params: this.convertChildren(a) }
+      { type: C.TSTypeParameterDeclaration, loc: jr(f, this.ast), range: f, params: this.convertChildren(a) }
     );
   }
   convertParameters(t) {
     return t?.length
-      ? t.map((/** @type {Kf} */ a) => {
+      ? t.map((/** @type {ed} */ a) => {
           let s = this.convertChild(a);
           return ((s.decorators = this.convertChildren(wi(a) ?? [])), s);
         })
       : [];
   }
-  converter(/** @type {d6 | Kf | xh | vh | Th | undefined} */ t, /** @type {Kf | vh | xh | Th | undefined} */ a, /** @type {boolean | undefined} */ s) {
+  converter(/** @type {d6 | ed | wh | Sh | kh | undefined} */ t, /** @type {ed | Sh | wh | kh | undefined} */ a, /** @type {boolean | undefined} */ s) {
     if (!t) return null;
     let f = this.allowPattern;
     s != null && (this.allowPattern = s);
@@ -30764,20 +30784,20 @@ var Fl = class {
     let b = this.convertNode(t, h);
     return (this.registerTSNodeInNodeMap(t, b), (this.allowPattern = f), b);
   }
-  convertImportAttributes(/** @type {Kf} */ t) {
+  convertImportAttributes(/** @type {ed} */ t) {
     let a = t.attributes ?? t.assertClause;
     return this.convertChildren(a?.elements ?? []);
   }
-  convertJSXIdentifier(/** @type {Kf | vh | xh | Th} */ t) {
-    let a = this.createNode(t, { type: A.JSXIdentifier, name: t.getText() });
+  convertJSXIdentifier(/** @type {ed | Sh | wh | kh} */ t) {
+    let a = this.createNode(t, { type: C.JSXIdentifier, name: t.getText() });
     return (this.registerTSNodeInNodeMap(t, a), a);
   }
-  convertJSXNamespaceOrIdentifier(/** @type {Kf | vh | xh | Th} */ t) {
+  convertJSXNamespaceOrIdentifier(/** @type {ed | Sh | wh | kh} */ t) {
     if (t.kind === Ae.JsxNamespacedName) {
       let f = this.createNode(t, {
-        type: A.JSXNamespacedName,
-        name: this.createNode(t.name, { type: A.JSXIdentifier, name: t.name.text }),
-        namespace: this.createNode(t.namespace, { type: A.JSXIdentifier, name: t.namespace.text }),
+        type: C.JSXNamespacedName,
+        name: this.createNode(t.name, { type: C.JSXIdentifier, name: t.name.text }),
+        namespace: this.createNode(t.namespace, { type: C.JSXIdentifier, name: t.namespace.text }),
       });
       return (this.registerTSNodeInNodeMap(t, f), f);
     }
@@ -30786,22 +30806,22 @@ var Fl = class {
     if (s > 0) {
       let f = _a(t, this.ast),
         h = this.createNode(t, {
-          type: A.JSXNamespacedName,
+          type: C.JSXNamespacedName,
           range: f,
-          name: this.createNode(t, { type: A.JSXIdentifier, range: [f[0] + s + 1, f[1]], name: a.slice(s + 1) }),
-          namespace: this.createNode(t, { type: A.JSXIdentifier, range: [f[0], f[0] + s], name: a.slice(0, s) }),
+          name: this.createNode(t, { type: C.JSXIdentifier, range: [f[0] + s + 1, f[1]], name: a.slice(s + 1) }),
+          namespace: this.createNode(t, { type: C.JSXIdentifier, range: [f[0], f[0] + s], name: a.slice(0, s) }),
         });
       return (this.registerTSNodeInNodeMap(t, h), h);
     }
     return this.convertJSXIdentifier(t);
   }
-  convertJSXTagName(/** @type {Kf | vh | xh | Th} */ t, /** @type {Kf | vh | xh | Th} */ a) {
+  convertJSXTagName(/** @type {ed | Sh | wh | kh} */ t, /** @type {ed | Sh | wh | kh} */ a) {
     let s;
     switch (t.kind) {
       case w.PropertyAccessExpression:
         (t.name.kind === w.PrivateIdentifier && this.#e(t.name, "Non-private identifier expected."),
           (s = this.createNode(t, {
-            type: A.JSXMemberExpression,
+            type: C.JSXMemberExpression,
             object: this.convertJSXTagName(t.expression, a),
             property: this.convertJSXIdentifier(t.name),
           })));
@@ -30813,9 +30833,9 @@ var Fl = class {
     }
     return (this.registerTSNodeInNodeMap(t, s), s);
   }
-  convertMethodSignature(/** @type {Kf} */ t) {
+  convertMethodSignature(/** @type {ed} */ t) {
     return this.createNode(t, {
-      type: A.TSMethodSignature,
+      type: C.TSMethodSignature,
       accessibility: ki(t),
       computed: ca(t.name),
       key: this.convertChild(t.name),
@@ -30829,7 +30849,7 @@ var Fl = class {
             return "method";
         }
       })(),
-      optional: sd(t),
+      optional: od(t),
       params: this.convertParameters(t.parameters),
       readonly: Fe(w.ReadonlyKeyword, t),
       returnType: t.type && this.convertTypeAnnotation(t.type, t),
@@ -30841,81 +30861,81 @@ var Fl = class {
     (a[0] < t.range[0] && ((t.range[0] = a[0]), (t.loc.start = C_(t.range[0], this.ast))),
       a[1] > t.range[1] && ((t.range[1] = a[1]), (t.loc.end = C_(t.range[1], this.ast))));
   }
-  convertNode(/** @type {d6 | Kf | xh | vh | Th} */ t, /** @type {d6 | Kf | undefined} */ a) {
+  convertNode(/** @type {d6 | ed | wh | Sh | kh} */ t, /** @type {d6 | ed | undefined} */ a) {
     switch (t.kind) {
       case w.SourceFile:
         return this.createNode(t, {
-          type: A.Program,
-          range: [t.getStart(this.ast), t.endOfFileToken.end],
+          type: C.Program,
+          range: [0, t.endOfFileToken.end],
           body: this.convertBodyExpressions(t.statements, t),
           comments: void 0,
           sourceType: t.externalModuleIndicator ? "module" : "script",
           tokens: void 0,
         });
       case w.Block:
-        return this.createNode(t, { type: A.BlockStatement, body: this.convertBodyExpressions(t.statements, t) });
+        return this.createNode(t, { type: C.BlockStatement, body: this.convertBodyExpressions(t.statements, t) });
       case w.Identifier:
-        return Jh(t)
-          ? this.createNode(t, { type: A.ThisExpression })
+        return Bh(t)
+          ? this.createNode(t, { type: C.ThisExpression })
           : this.createNode(t, {
-              type: A.Identifier,
+              type: C.Identifier,
               decorators: [],
               name: t.text,
               optional: !1,
               typeAnnotation: void 0,
             });
       case w.PrivateIdentifier:
-        return this.createNode(t, { type: A.PrivateIdentifier, name: t.text.slice(1) });
+        return this.createNode(t, { type: C.PrivateIdentifier, name: t.text.slice(1) });
       case w.WithStatement:
         return this.createNode(t, {
-          type: A.WithStatement,
+          type: C.WithStatement,
           body: this.convertChild(t.statement),
           object: this.convertChild(t.expression),
         });
       case w.ReturnStatement:
-        return this.createNode(t, { type: A.ReturnStatement, argument: this.convertChild(t.expression) });
+        return this.createNode(t, { type: C.ReturnStatement, argument: this.convertChild(t.expression) });
       case w.LabeledStatement:
         return this.createNode(t, {
-          type: A.LabeledStatement,
+          type: C.LabeledStatement,
           body: this.convertChild(t.statement),
           label: this.convertChild(t.label),
         });
       case w.ContinueStatement:
-        return this.createNode(t, { type: A.ContinueStatement, label: this.convertChild(t.label) });
+        return this.createNode(t, { type: C.ContinueStatement, label: this.convertChild(t.label) });
       case w.BreakStatement:
-        return this.createNode(t, { type: A.BreakStatement, label: this.convertChild(t.label) });
+        return this.createNode(t, { type: C.BreakStatement, label: this.convertChild(t.label) });
       case w.IfStatement:
         return this.createNode(t, {
-          type: A.IfStatement,
+          type: C.IfStatement,
           alternate: this.convertChild(t.elseStatement),
           consequent: this.convertChild(t.thenStatement),
           test: this.convertChild(t.expression),
         });
       case w.SwitchStatement:
         return this.createNode(t, {
-          type: A.SwitchStatement,
+          type: C.SwitchStatement,
           cases: this.convertChildren(t.caseBlock.clauses),
           discriminant: this.convertChild(t.expression),
         });
       case w.CaseClause:
       case w.DefaultClause:
         return this.createNode(t, {
-          type: A.SwitchCase,
+          type: C.SwitchCase,
           consequent: this.convertChildren(t.statements),
           test: t.kind === w.CaseClause ? this.convertChild(t.expression) : null,
         });
       case w.ThrowStatement:
-        return this.createNode(t, { type: A.ThrowStatement, argument: this.convertChild(t.expression) });
+        return this.createNode(t, { type: C.ThrowStatement, argument: this.convertChild(t.expression) });
       case w.TryStatement:
         return this.createNode(t, {
-          type: A.TryStatement,
+          type: C.TryStatement,
           block: this.convertChild(t.tryBlock),
           finalizer: this.convertChild(t.finallyBlock),
           handler: this.convertChild(t.catchClause),
         });
       case w.CatchClause:
         return this.createNode(t, {
-          type: A.CatchClause,
+          type: C.CatchClause,
           body: this.convertChild(t.block),
           param: t.variableDeclaration
             ? this.convertBindingNameWithTypeAnnotation(t.variableDeclaration.name, t.variableDeclaration.type)
@@ -30923,19 +30943,19 @@ var Fl = class {
         });
       case w.WhileStatement:
         return this.createNode(t, {
-          type: A.WhileStatement,
+          type: C.WhileStatement,
           body: this.convertChild(t.statement),
           test: this.convertChild(t.expression),
         });
       case w.DoStatement:
         return this.createNode(t, {
-          type: A.DoWhileStatement,
+          type: C.DoWhileStatement,
           body: this.convertChild(t.statement),
           test: this.convertChild(t.expression),
         });
       case w.ForStatement:
         return this.createNode(t, {
-          type: A.ForStatement,
+          type: C.ForStatement,
           body: this.convertChild(t.statement),
           init: this.convertChild(t.initializer),
           test: this.convertChild(t.condition),
@@ -30943,14 +30963,14 @@ var Fl = class {
         });
       case w.ForInStatement:
         return this.createNode(t, {
-          type: A.ForInStatement,
+          type: C.ForInStatement,
           body: this.convertChild(t.statement),
           left: this.convertPattern(t.initializer),
           right: this.convertChild(t.expression),
         });
       case w.ForOfStatement:
         return this.createNode(t, {
-          type: A.ForOfStatement,
+          type: C.ForOfStatement,
           await: t.awaitModifier?.kind === w.AwaitKeyword,
           body: this.convertChild(t.statement),
           left: this.convertPattern(t.initializer),
@@ -30961,7 +30981,7 @@ var Fl = class {
           f = Fe(w.AsyncKeyword, t),
           h = !!t.asteriskToken,
           b = this.createNode(t, {
-            type: t.body ? A.FunctionDeclaration : A.TSDeclareFunction,
+            type: t.body ? C.FunctionDeclaration : C.TSDeclareFunction,
             async: f,
             body: this.convertChild(t.body) || void 0,
             declare: s,
@@ -30978,12 +30998,12 @@ var Fl = class {
         let s = !!t.exclamationToken,
           f = this.convertChild(t.initializer),
           h = this.convertBindingNameWithTypeAnnotation(t.name, t.type, t);
-        return this.createNode(t, { type: A.VariableDeclarator, definite: s, id: h, init: f });
+        return this.createNode(t, { type: C.VariableDeclarator, definite: s, id: h, init: f });
       }
       case w.VariableStatement: {
         let s = t.declarationList.declarations,
           f = this.createNode(t, {
-            type: A.VariableDeclaration,
+            type: C.VariableDeclaration,
             declarations: this.convertChildren(s),
             declare: Fe(w.DeclareKeyword, t),
             kind: oa(t.declarationList),
@@ -30992,42 +31012,42 @@ var Fl = class {
       }
       case w.VariableDeclarationList:
         return this.createNode(t, {
-          type: A.VariableDeclaration,
+          type: C.VariableDeclaration,
           declarations: this.convertChildren(t.declarations),
           declare: !1,
           kind: oa(t),
         });
       case w.ExpressionStatement:
         return this.createNode(t, {
-          type: A.ExpressionStatement,
+          type: C.ExpressionStatement,
           directive: void 0,
           expression: this.convertChild(t.expression),
         });
       case w.ThisKeyword:
-        return this.createNode(t, { type: A.ThisExpression });
+        return this.createNode(t, { type: C.ThisExpression });
       case w.ArrayLiteralExpression:
         return this.allowPattern
           ? this.createNode(t, {
-              type: A.ArrayPattern,
+              type: C.ArrayPattern,
               decorators: [],
-              elements: t.elements.map((/** @type {Kf | vh | xh | Th} */ s) => this.convertPattern(s)),
+              elements: t.elements.map((/** @type {ed | Sh | wh | kh} */ s) => this.convertPattern(s)),
               optional: !1,
               typeAnnotation: void 0,
             })
-          : this.createNode(t, { type: A.ArrayExpression, elements: this.convertChildren(t.elements) });
+          : this.createNode(t, { type: C.ArrayExpression, elements: this.convertChildren(t.elements) });
       case w.ObjectLiteralExpression:
         return this.allowPattern
           ? this.createNode(t, {
-              type: A.ObjectPattern,
+              type: C.ObjectPattern,
               decorators: [],
               optional: !1,
-              properties: t.properties.map((/** @type {Kf} */ s) => this.convertPattern(s)),
+              properties: t.properties.map((/** @type {ed} */ s) => this.convertPattern(s)),
               typeAnnotation: void 0,
             })
-          : this.createNode(t, { type: A.ObjectExpression, properties: this.convertChildren(t.properties) });
+          : this.createNode(t, { type: C.ObjectExpression, properties: this.convertChildren(t.properties) });
       case w.PropertyAssignment:
         return this.createNode(t, {
-          type: A.Property,
+          type: C.Property,
           computed: ca(t.name),
           key: this.convertChild(t.name),
           kind: "init",
@@ -31039,7 +31059,7 @@ var Fl = class {
       case w.ShorthandPropertyAssignment:
         return t.objectAssignmentInitializer
           ? this.createNode(t, {
-              type: A.Property,
+              type: C.Property,
               computed: !1,
               key: this.convertChild(t.name),
               kind: "init",
@@ -31047,7 +31067,7 @@ var Fl = class {
               optional: !1,
               shorthand: !0,
               value: this.createNode(t, {
-                type: A.AssignmentPattern,
+                type: C.AssignmentPattern,
                 decorators: [],
                 left: this.convertPattern(t.name),
                 optional: !1,
@@ -31056,7 +31076,7 @@ var Fl = class {
               }),
             })
           : this.createNode(t, {
-              type: A.Property,
+              type: C.Property,
               computed: !1,
               key: this.convertChild(t.name),
               kind: "init",
@@ -31071,11 +31091,11 @@ var Fl = class {
         let s = Fe(w.AbstractKeyword, t),
           h = Fe(w.AccessorKeyword, t)
             ? s
-              ? A.TSAbstractAccessorProperty
-              : A.AccessorProperty
+              ? C.TSAbstractAccessorProperty
+              : C.AccessorProperty
             : s
-              ? A.TSAbstractPropertyDefinition
-              : A.PropertyDefinition,
+              ? C.TSAbstractPropertyDefinition
+              : C.PropertyDefinition,
           b = this.convertChild(t.name);
         return this.createNode(t, {
           type: h,
@@ -31086,7 +31106,7 @@ var Fl = class {
           definite: !!t.exclamationToken,
           key: b,
           optional:
-            (b.type === A.Literal ||
+            (b.type === C.Literal ||
               t.name.kind === w.Identifier ||
               t.name.kind === w.ComputedPropertyName ||
               t.name.kind === w.PrivateIdentifier) &&
@@ -31104,7 +31124,7 @@ var Fl = class {
           return this.convertMethodSignature(t);
       case w.MethodDeclaration: {
         let s = this.createNode(t, {
-          type: t.body ? A.FunctionExpression : A.TSEmptyBodyFunctionExpression,
+          type: t.body ? C.FunctionExpression : C.TSEmptyBodyFunctionExpression,
           range: [t.parameters.pos - 1, t.end],
           async: Fe(w.AsyncKeyword, t),
           body: this.convertChild(t.body),
@@ -31121,7 +31141,7 @@ var Fl = class {
         if (a.kind === w.ObjectLiteralExpression)
           ((s.params = this.convertChildren(t.parameters)),
             (f = this.createNode(t, {
-              type: A.Property,
+              type: C.Property,
               computed: ca(t.name),
               key: this.convertChild(t.name),
               kind: "init",
@@ -31133,7 +31153,7 @@ var Fl = class {
         else {
           let h = Fe(w.AbstractKeyword, t);
           s.params = this.convertParameters(t.parameters);
-          let b = h ? A.TSAbstractMethodDefinition : A.MethodDefinition;
+          let b = h ? C.TSAbstractMethodDefinition : C.MethodDefinition;
           f = this.createNode(t, {
             type: b,
             accessibility: ki(t),
@@ -31155,16 +31175,16 @@ var Fl = class {
               : !f.static &&
                 t.name.kind === w.StringLiteral &&
                 t.name.text === "constructor" &&
-                f.type !== A.Property &&
+                f.type !== C.Property &&
                 (f.kind = "constructor"),
           f
         );
       }
       case w.Constructor: {
-        let s = Ph(t),
+        let s = Oh(t),
           f = (s && ir(s, t, this.ast)) ?? t.getFirstToken(),
           h = this.createNode(t, {
-            type: t.body ? A.FunctionExpression : A.TSEmptyBodyFunctionExpression,
+            type: t.body ? C.FunctionExpression : C.TSEmptyBodyFunctionExpression,
             range: [t.parameters.pos - 1, t.end],
             async: !1,
             body: this.convertChild(t.body),
@@ -31179,9 +31199,9 @@ var Fl = class {
         h.typeParameters && this.fixParentLocation(h, h.typeParameters.range);
         let b =
             f.kind === w.StringLiteral
-              ? this.createNode(f, { type: A.Literal, raw: f.getText(), value: "constructor" })
+              ? this.createNode(f, { type: C.Literal, raw: f.getText(), value: "constructor" })
               : this.createNode(t, {
-                  type: A.Identifier,
+                  type: C.Identifier,
                   range: [f.getStart(this.ast), f.end],
                   decorators: [],
                   name: "constructor",
@@ -31190,7 +31210,7 @@ var Fl = class {
                 }),
           v = Fe(w.StaticKeyword, t);
         return this.createNode(t, {
-          type: Fe(w.AbstractKeyword, t) ? A.TSAbstractMethodDefinition : A.MethodDefinition,
+          type: Fe(w.AbstractKeyword, t) ? C.TSAbstractMethodDefinition : C.MethodDefinition,
           accessibility: ki(t),
           computed: !1,
           decorators: [],
@@ -31204,7 +31224,7 @@ var Fl = class {
       }
       case w.FunctionExpression:
         return this.createNode(t, {
-          type: A.FunctionExpression,
+          type: C.FunctionExpression,
           async: Fe(w.AsyncKeyword, t),
           body: this.convertChild(t.body),
           declare: !1,
@@ -31216,12 +31236,12 @@ var Fl = class {
           typeParameters: this.convertTypeParameters(t),
         });
       case w.SuperKeyword:
-        return this.createNode(t, { type: A.Super });
+        return this.createNode(t, { type: C.Super });
       case w.ArrayBindingPattern:
         return this.createNode(t, {
-          type: A.ArrayPattern,
+          type: C.ArrayPattern,
           decorators: [],
-          elements: t.elements.map((/** @type {Kf} */ s) => this.convertPattern(s)),
+          elements: t.elements.map((/** @type {ed} */ s) => this.convertPattern(s)),
           optional: !1,
           typeAnnotation: void 0,
         });
@@ -31229,10 +31249,10 @@ var Fl = class {
         return null;
       case w.ObjectBindingPattern:
         return this.createNode(t, {
-          type: A.ObjectPattern,
+          type: C.ObjectPattern,
           decorators: [],
           optional: !1,
-          properties: t.elements.map((/** @type {Kf} */ s) => this.convertPattern(s)),
+          properties: t.elements.map((/** @type {ed} */ s) => this.convertPattern(s)),
           typeAnnotation: void 0,
         });
       case w.BindingElement: {
@@ -31240,7 +31260,7 @@ var Fl = class {
           let f = this.convertChild(t.name, a);
           return t.initializer
             ? this.createNode(t, {
-                type: A.AssignmentPattern,
+                type: C.AssignmentPattern,
                 decorators: [],
                 left: f,
                 optional: !1,
@@ -31249,7 +31269,7 @@ var Fl = class {
               })
             : t.dotDotDotToken
               ? this.createNode(t, {
-                  type: A.RestElement,
+                  type: C.RestElement,
                   argument: f,
                   decorators: [],
                   optional: !1,
@@ -31262,7 +31282,7 @@ var Fl = class {
         return (
           t.dotDotDotToken
             ? (s = this.createNode(t, {
-                type: A.RestElement,
+                type: C.RestElement,
                 argument: this.convertChild(t.propertyName ?? t.name),
                 decorators: [],
                 optional: !1,
@@ -31270,7 +31290,7 @@ var Fl = class {
                 value: void 0,
               }))
             : (s = this.createNode(t, {
-                type: A.Property,
+                type: C.Property,
                 computed: t.propertyName?.kind === w.ComputedPropertyName,
                 key: this.convertChild(t.propertyName ?? t.name),
                 kind: "init",
@@ -31281,7 +31301,7 @@ var Fl = class {
               })),
           t.initializer &&
             (s.value = this.createNode(t, {
-              type: A.AssignmentPattern,
+              type: C.AssignmentPattern,
               range: [t.name.getStart(this.ast), t.initializer.end],
               decorators: [],
               left: this.convertChild(t.name),
@@ -31294,7 +31314,7 @@ var Fl = class {
       }
       case w.ArrowFunction:
         return this.createNode(t, {
-          type: A.ArrowFunctionExpression,
+          type: C.ArrowFunctionExpression,
           async: Fe(w.AsyncKeyword, t),
           body: this.convertChild(t.body),
           expression: t.body.kind !== w.Block,
@@ -31306,20 +31326,20 @@ var Fl = class {
         });
       case w.YieldExpression:
         return this.createNode(t, {
-          type: A.YieldExpression,
+          type: C.YieldExpression,
           argument: this.convertChild(t.expression),
           delegate: !!t.asteriskToken,
         });
       case w.AwaitExpression:
-        return this.createNode(t, { type: A.AwaitExpression, argument: this.convertChild(t.expression) });
+        return this.createNode(t, { type: C.AwaitExpression, argument: this.convertChild(t.expression) });
       case w.NoSubstitutionTemplateLiteral: {
         let s = this.ast.text.slice(t.getStart(this.ast) + 1, t.end - 1);
         return this.createNode(t, {
-          type: A.TemplateLiteral,
+          type: C.TemplateLiteral,
           expressions: [],
           quasis: [
             this.createNode(t, {
-              type: A.TemplateElement,
+              type: C.TemplateElement,
               tail: !0,
               value: { cooked: t.parent.kind === w.TaggedTemplateExpression && !this.#r(s) ? null : t.text, raw: s },
             }),
@@ -31327,9 +31347,9 @@ var Fl = class {
         });
       }
       case w.TemplateExpression: {
-        let s = this.createNode(t, { type: A.TemplateLiteral, expressions: [], quasis: [this.convertChild(t.head)] });
+        let s = this.createNode(t, { type: C.TemplateLiteral, expressions: [], quasis: [this.convertChild(t.head)] });
         return (
-          t.templateSpans.forEach((/** @type {Kf} */ f) => {
+          t.templateSpans.forEach((/** @type {ed} */ f) => {
             (s.expressions.push(this.convertChild(f.expression)), s.quasis.push(this.convertChild(f.literal)));
           }),
           s
@@ -31337,7 +31357,7 @@ var Fl = class {
       }
       case w.TaggedTemplateExpression:
         return this.createNode(t, {
-          type: A.TaggedTemplateExpression,
+          type: C.TaggedTemplateExpression,
           quasi: this.convertChild(t.template),
           tag: this.convertChild(t.tag),
           typeArguments: this.convertTypeArguments(t),
@@ -31352,7 +31372,7 @@ var Fl = class {
               ? t.parent.parent.kind === w.TaggedTemplateExpression
               : t.parent.parent.parent.kind === w.TaggedTemplateExpression;
         return this.createNode(t, {
-          type: A.TemplateElement,
+          type: C.TemplateElement,
           tail: s,
           value: { cooked: h && !this.#r(f) ? null : t.text, raw: f },
         });
@@ -31361,21 +31381,21 @@ var Fl = class {
       case w.SpreadElement:
         return this.allowPattern
           ? this.createNode(t, {
-              type: A.RestElement,
+              type: C.RestElement,
               argument: this.convertPattern(t.expression),
               decorators: [],
               optional: !1,
               typeAnnotation: void 0,
               value: void 0,
             })
-          : this.createNode(t, { type: A.SpreadElement, argument: this.convertChild(t.expression) });
+          : this.createNode(t, { type: C.SpreadElement, argument: this.convertChild(t.expression) });
       case w.Parameter: {
         let s, f;
         return (
           t.dotDotDotToken
             ? (s = f =
                 this.createNode(t, {
-                  type: A.RestElement,
+                  type: C.RestElement,
                   argument: this.convertChild(t.name),
                   decorators: [],
                   optional: !1,
@@ -31385,7 +31405,7 @@ var Fl = class {
             : t.initializer
               ? ((s = this.convertChild(t.name)),
                 (f = this.createNode(t, {
-                  type: A.AssignmentPattern,
+                  type: C.AssignmentPattern,
                   range: [t.name.getStart(this.ast), t.initializer.end],
                   decorators: [],
                   left: s,
@@ -31393,7 +31413,7 @@ var Fl = class {
                   right: this.convertChild(t.initializer),
                   typeAnnotation: void 0,
                 })),
-                rr(t) && ((f.range[0] = s.range[0]), (f.loc = Zr(f.range, this.ast))))
+                rr(t) && ((f.range[0] = s.range[0]), (f.loc = jr(f.range, this.ast))))
               : (s = f = this.convertChild(t.name, a)),
           t.type &&
             ((s.typeAnnotation = this.convertTypeAnnotation(t.type, t)),
@@ -31404,7 +31424,7 @@ var Fl = class {
             (s.optional = !0)),
           rr(t)
             ? this.createNode(t, {
-                type: A.TSParameterProperty,
+                type: C.TSParameterProperty,
                 accessibility: ki(t),
                 decorators: [],
                 override: Fe(w.OverrideKeyword, t),
@@ -31417,16 +31437,16 @@ var Fl = class {
       }
       case w.ClassDeclaration:
       case w.ClassExpression: {
-        let s = t.kind === w.ClassDeclaration ? A.ClassDeclaration : A.ClassExpression,
-          f = t.heritageClauses?.find(/** @returns {boolean} */ (/** @type {Kf} */ v) => v.token === w.ExtendsKeyword),
-          h = t.heritageClauses?.find(/** @returns {boolean} */ (/** @type {Kf} */ v) => v.token === w.ImplementsKeyword),
+        let s = t.kind === w.ClassDeclaration ? C.ClassDeclaration : C.ClassExpression,
+          f = t.heritageClauses?.find(/** @returns {boolean} */ (/** @type {ed} */ v) => v.token === w.ExtendsKeyword),
+          h = t.heritageClauses?.find(/** @returns {boolean} */ (/** @type {ed} */ v) => v.token === w.ImplementsKeyword),
           b = this.createNode(t, {
             type: s,
             abstract: Fe(w.AbstractKeyword, t),
             body: this.createNode(t, {
-              type: A.ClassBody,
+              type: C.ClassBody,
               range: [t.members.pos - 1, t.end],
-              body: this.convertChildren(t.members.filter(Dh)),
+              body: this.convertChildren(t.members.filter(Ih)),
             }),
             declare: Fe(w.DeclareKeyword, t),
             decorators: this.convertChildren(wi(t) ?? []),
@@ -31442,13 +31462,13 @@ var Fl = class {
         );
       }
       case w.ModuleBlock:
-        return this.createNode(t, { type: A.TSModuleBlock, body: this.convertBodyExpressions(t.statements, t) });
+        return this.createNode(t, { type: C.TSModuleBlock, body: this.convertBodyExpressions(t.statements, t) });
       case w.ImportDeclaration: {
         let s = this.createNode(
           t,
           this.#t(
             {
-              type: A.ImportDeclaration,
+              type: C.ImportDeclaration,
               attributes: this.convertImportAttributes(t),
               importKind: "value",
               phase: P_(t.importClause) === "defer" ? "defer" : null,
@@ -31477,17 +31497,17 @@ var Fl = class {
         return s;
       }
       case w.NamespaceImport:
-        return this.createNode(t, { type: A.ImportNamespaceSpecifier, local: this.convertChild(t.name) });
+        return this.createNode(t, { type: C.ImportNamespaceSpecifier, local: this.convertChild(t.name) });
       case w.ImportSpecifier:
         return this.createNode(t, {
-          type: A.ImportSpecifier,
+          type: C.ImportSpecifier,
           imported: this.convertChild(t.propertyName ?? t.name),
           importKind: t.isTypeOnly ? "type" : "value",
           local: this.convertChild(t.name),
         });
       case w.ImportClause: {
         let s = this.convertChild(t.name);
-        return this.createNode(t, { type: A.ImportDefaultSpecifier, range: s.range, local: s });
+        return this.createNode(t, { type: C.ImportDefaultSpecifier, range: s.range, local: s });
       }
       case w.ExportDeclaration:
         return t.exportClause?.kind === w.NamedExports
@@ -31495,7 +31515,7 @@ var Fl = class {
               t,
               this.#t(
                 {
-                  type: A.ExportNamedDeclaration,
+                  type: C.ExportNamedDeclaration,
                   attributes: this.convertImportAttributes(t),
                   declaration: null,
                   exportKind: t.isTypeOnly ? "type" : "value",
@@ -31511,7 +31531,7 @@ var Fl = class {
               t,
               this.#t(
                 {
-                  type: A.ExportAllDeclaration,
+                  type: C.ExportAllDeclaration,
                   attributes: this.convertImportAttributes(t),
                   exported: t.exportClause?.kind === w.NamespaceExport ? this.convertChild(t.exportClause.name) : null,
                   exportKind: t.isTypeOnly ? "type" : "value",
@@ -31525,7 +31545,7 @@ var Fl = class {
       case w.ExportSpecifier: {
         let s = t.propertyName ?? t.name;
         return this.createNode(t, {
-          type: A.ExportSpecifier,
+          type: C.ExportSpecifier,
           exported: this.convertChild(t.name),
           exportKind: t.isTypeOnly ? "type" : "value",
           local: this.convertChild(s),
@@ -31533,18 +31553,18 @@ var Fl = class {
       }
       case w.ExportAssignment:
         return t.isExportEquals
-          ? this.createNode(t, { type: A.TSExportAssignment, expression: this.convertChild(t.expression) })
+          ? this.createNode(t, { type: C.TSExportAssignment, expression: this.convertChild(t.expression) })
           : this.createNode(t, {
-              type: A.ExportDefaultDeclaration,
+              type: C.ExportDefaultDeclaration,
               declaration: this.convertChild(t.expression),
               exportKind: "value",
             });
       case w.PrefixUnaryExpression:
       case w.PostfixUnaryExpression: {
-        let s = qn(t.operator);
+        let s = Fn(t.operator);
         if (s === "++" || s === "--")
           return this.createNode(t, {
-            type: A.UpdateExpression,
+            type: C.UpdateExpression,
             argument: this.convertChild(t.operand),
             operator: s,
             prefix: t.kind === w.PrefixUnaryExpression,
@@ -31553,7 +31573,7 @@ var Fl = class {
         return (
           f || this.#e(t, `Unexpected PrefixUnaryExpression with operator ${s}`),
           this.createNode(t, {
-            type: A.UnaryExpression,
+            type: C.UnaryExpression,
             argument: this.convertChild(t.operand),
             operator: s,
             prefix: f,
@@ -31562,47 +31582,47 @@ var Fl = class {
       }
       case w.DeleteExpression:
         return this.createNode(t, {
-          type: A.UnaryExpression,
+          type: C.UnaryExpression,
           argument: this.convertChild(t.expression),
           operator: "delete",
           prefix: !0,
         });
       case w.VoidExpression:
         return this.createNode(t, {
-          type: A.UnaryExpression,
+          type: C.UnaryExpression,
           argument: this.convertChild(t.expression),
           operator: "void",
           prefix: !0,
         });
       case w.TypeOfExpression:
         return this.createNode(t, {
-          type: A.UnaryExpression,
+          type: C.UnaryExpression,
           argument: this.convertChild(t.expression),
           operator: "typeof",
           prefix: !0,
         });
       case w.TypeOperator:
         return this.createNode(t, {
-          type: A.TSTypeOperator,
-          operator: qn(t.operator),
+          type: C.TSTypeOperator,
+          operator: Fn(t.operator),
           typeAnnotation: this.convertChild(t.type),
         });
       case w.BinaryExpression: {
-        if (Nh(t.operatorToken)) {
-          let f = this.createNode(t, { type: A.SequenceExpression, expressions: [] }),
+        if (Mh(t.operatorToken)) {
+          let f = this.createNode(t, { type: C.SequenceExpression, expressions: [] }),
             h = this.convertChild(t.left);
           return (
-            h.type === A.SequenceExpression && t.left.kind !== w.ParenthesizedExpression
+            h.type === C.SequenceExpression && t.left.kind !== w.ParenthesizedExpression
               ? f.expressions.push(...h.expressions)
               : f.expressions.push(h),
             f.expressions.push(this.convertChild(t.right)),
             f
           );
         }
-        let s = Ih(t.operatorToken);
-        return this.allowPattern && s.type === A.AssignmentExpression
+        let s = Lh(t.operatorToken);
+        return this.allowPattern && s.type === C.AssignmentExpression
           ? this.createNode(t, {
-              type: A.AssignmentPattern,
+              type: C.AssignmentPattern,
               decorators: [],
               left: this.convertPattern(t.left, t),
               optional: !1,
@@ -31611,7 +31631,7 @@ var Fl = class {
             })
           : this.createNode(t, {
               ...s,
-              left: this.converter(t.left, t, s.type === A.AssignmentExpression),
+              left: this.converter(t.left, t, s.type === C.AssignmentExpression),
               right: this.convertChild(t.right),
             });
       }
@@ -31619,7 +31639,7 @@ var Fl = class {
         let s = this.convertChild(t.expression),
           f = this.convertChild(t.name),
           b = this.createNode(t, {
-            type: A.MemberExpression,
+            type: C.MemberExpression,
             computed: !1,
             object: s,
             optional: t.questionDotToken != null,
@@ -31631,7 +31651,7 @@ var Fl = class {
         let s = this.convertChild(t.expression),
           f = this.convertChild(t.argumentExpression),
           b = this.createNode(t, {
-            type: A.MemberExpression,
+            type: C.MemberExpression,
             computed: !0,
             object: s,
             optional: t.questionDotToken != null,
@@ -31644,7 +31664,7 @@ var Fl = class {
           if (t.expression.kind === w.ImportKeyword) return { phase: null };
           if (t.expression.kind === w.MetaProperty) {
             let l = t.expression;
-            if (qn(l.keywordToken) === "import" && l.name.text === "defer") return { phase: "defer" };
+            if (Fn(l.keywordToken) === "import" && l.name.text === "defer") return { phase: "defer" };
           }
         })();
         if (s != null)
@@ -31652,7 +31672,7 @@ var Fl = class {
             t,
             this.#t(
               {
-                type: A.ImportExpression,
+                type: C.ImportExpression,
                 options: t.arguments[1] ? this.convertChild(t.arguments[1]) : null,
                 phase: s.phase,
                 source: this.convertChild(t.arguments[0]),
@@ -31666,7 +31686,7 @@ var Fl = class {
           h = this.convertChildren(t.arguments),
           b = this.convertTypeArguments(t),
           v = this.createNode(t, {
-            type: A.CallExpression,
+            type: C.CallExpression,
             arguments: h,
             callee: f,
             optional: t.questionDotToken != null,
@@ -31677,7 +31697,7 @@ var Fl = class {
       case w.NewExpression: {
         let s = this.convertTypeArguments(t);
         return this.createNode(t, {
-          type: A.NewExpression,
+          type: C.NewExpression,
           arguments: this.convertChildren(t.arguments ?? []),
           callee: this.convertChild(t.expression),
           typeArguments: s,
@@ -31685,39 +31705,39 @@ var Fl = class {
       }
       case w.ConditionalExpression:
         return this.createNode(t, {
-          type: A.ConditionalExpression,
+          type: C.ConditionalExpression,
           alternate: this.convertChild(t.whenFalse),
           consequent: this.convertChild(t.whenTrue),
           test: this.convertChild(t.condition),
         });
       case w.MetaProperty:
         return this.createNode(t, {
-          type: A.MetaProperty,
+          type: C.MetaProperty,
           meta: this.createNode(t.getFirstToken(), {
-            type: A.Identifier,
+            type: C.Identifier,
             decorators: [],
-            name: qn(t.keywordToken),
+            name: Fn(t.keywordToken),
             optional: !1,
             typeAnnotation: void 0,
           }),
           property: this.convertChild(t.name),
         });
       case w.Decorator:
-        return this.createNode(t, { type: A.Decorator, expression: this.convertChild(t.expression) });
+        return this.createNode(t, { type: C.Decorator, expression: this.convertChild(t.expression) });
       case w.StringLiteral:
         return this.createNode(t, {
-          type: A.Literal,
+          type: C.Literal,
           raw: t.getText(),
-          value: a.kind === w.JsxAttribute ? ad(t.text) : t.text,
+          value: a.kind === w.JsxAttribute ? _d(t.text) : t.text,
         });
       case w.NumericLiteral:
-        return this.createNode(t, { type: A.Literal, raw: t.getText(), value: Number(t.text) });
+        return this.createNode(t, { type: C.Literal, raw: t.getText(), value: Number(t.text) });
       case w.BigIntLiteral: {
         let s = _a(t, this.ast),
           f = this.ast.text.slice(s[0], s[1]),
-          h = yr(0, f.slice(0, -1), "_", ""),
+          h = gr(0, f.slice(0, -1), "_", ""),
           b = typeof BigInt < "u" ? BigInt(h) : null;
-        return this.createNode(t, { type: A.Literal, range: s, bigint: b == null ? h : String(b), raw: f, value: b });
+        return this.createNode(t, { type: C.Literal, range: s, bigint: b == null ? h : String(b), raw: f, value: b });
       }
       case w.RegularExpressionLiteral: {
         let s = t.text.slice(1, t.text.lastIndexOf("/")),
@@ -31726,39 +31746,39 @@ var Fl = class {
         try {
           h = new RegExp(s, f);
         } catch {}
-        return this.createNode(t, { type: A.Literal, raw: t.text, regex: { flags: f, pattern: s }, value: h });
+        return this.createNode(t, { type: C.Literal, raw: t.text, regex: { flags: f, pattern: s }, value: h });
       }
       case w.TrueKeyword:
-        return this.createNode(t, { type: A.Literal, raw: "true", value: !0 });
+        return this.createNode(t, { type: C.Literal, raw: "true", value: !0 });
       case w.FalseKeyword:
-        return this.createNode(t, { type: A.Literal, raw: "false", value: !1 });
+        return this.createNode(t, { type: C.Literal, raw: "false", value: !1 });
       case w.NullKeyword:
-        return this.createNode(t, { type: A.Literal, raw: "null", value: null });
+        return this.createNode(t, { type: C.Literal, raw: "null", value: null });
       case w.EmptyStatement:
-        return this.createNode(t, { type: A.EmptyStatement });
+        return this.createNode(t, { type: C.EmptyStatement });
       case w.DebuggerStatement:
-        return this.createNode(t, { type: A.DebuggerStatement });
+        return this.createNode(t, { type: C.DebuggerStatement });
       case w.JsxElement:
         return this.createNode(t, {
-          type: A.JSXElement,
+          type: C.JSXElement,
           children: this.convertChildren(t.children),
           closingElement: this.convertChild(t.closingElement),
           openingElement: this.convertChild(t.openingElement),
         });
       case w.JsxFragment:
         return this.createNode(t, {
-          type: A.JSXFragment,
+          type: C.JSXFragment,
           children: this.convertChildren(t.children),
           closingFragment: this.convertChild(t.closingFragment),
           openingFragment: this.convertChild(t.openingFragment),
         });
       case w.JsxSelfClosingElement:
         return this.createNode(t, {
-          type: A.JSXElement,
+          type: C.JSXElement,
           children: [],
           closingElement: null,
           openingElement: this.createNode(t, {
-            type: A.JSXOpeningElement,
+            type: C.JSXOpeningElement,
             range: _a(t, this.ast),
             attributes: this.convertChildren(t.attributes.properties),
             name: this.convertJSXTagName(t.tagName, t),
@@ -31768,29 +31788,29 @@ var Fl = class {
         });
       case w.JsxOpeningElement:
         return this.createNode(t, {
-          type: A.JSXOpeningElement,
+          type: C.JSXOpeningElement,
           attributes: this.convertChildren(t.attributes.properties),
           name: this.convertJSXTagName(t.tagName, t),
           selfClosing: !1,
           typeArguments: this.convertTypeArguments(t),
         });
       case w.JsxClosingElement:
-        return this.createNode(t, { type: A.JSXClosingElement, name: this.convertJSXTagName(t.tagName, t) });
+        return this.createNode(t, { type: C.JSXClosingElement, name: this.convertJSXTagName(t.tagName, t) });
       case w.JsxOpeningFragment:
-        return this.createNode(t, { type: A.JSXOpeningFragment });
+        return this.createNode(t, { type: C.JSXOpeningFragment });
       case w.JsxClosingFragment:
-        return this.createNode(t, { type: A.JSXClosingFragment });
+        return this.createNode(t, { type: C.JSXClosingFragment });
       case w.JsxExpression: {
         let s = t.expression
           ? this.convertChild(t.expression)
-          : this.createNode(t, { type: A.JSXEmptyExpression, range: [t.getStart(this.ast) + 1, t.getEnd() - 1] });
+          : this.createNode(t, { type: C.JSXEmptyExpression, range: [t.getStart(this.ast) + 1, t.getEnd() - 1] });
         return t.dotDotDotToken
-          ? this.createNode(t, { type: A.JSXSpreadChild, expression: s })
-          : this.createNode(t, { type: A.JSXExpressionContainer, expression: s });
+          ? this.createNode(t, { type: C.JSXSpreadChild, expression: s })
+          : this.createNode(t, { type: C.JSXExpressionContainer, expression: s });
       }
       case w.JsxAttribute:
         return this.createNode(t, {
-          type: A.JSXAttribute,
+          type: C.JSXAttribute,
           name: this.convertJSXNamespaceOrIdentifier(t.name),
           value: this.convertChild(t.initializer),
         });
@@ -31798,25 +31818,25 @@ var Fl = class {
         let s = t.getFullStart(),
           f = t.getEnd(),
           h = this.ast.text.slice(s, f);
-        return this.createNode(t, { type: A.JSXText, range: [s, f], raw: h, value: ad(h) });
+        return this.createNode(t, { type: C.JSXText, range: [s, f], raw: h, value: _d(h) });
       }
       case w.JsxSpreadAttribute:
-        return this.createNode(t, { type: A.JSXSpreadAttribute, argument: this.convertChild(t.expression) });
+        return this.createNode(t, { type: C.JSXSpreadAttribute, argument: this.convertChild(t.expression) });
       case w.QualifiedName:
         return this.createNode(t, {
-          type: A.TSQualifiedName,
+          type: C.TSQualifiedName,
           left: this.convertChild(t.left),
           right: this.convertChild(t.right),
         });
       case w.TypeReference:
         return this.createNode(t, {
-          type: A.TSTypeReference,
+          type: C.TSTypeReference,
           typeArguments: this.convertTypeArguments(t),
           typeName: this.convertChild(t.typeName),
         });
       case w.TypeParameter:
         return this.createNode(t, {
-          type: A.TSTypeParameter,
+          type: C.TSTypeParameter,
           const: Fe(w.ConstKeyword, t),
           constraint: t.constraint && this.convertChild(t.constraint),
           default: t.default ? this.convertChild(t.default) : void 0,
@@ -31825,7 +31845,7 @@ var Fl = class {
           out: Fe(w.OutKeyword, t),
         });
       case w.ThisType:
-        return this.createNode(t, { type: A.TSThisType });
+        return this.createNode(t, { type: C.TSThisType });
       case w.AnyKeyword:
       case w.BigIntKeyword:
       case w.BooleanKeyword:
@@ -31838,24 +31858,24 @@ var Fl = class {
       case w.VoidKeyword:
       case w.UndefinedKeyword:
       case w.IntrinsicKeyword:
-        return this.createNode(t, { type: A[`TS${w[t.kind]}`] });
+        return this.createNode(t, { type: C[`TS${w[t.kind]}`] });
       case w.NonNullExpression: {
-        let s = this.createNode(t, { type: A.TSNonNullExpression, expression: this.convertChild(t.expression) });
+        let s = this.createNode(t, { type: C.TSNonNullExpression, expression: this.convertChild(t.expression) });
         return this.convertChainExpression(s, t);
       }
       case w.TypeLiteral:
-        return this.createNode(t, { type: A.TSTypeLiteral, members: this.convertChildren(t.members) });
+        return this.createNode(t, { type: C.TSTypeLiteral, members: this.convertChildren(t.members) });
       case w.ArrayType:
-        return this.createNode(t, { type: A.TSArrayType, elementType: this.convertChild(t.elementType) });
+        return this.createNode(t, { type: C.TSArrayType, elementType: this.convertChild(t.elementType) });
       case w.IndexedAccessType:
         return this.createNode(t, {
-          type: A.TSIndexedAccessType,
+          type: C.TSIndexedAccessType,
           indexType: this.convertChild(t.indexType),
           objectType: this.convertChild(t.objectType),
         });
       case w.ConditionalType:
         return this.createNode(t, {
-          type: A.TSConditionalType,
+          type: C.TSConditionalType,
           checkType: this.convertChild(t.checkType),
           extendsType: this.convertChild(t.extendsType),
           falseType: this.convertChild(t.falseType),
@@ -31863,7 +31883,7 @@ var Fl = class {
         });
       case w.TypeQuery:
         return this.createNode(t, {
-          type: A.TSTypeQuery,
+          type: C.TSTypeQuery,
           exprName: this.convertChild(t.exprName),
           typeArguments: this.convertTypeArguments(t),
         });
@@ -31872,13 +31892,13 @@ var Fl = class {
           t,
           this.#n(
             {
-              type: A.TSMappedType,
+              type: C.TSMappedType,
               constraint: this.convertChild(t.typeParameter.constraint),
               key: this.convertChild(t.typeParameter.name),
               nameType: this.convertChild(t.nameType) ?? null,
-              optional: t.questionToken ? t.questionToken.kind === w.QuestionToken || qn(t.questionToken.kind) : !1,
+              optional: t.questionToken ? t.questionToken.kind === w.QuestionToken || Fn(t.questionToken.kind) : !1,
               readonly: t.readonlyToken
-                ? t.readonlyToken.kind === w.ReadonlyKeyword || qn(t.readonlyToken.kind)
+                ? t.readonlyToken.kind === w.ReadonlyKeyword || Fn(t.readonlyToken.kind)
                 : void 0,
               typeAnnotation: t.type && this.convertChild(t.type),
             },
@@ -31891,7 +31911,7 @@ var Fl = class {
         return this.convertChild(t.expression, a);
       case w.TypeAliasDeclaration: {
         let s = this.createNode(t, {
-          type: A.TSTypeAliasDeclaration,
+          type: C.TSTypeAliasDeclaration,
           declare: Fe(w.DeclareKeyword, t),
           id: this.convertChild(t.name),
           typeAnnotation: this.convertChild(t.type),
@@ -31903,18 +31923,18 @@ var Fl = class {
         return this.convertMethodSignature(t);
       case w.PropertySignature:
         return this.createNode(t, {
-          type: A.TSPropertySignature,
+          type: C.TSPropertySignature,
           accessibility: ki(t),
           computed: ca(t.name),
           key: this.convertChild(t.name),
-          optional: sd(t),
+          optional: od(t),
           readonly: Fe(w.ReadonlyKeyword, t),
           static: Fe(w.StaticKeyword, t),
           typeAnnotation: t.type && this.convertTypeAnnotation(t.type, t),
         });
       case w.IndexSignature:
         return this.createNode(t, {
-          type: A.TSIndexSignature,
+          type: C.TSIndexSignature,
           accessibility: ki(t),
           parameters: this.convertChildren(t.parameters),
           readonly: Fe(w.ReadonlyKeyword, t),
@@ -31923,7 +31943,7 @@ var Fl = class {
         });
       case w.ConstructorType:
         return this.createNode(t, {
-          type: A.TSConstructorType,
+          type: C.TSConstructorType,
           abstract: Fe(w.AbstractKeyword, t),
           params: this.convertParameters(t.parameters),
           returnType: t.type && this.convertTypeAnnotation(t.type, t),
@@ -31934,10 +31954,10 @@ var Fl = class {
       case w.CallSignature: {
         let s =
           t.kind === w.ConstructSignature
-            ? A.TSConstructSignatureDeclaration
+            ? C.TSConstructSignatureDeclaration
             : t.kind === w.CallSignature
-              ? A.TSCallSignatureDeclaration
-              : A.TSFunctionType;
+              ? C.TSCallSignatureDeclaration
+              : C.TSFunctionType;
         return this.createNode(t, {
           type: s,
           params: this.convertParameters(t.parameters),
@@ -31949,10 +31969,10 @@ var Fl = class {
         let s = a.kind,
           f =
             s === w.InterfaceDeclaration
-              ? A.TSInterfaceHeritage
+              ? C.TSInterfaceHeritage
               : s === w.HeritageClause
-                ? A.TSClassImplements
-                : A.TSInstantiationExpression;
+                ? C.TSClassImplements
+                : C.TSInstantiationExpression;
         return this.createNode(t, {
           type: f,
           expression: this.convertChild(t.expression),
@@ -31961,13 +31981,13 @@ var Fl = class {
       }
       case w.InterfaceDeclaration: {
         let s =
-            t.heritageClauses?.flatMap((/** @type {Kf} */ h) =>
-              h.token === w.ExtendsKeyword ? h.types.map((/** @type {Kf} */ b) => this.convertChild(b, t)) : [],
+            t.heritageClauses?.flatMap((/** @type {ed} */ h) =>
+              h.token === w.ExtendsKeyword ? h.types.map((/** @type {ed} */ b) => this.convertChild(b, t)) : [],
             ) ?? [],
           f = this.createNode(t, {
-            type: A.TSInterfaceDeclaration,
+            type: C.TSInterfaceDeclaration,
             body: this.createNode(t, {
-              type: A.TSInterfaceBody,
+              type: C.TSInterfaceBody,
               range: [t.members.pos - 1, t.end],
               body: this.convertChildren(t.members),
             }),
@@ -31980,7 +32000,7 @@ var Fl = class {
       }
       case w.TypePredicate: {
         let s = this.createNode(t, {
-          type: A.TSTypePredicate,
+          type: C.TSTypePredicate,
           asserts: t.assertsModifier != null,
           parameterName: this.convertChild(t.parameterName),
           typeAnnotation: null,
@@ -31996,16 +32016,16 @@ var Fl = class {
       case w.ImportType: {
         let s = _a(t, this.ast);
         if (t.isTypeOf) {
-          /** @type {vh} */ let l = ir(t.getFirstToken(), t, this.ast);
+          /** @type {Sh} */ let l = ir(t.getFirstToken(), t, this.ast);
           s[0] = l.getStart(this.ast);
         }
         let f = null;
         if (t.attributes) {
           let l = this.createNode(t.attributes, {
-              type: A.ObjectExpression,
+              type: C.ObjectExpression,
               properties: t.attributes.elements.map((xe) =>
                 this.createNode(xe, {
-                  type: A.Property,
+                  type: C.Property,
                   computed: !1,
                   key: this.convertChild(xe.name),
                   kind: "init",
@@ -32016,23 +32036,23 @@ var Fl = class {
                 }),
               ),
             }),
-            G = ir(t.argument, t, this.ast),
-            y = ir(G, t, this.ast),
-            W = ir(t.attributes, t, this.ast),
-            k = W.kind === Ae.CommaToken ? ir(W, t, this.ast) : W,
-            C = ir(y, t, this.ast),
-            R = _a(C, this.ast),
-            pe = C.kind === Ae.AssertKeyword ? "assert" : "with";
+            W = ir(t.argument, t, this.ast),
+            y = ir(W, t, this.ast),
+            G = ir(t.attributes, t, this.ast),
+            k = G.kind === Ae.CommaToken ? ir(G, t, this.ast) : G,
+            A = ir(y, t, this.ast),
+            R = _a(A, this.ast),
+            pe = A.kind === Ae.AssertKeyword ? "assert" : "with";
           f = this.createNode(t, {
-            type: A.ObjectExpression,
+            type: C.ObjectExpression,
             range: [y.getStart(this.ast), k.end],
             properties: [
               this.createNode(t, {
-                type: A.Property,
+                type: C.Property,
                 range: [R[0], t.attributes.end],
                 computed: !1,
                 key: this.createNode(t, {
-                  type: A.Identifier,
+                  type: C.Identifier,
                   range: R,
                   decorators: [],
                   name: pe,
@@ -32054,7 +32074,7 @@ var Fl = class {
             t,
             this.#n(
               {
-                type: A.TSImportType,
+                type: C.TSImportType,
                 range: s,
                 options: f,
                 qualifier: this.convertChild(t.qualifier),
@@ -32066,7 +32086,7 @@ var Fl = class {
               h,
             ),
           );
-        return t.isTypeOf ? this.createNode(t, { type: A.TSTypeQuery, exprName: v, typeArguments: void 0 }) : v;
+        return t.isTypeOf ? this.createNode(t, { type: C.TSTypeQuery, exprName: v, typeArguments: void 0 }) : v;
       }
       case w.EnumDeclaration: {
         let s = this.convertChildren(t.members),
@@ -32074,8 +32094,8 @@ var Fl = class {
             t,
             this.#n(
               {
-                type: A.TSEnumDeclaration,
-                body: this.createNode(t, { type: A.TSEnumBody, range: [t.members.pos - 1, t.end], members: s }),
+                type: C.TSEnumDeclaration,
+                body: this.createNode(t, { type: C.TSEnumBody, range: [t.members.pos - 1, t.end], members: s }),
                 const: Fe(w.ConstKeyword, t),
                 declare: Fe(w.DeclareKeyword, t),
                 id: this.convertChild(t.name),
@@ -32093,7 +32113,7 @@ var Fl = class {
           t,
           this.#n(
             {
-              type: A.TSEnumMember,
+              type: C.TSEnumMember,
               id: this.convertChild(t.name),
               initializer: t.initializer && this.convertChild(t.initializer),
             },
@@ -32106,7 +32126,7 @@ var Fl = class {
       case w.ModuleDeclaration: {
         let s = Fe(w.DeclareKeyword, t),
           f = this.createNode(t, {
-            type: A.TSModuleDeclaration,
+            type: C.TSModuleDeclaration,
             ...(() => {
               if (t.flags & rn.GlobalAugmentation)
                 return {
@@ -32127,7 +32147,7 @@ var Fl = class {
                 };
               }
               let h = this.createNode(t.name, {
-                type: A.Identifier,
+                type: C.Identifier,
                 range: [t.name.getStart(this.ast), t.name.getEnd()],
                 decorators: [],
                 name: t.name.text,
@@ -32138,14 +32158,14 @@ var Fl = class {
                 ((t = t.body), s || (s = Fe(w.DeclareKeyword, t)));
                 let b = t.name,
                   v = this.createNode(b, {
-                    type: A.Identifier,
+                    type: C.Identifier,
                     range: [b.getStart(this.ast), b.getEnd()],
                     decorators: [],
                     name: b.text,
                     optional: !1,
                     typeAnnotation: void 0,
                   });
-                h = this.createNode(b, { type: A.TSQualifiedName, range: [h.range[0], v.range[1]], left: h, right: v });
+                h = this.createNode(b, { type: C.TSQualifiedName, range: [h.range[0], v.range[1]], left: h, right: v });
               }
               return {
                 body: this.convertChild(t.body),
@@ -32161,24 +32181,24 @@ var Fl = class {
       case w.ParenthesizedType:
         return this.convertChild(t.type);
       case w.UnionType:
-        return this.createNode(t, { type: A.TSUnionType, types: this.convertChildren(t.types) });
+        return this.createNode(t, { type: C.TSUnionType, types: this.convertChildren(t.types) });
       case w.IntersectionType:
-        return this.createNode(t, { type: A.TSIntersectionType, types: this.convertChildren(t.types) });
+        return this.createNode(t, { type: C.TSIntersectionType, types: this.convertChildren(t.types) });
       case w.AsExpression:
         return this.createNode(t, {
-          type: A.TSAsExpression,
+          type: C.TSAsExpression,
           expression: this.convertChild(t.expression),
           typeAnnotation: this.convertChild(t.type),
         });
       case w.InferType:
-        return this.createNode(t, { type: A.TSInferType, typeParameter: this.convertChild(t.typeParameter) });
+        return this.createNode(t, { type: C.TSInferType, typeParameter: this.convertChild(t.typeParameter) });
       case w.LiteralType:
         return t.literal.kind === w.NullKeyword
-          ? this.createNode(t.literal, { type: A.TSNullKeyword })
-          : this.createNode(t, { type: A.TSLiteralType, literal: this.convertChild(t.literal) });
+          ? this.createNode(t.literal, { type: C.TSNullKeyword })
+          : this.createNode(t, { type: C.TSLiteralType, literal: this.convertChild(t.literal) });
       case w.TypeAssertionExpression:
         return this.createNode(t, {
-          type: A.TSTypeAssertion,
+          type: C.TSTypeAssertion,
           expression: this.convertChild(t.expression),
           typeAnnotation: this.convertChild(t.type),
         });
@@ -32186,25 +32206,25 @@ var Fl = class {
         return this.fixExports(
           t,
           this.createNode(t, {
-            type: A.TSImportEqualsDeclaration,
+            type: C.TSImportEqualsDeclaration,
             id: this.convertChild(t.name),
             importKind: t.isTypeOnly ? "type" : "value",
             moduleReference: this.convertChild(t.moduleReference),
           }),
         );
       case w.ExternalModuleReference:
-        return this.createNode(t, { type: A.TSExternalModuleReference, expression: this.convertChild(t.expression) });
+        return this.createNode(t, { type: C.TSExternalModuleReference, expression: this.convertChild(t.expression) });
       case w.NamespaceExportDeclaration:
-        return this.createNode(t, { type: A.TSNamespaceExportDeclaration, id: this.convertChild(t.name) });
+        return this.createNode(t, { type: C.TSNamespaceExportDeclaration, id: this.convertChild(t.name) });
       case w.AbstractKeyword:
-        return this.createNode(t, { type: A.TSAbstractKeyword });
+        return this.createNode(t, { type: C.TSAbstractKeyword });
       case w.TupleType: {
         let s = this.convertChildren(t.elements);
-        return this.createNode(t, { type: A.TSTupleType, elementTypes: s });
+        return this.createNode(t, { type: C.TSTupleType, elementTypes: s });
       }
       case w.NamedTupleMember: {
         let s = this.createNode(t, {
-          type: A.TSNamedTupleMember,
+          type: C.TSNamedTupleMember,
           elementType: this.convertChild(t.type, t),
           label: this.convertChild(t.name, t),
           optional: t.questionToken != null,
@@ -32212,15 +32232,15 @@ var Fl = class {
         return t.dotDotDotToken
           ? ((s.range[0] = s.label.range[0]),
             (s.loc.start = s.label.loc.start),
-            this.createNode(t, { type: A.TSRestType, typeAnnotation: s }))
+            this.createNode(t, { type: C.TSRestType, typeAnnotation: s }))
           : s;
       }
       case w.OptionalType:
-        return this.createNode(t, { type: A.TSOptionalType, typeAnnotation: this.convertChild(t.type) });
+        return this.createNode(t, { type: C.TSOptionalType, typeAnnotation: this.convertChild(t.type) });
       case w.RestType:
-        return this.createNode(t, { type: A.TSRestType, typeAnnotation: this.convertChild(t.type) });
+        return this.createNode(t, { type: C.TSRestType, typeAnnotation: this.convertChild(t.type) });
       case w.TemplateLiteralType: {
-        let s = this.createNode(t, { type: A.TSTemplateLiteralType, quasis: [this.convertChild(t.head)], types: [] });
+        let s = this.createNode(t, { type: C.TSTemplateLiteralType, quasis: [this.convertChild(t.head)], types: [] });
         return (
           t.templateSpans.forEach((f) => {
             (s.types.push(this.convertChild(f.type)), s.quasis.push(this.convertChild(f.literal)));
@@ -32229,17 +32249,17 @@ var Fl = class {
         );
       }
       case w.ClassStaticBlockDeclaration:
-        return this.createNode(t, { type: A.StaticBlock, body: this.convertBodyExpressions(t.body.statements, t) });
+        return this.createNode(t, { type: C.StaticBlock, body: this.convertBodyExpressions(t.body.statements, t) });
       case w.AssertEntry:
       case w.ImportAttribute:
         return this.createNode(t, {
-          type: A.ImportAttribute,
+          type: C.ImportAttribute,
           key: this.convertChild(t.name),
           value: this.convertChild(t.value),
         });
       case w.SatisfiesExpression:
         return this.createNode(t, {
-          type: A.TSSatisfiesExpression,
+          type: C.TSSatisfiesExpression,
           expression: this.convertChild(t.expression),
           typeAnnotation: this.convertChild(t.type),
         });
@@ -32247,11 +32267,11 @@ var Fl = class {
         return this.deeplyCopy(t);
     }
   }
-  createNode(/** @type {xh | vh | Kf | d6 | Th} */ t, a) {
+  createNode(/** @type {wh | Sh | ed | d6 | kh} */ t, a) {
     let s = a;
     return (
       s.range ?? (s.range = _a(t, this.ast)),
-      s.loc ?? (s.loc = Zr(s.range, this.ast)),
+      s.loc ?? (s.loc = jr(s.range, this.ast)),
       s && this.options.shouldPreserveNodeMaps && this.esTreeNodeToTSNodeMap.set(s, t),
       s
     );
@@ -32262,10 +32282,10 @@ var Fl = class {
   deeplyCopy(t) {
     t.kind === Ae.JSDocFunctionType && this.#e(t, "JSDoc types can only be used inside documentation comments.");
     let a = `TS${w[t.kind]}`;
-    if (this.options.errorOnUnknownASTType && !A[a]) throw new Error(`Unknown AST_NODE_TYPE: "${a}"`);
+    if (this.options.errorOnUnknownASTType && !C[a]) throw new Error(`Unknown AST_NODE_TYPE: "${a}"`);
     let s = this.createNode(t, { type: a });
     ("type" in t &&
-      (s.typeAnnotation = t.type && "kind" in t.type && l1(t.type) ? this.convertTypeAnnotation(t.type, t) : null),
+      (s.typeAnnotation = t.type && "kind" in t.type && f1(t.type) ? this.convertTypeAnnotation(t.type, t) : null),
       "typeArguments" in t &&
         (s.typeArguments = t.typeArguments && "pos" in t.typeArguments ? this.convertTypeArguments(t) : null),
       "typeParameters" in t &&
@@ -32307,32 +32327,32 @@ var Fl = class {
       s
     );
   }
-  fixExports(/** @type {Kf | vh | xh | Th} */ t, a) {
-    let f = Si(t) && !Lr(t.name) ? Rh(t) : rr(t);
+  fixExports(/** @type {ed | Sh | wh | kh} */ t, a) {
+    let f = Si(t) && !Lr(t.name) ? qh(t) : rr(t);
     if (f?.[0].kind === w.ExportKeyword) {
       this.registerTSNodeInNodeMap(t, a);
       let h = f[0],
         b = f[1],
         v = b?.kind === w.DefaultKeyword,
         l = v ? ir(b, this.ast, this.ast) : ir(h, this.ast, this.ast);
-      if (((a.range[0] = l.getStart(this.ast)), (a.loc = Zr(a.range, this.ast)), v))
+      if (((a.range[0] = l.getStart(this.ast)), (a.loc = jr(a.range, this.ast)), v))
         return this.createNode(t, {
-          type: A.ExportDefaultDeclaration,
+          type: C.ExportDefaultDeclaration,
           range: [h.getStart(this.ast), a.range[1]],
           declaration: a,
           exportKind: "value",
         });
-      let G = a.type === A.TSInterfaceDeclaration || a.type === A.TSTypeAliasDeclaration,
+      let W = a.type === C.TSInterfaceDeclaration || a.type === C.TSTypeAliasDeclaration,
         y = "declare" in a && a.declare;
       return this.createNode(
         t,
         this.#t(
           {
-            type: A.ExportNamedDeclaration,
+            type: C.ExportNamedDeclaration,
             range: [h.getStart(this.ast), a.range[1]],
             attributes: [],
             declaration: a,
-            exportKind: G || y ? "type" : "value",
+            exportKind: W || y ? "type" : "value",
             source: null,
             specifiers: [],
           },
@@ -32347,17 +32367,17 @@ var Fl = class {
   getASTMaps() {
     return { esTreeNodeToTSNodeMap: this.esTreeNodeToTSNodeMap, tsNodeToESTreeNodeMap: this.tsNodeToESTreeNodeMap };
   }
-  registerTSNodeInNodeMap(/** @type {xh | vh | Kf | d6 | Th} */ t, a) {
+  registerTSNodeInNodeMap(/** @type {wh | Sh | ed | d6 | kh} */ t, a) {
     a &&
       this.options.shouldPreserveNodeMaps &&
       !this.tsNodeToESTreeNodeMap.has(t) &&
       this.tsNodeToESTreeNodeMap.set(t, a);
   }
 };
-function* X6(/** @type {d6 | Kf | vh | xh | Th} */ e, /** @type {d6} */ t = e.getSourceFile()) {
-  /** @type {(d6 | Kf | vh | xh | Th)[]} */ let a = [];
+function* K6(/** @type {d6 | ed | Sh | wh | kh} */ e, /** @type {d6} */ t = e.getSourceFile()) {
+  /** @type {(d6 | ed | Sh | wh | kh)[]} */ let a = [];
   for (;;) {
-    if (vf(e.kind)) yield e;
+    if (Tf(e.kind)) yield e;
     else {
       let s = e.getChildren(t);
       if (s.length === 1) {
@@ -32370,40 +32390,40 @@ function* X6(/** @type {d6 | Kf | vh | xh | Th} */ e, /** @type {d6} */ t = e.ge
     e = a.pop();
   }
 }
-function* Hh(/** @type {d6} */ e, /** @type {d6} */ t = e.getSourceFile()) {
+function* Qh(/** @type {d6} */ e, /** @type {d6} */ t = e.getSourceFile()) {
   let a = t.text,
     s = t.languageVariant !== Pl.JSX;
-  for (let f of X6(e, t))
+  for (let f of K6(e, t))
     f.pos !== f.end &&
       (f.kind !== Ae.JsxText &&
-        (yield* Yh((h) => {
-          Qm(a, f.pos === 0 ? (lf(a) ?? "").length : f.pos, h);
+        (yield* $h((h) => {
+          e1(a, f.pos === 0 ? (pf(a) ?? "").length : f.pos, h);
         }, a)),
-      (s || $6(f)) &&
-        (yield* Yh((h) => {
-          Km(a, f.end, h);
+      (s || Z6(f)) &&
+        (yield* $h((h) => {
+          t1(a, f.end, h);
         }, a)));
 }
-/** @returns {boolean} */ function $6(/** @type {Kf | vh | xh | Th} */ e) {
+/** @returns {boolean} */ function Z6(/** @type {ed | Sh | wh | kh} */ e) {
   switch (e.kind) {
     case Ae.CloseBraceToken:
-      return e.parent.kind !== Ae.JsxExpression || !ld(e.parent.parent);
+      return e.parent.kind !== Ae.JsxExpression || !pd(e.parent.parent);
     case Ae.GreaterThanToken:
       switch (e.parent.kind) {
         case Ae.JsxClosingElement:
         case Ae.JsxClosingFragment:
-          return !ld(e.parent.parent.parent);
+          return !pd(e.parent.parent.parent);
         case Ae.JsxOpeningElement:
           return e.end !== e.parent.end;
         case Ae.JsxOpeningFragment:
           return !1;
         case Ae.JsxSelfClosingElement:
-          return e.end !== e.parent.end || !ld(e.parent.parent);
+          return e.end !== e.parent.end || !pd(e.parent.parent);
       }
   }
   return !0;
 }
-function Yh(/** @type {(cb: CommentRangeCallback) => void} */ e, /** @type {string} */ t) {
+function $h(/** @type {(cb: CommentRangeCallback) => void} */ e, /** @type {string} */ t) {
   let a = [];
   return (
     e((/** @type {number} */ s, /** @type {number} */ f, /** @type {number} */ h) => {
@@ -32414,11 +32434,11 @@ function Yh(/** @type {(cb: CommentRangeCallback) => void} */ e, /** @type {stri
     a
   );
 }
-/** @returns {boolean} */ function ld(/** @type {Kf | vh | xh | Th} */ e) {
+/** @returns {boolean} */ function pd(/** @type {ed | Sh | wh | kh} */ e) {
   return e.kind === Ae.JsxElement || e.kind === Ae.JsxFragment;
 }
-var [CT, DT] = km.split(".").map(/** @returns {number} */ (e) => Number.parseInt(e, 10));
-var PT =
+var [DT, PT] = Cm.split(".").map(/** @returns {number} */ (e) => Number.parseInt(e, 10));
+var NT =
   an.Intrinsic ??
   an.Any |
     an.Unknown |
@@ -32433,18 +32453,18 @@ var PT =
     an.Null |
     an.Never |
     an.NonPrimitive;
-function Xh(/** @type {d6} */ e) {
-  return Array.from(Hh(e), ({ end: t, kind: a, pos: s, value: f }) => {
-    let h = a === Ae.SingleLineCommentTrivia ? Bt.Line : Bt.Block,
+function Kh(/** @type {d6} */ e) {
+  return Array.from(Qh(e), ({ end: t, kind: a, pos: s, value: f }) => {
+    let h = a === Ae.SingleLineCommentTrivia ? Lt.Line : Lt.Block,
       b = [s, t],
-      v = Zr(b, e);
+      v = jr(b, e);
     return { type: h, loc: v, range: b, value: f };
   });
 }
-var $h = () => {};
-function Qh(/** @type {InstanceType<typeof d6>} */ e, t, /** @type {boolean} */ a) {
+var Zh = () => {};
+function e0(/** @type {InstanceType<typeof d6>} */ e, t, /** @type {boolean} */ a) {
   let { parseDiagnostics: s } = e;
-  if (s.length) throw cd(s[0]);
+  if (s.length) throw ud(s[0]);
   let f = new Fl(e, {
       allowInvalidAST: t.allowInvalidAST,
       errorOnUnknownASTType: t.errorOnUnknownASTType,
@@ -32454,13 +32474,13 @@ function Qh(/** @type {InstanceType<typeof d6>} */ e, t, /** @type {boolean} */ 
     h = f.convertProgram();
   return (
     (!t.range || !t.loc) &&
-      $h(h, {
+      Zh(h, {
         enter: (v) => {
           (t.range || delete v.range, t.loc || delete v.loc);
         },
       }),
-    t.tokens && (h.tokens = jh(e)),
-    t.comment && (h.comments = Xh(e)),
+    t.tokens && (h.tokens = Uh(e)),
+    t.comment && (h.comments = Kh(e)),
     { astMaps: f.getASTMaps(), estree: h }
   );
 }
@@ -32469,12 +32489,12 @@ function Qh(/** @type {InstanceType<typeof d6>} */ e, t, /** @type {boolean} */ 
   let t = e;
   return t.kind === Ae.SourceFile && typeof t.getFullText == "function";
 }
-var r4 = function (e) {
+var s4 = function (e) {
   return e && e.__esModule ? e : { default: e };
 };
-var i4 = r4({ extname: /** @returns {string} */ (/** @type {string} */ e) => "." + e.split(".").pop() });
-/** @returns {number} */ function Zh(/** @type {string} */ e, /** @type {boolean} */ t) {
-  switch (i4.default.extname(e).toLowerCase()) {
+var _4 = s4({ extname: /** @returns {string} */ (/** @type {string} */ e) => "." + e.split(".").pop() });
+/** @returns {number} */ function n0(/** @type {string} */ e, /** @type {boolean} */ t) {
+  switch (_4.default.extname(e).toLowerCase()) {
     case Nn.Cjs:
     case Nn.Js:
     case Nn.Mjs:
@@ -32493,14 +32513,14 @@ var i4 = r4({ extname: /** @returns {string} */ (/** @type {string} */ e) => "."
       return t ? Mr.TSX : Mr.TS;
   }
 }
-var s4 = { default: La },
-  _4 = (0, s4.default)("typescript-eslint:typescript-estree:create-program:createSourceFile");
-function e0(e) {
+var c4 = { default: La },
+  l4 = (0, c4.default)("typescript-eslint:typescript-estree:create-program:createSourceFile");
+function r0(e) {
   return (
-    _4("Getting AST without type information in %s mode for: %s", e.jsx ? "TSX" : "TS", e.filePath),
+    l4("Getting AST without type information in %s mode for: %s", e.jsx ? "TSX" : "TS", e.filePath),
     zl(e.code)
       ? e.code
-      : hh(
+      : bh(
           e.filePath,
           e.codeFullText,
           {
@@ -32509,37 +32529,37 @@ function e0(e) {
             setExternalModuleIndicator: e.setExternalModuleIndicator,
           },
           !0,
-          Zh(e.filePath, e.jsx),
+          n0(e.filePath, e.jsx),
         )
   );
 }
-var t0 = /** @returns {string} */ (/** @type {string} */ e) => e;
-var n0 = () => {};
-var r0 = class {};
-var a0 = /** @returns {boolean} */ () => !1;
-var s0 = () => {};
-var v4 = function (e) {
+var i0 = /** @returns {string} */ (/** @type {string} */ e) => e;
+var a0 = () => {};
+var s0 = class {};
+var _0 = /** @returns {boolean} */ () => !1;
+var o0 = () => {};
+var T4 = function (e) {
   return e && e.__esModule ? e : { default: e };
 };
-var x4 = {},
-  ud = { default: La },
-  T4 = v4({ extname: /** @returns {string} */ (/** @type {string} */ e) => "." + e.split(".").pop() }),
-  S4 = (0, ud.default)("typescript-eslint:typescript-estree:parseSettings:createParseSettings"),
-  w4,
-  _0 = null,
+var S4 = {},
+  dd = { default: La },
+  w4 = T4({ extname: /** @returns {string} */ (/** @type {string} */ e) => "." + e.split(".").pop() }),
+  k4 = (0, dd.default)("typescript-eslint:typescript-estree:parseSettings:createParseSettings"),
+  c0,
+  fd = null,
   N_ = {
-    ParseAll: Qa?.ParseAll,
-    ParseForTypeErrors: Qa?.ParseForTypeErrors,
-    ParseForTypeInfo: Qa?.ParseForTypeInfo,
-    ParseNone: Qa?.ParseNone,
+    ParseAll: $a?.ParseAll,
+    ParseForTypeErrors: $a?.ParseForTypeErrors,
+    ParseForTypeInfo: $a?.ParseForTypeInfo,
+    ParseNone: $a?.ParseNone,
   };
-function o0(/** @type {string} */ e, t = {}) {
-  let a = k4(e),
-    s = a0(t),
+function l0(/** @type {string} */ e, t = {}) {
+  let a = E4(e),
+    s = _0(t),
     f = void 0,
     h = typeof t.loggerFn == "function",
-    b = t0(typeof t.filePath == "string" && t.filePath !== "<input>" ? t.filePath : E4(t.jsx), f),
-    v = T4.default.extname(b).toLowerCase(),
+    b = i0(typeof t.filePath == "string" && t.filePath !== "<input>" ? t.filePath : A4(t.jsx), f),
+    v = w4.default.extname(b).toLowerCase(),
     l = (/** @returns {number} */ () => {
       switch (t.jsDocParsingMode) {
         case "all":
@@ -32552,7 +32572,7 @@ function o0(/** @type {string} */ e, t = {}) {
           return N_.ParseAll;
       }
     })(),
-    G = {
+    W = {
       loc: t.loc === !0,
       range: t.range === !0,
       allowInvalidAST: t.allowInvalidAST === !0,
@@ -32582,7 +32602,7 @@ function o0(/** @type {string} */ e, t = {}) {
       projectService:
         t.projectService ||
         (t.project && t.projectService !== !1 && (void 0).env.TYPESCRIPT_ESLINT_PROJECT_SERVICE === "true")
-          ? A4(t.projectService, { jsDocParsingMode: l, tsconfigRootDir: f })
+          ? C4(t.projectService, { jsDocParsingMode: l, tsconfigRootDir: f })
           : void 0,
       setExternalModuleIndicator:
         t.sourceType === "module" || (t.sourceType == null && v === Nn.Mjs) || (t.sourceType == null && v === Nn.Mts)
@@ -32593,72 +32613,72 @@ function o0(/** @type {string} */ e, t = {}) {
       singleRun: s,
       suppressDeprecatedPropertyWarnings: t.suppressDeprecatedPropertyWarnings ?? !0,
       tokens: t.tokens === !0 ? [] : null,
-      tsconfigMatchCache: w4 ?? (w4 = new r0(s ? "Infinity" : (t.cacheLifetime?.glob ?? void 0))),
+      tsconfigMatchCache: c0 ?? (c0 = new s0(s ? "Infinity" : (t.cacheLifetime?.glob ?? void 0))),
       tsconfigRootDir: f,
     };
   if (
-    G.projectService &&
+    W.projectService &&
     t.project &&
     (void 0).env.TYPESCRIPT_ESLINT_IGNORE_PROJECT_AND_PROJECT_SERVICE_ERROR !== "true"
   )
     throw new Error(
       'Enabling "project" does nothing when "projectService" is enabled. You can remove the "project" setting.',
     );
-  if (G.debugLevel.size > 0) {
+  if (W.debugLevel.size > 0) {
     let y = [];
-    (G.debugLevel.has("typescript-eslint") && y.push("typescript-eslint:*"),
-      (G.debugLevel.has("eslint") || ud.default.enabled("eslint:*,-eslint:code-path")) &&
+    (W.debugLevel.has("typescript-eslint") && y.push("typescript-eslint:*"),
+      (W.debugLevel.has("eslint") || dd.default.enabled("eslint:*,-eslint:code-path")) &&
         y.push("eslint:*,-eslint:code-path"),
-      ud.default.enable(y.join(",")));
+      dd.default.enable(y.join(",")));
   }
   if (Array.isArray(t.programs)) {
     if (!t.programs.length)
       throw new Error(
         "You have set parserOptions.programs to an empty array. This will cause all files to not be found in existing programs. Either provide one or more existing TypeScript Program instances in the array, or remove the parserOptions.programs setting.",
       );
-    S4("parserOptions.programs was provided, so parserOptions.project will be ignored.");
+    k4("parserOptions.programs was provided, so parserOptions.project will be ignored.");
   }
   return (
-    !G.programs && !G.projectService && (G.projects = new Map()),
+    !W.programs && !W.projectService && (W.projects = new Map()),
     t.jsDocParsingMode == null &&
-      G.projects.size === 0 &&
-      G.programs == null &&
-      G.projectService == null &&
-      (G.jsDocParsingMode = N_.ParseNone),
-    s0(G, t.onUnsupportedTypeScriptVersion ?? "warn", h),
-    G
+      W.projects.size === 0 &&
+      W.programs == null &&
+      W.projectService == null &&
+      (W.jsDocParsingMode = N_.ParseNone),
+    o0(W, t.onUnsupportedTypeScriptVersion ?? "warn", h),
+    W
   );
 }
-/** @returns {string} */ function k4(/** @type {string} */ e) {
+/** @returns {string} */ function E4(/** @type {string} */ e) {
   return zl(e) ? e.getFullText(e) : typeof e == "string" ? e : String(e);
 }
-/** @returns {string} */ function E4(/** @type {boolean} */ e) {
+/** @returns {string} */ function A4(/** @type {boolean} */ e) {
   return e ? "estree.tsx" : "estree.ts";
 }
-function A4(e, t) {
+function C4(e, t) {
   let a = typeof e == "object" ? e : {};
-  return (n0(a.allowDefaultProject), _0 ?? (_0 = (0, x4.createProjectService)({ options: a, ...t })), _0);
+  return (a0(a.allowDefaultProject), fd ?? (fd = (0, S4.createProjectService)({ options: a, ...t })), fd);
 }
-var N4 = { default: La },
-  GT = (0, N4.default)("typescript-eslint:typescript-estree:parser");
-function c0(/** @type {string} */ e, t) {
-  let { ast: a } = I4(e, t, !1);
+var I4 = { default: La },
+  HT = (0, I4.default)("typescript-eslint:typescript-estree:parser");
+function u0(/** @type {string} */ e, t) {
+  let { ast: a } = O4(e, t, !1);
   return a;
 }
-function I4(/** @type {string} */ e, t, /** @type {boolean} */ a) {
-  let s = o0(e, t);
+function O4(/** @type {string} */ e, t, /** @type {boolean} */ a) {
+  let s = l0(e, t);
   if (t?.errorOnTypeScriptSyntacticAndSemanticIssues)
     throw new Error('"errorOnTypeScriptSyntacticAndSemanticIssues" is only supported for parseAndGenerateServices()');
-  let f = e0(s),
-    { astMaps: h, estree: b } = Qh(f, s, a);
+  let f = r0(s),
+    { astMaps: h, estree: b } = e0(f, s, a);
   return { ast: b, esTreeNodeToTSNodeMap: h.esTreeNodeToTSNodeMap, tsNodeToESTreeNodeMap: h.tsNodeToESTreeNodeMap };
 }
-function O4(/** @type {string} */ e, t) {
+function M4(/** @type {string} */ e, t) {
   let a = new SyntaxError(e + " (" + t.loc.start.line + ":" + t.loc.start.column + ")");
   return Object.assign(a, t);
 }
-var l0 = O4;
-function u0(e) {
+var p0 = M4;
+function f0(e) {
   let t = [];
   for (let a of e)
     try {
@@ -32668,7 +32688,7 @@ function u0(e) {
     }
   throw Object.assign(new Error("All combinations failed"), { errors: t });
 }
-var M4 =
+var L4 =
     Array.prototype.findLast ??
     function (e) {
       for (let t = this.length - 1; t >= 0; t--) {
@@ -32676,18 +32696,18 @@ var M4 =
         if (e(a, t, this)) return a;
       }
     },
-  L4 = ja("findLast", function () {
-    if (Array.isArray(this)) return M4;
+  j4 = es("findLast", function () {
+    if (Array.isArray(this)) return L4;
   }),
-  p0 = L4;
-var Vl = Symbol.for("comments");
-function j4(/** @type {number} */ e) {
+  d0 = j4;
+var Gl = Symbol.for("comments");
+function J4(/** @type {number} */ e) {
   return this[e < 0 ? this.length + e : e];
 }
-var J4 = ja("at", function () {
-    if (Array.isArray(this) || typeof this == "string") return j4;
+var R4 = es("at", function () {
+    if (Array.isArray(this) || typeof this == "string") return J4;
   }),
-  f0 = J4;
+  m0 = R4;
 function la(e) {
   let t = new Set(e);
   return /** @returns {boolean} */ (a) => t.has(a?.type);
@@ -32700,12 +32720,12 @@ function la(e) {
     a = (e.declaration?.decorators ?? e.decorators)?.[0];
   return a ? Math.min(Qt(a), t) : t;
 }
-var R4 = 5,
-  U4 = 8,
+var U4 = 5,
   B4 = 8,
-  d0 = (/** @type {number} */ e) => /** @returns {number} */ (t) => (t.label ? Kt(t.label) : Qt(t) + e),
-  q4 = /** @returns {number} */ (e) => e.__contentEnd ?? ns(e),
-  m0 = [
+  q4 = 8,
+  h0 = (/** @type {number} */ e) => /** @returns {number} */ (t) => (t.label ? Kt(t.label) : Qt(t) + e),
+  F4 = /** @returns {number} */ (e) => e.__contentEnd ?? ns(e),
+  y0 = [
     "ExpressionStatement",
     "Directive",
     "ImportDeclaration",
@@ -32715,15 +32735,23 @@ var R4 = 5,
     "ReturnStatement",
     "ThrowStatement",
     "DoWhileStatement",
+    "ClassProperty",
+    "PropertyDefinition",
+    "ClassPrivateProperty",
+    "ClassAccessorProperty",
+    "AccessorProperty",
+    "AbstractPropertyDefinition",
+    "TSAbstractPropertyDefinition",
+    "TSAbstractAccessorProperty",
   ],
-  F4 = new Map([
-    ["BreakStatement", d0(R4)],
-    ["ContinueStatement", d0(U4)],
-    ["DebuggerStatement", /** @returns {number} */ (e) => Qt(e) + B4],
-    ["VariableDeclaration", /** @returns {number} */ (e) => Kt(f0(0, e.declarations, -1))],
-    ...m0.map((e) => [e, q4]),
+  z4 = new Map([
+    ["BreakStatement", h0(U4)],
+    ["ContinueStatement", h0(B4)],
+    ["DebuggerStatement", /** @returns {number} */ (e) => Qt(e) + q4],
+    ["VariableDeclaration", /** @returns {number} */ (e) => Kt(m0(0, e.declarations, -1))],
+    ...y0.map((e) => [e, F4]),
   ]),
-  pd = la(m0);
+  md = la(y0);
 /** @returns {number} */ function Kt(e) {
   let { type: t } = e;
   return t === "IfStatement"
@@ -32735,10 +32763,10 @@ var R4 = 5,
         t === "WithStatement" ||
         t === "WhileStatement"
       ? Kt(e.body)
-      : (F4.get(t)?.(e) ?? ns(e));
+      : (z4.get(t)?.(e) ?? ns(e));
 }
 var rs = la(["Block", "CommentBlock", "MultiLine"]),
-  h0 = la([
+  g0 = la([
     "Line",
     "CommentLine",
     "SingleLine",
@@ -32755,28 +32783,31 @@ function is(e, t, a) {
   }
   return e.get(t);
 }
-var z4 = new WeakMap();
-function y0(e) {
-  return is(z4, e, (t) => rs(t) && t.value[0] === "*" && /@(?:type|satisfies)\b/.test(t.value));
+var V4 = new WeakMap();
+function b0(e) {
+  return is(V4, e, (t) => rs(t) && t.value[0] === "*" && /@(?:type|satisfies)\b/.test(t.value));
 }
-/** @returns {string} */ function V4(/** @type {string} */ e) {
-  return yr(0, e, /[^\n]/g, " ");
+/** @returns {string} */ function W4(/** @type {string} */ e) {
+  return gr(0, e, /[^\n]/g, " ");
 }
-var g0 = V4;
-/** @returns {string} */ function W4(/** @type {string} */ e, t) {
-  for (let a of t) {
-    let s = Qt(a),
-      f = Kt(a);
-    e = e.slice(0, s) + g0(e.slice(s, f)) + e.slice(f);
+var v0 = W4;
+/** @returns {string} */ function G4(/** @type {string} */ e, t) {
+  if (t.length === 0) return e;
+  let a = "",
+    s = 0;
+  for (let f of t) {
+    let h = Qt(f),
+      b = Kt(f);
+    ((a += e.slice(s, h) + v0(e.slice(h, b))), (s = b));
   }
-  return e;
+  return a + e.slice(s);
 }
-var G4 = new WeakMap();
-/** @returns {string} */ function b0(e) {
-  let t = e[Vl];
-  return is(G4, t, /** @returns {string} */ (a) => W4(e.originalText, a));
+var Y4 = new WeakMap();
+/** @returns {string} */ function x0(e) {
+  let t = e[Gl];
+  return is(Y4, t, /** @returns {string} */ (a) => G4(e.originalText, a));
 }
-function Y4(e) {
+function H4(e) {
   if (!rs(e)) return [];
   if (
     !e.value.includes(`
@@ -32791,17 +32822,17 @@ function Y4(e) {
   }
   return t;
 }
-var v0 = new WeakMap();
-function H4(e) {
-  return is(v0, e, Y4);
+var T0 = new WeakMap();
+function X4(e) {
+  return is(T0, e, H4);
 }
-function x0(e) {
-  v0.delete(e);
+function S0(e) {
+  T0.delete(e);
 }
-function fd(e) {
-  return H4(e).length > 0;
+function hd(e) {
+  return X4(e).length > 0;
 }
-function T0(e) {
+function w0(e) {
   if (e.length < 2) return;
   let t;
   for (let a = e.length - 1; a >= 0; a--) {
@@ -32809,19 +32840,19 @@ function T0(e) {
     if (
       (t &&
         Kt(s) === Qt(t) &&
-        fd(s) &&
-        fd(t) &&
-        (e.splice(a + 1, 1), (s.value += "*//*" + t.value), (s.range = [Qt(s), Kt(t)]), x0(s)),
-      !h0(s) && !rs(s))
+        hd(s) &&
+        hd(t) &&
+        (e.splice(a + 1, 1), (s.value += "*//*" + t.value), (s.range = [Qt(s), Kt(t)]), S0(s)),
+      !g0(s) && !rs(s))
     )
       throw new TypeError(`Unknown comment type: "${s.type}".`);
     t = s;
   }
 }
-/** @returns {boolean} */ function X4(e) {
+/** @returns {boolean} */ function $4(e) {
   return e !== null && typeof e == "object";
 }
-var S0 = X4;
+var k0 = $4;
 var I_ = null;
 function O_(e) {
   if (I_ !== null && typeof I_.property) {
@@ -32830,13 +32861,13 @@ function O_(e) {
   }
   return ((I_ = O_.prototype = e ?? Object.create(null)), new O_());
 }
-var $4 = 10;
-for (let e = 0; e <= $4; e++) O_();
-function dd(e) {
+var Q4 = 10;
+for (let e = 0; e <= Q4; e++) O_();
+function yd(e) {
   return O_(e);
 }
-function Q4(e, t = "type") {
-  dd(e);
+function K4(e, t = "type") {
+  yd(e);
   function a(s) {
     let f = s[t],
       h = e[f];
@@ -32845,8 +32876,8 @@ function Q4(e, t = "type") {
   }
   return a;
 }
-var w0 = Q4;
-var M = [
+var E0 = K4;
+var I = [
     ["elements"],
     ["left", "right"],
     ["value"],
@@ -32868,13 +32899,11 @@ var M = [
     ["body"],
     ["decorators", "id", "typeParameters", "superClass", "superTypeArguments", "mixins", "implements", "body"],
     ["declaration", "specifiers", "source", "attributes"],
-    ["local"],
-    ["exported"],
     ["decorators", "variance", "key", "typeAnnotation", "value"],
     ["id"],
     ["key", "value"],
     ["elementType"],
-    ["id", "typeParameters"],
+    ["id", "typeArguments"],
     ["id", "typeParameters", "extends", "body"],
     ["id", "body"],
     ["typeAnnotation"],
@@ -32894,179 +32923,182 @@ var M = [
     ["parameterName", "typeAnnotation"],
     ["checkType", "extendsType", "trueType", "falseType"],
     ["typeParameter"],
+    ["quasis", "types"],
     ["literal"],
     ["expression", "typeArguments"],
+    ["id", "moduleReference"],
     ["decorators", "key", "typeAnnotation"],
+    ["params", "returnType", "rest", "typeParameters"],
     ["argument", "cases"],
     ["pattern", "body", "guard"],
     ["properties", "rest"],
     ["node"],
   ],
-  k0 = {
-    ArrayExpression: M[0],
-    AssignmentExpression: M[1],
-    BinaryExpression: M[1],
+  A0 = {
+    ArrayExpression: I[0],
+    AssignmentExpression: I[1],
+    BinaryExpression: I[1],
     InterpreterDirective: [],
-    Directive: M[2],
+    Directive: I[2],
     DirectiveLiteral: [],
-    BlockStatement: M[3],
-    BreakStatement: M[4],
-    CallExpression: M[5],
+    BlockStatement: I[3],
+    BreakStatement: I[4],
+    CallExpression: I[5],
     CatchClause: ["param", "body"],
-    ConditionalExpression: M[6],
-    ContinueStatement: M[4],
+    ConditionalExpression: I[6],
+    ContinueStatement: I[4],
     DebuggerStatement: [],
-    DoWhileStatement: M[7],
+    DoWhileStatement: I[7],
     EmptyStatement: [],
-    ExpressionStatement: M[8],
+    ExpressionStatement: I[8],
     File: ["program"],
-    ForInStatement: M[9],
+    ForInStatement: I[9],
     ForStatement: ["init", "test", "update", "body"],
-    FunctionDeclaration: M[10],
-    FunctionExpression: M[10],
+    FunctionDeclaration: I[10],
+    FunctionExpression: I[10],
     Identifier: ["typeAnnotation", "decorators"],
-    IfStatement: M[6],
+    IfStatement: I[6],
     LabeledStatement: ["label", "body"],
     StringLiteral: [],
     NumericLiteral: [],
     NullLiteral: [],
     BooleanLiteral: [],
     RegExpLiteral: [],
-    LogicalExpression: M[1],
-    MemberExpression: M[11],
-    NewExpression: M[5],
-    Program: M[3],
-    ObjectExpression: M[12],
-    ObjectMethod: M[13],
-    ObjectProperty: M[14],
+    LogicalExpression: I[1],
+    MemberExpression: I[11],
+    NewExpression: I[5],
+    Program: I[3],
+    ObjectExpression: I[12],
+    ObjectMethod: I[13],
+    ObjectProperty: I[14],
     RestElement: ["argument", "typeAnnotation", "decorators"],
-    ReturnStatement: M[15],
-    SequenceExpression: M[16],
-    ParenthesizedExpression: M[8],
+    ReturnStatement: I[15],
+    SequenceExpression: I[16],
+    ParenthesizedExpression: I[8],
     SwitchCase: ["test", "consequent"],
     SwitchStatement: ["discriminant", "cases"],
     ThisExpression: [],
-    ThrowStatement: M[15],
+    ThrowStatement: I[15],
     TryStatement: ["block", "handler", "finalizer"],
-    UnaryExpression: M[15],
-    UpdateExpression: M[15],
+    UnaryExpression: I[15],
+    UpdateExpression: I[15],
     VariableDeclaration: ["declarations"],
-    VariableDeclarator: M[17],
-    WhileStatement: M[7],
+    VariableDeclarator: I[17],
+    WhileStatement: I[7],
     WithStatement: ["object", "body"],
     AssignmentPattern: ["left", "right", "decorators", "typeAnnotation"],
     ArrayPattern: ["elements", "typeAnnotation", "decorators"],
     ArrowFunctionExpression: ["typeParameters", "params", "predicate", "returnType", "body"],
-    ClassBody: M[18],
-    ClassExpression: M[19],
-    ClassDeclaration: M[19],
+    ClassBody: I[18],
+    ClassExpression: I[19],
+    ClassDeclaration: I[19],
     ExportAllDeclaration: ["source", "attributes", "exported"],
     ExportDefaultDeclaration: ["declaration"],
-    ExportNamedDeclaration: M[20],
+    ExportNamedDeclaration: I[20],
     ExportSpecifier: ["local", "exported"],
-    ForOfStatement: M[9],
+    ForOfStatement: I[9],
     ImportDeclaration: ["specifiers", "source", "attributes"],
-    ImportDefaultSpecifier: M[21],
-    ImportNamespaceSpecifier: M[21],
+    ImportDefaultSpecifier: ["local"],
+    ImportNamespaceSpecifier: ["exportsFilter", "local"],
     ImportSpecifier: ["imported", "local"],
     MetaProperty: ["meta", "property"],
-    ClassMethod: M[13],
+    ClassMethod: I[13],
     ObjectPattern: ["decorators", "properties", "typeAnnotation"],
-    SpreadElement: M[15],
+    SpreadElement: I[15],
     Super: [],
     TaggedTemplateExpression: ["tag", "typeArguments", "quasi"],
     TemplateElement: [],
     TemplateLiteral: ["quasis", "expressions"],
-    YieldExpression: M[15],
-    AwaitExpression: M[15],
+    YieldExpression: I[15],
+    AwaitExpression: I[15],
     ImportExpression: ["source", "options"],
     BigIntLiteral: [],
-    ExportNamespaceSpecifier: M[22],
-    OptionalMemberExpression: M[11],
-    OptionalCallExpression: M[5],
-    ClassProperty: M[23],
-    ClassPrivateProperty: M[23],
-    ClassPrivateMethod: M[13],
-    PrivateName: M[24],
-    StaticBlock: M[18],
-    ImportAttribute: M[25],
+    ExportNamespaceSpecifier: ["exportsFilter", "exported"],
+    OptionalMemberExpression: I[11],
+    OptionalCallExpression: I[5],
+    ClassProperty: I[21],
+    ClassPrivateProperty: I[21],
+    ClassPrivateMethod: I[13],
+    PrivateName: I[22],
+    StaticBlock: I[18],
+    ImportAttribute: I[23],
     AnyTypeAnnotation: [],
-    ArrayTypeAnnotation: M[26],
+    ArrayTypeAnnotation: I[24],
     BooleanTypeAnnotation: [],
     BooleanLiteralTypeAnnotation: [],
     NullLiteralTypeAnnotation: [],
-    ClassImplements: M[27],
+    ClassImplements: I[25],
     DeclareClass: ["id", "typeParameters", "extends", "mixins", "implements", "body"],
-    DeclareFunction: ["id", "predicate"],
-    DeclareInterface: M[28],
-    DeclareModule: M[29],
-    DeclareModuleExports: M[30],
-    DeclareTypeAlias: M[31],
+    DeclareFunction: ["id", "predicate", "typeAnnotation"],
+    DeclareInterface: I[26],
+    DeclareModule: I[27],
+    DeclareModuleExports: I[28],
+    DeclareTypeAlias: I[29],
     DeclareOpaqueType: ["id", "typeParameters", "supertype", "lowerBound", "upperBound"],
     DeclareVariable: ["id", "declarations"],
-    DeclareExportDeclaration: M[20],
+    DeclareExportDeclaration: I[20],
     DeclareExportAllDeclaration: ["source", "attributes"],
-    DeclaredPredicate: M[2],
+    DeclaredPredicate: I[2],
     ExistsTypeAnnotation: [],
     FunctionTypeAnnotation: ["typeParameters", "this", "params", "rest", "returnType"],
-    FunctionTypeParam: M[32],
-    GenericTypeAnnotation: M[27],
+    FunctionTypeParam: I[30],
+    GenericTypeAnnotation: I[25],
     InferredPredicate: [],
-    InterfaceExtends: M[27],
-    InterfaceDeclaration: M[28],
+    InterfaceExtends: I[25],
+    InterfaceDeclaration: I[26],
     InterfaceTypeAnnotation: ["extends", "body"],
-    IntersectionTypeAnnotation: M[33],
+    IntersectionTypeAnnotation: I[31],
     MixedTypeAnnotation: [],
     EmptyTypeAnnotation: [],
-    NullableTypeAnnotation: M[30],
+    NullableTypeAnnotation: I[28],
     NumberLiteralTypeAnnotation: [],
     BigIntLiteralTypeAnnotation: [],
     NumberTypeAnnotation: [],
     ObjectTypeAnnotation: ["properties", "indexers", "callProperties", "internalSlots"],
     ObjectTypeInternalSlot: ["id", "value"],
-    ObjectTypeCallProperty: M[2],
+    ObjectTypeCallProperty: I[2],
     ObjectTypeIndexer: ["variance", "id", "key", "value"],
-    ObjectTypeProperty: ["key", "value", "variance"],
-    ObjectTypeSpreadProperty: M[15],
+    ObjectTypeProperty: ["key", "value", "variance", "init"],
+    ObjectTypeSpreadProperty: I[15],
     OpaqueType: ["id", "typeParameters", "supertype", "impltype", "lowerBound", "upperBound"],
-    QualifiedTypeIdentifier: M[34],
+    QualifiedTypeIdentifier: I[32],
     StringLiteralTypeAnnotation: [],
     StringTypeAnnotation: [],
     SymbolTypeAnnotation: [],
     ThisTypeAnnotation: [],
-    TupleTypeAnnotation: M[35],
+    TupleTypeAnnotation: I[33],
     TypeofTypeAnnotation: ["argument", "typeArguments"],
-    TypeAlias: M[31],
-    TypeAnnotation: M[30],
-    TypeCastExpression: M[36],
+    TypeAlias: I[29],
+    TypeAnnotation: I[28],
+    TypeCastExpression: I[34],
     TypeParameter: ["bound", "default", "variance"],
-    TypeParameterDeclaration: M[37],
-    TypeParameterInstantiation: M[37],
-    UnionTypeAnnotation: M[33],
+    TypeParameterDeclaration: I[35],
+    TypeParameterInstantiation: I[35],
+    UnionTypeAnnotation: I[31],
     Variance: [],
     VoidTypeAnnotation: [],
-    EnumDeclaration: M[29],
-    EnumBooleanBody: M[38],
-    EnumNumberBody: M[38],
-    EnumStringBody: M[38],
-    EnumSymbolBody: M[38],
-    EnumBooleanMember: M[17],
-    EnumNumberMember: M[17],
-    EnumStringMember: M[17],
-    EnumDefaultedMember: M[24],
-    IndexedAccessType: M[39],
-    OptionalIndexedAccessType: M[39],
+    EnumDeclaration: I[27],
+    EnumBooleanBody: I[36],
+    EnumNumberBody: I[36],
+    EnumStringBody: I[36],
+    EnumSymbolBody: I[36],
+    EnumBooleanMember: I[17],
+    EnumNumberMember: I[17],
+    EnumStringMember: I[17],
+    EnumDefaultedMember: I[22],
+    IndexedAccessType: I[37],
+    OptionalIndexedAccessType: I[37],
     JSXAttribute: ["name", "value"],
     JSXClosingElement: ["name"],
     JSXElement: ["openingElement", "children", "closingElement"],
     JSXEmptyExpression: [],
-    JSXExpressionContainer: M[8],
-    JSXSpreadChild: M[8],
+    JSXExpressionContainer: I[8],
+    JSXSpreadChild: I[8],
     JSXIdentifier: [],
-    JSXMemberExpression: M[11],
+    JSXMemberExpression: I[11],
     JSXNamespacedName: ["namespace", "name"],
     JSXOpeningElement: ["name", "typeArguments", "attributes"],
-    JSXSpreadAttribute: M[15],
+    JSXSpreadAttribute: I[15],
     JSXText: [],
     JSXFragment: ["openingFragment", "children", "closingFragment"],
     JSXOpeningFragment: [],
@@ -33075,21 +33107,23 @@ var M = [
     V8IntrinsicIdentifier: [],
     ArgumentPlaceholder: [],
     BindExpression: ["object", "callee"],
-    ClassAccessorProperty: M[40],
-    Decorator: M[8],
-    DoExpression: M[18],
-    ExportDefaultSpecifier: M[22],
-    ModuleExpression: M[18],
+    ClassAccessorProperty: I[38],
+    Decorator: I[8],
+    DoExpression: I[18],
+    ExportDefaultSpecifier: ["exported"],
+    ModuleExpression: I[18],
     TopicReference: [],
     VoidPattern: [],
-    TSParameterProperty: ["parameter", "decorators"],
-    TSDeclareFunction: M[41],
-    TSDeclareMethod: M[42],
-    TSQualifiedName: M[1],
-    TSCallSignatureDeclaration: M[43],
-    TSConstructSignatureDeclaration: M[43],
+    StructDeclaration: ["id", "superClass", "body"],
+    StructBody: I[18],
+    TSParameterProperty: ["decorators", "parameter"],
+    TSDeclareFunction: I[39],
+    TSDeclareMethod: I[40],
+    TSQualifiedName: I[1],
+    TSCallSignatureDeclaration: I[41],
+    TSConstructSignatureDeclaration: I[41],
     TSPropertySignature: ["key", "typeAnnotation"],
-    TSMethodSignature: M[42],
+    TSMethodSignature: I[40],
     TSIndexSignature: ["parameters", "typeAnnotation"],
     TSAnyKeyword: [],
     TSBooleanKeyword: [],
@@ -33105,62 +33139,62 @@ var M = [
     TSUnknownKeyword: [],
     TSVoidKeyword: [],
     TSThisType: [],
-    TSFunctionType: M[43],
-    TSConstructorType: M[43],
+    TSFunctionType: I[41],
+    TSConstructorType: I[41],
     TSTypeReference: ["typeName", "typeArguments"],
-    TSTypePredicate: M[44],
+    TSTypePredicate: I[42],
     TSTypeQuery: ["exprName", "typeArguments"],
-    TSTypeLiteral: M[38],
-    TSArrayType: M[26],
-    TSTupleType: M[35],
-    TSOptionalType: M[30],
-    TSRestType: M[30],
+    TSTypeLiteral: I[36],
+    TSArrayType: I[24],
+    TSTupleType: I[33],
+    TSOptionalType: I[28],
+    TSRestType: I[28],
     TSNamedTupleMember: ["label", "elementType"],
-    TSUnionType: M[33],
-    TSIntersectionType: M[33],
-    TSConditionalType: M[45],
-    TSInferType: M[46],
-    TSParenthesizedType: M[30],
-    TSTypeOperator: M[30],
-    TSIndexedAccessType: M[39],
+    TSUnionType: I[31],
+    TSIntersectionType: I[31],
+    TSConditionalType: I[43],
+    TSInferType: I[44],
+    TSParenthesizedType: I[28],
+    TSTypeOperator: I[28],
+    TSIndexedAccessType: I[37],
     TSMappedType: ["key", "constraint", "nameType", "typeAnnotation"],
-    TSTemplateLiteralType: ["quasis", "types"],
-    TSLiteralType: M[47],
-    TSClassImplements: M[48],
-    TSInterfaceHeritage: M[48],
-    TSInterfaceDeclaration: M[28],
-    TSInterfaceBody: M[18],
+    TSTemplateLiteralType: I[45],
+    TSLiteralType: I[46],
+    TSClassImplements: I[47],
+    TSInterfaceHeritage: I[47],
+    TSInterfaceDeclaration: I[26],
+    TSInterfaceBody: I[18],
     TSTypeAliasDeclaration: ["id", "typeParameters", "typeAnnotation"],
-    TSInstantiationExpression: M[48],
-    TSAsExpression: M[36],
-    TSSatisfiesExpression: M[36],
-    TSTypeAssertion: M[36],
-    TSEnumBody: M[38],
-    TSEnumDeclaration: M[29],
+    TSInstantiationExpression: I[47],
+    TSAsExpression: I[34],
+    TSSatisfiesExpression: I[34],
+    TSTypeAssertion: I[34],
+    TSEnumBody: I[36],
+    TSEnumDeclaration: I[27],
     TSEnumMember: ["id", "initializer"],
-    TSModuleDeclaration: M[29],
-    TSModuleBlock: M[18],
+    TSModuleDeclaration: I[27],
+    TSModuleBlock: I[18],
     TSImportType: ["source", "options", "qualifier", "typeArguments"],
-    TSImportEqualsDeclaration: ["id", "moduleReference"],
-    TSExternalModuleReference: M[8],
-    TSNonNullExpression: M[8],
-    TSExportAssignment: M[8],
-    TSNamespaceExportDeclaration: M[24],
-    TSTypeAnnotation: M[30],
-    TSTypeParameterInstantiation: M[37],
-    TSTypeParameterDeclaration: M[37],
+    TSImportEqualsDeclaration: I[48],
+    TSExternalModuleReference: I[8],
+    TSNonNullExpression: I[8],
+    TSExportAssignment: I[8],
+    TSNamespaceExportDeclaration: I[22],
+    TSTypeAnnotation: I[28],
+    TSTypeParameterInstantiation: I[35],
+    TSTypeParameterDeclaration: I[35],
     TSTypeParameter: ["name", "constraint", "default"],
-    ChainExpression: M[8],
+    ChainExpression: I[8],
     Literal: [],
-    MethodDefinition: M[14],
+    MethodDefinition: I[14],
     PrivateIdentifier: [],
-    Property: M[25],
-    PropertyDefinition: M[23],
-    AccessorProperty: M[40],
-    TSAbstractAccessorProperty: M[49],
+    Property: I[23],
+    PropertyDefinition: I[21],
+    AccessorProperty: I[38],
+    TSAbstractAccessorProperty: I[49],
     TSAbstractKeyword: [],
-    TSAbstractMethodDefinition: M[25],
-    TSAbstractPropertyDefinition: M[49],
+    TSAbstractMethodDefinition: I[23],
+    TSAbstractPropertyDefinition: I[49],
     TSAsyncKeyword: [],
     TSDeclareKeyword: [],
     TSEmptyBodyFunctionExpression: ["id", "typeParameters", "params", "returnType"],
@@ -33170,96 +33204,110 @@ var M = [
     TSPublicKeyword: [],
     TSReadonlyKeyword: [],
     TSStaticKeyword: [],
-    AsConstExpression: M[8],
-    AsExpression: M[36],
+    AbstractMethodDefinition: I[23],
+    AbstractPropertyDefinition: ["key", "value", "typeAnnotation", "variance"],
+    AsConstExpression: I[8],
+    AsExpression: I[34],
     BigIntTypeAnnotation: [],
     ComponentDeclaration: ["id", "params", "body", "typeParameters", "rendersType"],
     ComponentParameter: ["name", "local"],
     ComponentTypeAnnotation: ["params", "rest", "typeParameters", "rendersType"],
-    ComponentTypeParameter: M[32],
-    ConditionalTypeAnnotation: M[45],
+    ComponentTypeParameter: I[30],
+    ConditionalTypeAnnotation: I[43],
+    ConstructorTypeAnnotation: I[50],
+    DeclareClassExtendsCall: ["callee", "argument"],
     DeclareComponent: ["id", "params", "rest", "typeParameters", "rendersType"],
-    DeclareEnum: M[29],
-    DeclareHook: M[24],
-    DeclareNamespace: M[29],
-    EnumBigIntBody: M[38],
-    EnumBigIntMember: M[17],
-    EnumBody: M[38],
-    HookDeclaration: M[41],
-    HookTypeAnnotation: ["params", "returnType", "rest", "typeParameters"],
-    InferTypeAnnotation: M[46],
-    KeyofTypeAnnotation: M[15],
+    DeclareEnum: I[27],
+    DeclareHook: I[22],
+    DeclareNamespace: I[27],
+    EnumBigIntMember: I[17],
+    EnumBody: I[36],
+    ExportAssignment: I[8],
+    ExternalModuleReference: I[8],
+    HookDeclaration: I[39],
+    HookTypeAnnotation: I[50],
+    ImportEqualsDeclaration: I[48],
+    ImportType: ["source"],
+    InferTypeAnnotation: I[44],
+    KeyofTypeAnnotation: I[15],
     MatchArrayPattern: ["elements", "rest"],
     MatchAsPattern: ["pattern", "target"],
-    MatchBindingPattern: M[24],
-    MatchExpression: M[50],
-    MatchExpressionCase: M[51],
-    MatchIdentifierPattern: M[24],
-    MatchInstanceObjectPattern: M[52],
+    MatchBindingPattern: I[22],
+    MatchExpression: I[51],
+    MatchExpressionCase: I[52],
+    MatchIdentifierPattern: I[22],
+    MatchInstanceObjectPattern: I[53],
     MatchInstancePattern: ["targetConstructor", "properties"],
-    MatchLiteralPattern: M[47],
+    MatchLiteralPattern: I[46],
     MatchMemberPattern: ["base", "property"],
-    MatchObjectPattern: M[52],
+    MatchObjectPattern: I[53],
     MatchObjectPatternProperty: ["key", "pattern"],
     MatchOrPattern: ["patterns"],
-    MatchRestPattern: M[15],
-    MatchStatement: M[50],
-    MatchStatementCase: M[51],
-    MatchUnaryPattern: M[15],
+    MatchRestPattern: I[15],
+    MatchStatement: I[51],
+    MatchStatementCase: I[52],
+    MatchUnaryPattern: I[15],
     MatchWildcardPattern: [],
+    NamespaceExportDeclaration: I[22],
     NeverTypeAnnotation: [],
-    ObjectTypeMappedTypeProperty: ["keyTparam", "propType", "sourceType", "variance"],
-    QualifiedTypeofIdentifier: M[34],
+    NonNullExpression: I[8],
+    ObjectTypeMappedTypeProperty: ["keyTparam", "propType", "sourceType", "nameType", "variance"],
+    ObjectTypePrivateField: ["key"],
+    ParameterProperty: I[21],
+    QualifiedTypeofIdentifier: I[32],
     RecordDeclaration: ["id", "typeParameters", "implements", "body"],
-    RecordDeclarationBody: M[0],
-    RecordDeclarationImplements: ["id", "typeArguments"],
+    RecordDeclarationBody: I[0],
+    RecordDeclarationImplements: I[25],
     RecordDeclarationProperty: ["key", "typeAnnotation", "defaultValue"],
     RecordDeclarationStaticProperty: ["key", "typeAnnotation", "value"],
     RecordExpression: ["recordConstructor", "typeArguments", "properties"],
-    RecordExpressionProperties: M[12],
-    SatisfiesExpression: M[36],
+    RecordExpressionProperties: I[12],
+    SatisfiesExpression: I[34],
+    TemplateLiteralTypeAnnotation: I[45],
+    TupleTypeElement: I[24],
     TupleTypeLabeledElement: ["label", "elementType", "variance"],
     TupleTypeSpreadElement: ["label", "typeAnnotation"],
-    TypeOperator: M[30],
-    TypePredicate: M[44],
+    TypeOperator: I[28],
+    TypePredicate: I[42],
     UndefinedTypeAnnotation: [],
     UnknownTypeAnnotation: [],
-    NGChainedExpression: M[16],
+    NGChainedExpression: I[16],
     NGEmptyExpression: [],
     NGPipeExpression: ["left", "right", "arguments"],
-    NGMicrosyntax: M[18],
+    NGMicrosyntax: I[18],
     NGMicrosyntaxAs: ["key", "alias"],
     NGMicrosyntaxExpression: ["expression", "alias"],
     NGMicrosyntaxKey: [],
     NGMicrosyntaxKeyedExpression: ["key", "expression"],
-    NGMicrosyntaxLet: M[25],
-    NGRoot: M[53],
-    JsExpressionRoot: M[53],
-    JsonRoot: M[53],
+    NGMicrosyntaxLet: I[23],
+    NGRoot: I[54],
+    JsExpressionRoot: I[54],
+    JsonRoot: I[54],
     TSJSDocAllType: [],
     TSJSDocUnknownType: [],
-    TSJSDocNullableType: M[30],
-    TSJSDocNonNullableType: M[30],
+    TSJSDocNullableType: I[28],
+    TSJSDocNonNullableType: I[28],
+    EnumBigIntBody: I[36],
   };
-var K4 = w0(k0),
-  E0 = K4;
-function Wl(/** @type {any} */ e, /** @type {EstreeVisitor} */ t) {
-  if (!S0(e)) return e;
+var Z4 = E0(A0),
+  C0 = Z4;
+function Yl(/** @type {any} */ e, /** @type {EstreeVisitor} */ t) {
+  if (!k0(e)) return e;
   if (Array.isArray(e)) {
-    for (let s = 0; s < e.length; s++) e[s] = Wl(e[s], t);
+    for (let s = 0; s < e.length; s++) e[s] = Yl(e[s], t);
     return e;
   }
   if (t.onEnter) {
     let s = t.onEnter(e) ?? e;
-    if (s !== e) return Wl(s, t);
+    if (s !== e) return Yl(s, t);
     e = s;
   }
-  let a = E0(e);
-  for (let s = 0; s < a.length; s++) e[a[s]] = Wl(e[a[s]], t);
+  let a = C0(e);
+  for (let s = 0; s < a.length; s++) e[a[s]] = Yl(e[a[s]], t);
   return (t.onLeave && (e = t.onLeave(e) || e), e);
 }
-var A0 = Wl;
-var ZS = la([
+var D0 = Yl;
+var ew = la([
   "RegExpLiteral",
   "BigIntLiteral",
   "NumericLiteral",
@@ -33272,33 +33320,34 @@ var ZS = la([
   "NumberLiteralTypeAnnotation",
   "BigIntLiteralTypeAnnotation",
 ]);
-function Z4(e, t) {
+function e3(e, t) {
   let { text: a, astType: s } = t,
     { comments: f } = e;
-  T0(f);
+  w0(f);
   let h = e.type === "File" ? e.program : e;
   (h.interpreter && (f.unshift(h.interpreter), delete h.interpreter),
-    e.hashbang && ((s === "oxc-ts" || s === "yuku-js" || s === "yuku-ts") && f.unshift(e.hashbang), delete e.hashbang),
-    e.type === "Program" && (e.range = [0, a.length]));
+    e.hashbang && ((s === "oxc-ts" || s === "yuku-js" || s === "yuku-ts") && f.unshift(e.hashbang), delete e.hashbang));
   let b;
   return (
-    (e = A0(e, {
+    (e = D0(e, {
       onEnter(v) {
-        switch ((e3(v, f, a), v.type)) {
+        t3(v, f, a);
+        let { type: l } = v;
+        switch (l) {
           case "ParenthesizedExpression": {
-            let { expression: l } = v,
-              G = Qt(v);
-            if (l.type === "TypeCastExpression") return ((l.range = [G, Kt(v)]), l);
-            let y = !1;
+            let { expression: W } = v,
+              y = Qt(v);
+            if (W.type === "TypeCastExpression") return ((W.range = [y, Kt(v)]), W);
+            let G = !1;
             if (s !== "oxc-ts") {
               if (!b) {
                 b = [];
-                for (let k of f) y0(k) && b.push(Kt(k));
+                for (let A of f) b0(A) && b.push(Kt(A));
               }
-              let W = p0(0, b, (k) => k <= G);
-              y = W && a.slice(W, G).trim().length === 0;
+              let k = d0(0, b, (A) => A <= y);
+              G = k && a.slice(k, y).trim().length === 0;
             }
-            return y ? void 0 : ((l.extra = { ...l.extra, parenthesized: !0 }), l);
+            return G ? void 0 : ((W.extra = { ...W.extra, parenthesized: !0 }), W);
           }
           case "TemplateLiteral":
             if (v.expressions.length !== v.quasis.length - 1) throw new Error("Malformed template literal.");
@@ -33312,32 +33361,48 @@ function Z4(e, t) {
               s === "oxc-ts" ||
               s === "yuku-ts"
             ) {
-              let l = Qt(v) + 1,
-                G = Kt(v) - (v.tail ? 1 : 2);
-              v.range = [l, G];
+              let W = Qt(v) + 1,
+                y = Kt(v) - (v.tail ? 1 : 2);
+              v.range = [W, y];
             }
             break;
           case "TSParenthesizedType":
             return v.typeAnnotation;
-          case "TopicReference":
-            e.extra = { ...e.extra, __isUsingHackPipeline: !0 };
-            break;
           case "TSUnionType":
           case "TSIntersectionType":
             if (v.types.length === 1) return v.types[0];
             break;
           case "TupleTypeAnnotation":
-            v.types && !v.elementTypes && (v.elementTypes = v.types);
+            v.types && !v.elementTypes && ((v.elementTypes = v.types), delete v.types);
             break;
           case "ImportDeclaration":
             s === "hermes" && v.assertions && !v.attributes && ((v.attributes = v.assertions), delete v.assertions);
             break;
+          case "TypeParameter":
+            s !== "flow" && v.bound?.type === "TypeAnnotation" && (v.bound = v.bound.typeAnnotation);
+            break;
+          case "EnumBooleanBody":
+          case "EnumNumberBody":
+          case "EnumBigIntBody":
+          case "EnumStringBody":
+          case "EnumSymbolBody":
+            s === "hermes" &&
+              ((v.explicitType || l === "EnumSymbolBody") && (v.explicitType = l.slice(4, -4).toLowerCase()),
+              (v.type = "EnumBody"));
+            break;
+          case "GenericTypeAnnotation":
+          case "ClassImplements":
+          case "InterfaceExtends":
+            s !== "flow" &&
+              v.typeParameters &&
+              !v.typeArguments &&
+              ((v.typeArguments = v.typeParameters), delete v.typeParameters);
         }
       },
       onLeave(v) {
         switch (v.type) {
           case "LogicalExpression":
-            if (C0(v)) return md(v);
+            if (P0(v)) return gd(v);
             break;
         }
       },
@@ -33345,15 +33410,15 @@ function Z4(e, t) {
     e
   );
 }
-/** @returns {boolean} */ function C0(e) {
+/** @returns {boolean} */ function P0(e) {
   return e.type === "LogicalExpression" && e.right.type === "LogicalExpression" && e.operator === e.right.operator;
 }
-function md(e) {
-  return C0(e)
-    ? md({
+function gd(e) {
+  return P0(e)
+    ? gd({
         type: "LogicalExpression",
         operator: e.operator,
-        left: md({
+        left: gd({
           type: "LogicalExpression",
           operator: e.operator,
           left: e.left,
@@ -33365,104 +33430,104 @@ function md(e) {
       })
     : e;
 }
-function e3(e, t, /** @type {string} */ a) {
-  if (!pd(e)) return;
+function t3(e, t, /** @type {string} */ a) {
+  if (!md(e)) return;
   let s = ns(e);
   if (a[s - 1] !== ";") return;
-  let f = b0({ [Vl]: t, originalText: a });
+  let f = x0({ [Gl]: t, originalText: a });
   s -= 1;
   let h = f.slice(Qt(e), s),
     b = h.trimEnd();
   e.__contentEnd = s - (h.length - b.length);
 }
-var D0 = Z4;
-var t3 = Object.hasOwn ?? Function.prototype.call.bind(Object.prototype.hasOwnProperty),
-  hd = t3;
-var n3 = /\*\/$/,
-  r3 = /^\/\*\*?/,
-  i3 = /^\s*(\/\*\*?(.|\r?\n)*?\*\/)/,
-  a3 = /(^|\s+)\/\/([^\n\r]*)/g,
-  P0 = /^(\r?\n)+/,
-  s3 = /(?:^|\r?\n) *(@[^\n\r]*?) *\r?\n *(?![^\n\r@]*\/\/[^]*)([^\s@][^\n\r@]+?) *\r?\n/g,
-  N0 = /(?:^|\r?\n) *@(\S+) *([^\n\r]*)/g,
-  _3 = /(\r?\n|^) *\* ?/g,
-  o3 = [];
-function I0(e) {
-  let t = e.match(i3);
+var N0 = e3;
+var n3 = Object.hasOwn ?? Function.prototype.call.bind(Object.prototype.hasOwnProperty),
+  bd = n3;
+var r3 = /\*\/$/,
+  i3 = /^\/\*\*?/,
+  a3 = /^\s*(\/\*\*?(.|\r?\n)*?\*\/)/,
+  s3 = /(^|\s+)\/\/([^\n\r]*)/g,
+  I0 = /^(\r?\n)+/,
+  _3 = /(?:^|\r?\n) *(@[^\n\r]*?) *\r?\n *(?![^\n\r@]*\/\/[^]*)([^\s@][^\n\r@]+?) *\r?\n/g,
+  O0 = /(?:^|\r?\n) *@(\S+) *([^\n\r]*)/g,
+  o3 = /(\r?\n|^) *\* ?/g,
+  c3 = [];
+function M0(e) {
+  let t = e.match(a3);
   return t ? t[0].trimStart() : "";
 }
-function O0(e) {
-  e = yr(0, e.replace(r3, "").replace(n3, ""), _3, "$1");
+function L0(e) {
+  e = gr(0, e.replace(i3, "").replace(r3, ""), o3, "$1");
   let a = "";
   for (; a !== e;)
     ((a = e),
-      (e = yr(
+      (e = gr(
         0,
         e,
-        s3,
+        _3,
         `
 $1 $2
 `,
       )));
-  e = e.replace(P0, "").trimEnd();
+  e = e.replace(I0, "").trimEnd();
   let s = Object.create(null),
-    f = yr(0, e, N0, "").replace(P0, "").trimEnd(),
+    f = gr(0, e, O0, "").replace(I0, "").trimEnd(),
     h;
-  for (; (h = N0.exec(e));) {
-    let b = yr(0, h[2], a3, "");
+  for (; (h = O0.exec(e));) {
+    let b = gr(0, h[2], s3, "");
     if (typeof s[h[1]] == "string" || Array.isArray(s[h[1]])) {
       let v = s[h[1]];
-      s[h[1]] = [...o3, ...(Array.isArray(v) ? v : [v]), b];
+      s[h[1]] = [...c3, ...(Array.isArray(v) ? v : [v]), b];
     } else s[h[1]] = b;
   }
   return { comments: f, pragmas: s };
 }
-var M0 = ["noformat", "noprettier"],
-  L0 = ["format", "prettier"];
-function c3(e) {
+var j0 = ["noformat", "noprettier"],
+  J0 = ["format", "prettier"];
+function l3(e) {
   if (!e.startsWith("#!")) return "";
   let t = e.indexOf(`
 `);
   return t === -1 ? e : e.slice(0, t);
 }
-var j0 = c3;
-function J0(e) {
-  let t = j0(e);
+var R0 = l3;
+function U0(e) {
+  let t = R0(e);
   t && (e = e.slice(t.length + 1));
-  let a = I0(e),
-    { pragmas: s, comments: f } = O0(a);
+  let a = M0(e),
+    { pragmas: s, comments: f } = L0(a);
   return { shebang: t, text: e, pragmas: s, comments: f };
 }
-function R0(e) {
-  let { pragmas: t } = J0(e);
-  return L0.some((a) => hd(t, a));
+function B0(e) {
+  let { pragmas: t } = U0(e);
+  return J0.some((a) => bd(t, a));
 }
-function U0(e) {
-  let { pragmas: t } = J0(e);
-  return M0.some((a) => hd(t, a));
+function q0(e) {
+  let { pragmas: t } = U0(e);
+  return j0.some((a) => bd(t, a));
 }
-function l3(e) {
+function u3(e) {
   return (
     (e = typeof e == "function" ? { parse: e } : e),
-    { astFormat: "estree", hasPragma: R0, hasIgnorePragma: U0, locStart: Qt, locEnd: Kt, ...e }
+    { astFormat: "estree", hasPragma: B0, hasIgnorePragma: q0, locStart: Qt, locEnd: Kt, ...e }
   );
 }
-var B0 = l3;
-var q0 = /^[^"'`]*<\/|^[^/]{2}.*\/>/m;
-/** @returns {string} */ function u3(/** @type {string} */ e) {
+var F0 = u3;
+var z0 = /^[^"'`]*<\/|^[^/]{2}.*\/>/m;
+/** @returns {string} */ function p3(/** @type {string} */ e) {
   return e.charAt(0) === "#" && e.charAt(1) === "!" ? "//" + e.slice(2) : e;
 }
-var F0 = u3;
-var z0 = "module",
-  V0 = "commonjs",
-  W0 = [z0, V0];
-/** @returns {string | undefined} */ function G0(/** @type {string} */ e) {
+var V0 = p3;
+var W0 = "module",
+  G0 = "commonjs",
+  Y0 = [W0, G0];
+/** @returns {string | undefined} */ function H0(/** @type {string} */ e) {
   if (typeof e == "string") {
-    if (((e = e.toLowerCase()), /\.(?:mjs|mts)$/i.test(e))) return z0;
-    if (/\.(?:cjs|cts)$/i.test(e)) return V0;
+    if (/\.(?:mjs|mts)$/i.test(e)) return W0;
+    if (/\.(?:cjs|cts)$/i.test(e)) return G0;
   }
 }
-var p3 = {
+var f3 = {
   loc: !0,
   range: !0,
   comment: !0,
@@ -33473,41 +33538,41 @@ var p3 = {
   suppressDeprecatedPropertyWarnings: !0,
   onUnsupportedTypeScriptVersion: "ignore",
 };
-function f3(e) {
+function d3(e) {
   let { message: t, location: a } = e;
   if (!a) return e;
   let { start: s, end: f } = a;
-  return l0(t, {
+  return p0(t, {
     loc: { start: { line: s.line, column: s.column + 1 }, end: { line: f.line, column: f.column + 1 } },
     cause: e,
   });
 }
-var d3 = /** @returns {boolean} */ (/** @type {string} */ e) => e && /\.(?:js|mjs|cjs|jsx|ts|mts|cts|tsx)$/i.test(e);
-function m3(/** @type {string} */ e, /** @type {string} */ t) {
-  let a = [{ ...p3, filePath: t }],
-    s = G0(t);
+var m3 = /** @returns {boolean} */ (/** @type {string} */ e) => e && /\.(?:js|mjs|cjs|jsx|ts|mts|cts|tsx)$/i.test(e);
+function h3(/** @type {string} */ e, /** @type {string} */ t) {
+  let a = [{ ...f3, filePath: t }],
+    s = H0(t);
   if (
     (s
       ? (a = a.map((h) => ({ ...h, sourceType: s })))
-      : (a = W0.flatMap((h) => a.map((b) => ({ ...b, sourceType: h })))),
-    d3(t))
+      : (a = Y0.flatMap((h) => a.map((b) => ({ ...b, sourceType: h })))),
+    m3(t))
   )
     return a;
-  let f = q0.test(e);
+  let f = z0.test(e);
   return [f, !f].flatMap((h) => a.map((b) => ({ ...b, jsx: h })));
 }
-function h3(/** @type {string} */ e, t) {
+function y3(/** @type {string} */ e, t) {
   let a = t?.filepath;
   typeof a != "string" && (a = void 0);
-  let s = F0(e),
-    f = m3(e, a),
+  let s = V0(e),
+    f = h3(e, a),
     h;
   try {
-    h = u0(f.map((b) => () => c0(s, b)));
+    h = f0(f.map((b) => () => u0(s, b)));
   } catch ({ errors: [b] }) {
-    throw f3(b);
+    throw d3(b);
   }
-  return D0(h, { text: e, astType: "typescript" });
+  return N0(h, { text: e, astType: "typescript" });
 }
-var y3 = B0(h3);
-export { Y0 as default, yd as parsers };
+var g3 = F0(y3);
+export { X0 as default, vd as parsers };

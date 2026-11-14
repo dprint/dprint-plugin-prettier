@@ -53,7 +53,9 @@ function formatWithPlugin(testCase: PluginTestCase) {
   // without a limit is as wide as any line could be
   const input = testCase.input.replace(/^\uFEFF/, "");
   const overrideConfig: Record<string, unknown> = Object.fromEntries(
-    Object.entries(testCase.options).map(([key, value]) => [key, value === "Infinity" ? Number.MAX_SAFE_INTEGER : value]),
+    Object.entries(testCase.options).map((
+      [key, value],
+    ) => [key, value === "Infinity" ? Number.MAX_SAFE_INTEGER : value]),
   );
   if (testCase.jsDoc) {
     overrideConfig["plugin.jsDoc"] = true;
@@ -65,6 +67,11 @@ function formatWithPlugin(testCase: PluginTestCase) {
       // the module trapped, so its state can't be trusted for the next case
       formatter = createFormatter();
       return "error: crashed: " + String(error);
+    }
+    if (error instanceof RangeError) {
+      // the host ran out of stack inside of the module, which leaves the module's own stack where it was
+      formatter = createFormatter();
+      return "error: " + String(error);
     }
     return "error: " + (error as Error).message;
   }

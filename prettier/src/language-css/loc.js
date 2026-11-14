@@ -34,6 +34,10 @@ import { skipEverythingButNewLine } from "../utilities/skip.js";
 }
 
 function calculateLocEnd(/** @type {import("./types.js").CssNode} */ node, /** @type {string} */ text) {
+  if (node.type === "value-func" && node.group?.close) {
+    return calculateLocEnd(node.group.close, text);
+  }
+
   if (node.type === "css-comment" && node.inline) {
     return skipEverythingButNewLine(text, node.source.startOffset);
   }

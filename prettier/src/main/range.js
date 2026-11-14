@@ -1,5 +1,6 @@
 // @nts-check
 import * as assert from "#universal/assert";
+import { isExportAssignment } from "../language-js/utilities/node-types.js";
 import { childNodesCache } from "./comments/attach.js";
 import getSortedChildNodes from "./utilities/get-sorted-child-nodes.js";
 
@@ -26,8 +27,9 @@ function dropRootParents(parents) {
 function findSiblingAncestors(
   startNodeAndAncestors,
   endNodeAndAncestors,
-  { locStart, locEnd },
+  options,
 ) {
+  const { locStart, locEnd } = options;
   let [resultStartNode, ...startNodeAncestors] = startNodeAndAncestors;
   let [resultEndNode, ...endNodeAncestors] = endNodeAndAncestors;
 
@@ -47,7 +49,9 @@ function findSiblingAncestors(
   const endNodeEnd = locEnd(resultEndNode);
   for (const startAncestor of dropRootParents(startNodeAncestors)) {
     if (locEnd(startAncestor) <= endNodeEnd) {
-      resultStartNode = startAncestor;
+      if (isSourceElement(options, startAncestor)) {
+        resultStartNode = startAncestor;
+      }
     } else {
       break;
     }
@@ -111,14 +115,27 @@ function findNodeAtOffset(
   }
 }
 
-// See https://www.ecma-international.org/ecma-262/5.1/#sec-A.5
-/** @returns {boolean} */ function isJsSourceElement(/** @type {string} */ type, /** @type {string | undefined} */ parentType) {
+function isForXStatementInitializer(node, parent) {
   return (
-    parentType !== "DeclareExportDeclaration" &&
+    (parent?.type === "ForStatement" && parent.init === node) ||
+    ((parent?.type === "ForInStatement" || parent?.type === "ForOfStatement") &&
+      parent.left === node)
+  );
+}
+
+// See https://www.ecma-international.org/ecma-262/5.1/#sec-A.5
+function isJsSourceElement(node, parent) {
+  const { type } = node;
+  return (
+    parent?.type !== "DeclareExportDeclaration" &&
     type !== "TypeParameterDeclaration" &&
+    type !== "TSTypeParameterDeclaration" &&
+    !(
+      type === "VariableDeclaration" && isForXStatementInitializer(node, parent)
+    ) &&
     (type === "Directive" ||
       type === "TypeAlias" ||
-      type === "TSExportAssignment" ||
+      isExportAssignment(node) ||
       type.startsWith("Declare") ||
       type.startsWith("TSDeclare") ||
       type.endsWith("Statement") ||
@@ -175,7 +192,7 @@ const graphqlSourceElements = new Set([
     case "yuku":
     case "yuku-ts":
     case "__babel_estree":
-      return isJsSourceElement(node.type, parentNode?.type);
+      return isJsSourceElement(node, parentNode);
     case "json":
     case "json5":
     case "jsonc":

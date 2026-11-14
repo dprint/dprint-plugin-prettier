@@ -1,18 +1,19 @@
 // @nts-check
-/* eslint-disable import/no-extraneous-dependencies,  no-param-reassign */
+import Comment from 'postcss/lib/comment';
+import Parser from 'postcss/lib/parser';
 
-const Comment = require('postcss/lib/comment');
-const Parser = require('postcss/lib/parser');
-
-const { isInlineComment } = require('./nodes/inline-comment');
-const { interpolation } = require('./nodes/interpolation');
-const { isMixinToken } = require('./nodes/mixin');
-const importNode = require('./nodes/import');
-const variableNode = require('./nodes/variable');
+import { isInlineComment } from './nodes/inline-comment.js';
+import {
+  isInterpolation,
+  mergeParamsInterpolation,
+} from './nodes/interpolation.js';
+import { isMixinToken } from './nodes/mixin.js';
+import { convertImport } from './nodes/import.js';
+import { convertVariable } from './nodes/variable.js';
 
 /** @type {RegExp} */ const importantPattern = /(!\s*important)$/i;
 
-module.exports = class LessParser extends Parser {
+export class LessParser extends Parser {
   constructor(...args) {
     super(...args);
 
@@ -20,13 +21,15 @@ module.exports = class LessParser extends Parser {
   }
 
   atrule(/** @type {any[]} */ token) {
-    if (interpolation.bind(this)(token)) {
+    if (isInterpolation.bind(this)(token)) {
       return;
     }
 
+    mergeParamsInterpolation(this);
+
     super.atrule(token);
-    importNode(this.lastNode);
-    variableNode(this.lastNode);
+    convertImport(this.lastNode);
+    convertVariable(this.lastNode);
   }
 
   decl(...args) {
@@ -92,9 +95,14 @@ module.exports = class LessParser extends Parser {
 
     // fix for #86. if rulesets are mixin params, they need to be converted to a brackets token
     if ((bracketsIndex < 0 || bracketsIndex > 3) && firstParenIndex > 0) {
-      const lastParenIndex = tokens.reduce((last, t, /** @type {number} */ i) => (t[0] === ')' ? i : last));
+      const lastParenIndex = tokens.reduce((last, t, /** @type {number} */ i) =>
+        t[0] === ')' ? i : last,
+      );
 
-      const contents = tokens.slice(firstParenIndex, lastParenIndex + firstParenIndex);
+      const contents = tokens.slice(
+        firstParenIndex,
+        lastParenIndex + firstParenIndex,
+      );
       /** @type {string} */ const brackets = contents.map(/** @returns {string} */ (t) => t[1]).join('');
       const [paren] = tokens.slice(firstParenIndex);
       const start = [paren[2], paren[3]];
@@ -165,7 +173,7 @@ module.exports = class LessParser extends Parser {
 
     if (prev[0] === 'at-word' && last[0] === '{') {
       this.tokenizer.back(last);
-      if (interpolation.bind(this)(prev)) {
+      if (isInterpolation.bind(this)(prev)) {
         const newToken = this.tokenizer.nextToken();
 
         tokens = tokens.slice(0, tokens.length - 2).concat([newToken]);
@@ -208,4 +216,4 @@ module.exports = class LessParser extends Parser {
 
     super.unknownWord(tokens);
   }
-};
+}

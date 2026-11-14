@@ -24,6 +24,7 @@ import {
   isChainElementWrapper,
   isIntersectionType,
   isMemberExpression,
+  isNonNullExpression,
   isNumericLiteral,
   isStringLiteral,
   isTypeAlias,
@@ -247,7 +248,7 @@ function printVariableDeclarator(/** @type {AstPath} */ path, /** @type {import(
     ) {
       node = node.argument;
       propertiesForPath.push("argument");
-    } else if (node.type === "TSNonNullExpression") {
+    } else if (isNonNullExpression(node)) {
       node = node.expression;
       propertiesForPath.push("expression");
     } else {
@@ -348,8 +349,6 @@ function printVariableDeclarator(/** @type {AstPath} */ path, /** @type {import(
   let typeArguments;
   switch (node.type) {
     case "GenericTypeAnnotation":
-      typeArguments = node.typeParameters;
-      break;
     case "TSTypeReference":
       typeArguments = node.typeArguments;
       break;
@@ -452,9 +451,11 @@ function isPoorlyBreakableMemberOrCallChain(
 /** @returns {boolean} */ function isGeneric(/** @type {import("../types/estree.js").Node} */ node) {
   switch (node.type) {
     case "FunctionTypeAnnotation":
-    case "GenericTypeAnnotation":
+    case "ConstructorTypeAnnotation":
     case "TSFunctionType":
+    case "TSConstructorType":
       return Boolean(node.typeParameters);
+    case "GenericTypeAnnotation":
     case "TSTypeReference":
       return Boolean(node.typeArguments);
     default:

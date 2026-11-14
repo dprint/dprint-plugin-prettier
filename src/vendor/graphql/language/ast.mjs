@@ -146,4 +146,4 @@ export const OperationTypeNode = {
     MUTATION: 'mutation',
     SUBSCRIPTION: 'subscription',
 };
-//# sourceMappingURL=ast.js.map
+//# sourceMappingURL=ast.mjs.map

@@ -14,7 +14,6 @@ type FlowOptions = {
   babel?: boolean;
   tokens?: boolean;
   allowReturnOutsideFunction?: boolean;
-  assertOperator?: boolean;
   enableEnums?: boolean;
   enableRecords?: boolean;
   enableTypes?: boolean;
@@ -26,6 +25,8 @@ type FlowOptions = {
   sourceType?: string;
   sourceFilename?: string;
   throwOnParseErrors?: boolean;
+  transformOptions?: any;
+  reactRuntimeTarget?: string;
 };
 
 const DEFAULTS = {
@@ -57,6 +58,12 @@ function getOptions(opts: FlowOptions | undefined): FlowOptions {
     delete options.sourceType;
   } else if (options.sourceType != null && options.sourceType !== "script" && options.sourceType !== "module") {
     throw new Error("sourceType option must be \"script\", \"module\", or \"unambiguous\" if set");
+  }
+  if (
+    options.sourceType == null && typeof options.sourceFilename === "string"
+    && /\.(mjs|mts)$/.test(options.sourceFilename)
+  ) {
+    options.sourceType = "module";
   }
   if (options.enableExperimentalComponentSyntax == null) {
     options.enableExperimentalComponentSyntax = true;
@@ -112,13 +119,17 @@ function parseFlow(source: string, options: FlowOptions): any {
       flag(options.enableExperimentalDecorators),
       flag(options.tokens),
       flag(options.allowReturnOutsideFunction),
-      flag(options.assertOperator),
       flag(options.enableEnums),
       flag(options.enableRecords),
       enableTypes,
       sourceTypeCode,
       flag(options.enableTypesPragmaDetection),
       0,
+      flag(options.babel),
+      flag(options.transformOptions?.TransformEnumSyntax?.enable),
+      flag(options.transformOptions?.TransformEnumSyntax?.getRuntime != null),
+      options.reactRuntimeTarget === "19" ? 19 : 18,
+      options.throwOnParseErrors === false ? 0 : 1,
     );
     const programBuffer = flowNative.resultProgramBuffer(parseResult);
     if (!programBuffer) {
@@ -140,51 +151,11 @@ function parseFlow(source: string, options: FlowOptions): any {
       wasmParser,
       options,
     );
-    const ast = deserializer.deserialize();
-    if (ast.type !== "Program") {
-      throw new Error(`Expected Program, got ${ast.type}`);
+    const deserialized = deserializer.deserialize();
+    if (deserialized.type !== "Program") {
+      throw new Error(`Expected Program, got ${deserialized.type}`);
     }
-    const sourceFilename = typeof options.sourceFilename === "string" ? options.sourceFilename : null;
-    const visitedNodes = new WeakSet<object>();
-    const locRanges = new WeakMap<object, any>();
-    function fixLocs(node: any): void {
-      if (node == null || typeof node !== "object") {
-        return;
-      }
-      const wireNode = node;
-      if (visitedNodes.has(wireNode)) {
-        return;
-      }
-      visitedNodes.add(wireNode);
-      if (wireNode.loc != null) {
-        const loc = wireNode.loc;
-        let range = locRanges.get(loc);
-        if (range == null) {
-          const rangeStart = loc.rangeStart;
-          const rangeEnd = loc.rangeEnd;
-          if (rangeStart == null || rangeEnd == null) {
-            throw new Error("Expected serialized source range");
-          }
-          loc.source = sourceFilename;
-          range = [rangeStart, rangeEnd];
-          locRanges.set(loc, range);
-          delete loc.rangeStart;
-          delete loc.rangeEnd;
-        }
-        wireNode.range = range;
-      }
-      for (const key of Object.keys(wireNode)) {
-        const val = wireNode[key];
-        if (Array.isArray(val)) {
-          for (const child of val) {
-            fixLocs(child);
-          }
-        } else {
-          fixLocs(val);
-        }
-      }
-    }
-    fixLocs(ast);
+    const ast = deserialized;
     if (options.throwOnParseErrors !== false) {
       const errors = ast.errors;
       if (errors != null && errors.length > 0) {
@@ -236,14 +207,39 @@ function detectSourceType(program: any): string {
       continue;
     }
     switch (stmt.type) {
+      case "ImportEqualsDeclaration":
+        if (stmt.isExport && (stmt.importKind === "value" || stmt.importKind == null)) {
+          return "module";
+        }
+        break;
       case "ImportDeclaration":
-        if (stmt.importKind === "value" || stmt.importKind == null) {
+        if (
+          (stmt.importKind === "value" || stmt.importKind == null)
+          && (stmt.specifiers.length === 0
+            || stmt.specifiers.some((specifier: any) =>
+              specifier.type !== "ImportSpecifier" || specifier.importKind == null
+              || specifier.importKind === "value"
+            ))
+        ) {
           return "module";
         }
         break;
       case "ExportDefaultDeclaration":
-        return "module";
+        if (stmt.exportKind !== "type") {
+          return "module";
+        }
+        break;
       case "ExportNamedDeclaration":
+        if (
+          (stmt.exportKind === "value" || stmt.exportKind == null)
+          && (stmt.declaration != null || stmt.specifiers.length === 0
+            || stmt.specifiers.some((specifier: any) =>
+              specifier.exportKind == null || specifier.exportKind === "value"
+            ))
+        ) {
+          return "module";
+        }
+        break;
       case "ExportAllDeclaration":
         if (stmt.exportKind === "value" || stmt.exportKind == null) {
           return "module";

@@ -12,6 +12,7 @@ const validate_ts_1 = require("../type/validate.js");
 const TypeInfo_ts_1 = require("../utilities/TypeInfo.js");
 const diagnostics_ts_1 = require("../diagnostics.js");
 const specifiedRules_ts_1 = require("./specifiedRules.js");
+const validationAbortedError_ts_1 = require("./validationAbortedError.js");
 const ValidationContext_ts_1 = require("./ValidationContext.js");
 const QueryDocumentKeysToValidate = (0, mapValue_ts_1.mapValue)(ast_ts_1.QueryDocumentKeys, (keys) => keys.filter((key) => key !== 'description'));
 const tooManyValidationErrorsError = new GraphQLError_ts_1.GraphQLError('Too many validation errors, error limit reached. Validation aborted.');
@@ -23,6 +24,7 @@ function validate(schema, documentAST, rules = specifiedRules_ts_1.specifiedRule
 function validateImpl(schema, documentAST, rules, options) {
     const maxErrors = options?.maxErrors ?? 100;
     const hideSuggestions = options?.hideSuggestions ?? false;
+    const allowEmptySelectionSets = options?.allowEmptySelectionSets ?? true;
     (0, validate_ts_1.assertValidSchema)(schema);
     const errors = [];
     const typeInfo = new TypeInfo_ts_1.TypeInfo(schema);
@@ -31,14 +33,14 @@ function validateImpl(schema, documentAST, rules, options) {
             throw tooManyValidationErrorsError;
         }
         errors.push(error);
-    }, hideSuggestions);
+    }, { hideSuggestions, allowEmptySelectionSets });
     const visitor = (0, visitor_ts_1.visitInParallel)(rules.map((rule) => rule(context)));
     try {
         (0, visitor_ts_1.visit)(documentAST, (0, TypeInfo_ts_1.visitWithTypeInfo)(typeInfo, visitor), QueryDocumentKeysToValidate);
     }
     catch (e) {
-        if (e === tooManyValidationErrorsError) {
-            errors.push(tooManyValidationErrorsError);
+        if (e === tooManyValidationErrorsError || e === validationAbortedError_ts_1.validationAbortedError) {
+            errors.push(e);
         }
         else {
             throw e;

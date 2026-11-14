@@ -12,6 +12,8 @@ export class Lexer {
         /** @type {Token} */ this.token = startOfFileToken;
         /** @type {number} */ this.line = 1;
         /** @type {number} */ this.lineStart = 0;
+        this._maxComments = undefined;
+        this._commentCount = 0;
     }
     get [Symbol.toStringTag]() {
         return 'Lexer';
@@ -177,6 +179,14 @@ export class Lexer {
     return createToken(lexer, TokenKind.EOF, bodyLength, bodyLength);
 }
 /** @returns {Token} */ function readComment(/** @type {Lexer} */ lexer, /** @type {number} */ start) {
+    const maxComments = lexer._maxComments;
+    if (maxComments !== undefined) {
+        const nextCommentCount = lexer._commentCount + 1;
+        if (nextCommentCount > maxComments) {
+            throw syntaxError(lexer.source, start, `Document contains more than ${maxComments} comments. Parsing aborted.`);
+        }
+        lexer._commentCount = nextCommentCount;
+    }
     const body = lexer.source.body;
     /** @type {number} */ const bodyLength = body.length;
     let position = start + 1;
@@ -429,4 +439,4 @@ export class Lexer {
     }
     return createToken(lexer, TokenKind.NAME, start, position, body.slice(start, position));
 }
-//# sourceMappingURL=lexer.js.map
+//# sourceMappingURL=lexer.mjs.map

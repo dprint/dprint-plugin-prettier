@@ -10,9 +10,10 @@ if (match == null) {
 }
 // the module's imports and exports have minified names, which flow_parser_glue.c is written for
 const expected = [
-  "wasmImports={b:_emscripten_memcpy_big,c:_emscripten_resize_heap,a:_getentropy}",
-  'addOnInit(wasmExports["e"])',
-  ...["f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q"].map((name, i) =>
+  "wasmImports={b:_abort,c:_emscripten_memcpy_big,d:_emscripten_resize_heap,a:_getentropy}",
+  'wasmMemory=wasmExports["e"]',
+  'addOnInit(wasmExports["f"])',
+  ...["h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r"].map((name, i) =>
     `Module["_${
       [
         "hermesParse",
@@ -24,7 +25,6 @@ const expected = [
         "hermesParseResult_getPositionBufferSize",
         "hermesParseResult_getProgramBuffer",
         "hermesParseResult_getStringBuffer",
-        "main",
         "malloc",
         "free",
       ][i]

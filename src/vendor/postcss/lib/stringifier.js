@@ -1,22 +1,9 @@
 // @nts-check
 'use strict'
 
-// Escapes sequences that could break out of an HTML <style> context.
-// Uses CSS unicode escaping (\3c = '<') which is valid CSS and parsed
-// correctly by all compliant CSS consumers.
-/** @type {RegExp} */ const STYLE_TAG = /(<)(\/?style\b)/gi
-/** @type {RegExp} */ const COMMENT_OPEN = /(<)(!--)/g
-
-/**
- * what a node is written out to, with the node it is of and whether it is its start or its end
- * @typedef {(str: string, node?: import("./node"), type?: string) => void} Builder
- */
-
-/** @returns {any} */ function escapeHTMLInCSS(/** @type {any} */ str) {
-  if (typeof str !== 'string') return str
-  if (!str.includes('<')) return str
-  return str.replace(STYLE_TAG, '\\3c $2').replace(COMMENT_OPEN, '\\3c $2')
-}
+// Characters that end an at-rule name, mirroring RE_AT_END in the tokenizer.
+// Params starting with anything else need a space to stay separate tokens.
+const AT_NAME_END = /[\t\n\f\r "#'()/;[\\\]{}]/
 
 /** @type {Record<string, string | boolean>} */ const DEFAULT_RAW = {
   after: '\n',
@@ -37,27 +24,98 @@
   return str[0].toUpperCase() + str.slice(1)
 }
 
+function atruleStart(str, node) {
+  let name = '@' + node.name
+  let params = node.params ? str.rawValue(node, 'params') : ''
+  let afterName = node.raws.afterName
+
+  if (typeof afterName === 'undefined') {
+    afterName = params ? ' ' : ''
+  } else if (afterName === '' && params && !AT_NAME_END.test(params[0])) {
+    afterName = ' '
+  }
+
+  return name + afterName + params
+}
+
+// `*--x` is not a custom property: the parser checks the first token, and the
+// `*`/`_` hack prefix moves from `prop` into `before` only after that. A free
+// semicolon in front of the declaration also ends up in `before`.
+function isCustomProperty(node) {
+  if (!node.prop.startsWith('--')) return false
+  let before = node.raws.before
+  return typeof before === 'undefined' || !/[^\s;]$/.test(before)
+}
+
+function pushBody(str, stack, node) {
+  let nodes = node.nodes
+  let last = nodes.length - 1
+  while (last > 0) {
+    if (nodes[last].type !== 'comment') break
+    last -= 1
+  }
+
+  let semicolon = str.raw(node, 'semicolon')
+  let isDocument = node.type === 'document'
+  for (let i = nodes.length - 1; i >= 0; i--) {
+    let child = nodes[i]
+    let childSemicolon = last !== i || semicolon
+    // A childless at-rule or a custom property declaration that still has
+    // following siblings must be terminated. Without the semicolon those
+    // trailing comments are folded into the at-rule's prelude or the custom
+    // property's value and disappear when the output is re-parsed.
+    if (
+      !childSemicolon &&
+      i < nodes.length - 1 &&
+      ((child.type === 'atrule' && !child.nodes) ||
+        (child.type === 'decl' && isCustomProperty(child)))
+    ) {
+      childSemicolon = true
+    }
+    stack.push({
+      document: isDocument,
+      node: child,
+      semicolon: childSemicolon
+    })
+  }
+}
+
+function pushBlock(str, stack, node, start) {
+  let between = str.raw(node, 'between', 'beforeOpen')
+  str.builder(start + between + '{', node, 'start')
+
+  let hasNodes = node.nodes && node.nodes.length
+  let close = () => {
+    let after = hasNodes
+      ? str.raw(node, 'after')
+      : str.raw(node, 'after', 'emptyBody')
+    if (after) str.builder(after)
+    str.builder('}', node, 'end')
+    if (node.type === 'rule' && node.raws.ownSemicolon) {
+      str.builder(node.raws.ownSemicolon, node, 'end')
+    }
+  }
+
+  if (hasNodes) {
+    stack.push(close)
+    pushBody(str, stack, node)
+  } else {
+    close()
+  }
+}
+
 class Stringifier {
   constructor(/** @type {Builder} */ builder) {
     /** @type {Builder} */ this.builder = builder
   }
 
   atrule(/** @type {import("./node")} */ node, /** @type {undefined | boolean} */ semicolon) {
-    let raws = node.raws
-    /** @type {string} */ let name = '@' + node.name
-    /** @type {string} */ let params = node.params ? this.rawValue(node, 'params') : ''
-
-    if (typeof raws.afterName !== 'undefined') {
-      name += raws.afterName
-    } else if (params) {
-      name += ' '
-    }
-
+    let start = atruleStart(this, node)
     if (node.nodes) {
-      this.block(node, name + params)
+      this.block(node, start)
     } else {
-      let end = (raws.between || '') + (semicolon ? ';' : '')
-      this.builder(escapeHTMLInCSS(name + params + end), node)
+      let end = (node.raws.between || '') + (semicolon ? ';' : '')
+      this.builder(start + end, node)
     }
   }
 
@@ -92,7 +150,7 @@ class Stringifier {
 
   block(/** @type {import("./node")} */ node, /** @type {string} */ start) {
     /** @type {string} */ let between = this.raw(node, 'between', 'beforeOpen')
-    this.builder(escapeHTMLInCSS(start + between) + '{', node, 'start')
+    this.builder(start + between + '{', node, 'start')
 
     /** @type {string} */ let after
     if (node.nodes && node.nodes.length) {
@@ -102,32 +160,50 @@ class Stringifier {
       after = this.raw(node, 'after', 'emptyBody')
     }
 
-    if (after) this.builder(escapeHTMLInCSS(after))
+    if (after) this.builder(after)
     this.builder('}', node, 'end')
   }
 
   body(/** @type {import("./node")} */ node) {
-    let nodes = node.nodes
-    let last = nodes.length - 1
-    while (last > 0) {
-      if (nodes[last].type !== 'comment') break
-      last -= 1
-    }
+    // Rules and at-rules are expanded into an explicit stack instead of
+    // recursive `stringify()` calls to survive deeply nested trees.
+    // If a subclass changes the traversal methods, its children go
+    // through `stringify()` to keep the override in charge.
+    let proto = Stringifier.prototype
+    let expandable = ['atrule', 'block', 'body', 'rule', 'stringify'].every(
+      method => this[method] === proto[method]
+    )
 
-    /** @type {boolean} */ let semicolon = this.raw(node, 'semicolon')
-    let isDocument = node.type === 'document'
-    for (let i = 0; i < nodes.length; i++) {
-      let child = nodes[i]
+    let stack = []
+    pushBody(this, stack, node)
+
+    while (stack.length > 0) {
+      let entry = stack.pop()
+      if (typeof entry === 'function') {
+        entry()
+        continue
+      }
+
+      let child = entry.node
       /** @type {string} */ let before = this.raw(child, 'before')
-      if (before) this.builder(isDocument ? before : escapeHTMLInCSS(before))
-      this.stringify(child, last !== i || semicolon)
+      if (before) {
+        this.builder(before)
+      }
+
+      if (expandable && child.type === 'rule') {
+        pushBlock(this, stack, child, this.rawValue(child, 'selector'))
+      } else if (expandable && child.type === 'atrule' && child.nodes) {
+        pushBlock(this, stack, child, atruleStart(this, child))
+      } else {
+        this.stringify(child, entry.semicolon)
+      }
     }
   }
 
   comment(/** @type {import("./node")} */ node) {
     /** @type {string} */ let left = this.raw(node, 'left', 'commentLeft')
     /** @type {string} */ let right = this.raw(node, 'right', 'commentRight')
-    this.builder(escapeHTMLInCSS('/*' + left + node.text + right + '*/'), node)
+    this.builder('/*' + left + node.text + right + '*/', node)
   }
 
   decl(/** @type {import("./node")} */ node, /** @type {undefined | boolean} */ semicolon) {
@@ -141,7 +217,7 @@ class Stringifier {
     }
 
     if (semicolon) string += ';'
-    this.builder(escapeHTMLInCSS(string), node)
+    this.builder(string, node)
   }
 
   document(/** @type {import("./node")} */ node) {
@@ -346,18 +422,20 @@ class Stringifier {
   }
 
   root(/** @type {import("./node")} */ node) {
+    let inDocument = node.parent && node.parent.type === 'document'
+    if (!inDocument && node.source && node.source.input.hasBOM) {
+      this.builder('\uFEFF', node, 'start')
+    }
     this.body(node)
     if (node.raws.after) {
-      /** @type {string} */ let after = node.raws.after
-      /** @type {boolean} */ let isDocument = node.parent && node.parent.type === 'document'
-      this.builder(isDocument ? after : escapeHTMLInCSS(after))
+      this.builder(node.raws.after)
     }
   }
 
   rule(/** @type {import("./node")} */ node) {
     this.block(node, this.rawValue(node, 'selector'))
     if (node.raws.ownSemicolon) {
-      this.builder(escapeHTMLInCSS(node.raws.ownSemicolon), node, 'end')
+      this.builder(node.raws.ownSemicolon, node, 'end')
     }
   }
 

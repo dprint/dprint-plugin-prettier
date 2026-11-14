@@ -102,7 +102,7 @@ class NoWorkResult {
   }
 
   finally(/** @type {any} */ onFinally) {
-    return this.async().then(onFinally, onFinally)
+    return this.async().finally(onFinally)
   }
 
   sync() {

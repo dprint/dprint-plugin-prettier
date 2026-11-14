@@ -25,6 +25,7 @@ import { mergeNsAndName } from "./tags.mjs";
 import { isAsciiHexDigit, isAsciiLetter, isDigit, isNewLine, isOctalDigit, isQuote, isWhitespace } from "../chars.mjs";
 import { ParseError, ParseLocation, ParseSourceFile, ParseSourceSpan } from "../parse_util.mjs";
 import { NAMED_ENTITIES } from "./entities.mjs";
+import "./tokens.mjs";
 //#region ../compiler/src/ml_parser/lexer.ts
 /**
 * @license

@@ -30,43 +30,44 @@ FLOW_EXPORT int flow_start(void) {
   if (started) return 1;
   imports.flow = &instance;
   wasm2c_flow_instantiate(&instance, &imports);
-  // what Emscripten's JavaScript does when it starts the module: its constructors and then its main
-  w2c_flow_e(&instance);
-  w2c_flow_o(&instance, 0, 0);
+  // what Emscripten's JavaScript does when it starts the module: its constructors
+  w2c_flow_f(&instance);
   started = 1;
   return 1;
 }
 
 /** Where the parser's memory is, which moves when it grows, so it is asked for after each call. */
-FLOW_EXPORT uint8_t* flow_memory(void) { return w2c_flow_d(&instance)->data; }
+FLOW_EXPORT uint8_t* flow_memory(void) { return w2c_flow_e(&instance)->data; }
 
-FLOW_EXPORT uint32_t flow_memory_size(void) { return (uint32_t)w2c_flow_d(&instance)->size; }
+FLOW_EXPORT uint32_t flow_memory_size(void) { return (uint32_t)w2c_flow_e(&instance)->size; }
 
 FLOW_EXPORT uint32_t flow_parse(uint32_t source, uint32_t sourceSize, uint32_t filename, uint32_t filenameSize,
                     uint32_t componentSyntax, uint32_t matchSyntax, uint32_t decorators, uint32_t tokens,
-                    uint32_t returnOutsideFunction, uint32_t assertOperator, uint32_t enums, uint32_t records,
-                    uint32_t types, uint32_t sourceType, uint32_t typesPragmaDetection, uint32_t last) {
-  return w2c_flow_f(&instance, source, sourceSize, filename, filenameSize, componentSyntax, matchSyntax, decorators,
-                    tokens, returnOutsideFunction, assertOperator, enums, records, types, sourceType,
-                    typesPragmaDetection, last);
+                    uint32_t returnOutsideFunction, uint32_t enums, uint32_t records, uint32_t types,
+                    uint32_t sourceType, uint32_t typesPragmaDetection, uint32_t last, uint32_t babel,
+                    uint32_t enumTransform, uint32_t enumRuntime, uint32_t reactRuntimeTarget,
+                    uint32_t throwOnParseErrors) {
+  return w2c_flow_h(&instance, source, sourceSize, filename, filenameSize, componentSyntax, matchSyntax, decorators,
+                    tokens, returnOutsideFunction, enums, records, types, sourceType, typesPragmaDetection, last,
+                    babel, enumTransform, enumRuntime, reactRuntimeTarget, throwOnParseErrors);
 }
 
-FLOW_EXPORT void flow_result_free(uint32_t result) { w2c_flow_g(&instance, result); }
-FLOW_EXPORT uint32_t flow_result_error(uint32_t result) { return w2c_flow_h(&instance, result); }
-FLOW_EXPORT uint32_t flow_result_error_column(uint32_t result) { return w2c_flow_i(&instance, result); }
-FLOW_EXPORT uint32_t flow_result_error_line(uint32_t result) { return w2c_flow_j(&instance, result); }
-FLOW_EXPORT uint32_t flow_result_position_buffer(uint32_t result) { return w2c_flow_k(&instance, result); }
-FLOW_EXPORT uint32_t flow_result_position_buffer_size(uint32_t result) { return w2c_flow_l(&instance, result); }
-FLOW_EXPORT uint32_t flow_result_program_buffer(uint32_t result) { return w2c_flow_m(&instance, result); }
-FLOW_EXPORT uint32_t flow_result_string_buffer(uint32_t result) { return w2c_flow_n(&instance, result); }
-FLOW_EXPORT uint32_t flow_malloc(uint32_t size) { return w2c_flow_p(&instance, size); }
-FLOW_EXPORT void flow_free(uint32_t address) { w2c_flow_q(&instance, address); }
+FLOW_EXPORT void flow_result_free(uint32_t result) { w2c_flow_i(&instance, result); }
+FLOW_EXPORT uint32_t flow_result_error(uint32_t result) { return w2c_flow_j(&instance, result); }
+FLOW_EXPORT uint32_t flow_result_error_column(uint32_t result) { return w2c_flow_k(&instance, result); }
+FLOW_EXPORT uint32_t flow_result_error_line(uint32_t result) { return w2c_flow_l(&instance, result); }
+FLOW_EXPORT uint32_t flow_result_position_buffer(uint32_t result) { return w2c_flow_m(&instance, result); }
+FLOW_EXPORT uint32_t flow_result_position_buffer_size(uint32_t result) { return w2c_flow_n(&instance, result); }
+FLOW_EXPORT uint32_t flow_result_program_buffer(uint32_t result) { return w2c_flow_o(&instance, result); }
+FLOW_EXPORT uint32_t flow_result_string_buffer(uint32_t result) { return w2c_flow_p(&instance, result); }
+FLOW_EXPORT uint32_t flow_malloc(uint32_t size) { return w2c_flow_q(&instance, size); }
+FLOW_EXPORT void flow_free(uint32_t address) { w2c_flow_r(&instance, address); }
 
 // the module's imports, as Emscripten's JavaScript has them
 
 /** getentropy */
 u32 w2c_a_a(struct w2c_a* imports, u32 buffer, u32 size) {
-  wasm_rt_memory_t* memory = w2c_flow_d(imports->flow);
+  wasm_rt_memory_t* memory = w2c_flow_e(imports->flow);
   if ((uint64_t)buffer + size > memory->size) wasm_rt_trap(WASM_RT_TRAP_OOB);
 #ifdef _WIN32
   for (u32 i = 0; i < size; i++) {
@@ -80,16 +81,22 @@ u32 w2c_a_a(struct w2c_a* imports, u32 buffer, u32 size) {
 #endif
 }
 
+/** abort, which Emscripten's JavaScript throws for */
+void w2c_a_b(struct w2c_a* imports) {
+  (void)imports;
+  wasm_rt_trap(WASM_RT_TRAP_UNREACHABLE);
+}
+
 /** emscripten_memcpy_big */
-void w2c_a_b(struct w2c_a* imports, u32 dest, u32 src, u32 num) {
-  wasm_rt_memory_t* memory = w2c_flow_d(imports->flow);
+void w2c_a_c(struct w2c_a* imports, u32 dest, u32 src, u32 num) {
+  wasm_rt_memory_t* memory = w2c_flow_e(imports->flow);
   if ((uint64_t)dest + num > memory->size || (uint64_t)src + num > memory->size) wasm_rt_trap(WASM_RT_TRAP_OOB);
   memmove(memory->data + dest, memory->data + src, num);
 }
 
 /** emscripten_resize_heap, which grows the memory by as much as Emscripten's JavaScript would */
-u32 w2c_a_c(struct w2c_a* imports, u32 requested) {
-  wasm_rt_memory_t* memory = w2c_flow_d(imports->flow);
+u32 w2c_a_d(struct w2c_a* imports, u32 requested) {
+  wasm_rt_memory_t* memory = w2c_flow_e(imports->flow);
   uint64_t oldSize = memory->size;
   uint64_t maxSize = memory->max_pages * memory->page_size;
   if (requested > maxSize) return 0;

@@ -107,4 +107,4 @@ import { isWhiteSpace } from "./characterClasses.mjs";
     }
     return '"""' + result + '"""';
 }
-//# sourceMappingURL=blockString.js.map
+//# sourceMappingURL=blockString.mjs.map

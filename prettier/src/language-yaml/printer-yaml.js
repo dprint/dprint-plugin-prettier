@@ -9,6 +9,8 @@ import {
   join,
   line,
   lineSuffix,
+  literalline,
+  markAsRoot,
   replaceEndOfLine,
 } from "../document/index.js";
 import isPreviousLineEmpty from "../utilities/is-previous-line-empty.js";
@@ -26,11 +28,13 @@ import {
 import printMappingItem from "./print/mapping-item.js";
 import {
   alignWithSpaces,
+  markNextEmptyLinePrinted,
   printNextEmptyLine,
   shouldPrintEndComments,
 } from "./print/misc.js";
 import preprocess from "./print-preprocess.js";
 import {
+  endsWithBlockWithTrailingWhitespace,
   getFlowScalarLineContents,
   getLastDescendantNode,
   hasEndComments,
@@ -38,6 +42,7 @@ import {
   hasMiddleComments,
   hasPrettierIgnore,
   hasTrailingComment,
+  hasTrailingContentWhitespace,
   isInlineNode,
   isLastDescendantNode,
   isNode,
@@ -57,15 +62,20 @@ import {
     parts.push([join(hardline, path.map(print, "leadingComments")), hardline]);
   }
 
-  const { tag, anchor } = node;
-  if (tag) {
-    parts.push(print("tag"));
+  const tagAndAnchor = ["tag", "anchor"].filter((property) => node[property]);
+  if (tagAndAnchor.length > 1) {
+    tagAndAnchor.sort(
+      (propertyA, propertyB) =>
+        locStart(node[propertyA]) - locStart(node[propertyB]),
+    );
   }
-  if (tag && anchor) {
-    parts.push(" ");
-  }
-  if (anchor) {
-    parts.push(print("anchor"));
+
+  for (const [index, property] of tagAndAnchor.entries()) {
+    if (index > 0) {
+      parts.push(" ");
+    }
+
+    parts.push(print(property));
   }
 
   /** @type {Doc} */
@@ -85,7 +95,7 @@ import {
     nextEmptyLine = printNextEmptyLine(path, options.originalText);
   }
 
-  if (tag || anchor) {
+  if (tagAndAnchor.length > 0) {
     if (isNode(node, ["sequence", "mapping"]) && !hasMiddleComments(node)) {
       parts.push(hardline);
     } else {
@@ -130,7 +140,10 @@ import {
   if (shouldPrintEndComments(node)) {
     parts.push(
       alignWithSpaces(node.type === "sequenceItem" ? 2 : 0, [
-        hardline,
+        // Same as below, `hardline` would trim the whitespace of the block
+        endsWithBlockWithTrailingWhitespace(node)
+          ? markAsRoot(literalline)
+          : hardline,
         join(
           hardline,
           path.map(
@@ -146,6 +159,17 @@ import {
       ]),
     );
   }
+
+  // `hardline` trims the trailing whitespace of the block, use `literalline`
+  // (`markAsRoot` makes it indent like `hardline`) before `nextEmptyLine`
+  if (
+    isNode(node, ["mappingItem", "sequenceItem"]) &&
+    !path.isLast &&
+    endsWithBlockWithTrailingWhitespace(node)
+  ) {
+    parts.push(markAsRoot(literalline));
+  }
+
   parts.push(nextEmptyLine);
   return parts;
 }
@@ -155,18 +179,35 @@ function printNode(/** @type {AstPath} */ path, /** @type {YamlOptions} */ optio
   switch (node.type) {
     case "root": {
       const lastDescendantNode = getLastDescendantNode(node);
-      const shouldPrintHardline = !(
+      const lastBlockUsesKeepChomping =
         isNode(lastDescendantNode, ["blockLiteral", "blockFolded"]) &&
-        lastDescendantNode.chomping === "keep"
-      );
+        lastDescendantNode.chomping === "keep";
+      const lastBlockPrintsTrailingLine =
+        lastBlockUsesKeepChomping ||
+        (isNode(lastDescendantNode, ["blockLiteral", "blockFolded"]) &&
+          hasTrailingContentWhitespace(lastDescendantNode));
+      const shouldPrintHardline = !lastBlockPrintsTrailingLine;
       const parts = [];
-      path.each((/** @type {AstPath & { node: YamlNode }} */ { node: document, isFirst }) => {
-        if (!isFirst) {
+      let lastDocumentEndMarkerPrinted = false;
+      let previousDocumentPrintsTrailingLine = false;
+      path.each((/** @type {AstPath & { node: YamlNode }} */ { node: document, isFirst, isLast }) => {
+        if (!isFirst && !previousDocumentPrintsTrailingLine) {
           parts.push(hardline);
         }
         parts.push(print());
-        if (shouldPrintDocumentEndMarker(path)) {
-          if (shouldPrintHardline) {
+        const documentLastDescendantNode = getLastDescendantNode(document);
+        const documentBlockPrintsTrailingLine =
+          isNode(documentLastDescendantNode, ["blockLiteral", "blockFolded"]) &&
+          (hasTrailingContentWhitespace(documentLastDescendantNode) ||
+            (isLast && documentLastDescendantNode.chomping === "keep"));
+        // Same as `genericPrint`, `hardline` would trim the whitespace
+        if (documentBlockPrintsTrailingLine && !isLast) {
+          parts.push(literalline);
+        }
+        const documentEndMarkerPrinted = shouldPrintDocumentEndMarker(path);
+        lastDocumentEndMarkerPrinted = documentEndMarkerPrinted;
+        if (documentEndMarkerPrinted) {
+          if (!documentBlockPrintsTrailingLine) {
             parts.push(hardline);
           }
 
@@ -175,9 +216,14 @@ function printNode(/** @type {AstPath} */ path, /** @type {YamlOptions} */ optio
             parts.push(" ", print("trailingComment"));
           }
         }
+        previousDocumentPrintsTrailingLine =
+          documentBlockPrintsTrailingLine && !documentEndMarkerPrinted;
       }, "children");
 
-      if (shouldPrintHardline) {
+      if (
+        shouldPrintHardline ||
+        (lastDocumentEndMarkerPrinted && !lastBlockUsesKeepChomping)
+      ) {
         parts.push(hardline);
       }
 
@@ -226,6 +272,10 @@ function printNode(/** @type {AstPath} */ path, /** @type {YamlOptions} */ optio
           const shouldPreserveEmptyLine =
             isNode(lastChild, ["mapping"]) &&
             isPreviousLineEmpty(options.originalText, locStart(endComments[0]));
+
+          if (shouldPreserveEmptyLine) {
+            markNextEmptyLinePrinted(path, lastChild);
+          }
 
           separator = shouldPreserveEmptyLine ? [hardline, hardline] : hardline;
         }
@@ -325,7 +375,14 @@ function printNode(/** @type {AstPath} */ path, /** @type {YamlOptions} */ optio
 
     case "mapping":
     case "sequence":
-      return join(hardline, path.map(print, "children"));
+      return path.map(
+        ({ node, isLast }) => [
+          print(),
+          // The line break is printed by the child, see `genericPrint`
+          !isLast && !endsWithBlockWithTrailingWhitespace(node) ? hardline : "",
+        ],
+        "children",
+      );
     case "sequenceItem":
       return ["- ", alignWithSpaces(2, node.content ? print("content") : "")];
     case "mappingKey":

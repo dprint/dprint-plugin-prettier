@@ -14,6 +14,19 @@ class Root extends Container {
   }
 
   /** @returns {import("./node")[]} */ normalize(child, /** @type {import("./node") | undefined} */ sample, /** @type {any} */ type) {
+    let keepBefore = new Set()
+    for (let node of Array.isArray(child) ? child : [child]) {
+      if (
+        node &&
+        typeof node === 'object' &&
+        !node.parent &&
+        node.raws &&
+        typeof node.raws.before !== 'undefined'
+      ) {
+        keepBefore.add(node.raws)
+      }
+    }
+
     /** @type {import("./node")[]} */ let nodes = super.normalize(child)
 
     if (sample) {
@@ -25,7 +38,9 @@ class Root extends Container {
         }
       } else if (this.first !== sample) {
         for (let node of nodes) {
-          node.raws.before = sample.raws.before
+          if (!keepBefore.has(node.raws)) {
+            node.raws.before = sample.raws.before
+          }
         }
       }
     }

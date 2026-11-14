@@ -2,11 +2,11 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.BranchingIncrementalExecutor = void 0;
 const AccumulatorMap_ts_1 = require("../../jsutils/AccumulatorMap.js");
-const getBySet_ts_1 = require("../../jsutils/getBySet.js");
 const invariant_ts_1 = require("../../jsutils/invariant.js");
 const isSameSet_ts_1 = require("../../jsutils/isSameSet.js");
 const memoize1_ts_1 = require("../../jsutils/memoize1.js");
 const memoize2_ts_1 = require("../../jsutils/memoize2.js");
+const SetMap_ts_1 = require("../../jsutils/SetMap.js");
 const IncrementalExecutor_ts_1 = require("../incremental/IncrementalExecutor.js");
 const BranchingIncrementalPublisher_ts_1 = require("./BranchingIncrementalPublisher.js");
 const buildBranchingExecutionPlanFromInitial = (0, memoize1_ts_1.memoize1)((groupedFieldSet) => buildBranchingExecutionPlan(groupedFieldSet));
@@ -41,7 +41,7 @@ class BranchingIncrementalExecutor extends IncrementalExecutor_ts_1.IncrementalE
 exports.BranchingIncrementalExecutor = BranchingIncrementalExecutor;
 function buildBranchingExecutionPlan(originalGroupedFieldSet, parentDeferUsages = new Set()) {
     const groupedFieldSet = new AccumulatorMap_ts_1.AccumulatorMap();
-    const newGroupedFieldSets = new Map();
+    const newGroupedFieldSets = new SetMap_ts_1.SetMap();
     for (const [responseKey, fieldGroup] of originalGroupedFieldSet) {
         for (const fieldDetails of fieldGroup) {
             const deferUsage = fieldDetails.deferUsage;
@@ -52,11 +52,7 @@ function buildBranchingExecutionPlan(originalGroupedFieldSet, parentDeferUsages 
                 groupedFieldSet.add(responseKey, fieldDetails);
             }
             else {
-                let newGroupedFieldSet = (0, getBySet_ts_1.getBySet)(newGroupedFieldSets, deferUsageSet);
-                if (newGroupedFieldSet === undefined) {
-                    newGroupedFieldSet = new AccumulatorMap_ts_1.AccumulatorMap();
-                    newGroupedFieldSets.set(deferUsageSet, newGroupedFieldSet);
-                }
+                const newGroupedFieldSet = newGroupedFieldSets.getOrInsertComputed(deferUsageSet, () => new AccumulatorMap_ts_1.AccumulatorMap());
                 newGroupedFieldSet.add(responseKey, fieldDetails);
             }
         }

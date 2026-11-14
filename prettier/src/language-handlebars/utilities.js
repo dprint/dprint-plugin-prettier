@@ -38,6 +38,20 @@ const htmlVoidElements = new Set(getVoidTags());
   return node.type === "TextNode" && !/\S/.test(node.chars);
 }
 
+/** @returns {boolean} */ function isPlainTextElement(/** @type {GlimmerNode} */ node) {
+  return (
+    node.type === "ElementNode" &&
+    node.children.length === 1 &&
+    node.children[0].type === "TextNode"
+  );
+}
+
+/** @returns {boolean} */ function isPlainTextStyleOrScriptElement(/** @type {GlimmerNode} */ node) {
+  return (
+    isPlainTextElement(node) && (node.tag === "style" || node.tag === "script")
+  );
+}
+
 /** @returns {boolean} */ function isPrettierIgnoreNode(/** @type {GlimmerNode} */ node) {
   return (
     node?.type === "MustacheCommentStatement" &&
@@ -57,4 +71,9 @@ const htmlVoidElements = new Set(getVoidTags());
   );
 }
 
-export { hasPrettierIgnore, isVoidElement, isWhitespaceNode };
+export {
+  hasPrettierIgnore,
+  isPlainTextStyleOrScriptElement,
+  isVoidElement,
+  isWhitespaceNode,
+};

@@ -39,7 +39,7 @@ postcss.plugin = function plugin(/** @type {string} */ name, /** @type {any} */ 
           ': postcss.plugin was deprecated. Migration guide:\n' +
           'https://evilmartians.com/chronicles/postcss-8-plugin-migration'
       )
-      if (process.env.LANG && process.env.LANG.startsWith('cn')) {
+      if (process.env.LANG && process.env.LANG.startsWith('zh')) {
         /* c8 ignore next 7 */
         // eslint-disable-next-line no-console
         console.warn(

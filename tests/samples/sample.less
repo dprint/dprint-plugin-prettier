@@ -1,0 +1,15 @@
+@import (reference) "foo";
+@color:#4D926F;@my-ruleset:{.my-selector{background-color:black}};
+.bordered(@width:2px;@style:solid){border:@width @style black}
+.mixin(@a) when (lightness(@a)>=50%){background-color:black}
+#header{color:darken(@color,10%);.navigation{font-size:12px;&:extend(.banner);&-item{.bordered(4px;dashed)}}
+  @media (min-width:768px){float:left}
+  width:~"calc(100% - @{gutter})";@r:{color:red};
+  .mixin(#ddd)!important;
+  // a line comment
+}
+@plugin "my-plugin";
+@selector:~".my";@{selector}-class{color:fade(@color,50%)}
+.guard when (@mode=huge){width:100%}
+@detached:{background:red;};
+.call{@detached();}

@@ -64,6 +64,13 @@ export class Parser {
         }
         /** @type {import("graphql-ast-types").GraphqlParseOptions} */ this._options = _options;
         /** @type {number} */ this._tokenCounter = 0;
+        this._lexer._maxComments = _options.maxComments;
+        this._lexer._commentCount = 0;
+        const maxSourceLength = _options.maxSourceLength;
+        if (maxSourceLength !== undefined &&
+            this._lexer.source.body.length > maxSourceLength) {
+            throw syntaxError(this._lexer.source, maxSourceLength, `Source contains more than ${maxSourceLength} UTF-16 code units. Parsing aborted.`);
+        }
     }
     /** @returns {number} */ get tokenCount() {
         return this._tokenCounter;
@@ -196,7 +203,9 @@ export class Parser {
     /** @returns {import("graphql-ast-types").GraphqlAstNode} */ parseSelectionSet() {
         return this.node(this._lexer.token, {
             kind: Kind.SELECTION_SET,
-            selections: this.many(TokenKind.BRACE_L, this.parseSelection, TokenKind.BRACE_R),
+            selections: this._options.allowEmptySelectionSets === false
+                ? this.many(TokenKind.BRACE_L, this.parseSelection, TokenKind.BRACE_R)
+                : this.any(TokenKind.BRACE_L, this.parseSelection, TokenKind.BRACE_R),
         });
     }
     /** @returns {import("graphql-ast-types").GraphqlAstNode} */ parseSelection() {
@@ -988,12 +997,13 @@ export class Parser {
         return nodes;
     }
     advanceLexer() {
-        const { maxTokens } = this._options;
+        const { maxLexicalTokens = this._options.maxTokens } = this._options;
         /** @type {import("./ast.mjs").Token} */ const token = this._lexer.advance();
         if (token.kind !== TokenKind.EOF) {
             ++this._tokenCounter;
-            if (maxTokens !== undefined && this._tokenCounter > maxTokens) {
-                throw syntaxError(this._lexer.source, token.start, `Document contains more than ${maxTokens} tokens. Parsing aborted.`);
+            if (maxLexicalTokens !== undefined &&
+                this._tokenCounter > maxLexicalTokens) {
+                throw syntaxError(this._lexer.source, token.start, `Document contains more than ${maxLexicalTokens} tokens. Parsing aborted.`);
             }
         }
     }
@@ -1005,4 +1015,4 @@ export class Parser {
 /** @returns {string} */ function getTokenKindDesc(/** @type {string} */ kind) {
     return isPunctuatorTokenKind(kind) ? `"${kind}"` : kind;
 }
-//# sourceMappingURL=parser.js.map
+//# sourceMappingURL=parser.mjs.map

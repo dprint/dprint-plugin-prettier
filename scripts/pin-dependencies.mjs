@@ -27,5 +27,6 @@ for (const name of Object.keys(pkg.dependencies)) {
     pkg.dependencies[name] = pinned[name];
   }
 }
+pkg.description = pkg.description.replace(`prettier ${pkg.version} `, `prettier ${version} `);
 pkg.version = version;
 fs.writeFileSync(packagePath, JSON.stringify(pkg, null, 2) + "\n");

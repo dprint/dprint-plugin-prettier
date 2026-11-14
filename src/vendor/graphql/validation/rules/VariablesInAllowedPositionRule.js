@@ -10,8 +10,13 @@ function VariablesInAllowedPositionRule(context) {
     let varDefMap;
     return {
         OperationDefinition: {
-            enter() {
+            enter(operation) {
                 varDefMap = new Map();
+                if (operation.variableDefinitions) {
+                    for (const varDef of operation.variableDefinitions) {
+                        varDefMap.set(varDef.variable.name.value, varDef);
+                    }
+                }
             },
             leave(operation) {
                 const usages = context.getRecursiveVariableUsages(operation);
@@ -34,9 +39,6 @@ function VariablesInAllowedPositionRule(context) {
                     }
                 }
             },
-        },
-        VariableDefinition(node) {
-            varDefMap.set(node.variable.name.value, node);
         },
     };
 }

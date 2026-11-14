@@ -11,6 +11,7 @@
     "src/generated",
     "src/prettier-plugins",
     "tests/specs",
+    "tests/samples",
     "wasm/bin",
     "wasm/obj",
     ".github/workflows/*.generated.yml"

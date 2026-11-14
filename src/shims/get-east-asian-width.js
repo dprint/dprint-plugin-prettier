@@ -88,4 +88,4 @@ const isWide = /** @returns {boolean} */ (/** @type {number} */ codePoint) => {
 	return isInRange(wideRanges, codePoint);
 };
 
-export { isFullwidth as _isFullWidth, isWide as _isWide };
+export { isFullwidth as _isFullwidth, isFullwidth as _isFullWidth, isWide as _isWide };

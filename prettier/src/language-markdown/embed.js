@@ -1,7 +1,7 @@
 // @nts-check
 import { hardline, markAsRoot, replaceEndOfLine } from "../document/index.js";
-import getMaxContinuousCount from "../utilities/get-max-continuous-count.js";
 import inferParser from "../utilities/infer-parser.js";
+import { printCodeFences } from "./print/code.js";
 import { getFencedCodeBlockValue } from "./utilities.js";
 
 /**
@@ -14,8 +14,8 @@ function embed(/** @type {AstPath} */ path, /** @type {MarkdownOptions} */ optio
 
   switch (node.type) {
     case "code": {
-      const { lang: language } = node;
-      if (!language) {
+      const { isIndented, lang: language } = node;
+      if (isIndented || !language) {
         return;
       }
 
@@ -53,10 +53,7 @@ function embed(/** @type {AstPath} */ path, /** @type {MarkdownOptions} */ optio
           textToDocOptions,
         );
 
-        /** @type {string} */ const styleUnit = options.__inJsTemplate ? "~" : "`";
-        /** @type {string} */ const style = styleUnit.repeat(
-          Math.max(3, getMaxContinuousCount(node.value, styleUnit) + 1),
-        );
+        /** @type {string} */ const style = printCodeFences(doc, options);
 
         return markAsRoot([
           style,

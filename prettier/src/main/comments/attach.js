@@ -114,7 +114,7 @@ function decorateComment(
     }
   }
 
-  return { enclosingNode, precedingNode, followingNode };
+  return { enclosingNode, precedingNode, followingNode, ancestors };
 }
 
 const returnFalse = /** @returns {boolean} */ () => false;

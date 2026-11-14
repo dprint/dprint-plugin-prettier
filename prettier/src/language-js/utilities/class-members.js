@@ -16,7 +16,11 @@ const flowObjectTypeAnnotationChildrenProperties = [
 
 function iterateClassMembersPath(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, iteratee) {
   /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
-  if (node.type === "ClassBody" || node.type === "TSInterfaceBody") {
+  if (
+    node.type === "ClassBody" ||
+    node.type === "StructBody" ||
+    node.type === "TSInterfaceBody"
+  ) {
     path.each(iteratee, "body");
     return;
   }
@@ -64,7 +68,11 @@ function iterateClassMembersPath(/** @type {import("../../../../prettier/src/com
 
 /**
 @param {
-  any
+  | NodeMap["ClassBody"]
+  | NodeMap["StructBody"]
+  | NodeMap["TSInterfaceBody"]
+  | NodeMap["RecordDeclarationBody"]
+  | NodeMap["ObjectTypeAnnotation"]
 } node
 @returns {boolean}
 */

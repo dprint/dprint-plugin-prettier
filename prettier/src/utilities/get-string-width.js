@@ -2,13 +2,15 @@
 import emojiRegex from "emoji-regex";
 import {
   // @ts-expect-error -- Private
-  _isFullWidth as isFullWidth,
+  _isFullwidth as isFullwidth,
   // @ts-expect-error -- Private
   _isWide as isWide,
 } from "get-east-asian-width";
 import { isNarrowEmojiCharacter } from "narrow-emojis";
 
 const notAsciiRegex = /[^\x20-\x7F]/;
+// Exclude [`Spacing Mark`](https://www.compart.com/en/unicode/category/Mc) because spacing marks contribute horizontal width.
+const zeroWidthMarkRegex = /[\p{Nonspacing_Mark}\p{Enclosing_Mark}]/u;
 
 // Similar to https://github.com/sindresorhus/string-width
 // We don't strip ansi, always treat ambiguous width characters as having narrow width.
@@ -43,17 +45,12 @@ function getStringWidth(text) {
       continue;
     }
 
-    // Ignore combining characters
-    if (codePoint >= 0x300 && codePoint <= 0x36f) {
+    // Ignore zero-width marks, including combining marks and variation selectors
+    if (zeroWidthMarkRegex.test(character)) {
       continue;
     }
 
-    // Ignore Variation Selectors
-    if (codePoint >= 0xfe00 && codePoint <= 0xfe0f) {
-      continue;
-    }
-
-    width += isFullWidth(codePoint) || isWide(codePoint) ? 2 : 1;
+    width += isFullwidth(codePoint) || isWide(codePoint) ? 2 : 1;
   }
 
   return width;

@@ -10,10 +10,12 @@ import {
   line,
   literalline,
   markAsRoot,
+  trim,
 } from "../../document/index.js";
 import {
   getBlockValueLineContents,
   hasIndicatorComment,
+  hasTrailingContentWhitespace,
   isLastDescendantNode,
 } from "../utilities.js";
 import { alignWithSpaces } from "./misc.js";
@@ -58,10 +60,16 @@ function printBlock(/** @type {AstPath} */ path, /** @type {YamlOptions} */ opti
       contentsParts.push(
         lineWords.length === 0 ? hardline : markAsRoot(literalline),
       );
-    } else if (node.chomping === "keep" && isLastDescendant) {
+    } else if (
+      isLastDescendant &&
+      (node.chomping === "keep" || hasTrailingContentWhitespace(node))
+    ) {
       contentsParts.push(
         dedentToRoot(lineWords.length === 0 ? hardline : literalline),
       );
+    } else if (lineWords.length === 0 && hasTrailingContentWhitespace(node)) {
+      // The `literalline` printed after the block doesn't trim the indentation
+      contentsParts.push(trim);
     }
   }
   if (node.indent === null) {

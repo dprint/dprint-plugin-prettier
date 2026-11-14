@@ -7,17 +7,19 @@ import { hasEndComments, isNextLineEmpty, isNode } from "../utilities.js";
 /** @import { YamlNode } from "../../../../src/vendor/yaml-unist-parser/transforms/context.mjs" */
 
 const printedEmptyLineCache = new WeakMap();
+const getNextEmptyLinePrintedSet = (path) =>
+  getOrInsertComputed(printedEmptyLineCache, path.root, () => new Set());
+const markNextEmptyLinePrinted = (path, node = path.node) => {
+  getNextEmptyLinePrintedSet(path).add(node.position.end.offset);
+};
+const hasNextEmptyLineBeenPrinted = (path, node = path.node) =>
+  getNextEmptyLinePrintedSet(path).has(node.position.end.offset);
+
 function printNextEmptyLine(/** @type {AstPath} */ path, /** @type {string} */ originalText) {
-  /** @type {{ node: YamlNode, root: any }} */ const { node, root } = path;
+  if (!hasNextEmptyLineBeenPrinted(path)) {
+    markNextEmptyLinePrinted(path);
 
-  /** @type {Set<number>} */ const isNextEmptyLinePrintedSet = getOrInsertComputed(
-    printedEmptyLineCache,
-    root,
-    /** @returns {Set<number>} */ () => new Set(),
-  );
-
-  if (!isNextEmptyLinePrintedSet.has(node.position.end.offset)) {
-    isNextEmptyLinePrintedSet.add(node.position.end.offset);
+    /** @type {{ node: YamlNode }} */ const { node } = path;
     if (
       isNextLineEmpty(node, originalText) &&
       !shouldPrintEndComments(path.parent)
@@ -45,4 +47,9 @@ function alignWithSpaces(/** @type {number} */ width, doc) {
   return align(" ".repeat(width), doc);
 }
 
-export { alignWithSpaces, printNextEmptyLine, shouldPrintEndComments };
+export {
+  alignWithSpaces,
+  markNextEmptyLinePrinted,
+  printNextEmptyLine,
+  shouldPrintEndComments,
+};

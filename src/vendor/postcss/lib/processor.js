@@ -7,7 +7,7 @@ let Root = require('./root')
 
 class Processor {
   constructor(/** @type {any[]} */ plugins = []) {
-    /** @type {string} */ this.version = '8.5.16'
+    /** @type {string} */ this.version = '8.5.32'
     /** @type {any[]} */ this.plugins = this.normalize(plugins)
   }
 

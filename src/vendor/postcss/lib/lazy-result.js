@@ -103,8 +103,14 @@ let warnOnce = require('./warn-once')
 }
 
 /** @returns {any} */ function cleanMarks(/** @type {any} */ node) {
-  node[isClean] = false
-  if (node.nodes) node.nodes.forEach((/** @type {any} */ i) => cleanMarks(i))
+  let stack = [node]
+  while (stack.length > 0) {
+    let next = stack.pop()
+    next[isClean] = false
+    if (next.nodes) {
+      for (let i of next.nodes) stack.push(i)
+    }
+  }
   return node
 }
 
@@ -205,7 +211,7 @@ class LazyResult {
   }
 
   finally(/** @type {any} */ onFinally) {
-    return this.async().then(onFinally, onFinally)
+    return this.async().finally(onFinally)
   }
 
   getAsyncError() {
@@ -503,14 +509,24 @@ class LazyResult {
 
     if (visit.iterator !== 0) {
       /** @type {number} */ let iterator = visit.iterator
+      // Advance past the child we just finished visiting. Like
+      // `Container#each`, the index is incremented only after a child has
+      // been fully processed, so a node inserted right after the current
+      // child is not skipped by the `existIndex < index` adjustment in
+      // `Container#insertAfter()` (which would fire exit events too early).
+      if (visit.descending) {
+        visit.descending = false
+        node.indexes[iterator] += 1
+      }
       /** @type {any} */ let child
       while ((child = node.nodes[node.indexes[iterator]])) {
-        node.indexes[iterator] += 1
         if (!child[isClean]) {
           child[isClean] = true
+          visit.descending = true
           stack.push(toStack(child))
           return
         }
+        node.indexes[iterator] += 1
       }
       visit.iterator = 0
       delete node.indexes[iterator]
@@ -535,21 +551,68 @@ class LazyResult {
   }
 
   walkSync(/** @type {any} */ node) {
+    // An explicit stack like in async `visitTick()` to survive deeply
+    // nested trees. Unlike `visitTick()`, nodes are marked clean only
+    // on entering, so a node dirtied by its own visitors is revisited
+    // on the next pass.
     node[isClean] = true
-    /** @type {(string | number)[]} */ let events = getEvents(node)
-    for (let event of events) {
-      if (event === CHILDREN) {
-        if (node.nodes) {
-          node.each((/** @type {any} */ child) => {
-            if (!child[isClean]) this.walkSync(child)
-          })
+    let stack = [{ eventIndex: 0, events: getEvents(node), iterator: 0, node }]
+
+    while (stack.length > 0) {
+      let visit = stack[stack.length - 1]
+      let visitNode = visit.node
+
+      if (visit.iterator !== 0) {
+        let iterator = visit.iterator
+        // Advance past the child we just finished visiting. Like
+        // `Container#each`, the index is incremented only after a child has
+        // been fully processed. Incrementing before (as this loop used to)
+        // makes a node inserted right after the current child get skipped by
+        // the `existIndex < index` adjustment in `Container#insertAfter()`,
+        // which fires exit events before those new siblings are visited.
+        if (visit.descending) {
+          visit.descending = false
+          visitNode.indexes[iterator] += 1
         }
-      } else {
-        let visitors = this.listeners[event]
-        if (visitors) {
-          if (this.visitSync(visitors, node.toProxy())) return
+        let child
+        let descended = false
+        while ((child = visitNode.nodes[visitNode.indexes[iterator]])) {
+          if (!child[isClean]) {
+            child[isClean] = true
+            visit.descending = true
+            stack.push({
+              eventIndex: 0,
+              events: getEvents(child),
+              iterator: 0,
+              node: child
+            })
+            descended = true
+            break
+          }
+          visitNode.indexes[iterator] += 1
         }
+        if (descended) continue
+        visit.iterator = 0
+        delete visitNode.indexes[iterator]
       }
+
+      if (visit.eventIndex < visit.events.length) {
+        let event = visit.events[visit.eventIndex]
+        visit.eventIndex += 1
+        if (event === CHILDREN) {
+          if (visitNode.nodes && visitNode.nodes.length) {
+            visit.iterator = visitNode.getIterator()
+          }
+        } else {
+          let visitors = this.listeners[event]
+          if (visitors) {
+            if (this.visitSync(visitors, visitNode.toProxy())) stack.pop()
+          }
+        }
+        continue
+      }
+
+      stack.pop()
     }
   }
 

@@ -1,11 +1,9 @@
 // @nts-check
-/* eslint-disable import/no-extraneous-dependencies, no-param-reassign */
-
-const tokenize = require('postcss/lib/tokenize');
+import tokenize from 'postcss/lib/tokenize';
 
 /** @type {RegExp} */ const urlPattern = /^url\((.+)\)/;
 
-module.exports = (/** @type {import("postcss/lib/node")} */ node) => {
+export function convertImport(/** @type {import("postcss/lib/node")} */ node) {
   const { name, params = '' } = node;
 
   if (name === 'import' && params.length) {
@@ -27,4 +25,4 @@ module.exports = (/** @type {import("postcss/lib/node")} */ node) => {
       }
     }
   }
-};
+}

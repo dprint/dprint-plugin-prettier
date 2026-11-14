@@ -131,7 +131,7 @@ class Parser {
   }
 
   checkMissedSemicolon(/** @type {[string, string, number?, number?][]} */ tokens) {
-    /** @type {boolean} */ let colon = this.colon(tokens)
+    let colon = this.colon(tokens)
     if (colon === false) return
 
     /** @type {number} */ let founded = 0
@@ -153,7 +153,7 @@ class Parser {
     )
   }
 
-  /** @returns {boolean} */ colon(/** @type {[string, string, number?, number?][]} */ tokens) {
+  colon(/** @type {[string, string, number?, number?][]} */ tokens) {
     /** @type {number} */ let brackets = 0
     let /** @type {[string, string, number?, number?]} */ prev, /** @type {[string, string, number?, number?]} */ token, /** @type {string} */ type
     for (let [i, element] of tokens.entries()) {
@@ -359,8 +359,11 @@ class Parser {
       if (prev && prev.type === 'rule' && !prev.raws.ownSemicolon) {
         prev.raws.ownSemicolon = this.spaces
         this.spaces = ''
+        // `ownSemicolon` also holds the spaces before the semicolon, but
+        // the position above is the semicolon itself, so the node ends
+        // right after it.
         prev.source.end = this.getPosition(token[2])
-        prev.source.end.offset += prev.raws.ownSemicolon.length
+        prev.source.end.offset++
       }
     }
   }
@@ -496,6 +499,9 @@ class Parser {
     let /** @type {[string, string, number?, number?]} */ token, /** @type {string} */ type
     /** @type {number} */ let length = tokens.length
     /** @type {string} */ let value = ''
+    // Last character of `value`. Reading it from `value` would flatten
+    // the string concatenation on every comment and make parsing O(n^2).
+    let last = ''
     /** @type {boolean} */ let clean = true
     let /** @type {string} */ next, /** @type {string} */ prev
 
@@ -508,16 +514,18 @@ class Parser {
         prev = tokens[i - 1] ? tokens[i - 1][0] : 'empty'
         next = tokens[i + 1] ? tokens[i + 1][0] : 'empty'
         if (!SAFE_COMMENT_NEIGHBOR[prev] && !SAFE_COMMENT_NEIGHBOR[next]) {
-          if (value.slice(-1) === ',') {
+          if (last === ',') {
             clean = false
           } else {
             value += token[1]
+            last = token[1].slice(-1)
           }
         } else {
           clean = false
         }
       } else {
         value += token[1]
+        last = token[1].slice(-1)
       }
     }
     if (!clean) {

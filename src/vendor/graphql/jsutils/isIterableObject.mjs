@@ -2,4 +2,4 @@
     return (typeof maybeIterable === 'object' &&
         typeof maybeIterable?.[Symbol.iterator] === 'function');
 }
-//# sourceMappingURL=isIterableObject.js.map
+//# sourceMappingURL=isIterableObject.mjs.map

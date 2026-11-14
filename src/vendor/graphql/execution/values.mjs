@@ -115,6 +115,9 @@ export function getFragmentVariableValues(fragmentSpreadNode, fragmentSignatures
 }
 export function getArgumentValues(def, node, variableValues, fragmentVariableValues, hideSuggestions) {
     const coercedValues = Object.create(null);
+    if (def.args.length === 0) {
+        return coercedValues;
+    }
     const argumentNodes = node.arguments ?? [];
     const argNodeMap = new Map(argumentNodes.map((arg) => [arg.name.value, arg]));
     for (const argDef of def.args) {
@@ -169,4 +172,4 @@ export function getDirectiveValues(directiveDef, node, variableValues, fragmentV
         return getArgumentValues(directiveDef, directiveNode, variableValues, fragmentVariableValues, hideSuggestions);
     }
 }
-//# sourceMappingURL=values.js.map
+//# sourceMappingURL=values.mjs.map

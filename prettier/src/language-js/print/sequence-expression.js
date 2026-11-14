@@ -8,13 +8,13 @@ import {
   softline,
 } from "../../document/index.js";
 import needsParentheses from "../parentheses/needs-parentheses.js";
-import { isReturnOrThrowStatement } from "../utilities/node-types.js";
+import { isUnaryLikeNode } from "../utilities/node-types.js";
 
 /** @returns {boolean} */ function shouldIndentSequenceExpression(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options) {
   /** @type {{ key: any, parent: import("../types/estree.js").Node }} */ const { key, parent } = path;
   if (
     key === "argument" &&
-    isReturnOrThrowStatement(parent) &&
+    isUnaryLikeNode(parent) &&
     needsParentheses(path, options)
   ) {
     return true;

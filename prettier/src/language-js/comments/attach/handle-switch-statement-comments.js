@@ -33,8 +33,7 @@ function handleSwitchStatementComments({
   );
 
   if (nextCharacter === "}") {
-    addDanglingComment(enclosingNode, comment);
-    return true;
+    return addDanglingComment(enclosingNode, comment);
   }
 
   return false;

@@ -1,0 +1,14 @@
+@use 'sass:math';
+@import 'a', "b";
+$map:(key1:value1,key2:value2,key3:value3);
+$breakpoints:('small':576px,'medium':768px,'large':992px,'xlarge':1200px)!default;
+@mixin respond($breakpoint,$direction:min){@media (#{$direction}-width:map-get($breakpoints,$breakpoint)){@content}}
+@function rem($px,$base:16px){@return math.div($px,$base)*1rem}
+%placeholder{color:blue}
+.card{@extend %placeholder;padding:rem(24px);&__title{font:{family:$font;size:rem(18px)}}&:not(.is-active):hover{color:darken($primary,10%)}
+  @include respond('medium'){padding:rem(32px)}
+  @each $name,$glyph in $icons{.icon-#{$name}:before{content:$glyph}}
+  @if $theme==dark{background:#000}@else if $theme==light{background:#fff}@else{background:gray}
+  // a line comment
+  @for $i from 1 through 3{.item-#{$i}{width:2em*$i}}
+}

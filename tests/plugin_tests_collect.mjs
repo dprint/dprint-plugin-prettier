@@ -45,6 +45,23 @@ for (const testCase of cases) {
   }
   delete testCase.testExpects;
 }
+// as tests/prettier_tests_worker.ts does for Prettier's own tests, each case is also formatted with the line endings
+// of Windows (CRLF) and of old Macs (CR), and what Prettier gives for it is formatted a second time
+for (const testCase of [...cases]) {
+  const input = testCase.input.replace(/^﻿/, "");
+  const variants = [];
+  if (input.includes("\n") && !input.includes("\r")) {
+    variants.push([" (CRLF)", input.replaceAll("\n", "\r\n")], [" (CR)", input.replaceAll("\n", "\r")]);
+  }
+  if (!testCase.expected.startsWith("error: ") && testCase.expected !== input) {
+    variants.push([" (second format)", testCase.expected]);
+  }
+  for (const [variant, text] of variants) {
+    const variantCase = { ...testCase, name: testCase.name + variant, input: text };
+    variantCase.expected = await formatWithPrettier(variantCase);
+    cases.push(variantCase);
+  }
+}
 fs.writeFileSync(outPath, JSON.stringify({ cases, failedTests }));
 console.log(JSON.stringify({ cases: cases.length, failedTests: failedTests.length }));
 

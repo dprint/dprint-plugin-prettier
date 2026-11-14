@@ -8,17 +8,18 @@ const devAssert_ts_1 = require("../jsutils/devAssert.js");
 const inspect_ts_1 = require("../jsutils/inspect.js");
 const ast_ts_1 = require("./ast.js");
 const kinds_ts_1 = require("./kinds.js");
+const allKinds = Object.values(kinds_ts_1.Kind);
 exports.BREAK = Object.freeze({});
 function visit(root, visitor, visitorKeys = ast_ts_1.QueryDocumentKeys) {
     const enterLeaveMap = new Map();
-    for (const kind of Object.values(kinds_ts_1.Kind)) {
+    for (const kind of allKinds) {
         enterLeaveMap.set(kind, getEnterLeaveForKind(visitor, kind));
     }
     let stack = undefined;
     let inArray = Array.isArray(root);
     let keys = [root];
     let index = -1;
-    let edits = [];
+    let edits;
     let node = root;
     let key = undefined;
     let parent = undefined;
@@ -27,16 +28,18 @@ function visit(root, visitor, visitorKeys = ast_ts_1.QueryDocumentKeys) {
     do {
         index++;
         const isLeaving = index === keys.length;
-        const isEdited = isLeaving && edits.length !== 0;
+        const isEdited = isLeaving && edits !== undefined;
         if (isLeaving) {
             key = ancestors.length === 0 ? undefined : path[path.length - 1];
             node = parent;
             parent = ancestors.pop();
-            if (isEdited) {
+            if (edits !== undefined) {
                 if (inArray) {
                     node = node.slice();
                     let editOffset = 0;
-                    for (const [editKey, editValue] of edits) {
+                    for (let editIndex = 0; editIndex < edits.length; editIndex += 2) {
+                        const editKey = edits[editIndex];
+                        const editValue = edits[editIndex + 1];
                         const arrayKey = editKey - editOffset;
                         if (editValue === null) {
                             node.splice(arrayKey, 1);
@@ -49,8 +52,8 @@ function visit(root, visitor, visitorKeys = ast_ts_1.QueryDocumentKeys) {
                 }
                 else {
                     node = { ...node };
-                    for (const [editKey, editValue] of edits) {
-                        node[editKey] = editValue;
+                    for (let editIndex = 0; editIndex < edits.length; editIndex += 2) {
+                        node[edits[editIndex]] = edits[editIndex + 1];
                     }
                 }
             }
@@ -69,7 +72,8 @@ function visit(root, visitor, visitorKeys = ast_ts_1.QueryDocumentKeys) {
             path.push(key);
         }
         let result;
-        if (!Array.isArray(node)) {
+        let nodeIsArray = Array.isArray(node);
+        if (!nodeIsArray) {
             if (!((0, ast_ts_1.isNode)(node)))
                 (0, devAssert_ts_1.devAssert)(false, `Invalid AST Node: ${(0, inspect_ts_1.inspect)(node)}.`);
             const visitFn = isLeaving
@@ -86,10 +90,11 @@ function visit(root, visitor, visitorKeys = ast_ts_1.QueryDocumentKeys) {
                 }
             }
             else if (result !== undefined) {
-                edits.push([key, result]);
+                (edits ??= []).push(key, result);
                 if (!isLeaving) {
                     if ((0, ast_ts_1.isNode)(result)) {
                         node = result;
+                        nodeIsArray = Array.isArray(node);
                     }
                     else {
                         path.pop();
@@ -99,32 +104,32 @@ function visit(root, visitor, visitorKeys = ast_ts_1.QueryDocumentKeys) {
             }
         }
         if (result === undefined && isEdited) {
-            edits.push([key, node]);
+            (edits ??= []).push(key, node);
         }
         if (isLeaving) {
             path.pop();
         }
         else {
             stack = { inArray, index, keys, edits, prev: stack };
-            inArray = Array.isArray(node);
+            inArray = nodeIsArray;
             keys = inArray ? node : (visitorKeys[node.kind] ?? []);
             index = -1;
-            edits = [];
+            edits = undefined;
             if (parent != null) {
                 ancestors.push(parent);
             }
             parent = node;
         }
     } while (stack !== undefined);
-    if (edits.length !== 0) {
-        return edits.at(-1)[1];
+    if (edits !== undefined) {
+        return edits.at(-1);
     }
     return root;
 }
 function visitInParallel(visitors) {
     const skipping = new Array(visitors.length).fill(null);
     const mergedVisitor = Object.create(null);
-    for (const kind of Object.values(kinds_ts_1.Kind)) {
+    for (const kind of allKinds) {
         let hasVisitor = false;
         const enterList = new Array(visitors.length).fill(undefined);
         const leaveList = new Array(visitors.length).fill(undefined);

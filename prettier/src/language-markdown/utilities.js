@@ -372,8 +372,9 @@ function isPrettierIgnore(/** @type {MdastNode} */ node) {
 }
 
 /** @returns {boolean} */ function isSetextHeading(/** @type {import("./utilities.js").MdastNode} */ node) {
-  const { start, end } = node.position;
-  return start.line !== end.line;
+  return (
+    node.type === "heading" && node.position.start.line < node.position.end.line
+  );
 }
 
 const isNewLine = /** @returns {boolean} */ (/** @type {import("./utilities.js").MdastNode} */ node) => node?.type === "whitespace" && node.value === "\n";

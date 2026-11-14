@@ -5,7 +5,7 @@ import postprocess from "./postprocess/index.js";
 import createParser from "./utilities/create-parser.js";
 
 // https://github.com/facebook/flow/blob/7c64d4b077bc6fc45c12cee3cfa7368fdb2186ce/packages/flow-parser/oxidized-src/ParserOptions.js#L15
-// Keep this sync with `/scripts/sync-flow-test.js`
+// Keep this in sync with `/scripts/sync-flow-tests.cjs`
 const parseOptions = {
   flow: "all",
   babel: false,
@@ -17,9 +17,6 @@ const parseOptions = {
   enableExperimentalFlowMatchSyntax: true,
   // `enableExperimentalComponentSyntax` (boolean, default `true`) - enable parsing of Flow component syntax
   enableExperimentalComponentSyntax: true,
-  // TODO: Support it
-  // `assertOperator` (boolean, default `false`) - enable parsing of the assert operator
-  // assertOperator: true,
   // `enableExperimentalDecorators` (boolean, default `true`) - enable parsing of decorators
   enableExperimentalDecorators: true,
   // `enableExperimentalFlowRecordSyntax` (boolean, default `true`) - enable parsing of records

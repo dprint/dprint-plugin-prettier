@@ -1,9 +1,19 @@
 // @nts-check
 'use strict'
 
-let { existsSync, readFileSync } = require('fs')
-let { dirname, join } = require('path')
+let { existsSync, readFileSync, realpathSync } = require('fs')
+let { dirname, isAbsolute, join, relative, sep } = require('path')
 let { SourceMapConsumer, SourceMapGenerator } = require('source-map-js')
+
+function realPath(path) {
+  try {
+    return realpathSync(path)
+  } catch {
+    // Missing or dangling: keep the literal path. The existsSync() check below
+    // still gates the read, and a path that does not exist cannot escape.
+    return path
+  }
+}
 
 /** @returns {string} */ function fromBase64(/** @type {string} */ str) {
   if (Buffer) {
@@ -86,9 +96,14 @@ class PreviousMap {
   }
 
   /** @returns {string | undefined} */ loadFile(/** @type {string} */ path, /** @type {any} */ cssFile, /** @type {boolean} */ trusted) {
-    /* c8 ignore next 5 */
     if (!trusted && !this.unsafeMap) {
-      if (!/\.map$/i.test(path)) {
+      if (!/\.map$/i.test(path)) return undefined
+      if (!cssFile) return undefined
+
+      // Compare *resolved* paths: relative() is textual, so without this a
+      // symlink at or below the CSS file's directory points the map outside it.
+      let rel = relative(realPath(dirname(cssFile)), realPath(path))
+      if (rel === '..' || rel.startsWith('..' + sep) || isAbsolute(rel)) {
         return undefined
       }
     }

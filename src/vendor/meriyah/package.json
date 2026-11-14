@@ -1,6 +1,6 @@
 {
   "name": "meriyah",
-  "version": "7.1.1",
+  "version": "7.4.2",
   "description": "A 100% compliant, self-hosted javascript parser with high focus on both performance and stability",
   "main": "dist/meriyah.cjs",
   "module": "dist/meriyah.min.mjs",
@@ -11,6 +11,7 @@
   "exports": {
     "types": "./dist/types/meriyah.d.ts",
     "module-sync": "./dist/meriyah.mjs",
+    "import": "./dist/meriyah.mjs",
     "require": "./dist/meriyah.cjs",
     "default": "./dist/meriyah.mjs"
   },

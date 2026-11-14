@@ -1,5 +1,6 @@
 // @nts-check
 import { getCallArguments } from "./call-arguments.js";
+import { hasComment } from "./comments.js";
 import { getFunctionParameters } from "./function-parameters.js";
 import { isNodeMatches } from "./is-node-matches.js";
 import {
@@ -104,6 +105,10 @@ function isFunctionOrArrowExpressionWithBody(node) {
   }
 
   const args = getCallArguments(node);
+
+  if (args.some((arg) => hasComment(arg))) {
+    return false;
+  }
 
   if (args.length === 1) {
     if (isAngularTestWrapper(node) && isTestCall(parent)) {

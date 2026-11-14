@@ -1,0 +1,17 @@
+<div class="entry {{if active 'active'}}  other"   id='main'>
+  {{#if author}}
+    <h1>{{firstName}}   {{lastName}}</h1>
+  {{else if editor}}
+  <h2>{{editor.name}}</h2>
+  {{else}}
+    <p>Unknown, which is long enough to be wrapped onto another line when it is formatted at the width.</p>
+  {{/if}}
+  {{#each items key="id" as |item index|}}
+    <Item @value={{item}} @onClick={{action "select" item}} @label="it's" class="item" {{on "click" (fn this.select item index)}} />
+  {{/each}}
+  {{! a comment }}
+  {{!-- another comment --}}
+  {{{raw}}}
+  {{yield (hash title=(component "title" size="large") body=(component "body"))}}
+  <input disabled type="checkbox" checked={{this.checked}}>
+</div>

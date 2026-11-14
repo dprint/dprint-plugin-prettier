@@ -24,6 +24,8 @@ went wrong then.
 The version of Prettier is written in:
 
 - `prettier/package.json` (`version` and `description`), which `scripts/pin-dependencies.mjs` sets
+- `plugins/package.json` (the `prettier` that the plugins' tests are given), after which `npm install` there updates
+  its lockfile
 - `deno.json` (`npm:prettier@<version>`), the Prettier that the tests compare with
 - `.github/workflows/ci.ts` (`prettierVersion`), after which `deno run -A .github/workflows/ci.ts` regenerates
   `ci.generated.yml`
@@ -31,6 +33,11 @@ The version of Prettier is written in:
 - `README.md`
 
 `wasm/Plugin.csproj` has the version of the plugin, which is not Prettier's.
+
+npm and Deno may be set to only install releases that are some days old (npm's `min-release-age`, Deno's minimum
+dependency age), which a new Prettier is not yet. Prettier from npm is needed for the TypeScript bundle (section 4)
+and for the tests, so wait, or with the owner's agreement install it with `--min-release-age=0` (npm) and
+`--minimum-dependency-age=0` (Deno) for that one command.
 
 ## 2. The packages
 
@@ -45,7 +52,14 @@ cd prettier && npm install --ignore-scripts
 ```
 
 Before installing, copy the packages that are about to change (`prettier/node_modules/<name>`) somewhere, since the
-old version of a package is what the types of its copy in `src/vendor` are carried from.
+old version of a package is what the types of its copy in `src/vendor` are carried from. Copying all of
+`prettier/node_modules` is simplest, and comparing the versions of every package in it before and after shows the
+packages that only change with others too.
+
+The script warns about a package that Prettier no longer has. Look up what the new source imports in its place and
+put that in `prettier/package.json` instead: at 3.10.1, fast-json-stable-stringify became
+json-stringify-stable-replacer, json5 became `@bybrave/json5` (both only for the CLI) and html-element-attributes
+became `@prettier/html-attributes`, which `scripts/generate.mjs` needs.
 
 ### The copies in `src/vendor`
 
@@ -65,7 +79,26 @@ node scripts/carry-types.mjs <old package file> <old typed copy> <new package fi
 ```
 
 It prints how many types it carried; those it could not line up are written to `<out>.unmatched.txt` to be looked
-at. Check that the result is the new package's file once the types are taken out again. Babel's parser
+at. It only carries a type that is on a line of its own code, so a type that the copy gives by splitting a declaration
+in two, by a cast in parentheses or in a comment of several lines (`@property` of a class, `@returns` in a doc
+comment) has to be put back by hand. For a package that is not minified, `CARRY_UNMINIFIED=1` lines the lines up with
+their names, and a three-way merge as for `prettier/src` (below) keeps all of these where the code is the same:
+
+```sh
+git merge-file --diff3 <old typed copy> <old package file> <new package file>
+```
+
+At 3.10.1 this was how Babel's parser, meriyah, acorn, PostCSS, postcss-less, yaml, yaml-unist-parser,
+angular-html-parser, graphql and flow-parser's deserializer were updated, and `@angular/compiler`, whose changes the
+merge could not line up, with `CARRY_UNMINIFIED=1`. Check that every file that started with `// @nts-check` still does:
+the merge dropped it from meriyah and postcss-less, as it does in `prettier/src`. A method whose parameters changed
+loses its types in a merge; giving the new one the types of the parameters that kept their names puts most back.
+
+A package may also change how it is bundled. `@glimmer/syntax` 0.97 bundles `@glimmer/util`, `@glimmer/wire-format`,
+`@handlebars/parser` and simple-html-tokenizer (1.0, which was rewritten) into one file, written out differently,
+so its copy is that file alone, and types were carried to it from the four old copies by lining up their lines without
+whitespace and quotes; simple-html-tokenizer's and the lines that changed have no types until they are recorded again
+(section 8). Check that the result is the new package's file once the types are taken out again. Babel's parser
 (`src/vendor/babel-parser/index.js`) and angular-html-parser's lexer (`src/vendor/angular-html-parser/lexer.mjs`)
 are this way, and the lexer's imports may need following, as a file that the old version imported may be gone.
 
@@ -104,6 +137,15 @@ Set `CARRY_CONTEXT=2` so that a type is only carried where the lines around it l
 code changed may line up with a different function and be given its types. A wrong type there showed up as files
 that took minutes, such as a `lineMap` that was copied for every node because its type was lost.
 
+The typed bundle is the npm bundle formatted with Prettier at a `printWidth` of 120, so format the old and new npm
+bundles that way first (with the same Prettier) and carry between those. The lines left over after that (in
+`<out>.unmatched.txt`, and the ones that lined up with lines that changed) are worth looking at one by one with
+`CARRY_CONTEXT=0`: at 3.10.1 they were mostly small helpers that were only renamed. What the script does not carry
+has to be put back by hand, with the names that the new bundle gives the classes: the comment of `@property` and
+`@sideProperty` before the node classes and the source file class (`parent`, `text` and `lineMap`), the type of
+the `forEachChild` table, `computeLineStarts`'s array, the declarations of the parser that were split to type one of
+them, and the casts of the visitors in the function that creates a node's children.
+
 ## 5. Flow's parser
 
 Prettier's Flow parser comes from the flow-parser package, which is Flow's parser compiled with Emscripten to a Wasm
@@ -120,6 +162,10 @@ When flow-parser changes:
 - Compare `src/shims/flow-parser.ts` with the package's `dist/index.js` and `dist/FlowParser.js`, which it follows.
   The option `enableExperimentalFlowRecordSyntax` going to `enableRecords` in `index.js` was missed at first, and
   records failed to parse.
+- At 0.339 the module got a fourth import (`abort`), lost its `main` export, and `hermesParse` went from 16 to 20
+  arguments (no `assertOperator`; Babel's AST, two enum transform flags, the React runtime and
+  `throwOnParseErrors` added), which the glue, `wasm/FlowParser.cs`, `src/types/flow-native.d.ts` and the shim
+  all have; the deserializer now fills in the locations and ranges that the shim used to.
 
 The parser's memory starts at 128 MB, so it is only created the first time a file is parsed with it.
 
@@ -146,15 +192,25 @@ whose version is pinned with the others.
 WASI_SDK_PATH=<wasi-sdk folder> BINARYEN=<binaryen folder>/bin WABT=<wabt folder> deno task build
 deno task test
 deno task test:prettier
+deno task test:plugins
 deno task test:repos
 ```
 
+`test` runs the specs, checks what dprint sees of the plugin (`tests/dprint_test.ts`) and formats the samples of
+`tests/samples` with every value of every option that `getSupportInfo()` lists, compared with Prettier from npm
+(`tests/options_test.ts`). It finds the options by itself, so an option that an upgrade adds is tested without
+writing anything, but it fails until the option is in `deployment/schema.json` with its values and default. Add a
+sample for a language that an upgrade adds.
+
 `test:prettier` runs Prettier's own format tests through `target/plugin.wasm`: every fixture of `tests/format` with
 every parser and the options of its test, as Prettier's test runner makes them, compared with Prettier from npm,
-including the message of an error. At 3.9.10 all 21,650 cases give the same output. The cases that differ are written
-to `target/prettier-tests/diffs`. It leaves out the fixtures that mark a cursor or a range, the tests that give
-Prettier plugins, and the parsers of other packages (oxc, hermes, yuku). CI runs it after `deno task test`. `test:repos`
-formats the files of many codebases with Prettier's default options.
+including the message of an error. At 3.10.1 all 23,551 cases (79,853 with their CRLF, CR and second-format
+variants) give the same output. The cases that differ are written to `target/prettier-tests/diffs`. It leaves out
+the fixtures that mark a cursor or a range, the tests that give Prettier plugins, and the parsers of other packages
+(oxc, hermes, yuku). CI runs it after `deno task test`. `test:plugins` (after `test:prettier`, whose cases it uses)
+runs the tests of the Prettier plugins and Prettier's JavaScript tests with prettier-plugin-jsdoc: 38,086 cases at
+3.10.1, of which 4 are known to run out of stack in the plugin only (`knownStackOverflows`). `test:repos` formats the files of many codebases with
+Prettier's default options.
 
 A difference is one of these:
 
@@ -167,7 +223,10 @@ A difference is one of these:
   `toString` with a radix and on a BigInt where the type is not known, `\p{…}` in a regular expression with the `u`
   flag for characters beyond the first 65536, `null` given to a property of an object of a class after it was
   created, `codePointAt` outside of the text, and fields of JavaScript classes that their own file gives other kinds of
-  values. Fix it in nts with a spec, as the nts repository describes.
+  values. At 3.10.1 these were a class that extends `Map` (graphql's `AccumulatorMap`), a negative number in a
+  constant `case`, `array[i] ?? fallback` past the end of an array of numbers, a default of a constructor's parameter
+  that `super(...)` is given, `JSON.stringify` of undefined in a template, and a call of a function that nothing
+  declares, which is a `ReferenceError`. Fix it in nts with a spec, as the nts repository describes.
 - The comparison itself: dprint gives a plugin a file without its BOM and always with a path, and its configuration is
   JSON, which has no `Infinity`. `tests/prettier_tests_worker.ts` gives Prettier the same.
 

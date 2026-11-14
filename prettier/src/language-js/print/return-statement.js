@@ -15,7 +15,7 @@ import { printSemicolon } from "./miscellaneous.js";
 @import {Doc} from "../../document/index.js";
 */
 
-/** @returns {Doc} */ function printReturnOrThrowArgument(/** @type {AstPath} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options, /** @type {import("../print-options.js").JsPrint} */ print) {
+/** @returns {Doc} */ function printArgumentNode(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   const argumentDoc = print();
 
@@ -41,25 +41,39 @@ import { printSemicolon } from "./miscellaneous.js";
   return argumentDoc;
 }
 
-// `ReturnStatement` and `ThrowStatement`
-function printReturnOrThrowStatement(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
-  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
+function printArgument(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
+  if (!path.node.argument) {
+    return "";
+  }
+
   return [
-    node.type === "ThrowStatement" ? "throw" : "return",
-    node.argument
-      ? [
-          " ",
-          path.call(
-            () => printReturnOrThrowArgument(path, options, print),
-            "argument",
-          ),
-        ]
-      : "",
+    " ",
+    path.call(() => printArgumentNode(path, options, print), "argument"),
+  ];
+}
+
+function printReturnStatement(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
+  return [
+    "return",
+    printArgument(path, options, print),
     printSemicolon(options),
   ];
 }
 
-export {
-  printReturnOrThrowStatement as printReturnStatement,
-  printReturnOrThrowStatement as printThrowStatement,
-};
+function printThrowStatement(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
+  return [
+    "throw",
+    printArgument(path, options, print),
+    printSemicolon(options),
+  ];
+}
+
+function printYieldExpression(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
+  return [
+    "yield",
+    path.node.delegate ? "*" : "",
+    printArgument(path, options, print),
+  ];
+}
+
+export { printReturnStatement, printThrowStatement, printYieldExpression };

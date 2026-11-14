@@ -1,6 +1,6 @@
 // @nts-check
 /**
- * @license Angular v22.0.6
+ * @license Angular v22.2.5
  * (c) 2010-2026 Google LLC. https://angular.dev/
  * License: MIT
  */
@@ -342,7 +342,7 @@ function SECURITY_SCHEMA() {
   _SECURITY_SCHEMA = createNullObj();
   registerContext(SecurityContext.HTML, undefined, [['iframe', ['srcdoc']], ['*', ['innerHTML', 'outerHTML']]]);
   registerContext(SecurityContext.STYLE, undefined, [['*', ['style']]]);
-  registerContext(SecurityContext.URL, undefined, [['*', ['formAction']], ['area', ['href']], ['a', ['href', 'xlink:href']], ['form', ['action']], ['img', ['src']], ['video', ['src']]]);
+  registerContext(SecurityContext.URL, undefined, [['*', ['formAction']], ['area', ['href']], ['a', ['href', 'xlink:href']], ['form', ['action']]]);
   registerContext(SecurityContext.URL, MATH_ML_NAMESPACE$1, [['*', ['href', 'xlink:href']]]);
   registerContext(SecurityContext.RESOURCE_URL, undefined, [['base', ['href']], ['embed', ['src']], ['frame', ['src']], ['iframe', ['src']], ['link', ['href']], ['object', ['codebase', 'data']]]);
   registerContext(SecurityContext.URL, SVG_NAMESPACE$1, [['a', ['href', 'xlink:href']]]);
@@ -380,6 +380,12 @@ function registerContext(/** @type {number} */ ctx, /** @type {string | undefine
     const defaultSchema = attrSchema[NO_NAMESPACE];
     if (defaultSchema) {
       context = defaultSchema[tagLower] ?? defaultSchema[MATCH_ALL_ELEMENTS];
+    }
+  }
+  if (context === undefined && (!namespace || namespace === NO_NAMESPACE)) {
+    const svgSchema = attrSchema[SVG_NAMESPACE$1];
+    if (svgSchema) {
+      context = svgSchema[tagLower];
     }
   }
   return context ?? SecurityContext.NONE;
@@ -1601,16 +1607,18 @@ class LiteralMapPropertyAssignment {
   /** @type {string} */ key;
   /** @type {Expression} */ value;
   /** @type {boolean} */ quoted;
-  constructor(/** @type {string} */ key, /** @type {Expression} */ value, /** @type {boolean} */ quoted) {
+  leadingComments;
+  constructor(key, value, quoted, leadingComments) {
     this.key = key;
     this.value = value;
     this.quoted = quoted;
+    this.leadingComments = leadingComments;
   }
   /** @returns {boolean} */ isEquivalent(e) {
     return this.key === e.key && this.value.isEquivalent(e.value);
   }
   clone() {
-    return new LiteralMapPropertyAssignment(this.key, this.value.clone(), this.quoted);
+    return new LiteralMapPropertyAssignment(this.key, this.value.clone(), this.quoted, this.leadingComments ? [...this.leadingComments] : undefined);
   }
   isConstant() {
     return this.value.isConstant();
@@ -1751,7 +1759,7 @@ class DeclareVarStmt extends Statement {
     super(modifiers, sourceSpan, leadingComments);
     this.name = name;
     this.value = value;
-    this.type = type || value && value.type || null;
+    this.type = type || null;
   }
   /** @returns {boolean} */ isEquivalent(/** @type {Statement} */ stmt) {
     return stmt instanceof DeclareVarStmt && this.name === stmt.name && (this.value ? !!stmt.value && this.value.isEquivalent(stmt.value) : !stmt.value);
@@ -2220,10 +2228,8 @@ class ConstantPool {
   /** @type {boolean} */ isClosureCompilerEnabled;
   /** @type {Statement[]} */ statements = [];
   literals = new Map();
-  literalFactories = new Map();
   sharedConstants = new Map();
   _claimedNames = new Map();
-  nextNameIndex = 0;
   constructor(/** @type {boolean} */ isClosureCompilerEnabled = false) {
     this.isClosureCompilerEnabled = isClosureCompilerEnabled;
   }
@@ -2244,7 +2250,7 @@ class ConstantPool {
       let value;
       let usage;
       if (this.isClosureCompilerEnabled && isLongStringLiteral(literal)) {
-        value = new FunctionExpr([], [new ReturnStatement(literal)]);
+        value = new FunctionExpr([], [new ReturnStatement(literal)], DYNAMIC_TYPE);
         usage = variable(name).callFn([]);
       } else {
         value = literal;
@@ -2362,6 +2368,18 @@ class Identifiers {
   };
   static elementEnd = {
     name: 'ɵɵelementEnd',
+    moduleName: CORE
+  };
+  static foreignComponent = {
+    name: 'ɵɵforeignComponent',
+    moduleName: CORE
+  };
+  static foreignContent = {
+    name: 'ɵɵforeignContent',
+    moduleName: CORE
+  };
+  static foreignContentFn = {
+    name: 'ɵɵforeignContentFn',
     moduleName: CORE
   };
   static domElement = {
@@ -2602,6 +2620,18 @@ class Identifiers {
   };
   static conditional = {
     name: 'ɵɵconditional',
+    moduleName: CORE
+  };
+  static boundaryCreate = {
+    name: 'ɵɵboundaryCreate',
+    moduleName: CORE
+  };
+  static boundaryUpdate = {
+    name: 'ɵɵboundaryUpdate',
+    moduleName: CORE
+  };
+  static getBoundary = {
+    name: 'ɵɵgetBoundary',
     moduleName: CORE
   };
   static repeater = {
@@ -3273,14 +3303,25 @@ class Version {
 }
 const _global = globalThis;
 const V1_TO_18 = /^([1-9]|1[0-8])\./;
+const V1_TO_21 = /^([1-9]|1[0-9]|2[0-1])\./;
 /** @returns {boolean} */ function getJitStandaloneDefaultForVersion(/** @type {string} */ version) {
-  if (version.startsWith('0.')) {
-    return true;
-  }
   if (V1_TO_18.test(version)) {
     return false;
   }
   return true;
+}
+function getJitChangeDetectionDefaultForVersion(version) {
+  if (V1_TO_21.test(version)) {
+    return ChangeDetectionStrategy.Eager;
+  }
+  return ChangeDetectionStrategy.OnPush;
+}
+function namespaceCssVariable(varName) {
+  if (varName.startsWith('--global--')) {
+    return '--' + varName.substring('--global--'.length);
+  } else {
+    return '--%NS%' + varName.substring('--'.length);
+  }
 }
 
 const VERSION$1 = 3;
@@ -3539,6 +3580,18 @@ class EmitterVisitorContext {
       }
     }
     return null;
+  }
+  addUniqueSingleLineComment(commentText) {
+    const previousIndex = this._lines.length - 2;
+    const comment = `//${commentText}`;
+    if (previousIndex >= 0 && this._lines[previousIndex].parts.length === 1 && this._lines[previousIndex].parts[0] === comment) {
+      return;
+    }
+    const line = new EmittedLine(this._currentLine.indent);
+    line.parts.push(comment);
+    line.partsLength = comment.length;
+    line.srcSpans.push(null);
+    this._lines.splice(this._lines.length - 1, 0, line);
   }
   /** @returns {EmittedLine[]} */ get sourceLines() {
     if (this._lines.length && this._lines[this._lines.length - 1].parts.length === 0) {
@@ -3817,15 +3870,26 @@ class AbstractEmitterVisitor {
   visitLiteralMapExpr(/** @type {LiteralMapExpr} */ ast, /** @type {EmitterVisitorContext} */ ctx) {
     this.printLeadingComments(ast, ctx);
     ctx.print(ast, `{`);
-    this.visitAllObjects(entry => {
+    for (let i = 0; i < ast.entries.length; i++) {
+      const entry = ast.entries[i];
       if (entry instanceof LiteralMapSpreadAssignment) {
+        if (i > 0) {
+          ctx.print(ast, ', ', false);
+        }
         ctx.print(ast, '...');
         entry.expression.visitExpression(this, ctx);
       } else {
+        const hasLeadingComments = this.printComments && entry.leadingComments !== undefined && entry.leadingComments.length > 0;
+        if (i > 0) {
+          ctx.print(ast, hasLeadingComments ? ',' : ', ', hasLeadingComments);
+        } else if (hasLeadingComments) {
+          ctx.println(ast);
+        }
+        this.printLeadingComments(entry, ctx);
         ctx.print(ast, `${escapeIdentifier(entry.key, entry.quoted)}: `);
         entry.value.visitExpression(this, ctx);
       }
-    }, ast.entries, ctx, ', ');
+    }
     ctx.print(ast, `}`);
   }
   visitCommaExpr(/** @type {CommaExpr} */ ast, /** @type {EmitterVisitorContext} */ ctx) {
@@ -3836,7 +3900,15 @@ class AbstractEmitterVisitor {
   }
   visitParenthesizedExpr(/** @type {ParenthesizedExpr} */ ast, /** @type {EmitterVisitorContext} */ ctx) {
     this.printLeadingComments(ast, ctx);
-    ast.expr.visitExpression(this, ctx);
+    if (ast === this.lastIfCondition) {
+      this.lastIfCondition = ast.expr;
+      ast.expr.visitExpression(this, ctx);
+    } else {
+      const preserveParens = !(ast.expr instanceof BinaryOperatorExpr) && !(ast.expr instanceof UnaryOperatorExpr) && !(ast.expr instanceof ConditionalExpr) && !(ast.expr instanceof CommaExpr) && !(ast.expr instanceof ParenthesizedExpr);
+      preserveParens && ctx.print(ast, '(');
+      ast.expr.visitExpression(this, ctx);
+      preserveParens && ctx.print(ast, ')');
+    }
   }
   visitSpreadElementExpr(/** @type {SpreadElementExpr} */ ast, /** @type {EmitterVisitorContext} */ ctx) {
     this.printLeadingComments(ast, ctx);
@@ -3967,227 +4039,248 @@ class AbstractEmitterVisitor {
   return requiresQuotes ? `'${body}'` : body;
 }
 
-const UNSAFE_OBJECT_KEY_NAME_REGEXP = /[-.]/;
-/** @returns {ExpressionType} */ function typeWithParameters(/** @type {Expression} */ type, /** @type {number} */ numParams) {
-  if (numParams === 0) {
-    return expressionType(type);
-  }
-  const params = [];
-  for (let i = 0; i < numParams; i++) {
-    params.push(DYNAMIC_TYPE);
-  }
-  return expressionType(type, undefined, params);
+const $EOF = 0;
+const $BSPACE = 8;
+const $TAB = 9;
+const $LF = 10;
+const $VTAB = 11;
+const $FF = 12;
+const $CR = 13;
+const $SPACE = 32;
+const $BANG = 33;
+const $DQ = 34;
+const $HASH = 35;
+const $$ = 36;
+const $PERCENT = 37;
+const $AMPERSAND = 38;
+const $SQ = 39;
+const $LPAREN = 40;
+const $RPAREN = 41;
+const $STAR = 42;
+const $PLUS = 43;
+const $COMMA = 44;
+const $MINUS = 45;
+const $PERIOD = 46;
+const $SLASH = 47;
+const $COLON = 58;
+const $SEMICOLON = 59;
+const $LT = 60;
+const $EQ = 61;
+const $GT = 62;
+const $QUESTION = 63;
+const $0 = 48;
+const $7 = 55;
+const $9 = 57;
+const $A = 65;
+const $E = 69;
+const $F = 70;
+const $X = 88;
+const $Z = 90;
+const $LBRACKET = 91;
+const $BACKSLASH = 92;
+const $RBRACKET = 93;
+const $CARET = 94;
+const $_ = 95;
+const $a = 97;
+const $b = 98;
+const $e = 101;
+const $f = 102;
+const $n = 110;
+const $r = 114;
+const $t = 116;
+const $u = 117;
+const $v = 118;
+const $x = 120;
+const $z = 122;
+const $LBRACE = 123;
+const $BAR = 124;
+const $RBRACE = 125;
+const $NBSP = 160;
+const $AT = 64;
+const $BT = 96;
+/** @returns {boolean} */ function isWhitespace(/** @type {number} */ code) {
+  return code >= $TAB && code <= $SPACE || code == $NBSP;
 }
-/** @returns {string} */ function getSafePropertyAccessString(/** @type {string} */ accessor, /** @type {string} */ name) {
-  const escapedName = escapeIdentifier(name, false);
-  return escapedName !== name ? `${accessor}[${escapedName}]` : `${accessor}.${name}`;
+/** @returns {boolean} */ function isDigit(/** @type {number} */ code) {
+  return $0 <= code && code <= $9;
 }
-/** @returns {Expression} */ function jitOnlyGuardedExpression(/** @type {Expression} */ expr) {
-  return guardedExpression('ngJitMode', expr);
+/** @returns {boolean} */ function isAsciiLetter(/** @type {number} */ code) {
+  return code >= $a && code <= $z || code >= $A && code <= $Z;
 }
-/** @returns {Expression} */ function devOnlyGuardedExpression(/** @type {Expression} */ expr) {
-  return guardedExpression('ngDevMode', expr);
+/** @returns {boolean} */ function isAsciiHexDigit(/** @type {number} */ code) {
+  return code >= $a && code <= $f || code >= $A && code <= $F || isDigit(code);
 }
-/** @returns {Expression} */ function guardedExpression(/** @type {string} */ guard, /** @type {Expression} */ expr) {
-  const guardExpr = new ExternalExpr({
-    name: guard,
-    moduleName: null
-  });
-  const guardNotDefined = new BinaryOperatorExpr(BinaryOperator.Identical, new TypeofExpr(guardExpr), literal('undefined'));
-  const guardUndefinedOrTrue = new BinaryOperatorExpr(BinaryOperator.Or, guardNotDefined, guardExpr, undefined, undefined);
-  return new BinaryOperatorExpr(BinaryOperator.And, guardUndefinedOrTrue, expr);
+/** @returns {boolean} */ function isNewLine(/** @type {number} */ code) {
+  return code === $LF || code === $CR;
 }
-function wrapReference(value) {
-  const wrapped = new WrappedNodeExpr(value);
-  return {
-    value: wrapped,
-    type: wrapped
-  };
+/** @returns {boolean} */ function isOctalDigit(/** @type {number} */ code) {
+  return $0 <= code && code <= $7;
 }
-/** @returns {Expression} */ function refsToArray(/** @type {any[]} */ refs, /** @type {boolean} */ shouldForwardDeclare) {
-  const values = literalArr(refs.map(ref => ref.value));
-  return shouldForwardDeclare ? arrowFn([], values) : values;
-}
-/** @returns {LeadingComment} */ function tsIgnoreComment() {
-  return leadingComment('@ts-ignore', true, true);
-}
-/** @returns {boolean} */ function isUnsafeObjectKey(/** @type {string} */ key) {
-  return UNSAFE_OBJECT_KEY_NAME_REGEXP.test(key);
-}
-function createMayBeForwardRefExpression(expression, /** @type {number} */ forwardRef) {
-  return {
-    expression,
-    forwardRef
-  };
-}
-/** @returns {Expression} */ function convertFromMaybeForwardRefExpression({
-  expression,
-  forwardRef
-}) {
-  switch (forwardRef) {
-    case 0:
-    case 1:
-      return expression;
-    case 2:
-      return generateForwardRef(expression);
-  }
-}
-/** @returns {Expression} */ function generateForwardRef(/** @type {Expression} */ expr) {
-  return importExpr(Identifiers.forwardRef).callFn([arrowFn([], expr)]);
+/** @returns {boolean} */ function isQuote(/** @type {number} */ code) {
+  return code === $SQ || code === $DQ || code === $BT;
 }
 
-var R3FactoryDelegateType;
-(function (R3FactoryDelegateType) {
-  R3FactoryDelegateType[R3FactoryDelegateType["Class"] = 0] = "Class";
-  R3FactoryDelegateType[R3FactoryDelegateType["Function"] = 1] = "Function";
-})(R3FactoryDelegateType || (R3FactoryDelegateType = {}));
-function compileFactoryFunction(meta) {
-  const t = variable('__ngFactoryType__');
-  let baseFactoryVar = null;
-  const typeForCtor = !isDelegatedFactoryMetadata(meta) ? new BinaryOperatorExpr(BinaryOperator.Or, t, meta.type.value) : t;
-  let ctorExpr = null;
-  const factoryComments = meta.deps !== null && meta.deps !== 'invalid' && meta.deps.length > 0 ? [tsIgnoreComment()] : undefined;
-  if (meta.deps !== null) {
-    if (meta.deps !== 'invalid') {
-      ctorExpr = new InstantiateExpr(typeForCtor, injectDependencies(meta.deps, meta.target));
+class ParseLocation {
+  file;
+  offset;
+  line;
+  col;
+  constructor(file, offset, line, col) {
+    this.file = file;
+    this.offset = offset;
+    this.line = line;
+    this.col = col;
+  }
+  toString() {
+    return this.offset != null ? `${this.file.url}@${this.line}:${this.col}` : this.file.url;
+  }
+  /** @returns {ParseLocation} */ moveBy(/** @type {number} */ delta) {
+    const source = this.file.content;
+    const len = source.length;
+    let offset = this.offset;
+    let line = this.line;
+    let col = this.col;
+    while (offset > 0 && delta < 0) {
+      offset--;
+      delta++;
+      const ch = source.charCodeAt(offset);
+      if (ch == $LF) {
+        line--;
+        const priorLine = source.substring(0, offset - 1).lastIndexOf(String.fromCharCode($LF));
+        col = priorLine > 0 ? offset - priorLine : offset;
+      } else {
+        col--;
+      }
     }
-  } else {
-    baseFactoryVar = variable(`ɵ${meta.name}_BaseFactory`);
-    ctorExpr = baseFactoryVar.callFn([typeForCtor]);
-  }
-  const body = [];
-  let retExpr = null;
-  function makeConditionalFactory(nonCtorExpr) {
-    const r = variable('__ngConditionalFactory__');
-    body.push(new DeclareVarStmt(r.name, NULL_EXPR, DYNAMIC_TYPE));
-    const ctorStmt = ctorExpr !== null ? r.set(ctorExpr).toStmt(factoryComments) : importExpr(Identifiers.invalidFactory).callFn([]).toStmt();
-    body.push(ifStmt(t, [ctorStmt], [r.set(nonCtorExpr).toStmt([tsIgnoreComment()])]));
-    return r;
-  }
-  if (isDelegatedFactoryMetadata(meta)) {
-    const delegateArgs = injectDependencies(meta.delegateDeps, meta.target);
-    const factoryExpr = new (meta.delegateType === R3FactoryDelegateType.Class ? InstantiateExpr : InvokeFunctionExpr)(meta.delegate, delegateArgs);
-    retExpr = makeConditionalFactory(factoryExpr);
-  } else if (isExpressionFactoryMetadata(meta)) {
-    retExpr = makeConditionalFactory(meta.expression);
-  } else {
-    retExpr = ctorExpr;
-  }
-  if (retExpr === null) {
-    body.push(importExpr(Identifiers.invalidFactory).callFn([]).toStmt());
-  } else if (baseFactoryVar !== null) {
-    const getInheritedFactoryCall = importExpr(Identifiers.getInheritedFactory).callFn([meta.type.value]);
-    const baseFactory = new BinaryOperatorExpr(BinaryOperator.Or, baseFactoryVar, baseFactoryVar.set(getInheritedFactoryCall));
-    body.push(new ReturnStatement(baseFactory.callFn([typeForCtor])));
-  } else {
-    body.push(new ReturnStatement(retExpr, null, factoryComments));
-  }
-  let factoryFn = fn([new FnParam(t.name, DYNAMIC_TYPE)], body, INFERRED_TYPE, undefined, `${meta.name}_Factory`);
-  if (baseFactoryVar !== null) {
-    factoryFn = arrowFn([], [new DeclareVarStmt(baseFactoryVar.name, undefined, DYNAMIC_TYPE), new ReturnStatement(factoryFn)]).callFn([], undefined, true);
-  }
-  return {
-    expression: factoryFn,
-    statements: [],
-    type: createFactoryType(meta)
-  };
-}
-function createFactoryType(meta) {
-  const ctorDepsType = meta.deps !== null && meta.deps !== 'invalid' ? createCtorDepsType(meta.deps) : NONE_TYPE;
-  return expressionType(importExpr(Identifiers.FactoryDeclaration, [typeWithParameters(meta.type.type, meta.typeArgumentCount), ctorDepsType]));
-}
-/** @returns {Expression[]} */ function injectDependencies(/** @type {any[]} */ deps, /** @type {number} */ target) {
-  return deps.map((dep, index) => compileInjectDependency(dep, target, index));
-}
-/** @returns {Expression} */ function compileInjectDependency(dep, /** @type {number} */ target, /** @type {number} */ index) {
-  if (dep.token === null) {
-    return importExpr(Identifiers.invalidFactoryDep).callFn([literal(index)]);
-  } else if (dep.attributeNameType === null) {
-    const flags = 0 | (dep.self ? 2 : 0) | (dep.skipSelf ? 4 : 0) | (dep.host ? 1 : 0) | (dep.optional ? 8 : 0) | (target === FactoryTarget.Pipe ? 16 : 0);
-    let flagsParam = flags !== 0 || dep.optional ? literal(flags) : null;
-    const injectArgs = [dep.token];
-    if (flagsParam) {
-      injectArgs.push(flagsParam);
+    while (offset < len && delta > 0) {
+      const ch = source.charCodeAt(offset);
+      offset++;
+      delta--;
+      if (ch == $LF) {
+        line++;
+        col = 0;
+      } else {
+        col++;
+      }
     }
-    const injectFn = getInjectFn(target);
-    return importExpr(injectFn).callFn(injectArgs);
-  } else {
-    return importExpr(Identifiers.injectAttribute).callFn([dep.token]);
+    return new ParseLocation(this.file, offset, line, col);
   }
-}
-/** @returns {Type} */ function createCtorDepsType(/** @type {any[]} */ deps) {
-  let hasTypes = false;
-  const attributeTypes = deps.map(dep => {
-    const type = createCtorDepType(dep);
-    if (type !== null) {
-      hasTypes = true;
-      return type;
-    } else {
-      return literal(null);
+  getContext(/** @type {number} */ maxChars, /** @type {number} */ maxLines) {
+    const content = this.file.content;
+    let startOffset = this.offset;
+    if (startOffset != null) {
+      if (startOffset > content.length - 1) {
+        startOffset = content.length - 1;
+      }
+      let endOffset = startOffset;
+      let ctxChars = 0;
+      let ctxLines = 0;
+      while (ctxChars < maxChars && startOffset > 0) {
+        startOffset--;
+        ctxChars++;
+        if (content[startOffset] == '\n') {
+          if (++ctxLines == maxLines) {
+            break;
+          }
+        }
+      }
+      ctxChars = 0;
+      ctxLines = 0;
+      while (ctxChars < maxChars && endOffset < content.length - 1) {
+        endOffset++;
+        ctxChars++;
+        if (content[endOffset] == '\n') {
+          if (++ctxLines == maxLines) {
+            break;
+          }
+        }
+      }
+      return {
+        before: content.substring(startOffset, this.offset),
+        after: content.substring(this.offset, endOffset + 1)
+      };
     }
-  });
-  if (hasTypes) {
-    return expressionType(literalArr(attributeTypes));
+    return null;
+  }
+}
+class ParseSourceFile {
+  content;
+  url;
+  constructor(content, url) {
+    this.content = content;
+    this.url = url;
+  }
+}
+class ParseSourceSpan {
+  start;
+  end;
+  fullStart;
+  details;
+  constructor(start, end, fullStart = start, details = null) {
+    this.start = start;
+    this.end = end;
+    this.fullStart = fullStart;
+    this.details = details;
+  }
+  toString() {
+    return this.start.file.content.substring(this.start.offset, this.end.offset);
+  }
+}
+var ParseErrorLevel;
+(function (ParseErrorLevel) {
+  ParseErrorLevel[ParseErrorLevel["WARNING"] = 0] = "WARNING";
+  ParseErrorLevel[ParseErrorLevel["ERROR"] = 1] = "ERROR";
+})(ParseErrorLevel || (ParseErrorLevel = {}));
+class ParseError extends Error {
+  span;
+  msg;
+  level;
+  relatedError;
+  constructor(span, msg, level = ParseErrorLevel.ERROR, relatedError) {
+    super(msg);
+    this.span = span;
+    this.msg = msg;
+    this.level = level;
+    this.relatedError = relatedError;
+    Object.setPrototypeOf(this, new.target.prototype);
+  }
+  /** @returns {string} */ contextualMessage() {
+    const ctx = this.span.start.getContext(100, 3);
+    return ctx ? `${this.msg} ("${ctx.before}[${ParseErrorLevel[this.level]} ->]${ctx.after}")` : this.msg;
+  }
+  toString() {
+    const details = this.span.details ? `, ${this.span.details}` : '';
+    return `${this.contextualMessage()}: ${this.span.start}${details}`;
+  }
+}
+/** @returns {ParseSourceSpan} */ function r3JitTypeSourceSpan(/** @type {string} */ kind, /** @type {string} */ typeName, /** @type {string} */ sourceUrl) {
+  const sourceFileName = `in ${kind} ${typeName} in ${sourceUrl}`;
+  const sourceFile = new ParseSourceFile('', sourceFileName);
+  return new ParseSourceSpan(new ParseLocation(sourceFile, -1, -1, -1), new ParseLocation(sourceFile, -1, -1, -1));
+}
+let _anonymousTypeIndex = 0;
+/** @returns {string | null} */ function identifierName(compileIdentifier) {
+  if (!compileIdentifier || !compileIdentifier.reference) {
+    return null;
+  }
+  const ref = compileIdentifier.reference;
+  if (Object.hasOwn(ref, '__anonymousType')) {
+    return ref['__anonymousType'];
+  }
+  if (Object.hasOwn(ref, '__forward_ref__')) {
+    return '__forward_ref__';
+  }
+  let identifier = stringify(ref);
+  if (identifier.indexOf('(') >= 0) {
+    identifier = `anonymous_${_anonymousTypeIndex++}`;
+    ref['__anonymousType'] = identifier;
   } else {
-    return NONE_TYPE;
+    identifier = sanitizeIdentifier(identifier);
   }
+  return identifier;
 }
-/** @returns {LiteralMapExpr | null} */ function createCtorDepType(dep) {
-  const entries = [];
-  if (dep.attributeNameType !== null) {
-    entries.push({
-      key: 'attribute',
-      value: dep.attributeNameType,
-      quoted: false
-    });
-  }
-  if (dep.optional) {
-    entries.push({
-      key: 'optional',
-      value: literal(true),
-      quoted: false
-    });
-  }
-  if (dep.host) {
-    entries.push({
-      key: 'host',
-      value: literal(true),
-      quoted: false
-    });
-  }
-  if (dep.self) {
-    entries.push({
-      key: 'self',
-      value: literal(true),
-      quoted: false
-    });
-  }
-  if (dep.skipSelf) {
-    entries.push({
-      key: 'skipSelf',
-      value: literal(true),
-      quoted: false
-    });
-  }
-  return entries.length > 0 ? literalMap(entries) : null;
-}
-/** @returns {boolean} */ function isDelegatedFactoryMetadata(meta) {
-  return meta.delegateType !== undefined;
-}
-/** @returns {boolean} */ function isExpressionFactoryMetadata(meta) {
-  return meta.expression !== undefined;
-}
-function getInjectFn(/** @type {number} */ target) {
-  switch (target) {
-    case FactoryTarget.Component:
-    case FactoryTarget.Directive:
-    case FactoryTarget.Pipe:
-      return Identifiers.directiveInject;
-    case FactoryTarget.NgModule:
-    case FactoryTarget.Injectable:
-    default:
-      return Identifiers.inject;
-  }
+/** @returns {string} */ function sanitizeIdentifier(/** @type {string} */ name) {
+  return name.replace(/\W/g, '_');
 }
 
 class ParseSpan {
@@ -4357,9 +4450,6 @@ class SpreadElement extends AST {
     return visitor.visitSpreadElement(this, context);
   }
 }
-/**
-@typedef {{ kind: string, key?: string, quoted?: boolean, span: ParseSpan, sourceSpan: AbsoluteSourceSpan, isShorthandInitialized?: boolean }} LiteralMapKey
-*/
 class LiteralMap extends AST {
   /** @type {LiteralMapKey[]} */ keys;
   /** @type {AST[]} */ values;
@@ -4601,9 +4691,6 @@ class ASTWithSource extends AST {
     return `${this.source} in ${this.location}`;
   }
 }
-/**
-@typedef {{ source: string, span: AbsoluteSourceSpan }} TemplateBindingIdentifier
-*/
 class VariableBinding {
   /** @type {AbsoluteSourceSpan} */ sourceSpan;
   /** @type {TemplateBindingIdentifier} */ key;
@@ -4822,42 +4909,6 @@ class BoundElementProperty {
     this.keySpan = keySpan;
     this.valueSpan = valueSpan;
   }
-}
-
-var TagContentType;
-(function (TagContentType) {
-  TagContentType[TagContentType["RAW_TEXT"] = 0] = "RAW_TEXT";
-  TagContentType[TagContentType["ESCAPABLE_RAW_TEXT"] = 1] = "ESCAPABLE_RAW_TEXT";
-  TagContentType[TagContentType["PARSABLE_DATA"] = 2] = "PARSABLE_DATA";
-})(TagContentType || (TagContentType = {}));
-function splitNsName(/** @type {string} */ elementName, /** @type {boolean} */ fatal = true) {
-  if (elementName[0] != ':') {
-    return [null, elementName];
-  }
-  const colonIndex = elementName.indexOf(':', 1);
-  if (colonIndex === -1) {
-    if (fatal) {
-      throw new Error(`Unsupported format "${elementName}" expecting ":namespace:name"`);
-    } else {
-      return [null, elementName];
-    }
-  }
-  return [elementName.slice(1, colonIndex), elementName.slice(colonIndex + 1)];
-}
-/** @returns {boolean} */ function isNgContainer(/** @type {string} */ tagName) {
-  return splitNsName(tagName)[1] === 'ng-container';
-}
-/** @returns {boolean} */ function isNgContent(/** @type {string} */ tagName) {
-  return splitNsName(tagName)[1] === 'ng-content';
-}
-/** @returns {boolean} */ function isNgTemplate(/** @type {string} */ tagName) {
-  return splitNsName(tagName)[1] === 'ng-template';
-}
-/** @returns {string | null} */ function getNsPrefix(/** @type {string | null} */ fullName) {
-  return fullName === null ? null : splitNsName(fullName)[0];
-}
-/** @returns {string} */ function mergeNsAndName(/** @type {string} */ prefix, /** @type {string} */ localName) {
-  return prefix ? `:${prefix}:${localName}` : localName;
 }
 
 let Comment$1 = class Comment {
@@ -5126,12 +5177,61 @@ class DeferredBlockError extends BlockNode {
     return visitor.visitDeferredBlockError(this);
   }
 }
+class ContentBlock extends BlockNode {
+  name;
+  variables;
+  children;
+  i18n;
+  constructor(name, variables, children, nameSpan, sourceSpan, startSourceSpan, endSourceSpan, i18n) {
+    super(nameSpan, sourceSpan, startSourceSpan, endSourceSpan);
+    this.name = name;
+    this.variables = variables;
+    this.children = children;
+    this.i18n = i18n;
+  }
+  visit(visitor) {
+    return visitor.visitContentBlock(this);
+  }
+}
+class BoundaryBlock extends BlockNode {
+  children;
+  errorBlocks;
+  mainBlockSpan;
+  i18n;
+  constructor(children, errorBlocks, nameSpan, sourceSpan, mainBlockSpan, startSourceSpan, endSourceSpan, i18n) {
+    super(nameSpan, sourceSpan, startSourceSpan, endSourceSpan);
+    this.children = children;
+    this.errorBlocks = errorBlocks;
+    this.mainBlockSpan = mainBlockSpan;
+    this.i18n = i18n;
+  }
+  visit(visitor) {
+    return visitor.visitBoundaryBlock(this);
+  }
+}
+class BoundaryErrorBlock extends BlockNode {
+  children;
+  contextVariables;
+  expression;
+  i18n;
+  constructor(children, contextVariables, expression, nameSpan, sourceSpan, startSourceSpan, endSourceSpan, i18n) {
+    super(nameSpan, sourceSpan, startSourceSpan, endSourceSpan);
+    this.children = children;
+    this.contextVariables = contextVariables;
+    this.expression = expression;
+    this.i18n = i18n;
+  }
+  visit(visitor) {
+    return visitor.visitBoundaryErrorBlock(this);
+  }
+}
 class DeferredBlock extends BlockNode {
   /** @type {any[]} */ children;
   /** @type {DeferredBlockPlaceholder | null} */ placeholder;
   /** @type {DeferredBlockLoading | null} */ loading;
   /** @type {DeferredBlockError | null} */ error;
   /** @type {ParseSourceSpan} */ mainBlockSpan;
+  definedName;
   i18n;
   triggers;
   prefetchTriggers;
@@ -5139,13 +5239,14 @@ class DeferredBlock extends BlockNode {
   /** @type {any[]} */ definedTriggers;
   /** @type {any[]} */ definedPrefetchTriggers;
   /** @type {any[]} */ definedHydrateTriggers;
-  constructor(/** @type {any[]} */ children, triggers, prefetchTriggers, hydrateTriggers, /** @type {DeferredBlockPlaceholder | null} */ placeholder, /** @type {DeferredBlockLoading | null} */ loading, /** @type {DeferredBlockError | null} */ error, /** @type {ParseSourceSpan} */ nameSpan, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {ParseSourceSpan} */ mainBlockSpan, /** @type {ParseSourceSpan} */ startSourceSpan, /** @type {ParseSourceSpan | null} */ endSourceSpan, i18n) {
+  constructor(children, triggers, prefetchTriggers, hydrateTriggers, placeholder, loading, error, nameSpan, sourceSpan, mainBlockSpan, startSourceSpan, endSourceSpan, definedName, i18n) {
     super(nameSpan, sourceSpan, startSourceSpan, endSourceSpan);
     this.children = children;
     this.placeholder = placeholder;
     this.loading = loading;
     this.error = error;
     this.mainBlockSpan = mainBlockSpan;
+    this.definedName = definedName;
     this.i18n = i18n;
     this.triggers = triggers;
     this.prefetchTriggers = prefetchTriggers;
@@ -5553,6 +5654,14 @@ let RecursiveVisitor$1 = class RecursiveVisitor {
     visitAll$1(this, block.children);
     block.expressionAlias?.visit(this);
   }
+  visitBoundaryBlock(block) {
+    visitAll$1(this, block.children);
+    visitAll$1(this, block.errorBlocks);
+  }
+  visitBoundaryErrorBlock(block) {
+    const blockItems = [...block.contextVariables, ...block.children];
+    visitAll$1(this, blockItems);
+  }
   visitContent(/** @type {Content} */ content) {
     visitAll$1(this, content.children);
   }
@@ -5581,6 +5690,9 @@ let RecursiveVisitor$1 = class RecursiveVisitor {
   visitDeferredTrigger(/** @type {DeferredTrigger} */ trigger) {}
   visitUnknownBlock(/** @type {UnknownBlock} */ block) {}
   visitLetDeclaration(decl) {}
+  visitContentBlock(block) {
+    visitAll$1(this, block.children);
+  }
 };
 /** @returns {any[]} */ function visitAll$1(visitor, /** @type {any[]} */ nodes) {
   const result = [];
@@ -5597,6 +5709,294 @@ let RecursiveVisitor$1 = class RecursiveVisitor {
     }
   }
   return result;
+}
+
+const CHARACTERS_IN_SURROUNDING_WHITESPACE_PATTERN = /(\s*)(\S+)(\s*)/;
+const UNSAFE_OBJECT_KEY_NAME_REGEXP = /[-.]/;
+const IDENTIFIER_PATTERN = /^[$A-Z_][0-9A-Z_$]*$/i;
+const LET_PATTERN = /^let\s+([\S\s]*)/;
+function parseLetParameters(sourceSpan, expression, span, context, errors, validateLet, messagePrefix, defaultImplicitVariableName) {
+  const parts = expression.split(',');
+  let startSpan = span.start;
+  for (const part of parts) {
+    const expressionParts = part.split('=');
+    const name = expressionParts[0].trim();
+    let variableName = expressionParts.length === 2 ? expressionParts[1].trim() : defaultImplicitVariableName ?? '';
+    if (name.length === 0 || variableName.length === 0) {
+      errors.push(new ParseError(sourceSpan, `Invalid ${messagePrefix} "let" parameter. Parameter should match the pattern "<name> = <variable name>"`));
+    } else if (!IDENTIFIER_PATTERN.test(name)) {
+      errors.push(new ParseError(sourceSpan, `"let" parameter must be a valid JavaScript identifier`));
+    } else {
+      validateLet(name, variableName, sourceSpan);
+      const [, keyLeadingWhitespace, keyName] = expressionParts[0].match(CHARACTERS_IN_SURROUNDING_WHITESPACE_PATTERN) ?? [];
+      const keySpan = keyLeadingWhitespace !== undefined ? new ParseSourceSpan(startSpan.moveBy(keyLeadingWhitespace.length), startSpan.moveBy(keyLeadingWhitespace.length + keyName.length)) : span;
+      let valueSpan = undefined;
+      if (expressionParts.length === 2) {
+        const [, valueLeadingWhitespace, implicit] = expressionParts[1].match(CHARACTERS_IN_SURROUNDING_WHITESPACE_PATTERN) ?? [];
+        valueSpan = valueLeadingWhitespace !== undefined ? new ParseSourceSpan(startSpan.moveBy(expressionParts[0].length + 1 + valueLeadingWhitespace.length), startSpan.moveBy(expressionParts[0].length + 1 + valueLeadingWhitespace.length + implicit.length)) : undefined;
+      }
+      const variableSpan = new ParseSourceSpan(keySpan.start, valueSpan?.end ?? keySpan.end);
+      context.push(new Variable(name, variableName, variableSpan, keySpan, valueSpan));
+    }
+    startSpan = startSpan.moveBy(part.length + 1);
+  }
+}
+/** @returns {ExpressionType} */ function typeWithParameters(/** @type {Expression} */ type, /** @type {number} */ numParams) {
+  if (numParams === 0) {
+    return expressionType(type);
+  }
+  const params = [];
+  for (let i = 0; i < numParams; i++) {
+    params.push(DYNAMIC_TYPE);
+  }
+  return expressionType(type, undefined, params);
+}
+/** @returns {string} */ function getSafePropertyAccessString(/** @type {string} */ accessor, /** @type {string} */ name) {
+  const escapedName = escapeIdentifier(name, false);
+  return escapedName !== name ? `${accessor}[${escapedName}]` : `${accessor}.${name}`;
+}
+/** @returns {Expression} */ function jitOnlyGuardedExpression(/** @type {Expression} */ expr) {
+  return guardedExpression('ngJitMode', expr);
+}
+/** @returns {Expression} */ function devOnlyGuardedExpression(/** @type {Expression} */ expr) {
+  return guardedExpression('ngDevMode', expr);
+}
+/** @returns {Expression} */ function guardedExpression(/** @type {string} */ guard, /** @type {Expression} */ expr) {
+  const guardExpr = new ExternalExpr({
+    name: guard,
+    moduleName: null
+  });
+  const guardNotDefined = new BinaryOperatorExpr(BinaryOperator.Identical, new TypeofExpr(guardExpr), literal('undefined'));
+  const guardUndefinedOrTrue = new BinaryOperatorExpr(BinaryOperator.Or, guardNotDefined, guardExpr, undefined, undefined);
+  return new BinaryOperatorExpr(BinaryOperator.And, guardUndefinedOrTrue, expr);
+}
+function wrapReference(value) {
+  const wrapped = new WrappedNodeExpr(value);
+  return {
+    value: wrapped,
+    type: wrapped
+  };
+}
+/** @returns {Expression} */ function refsToArray(/** @type {any[]} */ refs, /** @type {boolean} */ shouldForwardDeclare) {
+  const values = literalArr(refs.map(ref => ref.value));
+  return shouldForwardDeclare ? arrowFn([], values, DYNAMIC_TYPE) : values;
+}
+/** @returns {LeadingComment} */ function tsIgnoreComment() {
+  return leadingComment('@ts-ignore', true, true);
+}
+/** @returns {boolean} */ function isUnsafeObjectKey(/** @type {string} */ key) {
+  return UNSAFE_OBJECT_KEY_NAME_REGEXP.test(key);
+}
+function createMayBeForwardRefExpression(expression, /** @type {number} */ forwardRef) {
+  return {
+    expression,
+    forwardRef
+  };
+}
+function convertFromMaybeForwardRefExpression({
+  expression,
+  forwardRef
+}) {
+  switch (forwardRef) {
+    case 0:
+    case 1:
+      return expression;
+    case 2:
+      return generateForwardRef(expression);
+  }
+}
+/** @returns {Expression} */ function generateForwardRef(/** @type {Expression} */ expr) {
+  return importExpr(Identifiers.forwardRef).callFn([arrowFn([], expr, DYNAMIC_TYPE)]);
+}
+
+var R3FactoryDelegateType;
+(function (R3FactoryDelegateType) {
+  R3FactoryDelegateType[R3FactoryDelegateType["Class"] = 0] = "Class";
+  R3FactoryDelegateType[R3FactoryDelegateType["Function"] = 1] = "Function";
+})(R3FactoryDelegateType || (R3FactoryDelegateType = {}));
+function compileFactoryFunction(meta) {
+  const t = variable('__ngFactoryType__');
+  let baseFactoryVar = null;
+  const typeForCtor = !isDelegatedFactoryMetadata(meta) ? new BinaryOperatorExpr(BinaryOperator.Or, t, meta.type.value) : t;
+  let ctorExpr = null;
+  const factoryComments = meta.deps !== null && meta.deps !== 'invalid' && meta.deps.length > 0 ? [tsIgnoreComment()] : undefined;
+  if (meta.deps !== null) {
+    if (meta.deps !== 'invalid') {
+      ctorExpr = new InstantiateExpr(typeForCtor, injectDependencies(meta.deps, meta.target));
+    }
+  } else {
+    baseFactoryVar = variable(`ɵ${meta.name}_BaseFactory`);
+    ctorExpr = baseFactoryVar.callFn([typeForCtor]);
+  }
+  const body = [];
+  let retExpr = null;
+  function makeConditionalFactory(nonCtorExpr) {
+    const r = variable('__ngConditionalFactory__');
+    body.push(new DeclareVarStmt(r.name, NULL_EXPR, DYNAMIC_TYPE));
+    const ctorStmt = ctorExpr !== null ? r.set(ctorExpr).toStmt(factoryComments) : importExpr(Identifiers.invalidFactory).callFn([]).toStmt();
+    body.push(ifStmt(t, [ctorStmt], [r.set(nonCtorExpr).toStmt([tsIgnoreComment()])]));
+    return r;
+  }
+  if (isDelegatedFactoryMetadata(meta)) {
+    const delegateArgs = injectDependencies(meta.delegateDeps, meta.target);
+    const factoryExpr = new (meta.delegateType === R3FactoryDelegateType.Class ? InstantiateExpr : InvokeFunctionExpr)(meta.delegate, delegateArgs);
+    retExpr = makeConditionalFactory(factoryExpr);
+  } else if (isExpressionFactoryMetadata(meta)) {
+    retExpr = makeConditionalFactory(meta.expression);
+  } else {
+    retExpr = ctorExpr;
+  }
+  if (retExpr === null) {
+    body.push(importExpr(Identifiers.invalidFactory).callFn([]).toStmt());
+  } else if (baseFactoryVar !== null) {
+    const getInheritedFactoryCall = importExpr(Identifiers.getInheritedFactory).callFn([meta.type.value]);
+    const baseFactory = new BinaryOperatorExpr(BinaryOperator.Or, baseFactoryVar, baseFactoryVar.set(getInheritedFactoryCall));
+    body.push(new ReturnStatement(baseFactory.callFn([typeForCtor])));
+  } else {
+    body.push(new ReturnStatement(retExpr, null, factoryComments));
+  }
+  let factoryFn = fn([new FnParam(t.name, DYNAMIC_TYPE)], body, DYNAMIC_TYPE, undefined, `${meta.name}_Factory`);
+  if (baseFactoryVar !== null) {
+    factoryFn = arrowFn([], [new DeclareVarStmt(baseFactoryVar.name, undefined, DYNAMIC_TYPE), new ReturnStatement(factoryFn)], DYNAMIC_TYPE).callFn([], undefined, true);
+  }
+  return {
+    expression: factoryFn,
+    statements: [],
+    type: createFactoryType(meta)
+  };
+}
+function createFactoryType(meta) {
+  const ctorDepsType = meta.deps !== null && meta.deps !== 'invalid' ? createCtorDepsType(meta.deps) : NONE_TYPE;
+  return expressionType(importExpr(Identifiers.FactoryDeclaration, [typeWithParameters(meta.type.type, meta.typeArgumentCount), ctorDepsType]));
+}
+/** @returns {Expression[]} */ function injectDependencies(/** @type {any[]} */ deps, /** @type {number} */ target) {
+  return deps.map((dep, index) => compileInjectDependency(dep, target, index));
+}
+/** @returns {Expression} */ function compileInjectDependency(dep, /** @type {number} */ target, /** @type {number} */ index) {
+  if (dep.token === null) {
+    return importExpr(Identifiers.invalidFactoryDep).callFn([literal(index)]);
+  } else if (dep.attributeNameType === null) {
+    const flags = 0 | (dep.self ? 2 : 0) | (dep.skipSelf ? 4 : 0) | (dep.host ? 1 : 0) | (dep.optional ? 8 : 0) | (target === FactoryTarget.Pipe ? 16 : 0);
+    let flagsParam = flags !== 0 || dep.optional ? literal(flags) : null;
+    const injectArgs = [dep.token];
+    if (flagsParam) {
+      injectArgs.push(flagsParam);
+    }
+    const injectFn = getInjectFn(target);
+    return importExpr(injectFn).callFn(injectArgs);
+  } else {
+    return importExpr(Identifiers.injectAttribute).callFn([dep.token]);
+  }
+}
+/** @returns {Type} */ function createCtorDepsType(/** @type {any[]} */ deps) {
+  let hasTypes = false;
+  const attributeTypes = deps.map(dep => {
+    const type = createCtorDepType(dep);
+    if (type !== null) {
+      hasTypes = true;
+      return type;
+    } else {
+      return literal(null);
+    }
+  });
+  if (hasTypes) {
+    return expressionType(literalArr(attributeTypes));
+  } else {
+    return NONE_TYPE;
+  }
+}
+/** @returns {LiteralMapExpr | null} */ function createCtorDepType(dep) {
+  const entries = [];
+  if (dep.attributeNameType !== null) {
+    entries.push({
+      key: 'attribute',
+      value: dep.attributeNameType,
+      quoted: false
+    });
+  }
+  if (dep.optional) {
+    entries.push({
+      key: 'optional',
+      value: literal(true),
+      quoted: false
+    });
+  }
+  if (dep.host) {
+    entries.push({
+      key: 'host',
+      value: literal(true),
+      quoted: false
+    });
+  }
+  if (dep.self) {
+    entries.push({
+      key: 'self',
+      value: literal(true),
+      quoted: false
+    });
+  }
+  if (dep.skipSelf) {
+    entries.push({
+      key: 'skipSelf',
+      value: literal(true),
+      quoted: false
+    });
+  }
+  return entries.length > 0 ? literalMap(entries) : null;
+}
+/** @returns {boolean} */ function isDelegatedFactoryMetadata(meta) {
+  return meta.delegateType !== undefined;
+}
+/** @returns {boolean} */ function isExpressionFactoryMetadata(meta) {
+  return meta.expression !== undefined;
+}
+function getInjectFn(/** @type {number} */ target) {
+  switch (target) {
+    case FactoryTarget.Component:
+    case FactoryTarget.Directive:
+    case FactoryTarget.Pipe:
+      return Identifiers.directiveInject;
+    case FactoryTarget.NgModule:
+    case FactoryTarget.Injectable:
+    default:
+      return Identifiers.inject;
+  }
+}
+
+var TagContentType;
+(function (TagContentType) {
+  TagContentType[TagContentType["RAW_TEXT"] = 0] = "RAW_TEXT";
+  TagContentType[TagContentType["ESCAPABLE_RAW_TEXT"] = 1] = "ESCAPABLE_RAW_TEXT";
+  TagContentType[TagContentType["PARSABLE_DATA"] = 2] = "PARSABLE_DATA";
+})(TagContentType || (TagContentType = {}));
+function splitNsName(/** @type {string} */ elementName, /** @type {boolean} */ fatal = true) {
+  if (elementName[0] != ':') {
+    return [null, elementName];
+  }
+  const colonIndex = elementName.indexOf(':', 1);
+  if (colonIndex === -1) {
+    if (fatal) {
+      throw new Error(`Unsupported format "${elementName}" expecting ":namespace:name"`);
+    } else {
+      return [null, elementName];
+    }
+  }
+  return [elementName.slice(1, colonIndex), elementName.slice(colonIndex + 1)];
+}
+/** @returns {boolean} */ function isNgContainer(/** @type {string} */ tagName) {
+  return splitNsName(tagName)[1] === 'ng-container';
+}
+/** @returns {boolean} */ function isNgContent(/** @type {string} */ tagName) {
+  return splitNsName(tagName)[1] === 'ng-content';
+}
+/** @returns {boolean} */ function isNgTemplate(/** @type {string} */ tagName) {
+  return splitNsName(tagName)[1] === 'ng-template';
+}
+/** @returns {string | null} */ function getNsPrefix(/** @type {string | null} */ fullName) {
+  return fullName === null ? null : splitNsName(fullName)[0];
+}
+/** @returns {string} */ function mergeNsAndName(/** @type {string} */ prefix, /** @type {string} */ localName) {
+  return prefix ? `:${prefix}:${localName}` : localName;
 }
 
 class Message {
@@ -5842,10 +6242,10 @@ class SimplePlaceholderMapper extends RecurseVisitor {
     message.nodes.forEach(node => node.visit(this));
   }
   /** @returns {string | null} */ toPublicName(/** @type {string} */ internalName) {
-    return this.internalToPublic.hasOwnProperty(internalName) ? this.internalToPublic[internalName] : null;
+    return Object.hasOwn(this.internalToPublic, internalName) ? this.internalToPublic[internalName] : null;
   }
   /** @returns {string | null} */ toInternalName(/** @type {string} */ publicName) {
-    return this.publicToInternal.hasOwnProperty(publicName) ? this.publicToInternal[publicName] : null;
+    return Object.hasOwn(this.publicToInternal, publicName) ? this.publicToInternal[publicName] : null;
   }
   visitText(text, context) {
     return null;
@@ -5867,11 +6267,11 @@ class SimplePlaceholderMapper extends RecurseVisitor {
     this.visitPlaceholderName(ph.name);
   }
   visitPlaceholderName(/** @type {string} */ internalName) {
-    if (!internalName || this.internalToPublic.hasOwnProperty(internalName)) {
+    if (!internalName || Object.hasOwn(this.internalToPublic, internalName)) {
       return;
     }
     let publicName = this.mapName(internalName);
-    if (this.publicToInternal.hasOwnProperty(publicName)) {
+    if (Object.hasOwn(this.publicToInternal, publicName)) {
       const nextId = this.publicToNextId[publicName];
       this.publicToNextId[publicName] = nextId + 1;
       publicName = `${publicName}_${nextId}`;
@@ -6268,7 +6668,7 @@ class DefinitionMap {
 }
 function getAttrsForDirectiveMatching(elOrTpl) {
   const attributesMap = {};
-  if (elOrTpl instanceof Template && elOrTpl.tagName !== 'ng-template') {
+  if (elOrTpl instanceof Template && (!elOrTpl.tagName || !isNgTemplate(elOrTpl.tagName))) {
     elOrTpl.templateAttrs.forEach(a => attributesMap[a.name] = '');
   } else {
     elOrTpl.attributes.forEach(a => {
@@ -6329,7 +6729,7 @@ function compileInjectable(meta, /** @type {boolean} */ resolveForwardRefs) {
     } else {
       result = {
         statements: [],
-        expression: arrowFn([], meta.useFactory.callFn([]))
+        expression: arrowFn([], meta.useFactory.callFn([]), DYNAMIC_TYPE)
       };
     }
   } else if (meta.useValue !== undefined) {
@@ -6358,12 +6758,12 @@ function compileInjectable(meta, /** @type {boolean} */ resolveForwardRefs) {
   const expression = importExpr(Identifiers.ɵɵdefineInjectable).callFn([injectableProps.toLiteralMap()], undefined, true);
   return {
     expression,
-    type: createInjectableType(meta.type.type, meta.typeArgumentCount),
+    type: createInjectableType(),
     statements: result.statements
   };
 }
 /** @returns {ExpressionType} */ function createInjectableType(/** @type {Expression} */ type, /** @type {number} */ typeArgumentCount) {
-  return new ExpressionType(importExpr(Identifiers.InjectableDeclaration, [typeWithParameters(type, typeArgumentCount)]));
+  return new ExpressionType(importExpr(Identifiers.InjectableDeclaration, [DYNAMIC_TYPE]));
 }
 /** @returns {Expression} */ function delegateToFactory(type, useType, /** @type {boolean} */ unwrapForwardRefs) {
   if (type.node === useType.node) {
@@ -6377,254 +6777,10 @@ function compileInjectable(meta, /** @type {boolean} */ resolveForwardRefs) {
 }
 /** @returns {ArrowFunctionExpr$1} */ function createFactoryFunction(/** @type {Expression} */ type) {
   const t = new FnParam('__ngFactoryType__', DYNAMIC_TYPE);
-  return arrowFn([t], type.prop('ɵfac').callFn([variable(t.name)]));
+  return arrowFn([t], type.prop('ɵfac').callFn([variable(t.name)]), DYNAMIC_TYPE);
 }
 
 const LEGACY_OPTIONAL_CHAINING_DEFAULT = false;
-
-const $EOF = 0;
-const $BSPACE = 8;
-const $TAB = 9;
-const $LF = 10;
-const $VTAB = 11;
-const $FF = 12;
-const $CR = 13;
-const $SPACE = 32;
-const $BANG = 33;
-const $DQ = 34;
-const $HASH = 35;
-const $$ = 36;
-const $PERCENT = 37;
-const $AMPERSAND = 38;
-const $SQ = 39;
-const $LPAREN = 40;
-const $RPAREN = 41;
-const $STAR = 42;
-const $PLUS = 43;
-const $COMMA = 44;
-const $MINUS = 45;
-const $PERIOD = 46;
-const $SLASH = 47;
-const $COLON = 58;
-const $SEMICOLON = 59;
-const $LT = 60;
-const $EQ = 61;
-const $GT = 62;
-const $QUESTION = 63;
-const $0 = 48;
-const $7 = 55;
-const $9 = 57;
-const $A = 65;
-const $E = 69;
-const $F = 70;
-const $X = 88;
-const $Z = 90;
-const $LBRACKET = 91;
-const $BACKSLASH = 92;
-const $RBRACKET = 93;
-const $CARET = 94;
-const $_ = 95;
-const $a = 97;
-const $b = 98;
-const $e = 101;
-const $f = 102;
-const $n = 110;
-const $r = 114;
-const $t = 116;
-const $u = 117;
-const $v = 118;
-const $x = 120;
-const $z = 122;
-const $LBRACE = 123;
-const $BAR = 124;
-const $RBRACE = 125;
-const $NBSP = 160;
-const $AT = 64;
-const $BT = 96;
-/** @returns {boolean} */ function isWhitespace(/** @type {number} */ code) {
-  return code >= $TAB && code <= $SPACE || code == $NBSP;
-}
-/** @returns {boolean} */ function isDigit(/** @type {number} */ code) {
-  return $0 <= code && code <= $9;
-}
-/** @returns {boolean} */ function isAsciiLetter(/** @type {number} */ code) {
-  return code >= $a && code <= $z || code >= $A && code <= $Z;
-}
-/** @returns {boolean} */ function isAsciiHexDigit(/** @type {number} */ code) {
-  return code >= $a && code <= $f || code >= $A && code <= $F || isDigit(code);
-}
-/** @returns {boolean} */ function isNewLine(/** @type {number} */ code) {
-  return code === $LF || code === $CR;
-}
-/** @returns {boolean} */ function isOctalDigit(/** @type {number} */ code) {
-  return $0 <= code && code <= $7;
-}
-/** @returns {boolean} */ function isQuote(/** @type {number} */ code) {
-  return code === $SQ || code === $DQ || code === $BT;
-}
-
-class ParseLocation {
-  /** @type {ParseSourceFile} */ file;
-  /** @type {number} */ offset;
-  /** @type {number} */ line;
-  /** @type {number} */ col;
-  constructor(/** @type {ParseSourceFile} */ file, /** @type {number} */ offset, /** @type {number} */ line, /** @type {number} */ col) {
-    this.file = file;
-    this.offset = offset;
-    this.line = line;
-    this.col = col;
-  }
-  /** @returns {string} */ toString() {
-    return this.offset != null ? `${this.file.url}@${this.line}:${this.col}` : this.file.url;
-  }
-  /** @returns {ParseLocation} */ moveBy(/** @type {number} */ delta) {
-    const source = this.file.content;
-    const len = source.length;
-    let offset = this.offset;
-    let line = this.line;
-    let col = this.col;
-    while (offset > 0 && delta < 0) {
-      offset--;
-      delta++;
-      const ch = source.charCodeAt(offset);
-      if (ch == $LF) {
-        line--;
-        const priorLine = source.substring(0, offset - 1).lastIndexOf(String.fromCharCode($LF));
-        col = priorLine > 0 ? offset - priorLine : offset;
-      } else {
-        col--;
-      }
-    }
-    while (offset < len && delta > 0) {
-      const ch = source.charCodeAt(offset);
-      offset++;
-      delta--;
-      if (ch == $LF) {
-        line++;
-        col = 0;
-      } else {
-        col++;
-      }
-    }
-    return new ParseLocation(this.file, offset, line, col);
-  }
-  getContext(/** @type {number} */ maxChars, /** @type {number} */ maxLines) {
-    const content = this.file.content;
-    let startOffset = this.offset;
-    if (startOffset != null) {
-      if (startOffset > content.length - 1) {
-        startOffset = content.length - 1;
-      }
-      let endOffset = startOffset;
-      let ctxChars = 0;
-      let ctxLines = 0;
-      while (ctxChars < maxChars && startOffset > 0) {
-        startOffset--;
-        ctxChars++;
-        if (content[startOffset] == '\n') {
-          if (++ctxLines == maxLines) {
-            break;
-          }
-        }
-      }
-      ctxChars = 0;
-      ctxLines = 0;
-      while (ctxChars < maxChars && endOffset < content.length - 1) {
-        endOffset++;
-        ctxChars++;
-        if (content[endOffset] == '\n') {
-          if (++ctxLines == maxLines) {
-            break;
-          }
-        }
-      }
-      return {
-        before: content.substring(startOffset, this.offset),
-        after: content.substring(this.offset, endOffset + 1)
-      };
-    }
-    return null;
-  }
-}
-class ParseSourceFile {
-  /** @type {string} */ content;
-  /** @type {string} */ url;
-  constructor(/** @type {string} */ content, /** @type {string} */ url) {
-    this.content = content;
-    this.url = url;
-  }
-}
-class ParseSourceSpan {
-  /** @type {ParseLocation} */ start;
-  /** @type {ParseLocation} */ end;
-  /** @type {ParseLocation} */ fullStart;
-  /** @type {string | null} */ details;
-  constructor(/** @type {ParseLocation} */ start, /** @type {ParseLocation} */ end, /** @type {ParseLocation} */ fullStart = start, /** @type {string | null} */ details = null) {
-    this.start = start;
-    this.end = end;
-    this.fullStart = fullStart;
-    this.details = details;
-  }
-  /** @returns {string} */ toString() {
-    return this.start.file.content.substring(this.start.offset, this.end.offset);
-  }
-}
-var ParseErrorLevel;
-(function (ParseErrorLevel) {
-  ParseErrorLevel[ParseErrorLevel["WARNING"] = 0] = "WARNING";
-  ParseErrorLevel[ParseErrorLevel["ERROR"] = 1] = "ERROR";
-})(ParseErrorLevel || (ParseErrorLevel = {}));
-class ParseError extends Error {
-  /** @type {ParseSourceSpan} */ span;
-  /** @type {string} */ msg;
-  /** @type {number} */ level;
-  relatedError;
-  constructor(/** @type {ParseSourceSpan} */ span, /** @type {string} */ msg, /** @type {number} */ level = ParseErrorLevel.ERROR, relatedError) {
-    super(msg);
-    this.span = span;
-    this.msg = msg;
-    this.level = level;
-    this.relatedError = relatedError;
-    Object.setPrototypeOf(this, new.target.prototype);
-  }
-  /** @returns {string} */ contextualMessage() {
-    const ctx = this.span.start.getContext(100, 3);
-    return ctx ? `${this.msg} ("${ctx.before}[${ParseErrorLevel[this.level]} ->]${ctx.after}")` : this.msg;
-  }
-  /** @returns {string} */ toString() {
-    const details = this.span.details ? `, ${this.span.details}` : '';
-    return `${this.contextualMessage()}: ${this.span.start}${details}`;
-  }
-}
-/** @returns {ParseSourceSpan} */ function r3JitTypeSourceSpan(/** @type {string} */ kind, /** @type {string} */ typeName, /** @type {string} */ sourceUrl) {
-  const sourceFileName = `in ${kind} ${typeName} in ${sourceUrl}`;
-  const sourceFile = new ParseSourceFile('', sourceFileName);
-  return new ParseSourceSpan(new ParseLocation(sourceFile, -1, -1, -1), new ParseLocation(sourceFile, -1, -1, -1));
-}
-let _anonymousTypeIndex = 0;
-/** @returns {string | null} */ function identifierName(compileIdentifier) {
-  if (!compileIdentifier || !compileIdentifier.reference) {
-    return null;
-  }
-  const ref = compileIdentifier.reference;
-  if (ref['__anonymousType']) {
-    return ref['__anonymousType'];
-  }
-  if (ref['__forward_ref__']) {
-    return '__forward_ref__';
-  }
-  let identifier = stringify(ref);
-  if (identifier.indexOf('(') >= 0) {
-    identifier = `anonymous_${_anonymousTypeIndex++}`;
-    ref['__anonymousType'] = identifier;
-  } else {
-    identifier = sanitizeIdentifier(identifier);
-  }
-  return identifier;
-}
-/** @returns {string} */ function sanitizeIdentifier(/** @type {string} */ name) {
-  return name.replace(/\W/g, '_');
-}
 
 const makeTemplateObjectPolyfill = '(this&&this.__makeTemplateObject||function(e,t){return Object.defineProperty?Object.defineProperty(e,"raw",{value:t}):e.raw=t,e})';
 class AbstractJsEmitterVisitor extends AbstractEmitterVisitor {
@@ -6704,13 +6860,19 @@ function getPolicy() {
 function trustedScriptFromString(/** @type {string} */ script) {
   return getPolicy()?.createScript(script) || script;
 }
+const PARAM_NAME_PATTERN = /^[A-Za-z_$][\w$]*$/;
 function newTrustedFunctionForJIT(...args) {
   if (!_global['trustedTypes']) {
     return new Function(...args);
   }
-  const fnArgs = args.slice(0, -1).join(',');
   const fnBody = args[args.length - 1];
-  const body = `(function anonymous(${fnArgs}
+  const fnParams = args.slice(0, -1);
+  for (const param of fnParams) {
+    if (!PARAM_NAME_PATTERN.test(param)) {
+      throw new Error(`newTrustedFunctionForJIT: invalid parameter name "${param}"`);
+    }
+  }
+  const body = `(function anonymous(${fnParams.join(',')}
 ) { ${fnBody}
 })`;
   const fn = _global['eval'](trustedScriptFromString(body));
@@ -6737,8 +6899,10 @@ class JitEvaluator {
     const fnArgNames = [];
     const fnArgValues = [];
     for (const argName in vars) {
-      fnArgValues.push(vars[argName]);
-      fnArgNames.push(argName);
+      if (Object.hasOwn(vars, argName)) {
+        fnArgValues.push(vars[argName]);
+        fnArgNames.push(argName);
+      }
     }
     if (createSourceMap) {
       const emptyFn = newTrustedFunctionForJIT(...fnArgNames.concat('return null;')).toString();
@@ -6838,7 +7002,7 @@ class R3JitReflector {
     if (ref.moduleName !== '@angular/core') {
       throw new Error(`Cannot resolve external reference to ${ref.moduleName}, only references to @angular/core are supported.`);
     }
-    if (!this.context.hasOwnProperty(ref.name)) {
+    if (!Object.hasOwn(this.context, ref.name)) {
       throw new Error(`No value provided for @angular/core symbol '${ref.name}'.`);
     }
     return this.context[ref.name];
@@ -6972,7 +7136,7 @@ function compileNgModule(meta) {
   }
   const fnCall = new InvokeFunctionExpr(importExpr(Identifiers.setNgModuleScope), [meta.type.value, scopeMap.toLiteralMap()]);
   const guardedCall = jitOnlyGuardedExpression(fnCall);
-  const iife = new FunctionExpr([], [guardedCall.toStmt()]);
+  const iife = new FunctionExpr([], [guardedCall.toStmt()], DYNAMIC_TYPE);
   const iifeCall = new InvokeFunctionExpr(iife, []);
   return iifeCall.toStmt();
 }
@@ -7068,14 +7232,14 @@ class ShadowCss {
   }
   _animationDeclarationKeyframesRe = /(^|\s+|,)(?:(?:(['"])((?:\\\\|\\\2|(?!\2).)+)\2)|(-?[A-Za-z][\w\-]*))(?=[,\s]|$)/g;
   _scopeAnimationRule(rule, /** @type {string} */ scopeSelector, unscopedKeyframesSet) {
-    let content = rule.content.replace(/((?:^|\s+|;)(?:-webkit-)?animation\s*:\s*)([^;]+)/g, (_, start, animationDeclarations) => start + animationDeclarations.replace(this._animationDeclarationKeyframesRe, (original, leadingSpaces, quote = '', quotedName, nonQuotedName) => {
+    let content = rule.content.replace(/((?:^|[\s;{])(?:-webkit-)?animation\s*:\s*)([^;}]+)/g, (_, start, animationDeclarations) => start + animationDeclarations.replace(this._animationDeclarationKeyframesRe, (original, leadingSpaces, quote = '', quotedName, nonQuotedName) => {
       if (quotedName) {
         return `${leadingSpaces}${this._scopeAnimationKeyframe(`${quote}${quotedName}${quote}`, scopeSelector, unscopedKeyframesSet)}`;
       } else {
         return animationKeywords.has(nonQuotedName) ? original : `${leadingSpaces}${this._scopeAnimationKeyframe(nonQuotedName, scopeSelector, unscopedKeyframesSet)}`;
       }
     }));
-    content = content.replace(/((?:^|\s+|;)(?:-webkit-)?animation-name(?:\s*):(?:\s*))([^;]+)/g, (_match, start, commaSeparatedKeyframes) => `${start}${commaSeparatedKeyframes.split(',').map(keyframe => this._scopeAnimationKeyframe(keyframe, scopeSelector, unscopedKeyframesSet)).join(',')}`);
+    content = content.replace(/((?:^|[\s;{])(?:-webkit-)?animation-name(?:\s*):(?:\s*))([^;}]+)/g, (_match, start, commaSeparatedKeyframes) => `${start}${commaSeparatedKeyframes.split(',').map(keyframe => this._scopeAnimationKeyframe(keyframe, scopeSelector, unscopedKeyframesSet)).join(',')}`);
     return {
       ...rule,
       content
@@ -7172,24 +7336,29 @@ class ShadowCss {
       let selector = rule.selector;
       let content = rule.content;
       if (rule.selector[0] !== '@') {
-        selector = this._scopeSelector({
-          selector,
-          scopeSelector,
-          hostSelector,
-          isParentSelector: true
-        });
+        if (rule.isBlock) {
+          const selectorParts = selector.split(_selectorSplitRe);
+          const containsDeep = selectorParts.some(part => _shadowDeepSelectorRe.test(part));
+          selector = this._scopeSelector({
+            selector,
+            scopeSelector,
+            hostSelector,
+            isParentSelector: true
+          });
+          content = !containsDeep && rule.content.includes('{') ? this._scopeSelectors(rule.content, scopeSelector, hostSelector) : this._stripScopingSelectors(rule.content);
+        }
       } else if (scopedAtRuleIdentifiers.some(atRule => rule.selector.startsWith(atRule))) {
         content = this._scopeSelectors(rule.content, scopeSelector, hostSelector);
       } else if (rule.selector.startsWith('@font-face') || rule.selector.startsWith('@page')) {
         content = this._stripScopingSelectors(rule.content);
       }
-      return new CssRule(selector, content);
+      return new CssRule(selector, content, rule.isBlock);
     });
   }
   /** @returns {string} */ _stripScopingSelectors(/** @type {string} */ cssText) {
     return processRules(cssText, rule => {
       const selector = rule.selector.replace(_shadowDeepSelectors, ' ').replace(_polyfillHostNoCombinatorRe, ' ');
-      return new CssRule(selector, rule.content);
+      return new CssRule(selector, rule.content, rule.isBlock);
     });
   }
   /** @type {SafeSelector | undefined} */ _safeSelector;
@@ -7200,8 +7369,7 @@ class ShadowCss {
     hostSelector,
     isParentSelector = false
   }) {
-    const selectorSplitRe = / ?,(?!(?:[^)(]*(?:\([^)(]*(?:\([^)(]*(?:\([^)(]*\)[^)(]*)*\)[^)(]*)*\)[^)(]*)*\))) ?/;
-    return selector.split(selectorSplitRe).map(part => part.split(_shadowDeepSelectors)).map(deepParts => {
+    return selector.split(_selectorSplitRe).map(part => part.split(_shadowDeepSelectors)).map(deepParts => {
       const [shallowPart, ...otherParts] = deepParts;
       const applyScope = shallowPart => {
         if (this._selectorNeedsScoping(shallowPart, scopeSelector)) {
@@ -7255,7 +7423,7 @@ class ShadowCss {
     const attrName = `[${scopeSelector}]`;
     const _scopeSelectorPart = p => {
       let scopedP = p.trim();
-      if (!scopedP) {
+      if (!scopedP || scopedP === '&' || _onlyCommentPlaceholdersRe.test(scopedP)) {
         return p;
       }
       if (p.includes(_polyfillHostNoCombinator)) {
@@ -7400,6 +7568,8 @@ const _polyfillHostNoCombinator = _polyfillHost + '-no-combinator';
 const _polyfillHostNoCombinatorOutsidePseudoFunction = new RegExp(`${_polyfillHostNoCombinator}(?![^(]*\\))`, 'g');
 const _polyfillHostNoCombinatorRe = /-shadowcsshost-no-combinator([^\s,]*)/;
 const _shadowDeepSelectors = /(?:>>>)|(?:\/deep\/)|(?:::ng-deep)/g;
+const _shadowDeepSelectorRe = new RegExp(_shadowDeepSelectors.source);
+const _selectorSplitRe = / ?,(?!(?:[^)(]*(?:\([^)(]*(?:\([^)(]*(?:\([^)(]*\)[^)(]*)*\)[^)(]*)*\)[^)(]*)*\))) ?/;
 const _selectorReSuffix = '([>\\s~+[.,{:][\\s\\S]*)?$';
 const _polyfillHostRe = /-shadowcsshost/gim;
 const _colonHostRe = /:host(?!\-context)/gim;
@@ -7409,21 +7579,37 @@ const _commentRe = /\/\*[\s\S]*?\*\//g;
 const _commentWithHashRe = /\/\*\s*#\s*source(Mapping)?URL=/g;
 const COMMENT_PLACEHOLDER = '%COMMENT%';
 const _commentWithHashPlaceHolderRe = new RegExp(COMMENT_PLACEHOLDER, 'g');
+const _onlyCommentPlaceholdersRe = new RegExp(`^(?:${COMMENT_PLACEHOLDER})+$`);
 const BLOCK_PLACEHOLDER = '%BLOCK%';
-const _ruleRe = new RegExp(`(\\s*(?:${COMMENT_PLACEHOLDER}\\s*)*)([^;\\{\\}]+?)(\\s*)((?:{%BLOCK%}?\\s*;?)|(?:\\s*;))`, 'g');
+const _ruleRe = new RegExp(`(\\s*(?:${COMMENT_PLACEHOLDER}\\s*)*)([^;\\{\\}]+?)(\\s*)((?:{%BLOCK%}?\\s*;?)|(?:\\s*;)|$)`, 'g');
 const CONTENT_PAIRS = new Map([['{', '}']]);
 const COMMA_IN_PLACEHOLDER = '%COMMA_IN_PLACEHOLDER%';
 const SEMI_IN_PLACEHOLDER = '%SEMI_IN_PLACEHOLDER%';
 const COLON_IN_PLACEHOLDER = '%COLON_IN_PLACEHOLDER%';
+const LBRACE_IN_PLACEHOLDER = '%LBRACE_IN_PLACEHOLDER%';
+const RBRACE_IN_PLACEHOLDER = '%RBRACE_IN_PLACEHOLDER%';
 const _cssCommaInPlaceholderReGlobal = new RegExp(COMMA_IN_PLACEHOLDER, 'g');
 const _cssSemiInPlaceholderReGlobal = new RegExp(SEMI_IN_PLACEHOLDER, 'g');
 const _cssColonInPlaceholderReGlobal = new RegExp(COLON_IN_PLACEHOLDER, 'g');
+const _cssLbraceInPlaceholderReGlobal = new RegExp(LBRACE_IN_PLACEHOLDER, 'g');
+const _cssRbraceInPlaceholderReGlobal = new RegExp(RBRACE_IN_PLACEHOLDER, 'g');
+const _cssVariableRe = /(var\(\s*|@property\s+)?(--(?:[a-zA-Z0-9_-]|[^\x00-\x7F])+)(\s*:)?/g;
+function namespaceCssVariables(cssText) {
+  return cssText.replace(_cssVariableRe, (match, prefix, varName, trailingColon) => {
+    if (!prefix && !trailingColon) {
+      return match;
+    }
+    return (prefix ?? '') + namespaceCssVariable(varName) + (trailingColon ?? '');
+  });
+}
 class CssRule {
   /** @type {string} */ selector;
   /** @type {string} */ content;
-  constructor(/** @type {string} */ selector, /** @type {string} */ content) {
+  isBlock;
+  constructor(selector, content, isBlock) {
     this.selector = selector;
     this.content = content;
+    this.isBlock = isBlock;
   }
 }
 /** @returns {string} */ function processRules(/** @type {string} */ input, ruleCallback) {
@@ -7435,12 +7621,14 @@ class CssRule {
     let content = '';
     let suffix = m[4];
     let contentPrefix = '';
+    let hasBlock = false;
     if (suffix && suffix.startsWith('{' + BLOCK_PLACEHOLDER)) {
       content = inputWithEscapedBlocks.blocks[nextBlockIndex++];
       suffix = suffix.substring(BLOCK_PLACEHOLDER.length + 1);
       contentPrefix = '{';
+      hasBlock = true;
     }
-    const rule = ruleCallback(new CssRule(selector, content));
+    const rule = ruleCallback(new CssRule(selector, content, hasBlock));
     return `${m[1]}${rule.selector}${m[3]}${contentPrefix}${rule.content}${suffix}`;
   });
   return unescapeInStrings(escapedResult);
@@ -7495,7 +7683,9 @@ class StringWithEscapedBlocks {
 const ESCAPE_IN_STRING_MAP = {
   ';': SEMI_IN_PLACEHOLDER,
   ',': COMMA_IN_PLACEHOLDER,
-  ':': COLON_IN_PLACEHOLDER
+  ':': COLON_IN_PLACEHOLDER,
+  '{': LBRACE_IN_PLACEHOLDER,
+  '}': RBRACE_IN_PLACEHOLDER
 };
 /** @returns {string} */ function escapeInStrings(/** @type {string} */ input) {
   let result = input;
@@ -7526,6 +7716,8 @@ const ESCAPE_IN_STRING_MAP = {
   let result = input.replace(_cssCommaInPlaceholderReGlobal, ',');
   result = result.replace(_cssSemiInPlaceholderReGlobal, ';');
   result = result.replace(_cssColonInPlaceholderReGlobal, ':');
+  result = result.replace(_cssLbraceInPlaceholderReGlobal, '{');
+  result = result.replace(_cssRbraceInPlaceholderReGlobal, '}');
   return result;
 }
 /** @returns {string} */ function unescapeQuotes(/** @type {string} */ str, /** @type {boolean} */ isQuoted) {
@@ -7567,61 +7759,66 @@ var OpKind;
   OpKind[OpKind["Variable"] = 2] = "Variable";
   OpKind[OpKind["ElementStart"] = 3] = "ElementStart";
   OpKind[OpKind["Element"] = 4] = "Element";
-  OpKind[OpKind["Template"] = 5] = "Template";
-  OpKind[OpKind["ElementEnd"] = 6] = "ElementEnd";
-  OpKind[OpKind["ContainerStart"] = 7] = "ContainerStart";
-  OpKind[OpKind["Container"] = 8] = "Container";
-  OpKind[OpKind["ContainerEnd"] = 9] = "ContainerEnd";
-  OpKind[OpKind["DisableBindings"] = 10] = "DisableBindings";
-  OpKind[OpKind["ConditionalCreate"] = 11] = "ConditionalCreate";
-  OpKind[OpKind["ConditionalBranchCreate"] = 12] = "ConditionalBranchCreate";
-  OpKind[OpKind["Conditional"] = 13] = "Conditional";
-  OpKind[OpKind["EnableBindings"] = 14] = "EnableBindings";
-  OpKind[OpKind["Text"] = 15] = "Text";
-  OpKind[OpKind["Listener"] = 16] = "Listener";
-  OpKind[OpKind["InterpolateText"] = 17] = "InterpolateText";
-  OpKind[OpKind["Binding"] = 18] = "Binding";
-  OpKind[OpKind["Property"] = 19] = "Property";
-  OpKind[OpKind["StyleProp"] = 20] = "StyleProp";
-  OpKind[OpKind["ClassProp"] = 21] = "ClassProp";
-  OpKind[OpKind["StyleMap"] = 22] = "StyleMap";
-  OpKind[OpKind["ClassMap"] = 23] = "ClassMap";
-  OpKind[OpKind["Advance"] = 24] = "Advance";
-  OpKind[OpKind["Pipe"] = 25] = "Pipe";
-  OpKind[OpKind["Attribute"] = 26] = "Attribute";
-  OpKind[OpKind["ExtractedAttribute"] = 27] = "ExtractedAttribute";
-  OpKind[OpKind["Defer"] = 28] = "Defer";
-  OpKind[OpKind["DeferOn"] = 29] = "DeferOn";
-  OpKind[OpKind["DeferWhen"] = 30] = "DeferWhen";
-  OpKind[OpKind["I18nMessage"] = 31] = "I18nMessage";
-  OpKind[OpKind["DomProperty"] = 32] = "DomProperty";
-  OpKind[OpKind["Namespace"] = 33] = "Namespace";
-  OpKind[OpKind["ProjectionDef"] = 34] = "ProjectionDef";
-  OpKind[OpKind["EnableIncrementalHydrationRuntime"] = 35] = "EnableIncrementalHydrationRuntime";
-  OpKind[OpKind["Projection"] = 36] = "Projection";
-  OpKind[OpKind["RepeaterCreate"] = 37] = "RepeaterCreate";
-  OpKind[OpKind["Repeater"] = 38] = "Repeater";
-  OpKind[OpKind["TwoWayProperty"] = 39] = "TwoWayProperty";
-  OpKind[OpKind["TwoWayListener"] = 40] = "TwoWayListener";
-  OpKind[OpKind["DeclareLet"] = 41] = "DeclareLet";
-  OpKind[OpKind["StoreLet"] = 42] = "StoreLet";
-  OpKind[OpKind["I18nStart"] = 43] = "I18nStart";
-  OpKind[OpKind["I18n"] = 44] = "I18n";
-  OpKind[OpKind["I18nEnd"] = 45] = "I18nEnd";
-  OpKind[OpKind["I18nExpression"] = 46] = "I18nExpression";
-  OpKind[OpKind["I18nApply"] = 47] = "I18nApply";
-  OpKind[OpKind["IcuStart"] = 48] = "IcuStart";
-  OpKind[OpKind["IcuEnd"] = 49] = "IcuEnd";
-  OpKind[OpKind["IcuPlaceholder"] = 50] = "IcuPlaceholder";
-  OpKind[OpKind["I18nContext"] = 51] = "I18nContext";
-  OpKind[OpKind["I18nAttributes"] = 52] = "I18nAttributes";
-  OpKind[OpKind["SourceLocation"] = 53] = "SourceLocation";
-  OpKind[OpKind["Animation"] = 54] = "Animation";
-  OpKind[OpKind["AnimationString"] = 55] = "AnimationString";
-  OpKind[OpKind["AnimationBinding"] = 56] = "AnimationBinding";
-  OpKind[OpKind["AnimationListener"] = 57] = "AnimationListener";
-  OpKind[OpKind["Control"] = 58] = "Control";
-  OpKind[OpKind["ControlCreate"] = 59] = "ControlCreate";
+  OpKind[OpKind["ForeignComponent"] = 5] = "ForeignComponent";
+  OpKind[OpKind["Template"] = 6] = "Template";
+  OpKind[OpKind["ElementEnd"] = 7] = "ElementEnd";
+  OpKind[OpKind["ContainerStart"] = 8] = "ContainerStart";
+  OpKind[OpKind["Container"] = 9] = "Container";
+  OpKind[OpKind["ContainerEnd"] = 10] = "ContainerEnd";
+  OpKind[OpKind["DisableBindings"] = 11] = "DisableBindings";
+  OpKind[OpKind["ConditionalCreate"] = 12] = "ConditionalCreate";
+  OpKind[OpKind["ConditionalBranchCreate"] = 13] = "ConditionalBranchCreate";
+  OpKind[OpKind["Conditional"] = 14] = "Conditional";
+  OpKind[OpKind["BoundaryCreate"] = 15] = "BoundaryCreate";
+  OpKind[OpKind["BoundaryErrorCreate"] = 16] = "BoundaryErrorCreate";
+  OpKind[OpKind["Boundary"] = 17] = "Boundary";
+  OpKind[OpKind["EnableBindings"] = 18] = "EnableBindings";
+  OpKind[OpKind["Text"] = 19] = "Text";
+  OpKind[OpKind["Listener"] = 20] = "Listener";
+  OpKind[OpKind["InterpolateText"] = 21] = "InterpolateText";
+  OpKind[OpKind["Binding"] = 22] = "Binding";
+  OpKind[OpKind["Property"] = 23] = "Property";
+  OpKind[OpKind["StyleProp"] = 24] = "StyleProp";
+  OpKind[OpKind["ClassProp"] = 25] = "ClassProp";
+  OpKind[OpKind["StyleMap"] = 26] = "StyleMap";
+  OpKind[OpKind["ClassMap"] = 27] = "ClassMap";
+  OpKind[OpKind["Advance"] = 28] = "Advance";
+  OpKind[OpKind["Pipe"] = 29] = "Pipe";
+  OpKind[OpKind["Attribute"] = 30] = "Attribute";
+  OpKind[OpKind["ExtractedAttribute"] = 31] = "ExtractedAttribute";
+  OpKind[OpKind["Defer"] = 32] = "Defer";
+  OpKind[OpKind["DeferOn"] = 33] = "DeferOn";
+  OpKind[OpKind["DeferWhen"] = 34] = "DeferWhen";
+  OpKind[OpKind["I18nMessage"] = 35] = "I18nMessage";
+  OpKind[OpKind["DomProperty"] = 36] = "DomProperty";
+  OpKind[OpKind["Namespace"] = 37] = "Namespace";
+  OpKind[OpKind["ProjectionDef"] = 38] = "ProjectionDef";
+  OpKind[OpKind["EnableIncrementalHydrationRuntime"] = 39] = "EnableIncrementalHydrationRuntime";
+  OpKind[OpKind["Projection"] = 40] = "Projection";
+  OpKind[OpKind["Content"] = 41] = "Content";
+  OpKind[OpKind["RepeaterCreate"] = 42] = "RepeaterCreate";
+  OpKind[OpKind["Repeater"] = 43] = "Repeater";
+  OpKind[OpKind["TwoWayProperty"] = 44] = "TwoWayProperty";
+  OpKind[OpKind["TwoWayListener"] = 45] = "TwoWayListener";
+  OpKind[OpKind["DeclareLet"] = 46] = "DeclareLet";
+  OpKind[OpKind["StoreLet"] = 47] = "StoreLet";
+  OpKind[OpKind["I18nStart"] = 48] = "I18nStart";
+  OpKind[OpKind["I18n"] = 49] = "I18n";
+  OpKind[OpKind["I18nEnd"] = 50] = "I18nEnd";
+  OpKind[OpKind["I18nExpression"] = 51] = "I18nExpression";
+  OpKind[OpKind["I18nApply"] = 52] = "I18nApply";
+  OpKind[OpKind["IcuStart"] = 53] = "IcuStart";
+  OpKind[OpKind["IcuEnd"] = 54] = "IcuEnd";
+  OpKind[OpKind["IcuPlaceholder"] = 55] = "IcuPlaceholder";
+  OpKind[OpKind["I18nContext"] = 56] = "I18nContext";
+  OpKind[OpKind["I18nAttributes"] = 57] = "I18nAttributes";
+  OpKind[OpKind["SourceLocation"] = 58] = "SourceLocation";
+  OpKind[OpKind["Animation"] = 59] = "Animation";
+  OpKind[OpKind["AnimationString"] = 60] = "AnimationString";
+  OpKind[OpKind["AnimationBinding"] = 61] = "AnimationBinding";
+  OpKind[OpKind["AnimationListener"] = 62] = "AnimationListener";
+  OpKind[OpKind["Control"] = 63] = "Control";
+  OpKind[OpKind["ControlCreate"] = 64] = "ControlCreate";
 })(OpKind || (OpKind = {}));
 var ExpressionKind;
 (function (ExpressionKind) {
@@ -7633,25 +7830,27 @@ var ExpressionKind;
   ExpressionKind[ExpressionKind["Reference"] = 5] = "Reference";
   ExpressionKind[ExpressionKind["StoreLet"] = 6] = "StoreLet";
   ExpressionKind[ExpressionKind["ContextLetReference"] = 7] = "ContextLetReference";
-  ExpressionKind[ExpressionKind["GetCurrentView"] = 8] = "GetCurrentView";
-  ExpressionKind[ExpressionKind["RestoreView"] = 9] = "RestoreView";
-  ExpressionKind[ExpressionKind["ResetView"] = 10] = "ResetView";
-  ExpressionKind[ExpressionKind["PureFunctionExpr"] = 11] = "PureFunctionExpr";
-  ExpressionKind[ExpressionKind["PureFunctionParameterExpr"] = 12] = "PureFunctionParameterExpr";
-  ExpressionKind[ExpressionKind["PipeBinding"] = 13] = "PipeBinding";
-  ExpressionKind[ExpressionKind["PipeBindingVariadic"] = 14] = "PipeBindingVariadic";
-  ExpressionKind[ExpressionKind["SafePropertyRead"] = 15] = "SafePropertyRead";
-  ExpressionKind[ExpressionKind["SafeKeyedRead"] = 16] = "SafeKeyedRead";
-  ExpressionKind[ExpressionKind["SafeNavigationMigration"] = 17] = "SafeNavigationMigration";
-  ExpressionKind[ExpressionKind["SafeTernaryExpr"] = 18] = "SafeTernaryExpr";
-  ExpressionKind[ExpressionKind["EmptyExpr"] = 19] = "EmptyExpr";
-  ExpressionKind[ExpressionKind["AssignTemporaryExpr"] = 20] = "AssignTemporaryExpr";
-  ExpressionKind[ExpressionKind["ReadTemporaryExpr"] = 21] = "ReadTemporaryExpr";
-  ExpressionKind[ExpressionKind["SlotLiteralExpr"] = 22] = "SlotLiteralExpr";
-  ExpressionKind[ExpressionKind["ConditionalCase"] = 23] = "ConditionalCase";
-  ExpressionKind[ExpressionKind["ConstCollected"] = 24] = "ConstCollected";
-  ExpressionKind[ExpressionKind["TwoWayBindingSet"] = 25] = "TwoWayBindingSet";
-  ExpressionKind[ExpressionKind["ArrowFunction"] = 26] = "ArrowFunction";
+  ExpressionKind[ExpressionKind["BoundaryState"] = 8] = "BoundaryState";
+  ExpressionKind[ExpressionKind["GetCurrentView"] = 9] = "GetCurrentView";
+  ExpressionKind[ExpressionKind["RestoreView"] = 10] = "RestoreView";
+  ExpressionKind[ExpressionKind["ResetView"] = 11] = "ResetView";
+  ExpressionKind[ExpressionKind["PureFunctionExpr"] = 12] = "PureFunctionExpr";
+  ExpressionKind[ExpressionKind["PureFunctionParameterExpr"] = 13] = "PureFunctionParameterExpr";
+  ExpressionKind[ExpressionKind["PipeBinding"] = 14] = "PipeBinding";
+  ExpressionKind[ExpressionKind["PipeBindingVariadic"] = 15] = "PipeBindingVariadic";
+  ExpressionKind[ExpressionKind["SafePropertyRead"] = 16] = "SafePropertyRead";
+  ExpressionKind[ExpressionKind["SafeKeyedRead"] = 17] = "SafeKeyedRead";
+  ExpressionKind[ExpressionKind["SafeNavigationMigration"] = 18] = "SafeNavigationMigration";
+  ExpressionKind[ExpressionKind["SafeTernaryExpr"] = 19] = "SafeTernaryExpr";
+  ExpressionKind[ExpressionKind["EmptyExpr"] = 20] = "EmptyExpr";
+  ExpressionKind[ExpressionKind["AssignTemporaryExpr"] = 21] = "AssignTemporaryExpr";
+  ExpressionKind[ExpressionKind["ReadTemporaryExpr"] = 22] = "ReadTemporaryExpr";
+  ExpressionKind[ExpressionKind["SlotLiteralExpr"] = 23] = "SlotLiteralExpr";
+  ExpressionKind[ExpressionKind["ConditionalCase"] = 24] = "ConditionalCase";
+  ExpressionKind[ExpressionKind["ConstCollected"] = 25] = "ConstCollected";
+  ExpressionKind[ExpressionKind["TwoWayBindingSet"] = 26] = "TwoWayBindingSet";
+  ExpressionKind[ExpressionKind["ForeignContent"] = 27] = "ForeignContent";
+  ExpressionKind[ExpressionKind["ArrowFunction"] = 28] = "ArrowFunction";
 })(ExpressionKind || (ExpressionKind = {}));
 var VariableFlags;
 (function (VariableFlags) {
@@ -7664,6 +7863,7 @@ var SemanticVariableKind;
   SemanticVariableKind[SemanticVariableKind["Identifier"] = 1] = "Identifier";
   SemanticVariableKind[SemanticVariableKind["SavedView"] = 2] = "SavedView";
   SemanticVariableKind[SemanticVariableKind["Alias"] = 3] = "Alias";
+  SemanticVariableKind[SemanticVariableKind["BoundaryState"] = 4] = "BoundaryState";
 })(SemanticVariableKind || (SemanticVariableKind = {}));
 var BindingKind;
 (function (BindingKind) {
@@ -8133,6 +8333,21 @@ function createConditionalOp(target, /** @type {Expression | null} */ test, /** 
     ...TRAIT_CONSUMES_VARS
   };
 }
+function createBoundaryOp(target, targetSlot, primaryTarget, guarded, conditions, sourceSpan) {
+  return {
+    kind: OpKind.Boundary,
+    target,
+    targetSlot,
+    primaryTarget,
+    guarded,
+    conditions,
+    processed: null,
+    sourceSpan,
+    ...NEW_OP,
+    ...TRAIT_DEPENDS_ON_SLOT_CONTEXT,
+    ...TRAIT_CONSUMES_VARS
+  };
+}
 function createRepeaterOp(repeaterCreate, /** @type {SlotHandle} */ targetSlot, /** @type {Expression} */ collection, /** @type {ParseSourceSpan} */ sourceSpan) {
   return {
     kind: OpKind.Repeater,
@@ -8269,6 +8484,51 @@ class ReferenceExpr extends ExpressionBase {
   transformInternalExpressions() {}
   /** @returns {ReferenceExpr} */ clone() {
     return new ReferenceExpr(this.target, this.targetSlot, this.offset);
+  }
+}
+class ForeignContentExpr extends ExpressionBase {
+  childrenViewXref;
+  childrenViewHandle;
+  foreignComponentConstIndex;
+  kind = ExpressionKind.ForeignContent;
+  constructor(childrenViewXref, childrenViewHandle, foreignComponentConstIndex) {
+    super();
+    this.childrenViewXref = childrenViewXref;
+    this.childrenViewHandle = childrenViewHandle;
+    this.foreignComponentConstIndex = foreignComponentConstIndex;
+  }
+  visitExpression() {}
+  isEquivalent(e) {
+    return e instanceof ForeignContentExpr && e.childrenViewXref === this.childrenViewXref && e.foreignComponentConstIndex === this.foreignComponentConstIndex;
+  }
+  isConstant() {
+    return false;
+  }
+  transformInternalExpressions() {}
+  clone() {
+    return new ForeignContentExpr(this.childrenViewXref, this.childrenViewHandle, this.foreignComponentConstIndex);
+  }
+}
+class BoundaryStateExpr extends ExpressionBase {
+  xref;
+  kind = ExpressionKind.BoundaryState;
+  name = null;
+  constructor(xref) {
+    super();
+    this.xref = xref;
+  }
+  visitExpression() {}
+  isEquivalent(other) {
+    return other instanceof BoundaryStateExpr && other.xref === this.xref;
+  }
+  isConstant() {
+    return false;
+  }
+  transformInternalExpressions() {}
+  clone() {
+    const b = new BoundaryStateExpr(this.xref);
+    b.name = this.name;
+    return b;
   }
 }
 class StoreLetExpr extends ExpressionBase {
@@ -8791,8 +9051,8 @@ class ReadTemporaryExpr extends ExpressionBase {
     this.xref = xref;
   }
   visitExpression(visitor, context) {}
-  /** @returns {boolean} */ isEquivalent() {
-    return this.xref === this.xref;
+  isEquivalent(e) {
+    return e instanceof ReadTemporaryExpr && e.xref === this.xref;
   }
   /** @returns {boolean} */ isConstant() {
     return false;
@@ -8997,6 +9257,17 @@ function transformExpressionsInOp(op, transform, /** @type {number} */ flags) {
         op.contextValue = transformExpressionsInExpression(op.contextValue, transform, flags);
       }
       break;
+    case OpKind.Boundary:
+      for (const condition of op.conditions) {
+        if (condition.expr === null) {
+          continue;
+        }
+        condition.expr = transformExpressionsInExpression(condition.expr, transform, flags);
+      }
+      if (op.processed !== null) {
+        op.processed = transformExpressionsInExpression(op.processed, transform, flags);
+      }
+      break;
     case OpKind.Animation:
     case OpKind.AnimationListener:
     case OpKind.Listener:
@@ -9049,6 +9320,11 @@ function transformExpressionsInOp(op, transform, /** @type {number} */ flags) {
     case OpKind.StoreLet:
       op.value = transformExpressionsInExpression(op.value, transform, flags);
       break;
+    case OpKind.ForeignComponent:
+      for (const [key, expr] of op.props) {
+        op.props.set(key, transformExpressionsInExpression(expr, transform, flags));
+      }
+      break;
     case OpKind.Advance:
     case OpKind.Container:
     case OpKind.ContainerEnd:
@@ -9072,6 +9348,7 @@ function transformExpressionsInOp(op, transform, /** @type {number} */ flags) {
     case OpKind.ProjectionDef:
     case OpKind.EnableIncrementalHydrationRuntime:
     case OpKind.Template:
+    case OpKind.Content:
     case OpKind.Text:
     case OpKind.I18nAttributes:
     case OpKind.IcuPlaceholder:
@@ -9081,6 +9358,8 @@ function transformExpressionsInOp(op, transform, /** @type {number} */ flags) {
     case OpKind.ConditionalBranchCreate:
     case OpKind.Control:
     case OpKind.ControlCreate:
+    case OpKind.BoundaryCreate:
+    case OpKind.BoundaryErrorCreate:
       break;
     default:
       throw new Error(`AssertionError: transformExpressionsInOp doesn't handle ${OpKind[op.kind]}`);
@@ -9151,6 +9430,10 @@ function transformExpressionsInOp(op, transform, /** @type {number} */ flags) {
     expr.expr = transformExpressionsInExpression(expr.expr, transform, flags);
   } else if (expr instanceof SpreadElementExpr) {
     expr.expression = transformExpressionsInExpression(expr.expression, transform, flags);
+  } else if (expr instanceof FunctionExpr) {
+    for (let i = 0; i < expr.statements.length; i++) {
+      transformExpressionsInStatement(expr.statements[i], transform, flags);
+    }
   } else if (expr instanceof ReadVarExpr || expr instanceof ExternalExpr || expr instanceof LiteralExpr || expr instanceof RegularExpressionLiteralExpr) ; else {
     throw new Error(`Unhandled expression kind: ${expr.constructor.name}`);
   }
@@ -9185,7 +9468,7 @@ class SlotHandle {
   slot = null;
 }
 
-const elementContainerOpKinds = new Set([OpKind.Element, OpKind.ElementStart, OpKind.Container, OpKind.ContainerStart, OpKind.Template, OpKind.RepeaterCreate, OpKind.ConditionalCreate, OpKind.ConditionalBranchCreate]);
+const elementContainerOpKinds = new Set([OpKind.Element, OpKind.ElementStart, OpKind.Container, OpKind.ContainerStart, OpKind.Template, OpKind.RepeaterCreate, OpKind.ConditionalCreate, OpKind.ConditionalBranchCreate, OpKind.BoundaryCreate]);
 /** @returns {boolean} */ function isElementOrContainerOp(op) {
   return elementContainerOpKinds.has(op.kind);
 }
@@ -9203,6 +9486,29 @@ function createElementStartOp(/** @type {string} */ tag, xref, /** @type {number
     startSourceSpan,
     wholeSourceSpan,
     ...TRAIT_CONSUMES_SLOT,
+    ...NEW_OP
+  };
+}
+function createForeignComponentOp(xref, constIndex, props, sourceSpan) {
+  return {
+    kind: OpKind.ForeignComponent,
+    xref,
+    handle: new SlotHandle(),
+    constIndex,
+    props,
+    sourceSpan,
+    ...TRAIT_CONSUMES_SLOT,
+    ...NEW_OP
+  };
+}
+function createContentOp(target, view, propertyName, startSourceSpan, sourceSpan) {
+  return {
+    kind: OpKind.Content,
+    target,
+    propertyName,
+    view,
+    startSourceSpan,
+    sourceSpan,
     ...NEW_OP
   };
 }
@@ -9265,6 +9571,45 @@ function createConditionalBranchCreateOp(xref, /** @type {number} */ templateKin
     i18nPlaceholder,
     startSourceSpan,
     wholeSourceSpan,
+    ...TRAIT_CONSUMES_SLOT,
+    ...NEW_OP
+  };
+}
+function createBoundaryCreateOp(xref, templateKind, tag, functionNameSuffix, namespace, i18nPlaceholder, startSourceSpan, wholeSourceSpan) {
+  return {
+    kind: OpKind.BoundaryCreate,
+    xref,
+    templateKind,
+    attributes: null,
+    tag,
+    handle: new SlotHandle(),
+    functionNameSuffix,
+    decls: null,
+    vars: null,
+    localRefs: [],
+    nonBindable: false,
+    namespace,
+    i18nPlaceholder,
+    startSourceSpan,
+    wholeSourceSpan,
+    ...TRAIT_CONSUMES_SLOT,
+    ...NEW_OP
+  };
+}
+function createBoundaryErrorCreateOp(xref, templateKind, functionNameSuffix, i18nPlaceholder, startSourceSpan, wholeSourceSpan, boundaryXref, contextVariables) {
+  return {
+    kind: OpKind.BoundaryErrorCreate,
+    xref,
+    templateKind,
+    handle: new SlotHandle(),
+    functionNameSuffix,
+    decls: null,
+    vars: null,
+    i18nPlaceholder,
+    startSourceSpan,
+    wholeSourceSpan,
+    boundaryXref,
+    contextVariables,
     ...TRAIT_CONSUMES_SLOT,
     ...NEW_OP
   };
@@ -9542,6 +9887,7 @@ function createI18nMessageOp(xref, i18nContext, i18nBlock, /** @type {Message} *
     postprocessingParams,
     needsPostprocessing,
     subMessages: [],
+    requiresExtraction: null,
     ...NEW_OP
   };
 }
@@ -9691,7 +10037,9 @@ class ComponentCompilationJob extends CompilationJob {
   /** @type {ReadVarExpr | null} */ allDeferrableDepsFn;
   /** @type {string | null} */ relativeTemplatePath;
   /** @type {boolean} */ enableDebugLocations;
-  constructor(/** @type {string} */ componentName, /** @type {ConstantPool} */ pool, /** @type {number} */ mode, /** @type {string} */ relativeContextFilePath, /** @type {boolean} */ i18nUseExternalIds, deferMeta, /** @type {ReadVarExpr | null} */ allDeferrableDepsFn, /** @type {string | null} */ relativeTemplatePath, /** @type {boolean} */ enableDebugLocations, /** @type {boolean} */ legacyOptionalChaining) {
+  foreignImports;
+  foreignMatcher;
+  constructor(componentName, pool, mode, relativeContextFilePath, i18nUseExternalIds, deferMeta, allDeferrableDepsFn, relativeTemplatePath, enableDebugLocations, legacyOptionalChaining, foreignImports) {
     super(componentName, pool, mode, legacyOptionalChaining);
     this.relativeContextFilePath = relativeContextFilePath;
     this.i18nUseExternalIds = i18nUseExternalIds;
@@ -9699,8 +10047,25 @@ class ComponentCompilationJob extends CompilationJob {
     this.allDeferrableDepsFn = allDeferrableDepsFn;
     this.relativeTemplatePath = relativeTemplatePath;
     this.enableDebugLocations = enableDebugLocations;
+    this.foreignImports = foreignImports;
     this.root = new ViewCompilationUnit(this, this.allocateXrefId(), null);
     this.views.set(this.root.xref, this.root);
+    if (foreignImports && foreignImports.length > 0) {
+      const registry = new Map();
+      for (const meta of foreignImports) {
+        registry.set(meta.name, [meta]);
+      }
+      this.foreignMatcher = new SelectorlessMatcher(registry);
+    } else {
+      this.foreignMatcher = null;
+    }
+  }
+  getForeignComponent(element) {
+    if (this.foreignMatcher === null) {
+      return null;
+    }
+    const matches = this.foreignMatcher.match(element.name);
+    return matches.length > 0 ? matches[0] : null;
   }
   kind = CompilationJobKind.Tmpl;
   fnSuffix = 'Template';
@@ -10153,7 +10518,7 @@ function generateConditionalExpressions(/** @type {ComponentCompilationJob} */ j
       } else {
         test = literal(-1);
       }
-      let tmp = op.test == null ? null : new AssignTemporaryExpr(op.test, job.allocateXrefId());
+      let tmp = op.test != null ? new AssignTemporaryExpr(op.test, job.allocateXrefId()) : null;
       let caseExpressionTemporaryXref = null;
       for (let i = op.conditions.length - 1; i >= 0; i--) {
         let conditionalCase = op.conditions[i];
@@ -10172,6 +10537,41 @@ function generateConditionalExpressions(/** @type {ComponentCompilationJob} */ j
       }
       op.processed = test;
       op.conditions = [];
+    }
+  }
+}
+
+function generateBoundaryConditions(job) {
+  for (const unit of job.units) {
+    for (const op of unit.update) {
+      if (op.kind === OpKind.Boundary) {
+        const boundaryXref = op.target;
+        const boundaryStateExpr = new BoundaryStateExpr(boundaryXref);
+        const errorProp = new ReadPropExpr(boundaryStateExpr, 'error');
+        const condition = new BinaryOperatorExpr(BinaryOperator.Identical, errorProp, NULL_EXPR);
+        const errorBranches = op.conditions;
+        const fallbackBranch = errorBranches.find(c => c.expr === null);
+        let errorResultExpr = fallbackBranch ? new SlotLiteralExpr(fallbackBranch.targetSlot) : literal(-1);
+        const conditionalBranches = errorBranches.filter(c => c.expr !== null);
+        for (let i = conditionalBranches.length - 1; i >= 0; i--) {
+          const branch = conditionalBranches[i];
+          let conditionExpr = branch.expr;
+          const errorCreateOp = Array.from(unit.create).find(o => o.kind === OpKind.BoundaryErrorCreate && o.xref === branch.target);
+          if (errorCreateOp !== undefined) {
+            const errorVarNames = errorCreateOp.contextVariables.filter(v => v.value === '$error').map(v => v.name);
+            if (errorVarNames.length > 0) {
+              conditionExpr = transformExpressionsInExpression(conditionExpr, expr => {
+                if (expr instanceof LexicalReadExpr && errorVarNames.includes(expr.name)) {
+                  return errorProp;
+                }
+                return expr;
+              }, VisitorContextFlag.None);
+            }
+          }
+          errorResultExpr = new ConditionalExpr(conditionExpr, new SlotLiteralExpr(branch.targetSlot), errorResultExpr);
+        }
+        op.processed = new ConditionalExpr(condition, new SlotLiteralExpr(op.guarded.targetSlot), errorResultExpr);
+      }
     }
   }
 }
@@ -10384,19 +10784,17 @@ function processView(/** @type {ViewCompilationUnit} */ view) {
     }
   }
 }
-const CONTROL_OP_CREATE_KINDS = new Set([OpKind.Container, OpKind.ContainerStart, OpKind.ContainerEnd, OpKind.Element, OpKind.ElementStart, OpKind.ElementEnd, OpKind.Template]);
+const CONTROL_OP_CREATE_KINDS = new Set([OpKind.Container, OpKind.ContainerStart, OpKind.Element, OpKind.ElementStart]);
 /** @returns {boolean} */ function isRelevantCreateOp(createOp) {
   return CONTROL_OP_CREATE_KINDS.has(createOp.kind);
 }
 function findCreateInstruction(/** @type {ViewCompilationUnit} */ view, target) {
-  let lastFoundOp = null;
   for (const createOp of view.create) {
-    if (!isRelevantCreateOp(createOp) || createOp.xref !== target) {
-      continue;
+    if (isRelevantCreateOp(createOp) && createOp.xref === target) {
+      return createOp;
     }
-    lastFoundOp = createOp;
   }
-  return lastFoundOp;
+  return null;
 }
 function addControlInstruction(/** @type {ViewCompilationUnit} */ view, propertyOp) {
   const targetCreateOp = findCreateInstruction(view, propertyOp.target);
@@ -10636,7 +11034,8 @@ function resolveDeferTargetNames(/** @type {ComponentCompilationJob} */ job) {
     return scope;
   }
   function resolveTrigger(deferOwnerView, op, placeholderView) {
-    switch (op.trigger.kind) {
+    const triggerKind = op.trigger.kind;
+    switch (triggerKind) {
       case DeferTriggerKind.Idle:
       case DeferTriggerKind.Never:
       case DeferTriggerKind.Immediate:
@@ -10684,7 +11083,10 @@ function resolveDeferTargetNames(/** @type {ComponentCompilationJob} */ job) {
         }
         break;
       default:
-        throw new Error(`Trigger kind ${op.trigger.kind} not handled`);
+        {
+          const unhandledTriggerKind = triggerKind;
+          throw new Error(`Trigger kind ${unhandledTriggerKind} not handled`);
+        }
     }
   }
   for (const unit of job.units) {
@@ -11125,6 +11527,500 @@ function generateProjectionDefs(/** @type {ComponentCompilationJob} */ job) {
   }
 }
 
+function element(/** @type {number} */ slot, /** @type {string} */ tag, /** @type {number | null} */ constIndex, /** @type {number | null} */ localRefIndex, /** @type {ParseSourceSpan} */ sourceSpan) {
+  return elementOrContainerBase(Identifiers.element, slot, tag, constIndex, localRefIndex, sourceSpan);
+}
+function elementStart(/** @type {number} */ slot, /** @type {string} */ tag, /** @type {number | null} */ constIndex, /** @type {number | null} */ localRefIndex, /** @type {ParseSourceSpan} */ sourceSpan) {
+  return elementOrContainerBase(Identifiers.elementStart, slot, tag, constIndex, localRefIndex, sourceSpan);
+}
+function foreignComponent(slot, foreignComponentRef, props, sourceSpan) {
+  const args = [literal(slot), foreignComponentRef];
+  if (props !== null) {
+    args.push(props);
+  }
+  return call(Identifiers.foreignComponent, args, sourceSpan);
+}
+function foreignContent(slot, foreignComponentIndex, parameterized) {
+  return importExpr(parameterized ? Identifiers.foreignContentFn : Identifiers.foreignContent).callFn([literal(slot), literal(foreignComponentIndex)]);
+}
+function elementOrContainerBase(instruction, /** @type {number} */ slot, /** @type {string | null} */ tag, /** @type {number | null} */ constIndex, /** @type {number | null} */ localRefIndex, /** @type {ParseSourceSpan} */ sourceSpan) {
+  const args = [literal(slot)];
+  if (tag !== null) {
+    args.push(literal(tag));
+  }
+  if (localRefIndex !== null) {
+    args.push(literal(constIndex), literal(localRefIndex));
+  } else if (constIndex !== null) {
+    args.push(literal(constIndex));
+  }
+  return call(instruction, args, sourceSpan);
+}
+function templateBase(instruction, /** @type {number} */ slot, /** @type {Expression} */ templateFnRef, /** @type {number} */ decls, /** @type {number} */ vars, /** @type {string | null} */ tag, /** @type {number | null} */ constIndex, /** @type {number | null} */ localRefs, /** @type {ParseSourceSpan} */ sourceSpan) {
+  const args = [literal(slot), templateFnRef, literal(decls), literal(vars), literal(tag), literal(constIndex)];
+  if (localRefs !== null) {
+    args.push(literal(localRefs));
+    args.push(importExpr(Identifiers.templateRefExtractor));
+  }
+  while (args[args.length - 1].isEquivalent(NULL_EXPR)) {
+    args.pop();
+  }
+  return call(instruction, args, sourceSpan);
+}
+function propertyBase(instruction, /** @type {string} */ name, expression, /** @type {Expression | null} */ sanitizer, /** @type {ParseSourceSpan} */ sourceSpan) {
+  const args = [literal(name)];
+  if (expression instanceof Interpolation) {
+    args.push(interpolationToExpression(expression, sourceSpan));
+  } else {
+    args.push(expression);
+  }
+  if (sanitizer !== null) {
+    args.push(sanitizer);
+  }
+  return call(instruction, args, sourceSpan);
+}
+function elementEnd(/** @type {ParseSourceSpan | null} */ sourceSpan) {
+  return call(Identifiers.elementEnd, [], sourceSpan);
+}
+function elementContainerStart(/** @type {number} */ slot, /** @type {number | null} */ constIndex, /** @type {number | null} */ localRefIndex, /** @type {ParseSourceSpan} */ sourceSpan) {
+  return elementOrContainerBase(Identifiers.elementContainerStart, slot, null, constIndex, localRefIndex, sourceSpan);
+}
+function elementContainer(/** @type {number} */ slot, /** @type {number | null} */ constIndex, /** @type {number | null} */ localRefIndex, /** @type {ParseSourceSpan} */ sourceSpan) {
+  return elementOrContainerBase(Identifiers.elementContainer, slot, null, constIndex, localRefIndex, sourceSpan);
+}
+function elementContainerEnd() {
+  return call(Identifiers.elementContainerEnd, [], null);
+}
+function template(/** @type {number} */ slot, /** @type {Expression} */ templateFnRef, /** @type {number} */ decls, /** @type {number} */ vars, /** @type {string | null} */ tag, /** @type {number | null} */ constIndex, /** @type {number | null} */ localRefs, /** @type {ParseSourceSpan} */ sourceSpan) {
+  return templateBase(Identifiers.templateCreate, slot, templateFnRef, decls, vars, tag, constIndex, localRefs, sourceSpan);
+}
+function disableBindings$1() {
+  return call(Identifiers.disableBindings, [], null);
+}
+function enableBindings() {
+  return call(Identifiers.enableBindings, [], null);
+}
+function listener(/** @type {string} */ name, /** @type {Expression} */ handlerFn, eventTargetResolver, /** @type {boolean} */ syntheticHost, /** @type {ParseSourceSpan} */ sourceSpan) {
+  const args = [literal(name), handlerFn];
+  if (eventTargetResolver !== null) {
+    args.push(importExpr(eventTargetResolver));
+  }
+  return call(syntheticHost ? Identifiers.syntheticHostListener : Identifiers.listener, args, sourceSpan);
+}
+/** @returns {Expression} */ function twoWayBindingSet(/** @type {Expression} */ target, /** @type {Expression} */ value) {
+  return importExpr(Identifiers.twoWayBindingSet).callFn([target, value]);
+}
+function twoWayListener(/** @type {string} */ name, /** @type {Expression} */ handlerFn, /** @type {ParseSourceSpan} */ sourceSpan) {
+  return call(Identifiers.twoWayListener, [literal(name), handlerFn], sourceSpan);
+}
+function pipe(/** @type {number} */ slot, /** @type {string} */ name) {
+  return call(Identifiers.pipe, [literal(slot), literal(name)], null);
+}
+function namespaceHTML() {
+  return call(Identifiers.namespaceHTML, [], null);
+}
+function namespaceSVG() {
+  return call(Identifiers.namespaceSVG, [], null);
+}
+function namespaceMath() {
+  return call(Identifiers.namespaceMathML, [], null);
+}
+function advance(delta, sourceSpan) {
+  return call(Identifiers.advance, delta > 1 ? [literal(delta)] : [], sourceSpan);
+}
+/** @returns {Expression} */ function reference(/** @type {number} */ slot) {
+  return importExpr(Identifiers.reference).callFn([literal(slot)]);
+}
+/** @returns {Expression} */ function nextContext(/** @type {number} */ steps) {
+  return importExpr(Identifiers.nextContext).callFn(steps === 1 ? [] : [literal(steps)]);
+}
+/** @returns {Expression} */ function getCurrentView() {
+  return importExpr(Identifiers.getCurrentView).callFn([]);
+}
+/** @returns {Expression} */ function restoreView(/** @type {Expression} */ savedView) {
+  return importExpr(Identifiers.restoreView).callFn([savedView]);
+}
+/** @returns {Expression} */ function resetView(/** @type {Expression} */ returnValue) {
+  return importExpr(Identifiers.resetView).callFn([returnValue]);
+}
+function text(/** @type {number} */ slot, /** @type {string} */ initialValue, /** @type {ParseSourceSpan | null} */ sourceSpan) {
+  const args = [literal(slot, null)];
+  if (initialValue !== '') {
+    args.push(literal(initialValue));
+  }
+  return call(Identifiers.text, args, sourceSpan);
+}
+function defer(/** @type {number} */ selfSlot, /** @type {number} */ primarySlot, /** @type {Expression | null} */ dependencyResolverFn, /** @type {number | null} */ loadingSlot, /** @type {number | null} */ placeholderSlot, /** @type {number | null} */ errorSlot, /** @type {Expression | null} */ loadingConfig, /** @type {Expression | null} */ placeholderConfig, /** @type {boolean} */ enableTimerScheduling, /** @type {ParseSourceSpan | null} */ sourceSpan, /** @type {number | null} */ flags) {
+  const args = [literal(selfSlot), literal(primarySlot), dependencyResolverFn ?? literal(null), literal(loadingSlot), literal(placeholderSlot), literal(errorSlot), loadingConfig ?? literal(null), placeholderConfig ?? literal(null), enableTimerScheduling ? importExpr(Identifiers.deferEnableTimerScheduling) : literal(null), literal(flags)];
+  let expr;
+  while ((expr = args[args.length - 1]) !== null && expr instanceof LiteralExpr && expr.value === null) {
+    args.pop();
+  }
+  return call(Identifiers.defer, args, sourceSpan);
+}
+function enableIncrementalHydrationRuntime(/** @type {ParseSourceSpan | null} */ sourceSpan) {
+  return call(Identifiers.enableIncrementalHydrationRuntime, [], sourceSpan);
+}
+const deferTriggerToR3TriggerInstructionsMap = new Map([[DeferTriggerKind.Idle, {
+  ["none"]: Identifiers.deferOnIdle,
+  ["prefetch"]: Identifiers.deferPrefetchOnIdle,
+  ["hydrate"]: Identifiers.deferHydrateOnIdle
+}], [DeferTriggerKind.Immediate, {
+  ["none"]: Identifiers.deferOnImmediate,
+  ["prefetch"]: Identifiers.deferPrefetchOnImmediate,
+  ["hydrate"]: Identifiers.deferHydrateOnImmediate
+}], [DeferTriggerKind.Timer, {
+  ["none"]: Identifiers.deferOnTimer,
+  ["prefetch"]: Identifiers.deferPrefetchOnTimer,
+  ["hydrate"]: Identifiers.deferHydrateOnTimer
+}], [DeferTriggerKind.Hover, {
+  ["none"]: Identifiers.deferOnHover,
+  ["prefetch"]: Identifiers.deferPrefetchOnHover,
+  ["hydrate"]: Identifiers.deferHydrateOnHover
+}], [DeferTriggerKind.Interaction, {
+  ["none"]: Identifiers.deferOnInteraction,
+  ["prefetch"]: Identifiers.deferPrefetchOnInteraction,
+  ["hydrate"]: Identifiers.deferHydrateOnInteraction
+}], [DeferTriggerKind.Viewport, {
+  ["none"]: Identifiers.deferOnViewport,
+  ["prefetch"]: Identifiers.deferPrefetchOnViewport,
+  ["hydrate"]: Identifiers.deferHydrateOnViewport
+}], [DeferTriggerKind.Never, {
+  ["none"]: Identifiers.deferHydrateNever,
+  ["prefetch"]: Identifiers.deferHydrateNever,
+  ["hydrate"]: Identifiers.deferHydrateNever
+}]]);
+function deferOn(/** @type {number} */ trigger, /** @type {Expression[]} */ args, /** @type {string} */ modifier, /** @type {ParseSourceSpan | null} */ sourceSpan) {
+  const instructionToCall = deferTriggerToR3TriggerInstructionsMap.get(trigger)?.[modifier];
+  if (instructionToCall === undefined) {
+    throw new Error(`Unable to determine instruction for trigger ${trigger}`);
+  }
+  return call(instructionToCall, args, sourceSpan);
+}
+function projectionDef(/** @type {Expression | null} */ def) {
+  return call(Identifiers.projectionDef, def ? [def] : [], null);
+}
+function projection(/** @type {number} */ slot, /** @type {number} */ projectionSlotIndex, /** @type {Expression | null} */ attributes, /** @type {string | null} */ fallbackFnName, /** @type {number | null} */ fallbackDecls, /** @type {number | null} */ fallbackVars, /** @type {ParseSourceSpan} */ sourceSpan) {
+  const args = [literal(slot)];
+  if (projectionSlotIndex !== 0 || attributes !== null || fallbackFnName !== null) {
+    args.push(literal(projectionSlotIndex));
+    if (attributes !== null) {
+      args.push(attributes);
+    }
+    if (fallbackFnName !== null) {
+      if (attributes === null) {
+        args.push(literal(null));
+      }
+      args.push(variable(fallbackFnName), literal(fallbackDecls), literal(fallbackVars));
+    }
+  }
+  return call(Identifiers.projection, args, sourceSpan);
+}
+function i18nStart(/** @type {number} */ slot, /** @type {number} */ constIndex, /** @type {number} */ subTemplateIndex, /** @type {ParseSourceSpan | null} */ sourceSpan) {
+  const args = [literal(slot), literal(constIndex)];
+  if (subTemplateIndex !== null) {
+    args.push(literal(subTemplateIndex));
+  }
+  return call(Identifiers.i18nStart, args, sourceSpan);
+}
+function conditionalCreate(/** @type {number} */ slot, /** @type {Expression} */ templateFnRef, /** @type {number} */ decls, /** @type {number} */ vars, /** @type {string | null} */ tag, /** @type {number | null} */ constIndex, /** @type {number | null} */ localRefs, /** @type {ParseSourceSpan} */ sourceSpan) {
+  const args = [literal(slot), templateFnRef, literal(decls), literal(vars), literal(tag), literal(constIndex)];
+  if (localRefs !== null) {
+    args.push(literal(localRefs));
+    args.push(importExpr(Identifiers.templateRefExtractor));
+  }
+  while (args[args.length - 1].isEquivalent(NULL_EXPR)) {
+    args.pop();
+  }
+  return call(Identifiers.conditionalCreate, args, sourceSpan);
+}
+function conditionalBranchCreate(/** @type {number} */ slot, /** @type {Expression} */ templateFnRef, /** @type {number} */ decls, /** @type {number} */ vars, /** @type {string | null} */ tag, /** @type {number | null} */ constIndex, /** @type {number | null} */ localRefs, /** @type {ParseSourceSpan} */ sourceSpan) {
+  const args = [literal(slot), templateFnRef, literal(decls), literal(vars), literal(tag), literal(constIndex)];
+  if (localRefs !== null) {
+    args.push(literal(localRefs));
+    args.push(importExpr(Identifiers.templateRefExtractor));
+  }
+  while (args[args.length - 1].isEquivalent(NULL_EXPR)) {
+    args.pop();
+  }
+  return call(Identifiers.conditionalBranchCreate, args, sourceSpan);
+}
+function boundaryCreate(slot, sourceSpan) {
+  return call(Identifiers.boundaryCreate, [literal(slot)], sourceSpan);
+}
+function getBoundary(slot) {
+  return importExpr(Identifiers.getBoundary).callFn([slot]);
+}
+function boundary(slot, processedExpr, primarySlot, sourceSpan) {
+  const args = [slot, processedExpr, primarySlot];
+  return call(Identifiers.boundaryUpdate, args, sourceSpan);
+}
+function repeaterCreate(/** @type {number} */ slot, /** @type {string} */ viewFnName, /** @type {number} */ decls, /** @type {number} */ vars, /** @type {string | null} */ tag, /** @type {number | null} */ constIndex, /** @type {Expression} */ trackByFn, /** @type {boolean} */ trackByUsesComponentInstance, /** @type {string | null} */ emptyViewFnName, /** @type {number | null} */ emptyDecls, /** @type {number | null} */ emptyVars, /** @type {string | null} */ emptyTag, /** @type {number | null} */ emptyConstIndex, /** @type {ParseSourceSpan | null} */ sourceSpan) {
+  const args = [literal(slot), variable(viewFnName), literal(decls), literal(vars), literal(tag), literal(constIndex), trackByFn];
+  if (trackByUsesComponentInstance || emptyViewFnName !== null) {
+    args.push(literal(trackByUsesComponentInstance));
+    if (emptyViewFnName !== null) {
+      args.push(variable(emptyViewFnName), literal(emptyDecls), literal(emptyVars));
+      if (emptyTag !== null || emptyConstIndex !== null) {
+        args.push(literal(emptyTag));
+      }
+      if (emptyConstIndex !== null) {
+        args.push(literal(emptyConstIndex));
+      }
+    }
+  }
+  return call(Identifiers.repeaterCreate, args, sourceSpan);
+}
+function repeater(/** @type {Expression} */ collection, /** @type {ParseSourceSpan | null} */ sourceSpan) {
+  return call(Identifiers.repeater, [collection], sourceSpan);
+}
+function deferWhen(/** @type {string} */ modifier, /** @type {Expression} */ expr, /** @type {ParseSourceSpan | null} */ sourceSpan) {
+  if (modifier === "prefetch") {
+    return call(Identifiers.deferPrefetchWhen, [expr], sourceSpan);
+  } else if (modifier === "hydrate") {
+    return call(Identifiers.deferHydrateWhen, [expr], sourceSpan);
+  }
+  return call(Identifiers.deferWhen, [expr], sourceSpan);
+}
+function declareLet(/** @type {number} */ slot, /** @type {ParseSourceSpan} */ sourceSpan) {
+  return call(Identifiers.declareLet, [literal(slot)], sourceSpan);
+}
+/** @returns {Expression} */ function storeLet(/** @type {Expression} */ value, /** @type {ParseSourceSpan} */ sourceSpan) {
+  return importExpr(Identifiers.storeLet).callFn([value], sourceSpan);
+}
+/** @returns {Expression} */ function readContextLet(/** @type {number} */ slot) {
+  return importExpr(Identifiers.readContextLet).callFn([literal(slot)]);
+}
+function i18n(/** @type {number} */ slot, /** @type {number} */ constIndex, /** @type {number} */ subTemplateIndex, /** @type {ParseSourceSpan | null} */ sourceSpan) {
+  const args = [literal(slot), literal(constIndex)];
+  if (subTemplateIndex) {
+    args.push(literal(subTemplateIndex));
+  }
+  return call(Identifiers.i18n, args, sourceSpan);
+}
+function i18nEnd(/** @type {ParseSourceSpan | null} */ endSourceSpan) {
+  return call(Identifiers.i18nEnd, [], endSourceSpan);
+}
+function i18nAttributes(/** @type {number} */ slot, /** @type {number} */ i18nAttributesConfig) {
+  const args = [literal(slot), literal(i18nAttributesConfig)];
+  return call(Identifiers.i18nAttributes, args, null);
+}
+function ariaProperty(/** @type {string} */ name, expression, /** @type {ParseSourceSpan} */ sourceSpan) {
+  return propertyBase(Identifiers.ariaProperty, name, expression, null, sourceSpan);
+}
+function property(/** @type {string} */ name, expression, /** @type {Expression | null} */ sanitizer, /** @type {ParseSourceSpan} */ sourceSpan) {
+  return propertyBase(Identifiers.property, name, expression, sanitizer, sourceSpan);
+}
+function control(/** @type {ParseSourceSpan | null} */ sourceSpan) {
+  return call(Identifiers.control, [], sourceSpan);
+}
+function controlCreate(/** @type {ParseSourceSpan | null} */ sourceSpan) {
+  return call(Identifiers.controlCreate, [], sourceSpan);
+}
+function twoWayProperty(/** @type {string} */ name, /** @type {Expression} */ expression, /** @type {Expression | null} */ sanitizer, /** @type {ParseSourceSpan} */ sourceSpan) {
+  const args = [literal(name), expression];
+  if (sanitizer !== null) {
+    args.push(sanitizer);
+  }
+  return call(Identifiers.twoWayProperty, args, sourceSpan);
+}
+function attribute(/** @type {string} */ name, expression, /** @type {Expression | null} */ sanitizer, /** @type {string | null} */ namespace, /** @type {ParseSourceSpan} */ sourceSpan) {
+  const args = [literal(name)];
+  if (expression instanceof Interpolation) {
+    args.push(interpolationToExpression(expression, sourceSpan));
+  } else {
+    args.push(expression);
+  }
+  if (sanitizer !== null || namespace !== null) {
+    args.push(sanitizer ?? literal(null));
+  }
+  if (namespace !== null) {
+    args.push(literal(namespace));
+  }
+  return call(Identifiers.attribute, args, null);
+}
+function styleProp(/** @type {string} */ name, expression, /** @type {string | null} */ unit, /** @type {ParseSourceSpan} */ sourceSpan) {
+  const args = [literal(name)];
+  if (expression instanceof Interpolation) {
+    args.push(interpolationToExpression(expression, sourceSpan));
+  } else {
+    args.push(expression);
+  }
+  if (unit !== null) {
+    args.push(literal(unit));
+  }
+  return call(Identifiers.styleProp, args, sourceSpan);
+}
+function classProp(/** @type {string} */ name, /** @type {Expression} */ expression, /** @type {ParseSourceSpan} */ sourceSpan) {
+  return call(Identifiers.classProp, [literal(name), expression], sourceSpan);
+}
+function styleMap(expression, /** @type {ParseSourceSpan} */ sourceSpan) {
+  const value = expression instanceof Interpolation ? interpolationToExpression(expression, sourceSpan) : expression;
+  return call(Identifiers.styleMap, [value], sourceSpan);
+}
+function classMap(expression, /** @type {ParseSourceSpan} */ sourceSpan) {
+  const value = expression instanceof Interpolation ? interpolationToExpression(expression, sourceSpan) : expression;
+  return call(Identifiers.classMap, [value], sourceSpan);
+}
+function domElement(/** @type {number} */ slot, /** @type {string} */ tag, /** @type {number | null} */ constIndex, /** @type {number | null} */ localRefIndex, /** @type {ParseSourceSpan} */ sourceSpan) {
+  return elementOrContainerBase(Identifiers.domElement, slot, tag, constIndex, localRefIndex, sourceSpan);
+}
+function domElementStart(/** @type {number} */ slot, /** @type {string} */ tag, /** @type {number | null} */ constIndex, /** @type {number | null} */ localRefIndex, /** @type {ParseSourceSpan} */ sourceSpan) {
+  return elementOrContainerBase(Identifiers.domElementStart, slot, tag, constIndex, localRefIndex, sourceSpan);
+}
+function domElementEnd(/** @type {ParseSourceSpan | null} */ sourceSpan) {
+  return call(Identifiers.domElementEnd, [], sourceSpan);
+}
+function domElementContainerStart(/** @type {number} */ slot, /** @type {number | null} */ constIndex, /** @type {number | null} */ localRefIndex, /** @type {ParseSourceSpan} */ sourceSpan) {
+  return elementOrContainerBase(Identifiers.domElementContainerStart, slot, null, constIndex, localRefIndex, sourceSpan);
+}
+function domElementContainer(/** @type {number} */ slot, /** @type {number | null} */ constIndex, /** @type {number | null} */ localRefIndex, /** @type {ParseSourceSpan} */ sourceSpan) {
+  return elementOrContainerBase(Identifiers.domElementContainer, slot, null, constIndex, localRefIndex, sourceSpan);
+}
+function domElementContainerEnd() {
+  return call(Identifiers.domElementContainerEnd, [], null);
+}
+function domListener(/** @type {string} */ name, /** @type {Expression} */ handlerFn, eventTargetResolver, /** @type {ParseSourceSpan} */ sourceSpan) {
+  const args = [literal(name), handlerFn];
+  if (eventTargetResolver !== null) {
+    args.push(importExpr(eventTargetResolver));
+  }
+  return call(Identifiers.domListener, args, sourceSpan);
+}
+function domTemplate(/** @type {number} */ slot, /** @type {Expression} */ templateFnRef, /** @type {number} */ decls, /** @type {number} */ vars, /** @type {string | null} */ tag, /** @type {number | null} */ constIndex, /** @type {number | null} */ localRefs, /** @type {ParseSourceSpan} */ sourceSpan) {
+  return templateBase(Identifiers.domTemplate, slot, templateFnRef, decls, vars, tag, constIndex, localRefs, sourceSpan);
+}
+const PIPE_BINDINGS = [Identifiers.pipeBind1, Identifiers.pipeBind2, Identifiers.pipeBind3, Identifiers.pipeBind4];
+/** @returns {Expression} */ function pipeBind(/** @type {number} */ slot, /** @type {number} */ varOffset, /** @type {Expression[]} */ args) {
+  if (args.length < 1 || args.length > PIPE_BINDINGS.length) {
+    throw new Error(`pipeBind() argument count out of bounds`);
+  }
+  const instruction = PIPE_BINDINGS[args.length - 1];
+  return importExpr(instruction).callFn([literal(slot), literal(varOffset), ...args]);
+}
+/** @returns {Expression} */ function pipeBindV(/** @type {number} */ slot, /** @type {number} */ varOffset, /** @type {Expression} */ args) {
+  return importExpr(Identifiers.pipeBindV).callFn([literal(slot), literal(varOffset), args]);
+}
+function textInterpolate(/** @type {string[]} */ strings, /** @type {Expression[]} */ expressions, /** @type {ParseSourceSpan} */ sourceSpan) {
+  const interpolationArgs = collateInterpolationArgs(strings, expressions);
+  return callVariadicInstruction(TEXT_INTERPOLATE_CONFIG, [], interpolationArgs, sourceSpan);
+}
+function i18nExp(/** @type {Expression} */ expr, /** @type {ParseSourceSpan | null} */ sourceSpan) {
+  return call(Identifiers.i18nExp, [expr], sourceSpan);
+}
+function i18nApply(/** @type {number} */ slot, /** @type {ParseSourceSpan | null} */ sourceSpan) {
+  return call(Identifiers.i18nApply, [literal(slot)], sourceSpan);
+}
+function domProperty(/** @type {string} */ name, expression, /** @type {Expression | null} */ sanitizer, /** @type {ParseSourceSpan} */ sourceSpan) {
+  return propertyBase(Identifiers.domProperty, name, expression, sanitizer, sourceSpan);
+}
+function animation(/** @type {string} */ animationKind, /** @type {Expression} */ handlerFn, /** @type {Expression | null} */ sanitizer, /** @type {ParseSourceSpan} */ sourceSpan) {
+  const args = [handlerFn];
+  if (sanitizer !== null) {
+    args.push(sanitizer);
+  }
+  const identifier = animationKind === "enter" ? Identifiers.animationEnter : Identifiers.animationLeave;
+  return call(identifier, args, sourceSpan);
+}
+function animationString(/** @type {string} */ animationKind, expression, /** @type {Expression | null} */ sanitizer, /** @type {ParseSourceSpan} */ sourceSpan) {
+  const value = expression instanceof Interpolation ? interpolationToExpression(expression, sourceSpan) : expression;
+  const args = [value];
+  if (sanitizer !== null) {
+    args.push(sanitizer);
+  }
+  const identifier = animationKind === "enter" ? Identifiers.animationEnter : Identifiers.animationLeave;
+  return call(identifier, args, sourceSpan);
+}
+function animationListener(/** @type {string} */ animationKind, /** @type {Expression} */ handlerFn, eventTargetResolver, /** @type {ParseSourceSpan} */ sourceSpan) {
+  const args = [handlerFn];
+  const identifier = animationKind === "enter" ? Identifiers.animationEnterListener : Identifiers.animationLeaveListener;
+  return call(identifier, args, sourceSpan);
+}
+function syntheticHostProperty(/** @type {string} */ name, /** @type {Expression} */ expression, /** @type {ParseSourceSpan | null} */ sourceSpan) {
+  return call(Identifiers.syntheticHostProperty, [literal(name), expression], sourceSpan);
+}
+/** @returns {Expression} */ function pureFunction(/** @type {number} */ varOffset, /** @type {Expression} */ fn, /** @type {Expression[]} */ args) {
+  return callVariadicInstructionExpr(PURE_FUNCTION_CONFIG, [literal(varOffset), fn], args, null);
+}
+function attachSourceLocation(/** @type {string} */ templatePath, /** @type {LiteralArrayExpr} */ locations) {
+  return call(Identifiers.attachSourceLocations, [literal(templatePath), locations], null);
+}
+/** @returns {Expression} */ function arrowFunction(/** @type {number} */ slotOffset, /** @type {Expression} */ factory, /** @type {Expression} */ contextRef) {
+  return importExpr(Identifiers.arrowFunction).callFn([literal(slotOffset), factory, contextRef]);
+}
+/** @returns {Expression[]} */ function collateInterpolationArgs(/** @type {string[]} */ strings, /** @type {Expression[]} */ expressions) {
+  if (strings.length < 1 || expressions.length !== strings.length - 1) {
+    throw new Error(`AssertionError: expected specific shape of args for strings/expressions in interpolation`);
+  }
+  const interpolationArgs = [];
+  if (expressions.length === 1 && strings[0] === '' && strings[1] === '') {
+    interpolationArgs.push(expressions[0]);
+  } else {
+    let idx;
+    for (idx = 0; idx < expressions.length; idx++) {
+      interpolationArgs.push(literal(strings[idx]), expressions[idx]);
+    }
+    interpolationArgs.push(literal(strings[idx]));
+  }
+  return interpolationArgs;
+}
+/** @returns {Expression} */ function interpolationToExpression(/** @type {Interpolation} */ interpolation, /** @type {ParseSourceSpan} */ sourceSpan) {
+  const interpolationArgs = collateInterpolationArgs(interpolation.strings, interpolation.expressions);
+  return callVariadicInstructionExpr(VALUE_INTERPOLATE_CONFIG, [], interpolationArgs, sourceSpan);
+}
+function call(instruction, /** @type {Expression[]} */ args, /** @type {ParseSourceSpan | null} */ sourceSpan) {
+  const expr = importExpr(instruction).callFn(args, sourceSpan);
+  return createStatementOp(new ExpressionStatement(expr, sourceSpan));
+}
+function conditional(/** @type {Expression} */ condition, /** @type {Expression | null} */ contextValue, /** @type {ParseSourceSpan | null} */ sourceSpan) {
+  const args = [condition];
+  if (contextValue !== null) {
+    args.push(contextValue);
+  }
+  return call(Identifiers.conditional, args, sourceSpan);
+}
+const TEXT_INTERPOLATE_CONFIG = {
+  constant: [Identifiers.textInterpolate, Identifiers.textInterpolate1, Identifiers.textInterpolate2, Identifiers.textInterpolate3, Identifiers.textInterpolate4, Identifiers.textInterpolate5, Identifiers.textInterpolate6, Identifiers.textInterpolate7, Identifiers.textInterpolate8],
+  variable: Identifiers.textInterpolateV,
+  mapping: n => {
+    if (n % 2 === 0) {
+      throw new Error(`Expected odd number of arguments`);
+    }
+    return (n - 1) / 2;
+  }
+};
+const VALUE_INTERPOLATE_CONFIG = {
+  constant: [Identifiers.interpolate, Identifiers.interpolate1, Identifiers.interpolate2, Identifiers.interpolate3, Identifiers.interpolate4, Identifiers.interpolate5, Identifiers.interpolate6, Identifiers.interpolate7, Identifiers.interpolate8],
+  variable: Identifiers.interpolateV,
+  mapping: n => {
+    if (n % 2 === 0) {
+      throw new Error(`Expected odd number of arguments`);
+    }
+    return (n - 1) / 2;
+  }
+};
+const PURE_FUNCTION_CONFIG = {
+  constant: [Identifiers.pureFunction0, Identifiers.pureFunction1, Identifiers.pureFunction2, Identifiers.pureFunction3, Identifiers.pureFunction4, Identifiers.pureFunction5, Identifiers.pureFunction6, Identifiers.pureFunction7, Identifiers.pureFunction8],
+  variable: Identifiers.pureFunctionV,
+  mapping: n => n
+};
+/** @returns {Expression} */ function callVariadicInstructionExpr(config, /** @type {Expression[]} */ baseArgs, /** @type {Expression[]} */ interpolationArgs, /** @type {ParseSourceSpan | null} */ sourceSpan) {
+  const n = config.mapping(interpolationArgs.length);
+  const lastInterpolationArg = interpolationArgs.at(-1);
+  if (interpolationArgs.length > 1 && lastInterpolationArg instanceof LiteralExpr && lastInterpolationArg.value === '') {
+    interpolationArgs.pop();
+  }
+  if (n < config.constant.length) {
+    return importExpr(config.constant[n]).callFn([...baseArgs, ...interpolationArgs], sourceSpan);
+  } else if (config.variable !== null) {
+    return importExpr(config.variable).callFn([...baseArgs, literalArr(interpolationArgs)], sourceSpan);
+  } else {
+    throw new Error(`AssertionError: unable to call variadic function`);
+  }
+}
+function callVariadicInstruction(config, /** @type {Expression[]} */ baseArgs, /** @type {Expression[]} */ interpolationArgs, /** @type {ParseSourceSpan | null} */ sourceSpan) {
+  return createStatementOp(callVariadicInstructionExpr(config, baseArgs, interpolationArgs, sourceSpan).toStmt());
+}
+
 function generateVariables(/** @type {ComponentCompilationJob} */ job) {
   recursivelyProcessView(job.root, null);
 }
@@ -11134,6 +12030,7 @@ function recursivelyProcessView(/** @type {ViewCompilationUnit} */ view, parentS
     switch (op.kind) {
       case OpKind.ConditionalCreate:
       case OpKind.ConditionalBranchCreate:
+      case OpKind.BoundaryErrorCreate:
       case OpKind.Template:
         recursivelyProcessView(view.job.views.get(op.xref), scope);
         break;
@@ -11159,6 +12056,7 @@ function recursivelyProcessView(/** @type {ViewCompilationUnit} */ view, parentS
         break;
     }
   }
+  view.create.prepend(generateVariablesInScopeForView(view, scope, false));
   view.update.prepend(generateVariablesInScopeForView(view, scope, false));
   for (const expr of view.functions) {
     expr.ops.prepend(generateVariablesInScopeForView(view, getScopeForView(view, parentScope), true));
@@ -11176,6 +12074,7 @@ function getScopeForView(/** @type {ViewCompilationUnit} */ view, parent) {
     aliases: view.aliases,
     references: [],
     letDeclarations: [],
+    boundaryVariables: new Map(),
     parent
   };
   for (const identifier of view.contextVariables.keys()) {
@@ -11210,6 +12109,16 @@ function getScopeForView(/** @type {ViewCompilationUnit} */ view, parent) {
           });
         }
         break;
+      case OpKind.BoundaryCreate:
+        scope.boundaryVariables.set(op.xref, {
+          variable: {
+            kind: SemanticVariableKind.BoundaryState,
+            name: null,
+            boundaryXref: op.xref
+          },
+          handle: op.handle
+        });
+        break;
       case OpKind.DeclareLet:
         scope.letDeclarations.push({
           targetId: op.xref,
@@ -11221,6 +12130,20 @@ function getScopeForView(/** @type {ViewCompilationUnit} */ view, parent) {
             local: false
           }
         });
+        break;
+      case OpKind.BoundaryErrorCreate:
+        const boundaryStateExpr = new BoundaryStateExpr(op.boundaryXref);
+        const errorProp = new ReadPropExpr(boundaryStateExpr, 'error');
+        for (const variable of op.contextVariables) {
+          if (variable.value === '$error') {
+            view.aliases.add({
+              kind: SemanticVariableKind.Alias,
+              name: null,
+              identifier: variable.name,
+              expression: errorProp
+            });
+          }
+        }
         break;
     }
   }
@@ -11234,11 +12157,24 @@ function getScopeForView(/** @type {ViewCompilationUnit} */ view, parent) {
   const scopeView = view.job.views.get(scope.view);
   for (const [name, value] of scopeView.contextVariables) {
     const context = new ContextExpr(scope.view);
-    const variable = value === CTX_REF ? context : new ReadPropExpr(context, value);
+    let variable;
+    if (value === CTX_REF) {
+      variable = context;
+    } else if (typeof value === 'number') {
+      variable = new ReadKeyExpr(context, literal(value));
+    } else {
+      variable = new ReadPropExpr(context, value);
+    }
     newOps.push(createVariableOp(view.job.allocateXrefId(), scope.contextVariables.get(name), variable, VariableFlags.None));
   }
   for (const alias of scopeView.aliases) {
     newOps.push(createVariableOp(view.job.allocateXrefId(), alias, alias.expression.clone(), VariableFlags.AlwaysInline));
+  }
+  for (const [xref, {
+    variable,
+    handle
+  }] of scope.boundaryVariables) {
+    newOps.push(createVariableOp(view.job.allocateXrefId(), variable, getBoundary(new SlotLiteralExpr(handle)), VariableFlags.None));
   }
   for (const ref of scope.references) {
     newOps.push(createVariableOp(view.job.allocateXrefId(), ref.variable, new ReferenceExpr(ref.targetId, ref.targetSlot, ref.offset), VariableFlags.None));
@@ -11285,6 +12221,8 @@ function parseHostStyleProperties(/** @type {CompilationJob} */ job) {
       op.name = op.name.substring(STYLE_DOT.length);
       if (!isCssCustomProperty(op.name)) {
         op.name = hyphenate$1(op.name);
+      } else {
+        op.name = namespaceCssVariable(op.name);
       }
       const {
         property,
@@ -11297,10 +12235,10 @@ function parseHostStyleProperties(/** @type {CompilationJob} */ job) {
       op.name = 'style';
     } else if (op.name.startsWith(CLASS_DOT)) {
       op.bindingKind = BindingKind.ClassName;
-      op.name = parseProperty(op.name.substring(CLASS_DOT.length)).property;
+      op.name = stripImportant$1(op.name.substring(CLASS_DOT.length));
     } else if (op.name.startsWith(CLASS_BANG)) {
       op.bindingKind = BindingKind.ClassName;
-      op.name = parseProperty(op.name.substring(CLASS_BANG.length)).property;
+      op.name = stripImportant$1(op.name.substring(CLASS_BANG.length));
     }
   }
 }
@@ -11312,11 +12250,15 @@ function hyphenate$1(value) {
     return v.charAt(0) + '-' + v.charAt(1);
   }).toLowerCase();
 }
-function parseProperty(/** @type {string} */ name) {
-  const overrideIndex = name.indexOf('!important');
+function stripImportant$1(name) {
+  const overrideIndex = name.indexOf(BANG_IMPORTANT);
   if (overrideIndex !== -1) {
     name = overrideIndex > 0 ? name.substring(0, overrideIndex) : '';
   }
+  return name;
+}
+function parseProperty(/** @type {string} */ name) {
+  name = stripImportant$1(name);
   let suffix = null;
   let property = name;
   const unitIndex = name.lastIndexOf('.');
@@ -11647,2135 +12589,9 @@ class RecursiveVisitor {
   }
 }
 
-const NAMED_ENTITIES = {
-  'AElig': '\u00C6',
-  'AMP': '\u0026',
-  'amp': '\u0026',
-  'Aacute': '\u00C1',
-  'Abreve': '\u0102',
-  'Acirc': '\u00C2',
-  'Acy': '\u0410',
-  'Afr': '\uD835\uDD04',
-  'Agrave': '\u00C0',
-  'Alpha': '\u0391',
-  'Amacr': '\u0100',
-  'And': '\u2A53',
-  'Aogon': '\u0104',
-  'Aopf': '\uD835\uDD38',
-  'ApplyFunction': '\u2061',
-  'af': '\u2061',
-  'Aring': '\u00C5',
-  'angst': '\u00C5',
-  'Ascr': '\uD835\uDC9C',
-  'Assign': '\u2254',
-  'colone': '\u2254',
-  'coloneq': '\u2254',
-  'Atilde': '\u00C3',
-  'Auml': '\u00C4',
-  'Backslash': '\u2216',
-  'setminus': '\u2216',
-  'setmn': '\u2216',
-  'smallsetminus': '\u2216',
-  'ssetmn': '\u2216',
-  'Barv': '\u2AE7',
-  'Barwed': '\u2306',
-  'doublebarwedge': '\u2306',
-  'Bcy': '\u0411',
-  'Because': '\u2235',
-  'becaus': '\u2235',
-  'because': '\u2235',
-  'Bernoullis': '\u212C',
-  'Bscr': '\u212C',
-  'bernou': '\u212C',
-  'Beta': '\u0392',
-  'Bfr': '\uD835\uDD05',
-  'Bopf': '\uD835\uDD39',
-  'Breve': '\u02D8',
-  'breve': '\u02D8',
-  'Bumpeq': '\u224E',
-  'HumpDownHump': '\u224E',
-  'bump': '\u224E',
-  'CHcy': '\u0427',
-  'COPY': '\u00A9',
-  'copy': '\u00A9',
-  'Cacute': '\u0106',
-  'Cap': '\u22D2',
-  'CapitalDifferentialD': '\u2145',
-  'DD': '\u2145',
-  'Cayleys': '\u212D',
-  'Cfr': '\u212D',
-  'Ccaron': '\u010C',
-  'Ccedil': '\u00C7',
-  'Ccirc': '\u0108',
-  'Cconint': '\u2230',
-  'Cdot': '\u010A',
-  'Cedilla': '\u00B8',
-  'cedil': '\u00B8',
-  'CenterDot': '\u00B7',
-  'centerdot': '\u00B7',
-  'middot': '\u00B7',
-  'Chi': '\u03A7',
-  'CircleDot': '\u2299',
-  'odot': '\u2299',
-  'CircleMinus': '\u2296',
-  'ominus': '\u2296',
-  'CirclePlus': '\u2295',
-  'oplus': '\u2295',
-  'CircleTimes': '\u2297',
-  'otimes': '\u2297',
-  'ClockwiseContourIntegral': '\u2232',
-  'cwconint': '\u2232',
-  'CloseCurlyDoubleQuote': '\u201D',
-  'rdquo': '\u201D',
-  'rdquor': '\u201D',
-  'CloseCurlyQuote': '\u2019',
-  'rsquo': '\u2019',
-  'rsquor': '\u2019',
-  'Colon': '\u2237',
-  'Proportion': '\u2237',
-  'Colone': '\u2A74',
-  'Congruent': '\u2261',
-  'equiv': '\u2261',
-  'Conint': '\u222F',
-  'DoubleContourIntegral': '\u222F',
-  'ContourIntegral': '\u222E',
-  'conint': '\u222E',
-  'oint': '\u222E',
-  'Copf': '\u2102',
-  'complexes': '\u2102',
-  'Coproduct': '\u2210',
-  'coprod': '\u2210',
-  'CounterClockwiseContourIntegral': '\u2233',
-  'awconint': '\u2233',
-  'Cross': '\u2A2F',
-  'Cscr': '\uD835\uDC9E',
-  'Cup': '\u22D3',
-  'CupCap': '\u224D',
-  'asympeq': '\u224D',
-  'DDotrahd': '\u2911',
-  'DJcy': '\u0402',
-  'DScy': '\u0405',
-  'DZcy': '\u040F',
-  'Dagger': '\u2021',
-  'ddagger': '\u2021',
-  'Darr': '\u21A1',
-  'Dashv': '\u2AE4',
-  'DoubleLeftTee': '\u2AE4',
-  'Dcaron': '\u010E',
-  'Dcy': '\u0414',
-  'Del': '\u2207',
-  'nabla': '\u2207',
-  'Delta': '\u0394',
-  'Dfr': '\uD835\uDD07',
-  'DiacriticalAcute': '\u00B4',
-  'acute': '\u00B4',
-  'DiacriticalDot': '\u02D9',
-  'dot': '\u02D9',
-  'DiacriticalDoubleAcute': '\u02DD',
-  'dblac': '\u02DD',
-  'DiacriticalGrave': '\u0060',
-  'grave': '\u0060',
-  'DiacriticalTilde': '\u02DC',
-  'tilde': '\u02DC',
-  'Diamond': '\u22C4',
-  'diam': '\u22C4',
-  'diamond': '\u22C4',
-  'DifferentialD': '\u2146',
-  'dd': '\u2146',
-  'Dopf': '\uD835\uDD3B',
-  'Dot': '\u00A8',
-  'DoubleDot': '\u00A8',
-  'die': '\u00A8',
-  'uml': '\u00A8',
-  'DotDot': '\u20DC',
-  'DotEqual': '\u2250',
-  'doteq': '\u2250',
-  'esdot': '\u2250',
-  'DoubleDownArrow': '\u21D3',
-  'Downarrow': '\u21D3',
-  'dArr': '\u21D3',
-  'DoubleLeftArrow': '\u21D0',
-  'Leftarrow': '\u21D0',
-  'lArr': '\u21D0',
-  'DoubleLeftRightArrow': '\u21D4',
-  'Leftrightarrow': '\u21D4',
-  'hArr': '\u21D4',
-  'iff': '\u21D4',
-  'DoubleLongLeftArrow': '\u27F8',
-  'Longleftarrow': '\u27F8',
-  'xlArr': '\u27F8',
-  'DoubleLongLeftRightArrow': '\u27FA',
-  'Longleftrightarrow': '\u27FA',
-  'xhArr': '\u27FA',
-  'DoubleLongRightArrow': '\u27F9',
-  'Longrightarrow': '\u27F9',
-  'xrArr': '\u27F9',
-  'DoubleRightArrow': '\u21D2',
-  'Implies': '\u21D2',
-  'Rightarrow': '\u21D2',
-  'rArr': '\u21D2',
-  'DoubleRightTee': '\u22A8',
-  'vDash': '\u22A8',
-  'DoubleUpArrow': '\u21D1',
-  'Uparrow': '\u21D1',
-  'uArr': '\u21D1',
-  'DoubleUpDownArrow': '\u21D5',
-  'Updownarrow': '\u21D5',
-  'vArr': '\u21D5',
-  'DoubleVerticalBar': '\u2225',
-  'par': '\u2225',
-  'parallel': '\u2225',
-  'shortparallel': '\u2225',
-  'spar': '\u2225',
-  'DownArrow': '\u2193',
-  'ShortDownArrow': '\u2193',
-  'darr': '\u2193',
-  'downarrow': '\u2193',
-  'DownArrowBar': '\u2913',
-  'DownArrowUpArrow': '\u21F5',
-  'duarr': '\u21F5',
-  'DownBreve': '\u0311',
-  'DownLeftRightVector': '\u2950',
-  'DownLeftTeeVector': '\u295E',
-  'DownLeftVector': '\u21BD',
-  'leftharpoondown': '\u21BD',
-  'lhard': '\u21BD',
-  'DownLeftVectorBar': '\u2956',
-  'DownRightTeeVector': '\u295F',
-  'DownRightVector': '\u21C1',
-  'rhard': '\u21C1',
-  'rightharpoondown': '\u21C1',
-  'DownRightVectorBar': '\u2957',
-  'DownTee': '\u22A4',
-  'top': '\u22A4',
-  'DownTeeArrow': '\u21A7',
-  'mapstodown': '\u21A7',
-  'Dscr': '\uD835\uDC9F',
-  'Dstrok': '\u0110',
-  'ENG': '\u014A',
-  'ETH': '\u00D0',
-  'Eacute': '\u00C9',
-  'Ecaron': '\u011A',
-  'Ecirc': '\u00CA',
-  'Ecy': '\u042D',
-  'Edot': '\u0116',
-  'Efr': '\uD835\uDD08',
-  'Egrave': '\u00C8',
-  'Element': '\u2208',
-  'in': '\u2208',
-  'isin': '\u2208',
-  'isinv': '\u2208',
-  'Emacr': '\u0112',
-  'EmptySmallSquare': '\u25FB',
-  'EmptyVerySmallSquare': '\u25AB',
-  'Eogon': '\u0118',
-  'Eopf': '\uD835\uDD3C',
-  'Epsilon': '\u0395',
-  'Equal': '\u2A75',
-  'EqualTilde': '\u2242',
-  'eqsim': '\u2242',
-  'esim': '\u2242',
-  'Equilibrium': '\u21CC',
-  'rightleftharpoons': '\u21CC',
-  'rlhar': '\u21CC',
-  'Escr': '\u2130',
-  'expectation': '\u2130',
-  'Esim': '\u2A73',
-  'Eta': '\u0397',
-  'Euml': '\u00CB',
-  'Exists': '\u2203',
-  'exist': '\u2203',
-  'ExponentialE': '\u2147',
-  'ee': '\u2147',
-  'exponentiale': '\u2147',
-  'Fcy': '\u0424',
-  'Ffr': '\uD835\uDD09',
-  'FilledSmallSquare': '\u25FC',
-  'FilledVerySmallSquare': '\u25AA',
-  'blacksquare': '\u25AA',
-  'squarf': '\u25AA',
-  'squf': '\u25AA',
-  'Fopf': '\uD835\uDD3D',
-  'ForAll': '\u2200',
-  'forall': '\u2200',
-  'Fouriertrf': '\u2131',
-  'Fscr': '\u2131',
-  'GJcy': '\u0403',
-  'GT': '\u003E',
-  'gt': '\u003E',
-  'Gamma': '\u0393',
-  'Gammad': '\u03DC',
-  'Gbreve': '\u011E',
-  'Gcedil': '\u0122',
-  'Gcirc': '\u011C',
-  'Gcy': '\u0413',
-  'Gdot': '\u0120',
-  'Gfr': '\uD835\uDD0A',
-  'Gg': '\u22D9',
-  'ggg': '\u22D9',
-  'Gopf': '\uD835\uDD3E',
-  'GreaterEqual': '\u2265',
-  'ge': '\u2265',
-  'geq': '\u2265',
-  'GreaterEqualLess': '\u22DB',
-  'gel': '\u22DB',
-  'gtreqless': '\u22DB',
-  'GreaterFullEqual': '\u2267',
-  'gE': '\u2267',
-  'geqq': '\u2267',
-  'GreaterGreater': '\u2AA2',
-  'GreaterLess': '\u2277',
-  'gl': '\u2277',
-  'gtrless': '\u2277',
-  'GreaterSlantEqual': '\u2A7E',
-  'geqslant': '\u2A7E',
-  'ges': '\u2A7E',
-  'GreaterTilde': '\u2273',
-  'gsim': '\u2273',
-  'gtrsim': '\u2273',
-  'Gscr': '\uD835\uDCA2',
-  'Gt': '\u226B',
-  'NestedGreaterGreater': '\u226B',
-  'gg': '\u226B',
-  'HARDcy': '\u042A',
-  'Hacek': '\u02C7',
-  'caron': '\u02C7',
-  'Hat': '\u005E',
-  'Hcirc': '\u0124',
-  'Hfr': '\u210C',
-  'Poincareplane': '\u210C',
-  'HilbertSpace': '\u210B',
-  'Hscr': '\u210B',
-  'hamilt': '\u210B',
-  'Hopf': '\u210D',
-  'quaternions': '\u210D',
-  'HorizontalLine': '\u2500',
-  'boxh': '\u2500',
-  'Hstrok': '\u0126',
-  'HumpEqual': '\u224F',
-  'bumpe': '\u224F',
-  'bumpeq': '\u224F',
-  'IEcy': '\u0415',
-  'IJlig': '\u0132',
-  'IOcy': '\u0401',
-  'Iacute': '\u00CD',
-  'Icirc': '\u00CE',
-  'Icy': '\u0418',
-  'Idot': '\u0130',
-  'Ifr': '\u2111',
-  'Im': '\u2111',
-  'image': '\u2111',
-  'imagpart': '\u2111',
-  'Igrave': '\u00CC',
-  'Imacr': '\u012A',
-  'ImaginaryI': '\u2148',
-  'ii': '\u2148',
-  'Int': '\u222C',
-  'Integral': '\u222B',
-  'int': '\u222B',
-  'Intersection': '\u22C2',
-  'bigcap': '\u22C2',
-  'xcap': '\u22C2',
-  'InvisibleComma': '\u2063',
-  'ic': '\u2063',
-  'InvisibleTimes': '\u2062',
-  'it': '\u2062',
-  'Iogon': '\u012E',
-  'Iopf': '\uD835\uDD40',
-  'Iota': '\u0399',
-  'Iscr': '\u2110',
-  'imagline': '\u2110',
-  'Itilde': '\u0128',
-  'Iukcy': '\u0406',
-  'Iuml': '\u00CF',
-  'Jcirc': '\u0134',
-  'Jcy': '\u0419',
-  'Jfr': '\uD835\uDD0D',
-  'Jopf': '\uD835\uDD41',
-  'Jscr': '\uD835\uDCA5',
-  'Jsercy': '\u0408',
-  'Jukcy': '\u0404',
-  'KHcy': '\u0425',
-  'KJcy': '\u040C',
-  'Kappa': '\u039A',
-  'Kcedil': '\u0136',
-  'Kcy': '\u041A',
-  'Kfr': '\uD835\uDD0E',
-  'Kopf': '\uD835\uDD42',
-  'Kscr': '\uD835\uDCA6',
-  'LJcy': '\u0409',
-  'LT': '\u003C',
-  'lt': '\u003C',
-  'Lacute': '\u0139',
-  'Lambda': '\u039B',
-  'Lang': '\u27EA',
-  'Laplacetrf': '\u2112',
-  'Lscr': '\u2112',
-  'lagran': '\u2112',
-  'Larr': '\u219E',
-  'twoheadleftarrow': '\u219E',
-  'Lcaron': '\u013D',
-  'Lcedil': '\u013B',
-  'Lcy': '\u041B',
-  'LeftAngleBracket': '\u27E8',
-  'lang': '\u27E8',
-  'langle': '\u27E8',
-  'LeftArrow': '\u2190',
-  'ShortLeftArrow': '\u2190',
-  'larr': '\u2190',
-  'leftarrow': '\u2190',
-  'slarr': '\u2190',
-  'LeftArrowBar': '\u21E4',
-  'larrb': '\u21E4',
-  'LeftArrowRightArrow': '\u21C6',
-  'leftrightarrows': '\u21C6',
-  'lrarr': '\u21C6',
-  'LeftCeiling': '\u2308',
-  'lceil': '\u2308',
-  'LeftDoubleBracket': '\u27E6',
-  'lobrk': '\u27E6',
-  'LeftDownTeeVector': '\u2961',
-  'LeftDownVector': '\u21C3',
-  'dharl': '\u21C3',
-  'downharpoonleft': '\u21C3',
-  'LeftDownVectorBar': '\u2959',
-  'LeftFloor': '\u230A',
-  'lfloor': '\u230A',
-  'LeftRightArrow': '\u2194',
-  'harr': '\u2194',
-  'leftrightarrow': '\u2194',
-  'LeftRightVector': '\u294E',
-  'LeftTee': '\u22A3',
-  'dashv': '\u22A3',
-  'LeftTeeArrow': '\u21A4',
-  'mapstoleft': '\u21A4',
-  'LeftTeeVector': '\u295A',
-  'LeftTriangle': '\u22B2',
-  'vartriangleleft': '\u22B2',
-  'vltri': '\u22B2',
-  'LeftTriangleBar': '\u29CF',
-  'LeftTriangleEqual': '\u22B4',
-  'ltrie': '\u22B4',
-  'trianglelefteq': '\u22B4',
-  'LeftUpDownVector': '\u2951',
-  'LeftUpTeeVector': '\u2960',
-  'LeftUpVector': '\u21BF',
-  'uharl': '\u21BF',
-  'upharpoonleft': '\u21BF',
-  'LeftUpVectorBar': '\u2958',
-  'LeftVector': '\u21BC',
-  'leftharpoonup': '\u21BC',
-  'lharu': '\u21BC',
-  'LeftVectorBar': '\u2952',
-  'LessEqualGreater': '\u22DA',
-  'leg': '\u22DA',
-  'lesseqgtr': '\u22DA',
-  'LessFullEqual': '\u2266',
-  'lE': '\u2266',
-  'leqq': '\u2266',
-  'LessGreater': '\u2276',
-  'lessgtr': '\u2276',
-  'lg': '\u2276',
-  'LessLess': '\u2AA1',
-  'LessSlantEqual': '\u2A7D',
-  'leqslant': '\u2A7D',
-  'les': '\u2A7D',
-  'LessTilde': '\u2272',
-  'lesssim': '\u2272',
-  'lsim': '\u2272',
-  'Lfr': '\uD835\uDD0F',
-  'Ll': '\u22D8',
-  'Lleftarrow': '\u21DA',
-  'lAarr': '\u21DA',
-  'Lmidot': '\u013F',
-  'LongLeftArrow': '\u27F5',
-  'longleftarrow': '\u27F5',
-  'xlarr': '\u27F5',
-  'LongLeftRightArrow': '\u27F7',
-  'longleftrightarrow': '\u27F7',
-  'xharr': '\u27F7',
-  'LongRightArrow': '\u27F6',
-  'longrightarrow': '\u27F6',
-  'xrarr': '\u27F6',
-  'Lopf': '\uD835\uDD43',
-  'LowerLeftArrow': '\u2199',
-  'swarr': '\u2199',
-  'swarrow': '\u2199',
-  'LowerRightArrow': '\u2198',
-  'searr': '\u2198',
-  'searrow': '\u2198',
-  'Lsh': '\u21B0',
-  'lsh': '\u21B0',
-  'Lstrok': '\u0141',
-  'Lt': '\u226A',
-  'NestedLessLess': '\u226A',
-  'll': '\u226A',
-  'Map': '\u2905',
-  'Mcy': '\u041C',
-  'MediumSpace': '\u205F',
-  'Mellintrf': '\u2133',
-  'Mscr': '\u2133',
-  'phmmat': '\u2133',
-  'Mfr': '\uD835\uDD10',
-  'MinusPlus': '\u2213',
-  'mnplus': '\u2213',
-  'mp': '\u2213',
-  'Mopf': '\uD835\uDD44',
-  'Mu': '\u039C',
-  'NJcy': '\u040A',
-  'Nacute': '\u0143',
-  'Ncaron': '\u0147',
-  'Ncedil': '\u0145',
-  'Ncy': '\u041D',
-  'NegativeMediumSpace': '\u200B',
-  'NegativeThickSpace': '\u200B',
-  'NegativeThinSpace': '\u200B',
-  'NegativeVeryThinSpace': '\u200B',
-  'ZeroWidthSpace': '\u200B',
-  'NewLine': '\u000A',
-  'Nfr': '\uD835\uDD11',
-  'NoBreak': '\u2060',
-  'NonBreakingSpace': '\u00A0',
-  'nbsp': '\u00A0',
-  'Nopf': '\u2115',
-  'naturals': '\u2115',
-  'Not': '\u2AEC',
-  'NotCongruent': '\u2262',
-  'nequiv': '\u2262',
-  'NotCupCap': '\u226D',
-  'NotDoubleVerticalBar': '\u2226',
-  'npar': '\u2226',
-  'nparallel': '\u2226',
-  'nshortparallel': '\u2226',
-  'nspar': '\u2226',
-  'NotElement': '\u2209',
-  'notin': '\u2209',
-  'notinva': '\u2209',
-  'NotEqual': '\u2260',
-  'ne': '\u2260',
-  'NotEqualTilde': '\u2242\u0338',
-  'nesim': '\u2242\u0338',
-  'NotExists': '\u2204',
-  'nexist': '\u2204',
-  'nexists': '\u2204',
-  'NotGreater': '\u226F',
-  'ngt': '\u226F',
-  'ngtr': '\u226F',
-  'NotGreaterEqual': '\u2271',
-  'nge': '\u2271',
-  'ngeq': '\u2271',
-  'NotGreaterFullEqual': '\u2267\u0338',
-  'ngE': '\u2267\u0338',
-  'ngeqq': '\u2267\u0338',
-  'NotGreaterGreater': '\u226B\u0338',
-  'nGtv': '\u226B\u0338',
-  'NotGreaterLess': '\u2279',
-  'ntgl': '\u2279',
-  'NotGreaterSlantEqual': '\u2A7E\u0338',
-  'ngeqslant': '\u2A7E\u0338',
-  'nges': '\u2A7E\u0338',
-  'NotGreaterTilde': '\u2275',
-  'ngsim': '\u2275',
-  'NotHumpDownHump': '\u224E\u0338',
-  'nbump': '\u224E\u0338',
-  'NotHumpEqual': '\u224F\u0338',
-  'nbumpe': '\u224F\u0338',
-  'NotLeftTriangle': '\u22EA',
-  'nltri': '\u22EA',
-  'ntriangleleft': '\u22EA',
-  'NotLeftTriangleBar': '\u29CF\u0338',
-  'NotLeftTriangleEqual': '\u22EC',
-  'nltrie': '\u22EC',
-  'ntrianglelefteq': '\u22EC',
-  'NotLess': '\u226E',
-  'nless': '\u226E',
-  'nlt': '\u226E',
-  'NotLessEqual': '\u2270',
-  'nle': '\u2270',
-  'nleq': '\u2270',
-  'NotLessGreater': '\u2278',
-  'ntlg': '\u2278',
-  'NotLessLess': '\u226A\u0338',
-  'nLtv': '\u226A\u0338',
-  'NotLessSlantEqual': '\u2A7D\u0338',
-  'nleqslant': '\u2A7D\u0338',
-  'nles': '\u2A7D\u0338',
-  'NotLessTilde': '\u2274',
-  'nlsim': '\u2274',
-  'NotNestedGreaterGreater': '\u2AA2\u0338',
-  'NotNestedLessLess': '\u2AA1\u0338',
-  'NotPrecedes': '\u2280',
-  'npr': '\u2280',
-  'nprec': '\u2280',
-  'NotPrecedesEqual': '\u2AAF\u0338',
-  'npre': '\u2AAF\u0338',
-  'npreceq': '\u2AAF\u0338',
-  'NotPrecedesSlantEqual': '\u22E0',
-  'nprcue': '\u22E0',
-  'NotReverseElement': '\u220C',
-  'notni': '\u220C',
-  'notniva': '\u220C',
-  'NotRightTriangle': '\u22EB',
-  'nrtri': '\u22EB',
-  'ntriangleright': '\u22EB',
-  'NotRightTriangleBar': '\u29D0\u0338',
-  'NotRightTriangleEqual': '\u22ED',
-  'nrtrie': '\u22ED',
-  'ntrianglerighteq': '\u22ED',
-  'NotSquareSubset': '\u228F\u0338',
-  'NotSquareSubsetEqual': '\u22E2',
-  'nsqsube': '\u22E2',
-  'NotSquareSuperset': '\u2290\u0338',
-  'NotSquareSupersetEqual': '\u22E3',
-  'nsqsupe': '\u22E3',
-  'NotSubset': '\u2282\u20D2',
-  'nsubset': '\u2282\u20D2',
-  'vnsub': '\u2282\u20D2',
-  'NotSubsetEqual': '\u2288',
-  'nsube': '\u2288',
-  'nsubseteq': '\u2288',
-  'NotSucceeds': '\u2281',
-  'nsc': '\u2281',
-  'nsucc': '\u2281',
-  'NotSucceedsEqual': '\u2AB0\u0338',
-  'nsce': '\u2AB0\u0338',
-  'nsucceq': '\u2AB0\u0338',
-  'NotSucceedsSlantEqual': '\u22E1',
-  'nsccue': '\u22E1',
-  'NotSucceedsTilde': '\u227F\u0338',
-  'NotSuperset': '\u2283\u20D2',
-  'nsupset': '\u2283\u20D2',
-  'vnsup': '\u2283\u20D2',
-  'NotSupersetEqual': '\u2289',
-  'nsupe': '\u2289',
-  'nsupseteq': '\u2289',
-  'NotTilde': '\u2241',
-  'nsim': '\u2241',
-  'NotTildeEqual': '\u2244',
-  'nsime': '\u2244',
-  'nsimeq': '\u2244',
-  'NotTildeFullEqual': '\u2247',
-  'ncong': '\u2247',
-  'NotTildeTilde': '\u2249',
-  'nap': '\u2249',
-  'napprox': '\u2249',
-  'NotVerticalBar': '\u2224',
-  'nmid': '\u2224',
-  'nshortmid': '\u2224',
-  'nsmid': '\u2224',
-  'Nscr': '\uD835\uDCA9',
-  'Ntilde': '\u00D1',
-  'Nu': '\u039D',
-  'OElig': '\u0152',
-  'Oacute': '\u00D3',
-  'Ocirc': '\u00D4',
-  'Ocy': '\u041E',
-  'Odblac': '\u0150',
-  'Ofr': '\uD835\uDD12',
-  'Ograve': '\u00D2',
-  'Omacr': '\u014C',
-  'Omega': '\u03A9',
-  'ohm': '\u03A9',
-  'Omicron': '\u039F',
-  'Oopf': '\uD835\uDD46',
-  'OpenCurlyDoubleQuote': '\u201C',
-  'ldquo': '\u201C',
-  'OpenCurlyQuote': '\u2018',
-  'lsquo': '\u2018',
-  'Or': '\u2A54',
-  'Oscr': '\uD835\uDCAA',
-  'Oslash': '\u00D8',
-  'Otilde': '\u00D5',
-  'Otimes': '\u2A37',
-  'Ouml': '\u00D6',
-  'OverBar': '\u203E',
-  'oline': '\u203E',
-  'OverBrace': '\u23DE',
-  'OverBracket': '\u23B4',
-  'tbrk': '\u23B4',
-  'OverParenthesis': '\u23DC',
-  'PartialD': '\u2202',
-  'part': '\u2202',
-  'Pcy': '\u041F',
-  'Pfr': '\uD835\uDD13',
-  'Phi': '\u03A6',
-  'Pi': '\u03A0',
-  'PlusMinus': '\u00B1',
-  'plusmn': '\u00B1',
-  'pm': '\u00B1',
-  'Popf': '\u2119',
-  'primes': '\u2119',
-  'Pr': '\u2ABB',
-  'Precedes': '\u227A',
-  'pr': '\u227A',
-  'prec': '\u227A',
-  'PrecedesEqual': '\u2AAF',
-  'pre': '\u2AAF',
-  'preceq': '\u2AAF',
-  'PrecedesSlantEqual': '\u227C',
-  'prcue': '\u227C',
-  'preccurlyeq': '\u227C',
-  'PrecedesTilde': '\u227E',
-  'precsim': '\u227E',
-  'prsim': '\u227E',
-  'Prime': '\u2033',
-  'Product': '\u220F',
-  'prod': '\u220F',
-  'Proportional': '\u221D',
-  'prop': '\u221D',
-  'propto': '\u221D',
-  'varpropto': '\u221D',
-  'vprop': '\u221D',
-  'Pscr': '\uD835\uDCAB',
-  'Psi': '\u03A8',
-  'QUOT': '\u0022',
-  'quot': '\u0022',
-  'Qfr': '\uD835\uDD14',
-  'Qopf': '\u211A',
-  'rationals': '\u211A',
-  'Qscr': '\uD835\uDCAC',
-  'RBarr': '\u2910',
-  'drbkarow': '\u2910',
-  'REG': '\u00AE',
-  'circledR': '\u00AE',
-  'reg': '\u00AE',
-  'Racute': '\u0154',
-  'Rang': '\u27EB',
-  'Rarr': '\u21A0',
-  'twoheadrightarrow': '\u21A0',
-  'Rarrtl': '\u2916',
-  'Rcaron': '\u0158',
-  'Rcedil': '\u0156',
-  'Rcy': '\u0420',
-  'Re': '\u211C',
-  'Rfr': '\u211C',
-  'real': '\u211C',
-  'realpart': '\u211C',
-  'ReverseElement': '\u220B',
-  'SuchThat': '\u220B',
-  'ni': '\u220B',
-  'niv': '\u220B',
-  'ReverseEquilibrium': '\u21CB',
-  'leftrightharpoons': '\u21CB',
-  'lrhar': '\u21CB',
-  'ReverseUpEquilibrium': '\u296F',
-  'duhar': '\u296F',
-  'Rho': '\u03A1',
-  'RightAngleBracket': '\u27E9',
-  'rang': '\u27E9',
-  'rangle': '\u27E9',
-  'RightArrow': '\u2192',
-  'ShortRightArrow': '\u2192',
-  'rarr': '\u2192',
-  'rightarrow': '\u2192',
-  'srarr': '\u2192',
-  'RightArrowBar': '\u21E5',
-  'rarrb': '\u21E5',
-  'RightArrowLeftArrow': '\u21C4',
-  'rightleftarrows': '\u21C4',
-  'rlarr': '\u21C4',
-  'RightCeiling': '\u2309',
-  'rceil': '\u2309',
-  'RightDoubleBracket': '\u27E7',
-  'robrk': '\u27E7',
-  'RightDownTeeVector': '\u295D',
-  'RightDownVector': '\u21C2',
-  'dharr': '\u21C2',
-  'downharpoonright': '\u21C2',
-  'RightDownVectorBar': '\u2955',
-  'RightFloor': '\u230B',
-  'rfloor': '\u230B',
-  'RightTee': '\u22A2',
-  'vdash': '\u22A2',
-  'RightTeeArrow': '\u21A6',
-  'map': '\u21A6',
-  'mapsto': '\u21A6',
-  'RightTeeVector': '\u295B',
-  'RightTriangle': '\u22B3',
-  'vartriangleright': '\u22B3',
-  'vrtri': '\u22B3',
-  'RightTriangleBar': '\u29D0',
-  'RightTriangleEqual': '\u22B5',
-  'rtrie': '\u22B5',
-  'trianglerighteq': '\u22B5',
-  'RightUpDownVector': '\u294F',
-  'RightUpTeeVector': '\u295C',
-  'RightUpVector': '\u21BE',
-  'uharr': '\u21BE',
-  'upharpoonright': '\u21BE',
-  'RightUpVectorBar': '\u2954',
-  'RightVector': '\u21C0',
-  'rharu': '\u21C0',
-  'rightharpoonup': '\u21C0',
-  'RightVectorBar': '\u2953',
-  'Ropf': '\u211D',
-  'reals': '\u211D',
-  'RoundImplies': '\u2970',
-  'Rrightarrow': '\u21DB',
-  'rAarr': '\u21DB',
-  'Rscr': '\u211B',
-  'realine': '\u211B',
-  'Rsh': '\u21B1',
-  'rsh': '\u21B1',
-  'RuleDelayed': '\u29F4',
-  'SHCHcy': '\u0429',
-  'SHcy': '\u0428',
-  'SOFTcy': '\u042C',
-  'Sacute': '\u015A',
-  'Sc': '\u2ABC',
-  'Scaron': '\u0160',
-  'Scedil': '\u015E',
-  'Scirc': '\u015C',
-  'Scy': '\u0421',
-  'Sfr': '\uD835\uDD16',
-  'ShortUpArrow': '\u2191',
-  'UpArrow': '\u2191',
-  'uarr': '\u2191',
-  'uparrow': '\u2191',
-  'Sigma': '\u03A3',
-  'SmallCircle': '\u2218',
-  'compfn': '\u2218',
-  'Sopf': '\uD835\uDD4A',
-  'Sqrt': '\u221A',
-  'radic': '\u221A',
-  'Square': '\u25A1',
-  'squ': '\u25A1',
-  'square': '\u25A1',
-  'SquareIntersection': '\u2293',
-  'sqcap': '\u2293',
-  'SquareSubset': '\u228F',
-  'sqsub': '\u228F',
-  'sqsubset': '\u228F',
-  'SquareSubsetEqual': '\u2291',
-  'sqsube': '\u2291',
-  'sqsubseteq': '\u2291',
-  'SquareSuperset': '\u2290',
-  'sqsup': '\u2290',
-  'sqsupset': '\u2290',
-  'SquareSupersetEqual': '\u2292',
-  'sqsupe': '\u2292',
-  'sqsupseteq': '\u2292',
-  'SquareUnion': '\u2294',
-  'sqcup': '\u2294',
-  'Sscr': '\uD835\uDCAE',
-  'Star': '\u22C6',
-  'sstarf': '\u22C6',
-  'Sub': '\u22D0',
-  'Subset': '\u22D0',
-  'SubsetEqual': '\u2286',
-  'sube': '\u2286',
-  'subseteq': '\u2286',
-  'Succeeds': '\u227B',
-  'sc': '\u227B',
-  'succ': '\u227B',
-  'SucceedsEqual': '\u2AB0',
-  'sce': '\u2AB0',
-  'succeq': '\u2AB0',
-  'SucceedsSlantEqual': '\u227D',
-  'sccue': '\u227D',
-  'succcurlyeq': '\u227D',
-  'SucceedsTilde': '\u227F',
-  'scsim': '\u227F',
-  'succsim': '\u227F',
-  'Sum': '\u2211',
-  'sum': '\u2211',
-  'Sup': '\u22D1',
-  'Supset': '\u22D1',
-  'Superset': '\u2283',
-  'sup': '\u2283',
-  'supset': '\u2283',
-  'SupersetEqual': '\u2287',
-  'supe': '\u2287',
-  'supseteq': '\u2287',
-  'THORN': '\u00DE',
-  'TRADE': '\u2122',
-  'trade': '\u2122',
-  'TSHcy': '\u040B',
-  'TScy': '\u0426',
-  'Tab': '\u0009',
-  'Tau': '\u03A4',
-  'Tcaron': '\u0164',
-  'Tcedil': '\u0162',
-  'Tcy': '\u0422',
-  'Tfr': '\uD835\uDD17',
-  'Therefore': '\u2234',
-  'there4': '\u2234',
-  'therefore': '\u2234',
-  'Theta': '\u0398',
-  'ThickSpace': '\u205F\u200A',
-  'ThinSpace': '\u2009',
-  'thinsp': '\u2009',
-  'Tilde': '\u223C',
-  'sim': '\u223C',
-  'thicksim': '\u223C',
-  'thksim': '\u223C',
-  'TildeEqual': '\u2243',
-  'sime': '\u2243',
-  'simeq': '\u2243',
-  'TildeFullEqual': '\u2245',
-  'cong': '\u2245',
-  'TildeTilde': '\u2248',
-  'ap': '\u2248',
-  'approx': '\u2248',
-  'asymp': '\u2248',
-  'thickapprox': '\u2248',
-  'thkap': '\u2248',
-  'Topf': '\uD835\uDD4B',
-  'TripleDot': '\u20DB',
-  'tdot': '\u20DB',
-  'Tscr': '\uD835\uDCAF',
-  'Tstrok': '\u0166',
-  'Uacute': '\u00DA',
-  'Uarr': '\u219F',
-  'Uarrocir': '\u2949',
-  'Ubrcy': '\u040E',
-  'Ubreve': '\u016C',
-  'Ucirc': '\u00DB',
-  'Ucy': '\u0423',
-  'Udblac': '\u0170',
-  'Ufr': '\uD835\uDD18',
-  'Ugrave': '\u00D9',
-  'Umacr': '\u016A',
-  'UnderBar': '\u005F',
-  'lowbar': '\u005F',
-  'UnderBrace': '\u23DF',
-  'UnderBracket': '\u23B5',
-  'bbrk': '\u23B5',
-  'UnderParenthesis': '\u23DD',
-  'Union': '\u22C3',
-  'bigcup': '\u22C3',
-  'xcup': '\u22C3',
-  'UnionPlus': '\u228E',
-  'uplus': '\u228E',
-  'Uogon': '\u0172',
-  'Uopf': '\uD835\uDD4C',
-  'UpArrowBar': '\u2912',
-  'UpArrowDownArrow': '\u21C5',
-  'udarr': '\u21C5',
-  'UpDownArrow': '\u2195',
-  'updownarrow': '\u2195',
-  'varr': '\u2195',
-  'UpEquilibrium': '\u296E',
-  'udhar': '\u296E',
-  'UpTee': '\u22A5',
-  'bot': '\u22A5',
-  'bottom': '\u22A5',
-  'perp': '\u22A5',
-  'UpTeeArrow': '\u21A5',
-  'mapstoup': '\u21A5',
-  'UpperLeftArrow': '\u2196',
-  'nwarr': '\u2196',
-  'nwarrow': '\u2196',
-  'UpperRightArrow': '\u2197',
-  'nearr': '\u2197',
-  'nearrow': '\u2197',
-  'Upsi': '\u03D2',
-  'upsih': '\u03D2',
-  'Upsilon': '\u03A5',
-  'Uring': '\u016E',
-  'Uscr': '\uD835\uDCB0',
-  'Utilde': '\u0168',
-  'Uuml': '\u00DC',
-  'VDash': '\u22AB',
-  'Vbar': '\u2AEB',
-  'Vcy': '\u0412',
-  'Vdash': '\u22A9',
-  'Vdashl': '\u2AE6',
-  'Vee': '\u22C1',
-  'bigvee': '\u22C1',
-  'xvee': '\u22C1',
-  'Verbar': '\u2016',
-  'Vert': '\u2016',
-  'VerticalBar': '\u2223',
-  'mid': '\u2223',
-  'shortmid': '\u2223',
-  'smid': '\u2223',
-  'VerticalLine': '\u007C',
-  'verbar': '\u007C',
-  'vert': '\u007C',
-  'VerticalSeparator': '\u2758',
-  'VerticalTilde': '\u2240',
-  'wr': '\u2240',
-  'wreath': '\u2240',
-  'VeryThinSpace': '\u200A',
-  'hairsp': '\u200A',
-  'Vfr': '\uD835\uDD19',
-  'Vopf': '\uD835\uDD4D',
-  'Vscr': '\uD835\uDCB1',
-  'Vvdash': '\u22AA',
-  'Wcirc': '\u0174',
-  'Wedge': '\u22C0',
-  'bigwedge': '\u22C0',
-  'xwedge': '\u22C0',
-  'Wfr': '\uD835\uDD1A',
-  'Wopf': '\uD835\uDD4E',
-  'Wscr': '\uD835\uDCB2',
-  'Xfr': '\uD835\uDD1B',
-  'Xi': '\u039E',
-  'Xopf': '\uD835\uDD4F',
-  'Xscr': '\uD835\uDCB3',
-  'YAcy': '\u042F',
-  'YIcy': '\u0407',
-  'YUcy': '\u042E',
-  'Yacute': '\u00DD',
-  'Ycirc': '\u0176',
-  'Ycy': '\u042B',
-  'Yfr': '\uD835\uDD1C',
-  'Yopf': '\uD835\uDD50',
-  'Yscr': '\uD835\uDCB4',
-  'Yuml': '\u0178',
-  'ZHcy': '\u0416',
-  'Zacute': '\u0179',
-  'Zcaron': '\u017D',
-  'Zcy': '\u0417',
-  'Zdot': '\u017B',
-  'Zeta': '\u0396',
-  'Zfr': '\u2128',
-  'zeetrf': '\u2128',
-  'Zopf': '\u2124',
-  'integers': '\u2124',
-  'Zscr': '\uD835\uDCB5',
-  'aacute': '\u00E1',
-  'abreve': '\u0103',
-  'ac': '\u223E',
-  'mstpos': '\u223E',
-  'acE': '\u223E\u0333',
-  'acd': '\u223F',
-  'acirc': '\u00E2',
-  'acy': '\u0430',
-  'aelig': '\u00E6',
-  'afr': '\uD835\uDD1E',
-  'agrave': '\u00E0',
-  'alefsym': '\u2135',
-  'aleph': '\u2135',
-  'alpha': '\u03B1',
-  'amacr': '\u0101',
-  'amalg': '\u2A3F',
-  'and': '\u2227',
-  'wedge': '\u2227',
-  'andand': '\u2A55',
-  'andd': '\u2A5C',
-  'andslope': '\u2A58',
-  'andv': '\u2A5A',
-  'ang': '\u2220',
-  'angle': '\u2220',
-  'ange': '\u29A4',
-  'angmsd': '\u2221',
-  'measuredangle': '\u2221',
-  'angmsdaa': '\u29A8',
-  'angmsdab': '\u29A9',
-  'angmsdac': '\u29AA',
-  'angmsdad': '\u29AB',
-  'angmsdae': '\u29AC',
-  'angmsdaf': '\u29AD',
-  'angmsdag': '\u29AE',
-  'angmsdah': '\u29AF',
-  'angrt': '\u221F',
-  'angrtvb': '\u22BE',
-  'angrtvbd': '\u299D',
-  'angsph': '\u2222',
-  'angzarr': '\u237C',
-  'aogon': '\u0105',
-  'aopf': '\uD835\uDD52',
-  'apE': '\u2A70',
-  'apacir': '\u2A6F',
-  'ape': '\u224A',
-  'approxeq': '\u224A',
-  'apid': '\u224B',
-  'apos': '\u0027',
-  'aring': '\u00E5',
-  'ascr': '\uD835\uDCB6',
-  'ast': '\u002A',
-  'midast': '\u002A',
-  'atilde': '\u00E3',
-  'auml': '\u00E4',
-  'awint': '\u2A11',
-  'bNot': '\u2AED',
-  'backcong': '\u224C',
-  'bcong': '\u224C',
-  'backepsilon': '\u03F6',
-  'bepsi': '\u03F6',
-  'backprime': '\u2035',
-  'bprime': '\u2035',
-  'backsim': '\u223D',
-  'bsim': '\u223D',
-  'backsimeq': '\u22CD',
-  'bsime': '\u22CD',
-  'barvee': '\u22BD',
-  'barwed': '\u2305',
-  'barwedge': '\u2305',
-  'bbrktbrk': '\u23B6',
-  'bcy': '\u0431',
-  'bdquo': '\u201E',
-  'ldquor': '\u201E',
-  'bemptyv': '\u29B0',
-  'beta': '\u03B2',
-  'beth': '\u2136',
-  'between': '\u226C',
-  'twixt': '\u226C',
-  'bfr': '\uD835\uDD1F',
-  'bigcirc': '\u25EF',
-  'xcirc': '\u25EF',
-  'bigodot': '\u2A00',
-  'xodot': '\u2A00',
-  'bigoplus': '\u2A01',
-  'xoplus': '\u2A01',
-  'bigotimes': '\u2A02',
-  'xotime': '\u2A02',
-  'bigsqcup': '\u2A06',
-  'xsqcup': '\u2A06',
-  'bigstar': '\u2605',
-  'starf': '\u2605',
-  'bigtriangledown': '\u25BD',
-  'xdtri': '\u25BD',
-  'bigtriangleup': '\u25B3',
-  'xutri': '\u25B3',
-  'biguplus': '\u2A04',
-  'xuplus': '\u2A04',
-  'bkarow': '\u290D',
-  'rbarr': '\u290D',
-  'blacklozenge': '\u29EB',
-  'lozf': '\u29EB',
-  'blacktriangle': '\u25B4',
-  'utrif': '\u25B4',
-  'blacktriangledown': '\u25BE',
-  'dtrif': '\u25BE',
-  'blacktriangleleft': '\u25C2',
-  'ltrif': '\u25C2',
-  'blacktriangleright': '\u25B8',
-  'rtrif': '\u25B8',
-  'blank': '\u2423',
-  'blk12': '\u2592',
-  'blk14': '\u2591',
-  'blk34': '\u2593',
-  'block': '\u2588',
-  'bne': '\u003D\u20E5',
-  'bnequiv': '\u2261\u20E5',
-  'bnot': '\u2310',
-  'bopf': '\uD835\uDD53',
-  'bowtie': '\u22C8',
-  'boxDL': '\u2557',
-  'boxDR': '\u2554',
-  'boxDl': '\u2556',
-  'boxDr': '\u2553',
-  'boxH': '\u2550',
-  'boxHD': '\u2566',
-  'boxHU': '\u2569',
-  'boxHd': '\u2564',
-  'boxHu': '\u2567',
-  'boxUL': '\u255D',
-  'boxUR': '\u255A',
-  'boxUl': '\u255C',
-  'boxUr': '\u2559',
-  'boxV': '\u2551',
-  'boxVH': '\u256C',
-  'boxVL': '\u2563',
-  'boxVR': '\u2560',
-  'boxVh': '\u256B',
-  'boxVl': '\u2562',
-  'boxVr': '\u255F',
-  'boxbox': '\u29C9',
-  'boxdL': '\u2555',
-  'boxdR': '\u2552',
-  'boxdl': '\u2510',
-  'boxdr': '\u250C',
-  'boxhD': '\u2565',
-  'boxhU': '\u2568',
-  'boxhd': '\u252C',
-  'boxhu': '\u2534',
-  'boxminus': '\u229F',
-  'minusb': '\u229F',
-  'boxplus': '\u229E',
-  'plusb': '\u229E',
-  'boxtimes': '\u22A0',
-  'timesb': '\u22A0',
-  'boxuL': '\u255B',
-  'boxuR': '\u2558',
-  'boxul': '\u2518',
-  'boxur': '\u2514',
-  'boxv': '\u2502',
-  'boxvH': '\u256A',
-  'boxvL': '\u2561',
-  'boxvR': '\u255E',
-  'boxvh': '\u253C',
-  'boxvl': '\u2524',
-  'boxvr': '\u251C',
-  'brvbar': '\u00A6',
-  'bscr': '\uD835\uDCB7',
-  'bsemi': '\u204F',
-  'bsol': '\u005C',
-  'bsolb': '\u29C5',
-  'bsolhsub': '\u27C8',
-  'bull': '\u2022',
-  'bullet': '\u2022',
-  'bumpE': '\u2AAE',
-  'cacute': '\u0107',
-  'cap': '\u2229',
-  'capand': '\u2A44',
-  'capbrcup': '\u2A49',
-  'capcap': '\u2A4B',
-  'capcup': '\u2A47',
-  'capdot': '\u2A40',
-  'caps': '\u2229\uFE00',
-  'caret': '\u2041',
-  'ccaps': '\u2A4D',
-  'ccaron': '\u010D',
-  'ccedil': '\u00E7',
-  'ccirc': '\u0109',
-  'ccups': '\u2A4C',
-  'ccupssm': '\u2A50',
-  'cdot': '\u010B',
-  'cemptyv': '\u29B2',
-  'cent': '\u00A2',
-  'cfr': '\uD835\uDD20',
-  'chcy': '\u0447',
-  'check': '\u2713',
-  'checkmark': '\u2713',
-  'chi': '\u03C7',
-  'cir': '\u25CB',
-  'cirE': '\u29C3',
-  'circ': '\u02C6',
-  'circeq': '\u2257',
-  'cire': '\u2257',
-  'circlearrowleft': '\u21BA',
-  'olarr': '\u21BA',
-  'circlearrowright': '\u21BB',
-  'orarr': '\u21BB',
-  'circledS': '\u24C8',
-  'oS': '\u24C8',
-  'circledast': '\u229B',
-  'oast': '\u229B',
-  'circledcirc': '\u229A',
-  'ocir': '\u229A',
-  'circleddash': '\u229D',
-  'odash': '\u229D',
-  'cirfnint': '\u2A10',
-  'cirmid': '\u2AEF',
-  'cirscir': '\u29C2',
-  'clubs': '\u2663',
-  'clubsuit': '\u2663',
-  'colon': '\u003A',
-  'comma': '\u002C',
-  'commat': '\u0040',
-  'comp': '\u2201',
-  'complement': '\u2201',
-  'congdot': '\u2A6D',
-  'copf': '\uD835\uDD54',
-  'copysr': '\u2117',
-  'crarr': '\u21B5',
-  'cross': '\u2717',
-  'cscr': '\uD835\uDCB8',
-  'csub': '\u2ACF',
-  'csube': '\u2AD1',
-  'csup': '\u2AD0',
-  'csupe': '\u2AD2',
-  'ctdot': '\u22EF',
-  'cudarrl': '\u2938',
-  'cudarrr': '\u2935',
-  'cuepr': '\u22DE',
-  'curlyeqprec': '\u22DE',
-  'cuesc': '\u22DF',
-  'curlyeqsucc': '\u22DF',
-  'cularr': '\u21B6',
-  'curvearrowleft': '\u21B6',
-  'cularrp': '\u293D',
-  'cup': '\u222A',
-  'cupbrcap': '\u2A48',
-  'cupcap': '\u2A46',
-  'cupcup': '\u2A4A',
-  'cupdot': '\u228D',
-  'cupor': '\u2A45',
-  'cups': '\u222A\uFE00',
-  'curarr': '\u21B7',
-  'curvearrowright': '\u21B7',
-  'curarrm': '\u293C',
-  'curlyvee': '\u22CE',
-  'cuvee': '\u22CE',
-  'curlywedge': '\u22CF',
-  'cuwed': '\u22CF',
-  'curren': '\u00A4',
-  'cwint': '\u2231',
-  'cylcty': '\u232D',
-  'dHar': '\u2965',
-  'dagger': '\u2020',
-  'daleth': '\u2138',
-  'dash': '\u2010',
-  'hyphen': '\u2010',
-  'dbkarow': '\u290F',
-  'rBarr': '\u290F',
-  'dcaron': '\u010F',
-  'dcy': '\u0434',
-  'ddarr': '\u21CA',
-  'downdownarrows': '\u21CA',
-  'ddotseq': '\u2A77',
-  'eDDot': '\u2A77',
-  'deg': '\u00B0',
-  'delta': '\u03B4',
-  'demptyv': '\u29B1',
-  'dfisht': '\u297F',
-  'dfr': '\uD835\uDD21',
-  'diamondsuit': '\u2666',
-  'diams': '\u2666',
-  'digamma': '\u03DD',
-  'gammad': '\u03DD',
-  'disin': '\u22F2',
-  'div': '\u00F7',
-  'divide': '\u00F7',
-  'divideontimes': '\u22C7',
-  'divonx': '\u22C7',
-  'djcy': '\u0452',
-  'dlcorn': '\u231E',
-  'llcorner': '\u231E',
-  'dlcrop': '\u230D',
-  'dollar': '\u0024',
-  'dopf': '\uD835\uDD55',
-  'doteqdot': '\u2251',
-  'eDot': '\u2251',
-  'dotminus': '\u2238',
-  'minusd': '\u2238',
-  'dotplus': '\u2214',
-  'plusdo': '\u2214',
-  'dotsquare': '\u22A1',
-  'sdotb': '\u22A1',
-  'drcorn': '\u231F',
-  'lrcorner': '\u231F',
-  'drcrop': '\u230C',
-  'dscr': '\uD835\uDCB9',
-  'dscy': '\u0455',
-  'dsol': '\u29F6',
-  'dstrok': '\u0111',
-  'dtdot': '\u22F1',
-  'dtri': '\u25BF',
-  'triangledown': '\u25BF',
-  'dwangle': '\u29A6',
-  'dzcy': '\u045F',
-  'dzigrarr': '\u27FF',
-  'eacute': '\u00E9',
-  'easter': '\u2A6E',
-  'ecaron': '\u011B',
-  'ecir': '\u2256',
-  'eqcirc': '\u2256',
-  'ecirc': '\u00EA',
-  'ecolon': '\u2255',
-  'eqcolon': '\u2255',
-  'ecy': '\u044D',
-  'edot': '\u0117',
-  'efDot': '\u2252',
-  'fallingdotseq': '\u2252',
-  'efr': '\uD835\uDD22',
-  'eg': '\u2A9A',
-  'egrave': '\u00E8',
-  'egs': '\u2A96',
-  'eqslantgtr': '\u2A96',
-  'egsdot': '\u2A98',
-  'el': '\u2A99',
-  'elinters': '\u23E7',
-  'ell': '\u2113',
-  'els': '\u2A95',
-  'eqslantless': '\u2A95',
-  'elsdot': '\u2A97',
-  'emacr': '\u0113',
-  'empty': '\u2205',
-  'emptyset': '\u2205',
-  'emptyv': '\u2205',
-  'varnothing': '\u2205',
-  'emsp13': '\u2004',
-  'emsp14': '\u2005',
-  'emsp': '\u2003',
-  'eng': '\u014B',
-  'ensp': '\u2002',
-  'eogon': '\u0119',
-  'eopf': '\uD835\uDD56',
-  'epar': '\u22D5',
-  'eparsl': '\u29E3',
-  'eplus': '\u2A71',
-  'epsi': '\u03B5',
-  'epsilon': '\u03B5',
-  'epsiv': '\u03F5',
-  'straightepsilon': '\u03F5',
-  'varepsilon': '\u03F5',
-  'equals': '\u003D',
-  'equest': '\u225F',
-  'questeq': '\u225F',
-  'equivDD': '\u2A78',
-  'eqvparsl': '\u29E5',
-  'erDot': '\u2253',
-  'risingdotseq': '\u2253',
-  'erarr': '\u2971',
-  'escr': '\u212F',
-  'eta': '\u03B7',
-  'eth': '\u00F0',
-  'euml': '\u00EB',
-  'euro': '\u20AC',
-  'excl': '\u0021',
-  'fcy': '\u0444',
-  'female': '\u2640',
-  'ffilig': '\uFB03',
-  'fflig': '\uFB00',
-  'ffllig': '\uFB04',
-  'ffr': '\uD835\uDD23',
-  'filig': '\uFB01',
-  'fjlig': '\u0066\u006A',
-  'flat': '\u266D',
-  'fllig': '\uFB02',
-  'fltns': '\u25B1',
-  'fnof': '\u0192',
-  'fopf': '\uD835\uDD57',
-  'fork': '\u22D4',
-  'pitchfork': '\u22D4',
-  'forkv': '\u2AD9',
-  'fpartint': '\u2A0D',
-  'frac12': '\u00BD',
-  'half': '\u00BD',
-  'frac13': '\u2153',
-  'frac14': '\u00BC',
-  'frac15': '\u2155',
-  'frac16': '\u2159',
-  'frac18': '\u215B',
-  'frac23': '\u2154',
-  'frac25': '\u2156',
-  'frac34': '\u00BE',
-  'frac35': '\u2157',
-  'frac38': '\u215C',
-  'frac45': '\u2158',
-  'frac56': '\u215A',
-  'frac58': '\u215D',
-  'frac78': '\u215E',
-  'frasl': '\u2044',
-  'frown': '\u2322',
-  'sfrown': '\u2322',
-  'fscr': '\uD835\uDCBB',
-  'gEl': '\u2A8C',
-  'gtreqqless': '\u2A8C',
-  'gacute': '\u01F5',
-  'gamma': '\u03B3',
-  'gap': '\u2A86',
-  'gtrapprox': '\u2A86',
-  'gbreve': '\u011F',
-  'gcirc': '\u011D',
-  'gcy': '\u0433',
-  'gdot': '\u0121',
-  'gescc': '\u2AA9',
-  'gesdot': '\u2A80',
-  'gesdoto': '\u2A82',
-  'gesdotol': '\u2A84',
-  'gesl': '\u22DB\uFE00',
-  'gesles': '\u2A94',
-  'gfr': '\uD835\uDD24',
-  'gimel': '\u2137',
-  'gjcy': '\u0453',
-  'glE': '\u2A92',
-  'gla': '\u2AA5',
-  'glj': '\u2AA4',
-  'gnE': '\u2269',
-  'gneqq': '\u2269',
-  'gnap': '\u2A8A',
-  'gnapprox': '\u2A8A',
-  'gne': '\u2A88',
-  'gneq': '\u2A88',
-  'gnsim': '\u22E7',
-  'gopf': '\uD835\uDD58',
-  'gscr': '\u210A',
-  'gsime': '\u2A8E',
-  'gsiml': '\u2A90',
-  'gtcc': '\u2AA7',
-  'gtcir': '\u2A7A',
-  'gtdot': '\u22D7',
-  'gtrdot': '\u22D7',
-  'gtlPar': '\u2995',
-  'gtquest': '\u2A7C',
-  'gtrarr': '\u2978',
-  'gvertneqq': '\u2269\uFE00',
-  'gvnE': '\u2269\uFE00',
-  'hardcy': '\u044A',
-  'harrcir': '\u2948',
-  'harrw': '\u21AD',
-  'leftrightsquigarrow': '\u21AD',
-  'hbar': '\u210F',
-  'hslash': '\u210F',
-  'planck': '\u210F',
-  'plankv': '\u210F',
-  'hcirc': '\u0125',
-  'hearts': '\u2665',
-  'heartsuit': '\u2665',
-  'hellip': '\u2026',
-  'mldr': '\u2026',
-  'hercon': '\u22B9',
-  'hfr': '\uD835\uDD25',
-  'hksearow': '\u2925',
-  'searhk': '\u2925',
-  'hkswarow': '\u2926',
-  'swarhk': '\u2926',
-  'hoarr': '\u21FF',
-  'homtht': '\u223B',
-  'hookleftarrow': '\u21A9',
-  'larrhk': '\u21A9',
-  'hookrightarrow': '\u21AA',
-  'rarrhk': '\u21AA',
-  'hopf': '\uD835\uDD59',
-  'horbar': '\u2015',
-  'hscr': '\uD835\uDCBD',
-  'hstrok': '\u0127',
-  'hybull': '\u2043',
-  'iacute': '\u00ED',
-  'icirc': '\u00EE',
-  'icy': '\u0438',
-  'iecy': '\u0435',
-  'iexcl': '\u00A1',
-  'ifr': '\uD835\uDD26',
-  'igrave': '\u00EC',
-  'iiiint': '\u2A0C',
-  'qint': '\u2A0C',
-  'iiint': '\u222D',
-  'tint': '\u222D',
-  'iinfin': '\u29DC',
-  'iiota': '\u2129',
-  'ijlig': '\u0133',
-  'imacr': '\u012B',
-  'imath': '\u0131',
-  'inodot': '\u0131',
-  'imof': '\u22B7',
-  'imped': '\u01B5',
-  'incare': '\u2105',
-  'infin': '\u221E',
-  'infintie': '\u29DD',
-  'intcal': '\u22BA',
-  'intercal': '\u22BA',
-  'intlarhk': '\u2A17',
-  'intprod': '\u2A3C',
-  'iprod': '\u2A3C',
-  'iocy': '\u0451',
-  'iogon': '\u012F',
-  'iopf': '\uD835\uDD5A',
-  'iota': '\u03B9',
-  'iquest': '\u00BF',
-  'iscr': '\uD835\uDCBE',
-  'isinE': '\u22F9',
-  'isindot': '\u22F5',
-  'isins': '\u22F4',
-  'isinsv': '\u22F3',
-  'itilde': '\u0129',
-  'iukcy': '\u0456',
-  'iuml': '\u00EF',
-  'jcirc': '\u0135',
-  'jcy': '\u0439',
-  'jfr': '\uD835\uDD27',
-  'jmath': '\u0237',
-  'jopf': '\uD835\uDD5B',
-  'jscr': '\uD835\uDCBF',
-  'jsercy': '\u0458',
-  'jukcy': '\u0454',
-  'kappa': '\u03BA',
-  'kappav': '\u03F0',
-  'varkappa': '\u03F0',
-  'kcedil': '\u0137',
-  'kcy': '\u043A',
-  'kfr': '\uD835\uDD28',
-  'kgreen': '\u0138',
-  'khcy': '\u0445',
-  'kjcy': '\u045C',
-  'kopf': '\uD835\uDD5C',
-  'kscr': '\uD835\uDCC0',
-  'lAtail': '\u291B',
-  'lBarr': '\u290E',
-  'lEg': '\u2A8B',
-  'lesseqqgtr': '\u2A8B',
-  'lHar': '\u2962',
-  'lacute': '\u013A',
-  'laemptyv': '\u29B4',
-  'lambda': '\u03BB',
-  'langd': '\u2991',
-  'lap': '\u2A85',
-  'lessapprox': '\u2A85',
-  'laquo': '\u00AB',
-  'larrbfs': '\u291F',
-  'larrfs': '\u291D',
-  'larrlp': '\u21AB',
-  'looparrowleft': '\u21AB',
-  'larrpl': '\u2939',
-  'larrsim': '\u2973',
-  'larrtl': '\u21A2',
-  'leftarrowtail': '\u21A2',
-  'lat': '\u2AAB',
-  'latail': '\u2919',
-  'late': '\u2AAD',
-  'lates': '\u2AAD\uFE00',
-  'lbarr': '\u290C',
-  'lbbrk': '\u2772',
-  'lbrace': '\u007B',
-  'lcub': '\u007B',
-  'lbrack': '\u005B',
-  'lsqb': '\u005B',
-  'lbrke': '\u298B',
-  'lbrksld': '\u298F',
-  'lbrkslu': '\u298D',
-  'lcaron': '\u013E',
-  'lcedil': '\u013C',
-  'lcy': '\u043B',
-  'ldca': '\u2936',
-  'ldrdhar': '\u2967',
-  'ldrushar': '\u294B',
-  'ldsh': '\u21B2',
-  'le': '\u2264',
-  'leq': '\u2264',
-  'leftleftarrows': '\u21C7',
-  'llarr': '\u21C7',
-  'leftthreetimes': '\u22CB',
-  'lthree': '\u22CB',
-  'lescc': '\u2AA8',
-  'lesdot': '\u2A7F',
-  'lesdoto': '\u2A81',
-  'lesdotor': '\u2A83',
-  'lesg': '\u22DA\uFE00',
-  'lesges': '\u2A93',
-  'lessdot': '\u22D6',
-  'ltdot': '\u22D6',
-  'lfisht': '\u297C',
-  'lfr': '\uD835\uDD29',
-  'lgE': '\u2A91',
-  'lharul': '\u296A',
-  'lhblk': '\u2584',
-  'ljcy': '\u0459',
-  'llhard': '\u296B',
-  'lltri': '\u25FA',
-  'lmidot': '\u0140',
-  'lmoust': '\u23B0',
-  'lmoustache': '\u23B0',
-  'lnE': '\u2268',
-  'lneqq': '\u2268',
-  'lnap': '\u2A89',
-  'lnapprox': '\u2A89',
-  'lne': '\u2A87',
-  'lneq': '\u2A87',
-  'lnsim': '\u22E6',
-  'loang': '\u27EC',
-  'loarr': '\u21FD',
-  'longmapsto': '\u27FC',
-  'xmap': '\u27FC',
-  'looparrowright': '\u21AC',
-  'rarrlp': '\u21AC',
-  'lopar': '\u2985',
-  'lopf': '\uD835\uDD5D',
-  'loplus': '\u2A2D',
-  'lotimes': '\u2A34',
-  'lowast': '\u2217',
-  'loz': '\u25CA',
-  'lozenge': '\u25CA',
-  'lpar': '\u0028',
-  'lparlt': '\u2993',
-  'lrhard': '\u296D',
-  'lrm': '\u200E',
-  'lrtri': '\u22BF',
-  'lsaquo': '\u2039',
-  'lscr': '\uD835\uDCC1',
-  'lsime': '\u2A8D',
-  'lsimg': '\u2A8F',
-  'lsquor': '\u201A',
-  'sbquo': '\u201A',
-  'lstrok': '\u0142',
-  'ltcc': '\u2AA6',
-  'ltcir': '\u2A79',
-  'ltimes': '\u22C9',
-  'ltlarr': '\u2976',
-  'ltquest': '\u2A7B',
-  'ltrPar': '\u2996',
-  'ltri': '\u25C3',
-  'triangleleft': '\u25C3',
-  'lurdshar': '\u294A',
-  'luruhar': '\u2966',
-  'lvertneqq': '\u2268\uFE00',
-  'lvnE': '\u2268\uFE00',
-  'mDDot': '\u223A',
-  'macr': '\u00AF',
-  'strns': '\u00AF',
-  'male': '\u2642',
-  'malt': '\u2720',
-  'maltese': '\u2720',
-  'marker': '\u25AE',
-  'mcomma': '\u2A29',
-  'mcy': '\u043C',
-  'mdash': '\u2014',
-  'mfr': '\uD835\uDD2A',
-  'mho': '\u2127',
-  'micro': '\u00B5',
-  'midcir': '\u2AF0',
-  'minus': '\u2212',
-  'minusdu': '\u2A2A',
-  'mlcp': '\u2ADB',
-  'models': '\u22A7',
-  'mopf': '\uD835\uDD5E',
-  'mscr': '\uD835\uDCC2',
-  'mu': '\u03BC',
-  'multimap': '\u22B8',
-  'mumap': '\u22B8',
-  'nGg': '\u22D9\u0338',
-  'nGt': '\u226B\u20D2',
-  'nLeftarrow': '\u21CD',
-  'nlArr': '\u21CD',
-  'nLeftrightarrow': '\u21CE',
-  'nhArr': '\u21CE',
-  'nLl': '\u22D8\u0338',
-  'nLt': '\u226A\u20D2',
-  'nRightarrow': '\u21CF',
-  'nrArr': '\u21CF',
-  'nVDash': '\u22AF',
-  'nVdash': '\u22AE',
-  'nacute': '\u0144',
-  'nang': '\u2220\u20D2',
-  'napE': '\u2A70\u0338',
-  'napid': '\u224B\u0338',
-  'napos': '\u0149',
-  'natur': '\u266E',
-  'natural': '\u266E',
-  'ncap': '\u2A43',
-  'ncaron': '\u0148',
-  'ncedil': '\u0146',
-  'ncongdot': '\u2A6D\u0338',
-  'ncup': '\u2A42',
-  'ncy': '\u043D',
-  'ndash': '\u2013',
-  'neArr': '\u21D7',
-  'nearhk': '\u2924',
-  'nedot': '\u2250\u0338',
-  'nesear': '\u2928',
-  'toea': '\u2928',
-  'nfr': '\uD835\uDD2B',
-  'nharr': '\u21AE',
-  'nleftrightarrow': '\u21AE',
-  'nhpar': '\u2AF2',
-  'nis': '\u22FC',
-  'nisd': '\u22FA',
-  'njcy': '\u045A',
-  'nlE': '\u2266\u0338',
-  'nleqq': '\u2266\u0338',
-  'nlarr': '\u219A',
-  'nleftarrow': '\u219A',
-  'nldr': '\u2025',
-  'nopf': '\uD835\uDD5F',
-  'not': '\u00AC',
-  'notinE': '\u22F9\u0338',
-  'notindot': '\u22F5\u0338',
-  'notinvb': '\u22F7',
-  'notinvc': '\u22F6',
-  'notnivb': '\u22FE',
-  'notnivc': '\u22FD',
-  'nparsl': '\u2AFD\u20E5',
-  'npart': '\u2202\u0338',
-  'npolint': '\u2A14',
-  'nrarr': '\u219B',
-  'nrightarrow': '\u219B',
-  'nrarrc': '\u2933\u0338',
-  'nrarrw': '\u219D\u0338',
-  'nscr': '\uD835\uDCC3',
-  'nsub': '\u2284',
-  'nsubE': '\u2AC5\u0338',
-  'nsubseteqq': '\u2AC5\u0338',
-  'nsup': '\u2285',
-  'nsupE': '\u2AC6\u0338',
-  'nsupseteqq': '\u2AC6\u0338',
-  'ntilde': '\u00F1',
-  'nu': '\u03BD',
-  'num': '\u0023',
-  'numero': '\u2116',
-  'numsp': '\u2007',
-  'nvDash': '\u22AD',
-  'nvHarr': '\u2904',
-  'nvap': '\u224D\u20D2',
-  'nvdash': '\u22AC',
-  'nvge': '\u2265\u20D2',
-  'nvgt': '\u003E\u20D2',
-  'nvinfin': '\u29DE',
-  'nvlArr': '\u2902',
-  'nvle': '\u2264\u20D2',
-  'nvlt': '\u003C\u20D2',
-  'nvltrie': '\u22B4\u20D2',
-  'nvrArr': '\u2903',
-  'nvrtrie': '\u22B5\u20D2',
-  'nvsim': '\u223C\u20D2',
-  'nwArr': '\u21D6',
-  'nwarhk': '\u2923',
-  'nwnear': '\u2927',
-  'oacute': '\u00F3',
-  'ocirc': '\u00F4',
-  'ocy': '\u043E',
-  'odblac': '\u0151',
-  'odiv': '\u2A38',
-  'odsold': '\u29BC',
-  'oelig': '\u0153',
-  'ofcir': '\u29BF',
-  'ofr': '\uD835\uDD2C',
-  'ogon': '\u02DB',
-  'ograve': '\u00F2',
-  'ogt': '\u29C1',
-  'ohbar': '\u29B5',
-  'olcir': '\u29BE',
-  'olcross': '\u29BB',
-  'olt': '\u29C0',
-  'omacr': '\u014D',
-  'omega': '\u03C9',
-  'omicron': '\u03BF',
-  'omid': '\u29B6',
-  'oopf': '\uD835\uDD60',
-  'opar': '\u29B7',
-  'operp': '\u29B9',
-  'or': '\u2228',
-  'vee': '\u2228',
-  'ord': '\u2A5D',
-  'order': '\u2134',
-  'orderof': '\u2134',
-  'oscr': '\u2134',
-  'ordf': '\u00AA',
-  'ordm': '\u00BA',
-  'origof': '\u22B6',
-  'oror': '\u2A56',
-  'orslope': '\u2A57',
-  'orv': '\u2A5B',
-  'oslash': '\u00F8',
-  'osol': '\u2298',
-  'otilde': '\u00F5',
-  'otimesas': '\u2A36',
-  'ouml': '\u00F6',
-  'ovbar': '\u233D',
-  'para': '\u00B6',
-  'parsim': '\u2AF3',
-  'parsl': '\u2AFD',
-  'pcy': '\u043F',
-  'percnt': '\u0025',
-  'period': '\u002E',
-  'permil': '\u2030',
-  'pertenk': '\u2031',
-  'pfr': '\uD835\uDD2D',
-  'phi': '\u03C6',
-  'phiv': '\u03D5',
-  'straightphi': '\u03D5',
-  'varphi': '\u03D5',
-  'phone': '\u260E',
-  'pi': '\u03C0',
-  'piv': '\u03D6',
-  'varpi': '\u03D6',
-  'planckh': '\u210E',
-  'plus': '\u002B',
-  'plusacir': '\u2A23',
-  'pluscir': '\u2A22',
-  'plusdu': '\u2A25',
-  'pluse': '\u2A72',
-  'plussim': '\u2A26',
-  'plustwo': '\u2A27',
-  'pointint': '\u2A15',
-  'popf': '\uD835\uDD61',
-  'pound': '\u00A3',
-  'prE': '\u2AB3',
-  'prap': '\u2AB7',
-  'precapprox': '\u2AB7',
-  'precnapprox': '\u2AB9',
-  'prnap': '\u2AB9',
-  'precneqq': '\u2AB5',
-  'prnE': '\u2AB5',
-  'precnsim': '\u22E8',
-  'prnsim': '\u22E8',
-  'prime': '\u2032',
-  'profalar': '\u232E',
-  'profline': '\u2312',
-  'profsurf': '\u2313',
-  'prurel': '\u22B0',
-  'pscr': '\uD835\uDCC5',
-  'psi': '\u03C8',
-  'puncsp': '\u2008',
-  'qfr': '\uD835\uDD2E',
-  'qopf': '\uD835\uDD62',
-  'qprime': '\u2057',
-  'qscr': '\uD835\uDCC6',
-  'quatint': '\u2A16',
-  'quest': '\u003F',
-  'rAtail': '\u291C',
-  'rHar': '\u2964',
-  'race': '\u223D\u0331',
-  'racute': '\u0155',
-  'raemptyv': '\u29B3',
-  'rangd': '\u2992',
-  'range': '\u29A5',
-  'raquo': '\u00BB',
-  'rarrap': '\u2975',
-  'rarrbfs': '\u2920',
-  'rarrc': '\u2933',
-  'rarrfs': '\u291E',
-  'rarrpl': '\u2945',
-  'rarrsim': '\u2974',
-  'rarrtl': '\u21A3',
-  'rightarrowtail': '\u21A3',
-  'rarrw': '\u219D',
-  'rightsquigarrow': '\u219D',
-  'ratail': '\u291A',
-  'ratio': '\u2236',
-  'rbbrk': '\u2773',
-  'rbrace': '\u007D',
-  'rcub': '\u007D',
-  'rbrack': '\u005D',
-  'rsqb': '\u005D',
-  'rbrke': '\u298C',
-  'rbrksld': '\u298E',
-  'rbrkslu': '\u2990',
-  'rcaron': '\u0159',
-  'rcedil': '\u0157',
-  'rcy': '\u0440',
-  'rdca': '\u2937',
-  'rdldhar': '\u2969',
-  'rdsh': '\u21B3',
-  'rect': '\u25AD',
-  'rfisht': '\u297D',
-  'rfr': '\uD835\uDD2F',
-  'rharul': '\u296C',
-  'rho': '\u03C1',
-  'rhov': '\u03F1',
-  'varrho': '\u03F1',
-  'rightrightarrows': '\u21C9',
-  'rrarr': '\u21C9',
-  'rightthreetimes': '\u22CC',
-  'rthree': '\u22CC',
-  'ring': '\u02DA',
-  'rlm': '\u200F',
-  'rmoust': '\u23B1',
-  'rmoustache': '\u23B1',
-  'rnmid': '\u2AEE',
-  'roang': '\u27ED',
-  'roarr': '\u21FE',
-  'ropar': '\u2986',
-  'ropf': '\uD835\uDD63',
-  'roplus': '\u2A2E',
-  'rotimes': '\u2A35',
-  'rpar': '\u0029',
-  'rpargt': '\u2994',
-  'rppolint': '\u2A12',
-  'rsaquo': '\u203A',
-  'rscr': '\uD835\uDCC7',
-  'rtimes': '\u22CA',
-  'rtri': '\u25B9',
-  'triangleright': '\u25B9',
-  'rtriltri': '\u29CE',
-  'ruluhar': '\u2968',
-  'rx': '\u211E',
-  'sacute': '\u015B',
-  'scE': '\u2AB4',
-  'scap': '\u2AB8',
-  'succapprox': '\u2AB8',
-  'scaron': '\u0161',
-  'scedil': '\u015F',
-  'scirc': '\u015D',
-  'scnE': '\u2AB6',
-  'succneqq': '\u2AB6',
-  'scnap': '\u2ABA',
-  'succnapprox': '\u2ABA',
-  'scnsim': '\u22E9',
-  'succnsim': '\u22E9',
-  'scpolint': '\u2A13',
-  'scy': '\u0441',
-  'sdot': '\u22C5',
-  'sdote': '\u2A66',
-  'seArr': '\u21D8',
-  'sect': '\u00A7',
-  'semi': '\u003B',
-  'seswar': '\u2929',
-  'tosa': '\u2929',
-  'sext': '\u2736',
-  'sfr': '\uD835\uDD30',
-  'sharp': '\u266F',
-  'shchcy': '\u0449',
-  'shcy': '\u0448',
-  'shy': '\u00AD',
-  'sigma': '\u03C3',
-  'sigmaf': '\u03C2',
-  'sigmav': '\u03C2',
-  'varsigma': '\u03C2',
-  'simdot': '\u2A6A',
-  'simg': '\u2A9E',
-  'simgE': '\u2AA0',
-  'siml': '\u2A9D',
-  'simlE': '\u2A9F',
-  'simne': '\u2246',
-  'simplus': '\u2A24',
-  'simrarr': '\u2972',
-  'smashp': '\u2A33',
-  'smeparsl': '\u29E4',
-  'smile': '\u2323',
-  'ssmile': '\u2323',
-  'smt': '\u2AAA',
-  'smte': '\u2AAC',
-  'smtes': '\u2AAC\uFE00',
-  'softcy': '\u044C',
-  'sol': '\u002F',
-  'solb': '\u29C4',
-  'solbar': '\u233F',
-  'sopf': '\uD835\uDD64',
-  'spades': '\u2660',
-  'spadesuit': '\u2660',
-  'sqcaps': '\u2293\uFE00',
-  'sqcups': '\u2294\uFE00',
-  'sscr': '\uD835\uDCC8',
-  'star': '\u2606',
-  'sub': '\u2282',
-  'subset': '\u2282',
-  'subE': '\u2AC5',
-  'subseteqq': '\u2AC5',
-  'subdot': '\u2ABD',
-  'subedot': '\u2AC3',
-  'submult': '\u2AC1',
-  'subnE': '\u2ACB',
-  'subsetneqq': '\u2ACB',
-  'subne': '\u228A',
-  'subsetneq': '\u228A',
-  'subplus': '\u2ABF',
-  'subrarr': '\u2979',
-  'subsim': '\u2AC7',
-  'subsub': '\u2AD5',
-  'subsup': '\u2AD3',
-  'sung': '\u266A',
-  'sup1': '\u00B9',
-  'sup2': '\u00B2',
-  'sup3': '\u00B3',
-  'supE': '\u2AC6',
-  'supseteqq': '\u2AC6',
-  'supdot': '\u2ABE',
-  'supdsub': '\u2AD8',
-  'supedot': '\u2AC4',
-  'suphsol': '\u27C9',
-  'suphsub': '\u2AD7',
-  'suplarr': '\u297B',
-  'supmult': '\u2AC2',
-  'supnE': '\u2ACC',
-  'supsetneqq': '\u2ACC',
-  'supne': '\u228B',
-  'supsetneq': '\u228B',
-  'supplus': '\u2AC0',
-  'supsim': '\u2AC8',
-  'supsub': '\u2AD4',
-  'supsup': '\u2AD6',
-  'swArr': '\u21D9',
-  'swnwar': '\u292A',
-  'szlig': '\u00DF',
-  'target': '\u2316',
-  'tau': '\u03C4',
-  'tcaron': '\u0165',
-  'tcedil': '\u0163',
-  'tcy': '\u0442',
-  'telrec': '\u2315',
-  'tfr': '\uD835\uDD31',
-  'theta': '\u03B8',
-  'thetasym': '\u03D1',
-  'thetav': '\u03D1',
-  'vartheta': '\u03D1',
-  'thorn': '\u00FE',
-  'times': '\u00D7',
-  'timesbar': '\u2A31',
-  'timesd': '\u2A30',
-  'topbot': '\u2336',
-  'topcir': '\u2AF1',
-  'topf': '\uD835\uDD65',
-  'topfork': '\u2ADA',
-  'tprime': '\u2034',
-  'triangle': '\u25B5',
-  'utri': '\u25B5',
-  'triangleq': '\u225C',
-  'trie': '\u225C',
-  'tridot': '\u25EC',
-  'triminus': '\u2A3A',
-  'triplus': '\u2A39',
-  'trisb': '\u29CD',
-  'tritime': '\u2A3B',
-  'trpezium': '\u23E2',
-  'tscr': '\uD835\uDCC9',
-  'tscy': '\u0446',
-  'tshcy': '\u045B',
-  'tstrok': '\u0167',
-  'uHar': '\u2963',
-  'uacute': '\u00FA',
-  'ubrcy': '\u045E',
-  'ubreve': '\u016D',
-  'ucirc': '\u00FB',
-  'ucy': '\u0443',
-  'udblac': '\u0171',
-  'ufisht': '\u297E',
-  'ufr': '\uD835\uDD32',
-  'ugrave': '\u00F9',
-  'uhblk': '\u2580',
-  'ulcorn': '\u231C',
-  'ulcorner': '\u231C',
-  'ulcrop': '\u230F',
-  'ultri': '\u25F8',
-  'umacr': '\u016B',
-  'uogon': '\u0173',
-  'uopf': '\uD835\uDD66',
-  'upsi': '\u03C5',
-  'upsilon': '\u03C5',
-  'upuparrows': '\u21C8',
-  'uuarr': '\u21C8',
-  'urcorn': '\u231D',
-  'urcorner': '\u231D',
-  'urcrop': '\u230E',
-  'uring': '\u016F',
-  'urtri': '\u25F9',
-  'uscr': '\uD835\uDCCA',
-  'utdot': '\u22F0',
-  'utilde': '\u0169',
-  'uuml': '\u00FC',
-  'uwangle': '\u29A7',
-  'vBar': '\u2AE8',
-  'vBarv': '\u2AE9',
-  'vangrt': '\u299C',
-  'varsubsetneq': '\u228A\uFE00',
-  'vsubne': '\u228A\uFE00',
-  'varsubsetneqq': '\u2ACB\uFE00',
-  'vsubnE': '\u2ACB\uFE00',
-  'varsupsetneq': '\u228B\uFE00',
-  'vsupne': '\u228B\uFE00',
-  'varsupsetneqq': '\u2ACC\uFE00',
-  'vsupnE': '\u2ACC\uFE00',
-  'vcy': '\u0432',
-  'veebar': '\u22BB',
-  'veeeq': '\u225A',
-  'vellip': '\u22EE',
-  'vfr': '\uD835\uDD33',
-  'vopf': '\uD835\uDD67',
-  'vscr': '\uD835\uDCCB',
-  'vzigzag': '\u299A',
-  'wcirc': '\u0175',
-  'wedbar': '\u2A5F',
-  'wedgeq': '\u2259',
-  'weierp': '\u2118',
-  'wp': '\u2118',
-  'wfr': '\uD835\uDD34',
-  'wopf': '\uD835\uDD68',
-  'wscr': '\uD835\uDCCC',
-  'xfr': '\uD835\uDD35',
-  'xi': '\u03BE',
-  'xnis': '\u22FB',
-  'xopf': '\uD835\uDD69',
-  'xscr': '\uD835\uDCCD',
-  'yacute': '\u00FD',
-  'yacy': '\u044F',
-  'ycirc': '\u0177',
-  'ycy': '\u044B',
-  'yen': '\u00A5',
-  'yfr': '\uD835\uDD36',
-  'yicy': '\u0457',
-  'yopf': '\uD835\uDD6A',
-  'yscr': '\uD835\uDCCE',
-  'yucy': '\u044E',
-  'yuml': '\u00FF',
-  'zacute': '\u017A',
-  'zcaron': '\u017E',
-  'zcy': '\u0437',
-  'zdot': '\u017C',
-  'zeta': '\u03B6',
-  'zfr': '\uD835\uDD37',
-  'zhcy': '\u0436',
-  'zigrarr': '\u21DD',
-  'zopf': '\uD835\uDD6B',
-  'zscr': '\uD835\uDCCF',
-  'zwj': '\u200D',
-  'zwnj': '\u200C'
-};
+const NAMED_ENTITIES = new Map([['AElig', '\u00C6'], ['AMP', '\u0026'], ['amp', '\u0026'], ['Aacute', '\u00C1'], ['Abreve', '\u0102'], ['Acirc', '\u00C2'], ['Acy', '\u0410'], ['Afr', '\uD835\uDD04'], ['Agrave', '\u00C0'], ['Alpha', '\u0391'], ['Amacr', '\u0100'], ['And', '\u2A53'], ['Aogon', '\u0104'], ['Aopf', '\uD835\uDD38'], ['ApplyFunction', '\u2061'], ['af', '\u2061'], ['Aring', '\u00C5'], ['angst', '\u00C5'], ['Ascr', '\uD835\uDC9C'], ['Assign', '\u2254'], ['colone', '\u2254'], ['coloneq', '\u2254'], ['Atilde', '\u00C3'], ['Auml', '\u00C4'], ['Backslash', '\u2216'], ['setminus', '\u2216'], ['setmn', '\u2216'], ['smallsetminus', '\u2216'], ['ssetmn', '\u2216'], ['Barv', '\u2AE7'], ['Barwed', '\u2306'], ['doublebarwedge', '\u2306'], ['Bcy', '\u0411'], ['Because', '\u2235'], ['becaus', '\u2235'], ['because', '\u2235'], ['Bernoullis', '\u212C'], ['Bscr', '\u212C'], ['bernou', '\u212C'], ['Beta', '\u0392'], ['Bfr', '\uD835\uDD05'], ['Bopf', '\uD835\uDD39'], ['Breve', '\u02D8'], ['breve', '\u02D8'], ['Bumpeq', '\u224E'], ['HumpDownHump', '\u224E'], ['bump', '\u224E'], ['CHcy', '\u0427'], ['COPY', '\u00A9'], ['copy', '\u00A9'], ['Cacute', '\u0106'], ['Cap', '\u22D2'], ['CapitalDifferentialD', '\u2145'], ['DD', '\u2145'], ['Cayleys', '\u212D'], ['Cfr', '\u212D'], ['Ccaron', '\u010C'], ['Ccedil', '\u00C7'], ['Ccirc', '\u0108'], ['Cconint', '\u2230'], ['Cdot', '\u010A'], ['Cedilla', '\u00B8'], ['cedil', '\u00B8'], ['CenterDot', '\u00B7'], ['centerdot', '\u00B7'], ['middot', '\u00B7'], ['Chi', '\u03A7'], ['CircleDot', '\u2299'], ['odot', '\u2299'], ['CircleMinus', '\u2296'], ['ominus', '\u2296'], ['CirclePlus', '\u2295'], ['oplus', '\u2295'], ['CircleTimes', '\u2297'], ['otimes', '\u2297'], ['ClockwiseContourIntegral', '\u2232'], ['cwconint', '\u2232'], ['CloseCurlyDoubleQuote', '\u201D'], ['rdquo', '\u201D'], ['rdquor', '\u201D'], ['CloseCurlyQuote', '\u2019'], ['rsquo', '\u2019'], ['rsquor', '\u2019'], ['Colon', '\u2237'], ['Proportion', '\u2237'], ['Colone', '\u2A74'], ['Congruent', '\u2261'], ['equiv', '\u2261'], ['Conint', '\u222F'], ['DoubleContourIntegral', '\u222F'], ['ContourIntegral', '\u222E'], ['conint', '\u222E'], ['oint', '\u222E'], ['Copf', '\u2102'], ['complexes', '\u2102'], ['Coproduct', '\u2210'], ['coprod', '\u2210'], ['CounterClockwiseContourIntegral', '\u2233'], ['awconint', '\u2233'], ['Cross', '\u2A2F'], ['Cscr', '\uD835\uDC9E'], ['Cup', '\u22D3'], ['CupCap', '\u224D'], ['asympeq', '\u224D'], ['DDotrahd', '\u2911'], ['DJcy', '\u0402'], ['DScy', '\u0405'], ['DZcy', '\u040F'], ['Dagger', '\u2021'], ['ddagger', '\u2021'], ['Darr', '\u21A1'], ['Dashv', '\u2AE4'], ['DoubleLeftTee', '\u2AE4'], ['Dcaron', '\u010E'], ['Dcy', '\u0414'], ['Del', '\u2207'], ['nabla', '\u2207'], ['Delta', '\u0394'], ['Dfr', '\uD835\uDD07'], ['DiacriticalAcute', '\u00B4'], ['acute', '\u00B4'], ['DiacriticalDot', '\u02D9'], ['dot', '\u02D9'], ['DiacriticalDoubleAcute', '\u02DD'], ['dblac', '\u02DD'], ['DiacriticalGrave', '\u0060'], ['grave', '\u0060'], ['DiacriticalTilde', '\u02DC'], ['tilde', '\u02DC'], ['Diamond', '\u22C4'], ['diam', '\u22C4'], ['diamond', '\u22C4'], ['DifferentialD', '\u2146'], ['dd', '\u2146'], ['Dopf', '\uD835\uDD3B'], ['Dot', '\u00A8'], ['DoubleDot', '\u00A8'], ['die', '\u00A8'], ['uml', '\u00A8'], ['DotDot', '\u20DC'], ['DotEqual', '\u2250'], ['doteq', '\u2250'], ['esdot', '\u2250'], ['DoubleDownArrow', '\u21D3'], ['Downarrow', '\u21D3'], ['dArr', '\u21D3'], ['DoubleLeftArrow', '\u21D0'], ['Leftarrow', '\u21D0'], ['lArr', '\u21D0'], ['DoubleLeftRightArrow', '\u21D4'], ['Leftrightarrow', '\u21D4'], ['hArr', '\u21D4'], ['iff', '\u21D4'], ['DoubleLongLeftArrow', '\u27F8'], ['Longleftarrow', '\u27F8'], ['xlArr', '\u27F8'], ['DoubleLongLeftRightArrow', '\u27FA'], ['Longleftrightarrow', '\u27FA'], ['xhArr', '\u27FA'], ['DoubleLongRightArrow', '\u27F9'], ['Longrightarrow', '\u27F9'], ['xrArr', '\u27F9'], ['DoubleRightArrow', '\u21D2'], ['Implies', '\u21D2'], ['Rightarrow', '\u21D2'], ['rArr', '\u21D2'], ['DoubleRightTee', '\u22A8'], ['vDash', '\u22A8'], ['DoubleUpArrow', '\u21D1'], ['Uparrow', '\u21D1'], ['uArr', '\u21D1'], ['DoubleUpDownArrow', '\u21D5'], ['Updownarrow', '\u21D5'], ['vArr', '\u21D5'], ['DoubleVerticalBar', '\u2225'], ['par', '\u2225'], ['parallel', '\u2225'], ['shortparallel', '\u2225'], ['spar', '\u2225'], ['DownArrow', '\u2193'], ['ShortDownArrow', '\u2193'], ['darr', '\u2193'], ['downarrow', '\u2193'], ['DownArrowBar', '\u2913'], ['DownArrowUpArrow', '\u21F5'], ['duarr', '\u21F5'], ['DownBreve', '\u0311'], ['DownLeftRightVector', '\u2950'], ['DownLeftTeeVector', '\u295E'], ['DownLeftVector', '\u21BD'], ['leftharpoondown', '\u21BD'], ['lhard', '\u21BD'], ['DownLeftVectorBar', '\u2956'], ['DownRightTeeVector', '\u295F'], ['DownRightVector', '\u21C1'], ['rhard', '\u21C1'], ['rightharpoondown', '\u21C1'], ['DownRightVectorBar', '\u2957'], ['DownTee', '\u22A4'], ['top', '\u22A4'], ['DownTeeArrow', '\u21A7'], ['mapstodown', '\u21A7'], ['Dscr', '\uD835\uDC9F'], ['Dstrok', '\u0110'], ['ENG', '\u014A'], ['ETH', '\u00D0'], ['Eacute', '\u00C9'], ['Ecaron', '\u011A'], ['Ecirc', '\u00CA'], ['Ecy', '\u042D'], ['Edot', '\u0116'], ['Efr', '\uD835\uDD08'], ['Egrave', '\u00C8'], ['Element', '\u2208'], ['in', '\u2208'], ['isin', '\u2208'], ['isinv', '\u2208'], ['Emacr', '\u0112'], ['EmptySmallSquare', '\u25FB'], ['EmptyVerySmallSquare', '\u25AB'], ['Eogon', '\u0118'], ['Eopf', '\uD835\uDD3C'], ['Epsilon', '\u0395'], ['Equal', '\u2A75'], ['EqualTilde', '\u2242'], ['eqsim', '\u2242'], ['esim', '\u2242'], ['Equilibrium', '\u21CC'], ['rightleftharpoons', '\u21CC'], ['rlhar', '\u21CC'], ['Escr', '\u2130'], ['expectation', '\u2130'], ['Esim', '\u2A73'], ['Eta', '\u0397'], ['Euml', '\u00CB'], ['Exists', '\u2203'], ['exist', '\u2203'], ['ExponentialE', '\u2147'], ['ee', '\u2147'], ['exponentiale', '\u2147'], ['Fcy', '\u0424'], ['Ffr', '\uD835\uDD09'], ['FilledSmallSquare', '\u25FC'], ['FilledVerySmallSquare', '\u25AA'], ['blacksquare', '\u25AA'], ['squarf', '\u25AA'], ['squf', '\u25AA'], ['Fopf', '\uD835\uDD3D'], ['ForAll', '\u2200'], ['forall', '\u2200'], ['Fouriertrf', '\u2131'], ['Fscr', '\u2131'], ['GJcy', '\u0403'], ['GT', '\u003E'], ['gt', '\u003E'], ['Gamma', '\u0393'], ['Gammad', '\u03DC'], ['Gbreve', '\u011E'], ['Gcedil', '\u0122'], ['Gcirc', '\u011C'], ['Gcy', '\u0413'], ['Gdot', '\u0120'], ['Gfr', '\uD835\uDD0A'], ['Gg', '\u22D9'], ['ggg', '\u22D9'], ['Gopf', '\uD835\uDD3E'], ['GreaterEqual', '\u2265'], ['ge', '\u2265'], ['geq', '\u2265'], ['GreaterEqualLess', '\u22DB'], ['gel', '\u22DB'], ['gtreqless', '\u22DB'], ['GreaterFullEqual', '\u2267'], ['gE', '\u2267'], ['geqq', '\u2267'], ['GreaterGreater', '\u2AA2'], ['GreaterLess', '\u2277'], ['gl', '\u2277'], ['gtrless', '\u2277'], ['GreaterSlantEqual', '\u2A7E'], ['geqslant', '\u2A7E'], ['ges', '\u2A7E'], ['GreaterTilde', '\u2273'], ['gsim', '\u2273'], ['gtrsim', '\u2273'], ['Gscr', '\uD835\uDCA2'], ['Gt', '\u226B'], ['NestedGreaterGreater', '\u226B'], ['gg', '\u226B'], ['HARDcy', '\u042A'], ['Hacek', '\u02C7'], ['caron', '\u02C7'], ['Hat', '\u005E'], ['Hcirc', '\u0124'], ['Hfr', '\u210C'], ['Poincareplane', '\u210C'], ['HilbertSpace', '\u210B'], ['Hscr', '\u210B'], ['hamilt', '\u210B'], ['Hopf', '\u210D'], ['quaternions', '\u210D'], ['HorizontalLine', '\u2500'], ['boxh', '\u2500'], ['Hstrok', '\u0126'], ['HumpEqual', '\u224F'], ['bumpe', '\u224F'], ['bumpeq', '\u224F'], ['IEcy', '\u0415'], ['IJlig', '\u0132'], ['IOcy', '\u0401'], ['Iacute', '\u00CD'], ['Icirc', '\u00CE'], ['Icy', '\u0418'], ['Idot', '\u0130'], ['Ifr', '\u2111'], ['Im', '\u2111'], ['image', '\u2111'], ['imagpart', '\u2111'], ['Igrave', '\u00CC'], ['Imacr', '\u012A'], ['ImaginaryI', '\u2148'], ['ii', '\u2148'], ['Int', '\u222C'], ['Integral', '\u222B'], ['int', '\u222B'], ['Intersection', '\u22C2'], ['bigcap', '\u22C2'], ['xcap', '\u22C2'], ['InvisibleComma', '\u2063'], ['ic', '\u2063'], ['InvisibleTimes', '\u2062'], ['it', '\u2062'], ['Iogon', '\u012E'], ['Iopf', '\uD835\uDD40'], ['Iota', '\u0399'], ['Iscr', '\u2110'], ['imagline', '\u2110'], ['Itilde', '\u0128'], ['Iukcy', '\u0406'], ['Iuml', '\u00CF'], ['Jcirc', '\u0134'], ['Jcy', '\u0419'], ['Jfr', '\uD835\uDD0D'], ['Jopf', '\uD835\uDD41'], ['Jscr', '\uD835\uDCA5'], ['Jsercy', '\u0408'], ['Jukcy', '\u0404'], ['KHcy', '\u0425'], ['KJcy', '\u040C'], ['Kappa', '\u039A'], ['Kcedil', '\u0136'], ['Kcy', '\u041A'], ['Kfr', '\uD835\uDD0E'], ['Kopf', '\uD835\uDD42'], ['Kscr', '\uD835\uDCA6'], ['LJcy', '\u0409'], ['LT', '\u003C'], ['lt', '\u003C'], ['Lacute', '\u0139'], ['Lambda', '\u039B'], ['Lang', '\u27EA'], ['Laplacetrf', '\u2112'], ['Lscr', '\u2112'], ['lagran', '\u2112'], ['Larr', '\u219E'], ['twoheadleftarrow', '\u219E'], ['Lcaron', '\u013D'], ['Lcedil', '\u013B'], ['Lcy', '\u041B'], ['LeftAngleBracket', '\u27E8'], ['lang', '\u27E8'], ['langle', '\u27E8'], ['LeftArrow', '\u2190'], ['ShortLeftArrow', '\u2190'], ['larr', '\u2190'], ['leftarrow', '\u2190'], ['slarr', '\u2190'], ['LeftArrowBar', '\u21E4'], ['larrb', '\u21E4'], ['LeftArrowRightArrow', '\u21C6'], ['leftrightarrows', '\u21C6'], ['lrarr', '\u21C6'], ['LeftCeiling', '\u2308'], ['lceil', '\u2308'], ['LeftDoubleBracket', '\u27E6'], ['lobrk', '\u27E6'], ['LeftDownTeeVector', '\u2961'], ['LeftDownVector', '\u21C3'], ['dharl', '\u21C3'], ['downharpoonleft', '\u21C3'], ['LeftDownVectorBar', '\u2959'], ['LeftFloor', '\u230A'], ['lfloor', '\u230A'], ['LeftRightArrow', '\u2194'], ['harr', '\u2194'], ['leftrightarrow', '\u2194'], ['LeftRightVector', '\u294E'], ['LeftTee', '\u22A3'], ['dashv', '\u22A3'], ['LeftTeeArrow', '\u21A4'], ['mapstoleft', '\u21A4'], ['LeftTeeVector', '\u295A'], ['LeftTriangle', '\u22B2'], ['vartriangleleft', '\u22B2'], ['vltri', '\u22B2'], ['LeftTriangleBar', '\u29CF'], ['LeftTriangleEqual', '\u22B4'], ['ltrie', '\u22B4'], ['trianglelefteq', '\u22B4'], ['LeftUpDownVector', '\u2951'], ['LeftUpTeeVector', '\u2960'], ['LeftUpVector', '\u21BF'], ['uharl', '\u21BF'], ['upharpoonleft', '\u21BF'], ['LeftUpVectorBar', '\u2958'], ['LeftVector', '\u21BC'], ['leftharpoonup', '\u21BC'], ['lharu', '\u21BC'], ['LeftVectorBar', '\u2952'], ['LessEqualGreater', '\u22DA'], ['leg', '\u22DA'], ['lesseqgtr', '\u22DA'], ['LessFullEqual', '\u2266'], ['lE', '\u2266'], ['leqq', '\u2266'], ['LessGreater', '\u2276'], ['lessgtr', '\u2276'], ['lg', '\u2276'], ['LessLess', '\u2AA1'], ['LessSlantEqual', '\u2A7D'], ['leqslant', '\u2A7D'], ['les', '\u2A7D'], ['LessTilde', '\u2272'], ['lesssim', '\u2272'], ['lsim', '\u2272'], ['Lfr', '\uD835\uDD0F'], ['Ll', '\u22D8'], ['Lleftarrow', '\u21DA'], ['lAarr', '\u21DA'], ['Lmidot', '\u013F'], ['LongLeftArrow', '\u27F5'], ['longleftarrow', '\u27F5'], ['xlarr', '\u27F5'], ['LongLeftRightArrow', '\u27F7'], ['longleftrightarrow', '\u27F7'], ['xharr', '\u27F7'], ['LongRightArrow', '\u27F6'], ['longrightarrow', '\u27F6'], ['xrarr', '\u27F6'], ['Lopf', '\uD835\uDD43'], ['LowerLeftArrow', '\u2199'], ['swarr', '\u2199'], ['swarrow', '\u2199'], ['LowerRightArrow', '\u2198'], ['searr', '\u2198'], ['searrow', '\u2198'], ['Lsh', '\u21B0'], ['lsh', '\u21B0'], ['Lstrok', '\u0141'], ['Lt', '\u226A'], ['NestedLessLess', '\u226A'], ['ll', '\u226A'], ['Map', '\u2905'], ['Mcy', '\u041C'], ['MediumSpace', '\u205F'], ['Mellintrf', '\u2133'], ['Mscr', '\u2133'], ['phmmat', '\u2133'], ['Mfr', '\uD835\uDD10'], ['MinusPlus', '\u2213'], ['mnplus', '\u2213'], ['mp', '\u2213'], ['Mopf', '\uD835\uDD44'], ['Mu', '\u039C'], ['NJcy', '\u040A'], ['Nacute', '\u0143'], ['Ncaron', '\u0147'], ['Ncedil', '\u0145'], ['Ncy', '\u041D'], ['NegativeMediumSpace', '\u200B'], ['NegativeThickSpace', '\u200B'], ['NegativeThinSpace', '\u200B'], ['NegativeVeryThinSpace', '\u200B'], ['ZeroWidthSpace', '\u200B'], ['NewLine', '\u000A'], ['Nfr', '\uD835\uDD11'], ['NoBreak', '\u2060'], ['NonBreakingSpace', '\u00A0'], ['nbsp', '\u00A0'], ['Nopf', '\u2115'], ['naturals', '\u2115'], ['Not', '\u2AEC'], ['NotCongruent', '\u2262'], ['nequiv', '\u2262'], ['NotCupCap', '\u226D'], ['NotDoubleVerticalBar', '\u2226'], ['npar', '\u2226'], ['nparallel', '\u2226'], ['nshortparallel', '\u2226'], ['nspar', '\u2226'], ['NotElement', '\u2209'], ['notin', '\u2209'], ['notinva', '\u2209'], ['NotEqual', '\u2260'], ['ne', '\u2260'], ['NotEqualTilde', '\u2242\u0338'], ['nesim', '\u2242\u0338'], ['NotExists', '\u2204'], ['nexist', '\u2204'], ['nexists', '\u2204'], ['NotGreater', '\u226F'], ['ngt', '\u226F'], ['ngtr', '\u226F'], ['NotGreaterEqual', '\u2271'], ['nge', '\u2271'], ['ngeq', '\u2271'], ['NotGreaterFullEqual', '\u2267\u0338'], ['ngE', '\u2267\u0338'], ['ngeqq', '\u2267\u0338'], ['NotGreaterGreater', '\u226B\u0338'], ['nGtv', '\u226B\u0338'], ['NotGreaterLess', '\u2279'], ['ntgl', '\u2279'], ['NotGreaterSlantEqual', '\u2A7E\u0338'], ['ngeqslant', '\u2A7E\u0338'], ['nges', '\u2A7E\u0338'], ['NotGreaterTilde', '\u2275'], ['ngsim', '\u2275'], ['NotHumpDownHump', '\u224E\u0338'], ['nbump', '\u224E\u0338'], ['NotHumpEqual', '\u224F\u0338'], ['nbumpe', '\u224F\u0338'], ['NotLeftTriangle', '\u22EA'], ['nltri', '\u22EA'], ['ntriangleleft', '\u22EA'], ['NotLeftTriangleBar', '\u29CF\u0338'], ['NotLeftTriangleEqual', '\u22EC'], ['nltrie', '\u22EC'], ['ntrianglelefteq', '\u22EC'], ['NotLess', '\u226E'], ['nless', '\u226E'], ['nlt', '\u226E'], ['NotLessEqual', '\u2270'], ['nle', '\u2270'], ['nleq', '\u2270'], ['NotLessGreater', '\u2278'], ['ntlg', '\u2278'], ['NotLessLess', '\u226A\u0338'], ['nLtv', '\u226A\u0338'], ['NotLessSlantEqual', '\u2A7D\u0338'], ['nleqslant', '\u2A7D\u0338'], ['nles', '\u2A7D\u0338'], ['NotLessTilde', '\u2274'], ['nlsim', '\u2274'], ['NotNestedGreaterGreater', '\u2AA2\u0338'], ['NotNestedLessLess', '\u2AA1\u0338'], ['NotPrecedes', '\u2280'], ['npr', '\u2280'], ['nprec', '\u2280'], ['NotPrecedesEqual', '\u2AAF\u0338'], ['npre', '\u2AAF\u0338'], ['npreceq', '\u2AAF\u0338'], ['NotPrecedesSlantEqual', '\u22E0'], ['nprcue', '\u22E0'], ['NotReverseElement', '\u220C'], ['notni', '\u220C'], ['notniva', '\u220C'], ['NotRightTriangle', '\u22EB'], ['nrtri', '\u22EB'], ['ntriangleright', '\u22EB'], ['NotRightTriangleBar', '\u29D0\u0338'], ['NotRightTriangleEqual', '\u22ED'], ['nrtrie', '\u22ED'], ['ntrianglerighteq', '\u22ED'], ['NotSquareSubset', '\u228F\u0338'], ['NotSquareSubsetEqual', '\u22E2'], ['nsqsube', '\u22E2'], ['NotSquareSuperset', '\u2290\u0338'], ['NotSquareSupersetEqual', '\u22E3'], ['nsqsupe', '\u22E3'], ['NotSubset', '\u2282\u20D2'], ['nsubset', '\u2282\u20D2'], ['vnsub', '\u2282\u20D2'], ['NotSubsetEqual', '\u2288'], ['nsube', '\u2288'], ['nsubseteq', '\u2288'], ['NotSucceeds', '\u2281'], ['nsc', '\u2281'], ['nsucc', '\u2281'], ['NotSucceedsEqual', '\u2AB0\u0338'], ['nsce', '\u2AB0\u0338'], ['nsucceq', '\u2AB0\u0338'], ['NotSucceedsSlantEqual', '\u22E1'], ['nsccue', '\u22E1'], ['NotSucceedsTilde', '\u227F\u0338'], ['NotSuperset', '\u2283\u20D2'], ['nsupset', '\u2283\u20D2'], ['vnsup', '\u2283\u20D2'], ['NotSupersetEqual', '\u2289'], ['nsupe', '\u2289'], ['nsupseteq', '\u2289'], ['NotTilde', '\u2241'], ['nsim', '\u2241'], ['NotTildeEqual', '\u2244'], ['nsime', '\u2244'], ['nsimeq', '\u2244'], ['NotTildeFullEqual', '\u2247'], ['ncong', '\u2247'], ['NotTildeTilde', '\u2249'], ['nap', '\u2249'], ['napprox', '\u2249'], ['NotVerticalBar', '\u2224'], ['nmid', '\u2224'], ['nshortmid', '\u2224'], ['nsmid', '\u2224'], ['Nscr', '\uD835\uDCA9'], ['Ntilde', '\u00D1'], ['Nu', '\u039D'], ['OElig', '\u0152'], ['Oacute', '\u00D3'], ['Ocirc', '\u00D4'], ['Ocy', '\u041E'], ['Odblac', '\u0150'], ['Ofr', '\uD835\uDD12'], ['Ograve', '\u00D2'], ['Omacr', '\u014C'], ['Omega', '\u03A9'], ['ohm', '\u03A9'], ['Omicron', '\u039F'], ['Oopf', '\uD835\uDD46'], ['OpenCurlyDoubleQuote', '\u201C'], ['ldquo', '\u201C'], ['OpenCurlyQuote', '\u2018'], ['lsquo', '\u2018'], ['Or', '\u2A54'], ['Oscr', '\uD835\uDCAA'], ['Oslash', '\u00D8'], ['Otilde', '\u00D5'], ['Otimes', '\u2A37'], ['Ouml', '\u00D6'], ['OverBar', '\u203E'], ['oline', '\u203E'], ['OverBrace', '\u23DE'], ['OverBracket', '\u23B4'], ['tbrk', '\u23B4'], ['OverParenthesis', '\u23DC'], ['PartialD', '\u2202'], ['part', '\u2202'], ['Pcy', '\u041F'], ['Pfr', '\uD835\uDD13'], ['Phi', '\u03A6'], ['Pi', '\u03A0'], ['PlusMinus', '\u00B1'], ['plusmn', '\u00B1'], ['pm', '\u00B1'], ['Popf', '\u2119'], ['primes', '\u2119'], ['Pr', '\u2ABB'], ['Precedes', '\u227A'], ['pr', '\u227A'], ['prec', '\u227A'], ['PrecedesEqual', '\u2AAF'], ['pre', '\u2AAF'], ['preceq', '\u2AAF'], ['PrecedesSlantEqual', '\u227C'], ['prcue', '\u227C'], ['preccurlyeq', '\u227C'], ['PrecedesTilde', '\u227E'], ['precsim', '\u227E'], ['prsim', '\u227E'], ['Prime', '\u2033'], ['Product', '\u220F'], ['prod', '\u220F'], ['Proportional', '\u221D'], ['prop', '\u221D'], ['propto', '\u221D'], ['varpropto', '\u221D'], ['vprop', '\u221D'], ['Pscr', '\uD835\uDCAB'], ['Psi', '\u03A8'], ['QUOT', '\u0022'], ['quot', '\u0022'], ['Qfr', '\uD835\uDD14'], ['Qopf', '\u211A'], ['rationals', '\u211A'], ['Qscr', '\uD835\uDCAC'], ['RBarr', '\u2910'], ['drbkarow', '\u2910'], ['REG', '\u00AE'], ['circledR', '\u00AE'], ['reg', '\u00AE'], ['Racute', '\u0154'], ['Rang', '\u27EB'], ['Rarr', '\u21A0'], ['twoheadrightarrow', '\u21A0'], ['Rarrtl', '\u2916'], ['Rcaron', '\u0158'], ['Rcedil', '\u0156'], ['Rcy', '\u0420'], ['Re', '\u211C'], ['Rfr', '\u211C'], ['real', '\u211C'], ['realpart', '\u211C'], ['ReverseElement', '\u220B'], ['SuchThat', '\u220B'], ['ni', '\u220B'], ['niv', '\u220B'], ['ReverseEquilibrium', '\u21CB'], ['leftrightharpoons', '\u21CB'], ['lrhar', '\u21CB'], ['ReverseUpEquilibrium', '\u296F'], ['duhar', '\u296F'], ['Rho', '\u03A1'], ['RightAngleBracket', '\u27E9'], ['rang', '\u27E9'], ['rangle', '\u27E9'], ['RightArrow', '\u2192'], ['ShortRightArrow', '\u2192'], ['rarr', '\u2192'], ['rightarrow', '\u2192'], ['srarr', '\u2192'], ['RightArrowBar', '\u21E5'], ['rarrb', '\u21E5'], ['RightArrowLeftArrow', '\u21C4'], ['rightleftarrows', '\u21C4'], ['rlarr', '\u21C4'], ['RightCeiling', '\u2309'], ['rceil', '\u2309'], ['RightDoubleBracket', '\u27E7'], ['robrk', '\u27E7'], ['RightDownTeeVector', '\u295D'], ['RightDownVector', '\u21C2'], ['dharr', '\u21C2'], ['downharpoonright', '\u21C2'], ['RightDownVectorBar', '\u2955'], ['RightFloor', '\u230B'], ['rfloor', '\u230B'], ['RightTee', '\u22A2'], ['vdash', '\u22A2'], ['RightTeeArrow', '\u21A6'], ['map', '\u21A6'], ['mapsto', '\u21A6'], ['RightTeeVector', '\u295B'], ['RightTriangle', '\u22B3'], ['vartriangleright', '\u22B3'], ['vrtri', '\u22B3'], ['RightTriangleBar', '\u29D0'], ['RightTriangleEqual', '\u22B5'], ['rtrie', '\u22B5'], ['trianglerighteq', '\u22B5'], ['RightUpDownVector', '\u294F'], ['RightUpTeeVector', '\u295C'], ['RightUpVector', '\u21BE'], ['uharr', '\u21BE'], ['upharpoonright', '\u21BE'], ['RightUpVectorBar', '\u2954'], ['RightVector', '\u21C0'], ['rharu', '\u21C0'], ['rightharpoonup', '\u21C0'], ['RightVectorBar', '\u2953'], ['Ropf', '\u211D'], ['reals', '\u211D'], ['RoundImplies', '\u2970'], ['Rrightarrow', '\u21DB'], ['rAarr', '\u21DB'], ['Rscr', '\u211B'], ['realine', '\u211B'], ['Rsh', '\u21B1'], ['rsh', '\u21B1'], ['RuleDelayed', '\u29F4'], ['SHCHcy', '\u0429'], ['SHcy', '\u0428'], ['SOFTcy', '\u042C'], ['Sacute', '\u015A'], ['Sc', '\u2ABC'], ['Scaron', '\u0160'], ['Scedil', '\u015E'], ['Scirc', '\u015C'], ['Scy', '\u0421'], ['Sfr', '\uD835\uDD16'], ['ShortUpArrow', '\u2191'], ['UpArrow', '\u2191'], ['uarr', '\u2191'], ['uparrow', '\u2191'], ['Sigma', '\u03A3'], ['SmallCircle', '\u2218'], ['compfn', '\u2218'], ['Sopf', '\uD835\uDD4A'], ['Sqrt', '\u221A'], ['radic', '\u221A'], ['Square', '\u25A1'], ['squ', '\u25A1'], ['square', '\u25A1'], ['SquareIntersection', '\u2293'], ['sqcap', '\u2293'], ['SquareSubset', '\u228F'], ['sqsub', '\u228F'], ['sqsubset', '\u228F'], ['SquareSubsetEqual', '\u2291'], ['sqsube', '\u2291'], ['sqsubseteq', '\u2291'], ['SquareSuperset', '\u2290'], ['sqsup', '\u2290'], ['sqsupset', '\u2290'], ['SquareSupersetEqual', '\u2292'], ['sqsupe', '\u2292'], ['sqsupseteq', '\u2292'], ['SquareUnion', '\u2294'], ['sqcup', '\u2294'], ['Sscr', '\uD835\uDCAE'], ['Star', '\u22C6'], ['sstarf', '\u22C6'], ['Sub', '\u22D0'], ['Subset', '\u22D0'], ['SubsetEqual', '\u2286'], ['sube', '\u2286'], ['subseteq', '\u2286'], ['Succeeds', '\u227B'], ['sc', '\u227B'], ['succ', '\u227B'], ['SucceedsEqual', '\u2AB0'], ['sce', '\u2AB0'], ['succeq', '\u2AB0'], ['SucceedsSlantEqual', '\u227D'], ['sccue', '\u227D'], ['succcurlyeq', '\u227D'], ['SucceedsTilde', '\u227F'], ['scsim', '\u227F'], ['succsim', '\u227F'], ['Sum', '\u2211'], ['sum', '\u2211'], ['Sup', '\u22D1'], ['Supset', '\u22D1'], ['Superset', '\u2283'], ['sup', '\u2283'], ['supset', '\u2283'], ['SupersetEqual', '\u2287'], ['supe', '\u2287'], ['supseteq', '\u2287'], ['THORN', '\u00DE'], ['TRADE', '\u2122'], ['trade', '\u2122'], ['TSHcy', '\u040B'], ['TScy', '\u0426'], ['Tab', '\u0009'], ['Tau', '\u03A4'], ['Tcaron', '\u0164'], ['Tcedil', '\u0162'], ['Tcy', '\u0422'], ['Tfr', '\uD835\uDD17'], ['Therefore', '\u2234'], ['there4', '\u2234'], ['therefore', '\u2234'], ['Theta', '\u0398'], ['ThickSpace', '\u205F\u200A'], ['ThinSpace', '\u2009'], ['thinsp', '\u2009'], ['Tilde', '\u223C'], ['sim', '\u223C'], ['thicksim', '\u223C'], ['thksim', '\u223C'], ['TildeEqual', '\u2243'], ['sime', '\u2243'], ['simeq', '\u2243'], ['TildeFullEqual', '\u2245'], ['cong', '\u2245'], ['TildeTilde', '\u2248'], ['ap', '\u2248'], ['approx', '\u2248'], ['asymp', '\u2248'], ['thickapprox', '\u2248'], ['thkap', '\u2248'], ['Topf', '\uD835\uDD4B'], ['TripleDot', '\u20DB'], ['tdot', '\u20DB'], ['Tscr', '\uD835\uDCAF'], ['Tstrok', '\u0166'], ['Uacute', '\u00DA'], ['Uarr', '\u219F'], ['Uarrocir', '\u2949'], ['Ubrcy', '\u040E'], ['Ubreve', '\u016C'], ['Ucirc', '\u00DB'], ['Ucy', '\u0423'], ['Udblac', '\u0170'], ['Ufr', '\uD835\uDD18'], ['Ugrave', '\u00D9'], ['Umacr', '\u016A'], ['UnderBar', '\u005F'], ['lowbar', '\u005F'], ['UnderBrace', '\u23DF'], ['UnderBracket', '\u23B5'], ['bbrk', '\u23B5'], ['UnderParenthesis', '\u23DD'], ['Union', '\u22C3'], ['bigcup', '\u22C3'], ['xcup', '\u22C3'], ['UnionPlus', '\u228E'], ['uplus', '\u228E'], ['Uogon', '\u0172'], ['Uopf', '\uD835\uDD4C'], ['UpArrowBar', '\u2912'], ['UpArrowDownArrow', '\u21C5'], ['udarr', '\u21C5'], ['UpDownArrow', '\u2195'], ['updownarrow', '\u2195'], ['varr', '\u2195'], ['UpEquilibrium', '\u296E'], ['udhar', '\u296E'], ['UpTee', '\u22A5'], ['bot', '\u22A5'], ['bottom', '\u22A5'], ['perp', '\u22A5'], ['UpTeeArrow', '\u21A5'], ['mapstoup', '\u21A5'], ['UpperLeftArrow', '\u2196'], ['nwarr', '\u2196'], ['nwarrow', '\u2196'], ['UpperRightArrow', '\u2197'], ['nearr', '\u2197'], ['nearrow', '\u2197'], ['Upsi', '\u03D2'], ['upsih', '\u03D2'], ['Upsilon', '\u03A5'], ['Uring', '\u016E'], ['Uscr', '\uD835\uDCB0'], ['Utilde', '\u0168'], ['Uuml', '\u00DC'], ['VDash', '\u22AB'], ['Vbar', '\u2AEB'], ['Vcy', '\u0412'], ['Vdash', '\u22A9'], ['Vdashl', '\u2AE6'], ['Vee', '\u22C1'], ['bigvee', '\u22C1'], ['xvee', '\u22C1'], ['Verbar', '\u2016'], ['Vert', '\u2016'], ['VerticalBar', '\u2223'], ['mid', '\u2223'], ['shortmid', '\u2223'], ['smid', '\u2223'], ['VerticalLine', '\u007C'], ['verbar', '\u007C'], ['vert', '\u007C'], ['VerticalSeparator', '\u2758'], ['VerticalTilde', '\u2240'], ['wr', '\u2240'], ['wreath', '\u2240'], ['VeryThinSpace', '\u200A'], ['hairsp', '\u200A'], ['Vfr', '\uD835\uDD19'], ['Vopf', '\uD835\uDD4D'], ['Vscr', '\uD835\uDCB1'], ['Vvdash', '\u22AA'], ['Wcirc', '\u0174'], ['Wedge', '\u22C0'], ['bigwedge', '\u22C0'], ['xwedge', '\u22C0'], ['Wfr', '\uD835\uDD1A'], ['Wopf', '\uD835\uDD4E'], ['Wscr', '\uD835\uDCB2'], ['Xfr', '\uD835\uDD1B'], ['Xi', '\u039E'], ['Xopf', '\uD835\uDD4F'], ['Xscr', '\uD835\uDCB3'], ['YAcy', '\u042F'], ['YIcy', '\u0407'], ['YUcy', '\u042E'], ['Yacute', '\u00DD'], ['Ycirc', '\u0176'], ['Ycy', '\u042B'], ['Yfr', '\uD835\uDD1C'], ['Yopf', '\uD835\uDD50'], ['Yscr', '\uD835\uDCB4'], ['Yuml', '\u0178'], ['ZHcy', '\u0416'], ['Zacute', '\u0179'], ['Zcaron', '\u017D'], ['Zcy', '\u0417'], ['Zdot', '\u017B'], ['Zeta', '\u0396'], ['Zfr', '\u2128'], ['zeetrf', '\u2128'], ['Zopf', '\u2124'], ['integers', '\u2124'], ['Zscr', '\uD835\uDCB5'], ['aacute', '\u00E1'], ['abreve', '\u0103'], ['ac', '\u223E'], ['mstpos', '\u223E'], ['acE', '\u223E\u0333'], ['acd', '\u223F'], ['acirc', '\u00E2'], ['acy', '\u0430'], ['aelig', '\u00E6'], ['afr', '\uD835\uDD1E'], ['agrave', '\u00E0'], ['alefsym', '\u2135'], ['aleph', '\u2135'], ['alpha', '\u03B1'], ['amacr', '\u0101'], ['amalg', '\u2A3F'], ['and', '\u2227'], ['wedge', '\u2227'], ['andand', '\u2A55'], ['andd', '\u2A5C'], ['andslope', '\u2A58'], ['andv', '\u2A5A'], ['ang', '\u2220'], ['angle', '\u2220'], ['ange', '\u29A4'], ['angmsd', '\u2221'], ['measuredangle', '\u2221'], ['angmsdaa', '\u29A8'], ['angmsdab', '\u29A9'], ['angmsdac', '\u29AA'], ['angmsdad', '\u29AB'], ['angmsdae', '\u29AC'], ['angmsdaf', '\u29AD'], ['angmsdag', '\u29AE'], ['angmsdah', '\u29AF'], ['angrt', '\u221F'], ['angrtvb', '\u22BE'], ['angrtvbd', '\u299D'], ['angsph', '\u2222'], ['angzarr', '\u237C'], ['aogon', '\u0105'], ['aopf', '\uD835\uDD52'], ['apE', '\u2A70'], ['apacir', '\u2A6F'], ['ape', '\u224A'], ['approxeq', '\u224A'], ['apid', '\u224B'], ['apos', '\u0027'], ['aring', '\u00E5'], ['ascr', '\uD835\uDCB6'], ['ast', '\u002A'], ['midast', '\u002A'], ['atilde', '\u00E3'], ['auml', '\u00E4'], ['awint', '\u2A11'], ['bNot', '\u2AED'], ['backcong', '\u224C'], ['bcong', '\u224C'], ['backepsilon', '\u03F6'], ['bepsi', '\u03F6'], ['backprime', '\u2035'], ['bprime', '\u2035'], ['backsim', '\u223D'], ['bsim', '\u223D'], ['backsimeq', '\u22CD'], ['bsime', '\u22CD'], ['barvee', '\u22BD'], ['barwed', '\u2305'], ['barwedge', '\u2305'], ['bbrktbrk', '\u23B6'], ['bcy', '\u0431'], ['bdquo', '\u201E'], ['ldquor', '\u201E'], ['bemptyv', '\u29B0'], ['beta', '\u03B2'], ['beth', '\u2136'], ['between', '\u226C'], ['twixt', '\u226C'], ['bfr', '\uD835\uDD1F'], ['bigcirc', '\u25EF'], ['xcirc', '\u25EF'], ['bigodot', '\u2A00'], ['xodot', '\u2A00'], ['bigoplus', '\u2A01'], ['xoplus', '\u2A01'], ['bigotimes', '\u2A02'], ['xotime', '\u2A02'], ['bigsqcup', '\u2A06'], ['xsqcup', '\u2A06'], ['bigstar', '\u2605'], ['starf', '\u2605'], ['bigtriangledown', '\u25BD'], ['xdtri', '\u25BD'], ['bigtriangleup', '\u25B3'], ['xutri', '\u25B3'], ['biguplus', '\u2A04'], ['xuplus', '\u2A04'], ['bkarow', '\u290D'], ['rbarr', '\u290D'], ['blacklozenge', '\u29EB'], ['lozf', '\u29EB'], ['blacktriangle', '\u25B4'], ['utrif', '\u25B4'], ['blacktriangledown', '\u25BE'], ['dtrif', '\u25BE'], ['blacktriangleleft', '\u25C2'], ['ltrif', '\u25C2'], ['blacktriangleright', '\u25B8'], ['rtrif', '\u25B8'], ['blank', '\u2423'], ['blk12', '\u2592'], ['blk14', '\u2591'], ['blk34', '\u2593'], ['block', '\u2588'], ['bne', '\u003D\u20E5'], ['bnequiv', '\u2261\u20E5'], ['bnot', '\u2310'], ['bopf', '\uD835\uDD53'], ['bowtie', '\u22C8'], ['boxDL', '\u2557'], ['boxDR', '\u2554'], ['boxDl', '\u2556'], ['boxDr', '\u2553'], ['boxH', '\u2550'], ['boxHD', '\u2566'], ['boxHU', '\u2569'], ['boxHd', '\u2564'], ['boxHu', '\u2567'], ['boxUL', '\u255D'], ['boxUR', '\u255A'], ['boxUl', '\u255C'], ['boxUr', '\u2559'], ['boxV', '\u2551'], ['boxVH', '\u256C'], ['boxVL', '\u2563'], ['boxVR', '\u2560'], ['boxVh', '\u256B'], ['boxVl', '\u2562'], ['boxVr', '\u255F'], ['boxbox', '\u29C9'], ['boxdL', '\u2555'], ['boxdR', '\u2552'], ['boxdl', '\u2510'], ['boxdr', '\u250C'], ['boxhD', '\u2565'], ['boxhU', '\u2568'], ['boxhd', '\u252C'], ['boxhu', '\u2534'], ['boxminus', '\u229F'], ['minusb', '\u229F'], ['boxplus', '\u229E'], ['plusb', '\u229E'], ['boxtimes', '\u22A0'], ['timesb', '\u22A0'], ['boxuL', '\u255B'], ['boxuR', '\u2558'], ['boxul', '\u2518'], ['boxur', '\u2514'], ['boxv', '\u2502'], ['boxvH', '\u256A'], ['boxvL', '\u2561'], ['boxvR', '\u255E'], ['boxvh', '\u253C'], ['boxvl', '\u2524'], ['boxvr', '\u251C'], ['brvbar', '\u00A6'], ['bscr', '\uD835\uDCB7'], ['bsemi', '\u204F'], ['bsol', '\u005C'], ['bsolb', '\u29C5'], ['bsolhsub', '\u27C8'], ['bull', '\u2022'], ['bullet', '\u2022'], ['bumpE', '\u2AAE'], ['cacute', '\u0107'], ['cap', '\u2229'], ['capand', '\u2A44'], ['capbrcup', '\u2A49'], ['capcap', '\u2A4B'], ['capcup', '\u2A47'], ['capdot', '\u2A40'], ['caps', '\u2229\uFE00'], ['caret', '\u2041'], ['ccaps', '\u2A4D'], ['ccaron', '\u010D'], ['ccedil', '\u00E7'], ['ccirc', '\u0109'], ['ccups', '\u2A4C'], ['ccupssm', '\u2A50'], ['cdot', '\u010B'], ['cemptyv', '\u29B2'], ['cent', '\u00A2'], ['cfr', '\uD835\uDD20'], ['chcy', '\u0447'], ['check', '\u2713'], ['checkmark', '\u2713'], ['chi', '\u03C7'], ['cir', '\u25CB'], ['cirE', '\u29C3'], ['circ', '\u02C6'], ['circeq', '\u2257'], ['cire', '\u2257'], ['circlearrowleft', '\u21BA'], ['olarr', '\u21BA'], ['circlearrowright', '\u21BB'], ['orarr', '\u21BB'], ['circledS', '\u24C8'], ['oS', '\u24C8'], ['circledast', '\u229B'], ['oast', '\u229B'], ['circledcirc', '\u229A'], ['ocir', '\u229A'], ['circleddash', '\u229D'], ['odash', '\u229D'], ['cirfnint', '\u2A10'], ['cirmid', '\u2AEF'], ['cirscir', '\u29C2'], ['clubs', '\u2663'], ['clubsuit', '\u2663'], ['colon', '\u003A'], ['comma', '\u002C'], ['commat', '\u0040'], ['comp', '\u2201'], ['complement', '\u2201'], ['congdot', '\u2A6D'], ['copf', '\uD835\uDD54'], ['copysr', '\u2117'], ['crarr', '\u21B5'], ['cross', '\u2717'], ['cscr', '\uD835\uDCB8'], ['csub', '\u2ACF'], ['csube', '\u2AD1'], ['csup', '\u2AD0'], ['csupe', '\u2AD2'], ['ctdot', '\u22EF'], ['cudarrl', '\u2938'], ['cudarrr', '\u2935'], ['cuepr', '\u22DE'], ['curlyeqprec', '\u22DE'], ['cuesc', '\u22DF'], ['curlyeqsucc', '\u22DF'], ['cularr', '\u21B6'], ['curvearrowleft', '\u21B6'], ['cularrp', '\u293D'], ['cup', '\u222A'], ['cupbrcap', '\u2A48'], ['cupcap', '\u2A46'], ['cupcup', '\u2A4A'], ['cupdot', '\u228D'], ['cupor', '\u2A45'], ['cups', '\u222A\uFE00'], ['curarr', '\u21B7'], ['curvearrowright', '\u21B7'], ['curarrm', '\u293C'], ['curlyvee', '\u22CE'], ['cuvee', '\u22CE'], ['curlywedge', '\u22CF'], ['cuwed', '\u22CF'], ['curren', '\u00A4'], ['cwint', '\u2231'], ['cylcty', '\u232D'], ['dHar', '\u2965'], ['dagger', '\u2020'], ['daleth', '\u2138'], ['dash', '\u2010'], ['hyphen', '\u2010'], ['dbkarow', '\u290F'], ['rBarr', '\u290F'], ['dcaron', '\u010F'], ['dcy', '\u0434'], ['ddarr', '\u21CA'], ['downdownarrows', '\u21CA'], ['ddotseq', '\u2A77'], ['eDDot', '\u2A77'], ['deg', '\u00B0'], ['delta', '\u03B4'], ['demptyv', '\u29B1'], ['dfisht', '\u297F'], ['dfr', '\uD835\uDD21'], ['diamondsuit', '\u2666'], ['diams', '\u2666'], ['digamma', '\u03DD'], ['gammad', '\u03DD'], ['disin', '\u22F2'], ['div', '\u00F7'], ['divide', '\u00F7'], ['divideontimes', '\u22C7'], ['divonx', '\u22C7'], ['djcy', '\u0452'], ['dlcorn', '\u231E'], ['llcorner', '\u231E'], ['dlcrop', '\u230D'], ['dollar', '\u0024'], ['dopf', '\uD835\uDD55'], ['doteqdot', '\u2251'], ['eDot', '\u2251'], ['dotminus', '\u2238'], ['minusd', '\u2238'], ['dotplus', '\u2214'], ['plusdo', '\u2214'], ['dotsquare', '\u22A1'], ['sdotb', '\u22A1'], ['drcorn', '\u231F'], ['lrcorner', '\u231F'], ['drcrop', '\u230C'], ['dscr', '\uD835\uDCB9'], ['dscy', '\u0455'], ['dsol', '\u29F6'], ['dstrok', '\u0111'], ['dtdot', '\u22F1'], ['dtri', '\u25BF'], ['triangledown', '\u25BF'], ['dwangle', '\u29A6'], ['dzcy', '\u045F'], ['dzigrarr', '\u27FF'], ['eacute', '\u00E9'], ['easter', '\u2A6E'], ['ecaron', '\u011B'], ['ecir', '\u2256'], ['eqcirc', '\u2256'], ['ecirc', '\u00EA'], ['ecolon', '\u2255'], ['eqcolon', '\u2255'], ['ecy', '\u044D'], ['edot', '\u0117'], ['efDot', '\u2252'], ['fallingdotseq', '\u2252'], ['efr', '\uD835\uDD22'], ['eg', '\u2A9A'], ['egrave', '\u00E8'], ['egs', '\u2A96'], ['eqslantgtr', '\u2A96'], ['egsdot', '\u2A98'], ['el', '\u2A99'], ['elinters', '\u23E7'], ['ell', '\u2113'], ['els', '\u2A95'], ['eqslantless', '\u2A95'], ['elsdot', '\u2A97'], ['emacr', '\u0113'], ['empty', '\u2205'], ['emptyset', '\u2205'], ['emptyv', '\u2205'], ['varnothing', '\u2205'], ['emsp13', '\u2004'], ['emsp14', '\u2005'], ['emsp', '\u2003'], ['eng', '\u014B'], ['ensp', '\u2002'], ['eogon', '\u0119'], ['eopf', '\uD835\uDD56'], ['epar', '\u22D5'], ['eparsl', '\u29E3'], ['eplus', '\u2A71'], ['epsi', '\u03B5'], ['epsilon', '\u03B5'], ['epsiv', '\u03F5'], ['straightepsilon', '\u03F5'], ['varepsilon', '\u03F5'], ['equals', '\u003D'], ['equest', '\u225F'], ['questeq', '\u225F'], ['equivDD', '\u2A78'], ['eqvparsl', '\u29E5'], ['erDot', '\u2253'], ['risingdotseq', '\u2253'], ['erarr', '\u2971'], ['escr', '\u212F'], ['eta', '\u03B7'], ['eth', '\u00F0'], ['euml', '\u00EB'], ['euro', '\u20AC'], ['excl', '\u0021'], ['fcy', '\u0444'], ['female', '\u2640'], ['ffilig', '\uFB03'], ['fflig', '\uFB00'], ['ffllig', '\uFB04'], ['ffr', '\uD835\uDD23'], ['filig', '\uFB01'], ['fjlig', '\u0066\u006A'], ['flat', '\u266D'], ['fllig', '\uFB02'], ['fltns', '\u25B1'], ['fnof', '\u0192'], ['fopf', '\uD835\uDD57'], ['fork', '\u22D4'], ['pitchfork', '\u22D4'], ['forkv', '\u2AD9'], ['fpartint', '\u2A0D'], ['frac12', '\u00BD'], ['half', '\u00BD'], ['frac13', '\u2153'], ['frac14', '\u00BC'], ['frac15', '\u2155'], ['frac16', '\u2159'], ['frac18', '\u215B'], ['frac23', '\u2154'], ['frac25', '\u2156'], ['frac34', '\u00BE'], ['frac35', '\u2157'], ['frac38', '\u215C'], ['frac45', '\u2158'], ['frac56', '\u215A'], ['frac58', '\u215D'], ['frac78', '\u215E'], ['frasl', '\u2044'], ['frown', '\u2322'], ['sfrown', '\u2322'], ['fscr', '\uD835\uDCBB'], ['gEl', '\u2A8C'], ['gtreqqless', '\u2A8C'], ['gacute', '\u01F5'], ['gamma', '\u03B3'], ['gap', '\u2A86'], ['gtrapprox', '\u2A86'], ['gbreve', '\u011F'], ['gcirc', '\u011D'], ['gcy', '\u0433'], ['gdot', '\u0121'], ['gescc', '\u2AA9'], ['gesdot', '\u2A80'], ['gesdoto', '\u2A82'], ['gesdotol', '\u2A84'], ['gesl', '\u22DB\uFE00'], ['gesles', '\u2A94'], ['gfr', '\uD835\uDD24'], ['gimel', '\u2137'], ['gjcy', '\u0453'], ['glE', '\u2A92'], ['gla', '\u2AA5'], ['glj', '\u2AA4'], ['gnE', '\u2269'], ['gneqq', '\u2269'], ['gnap', '\u2A8A'], ['gnapprox', '\u2A8A'], ['gne', '\u2A88'], ['gneq', '\u2A88'], ['gnsim', '\u22E7'], ['gopf', '\uD835\uDD58'], ['gscr', '\u210A'], ['gsime', '\u2A8E'], ['gsiml', '\u2A90'], ['gtcc', '\u2AA7'], ['gtcir', '\u2A7A'], ['gtdot', '\u22D7'], ['gtrdot', '\u22D7'], ['gtlPar', '\u2995'], ['gtquest', '\u2A7C'], ['gtrarr', '\u2978'], ['gvertneqq', '\u2269\uFE00'], ['gvnE', '\u2269\uFE00'], ['hardcy', '\u044A'], ['harrcir', '\u2948'], ['harrw', '\u21AD'], ['leftrightsquigarrow', '\u21AD'], ['hbar', '\u210F'], ['hslash', '\u210F'], ['planck', '\u210F'], ['plankv', '\u210F'], ['hcirc', '\u0125'], ['hearts', '\u2665'], ['heartsuit', '\u2665'], ['hellip', '\u2026'], ['mldr', '\u2026'], ['hercon', '\u22B9'], ['hfr', '\uD835\uDD25'], ['hksearow', '\u2925'], ['searhk', '\u2925'], ['hkswarow', '\u2926'], ['swarhk', '\u2926'], ['hoarr', '\u21FF'], ['homtht', '\u223B'], ['hookleftarrow', '\u21A9'], ['larrhk', '\u21A9'], ['hookrightarrow', '\u21AA'], ['rarrhk', '\u21AA'], ['hopf', '\uD835\uDD59'], ['horbar', '\u2015'], ['hscr', '\uD835\uDCBD'], ['hstrok', '\u0127'], ['hybull', '\u2043'], ['iacute', '\u00ED'], ['icirc', '\u00EE'], ['icy', '\u0438'], ['iecy', '\u0435'], ['iexcl', '\u00A1'], ['ifr', '\uD835\uDD26'], ['igrave', '\u00EC'], ['iiiint', '\u2A0C'], ['qint', '\u2A0C'], ['iiint', '\u222D'], ['tint', '\u222D'], ['iinfin', '\u29DC'], ['iiota', '\u2129'], ['ijlig', '\u0133'], ['imacr', '\u012B'], ['imath', '\u0131'], ['inodot', '\u0131'], ['imof', '\u22B7'], ['imped', '\u01B5'], ['incare', '\u2105'], ['infin', '\u221E'], ['infintie', '\u29DD'], ['intcal', '\u22BA'], ['intercal', '\u22BA'], ['intlarhk', '\u2A17'], ['intprod', '\u2A3C'], ['iprod', '\u2A3C'], ['iocy', '\u0451'], ['iogon', '\u012F'], ['iopf', '\uD835\uDD5A'], ['iota', '\u03B9'], ['iquest', '\u00BF'], ['iscr', '\uD835\uDCBE'], ['isinE', '\u22F9'], ['isindot', '\u22F5'], ['isins', '\u22F4'], ['isinsv', '\u22F3'], ['itilde', '\u0129'], ['iukcy', '\u0456'], ['iuml', '\u00EF'], ['jcirc', '\u0135'], ['jcy', '\u0439'], ['jfr', '\uD835\uDD27'], ['jmath', '\u0237'], ['jopf', '\uD835\uDD5B'], ['jscr', '\uD835\uDCBF'], ['jsercy', '\u0458'], ['jukcy', '\u0454'], ['kappa', '\u03BA'], ['kappav', '\u03F0'], ['varkappa', '\u03F0'], ['kcedil', '\u0137'], ['kcy', '\u043A'], ['kfr', '\uD835\uDD28'], ['kgreen', '\u0138'], ['khcy', '\u0445'], ['kjcy', '\u045C'], ['kopf', '\uD835\uDD5C'], ['kscr', '\uD835\uDCC0'], ['lAtail', '\u291B'], ['lBarr', '\u290E'], ['lEg', '\u2A8B'], ['lesseqqgtr', '\u2A8B'], ['lHar', '\u2962'], ['lacute', '\u013A'], ['laemptyv', '\u29B4'], ['lambda', '\u03BB'], ['langd', '\u2991'], ['lap', '\u2A85'], ['lessapprox', '\u2A85'], ['laquo', '\u00AB'], ['larrbfs', '\u291F'], ['larrfs', '\u291D'], ['larrlp', '\u21AB'], ['looparrowleft', '\u21AB'], ['larrpl', '\u2939'], ['larrsim', '\u2973'], ['larrtl', '\u21A2'], ['leftarrowtail', '\u21A2'], ['lat', '\u2AAB'], ['latail', '\u2919'], ['late', '\u2AAD'], ['lates', '\u2AAD\uFE00'], ['lbarr', '\u290C'], ['lbbrk', '\u2772'], ['lbrace', '\u007B'], ['lcub', '\u007B'], ['lbrack', '\u005B'], ['lsqb', '\u005B'], ['lbrke', '\u298B'], ['lbrksld', '\u298F'], ['lbrkslu', '\u298D'], ['lcaron', '\u013E'], ['lcedil', '\u013C'], ['lcy', '\u043B'], ['ldca', '\u2936'], ['ldrdhar', '\u2967'], ['ldrushar', '\u294B'], ['ldsh', '\u21B2'], ['le', '\u2264'], ['leq', '\u2264'], ['leftleftarrows', '\u21C7'], ['llarr', '\u21C7'], ['leftthreetimes', '\u22CB'], ['lthree', '\u22CB'], ['lescc', '\u2AA8'], ['lesdot', '\u2A7F'], ['lesdoto', '\u2A81'], ['lesdotor', '\u2A83'], ['lesg', '\u22DA\uFE00'], ['lesges', '\u2A93'], ['lessdot', '\u22D6'], ['ltdot', '\u22D6'], ['lfisht', '\u297C'], ['lfr', '\uD835\uDD29'], ['lgE', '\u2A91'], ['lharul', '\u296A'], ['lhblk', '\u2584'], ['ljcy', '\u0459'], ['llhard', '\u296B'], ['lltri', '\u25FA'], ['lmidot', '\u0140'], ['lmoust', '\u23B0'], ['lmoustache', '\u23B0'], ['lnE', '\u2268'], ['lneqq', '\u2268'], ['lnap', '\u2A89'], ['lnapprox', '\u2A89'], ['lne', '\u2A87'], ['lneq', '\u2A87'], ['lnsim', '\u22E6'], ['loang', '\u27EC'], ['loarr', '\u21FD'], ['longmapsto', '\u27FC'], ['xmap', '\u27FC'], ['looparrowright', '\u21AC'], ['rarrlp', '\u21AC'], ['lopar', '\u2985'], ['lopf', '\uD835\uDD5D'], ['loplus', '\u2A2D'], ['lotimes', '\u2A34'], ['lowast', '\u2217'], ['loz', '\u25CA'], ['lozenge', '\u25CA'], ['lpar', '\u0028'], ['lparlt', '\u2993'], ['lrhard', '\u296D'], ['lrm', '\u200E'], ['lrtri', '\u22BF'], ['lsaquo', '\u2039'], ['lscr', '\uD835\uDCC1'], ['lsime', '\u2A8D'], ['lsimg', '\u2A8F'], ['lsquor', '\u201A'], ['sbquo', '\u201A'], ['lstrok', '\u0142'], ['ltcc', '\u2AA6'], ['ltcir', '\u2A79'], ['ltimes', '\u22C9'], ['ltlarr', '\u2976'], ['ltquest', '\u2A7B'], ['ltrPar', '\u2996'], ['ltri', '\u25C3'], ['triangleleft', '\u25C3'], ['lurdshar', '\u294A'], ['luruhar', '\u2966'], ['lvertneqq', '\u2268\uFE00'], ['lvnE', '\u2268\uFE00'], ['mDDot', '\u223A'], ['macr', '\u00AF'], ['strns', '\u00AF'], ['male', '\u2642'], ['malt', '\u2720'], ['maltese', '\u2720'], ['marker', '\u25AE'], ['mcomma', '\u2A29'], ['mcy', '\u043C'], ['mdash', '\u2014'], ['mfr', '\uD835\uDD2A'], ['mho', '\u2127'], ['micro', '\u00B5'], ['midcir', '\u2AF0'], ['minus', '\u2212'], ['minusdu', '\u2A2A'], ['mlcp', '\u2ADB'], ['models', '\u22A7'], ['mopf', '\uD835\uDD5E'], ['mscr', '\uD835\uDCC2'], ['mu', '\u03BC'], ['multimap', '\u22B8'], ['mumap', '\u22B8'], ['nGg', '\u22D9\u0338'], ['nGt', '\u226B\u20D2'], ['nLeftarrow', '\u21CD'], ['nlArr', '\u21CD'], ['nLeftrightarrow', '\u21CE'], ['nhArr', '\u21CE'], ['nLl', '\u22D8\u0338'], ['nLt', '\u226A\u20D2'], ['nRightarrow', '\u21CF'], ['nrArr', '\u21CF'], ['nVDash', '\u22AF'], ['nVdash', '\u22AE'], ['nacute', '\u0144'], ['nang', '\u2220\u20D2'], ['napE', '\u2A70\u0338'], ['napid', '\u224B\u0338'], ['napos', '\u0149'], ['natur', '\u266E'], ['natural', '\u266E'], ['ncap', '\u2A43'], ['ncaron', '\u0148'], ['ncedil', '\u0146'], ['ncongdot', '\u2A6D\u0338'], ['ncup', '\u2A42'], ['ncy', '\u043D'], ['ndash', '\u2013'], ['neArr', '\u21D7'], ['nearhk', '\u2924'], ['nedot', '\u2250\u0338'], ['nesear', '\u2928'], ['toea', '\u2928'], ['nfr', '\uD835\uDD2B'], ['nharr', '\u21AE'], ['nleftrightarrow', '\u21AE'], ['nhpar', '\u2AF2'], ['nis', '\u22FC'], ['nisd', '\u22FA'], ['njcy', '\u045A'], ['nlE', '\u2266\u0338'], ['nleqq', '\u2266\u0338'], ['nlarr', '\u219A'], ['nleftarrow', '\u219A'], ['nldr', '\u2025'], ['nopf', '\uD835\uDD5F'], ['not', '\u00AC'], ['notinE', '\u22F9\u0338'], ['notindot', '\u22F5\u0338'], ['notinvb', '\u22F7'], ['notinvc', '\u22F6'], ['notnivb', '\u22FE'], ['notnivc', '\u22FD'], ['nparsl', '\u2AFD\u20E5'], ['npart', '\u2202\u0338'], ['npolint', '\u2A14'], ['nrarr', '\u219B'], ['nrightarrow', '\u219B'], ['nrarrc', '\u2933\u0338'], ['nrarrw', '\u219D\u0338'], ['nscr', '\uD835\uDCC3'], ['nsub', '\u2284'], ['nsubE', '\u2AC5\u0338'], ['nsubseteqq', '\u2AC5\u0338'], ['nsup', '\u2285'], ['nsupE', '\u2AC6\u0338'], ['nsupseteqq', '\u2AC6\u0338'], ['ntilde', '\u00F1'], ['nu', '\u03BD'], ['num', '\u0023'], ['numero', '\u2116'], ['numsp', '\u2007'], ['nvDash', '\u22AD'], ['nvHarr', '\u2904'], ['nvap', '\u224D\u20D2'], ['nvdash', '\u22AC'], ['nvge', '\u2265\u20D2'], ['nvgt', '\u003E\u20D2'], ['nvinfin', '\u29DE'], ['nvlArr', '\u2902'], ['nvle', '\u2264\u20D2'], ['nvlt', '\u003C\u20D2'], ['nvltrie', '\u22B4\u20D2'], ['nvrArr', '\u2903'], ['nvrtrie', '\u22B5\u20D2'], ['nvsim', '\u223C\u20D2'], ['nwArr', '\u21D6'], ['nwarhk', '\u2923'], ['nwnear', '\u2927'], ['oacute', '\u00F3'], ['ocirc', '\u00F4'], ['ocy', '\u043E'], ['odblac', '\u0151'], ['odiv', '\u2A38'], ['odsold', '\u29BC'], ['oelig', '\u0153'], ['ofcir', '\u29BF'], ['ofr', '\uD835\uDD2C'], ['ogon', '\u02DB'], ['ograve', '\u00F2'], ['ogt', '\u29C1'], ['ohbar', '\u29B5'], ['olcir', '\u29BE'], ['olcross', '\u29BB'], ['olt', '\u29C0'], ['omacr', '\u014D'], ['omega', '\u03C9'], ['omicron', '\u03BF'], ['omid', '\u29B6'], ['oopf', '\uD835\uDD60'], ['opar', '\u29B7'], ['operp', '\u29B9'], ['or', '\u2228'], ['vee', '\u2228'], ['ord', '\u2A5D'], ['order', '\u2134'], ['orderof', '\u2134'], ['oscr', '\u2134'], ['ordf', '\u00AA'], ['ordm', '\u00BA'], ['origof', '\u22B6'], ['oror', '\u2A56'], ['orslope', '\u2A57'], ['orv', '\u2A5B'], ['oslash', '\u00F8'], ['osol', '\u2298'], ['otilde', '\u00F5'], ['otimesas', '\u2A36'], ['ouml', '\u00F6'], ['ovbar', '\u233D'], ['para', '\u00B6'], ['parsim', '\u2AF3'], ['parsl', '\u2AFD'], ['pcy', '\u043F'], ['percnt', '\u0025'], ['period', '\u002E'], ['permil', '\u2030'], ['pertenk', '\u2031'], ['pfr', '\uD835\uDD2D'], ['phi', '\u03C6'], ['phiv', '\u03D5'], ['straightphi', '\u03D5'], ['varphi', '\u03D5'], ['phone', '\u260E'], ['pi', '\u03C0'], ['piv', '\u03D6'], ['varpi', '\u03D6'], ['planckh', '\u210E'], ['plus', '\u002B'], ['plusacir', '\u2A23'], ['pluscir', '\u2A22'], ['plusdu', '\u2A25'], ['pluse', '\u2A72'], ['plussim', '\u2A26'], ['plustwo', '\u2A27'], ['pointint', '\u2A15'], ['popf', '\uD835\uDD61'], ['pound', '\u00A3'], ['prE', '\u2AB3'], ['prap', '\u2AB7'], ['precapprox', '\u2AB7'], ['precnapprox', '\u2AB9'], ['prnap', '\u2AB9'], ['precneqq', '\u2AB5'], ['prnE', '\u2AB5'], ['precnsim', '\u22E8'], ['prnsim', '\u22E8'], ['prime', '\u2032'], ['profalar', '\u232E'], ['profline', '\u2312'], ['profsurf', '\u2313'], ['prurel', '\u22B0'], ['pscr', '\uD835\uDCC5'], ['psi', '\u03C8'], ['puncsp', '\u2008'], ['qfr', '\uD835\uDD2E'], ['qopf', '\uD835\uDD62'], ['qprime', '\u2057'], ['qscr', '\uD835\uDCC6'], ['quatint', '\u2A16'], ['quest', '\u003F'], ['rAtail', '\u291C'], ['rHar', '\u2964'], ['race', '\u223D\u0331'], ['racute', '\u0155'], ['raemptyv', '\u29B3'], ['rangd', '\u2992'], ['range', '\u29A5'], ['raquo', '\u00BB'], ['rarrap', '\u2975'], ['rarrbfs', '\u2920'], ['rarrc', '\u2933'], ['rarrfs', '\u291E'], ['rarrpl', '\u2945'], ['rarrsim', '\u2974'], ['rarrtl', '\u21A3'], ['rightarrowtail', '\u21A3'], ['rarrw', '\u219D'], ['rightsquigarrow', '\u219D'], ['ratail', '\u291A'], ['ratio', '\u2236'], ['rbbrk', '\u2773'], ['rbrace', '\u007D'], ['rcub', '\u007D'], ['rbrack', '\u005D'], ['rsqb', '\u005D'], ['rbrke', '\u298C'], ['rbrksld', '\u298E'], ['rbrkslu', '\u2990'], ['rcaron', '\u0159'], ['rcedil', '\u0157'], ['rcy', '\u0440'], ['rdca', '\u2937'], ['rdldhar', '\u2969'], ['rdsh', '\u21B3'], ['rect', '\u25AD'], ['rfisht', '\u297D'], ['rfr', '\uD835\uDD2F'], ['rharul', '\u296C'], ['rho', '\u03C1'], ['rhov', '\u03F1'], ['varrho', '\u03F1'], ['rightrightarrows', '\u21C9'], ['rrarr', '\u21C9'], ['rightthreetimes', '\u22CC'], ['rthree', '\u22CC'], ['ring', '\u02DA'], ['rlm', '\u200F'], ['rmoust', '\u23B1'], ['rmoustache', '\u23B1'], ['rnmid', '\u2AEE'], ['roang', '\u27ED'], ['roarr', '\u21FE'], ['ropar', '\u2986'], ['ropf', '\uD835\uDD63'], ['roplus', '\u2A2E'], ['rotimes', '\u2A35'], ['rpar', '\u0029'], ['rpargt', '\u2994'], ['rppolint', '\u2A12'], ['rsaquo', '\u203A'], ['rscr', '\uD835\uDCC7'], ['rtimes', '\u22CA'], ['rtri', '\u25B9'], ['triangleright', '\u25B9'], ['rtriltri', '\u29CE'], ['ruluhar', '\u2968'], ['rx', '\u211E'], ['sacute', '\u015B'], ['scE', '\u2AB4'], ['scap', '\u2AB8'], ['succapprox', '\u2AB8'], ['scaron', '\u0161'], ['scedil', '\u015F'], ['scirc', '\u015D'], ['scnE', '\u2AB6'], ['succneqq', '\u2AB6'], ['scnap', '\u2ABA'], ['succnapprox', '\u2ABA'], ['scnsim', '\u22E9'], ['succnsim', '\u22E9'], ['scpolint', '\u2A13'], ['scy', '\u0441'], ['sdot', '\u22C5'], ['sdote', '\u2A66'], ['seArr', '\u21D8'], ['sect', '\u00A7'], ['semi', '\u003B'], ['seswar', '\u2929'], ['tosa', '\u2929'], ['sext', '\u2736'], ['sfr', '\uD835\uDD30'], ['sharp', '\u266F'], ['shchcy', '\u0449'], ['shcy', '\u0448'], ['shy', '\u00AD'], ['sigma', '\u03C3'], ['sigmaf', '\u03C2'], ['sigmav', '\u03C2'], ['varsigma', '\u03C2'], ['simdot', '\u2A6A'], ['simg', '\u2A9E'], ['simgE', '\u2AA0'], ['siml', '\u2A9D'], ['simlE', '\u2A9F'], ['simne', '\u2246'], ['simplus', '\u2A24'], ['simrarr', '\u2972'], ['smashp', '\u2A33'], ['smeparsl', '\u29E4'], ['smile', '\u2323'], ['ssmile', '\u2323'], ['smt', '\u2AAA'], ['smte', '\u2AAC'], ['smtes', '\u2AAC\uFE00'], ['softcy', '\u044C'], ['sol', '\u002F'], ['solb', '\u29C4'], ['solbar', '\u233F'], ['sopf', '\uD835\uDD64'], ['spades', '\u2660'], ['spadesuit', '\u2660'], ['sqcaps', '\u2293\uFE00'], ['sqcups', '\u2294\uFE00'], ['sscr', '\uD835\uDCC8'], ['star', '\u2606'], ['sub', '\u2282'], ['subset', '\u2282'], ['subE', '\u2AC5'], ['subseteqq', '\u2AC5'], ['subdot', '\u2ABD'], ['subedot', '\u2AC3'], ['submult', '\u2AC1'], ['subnE', '\u2ACB'], ['subsetneqq', '\u2ACB'], ['subne', '\u228A'], ['subsetneq', '\u228A'], ['subplus', '\u2ABF'], ['subrarr', '\u2979'], ['subsim', '\u2AC7'], ['subsub', '\u2AD5'], ['subsup', '\u2AD3'], ['sung', '\u266A'], ['sup1', '\u00B9'], ['sup2', '\u00B2'], ['sup3', '\u00B3'], ['supE', '\u2AC6'], ['supseteqq', '\u2AC6'], ['supdot', '\u2ABE'], ['supdsub', '\u2AD8'], ['supedot', '\u2AC4'], ['suphsol', '\u27C9'], ['suphsub', '\u2AD7'], ['suplarr', '\u297B'], ['supmult', '\u2AC2'], ['supnE', '\u2ACC'], ['supsetneqq', '\u2ACC'], ['supne', '\u228B'], ['supsetneq', '\u228B'], ['supplus', '\u2AC0'], ['supsim', '\u2AC8'], ['supsub', '\u2AD4'], ['supsup', '\u2AD6'], ['swArr', '\u21D9'], ['swnwar', '\u292A'], ['szlig', '\u00DF'], ['target', '\u2316'], ['tau', '\u03C4'], ['tcaron', '\u0165'], ['tcedil', '\u0163'], ['tcy', '\u0442'], ['telrec', '\u2315'], ['tfr', '\uD835\uDD31'], ['theta', '\u03B8'], ['thetasym', '\u03D1'], ['thetav', '\u03D1'], ['vartheta', '\u03D1'], ['thorn', '\u00FE'], ['times', '\u00D7'], ['timesbar', '\u2A31'], ['timesd', '\u2A30'], ['topbot', '\u2336'], ['topcir', '\u2AF1'], ['topf', '\uD835\uDD65'], ['topfork', '\u2ADA'], ['tprime', '\u2034'], ['triangle', '\u25B5'], ['utri', '\u25B5'], ['triangleq', '\u225C'], ['trie', '\u225C'], ['tridot', '\u25EC'], ['triminus', '\u2A3A'], ['triplus', '\u2A39'], ['trisb', '\u29CD'], ['tritime', '\u2A3B'], ['trpezium', '\u23E2'], ['tscr', '\uD835\uDCC9'], ['tscy', '\u0446'], ['tshcy', '\u045B'], ['tstrok', '\u0167'], ['uHar', '\u2963'], ['uacute', '\u00FA'], ['ubrcy', '\u045E'], ['ubreve', '\u016D'], ['ucirc', '\u00FB'], ['ucy', '\u0443'], ['udblac', '\u0171'], ['ufisht', '\u297E'], ['ufr', '\uD835\uDD32'], ['ugrave', '\u00F9'], ['uhblk', '\u2580'], ['ulcorn', '\u231C'], ['ulcorner', '\u231C'], ['ulcrop', '\u230F'], ['ultri', '\u25F8'], ['umacr', '\u016B'], ['uogon', '\u0173'], ['uopf', '\uD835\uDD66'], ['upsi', '\u03C5'], ['upsilon', '\u03C5'], ['upuparrows', '\u21C8'], ['uuarr', '\u21C8'], ['urcorn', '\u231D'], ['urcorner', '\u231D'], ['urcrop', '\u230E'], ['uring', '\u016F'], ['urtri', '\u25F9'], ['uscr', '\uD835\uDCCA'], ['utdot', '\u22F0'], ['utilde', '\u0169'], ['uuml', '\u00FC'], ['uwangle', '\u29A7'], ['vBar', '\u2AE8'], ['vBarv', '\u2AE9'], ['vangrt', '\u299C'], ['varsubsetneq', '\u228A\uFE00'], ['vsubne', '\u228A\uFE00'], ['varsubsetneqq', '\u2ACB\uFE00'], ['vsubnE', '\u2ACB\uFE00'], ['varsupsetneq', '\u228B\uFE00'], ['vsupne', '\u228B\uFE00'], ['varsupsetneqq', '\u2ACC\uFE00'], ['vsupnE', '\u2ACC\uFE00'], ['vcy', '\u0432'], ['veebar', '\u22BB'], ['veeeq', '\u225A'], ['vellip', '\u22EE'], ['vfr', '\uD835\uDD33'], ['vopf', '\uD835\uDD67'], ['vscr', '\uD835\uDCCB'], ['vzigzag', '\u299A'], ['wcirc', '\u0175'], ['wedbar', '\u2A5F'], ['wedgeq', '\u2259'], ['weierp', '\u2118'], ['wp', '\u2118'], ['wfr', '\uD835\uDD34'], ['wopf', '\uD835\uDD68'], ['wscr', '\uD835\uDCCC'], ['xfr', '\uD835\uDD35'], ['xi', '\u03BE'], ['xnis', '\u22FB'], ['xopf', '\uD835\uDD69'], ['xscr', '\uD835\uDCCD'], ['yacute', '\u00FD'], ['yacy', '\u044F'], ['ycirc', '\u0177'], ['ycy', '\u044B'], ['yen', '\u00A5'], ['yfr', '\uD835\uDD36'], ['yicy', '\u0457'], ['yopf', '\uD835\uDD6A'], ['yscr', '\uD835\uDCCE'], ['yucy', '\u044E'], ['yuml', '\u00FF'], ['zacute', '\u017A'], ['zcaron', '\u017E'], ['zcy', '\u0437'], ['zdot', '\u017C'], ['zeta', '\u03B6'], ['zfr', '\uD835\uDD37'], ['zhcy', '\u0436'], ['zigrarr', '\u21DD'], ['zopf', '\uD835\uDD6B'], ['zscr', '\uD835\uDCCF'], ['zwj', '\u200D'], ['zwnj', '\u200C']]);
 const NGSP_UNICODE = '\uE500';
-NAMED_ENTITIES['ngsp'] = NGSP_UNICODE;
+NAMED_ENTITIES.set('ngsp', NGSP_UNICODE);
 
 class TokenizeResult {
   /** @type {any[]} */ tokens;
@@ -13808,11 +12624,13 @@ var CharacterReferenceType;
   CharacterReferenceType["HEX"] = "hexadecimal";
   CharacterReferenceType["DEC"] = "decimal";
 })(CharacterReferenceType || (CharacterReferenceType = {}));
-const SUPPORTED_BLOCKS = ['@if', '@else', '@for', '@switch', '@case', '@default', '@empty', '@defer', '@placeholder', '@loading', '@error'];
+const SUPPORTED_BLOCKS = ['@if', '@else', '@for', '@switch', '@case', '@default', '@empty', '@defer', '@placeholder', '@loading', '@boundary', '@error', '@content'];
 const INTERPOLATION = {
   start: '{{',
   end: '}}'
 };
+const DEFAULT_NEVER_PATTERN = /^default[^\S\r\n]+never/;
+const ELSE_IF_PATTERN = /^else[^\S\r\n]+if/;
 class _Tokenizer {
   _getTagDefinition;
   _cursor;
@@ -13874,6 +12692,8 @@ class _Tokenizer {
             }
           } else if (this._attemptCharCode($SLASH)) {
             this._consumeTagClose(start);
+          } else if (this._attemptCharCode($QUESTION)) {
+            this._consumeProcessingInstruction(start);
           } else {
             this._consumeTagOpen(start);
           }
@@ -13890,7 +12710,7 @@ class _Tokenizer {
         this.handleError(e);
       }
     }
-    this._beginToken(42);
+    this._beginToken(43);
     this._endToken([]);
   }
   /** @returns {string} */ _getBlockName() {
@@ -13906,7 +12726,13 @@ class _Tokenizer {
       }
       return true;
     });
-    return this._cursor.getChars(nameCursor).trim();
+    let result = this._cursor.getChars(nameCursor).trim();
+    if (ELSE_IF_PATTERN.test(result)) {
+      result = 'else if';
+    } else if (DEFAULT_NEVER_PATTERN.test(result)) {
+      result = 'default never';
+    }
+    return result;
   }
   _consumeBlockStart(start) {
     this._requireCharCode($AT);
@@ -14019,23 +12845,7 @@ class _Tokenizer {
   _consumeLetDeclarationValue() {
     const start = this._cursor.clone();
     this._beginToken(31, start);
-    while (this._cursor.peek() !== $EOF) {
-      const char = this._cursor.peek();
-      if (char === $SEMICOLON) {
-        break;
-      }
-      if (isQuote(char)) {
-        this._cursor.advance();
-        this._attemptCharCodeUntilFn(inner => {
-          if (inner === $BACKSLASH) {
-            this._cursor.advance();
-            return false;
-          }
-          return inner === char;
-        });
-      }
-      this._cursor.advance();
-    }
+    this._attemptUntilIgnoreQuotes(char => char === $SEMICOLON);
     this._endToken([this._cursor.getChars(start)]);
   }
   /** @returns {boolean} */ _tokenizeExpansionForm() {
@@ -14164,6 +12974,25 @@ class _Tokenizer {
       this._cursor.advance();
     }
   }
+  _attemptUntilIgnoreQuotes(predicate) {
+    while (this._cursor.peek() !== $EOF) {
+      const char = this._cursor.peek();
+      if (predicate(char)) {
+        break;
+      }
+      if (isQuote(char)) {
+        this._cursor.advance();
+        this._attemptCharCodeUntilFn(inner => {
+          if (inner === $BACKSLASH) {
+            this._cursor.advance();
+            return false;
+          }
+          return inner === char;
+        });
+      }
+      this._cursor.advance();
+    }
+  }
   /** @returns {string} */ _readChar() {
     const char = String.fromCodePoint(this._cursor.peek());
     this._cursor.advance();
@@ -14220,7 +13049,7 @@ class _Tokenizer {
       } else {
         const name = this._cursor.getChars(nameStart);
         this._cursor.advance();
-        const char = NAMED_ENTITIES.hasOwnProperty(name) && NAMED_ENTITIES[name];
+        const char = NAMED_ENTITIES.get(name);
         if (!char) {
           throw this._createError(_unknownEntityErrorMsg(name), this._cursor.getSpan(start));
         }
@@ -14273,6 +13102,18 @@ class _Tokenizer {
     this._attemptUntilChar($GT);
     const content = this._cursor.getChars(contentStart);
     this._cursor.advance();
+    this._endToken([content]);
+  }
+  _consumeProcessingInstruction(start) {
+    this._beginToken(42, start);
+    const contentStart = this._cursor.clone();
+    this._attemptUntilIgnoreQuotes(char => char === $QUESTION || char === $GT);
+    const endChar = this._cursor.peek();
+    const content = this._cursor.getChars(contentStart);
+    this._cursor.advance();
+    if (endChar === $QUESTION) {
+      this._requireCharCode($GT);
+    }
     this._endToken([content]);
   }
   /** @returns {string[]} */ _consumePrefixAndName(endPredicate) {
@@ -14701,7 +13542,7 @@ class _Tokenizer {
       const tmp = this._cursor.clone();
       tmp.advance();
       const code = tmp.peek();
-      if ($a <= code && code <= $z || $A <= code && code <= $Z || code === $SLASH || code === $BANG) {
+      if ($a <= code && code <= $z || $A <= code && code <= $Z || code === $SLASH || code === $BANG || code === $QUESTION) {
         return true;
       }
     }
@@ -15041,7 +13882,7 @@ class _TreeBuilder {
     this._advance();
   }
   build() {
-    while (this._peek.type !== 42) {
+    while (this._peek.type !== 43) {
       if (this._peek.type === 0 || this._peek.type === 4) {
         this._consumeElementStartTag(this._advance());
       } else if (this._peek.type === 3) {
@@ -15139,7 +13980,7 @@ class _TreeBuilder {
     if (!exp) return null;
     const end = this._advance();
     exp.push({
-      type: 42,
+      type: 43,
       parts: [],
       sourceSpan: end.sourceSpan
     });
@@ -15177,7 +14018,7 @@ class _TreeBuilder {
           return null;
         }
       }
-      if (this._peek.type === 42) {
+      if (this._peek.type === 43) {
         this.errors.push(TreeError.create(null, start.sourceSpan, `Invalid ICU message. Missing '}'.`));
         return null;
       }
@@ -15553,8 +14394,9 @@ class _TreeBuilder {
   return stack.length > 0 && stack[stack.length - 1] === element;
 }
 /** @returns {string} */ function decodeEntity(/** @type {string} */ match, /** @type {string} */ entity) {
-  if (NAMED_ENTITIES[entity] !== undefined) {
-    return NAMED_ENTITIES[entity] || match;
+  const resolved = NAMED_ENTITIES.get(entity);
+  if (resolved) {
+    return resolved;
   }
   if (/^#x[a-f0-9]+$/i.test(entity)) {
     return String.fromCodePoint(parseInt(entity.slice(2), 16));
@@ -16312,9 +15154,6 @@ class _Scanner {
   return result;
 }
 
-/**
-@typedef {{ text: string, start: number, end: number }} InterpolationPiece
-*/
 class SplitInterpolation {
   /** @type {InterpolationPiece[]} */ strings;
   /** @type {InterpolationPiece[]} */ expressions;
@@ -16338,9 +15177,6 @@ class TemplateBindingParseResult {
 /** @returns {string} */ function getLocation(/** @type {ParseSourceSpan} */ span) {
   return span.start.toString() || '(unknown)';
 }
-/**
-@typedef {Readonly<{ stripped: string, hasComments: boolean }>} StrippedInput
-*/
 class Parser {
   /** @type {Lexer} */ _lexer;
   /** @type {boolean} */ _supportsDirectPipeReferences;
@@ -16519,6 +15355,10 @@ class Parser {
     for (let i = 0; i < input.length - 1; i++) {
       const char = input.charCodeAt(i);
       const nextChar = input.charCodeAt(i + 1);
+      if (char === $BACKSLASH) {
+        i++;
+        continue;
+      }
       if (char === $SLASH && nextChar == $SLASH && outerQuote == null) return i;
       if (outerQuote === char) {
         outerQuote = null;
@@ -16651,11 +15491,6 @@ class _ParseAST {
   advance() {
     this.index++;
   }
-  /**
-   * @template T
-   * @param {() => T} cb
-   * @returns {T}
-   */
   withContext(/** @type {number} */ context, cb) {
     this.context |= context;
     const ret = cb();
@@ -17322,10 +16157,13 @@ class _ParseAST {
         const expression = this.parsePipe();
         if (expression instanceof EmptyExpr$1) {
           this.error('Template literal interpolation cannot be empty');
-        } else {
-          expressions.push(expression);
         }
+        expressions.push(expression);
+        this.expectCharacter($RBRACE);
         this.rbracesExpected--;
+      } else if (token.isError()) {
+        this.errors.push(getParseError(token.toString(), this.input, this.getErrorLocationText(this.index), this.parseSourceSpan));
+        this.advance();
       } else {
         this.advance();
       }
@@ -17647,7 +16485,7 @@ const OBJECT = 'object';
   const [ns, name] = splitNsName(tagNameLower, false);
   return ns === SVG_NAMESPACE || ns === MATH_ML_NAMESPACE ? `:${ns}:${name}` : name;
 }
-/** @type {string[]} */ const SCHEMA = ['[Element]|textContent,%ariaActiveDescendantElement,%ariaAtomic,%ariaAutoComplete,%ariaBusy,%ariaChecked,%ariaColCount,%ariaColIndex,%ariaColIndexText,%ariaColSpan,%ariaControlsElements,%ariaCurrent,%ariaDescribedByElements,%ariaDescription,%ariaDetailsElements,%ariaDisabled,%ariaErrorMessageElements,%ariaExpanded,%ariaFlowToElements,%ariaHasPopup,%ariaHidden,%ariaInvalid,%ariaKeyShortcuts,%ariaLabel,%ariaLabelledByElements,%ariaLevel,%ariaLive,%ariaModal,%ariaMultiLine,%ariaMultiSelectable,%ariaOrientation,%ariaOwnsElements,%ariaPlaceholder,%ariaPosInSet,%ariaPressed,%ariaReadOnly,%ariaRelevant,%ariaRequired,%ariaRoleDescription,%ariaRowCount,%ariaRowIndex,%ariaRowIndexText,%ariaRowSpan,%ariaSelected,%ariaSetSize,%ariaSort,%ariaValueMax,%ariaValueMin,%ariaValueNow,%ariaValueText,%classList,className,elementTiming,id,innerHTML,*beforecopy,*beforecut,*beforepaste,*fullscreenchange,*fullscreenerror,*search,*webkitfullscreenchange,*webkitfullscreenerror,outerHTML,%part,#scrollLeft,#scrollTop,slot' + ',*message,*mozfullscreenchange,*mozfullscreenerror,*mozpointerlockchange,*mozpointerlockerror,*webglcontextcreationerror,*webglcontextlost,*webglcontextrestored', '[HTMLElement]^[Element]|accessKey,autocapitalize,!autofocus,contentEditable,dir,!draggable,enterKeyHint,!hidden,!inert,innerText,inputMode,lang,nonce,*abort,*animationend,*animationiteration,*animationstart,*auxclick,*beforexrselect,*blur,*cancel,*canplay,*canplaythrough,*change,*click,*close,*contextmenu,*copy,*cuechange,*cut,*dblclick,*drag,*dragend,*dragenter,*dragleave,*dragover,*dragstart,*drop,*durationchange,*emptied,*ended,*error,*focus,*formdata,*gotpointercapture,*input,*invalid,*keydown,*keypress,*keyup,*load,*loadeddata,*loadedmetadata,*loadstart,*lostpointercapture,*mousedown,*mouseenter,*mouseleave,*mousemove,*mouseout,*mouseover,*mouseup,*mousewheel,*paste,*pause,*play,*playing,*pointercancel,*pointerdown,*pointerenter,*pointerleave,*pointermove,*pointerout,*pointerover,*pointerrawupdate,*pointerup,*progress,*ratechange,*reset,*resize,*scroll,*securitypolicyviolation,*seeked,*seeking,*select,*selectionchange,*selectstart,*slotchange,*stalled,*submit,*suspend,*timeupdate,*toggle,*transitioncancel,*transitionend,*transitionrun,*transitionstart,*volumechange,*waiting,*webkitanimationend,*webkitanimationiteration,*webkitanimationstart,*webkittransitionend,*wheel,outerText,!spellcheck,%style,#tabIndex,title,!translate,virtualKeyboardPolicy', 'abbr,address,article,aside,b,bdi,bdo,cite,content,code,dd,dfn,dt,em,figcaption,figure,footer,header,hgroup,i,kbd,main,mark,nav,noscript,rb,rp,rt,rtc,ruby,s,samp,search,section,small,strong,sub,sup,u,var,wbr^[HTMLElement]|accessKey,autocapitalize,!autofocus,contentEditable,dir,!draggable,enterKeyHint,!hidden,innerText,inputMode,lang,nonce,*abort,*animationend,*animationiteration,*animationstart,*auxclick,*beforexrselect,*blur,*cancel,*canplay,*canplaythrough,*change,*click,*close,*contextmenu,*copy,*cuechange,*cut,*dblclick,*drag,*dragend,*dragenter,*dragleave,*dragover,*dragstart,*drop,*durationchange,*emptied,*ended,*error,*focus,*formdata,*gotpointercapture,*input,*invalid,*keydown,*keypress,*keyup,*load,*loadeddata,*loadedmetadata,*loadstart,*lostpointercapture,*mousedown,*mouseenter,*mouseleave,*mousemove,*mouseout,*mouseover,*mouseup,*mousewheel,*paste,*pause,*play,*playing,*pointercancel,*pointerdown,*pointerenter,*pointerleave,*pointermove,*pointerout,*pointerover,*pointerrawupdate,*pointerup,*progress,*ratechange,*reset,*resize,*scroll,*securitypolicyviolation,*seeked,*seeking,*select,*selectionchange,*selectstart,*slotchange,*stalled,*submit,*suspend,*timeupdate,*toggle,*transitioncancel,*transitionend,*transitionrun,*transitionstart,*volumechange,*waiting,*webkitanimationend,*webkitanimationiteration,*webkitanimationstart,*webkittransitionend,*wheel,outerText,!spellcheck,%style,#tabIndex,title,!translate,virtualKeyboardPolicy', 'media^[HTMLElement]|!autoplay,!controls,%controlsList,%crossOrigin,#currentTime,!defaultMuted,#defaultPlaybackRate,!disableRemotePlayback,!loop,!muted,*encrypted,*waitingforkey,#playbackRate,preload,!preservesPitch,src,%srcObject,#volume', ':svg:^[HTMLElement]|!autofocus,nonce,*abort,*animationend,*animationiteration,*animationstart,*auxclick,*beforexrselect,*blur,*cancel,*canplay,*canplaythrough,*change,*click,*close,*contextmenu,*copy,*cuechange,*cut,*dblclick,*drag,*dragend,*dragenter,*dragleave,*dragover,*dragstart,*drop,*durationchange,*emptied,*ended,*error,*focus,*formdata,*gotpointercapture,*input,*invalid,*keydown,*keypress,*keyup,*load,*loadeddata,*loadedmetadata,*loadstart,*lostpointercapture,*mousedown,*mouseenter,*mouseleave,*mousemove,*mouseout,*mouseover,*mouseup,*mousewheel,*paste,*pause,*play,*playing,*pointercancel,*pointerdown,*pointerenter,*pointerleave,*pointermove,*pointerout,*pointerover,*pointerrawupdate,*pointerup,*progress,*ratechange,*reset,*resize,*scroll,*securitypolicyviolation,*seeked,*seeking,*select,*selectionchange,*selectstart,*slotchange,*stalled,*submit,*suspend,*timeupdate,*toggle,*transitioncancel,*transitionend,*transitionrun,*transitionstart,*volumechange,*waiting,*webkitanimationend,*webkitanimationiteration,*webkitanimationstart,*webkittransitionend,*wheel,%style,#tabIndex', ':svg:graphics^:svg:|', ':svg:animation^:svg:|*begin,*end,*repeat', ':svg:geometry^:svg:|', ':svg:componentTransferFunction^:svg:|', ':svg:gradient^:svg:|', ':svg:textContent^:svg:graphics|', ':svg:textPositioning^:svg:textContent|', 'a^[HTMLElement]|charset,coords,download,hash,host,hostname,href,hreflang,name,password,pathname,ping,port,protocol,referrerPolicy,rel,%relList,rev,search,shape,target,text,type,username', 'area^[HTMLElement]|alt,coords,download,hash,host,hostname,href,!noHref,password,pathname,ping,port,protocol,referrerPolicy,rel,%relList,search,shape,target,username', 'audio^media|', 'br^[HTMLElement]|clear', 'base^[HTMLElement]|href,target', 'body^[HTMLElement]|aLink,background,bgColor,link,*afterprint,*beforeprint,*beforeunload,*blur,*error,*focus,*hashchange,*languagechange,*load,*message,*messageerror,*offline,*online,*pagehide,*pageshow,*popstate,*rejectionhandled,*resize,*scroll,*storage,*unhandledrejection,*unload,text,vLink', 'button^[HTMLElement]|!disabled,formAction,formEnctype,formMethod,!formNoValidate,formTarget,name,type,value', 'canvas^[HTMLElement]|#height,#width', 'content^[HTMLElement]|select', 'dl^[HTMLElement]|!compact', 'data^[HTMLElement]|value', 'datalist^[HTMLElement]|', 'details^[HTMLElement]|!open', 'dialog^[HTMLElement]|!open,returnValue', 'dir^[HTMLElement]|!compact', 'div^[HTMLElement]|align', 'embed^[HTMLElement]|align,height,name,src,type,width', 'fieldset^[HTMLElement]|!disabled,name', 'font^[HTMLElement]|color,face,size', 'form^[HTMLElement]|acceptCharset,action,autocomplete,encoding,enctype,method,name,!noValidate,target', 'frame^[HTMLElement]|frameBorder,longDesc,marginHeight,marginWidth,name,!noResize,scrolling,src', 'frameset^[HTMLElement]|cols,*afterprint,*beforeprint,*beforeunload,*blur,*error,*focus,*hashchange,*languagechange,*load,*message,*messageerror,*offline,*online,*pagehide,*pageshow,*popstate,*rejectionhandled,*resize,*scroll,*storage,*unhandledrejection,*unload,rows', 'geolocation^[HTMLElement]|accuracymode,!autolocate,*location,*promptaction,*promptdismiss,*validationstatuschange,!watch', 'hr^[HTMLElement]|align,color,!noShade,size,width', 'head^[HTMLElement]|', 'h1,h2,h3,h4,h5,h6^[HTMLElement]|align', 'html^[HTMLElement]|version', 'iframe^[HTMLElement]|align,allow,!allowFullscreen,!allowPaymentRequest,csp,!credentialless,frameBorder,height,loading,longDesc,marginHeight,marginWidth,name,referrerPolicy,%sandbox,scrolling,src,srcdoc,width', 'img^[HTMLElement]|align,alt,border,%crossOrigin,decoding,#height,#hspace,!isMap,loading,longDesc,lowsrc,name,referrerPolicy,sizes,src,srcset,useMap,#vspace,#width', 'input^[HTMLElement]|accept,align,alt,autocomplete,!checked,!defaultChecked,defaultValue,dirName,!disabled,%files,formAction,formEnctype,formMethod,!formNoValidate,formTarget,#height,!incremental,!indeterminate,max,#maxLength,min,#minLength,!multiple,name,pattern,placeholder,!readOnly,!required,selectionDirection,#selectionEnd,#selectionStart,#size,src,step,type,useMap,value,%valueAsDate,#valueAsNumber,#width', 'li^[HTMLElement]|type,#value', 'label^[HTMLElement]|htmlFor', 'legend^[HTMLElement]|align', 'link^[HTMLElement]|as,charset,%crossOrigin,!disabled,href,hreflang,imageSizes,imageSrcset,integrity,media,referrerPolicy,rel,%relList,rev,%sizes,target,type', 'map^[HTMLElement]|name', 'marquee^[HTMLElement]|behavior,bgColor,direction,height,#hspace,#loop,#scrollAmount,#scrollDelay,!trueSpeed,#vspace,width', 'menu^[HTMLElement]|!compact', 'meta^[HTMLElement]|content,httpEquiv,media,name,scheme', 'meter^[HTMLElement]|#high,#low,#max,#min,#optimum,#value', 'ins,del^[HTMLElement]|cite,dateTime', 'ol^[HTMLElement]|!compact,!reversed,#start,type', 'object^[HTMLElement]|align,archive,border,code,codeBase,codeType,data,!declare,height,#hspace,name,standby,type,useMap,#vspace,width', 'optgroup^[HTMLElement]|!disabled,label', 'option^[HTMLElement]|!defaultSelected,!disabled,label,!selected,text,value', 'output^[HTMLElement]|defaultValue,%htmlFor,name,value', 'p^[HTMLElement]|align', 'param^[HTMLElement]|name,type,value,valueType', 'picture^[HTMLElement]|', 'pre^[HTMLElement]|#width', 'progress^[HTMLElement]|#max,#value', 'q,blockquote,cite^[HTMLElement]|', 'script^[HTMLElement]|!async,charset,%crossOrigin,!defer,event,htmlFor,integrity,!noModule,%referrerPolicy,src,text,type', 'select^[HTMLElement]|autocomplete,!disabled,#length,!multiple,name,!required,#selectedIndex,#size,value', 'selectedcontent^[HTMLElement]|', 'slot^[HTMLElement]|name', 'source^[HTMLElement]|#height,media,sizes,src,srcset,type,#width', 'span^[HTMLElement]|', 'style^[HTMLElement]|!disabled,media,type', 'search^[HTMLELement]|', 'caption^[HTMLElement]|align', 'th,td^[HTMLElement]|abbr,align,axis,bgColor,ch,chOff,#colSpan,headers,height,!noWrap,#rowSpan,scope,vAlign,width', 'col,colgroup^[HTMLElement]|align,ch,chOff,#span,vAlign,width', 'table^[HTMLElement]|align,bgColor,border,%caption,cellPadding,cellSpacing,frame,rules,summary,%tFoot,%tHead,width', 'tr^[HTMLElement]|align,bgColor,ch,chOff,vAlign', 'tfoot,thead,tbody^[HTMLElement]|align,ch,chOff,vAlign', 'template^[HTMLElement]|', 'textarea^[HTMLElement]|autocomplete,#cols,defaultValue,dirName,!disabled,#maxLength,#minLength,name,placeholder,!readOnly,!required,#rows,selectionDirection,#selectionEnd,#selectionStart,value,wrap', 'time^[HTMLElement]|dateTime', 'title^[HTMLElement]|text', 'track^[HTMLElement]|!default,kind,label,src,srclang', 'ul^[HTMLElement]|!compact,type', 'unknown^[HTMLElement]|', 'video^media|!disablePictureInPicture,#height,*enterpictureinpicture,*leavepictureinpicture,!playsInline,poster,#width', ':svg:a^:svg:graphics|', ':svg:animate^:svg:animation|', ':svg:animateMotion^:svg:animation|', ':svg:animateTransform^:svg:animation|', ':svg:circle^:svg:geometry|', ':svg:clipPath^:svg:graphics|', ':svg:defs^:svg:graphics|', ':svg:desc^:svg:|', ':svg:discard^:svg:|', ':svg:ellipse^:svg:geometry|', ':svg:feBlend^:svg:|', ':svg:feColorMatrix^:svg:|', ':svg:feComponentTransfer^:svg:|', ':svg:feComposite^:svg:|', ':svg:feConvolveMatrix^:svg:|', ':svg:feDiffuseLighting^:svg:|', ':svg:feDisplacementMap^:svg:|', ':svg:feDistantLight^:svg:|', ':svg:feDropShadow^:svg:|', ':svg:feFlood^:svg:|', ':svg:feFuncA^:svg:componentTransferFunction|', ':svg:feFuncB^:svg:componentTransferFunction|', ':svg:feFuncG^:svg:componentTransferFunction|', ':svg:feFuncR^:svg:componentTransferFunction|', ':svg:feGaussianBlur^:svg:|', ':svg:feImage^:svg:|', ':svg:feMerge^:svg:|', ':svg:feMergeNode^:svg:|', ':svg:feMorphology^:svg:|', ':svg:feOffset^:svg:|', ':svg:fePointLight^:svg:|', ':svg:feSpecularLighting^:svg:|', ':svg:feSpotLight^:svg:|', ':svg:feTile^:svg:|', ':svg:feTurbulence^:svg:|', ':svg:filter^:svg:|', ':svg:foreignObject^:svg:graphics|', ':svg:g^:svg:graphics|', ':svg:image^:svg:graphics|decoding', ':svg:line^:svg:geometry|', ':svg:linearGradient^:svg:gradient|', ':svg:mpath^:svg:|', ':svg:marker^:svg:|', ':svg:mask^:svg:|', ':svg:metadata^:svg:|', ':svg:path^:svg:geometry|', ':svg:pattern^:svg:|', ':svg:polygon^:svg:geometry|', ':svg:polyline^:svg:geometry|', ':svg:radialGradient^:svg:gradient|', ':svg:rect^:svg:geometry|', ':svg:svg^:svg:graphics|#currentScale,#zoomAndPan', ':svg:script^:svg:|type', ':svg:set^:svg:animation|', ':svg:stop^:svg:|', ':svg:style^:svg:|!disabled,media,title,type', ':svg:switch^:svg:graphics|', ':svg:symbol^:svg:|', ':svg:tspan^:svg:textPositioning|', ':svg:text^:svg:textPositioning|', ':svg:textPath^:svg:textContent|', ':svg:title^:svg:|', ':svg:use^:svg:graphics|', ':svg:view^:svg:|#zoomAndPan', 'data^[HTMLElement]|value', 'keygen^[HTMLElement]|!autofocus,challenge,!disabled,form,keytype,name', 'menuitem^[HTMLElement]|type,label,icon,!disabled,!checked,radiogroup,!default', 'summary^[HTMLElement]|', 'time^[HTMLElement]|dateTime', ':svg:cursor^:svg:|', ':math:^[HTMLElement]|!autofocus,nonce,*abort,*animationend,*animationiteration,*animationstart,*auxclick,*beforeinput,*beforematch,*beforetoggle,*beforexrselect,*blur,*cancel,*canplay,*canplaythrough,*change,*click,*close,*contentvisibilityautostatechange,*contextlost,*contextmenu,*contextrestored,*copy,*cuechange,*cut,*dblclick,*drag,*dragend,*dragenter,*dragleave,*dragover,*dragstart,*drop,*durationchange,*emptied,*ended,*error,*focus,*formdata,*gotpointercapture,*input,*invalid,*keydown,*keypress,*keyup,*load,*loadeddata,*loadedmetadata,*loadstart,*lostpointercapture,*mousedown,*mouseenter,*mouseleave,*mousemove,*mouseout,*mouseover,*mouseup,*mousewheel,*paste,*pause,*play,*playing,*pointercancel,*pointerdown,*pointerenter,*pointerleave,*pointermove,*pointerout,*pointerover,*pointerrawupdate,*pointerup,*progress,*ratechange,*reset,*resize,*scroll,*scrollend,*securitypolicyviolation,*seeked,*seeking,*select,*selectionchange,*selectstart,*slotchange,*stalled,*submit,*suspend,*timeupdate,*toggle,*transitioncancel,*transitionend,*transitionrun,*transitionstart,*volumechange,*waiting,*webkitanimationend,*webkitanimationiteration,*webkitanimationstart,*webkittransitionend,*wheel,%style,#tabIndex', ':math:math^:math:|', ':math:maction^:math:|', ':math:menclose^:math:|', ':math:merror^:math:|', ':math:mfenced^:math:|', ':math:mfrac^:math:|', ':math:mi^:math:|', ':math:mmultiscripts^:math:|', ':math:mn^:math:|', ':math:mo^:math:|', ':math:mover^:math:|', ':math:mpadded^:math:|', ':math:mphantom^:math:|', ':math:mroot^:math:|', ':math:mrow^:math:|', ':math:ms^:math:|', ':math:mspace^:math:|', ':math:msqrt^:math:|', ':math:mstyle^:math:|', ':math:msub^:math:|', ':math:msubsup^:math:|', ':math:msup^:math:|', ':math:mtable^:math:|', ':math:mtd^:math:|', ':math:mtext^:math:|', ':math:mtr^:math:|', ':math:munder^:math:|', ':math:munderover^:math:|', ':math:semantics^:math:|'];
+/** @type {string[]} */ const SCHEMA = ['[Element]|textContent,%ariaActiveDescendantElement,%ariaAtomic,%ariaAutoComplete,%ariaBusy,%ariaChecked,%ariaColCount,%ariaColIndex,%ariaColIndexText,%ariaColSpan,%ariaControlsElements,%ariaCurrent,%ariaDescribedByElements,%ariaDescription,%ariaDetailsElements,%ariaDisabled,%ariaErrorMessageElements,%ariaExpanded,%ariaFlowToElements,%ariaHasPopup,%ariaHidden,%ariaInvalid,%ariaKeyShortcuts,%ariaLabel,%ariaLabelledByElements,%ariaLevel,%ariaLive,%ariaModal,%ariaMultiLine,%ariaMultiSelectable,%ariaOrientation,%ariaOwnsElements,%ariaPlaceholder,%ariaPosInSet,%ariaPressed,%ariaReadOnly,%ariaRelevant,%ariaRequired,%ariaRoleDescription,%ariaRowCount,%ariaRowIndex,%ariaRowIndexText,%ariaRowSpan,%ariaSelected,%ariaSetSize,%ariaSort,%ariaValueMax,%ariaValueMin,%ariaValueNow,%ariaValueText,%classList,className,elementTiming,id,innerHTML,*beforecopy,*beforecut,*beforepaste,*fullscreenchange,*fullscreenerror,*search,*webkitfullscreenchange,*webkitfullscreenerror,outerHTML,%part,#scrollLeft,#scrollTop,slot' + ',*message,*mozfullscreenchange,*mozfullscreenerror,*mozpointerlockchange,*mozpointerlockerror,*webglcontextcreationerror,*webglcontextlost,*webglcontextrestored', '[HTMLElement]^[Element]|accessKey,autocapitalize,!autofocus,contentEditable,dir,!draggable,enterKeyHint,!hidden,!inert,innerText,inputMode,lang,nonce,*abort,*animationend,*animationiteration,*animationstart,*auxclick,*beforexrselect,*blur,*cancel,*canplay,*canplaythrough,*change,*click,*close,*contextmenu,*copy,*cuechange,*cut,*dblclick,*drag,*dragend,*dragenter,*dragleave,*dragover,*dragstart,*drop,*durationchange,*emptied,*ended,*error,*focus,*formdata,*gotpointercapture,*input,*invalid,*keydown,*keypress,*keyup,*load,*loadeddata,*loadedmetadata,*loadstart,*lostpointercapture,*mousedown,*mouseenter,*mouseleave,*mousemove,*mouseout,*mouseover,*mouseup,*mousewheel,*paste,*pause,*play,*playing,*pointercancel,*pointerdown,*pointerenter,*pointerleave,*pointermove,*pointerout,*pointerover,*pointerrawupdate,*pointerup,*progress,*ratechange,*reset,*resize,*scroll,*securitypolicyviolation,*seeked,*seeking,*select,*selectionchange,*selectstart,*slotchange,*stalled,*submit,*suspend,*timeupdate,*toggle,*transitioncancel,*transitionend,*transitionrun,*transitionstart,*volumechange,*waiting,*webkitanimationend,*webkitanimationiteration,*webkitanimationstart,*webkittransitionend,*wheel,outerText,popover,!spellcheck,%style,#tabIndex,title,!translate,virtualKeyboardPolicy', 'abbr,address,article,aside,b,bdi,bdo,cite,content,code,dd,dfn,dt,em,figcaption,figure,footer,header,hgroup,i,kbd,main,mark,nav,noscript,rb,rp,rt,rtc,ruby,s,samp,search,section,small,strong,sub,sup,u,var,wbr^[HTMLElement]|accessKey,autocapitalize,!autofocus,contentEditable,dir,!draggable,enterKeyHint,!hidden,innerText,inputMode,lang,nonce,*abort,*animationend,*animationiteration,*animationstart,*auxclick,*beforexrselect,*blur,*cancel,*canplay,*canplaythrough,*change,*click,*close,*contextmenu,*copy,*cuechange,*cut,*dblclick,*drag,*dragend,*dragenter,*dragleave,*dragover,*dragstart,*drop,*durationchange,*emptied,*ended,*error,*focus,*formdata,*gotpointercapture,*input,*invalid,*keydown,*keypress,*keyup,*load,*loadeddata,*loadedmetadata,*loadstart,*lostpointercapture,*mousedown,*mouseenter,*mouseleave,*mousemove,*mouseout,*mouseover,*mouseup,*mousewheel,*paste,*pause,*play,*playing,*pointercancel,*pointerdown,*pointerenter,*pointerleave,*pointermove,*pointerout,*pointerover,*pointerrawupdate,*pointerup,*progress,*ratechange,*reset,*resize,*scroll,*securitypolicyviolation,*seeked,*seeking,*select,*selectionchange,*selectstart,*slotchange,*stalled,*submit,*suspend,*timeupdate,*toggle,*transitioncancel,*transitionend,*transitionrun,*transitionstart,*volumechange,*waiting,*webkitanimationend,*webkitanimationiteration,*webkitanimationstart,*webkittransitionend,*wheel,outerText,!spellcheck,%style,#tabIndex,title,!translate,virtualKeyboardPolicy', 'media^[HTMLElement]|!autoplay,!controls,%controlsList,%crossOrigin,#currentTime,!defaultMuted,#defaultPlaybackRate,!disableRemotePlayback,!loop,!muted,*encrypted,*waitingforkey,#playbackRate,preload,!preservesPitch,src,%srcObject,#volume', ':svg:^[HTMLElement]|!autofocus,nonce,*abort,*animationend,*animationiteration,*animationstart,*auxclick,*beforexrselect,*blur,*cancel,*canplay,*canplaythrough,*change,*click,*close,*contextmenu,*copy,*cuechange,*cut,*dblclick,*drag,*dragend,*dragenter,*dragleave,*dragover,*dragstart,*drop,*durationchange,*emptied,*ended,*error,*focus,*formdata,*gotpointercapture,*input,*invalid,*keydown,*keypress,*keyup,*load,*loadeddata,*loadedmetadata,*loadstart,*lostpointercapture,*mousedown,*mouseenter,*mouseleave,*mousemove,*mouseout,*mouseover,*mouseup,*mousewheel,*paste,*pause,*play,*playing,*pointercancel,*pointerdown,*pointerenter,*pointerleave,*pointermove,*pointerout,*pointerover,*pointerrawupdate,*pointerup,*progress,*ratechange,*reset,*resize,*scroll,*securitypolicyviolation,*seeked,*seeking,*select,*selectionchange,*selectstart,*slotchange,*stalled,*submit,*suspend,*timeupdate,*toggle,*transitioncancel,*transitionend,*transitionrun,*transitionstart,*volumechange,*waiting,*webkitanimationend,*webkitanimationiteration,*webkitanimationstart,*webkittransitionend,*wheel,%style,#tabIndex', ':svg:graphics^:svg:|', ':svg:animation^:svg:|*begin,*end,*repeat', ':svg:geometry^:svg:|', ':svg:componentTransferFunction^:svg:|', ':svg:gradient^:svg:|', ':svg:textContent^:svg:graphics|', ':svg:textPositioning^:svg:textContent|', 'a^[HTMLElement]|charset,coords,download,hash,host,hostname,href,hreflang,name,password,pathname,ping,port,protocol,referrerPolicy,rel,%relList,rev,search,shape,target,text,type,username', 'area^[HTMLElement]|alt,coords,download,hash,host,hostname,href,!noHref,password,pathname,ping,port,protocol,referrerPolicy,rel,%relList,search,shape,target,username', 'audio^media|', 'br^[HTMLElement]|clear', 'base^[HTMLElement]|href,target', 'body^[HTMLElement]|aLink,background,bgColor,link,*afterprint,*beforeprint,*beforeunload,*blur,*error,*focus,*hashchange,*languagechange,*load,*message,*messageerror,*offline,*online,*pagehide,*pageshow,*popstate,*rejectionhandled,*resize,*scroll,*storage,*unhandledrejection,*unload,text,vLink', 'button^[HTMLElement]|!disabled,formAction,formEnctype,formMethod,!formNoValidate,formTarget,name,popoverTargetAction,%popoverTargetElement,type,value', 'canvas^[HTMLElement]|#height,#width', 'content^[HTMLElement]|select', 'dl^[HTMLElement]|!compact', 'data^[HTMLElement]|value', 'datalist^[HTMLElement]|', 'details^[HTMLElement]|!open', 'dialog^[HTMLElement]|!open,returnValue', 'dir^[HTMLElement]|!compact', 'div^[HTMLElement]|align', 'embed^[HTMLElement]|align,height,name,src,type,width', 'fieldset^[HTMLElement]|!disabled,name', 'font^[HTMLElement]|color,face,size', 'form^[HTMLElement]|acceptCharset,action,autocomplete,encoding,enctype,method,name,!noValidate,target', 'frame^[HTMLElement]|frameBorder,longDesc,marginHeight,marginWidth,name,!noResize,scrolling,src', 'frameset^[HTMLElement]|cols,*afterprint,*beforeprint,*beforeunload,*blur,*error,*focus,*hashchange,*languagechange,*load,*message,*messageerror,*offline,*online,*pagehide,*pageshow,*popstate,*rejectionhandled,*resize,*scroll,*storage,*unhandledrejection,*unload,rows', 'geolocation^[HTMLElement]|accuracymode,!autolocate,*location,*promptaction,*promptdismiss,*validationstatuschange,!watch', 'hr^[HTMLElement]|align,color,!noShade,size,width', 'head^[HTMLElement]|', 'h1,h2,h3,h4,h5,h6^[HTMLElement]|align', 'html^[HTMLElement]|version', 'iframe^[HTMLElement]|align,allow,!allowFullscreen,!allowPaymentRequest,csp,!credentialless,frameBorder,height,loading,longDesc,marginHeight,marginWidth,name,referrerPolicy,%sandbox,scrolling,src,srcdoc,width', 'img^[HTMLElement]|align,alt,border,%crossOrigin,decoding,#height,#hspace,!isMap,loading,longDesc,lowsrc,name,referrerPolicy,sizes,src,srcset,useMap,#vspace,#width', 'input^[HTMLElement]|accept,align,alt,autocomplete,!checked,!defaultChecked,defaultValue,dirName,!disabled,%files,formAction,formEnctype,formMethod,!formNoValidate,formTarget,#height,!incremental,!indeterminate,max,#maxLength,min,#minLength,!multiple,name,pattern,placeholder,popoverTargetAction,%popoverTargetElement,!readOnly,!required,selectionDirection,#selectionEnd,#selectionStart,#size,src,step,type,useMap,value,%valueAsDate,#valueAsNumber,#width', 'li^[HTMLElement]|type,#value', 'label^[HTMLElement]|htmlFor', 'legend^[HTMLElement]|align', 'link^[HTMLElement]|as,charset,%crossOrigin,!disabled,href,hreflang,imageSizes,imageSrcset,integrity,media,referrerPolicy,rel,%relList,rev,%sizes,target,type', 'map^[HTMLElement]|name', 'marquee^[HTMLElement]|behavior,bgColor,direction,height,#hspace,#loop,#scrollAmount,#scrollDelay,!trueSpeed,#vspace,width', 'menu^[HTMLElement]|!compact', 'meta^[HTMLElement]|content,httpEquiv,media,name,scheme', 'meter^[HTMLElement]|#high,#low,#max,#min,#optimum,#value', 'ins,del^[HTMLElement]|cite,dateTime', 'ol^[HTMLElement]|!compact,!reversed,#start,type', 'object^[HTMLElement]|align,archive,border,code,codeBase,codeType,data,!declare,height,#hspace,name,standby,type,useMap,#vspace,width', 'optgroup^[HTMLElement]|!disabled,label', 'option^[HTMLElement]|!defaultSelected,!disabled,label,!selected,text,value', 'output^[HTMLElement]|defaultValue,%htmlFor,name,value', 'p^[HTMLElement]|align', 'param^[HTMLElement]|name,type,value,valueType', 'picture^[HTMLElement]|', 'pre^[HTMLElement]|#width', 'progress^[HTMLElement]|#max,#value', 'q,blockquote,cite^[HTMLElement]|', 'script^[HTMLElement]|!async,charset,%crossOrigin,!defer,event,htmlFor,integrity,!noModule,%referrerPolicy,src,text,type', 'select^[HTMLElement]|autocomplete,!disabled,#length,!multiple,name,!required,#selectedIndex,#size,value', 'selectedcontent^[HTMLElement]|', 'slot^[HTMLElement]|name', 'source^[HTMLElement]|#height,media,sizes,src,srcset,type,#width', 'span^[HTMLElement]|', 'style^[HTMLElement]|!disabled,media,type', 'search^[HTMLELement]|', 'caption^[HTMLElement]|align', 'th,td^[HTMLElement]|abbr,align,axis,bgColor,ch,chOff,#colSpan,headers,height,!noWrap,#rowSpan,scope,vAlign,width', 'col,colgroup^[HTMLElement]|align,ch,chOff,#span,vAlign,width', 'table^[HTMLElement]|align,bgColor,border,%caption,cellPadding,cellSpacing,frame,rules,summary,%tFoot,%tHead,width', 'tr^[HTMLElement]|align,bgColor,ch,chOff,vAlign', 'tfoot,thead,tbody^[HTMLElement]|align,ch,chOff,vAlign', 'template^[HTMLElement]|', 'textarea^[HTMLElement]|autocomplete,#cols,defaultValue,dirName,!disabled,#maxLength,#minLength,name,placeholder,!readOnly,!required,#rows,selectionDirection,#selectionEnd,#selectionStart,value,wrap', 'time^[HTMLElement]|dateTime', 'title^[HTMLElement]|text', 'track^[HTMLElement]|!default,kind,label,src,srclang', 'ul^[HTMLElement]|!compact,type', 'unknown^[HTMLElement]|', 'video^media|!disablePictureInPicture,#height,*enterpictureinpicture,*leavepictureinpicture,!playsInline,poster,#width', ':svg:a^:svg:graphics|', ':svg:animate^:svg:animation|', ':svg:animateMotion^:svg:animation|', ':svg:animateTransform^:svg:animation|', ':svg:circle^:svg:geometry|', ':svg:clipPath^:svg:graphics|', ':svg:defs^:svg:graphics|', ':svg:desc^:svg:|', ':svg:discard^:svg:|', ':svg:ellipse^:svg:geometry|', ':svg:feBlend^:svg:|', ':svg:feColorMatrix^:svg:|', ':svg:feComponentTransfer^:svg:|', ':svg:feComposite^:svg:|', ':svg:feConvolveMatrix^:svg:|', ':svg:feDiffuseLighting^:svg:|', ':svg:feDisplacementMap^:svg:|', ':svg:feDistantLight^:svg:|', ':svg:feDropShadow^:svg:|', ':svg:feFlood^:svg:|', ':svg:feFuncA^:svg:componentTransferFunction|', ':svg:feFuncB^:svg:componentTransferFunction|', ':svg:feFuncG^:svg:componentTransferFunction|', ':svg:feFuncR^:svg:componentTransferFunction|', ':svg:feGaussianBlur^:svg:|', ':svg:feImage^:svg:|', ':svg:feMerge^:svg:|', ':svg:feMergeNode^:svg:|', ':svg:feMorphology^:svg:|', ':svg:feOffset^:svg:|', ':svg:fePointLight^:svg:|', ':svg:feSpecularLighting^:svg:|', ':svg:feSpotLight^:svg:|', ':svg:feTile^:svg:|', ':svg:feTurbulence^:svg:|', ':svg:filter^:svg:|', ':svg:foreignObject^:svg:graphics|', ':svg:g^:svg:graphics|', ':svg:image^:svg:graphics|decoding', ':svg:line^:svg:geometry|', ':svg:linearGradient^:svg:gradient|', ':svg:mpath^:svg:|', ':svg:marker^:svg:|', ':svg:mask^:svg:|', ':svg:metadata^:svg:|', ':svg:path^:svg:geometry|', ':svg:pattern^:svg:|', ':svg:polygon^:svg:geometry|', ':svg:polyline^:svg:geometry|', ':svg:radialGradient^:svg:gradient|', ':svg:rect^:svg:geometry|', ':svg:svg^:svg:graphics|#currentScale,#zoomAndPan', ':svg:script^:svg:|type', ':svg:set^:svg:animation|', ':svg:stop^:svg:|', ':svg:style^:svg:|!disabled,media,title,type', ':svg:switch^:svg:graphics|', ':svg:symbol^:svg:|', ':svg:tspan^:svg:textPositioning|', ':svg:text^:svg:textPositioning|', ':svg:textPath^:svg:textContent|', ':svg:title^:svg:|', ':svg:use^:svg:graphics|', ':svg:view^:svg:|#zoomAndPan', 'data^[HTMLElement]|value', 'keygen^[HTMLElement]|!autofocus,challenge,!disabled,form,keytype,name', 'menuitem^[HTMLElement]|type,label,icon,!disabled,!checked,radiogroup,!default', 'summary^[HTMLElement]|', 'time^[HTMLElement]|dateTime', ':svg:cursor^:svg:|', ':math:^[HTMLElement]|!autofocus,nonce,*abort,*animationend,*animationiteration,*animationstart,*auxclick,*beforeinput,*beforematch,*beforetoggle,*beforexrselect,*blur,*cancel,*canplay,*canplaythrough,*change,*click,*close,*contentvisibilityautostatechange,*contextlost,*contextmenu,*contextrestored,*copy,*cuechange,*cut,*dblclick,*drag,*dragend,*dragenter,*dragleave,*dragover,*dragstart,*drop,*durationchange,*emptied,*ended,*error,*focus,*formdata,*gotpointercapture,*input,*invalid,*keydown,*keypress,*keyup,*load,*loadeddata,*loadedmetadata,*loadstart,*lostpointercapture,*mousedown,*mouseenter,*mouseleave,*mousemove,*mouseout,*mouseover,*mouseup,*mousewheel,*paste,*pause,*play,*playing,*pointercancel,*pointerdown,*pointerenter,*pointerleave,*pointermove,*pointerout,*pointerover,*pointerrawupdate,*pointerup,*progress,*ratechange,*reset,*resize,*scroll,*scrollend,*securitypolicyviolation,*seeked,*seeking,*select,*selectionchange,*selectstart,*slotchange,*stalled,*submit,*suspend,*timeupdate,*toggle,*transitioncancel,*transitionend,*transitionrun,*transitionstart,*volumechange,*waiting,*webkitanimationend,*webkitanimationiteration,*webkitanimationstart,*webkittransitionend,*wheel,%style,#tabIndex', ':math:math^:math:|', ':math:maction^:math:|', ':math:menclose^:math:|', ':math:merror^:math:|', ':math:mfenced^:math:|', ':math:mfrac^:math:|', ':math:mi^:math:|', ':math:mmultiscripts^:math:|', ':math:mn^:math:|', ':math:mo^:math:|', ':math:mover^:math:|', ':math:mpadded^:math:|', ':math:mphantom^:math:|', ':math:mroot^:math:|', ':math:mrow^:math:|', ':math:ms^:math:|', ':math:mspace^:math:|', ':math:msqrt^:math:|', ':math:mstyle^:math:|', ':math:msub^:math:|', ':math:msubsup^:math:|', ':math:msup^:math:|', ':math:mtable^:math:|', ':math:mtd^:math:|', ':math:mtext^:math:|', ':math:mtr^:math:|', ':math:munder^:math:|', ':math:munderover^:math:|', ':math:semantics^:math:|'];
 const _ATTR_TO_PROP = new Map(Object.entries({
   'class': 'className',
   'for': 'htmlFor',
@@ -17711,6 +16549,7 @@ const _PROP_TO_ATTR = Array.from(_ATTR_TO_PROP).reduce((inverted, [propertyName,
 class DomElementSchemaRegistry extends ElementSchemaRegistry {
   /** @type {Map<string, Map<string, string>>} */ _schema = new Map();
   /** @type {Map<string, Set<string>>} */ _eventSchema = new Map();
+  _allKnownEvents = null;
   constructor() {
     super();
     SCHEMA.forEach(encodedType => {
@@ -17835,6 +16674,10 @@ class DomElementSchemaRegistry extends ElementSchemaRegistry {
   /** @returns {string[]} */ allKnownEventsOfElement(/** @type {string} */ tagName) {
     const normalizedTag = normalizeTagName(tagName);
     return Array.from(this._eventSchema.get(normalizedTag) ?? []);
+  }
+  isKnownEventOfAnyElement(eventName) {
+    this._allKnownEvents ??= new Set(Array.from(this._eventSchema.values()).flatMap(events => Array.from(events)));
+    return this._allKnownEvents.has(eventName.toLowerCase());
   }
   /** @returns {string} */ normalizeAnimationStyleProperty(/** @type {string} */ propName) {
     return dashCaseToCamelCase(propName);
@@ -18200,7 +17043,7 @@ class PlaceholderRegistry {
     return name.toUpperCase().replace(/[^A-Z0-9]/g, '_');
   }
   /** @returns {string} */ _generateUniqueName(/** @type {string} */ base) {
-    const seen = this._placeHolderNameCounts.hasOwnProperty(base);
+    const seen = Object.hasOwn(this._placeHolderNameCounts, base);
     if (!seen) {
       this._placeHolderNameCounts[base] = 1;
       return base;
@@ -18798,6 +17641,7 @@ const TRANSLATION_VAR_PREFIX = 'i18n_';
 const I18N_ICU_MAPPING_PREFIX = 'I18N_EXP_';
 const ESCAPE = '\uFFFD';
 const CLOSURE_TRANSLATION_VAR_PREFIX = 'MSG_';
+const MESSAGE_EXTRACTION_LIMIT = 250;
 /** @returns {string} */ function getTranslationConstPrefix(/** @type {string} */ extra) {
   return `${CLOSURE_TRANSLATION_VAR_PREFIX}${extra}`.toUpperCase();
 }
@@ -18823,6 +17667,9 @@ function collectI18nConsts(/** @type {ComponentCompilationJob} */ job) {
         expressions.push(op);
         i18nExpressionsByElement.set(op.target, expressions);
       } else if (op.kind === OpKind.I18nMessage) {
+        if (op.requiresExtraction === null) {
+          op.requiresExtraction = messages.size >= MESSAGE_EXTRACTION_LIMIT;
+        }
         messages.set(op.xref, op);
       }
     }
@@ -18834,19 +17681,19 @@ function collectI18nConsts(/** @type {ComponentCompilationJob} */ job) {
       if (op.kind === OpKind.I18nMessage) {
         if (op.messagePlaceholder === null) {
           const {
-            mainVar,
+            value,
             statements
           } = collectMessage(job, fileBasedI18nSuffix, messages, op);
           if (op.i18nBlock !== null) {
-            const i18nConst = job.addConst(mainVar, statements);
+            const i18nConst = job.addConst(value, statements);
             messageConstIndices.set(op.i18nBlock, i18nConst);
           } else {
             job.constsInitializers.push(...statements);
-            i18nValuesByContext.set(op.i18nContext, mainVar);
+            i18nValuesByContext.set(op.i18nContext, value);
             const attributesForMessage = extractedAttributesByI18nContext.get(op.i18nContext);
             if (attributesForMessage !== undefined) {
               for (const attr of attributesForMessage) {
-                attr.expression = mainVar.clone();
+                attr.expression = value.clone();
               }
             }
           }
@@ -18901,17 +17748,16 @@ function collectMessage(/** @type {ComponentCompilationJob} */ job, /** @type {s
   for (const subMessageId of messageOp.subMessages) {
     const subMessage = messages.get(subMessageId);
     const {
-      mainVar: subMessageVar,
+      value: subMessageValue,
       statements: subMessageStatements
     } = collectMessage(job, fileBasedI18nSuffix, messages, subMessage);
     statements.push(...subMessageStatements);
     const subMessages = subMessagePlaceholders.get(subMessage.messagePlaceholder) ?? [];
-    subMessages.push(subMessageVar);
+    subMessages.push(subMessageValue);
     subMessagePlaceholders.set(subMessage.messagePlaceholder, subMessages);
   }
   addSubMessageParams(messageOp, subMessagePlaceholders);
   messageOp.params = new Map([...messageOp.params.entries()].sort());
-  const mainVar = variable(job.pool.uniqueName(TRANSLATION_VAR_PREFIX), DYNAMIC_TYPE);
   const closureVar = i18nGenerateClosureVar(job.pool, messageOp.message.id, fileBasedI18nSuffix, job.i18nUseExternalIds);
   let transformFn = undefined;
   if (messageOp.needsPostprocessing || messageOp.postprocessingParams.size > 0) {
@@ -18923,9 +17769,24 @@ function collectMessage(/** @type {ComponentCompilationJob} */ job, /** @type {s
     }
     transformFn = expr => importExpr(Identifiers.i18nPostprocess).callFn([expr, ...extraTransformFnParams]);
   }
-  statements.push(...getTranslationDeclStmts(messageOp.message, mainVar, closureVar, messageOp.params, transformFn));
+  if (messageOp.requiresExtraction === null) {
+    throw new Error('AssertionError: requiresExtraction of a message operation was not computed');
+  }
+  let value;
+  if (messageOp.requiresExtraction) {
+    const fnName = job.pool.uniqueName(TRANSLATION_VAR_PREFIX);
+    const returnVar = variable('msg');
+    const translationStatements = getTranslationDeclStmts(messageOp.message, returnVar, closureVar, messageOp.params, transformFn);
+    translationStatements.push(new ReturnStatement(returnVar));
+    job.pool.statements.push(new FunctionExpr([], translationStatements, DYNAMIC_TYPE).toDeclStmt(fnName, StmtModifier.Final));
+    value = variable(fnName).callFn([]);
+  } else {
+    const mainVar = variable(job.pool.uniqueName(TRANSLATION_VAR_PREFIX), DYNAMIC_TYPE);
+    value = mainVar;
+    statements.push(...getTranslationDeclStmts(messageOp.message, mainVar, closureVar, messageOp.params, transformFn));
+  }
   return {
-    mainVar,
+    value,
     statements
   };
 }
@@ -19269,6 +18130,7 @@ function addNamesToView(/** @type {CompilationUnit} */ unit, /** @type {string} 
         break;
       case OpKind.ConditionalCreate:
       case OpKind.ConditionalBranchCreate:
+      case OpKind.BoundaryErrorCreate:
       case OpKind.Template:
         if (!(unit instanceof ViewCompilationUnit)) {
           throw new Error(`AssertionError: must be compiling a component`);
@@ -19310,6 +18172,9 @@ function addNamesToView(/** @type {CompilationUnit} */ unit, /** @type {string} 
         const compatPrefix = variable.identifier === CONTEXT_NAME ? 'i' : '';
         variable.name = `${variable.identifier}_${compatPrefix}r${++state.index}`;
         break;
+      case SemanticVariableKind.BoundaryState:
+        variable.name = `bnd_r${++state.index}`;
+        break;
       default:
         variable.name = `_r${++state.index}`;
         break;
@@ -19338,6 +18203,7 @@ function mergeNextContextExpressions(/** @type {CompilationJob} */ job) {
         mergeNextContextsInOps(op.handlerOps);
       }
     }
+    mergeNextContextsInOps(unit.create);
     mergeNextContextsInOps(unit.update);
   }
 }
@@ -19400,7 +18266,7 @@ function lookupElement(elements, xref) {
   }
   return el;
 }
-function disableBindings$1(/** @type {CompilationJob} */ job) {
+function disableBindings(job) {
   const elements = new Map();
   for (const view of job.units) {
     for (const op of view.create) {
@@ -19567,7 +18433,7 @@ function processPipeBindingsInView(/** @type {CompilationUnit} */ unit) {
       if (slotHandle == undefined) {
         throw new Error(`AssertionError: expected slot handle to be assigned for pipe creation`);
       }
-      addPipeToCreationBlock(unit, updateOp.target, expr);
+      addPipeToCreationBlock(unit, slotHandle, expr);
     });
   }
 }
@@ -19699,7 +18565,7 @@ class PureFunctionConstant extends GenericKeyFn {
       }
       return variable('a' + expr.index);
     }, VisitorContextFlag.None);
-    return new DeclareVarStmt(declName, new ArrowFunctionExpr$1(fnParams, returnExpr), undefined, StmtModifier.Final);
+    return new DeclareVarStmt(declName, new ArrowFunctionExpr$1(fnParams, returnExpr, DYNAMIC_TYPE), undefined, StmtModifier.Final);
   }
 }
 
@@ -19799,480 +18665,6 @@ class RegularExpressionConstant extends GenericKeyFn {
   }
 }
 
-function element(/** @type {number} */ slot, /** @type {string} */ tag, /** @type {number | null} */ constIndex, /** @type {number | null} */ localRefIndex, /** @type {ParseSourceSpan} */ sourceSpan) {
-  return elementOrContainerBase(Identifiers.element, slot, tag, constIndex, localRefIndex, sourceSpan);
-}
-function elementStart(/** @type {number} */ slot, /** @type {string} */ tag, /** @type {number | null} */ constIndex, /** @type {number | null} */ localRefIndex, /** @type {ParseSourceSpan} */ sourceSpan) {
-  return elementOrContainerBase(Identifiers.elementStart, slot, tag, constIndex, localRefIndex, sourceSpan);
-}
-function elementOrContainerBase(instruction, /** @type {number} */ slot, /** @type {string | null} */ tag, /** @type {number | null} */ constIndex, /** @type {number | null} */ localRefIndex, /** @type {ParseSourceSpan} */ sourceSpan) {
-  const args = [literal(slot)];
-  if (tag !== null) {
-    args.push(literal(tag));
-  }
-  if (localRefIndex !== null) {
-    args.push(literal(constIndex), literal(localRefIndex));
-  } else if (constIndex !== null) {
-    args.push(literal(constIndex));
-  }
-  return call(instruction, args, sourceSpan);
-}
-function templateBase(instruction, /** @type {number} */ slot, /** @type {Expression} */ templateFnRef, /** @type {number} */ decls, /** @type {number} */ vars, /** @type {string | null} */ tag, /** @type {number | null} */ constIndex, /** @type {number | null} */ localRefs, /** @type {ParseSourceSpan} */ sourceSpan) {
-  const args = [literal(slot), templateFnRef, literal(decls), literal(vars), literal(tag), literal(constIndex)];
-  if (localRefs !== null) {
-    args.push(literal(localRefs));
-    args.push(importExpr(Identifiers.templateRefExtractor));
-  }
-  while (args[args.length - 1].isEquivalent(NULL_EXPR)) {
-    args.pop();
-  }
-  return call(instruction, args, sourceSpan);
-}
-function propertyBase(instruction, /** @type {string} */ name, expression, /** @type {Expression | null} */ sanitizer, /** @type {ParseSourceSpan} */ sourceSpan) {
-  const args = [literal(name)];
-  if (expression instanceof Interpolation) {
-    args.push(interpolationToExpression(expression, sourceSpan));
-  } else {
-    args.push(expression);
-  }
-  if (sanitizer !== null) {
-    args.push(sanitizer);
-  }
-  return call(instruction, args, sourceSpan);
-}
-function elementEnd(/** @type {ParseSourceSpan | null} */ sourceSpan) {
-  return call(Identifiers.elementEnd, [], sourceSpan);
-}
-function elementContainerStart(/** @type {number} */ slot, /** @type {number | null} */ constIndex, /** @type {number | null} */ localRefIndex, /** @type {ParseSourceSpan} */ sourceSpan) {
-  return elementOrContainerBase(Identifiers.elementContainerStart, slot, null, constIndex, localRefIndex, sourceSpan);
-}
-function elementContainer(/** @type {number} */ slot, /** @type {number | null} */ constIndex, /** @type {number | null} */ localRefIndex, /** @type {ParseSourceSpan} */ sourceSpan) {
-  return elementOrContainerBase(Identifiers.elementContainer, slot, null, constIndex, localRefIndex, sourceSpan);
-}
-function elementContainerEnd() {
-  return call(Identifiers.elementContainerEnd, [], null);
-}
-function template(/** @type {number} */ slot, /** @type {Expression} */ templateFnRef, /** @type {number} */ decls, /** @type {number} */ vars, /** @type {string | null} */ tag, /** @type {number | null} */ constIndex, /** @type {number | null} */ localRefs, /** @type {ParseSourceSpan} */ sourceSpan) {
-  return templateBase(Identifiers.templateCreate, slot, templateFnRef, decls, vars, tag, constIndex, localRefs, sourceSpan);
-}
-function disableBindings() {
-  return call(Identifiers.disableBindings, [], null);
-}
-function enableBindings() {
-  return call(Identifiers.enableBindings, [], null);
-}
-function listener(/** @type {string} */ name, /** @type {Expression} */ handlerFn, eventTargetResolver, /** @type {boolean} */ syntheticHost, /** @type {ParseSourceSpan} */ sourceSpan) {
-  const args = [literal(name), handlerFn];
-  if (eventTargetResolver !== null) {
-    args.push(importExpr(eventTargetResolver));
-  }
-  return call(syntheticHost ? Identifiers.syntheticHostListener : Identifiers.listener, args, sourceSpan);
-}
-/** @returns {Expression} */ function twoWayBindingSet(/** @type {Expression} */ target, /** @type {Expression} */ value) {
-  return importExpr(Identifiers.twoWayBindingSet).callFn([target, value]);
-}
-function twoWayListener(/** @type {string} */ name, /** @type {Expression} */ handlerFn, /** @type {ParseSourceSpan} */ sourceSpan) {
-  return call(Identifiers.twoWayListener, [literal(name), handlerFn], sourceSpan);
-}
-function pipe(/** @type {number} */ slot, /** @type {string} */ name) {
-  return call(Identifiers.pipe, [literal(slot), literal(name)], null);
-}
-function namespaceHTML() {
-  return call(Identifiers.namespaceHTML, [], null);
-}
-function namespaceSVG() {
-  return call(Identifiers.namespaceSVG, [], null);
-}
-function namespaceMath() {
-  return call(Identifiers.namespaceMathML, [], null);
-}
-function advance(/** @type {number} */ delta, /** @type {ParseSourceSpan} */ sourceSpan) {
-  return call(Identifiers.advance, delta > 1 ? [literal(delta)] : [], sourceSpan);
-}
-/** @returns {Expression} */ function reference(/** @type {number} */ slot) {
-  return importExpr(Identifiers.reference).callFn([literal(slot)]);
-}
-/** @returns {Expression} */ function nextContext(/** @type {number} */ steps) {
-  return importExpr(Identifiers.nextContext).callFn(steps === 1 ? [] : [literal(steps)]);
-}
-/** @returns {Expression} */ function getCurrentView() {
-  return importExpr(Identifiers.getCurrentView).callFn([]);
-}
-/** @returns {Expression} */ function restoreView(/** @type {Expression} */ savedView) {
-  return importExpr(Identifiers.restoreView).callFn([savedView]);
-}
-/** @returns {Expression} */ function resetView(/** @type {Expression} */ returnValue) {
-  return importExpr(Identifiers.resetView).callFn([returnValue]);
-}
-function text(/** @type {number} */ slot, /** @type {string} */ initialValue, /** @type {ParseSourceSpan | null} */ sourceSpan) {
-  const args = [literal(slot, null)];
-  if (initialValue !== '') {
-    args.push(literal(initialValue));
-  }
-  return call(Identifiers.text, args, sourceSpan);
-}
-function defer(/** @type {number} */ selfSlot, /** @type {number} */ primarySlot, /** @type {Expression | null} */ dependencyResolverFn, /** @type {number | null} */ loadingSlot, /** @type {number | null} */ placeholderSlot, /** @type {number | null} */ errorSlot, /** @type {Expression | null} */ loadingConfig, /** @type {Expression | null} */ placeholderConfig, /** @type {boolean} */ enableTimerScheduling, /** @type {ParseSourceSpan | null} */ sourceSpan, /** @type {number | null} */ flags) {
-  const args = [literal(selfSlot), literal(primarySlot), dependencyResolverFn ?? literal(null), literal(loadingSlot), literal(placeholderSlot), literal(errorSlot), loadingConfig ?? literal(null), placeholderConfig ?? literal(null), enableTimerScheduling ? importExpr(Identifiers.deferEnableTimerScheduling) : literal(null), literal(flags)];
-  let expr;
-  while ((expr = args[args.length - 1]) !== null && expr instanceof LiteralExpr && expr.value === null) {
-    args.pop();
-  }
-  return call(Identifiers.defer, args, sourceSpan);
-}
-function enableIncrementalHydrationRuntime(/** @type {ParseSourceSpan | null} */ sourceSpan) {
-  return call(Identifiers.enableIncrementalHydrationRuntime, [], sourceSpan);
-}
-const deferTriggerToR3TriggerInstructionsMap = new Map([[DeferTriggerKind.Idle, {
-  ["none"]: Identifiers.deferOnIdle,
-  ["prefetch"]: Identifiers.deferPrefetchOnIdle,
-  ["hydrate"]: Identifiers.deferHydrateOnIdle
-}], [DeferTriggerKind.Immediate, {
-  ["none"]: Identifiers.deferOnImmediate,
-  ["prefetch"]: Identifiers.deferPrefetchOnImmediate,
-  ["hydrate"]: Identifiers.deferHydrateOnImmediate
-}], [DeferTriggerKind.Timer, {
-  ["none"]: Identifiers.deferOnTimer,
-  ["prefetch"]: Identifiers.deferPrefetchOnTimer,
-  ["hydrate"]: Identifiers.deferHydrateOnTimer
-}], [DeferTriggerKind.Hover, {
-  ["none"]: Identifiers.deferOnHover,
-  ["prefetch"]: Identifiers.deferPrefetchOnHover,
-  ["hydrate"]: Identifiers.deferHydrateOnHover
-}], [DeferTriggerKind.Interaction, {
-  ["none"]: Identifiers.deferOnInteraction,
-  ["prefetch"]: Identifiers.deferPrefetchOnInteraction,
-  ["hydrate"]: Identifiers.deferHydrateOnInteraction
-}], [DeferTriggerKind.Viewport, {
-  ["none"]: Identifiers.deferOnViewport,
-  ["prefetch"]: Identifiers.deferPrefetchOnViewport,
-  ["hydrate"]: Identifiers.deferHydrateOnViewport
-}], [DeferTriggerKind.Never, {
-  ["none"]: Identifiers.deferHydrateNever,
-  ["prefetch"]: Identifiers.deferHydrateNever,
-  ["hydrate"]: Identifiers.deferHydrateNever
-}]]);
-function deferOn(/** @type {number} */ trigger, /** @type {Expression[]} */ args, /** @type {string} */ modifier, /** @type {ParseSourceSpan | null} */ sourceSpan) {
-  const instructionToCall = deferTriggerToR3TriggerInstructionsMap.get(trigger)?.[modifier];
-  if (instructionToCall === undefined) {
-    throw new Error(`Unable to determine instruction for trigger ${trigger}`);
-  }
-  return call(instructionToCall, args, sourceSpan);
-}
-function projectionDef(/** @type {Expression | null} */ def) {
-  return call(Identifiers.projectionDef, def ? [def] : [], null);
-}
-function projection(/** @type {number} */ slot, /** @type {number} */ projectionSlotIndex, /** @type {Expression | null} */ attributes, /** @type {string | null} */ fallbackFnName, /** @type {number | null} */ fallbackDecls, /** @type {number | null} */ fallbackVars, /** @type {ParseSourceSpan} */ sourceSpan) {
-  const args = [literal(slot)];
-  if (projectionSlotIndex !== 0 || attributes !== null || fallbackFnName !== null) {
-    args.push(literal(projectionSlotIndex));
-    if (attributes !== null) {
-      args.push(attributes);
-    }
-    if (fallbackFnName !== null) {
-      if (attributes === null) {
-        args.push(literal(null));
-      }
-      args.push(variable(fallbackFnName), literal(fallbackDecls), literal(fallbackVars));
-    }
-  }
-  return call(Identifiers.projection, args, sourceSpan);
-}
-function i18nStart(/** @type {number} */ slot, /** @type {number} */ constIndex, /** @type {number} */ subTemplateIndex, /** @type {ParseSourceSpan | null} */ sourceSpan) {
-  const args = [literal(slot), literal(constIndex)];
-  if (subTemplateIndex !== null) {
-    args.push(literal(subTemplateIndex));
-  }
-  return call(Identifiers.i18nStart, args, sourceSpan);
-}
-function conditionalCreate(/** @type {number} */ slot, /** @type {Expression} */ templateFnRef, /** @type {number} */ decls, /** @type {number} */ vars, /** @type {string | null} */ tag, /** @type {number | null} */ constIndex, /** @type {number | null} */ localRefs, /** @type {ParseSourceSpan} */ sourceSpan) {
-  const args = [literal(slot), templateFnRef, literal(decls), literal(vars), literal(tag), literal(constIndex)];
-  if (localRefs !== null) {
-    args.push(literal(localRefs));
-    args.push(importExpr(Identifiers.templateRefExtractor));
-  }
-  while (args[args.length - 1].isEquivalent(NULL_EXPR)) {
-    args.pop();
-  }
-  return call(Identifiers.conditionalCreate, args, sourceSpan);
-}
-function conditionalBranchCreate(/** @type {number} */ slot, /** @type {Expression} */ templateFnRef, /** @type {number} */ decls, /** @type {number} */ vars, /** @type {string | null} */ tag, /** @type {number | null} */ constIndex, /** @type {number | null} */ localRefs, /** @type {ParseSourceSpan} */ sourceSpan) {
-  const args = [literal(slot), templateFnRef, literal(decls), literal(vars), literal(tag), literal(constIndex)];
-  if (localRefs !== null) {
-    args.push(literal(localRefs));
-    args.push(importExpr(Identifiers.templateRefExtractor));
-  }
-  while (args[args.length - 1].isEquivalent(NULL_EXPR)) {
-    args.pop();
-  }
-  return call(Identifiers.conditionalBranchCreate, args, sourceSpan);
-}
-function repeaterCreate(/** @type {number} */ slot, /** @type {string} */ viewFnName, /** @type {number} */ decls, /** @type {number} */ vars, /** @type {string | null} */ tag, /** @type {number | null} */ constIndex, /** @type {Expression} */ trackByFn, /** @type {boolean} */ trackByUsesComponentInstance, /** @type {string | null} */ emptyViewFnName, /** @type {number | null} */ emptyDecls, /** @type {number | null} */ emptyVars, /** @type {string | null} */ emptyTag, /** @type {number | null} */ emptyConstIndex, /** @type {ParseSourceSpan | null} */ sourceSpan) {
-  const args = [literal(slot), variable(viewFnName), literal(decls), literal(vars), literal(tag), literal(constIndex), trackByFn];
-  if (trackByUsesComponentInstance || emptyViewFnName !== null) {
-    args.push(literal(trackByUsesComponentInstance));
-    if (emptyViewFnName !== null) {
-      args.push(variable(emptyViewFnName), literal(emptyDecls), literal(emptyVars));
-      if (emptyTag !== null || emptyConstIndex !== null) {
-        args.push(literal(emptyTag));
-      }
-      if (emptyConstIndex !== null) {
-        args.push(literal(emptyConstIndex));
-      }
-    }
-  }
-  return call(Identifiers.repeaterCreate, args, sourceSpan);
-}
-function repeater(/** @type {Expression} */ collection, /** @type {ParseSourceSpan | null} */ sourceSpan) {
-  return call(Identifiers.repeater, [collection], sourceSpan);
-}
-function deferWhen(/** @type {string} */ modifier, /** @type {Expression} */ expr, /** @type {ParseSourceSpan | null} */ sourceSpan) {
-  if (modifier === "prefetch") {
-    return call(Identifiers.deferPrefetchWhen, [expr], sourceSpan);
-  } else if (modifier === "hydrate") {
-    return call(Identifiers.deferHydrateWhen, [expr], sourceSpan);
-  }
-  return call(Identifiers.deferWhen, [expr], sourceSpan);
-}
-function declareLet(/** @type {number} */ slot, /** @type {ParseSourceSpan} */ sourceSpan) {
-  return call(Identifiers.declareLet, [literal(slot)], sourceSpan);
-}
-/** @returns {Expression} */ function storeLet(/** @type {Expression} */ value, /** @type {ParseSourceSpan} */ sourceSpan) {
-  return importExpr(Identifiers.storeLet).callFn([value], sourceSpan);
-}
-/** @returns {Expression} */ function readContextLet(/** @type {number} */ slot) {
-  return importExpr(Identifiers.readContextLet).callFn([literal(slot)]);
-}
-function i18n(/** @type {number} */ slot, /** @type {number} */ constIndex, /** @type {number} */ subTemplateIndex, /** @type {ParseSourceSpan | null} */ sourceSpan) {
-  const args = [literal(slot), literal(constIndex)];
-  if (subTemplateIndex) {
-    args.push(literal(subTemplateIndex));
-  }
-  return call(Identifiers.i18n, args, sourceSpan);
-}
-function i18nEnd(/** @type {ParseSourceSpan | null} */ endSourceSpan) {
-  return call(Identifiers.i18nEnd, [], endSourceSpan);
-}
-function i18nAttributes(/** @type {number} */ slot, /** @type {number} */ i18nAttributesConfig) {
-  const args = [literal(slot), literal(i18nAttributesConfig)];
-  return call(Identifiers.i18nAttributes, args, null);
-}
-function ariaProperty(/** @type {string} */ name, expression, /** @type {ParseSourceSpan} */ sourceSpan) {
-  return propertyBase(Identifiers.ariaProperty, name, expression, null, sourceSpan);
-}
-function property(/** @type {string} */ name, expression, /** @type {Expression | null} */ sanitizer, /** @type {ParseSourceSpan} */ sourceSpan) {
-  return propertyBase(Identifiers.property, name, expression, sanitizer, sourceSpan);
-}
-function control(/** @type {ParseSourceSpan | null} */ sourceSpan) {
-  return call(Identifiers.control, [], sourceSpan);
-}
-function controlCreate(/** @type {ParseSourceSpan | null} */ sourceSpan) {
-  return call(Identifiers.controlCreate, [], sourceSpan);
-}
-function twoWayProperty(/** @type {string} */ name, /** @type {Expression} */ expression, /** @type {Expression | null} */ sanitizer, /** @type {ParseSourceSpan} */ sourceSpan) {
-  const args = [literal(name), expression];
-  if (sanitizer !== null) {
-    args.push(sanitizer);
-  }
-  return call(Identifiers.twoWayProperty, args, sourceSpan);
-}
-function attribute(/** @type {string} */ name, expression, /** @type {Expression | null} */ sanitizer, /** @type {string | null} */ namespace, /** @type {ParseSourceSpan} */ sourceSpan) {
-  const args = [literal(name)];
-  if (expression instanceof Interpolation) {
-    args.push(interpolationToExpression(expression, sourceSpan));
-  } else {
-    args.push(expression);
-  }
-  if (sanitizer !== null || namespace !== null) {
-    args.push(sanitizer ?? literal(null));
-  }
-  if (namespace !== null) {
-    args.push(literal(namespace));
-  }
-  return call(Identifiers.attribute, args, null);
-}
-function styleProp(/** @type {string} */ name, expression, /** @type {string | null} */ unit, /** @type {ParseSourceSpan} */ sourceSpan) {
-  const args = [literal(name)];
-  if (expression instanceof Interpolation) {
-    args.push(interpolationToExpression(expression, sourceSpan));
-  } else {
-    args.push(expression);
-  }
-  if (unit !== null) {
-    args.push(literal(unit));
-  }
-  return call(Identifiers.styleProp, args, sourceSpan);
-}
-function classProp(/** @type {string} */ name, /** @type {Expression} */ expression, /** @type {ParseSourceSpan} */ sourceSpan) {
-  return call(Identifiers.classProp, [literal(name), expression], sourceSpan);
-}
-function styleMap(expression, /** @type {ParseSourceSpan} */ sourceSpan) {
-  const value = expression instanceof Interpolation ? interpolationToExpression(expression, sourceSpan) : expression;
-  return call(Identifiers.styleMap, [value], sourceSpan);
-}
-function classMap(expression, /** @type {ParseSourceSpan} */ sourceSpan) {
-  const value = expression instanceof Interpolation ? interpolationToExpression(expression, sourceSpan) : expression;
-  return call(Identifiers.classMap, [value], sourceSpan);
-}
-function domElement(/** @type {number} */ slot, /** @type {string} */ tag, /** @type {number | null} */ constIndex, /** @type {number | null} */ localRefIndex, /** @type {ParseSourceSpan} */ sourceSpan) {
-  return elementOrContainerBase(Identifiers.domElement, slot, tag, constIndex, localRefIndex, sourceSpan);
-}
-function domElementStart(/** @type {number} */ slot, /** @type {string} */ tag, /** @type {number | null} */ constIndex, /** @type {number | null} */ localRefIndex, /** @type {ParseSourceSpan} */ sourceSpan) {
-  return elementOrContainerBase(Identifiers.domElementStart, slot, tag, constIndex, localRefIndex, sourceSpan);
-}
-function domElementEnd(/** @type {ParseSourceSpan | null} */ sourceSpan) {
-  return call(Identifiers.domElementEnd, [], sourceSpan);
-}
-function domElementContainerStart(/** @type {number} */ slot, /** @type {number | null} */ constIndex, /** @type {number | null} */ localRefIndex, /** @type {ParseSourceSpan} */ sourceSpan) {
-  return elementOrContainerBase(Identifiers.domElementContainerStart, slot, null, constIndex, localRefIndex, sourceSpan);
-}
-function domElementContainer(/** @type {number} */ slot, /** @type {number | null} */ constIndex, /** @type {number | null} */ localRefIndex, /** @type {ParseSourceSpan} */ sourceSpan) {
-  return elementOrContainerBase(Identifiers.domElementContainer, slot, null, constIndex, localRefIndex, sourceSpan);
-}
-function domElementContainerEnd() {
-  return call(Identifiers.domElementContainerEnd, [], null);
-}
-function domListener(/** @type {string} */ name, /** @type {Expression} */ handlerFn, eventTargetResolver, /** @type {ParseSourceSpan} */ sourceSpan) {
-  const args = [literal(name), handlerFn];
-  if (eventTargetResolver !== null) {
-    args.push(importExpr(eventTargetResolver));
-  }
-  return call(Identifiers.domListener, args, sourceSpan);
-}
-function domTemplate(/** @type {number} */ slot, /** @type {Expression} */ templateFnRef, /** @type {number} */ decls, /** @type {number} */ vars, /** @type {string | null} */ tag, /** @type {number | null} */ constIndex, /** @type {number | null} */ localRefs, /** @type {ParseSourceSpan} */ sourceSpan) {
-  return templateBase(Identifiers.domTemplate, slot, templateFnRef, decls, vars, tag, constIndex, localRefs, sourceSpan);
-}
-const PIPE_BINDINGS = [Identifiers.pipeBind1, Identifiers.pipeBind2, Identifiers.pipeBind3, Identifiers.pipeBind4];
-/** @returns {Expression} */ function pipeBind(/** @type {number} */ slot, /** @type {number} */ varOffset, /** @type {Expression[]} */ args) {
-  if (args.length < 1 || args.length > PIPE_BINDINGS.length) {
-    throw new Error(`pipeBind() argument count out of bounds`);
-  }
-  const instruction = PIPE_BINDINGS[args.length - 1];
-  return importExpr(instruction).callFn([literal(slot), literal(varOffset), ...args]);
-}
-/** @returns {Expression} */ function pipeBindV(/** @type {number} */ slot, /** @type {number} */ varOffset, /** @type {Expression} */ args) {
-  return importExpr(Identifiers.pipeBindV).callFn([literal(slot), literal(varOffset), args]);
-}
-function textInterpolate(/** @type {string[]} */ strings, /** @type {Expression[]} */ expressions, /** @type {ParseSourceSpan} */ sourceSpan) {
-  const interpolationArgs = collateInterpolationArgs(strings, expressions);
-  return callVariadicInstruction(TEXT_INTERPOLATE_CONFIG, [], interpolationArgs, sourceSpan);
-}
-function i18nExp(/** @type {Expression} */ expr, /** @type {ParseSourceSpan | null} */ sourceSpan) {
-  return call(Identifiers.i18nExp, [expr], sourceSpan);
-}
-function i18nApply(/** @type {number} */ slot, /** @type {ParseSourceSpan | null} */ sourceSpan) {
-  return call(Identifiers.i18nApply, [literal(slot)], sourceSpan);
-}
-function domProperty(/** @type {string} */ name, expression, /** @type {Expression | null} */ sanitizer, /** @type {ParseSourceSpan} */ sourceSpan) {
-  return propertyBase(Identifiers.domProperty, name, expression, sanitizer, sourceSpan);
-}
-function animation(/** @type {string} */ animationKind, /** @type {Expression} */ handlerFn, /** @type {Expression | null} */ sanitizer, /** @type {ParseSourceSpan} */ sourceSpan) {
-  const args = [handlerFn];
-  if (sanitizer !== null) {
-    args.push(sanitizer);
-  }
-  const identifier = animationKind === "enter" ? Identifiers.animationEnter : Identifiers.animationLeave;
-  return call(identifier, args, sourceSpan);
-}
-function animationString(/** @type {string} */ animationKind, expression, /** @type {Expression | null} */ sanitizer, /** @type {ParseSourceSpan} */ sourceSpan) {
-  const value = expression instanceof Interpolation ? interpolationToExpression(expression, sourceSpan) : expression;
-  const args = [value];
-  if (sanitizer !== null) {
-    args.push(sanitizer);
-  }
-  const identifier = animationKind === "enter" ? Identifiers.animationEnter : Identifiers.animationLeave;
-  return call(identifier, args, sourceSpan);
-}
-function animationListener(/** @type {string} */ animationKind, /** @type {Expression} */ handlerFn, eventTargetResolver, /** @type {ParseSourceSpan} */ sourceSpan) {
-  const args = [handlerFn];
-  const identifier = animationKind === "enter" ? Identifiers.animationEnterListener : Identifiers.animationLeaveListener;
-  return call(identifier, args, sourceSpan);
-}
-function syntheticHostProperty(/** @type {string} */ name, /** @type {Expression} */ expression, /** @type {ParseSourceSpan | null} */ sourceSpan) {
-  return call(Identifiers.syntheticHostProperty, [literal(name), expression], sourceSpan);
-}
-/** @returns {Expression} */ function pureFunction(/** @type {number} */ varOffset, /** @type {Expression} */ fn, /** @type {Expression[]} */ args) {
-  return callVariadicInstructionExpr(PURE_FUNCTION_CONFIG, [literal(varOffset), fn], args, null);
-}
-function attachSourceLocation(/** @type {string} */ templatePath, /** @type {LiteralArrayExpr} */ locations) {
-  return call(Identifiers.attachSourceLocations, [literal(templatePath), locations], null);
-}
-/** @returns {Expression} */ function arrowFunction(/** @type {number} */ slotOffset, /** @type {Expression} */ factory, /** @type {Expression} */ contextRef) {
-  return importExpr(Identifiers.arrowFunction).callFn([literal(slotOffset), factory, contextRef]);
-}
-/** @returns {Expression[]} */ function collateInterpolationArgs(/** @type {string[]} */ strings, /** @type {Expression[]} */ expressions) {
-  if (strings.length < 1 || expressions.length !== strings.length - 1) {
-    throw new Error(`AssertionError: expected specific shape of args for strings/expressions in interpolation`);
-  }
-  const interpolationArgs = [];
-  if (expressions.length === 1 && strings[0] === '' && strings[1] === '') {
-    interpolationArgs.push(expressions[0]);
-  } else {
-    let idx;
-    for (idx = 0; idx < expressions.length; idx++) {
-      interpolationArgs.push(literal(strings[idx]), expressions[idx]);
-    }
-    interpolationArgs.push(literal(strings[idx]));
-  }
-  return interpolationArgs;
-}
-/** @returns {Expression} */ function interpolationToExpression(/** @type {Interpolation} */ interpolation, /** @type {ParseSourceSpan} */ sourceSpan) {
-  const interpolationArgs = collateInterpolationArgs(interpolation.strings, interpolation.expressions);
-  return callVariadicInstructionExpr(VALUE_INTERPOLATE_CONFIG, [], interpolationArgs, sourceSpan);
-}
-function call(instruction, /** @type {Expression[]} */ args, /** @type {ParseSourceSpan | null} */ sourceSpan) {
-  const expr = importExpr(instruction).callFn(args, sourceSpan);
-  return createStatementOp(new ExpressionStatement(expr, sourceSpan));
-}
-function conditional(/** @type {Expression} */ condition, /** @type {Expression | null} */ contextValue, /** @type {ParseSourceSpan | null} */ sourceSpan) {
-  const args = [condition];
-  if (contextValue !== null) {
-    args.push(contextValue);
-  }
-  return call(Identifiers.conditional, args, sourceSpan);
-}
-const TEXT_INTERPOLATE_CONFIG = {
-  constant: [Identifiers.textInterpolate, Identifiers.textInterpolate1, Identifiers.textInterpolate2, Identifiers.textInterpolate3, Identifiers.textInterpolate4, Identifiers.textInterpolate5, Identifiers.textInterpolate6, Identifiers.textInterpolate7, Identifiers.textInterpolate8],
-  variable: Identifiers.textInterpolateV,
-  mapping: n => {
-    if (n % 2 === 0) {
-      throw new Error(`Expected odd number of arguments`);
-    }
-    return (n - 1) / 2;
-  }
-};
-const VALUE_INTERPOLATE_CONFIG = {
-  constant: [Identifiers.interpolate, Identifiers.interpolate1, Identifiers.interpolate2, Identifiers.interpolate3, Identifiers.interpolate4, Identifiers.interpolate5, Identifiers.interpolate6, Identifiers.interpolate7, Identifiers.interpolate8],
-  variable: Identifiers.interpolateV,
-  mapping: n => {
-    if (n % 2 === 0) {
-      throw new Error(`Expected odd number of arguments`);
-    }
-    return (n - 1) / 2;
-  }
-};
-const PURE_FUNCTION_CONFIG = {
-  constant: [Identifiers.pureFunction0, Identifiers.pureFunction1, Identifiers.pureFunction2, Identifiers.pureFunction3, Identifiers.pureFunction4, Identifiers.pureFunction5, Identifiers.pureFunction6, Identifiers.pureFunction7, Identifiers.pureFunction8],
-  variable: Identifiers.pureFunctionV,
-  mapping: n => n
-};
-/** @returns {Expression} */ function callVariadicInstructionExpr(config, /** @type {Expression[]} */ baseArgs, /** @type {Expression[]} */ interpolationArgs, /** @type {ParseSourceSpan | null} */ sourceSpan) {
-  const n = config.mapping(interpolationArgs.length);
-  const lastInterpolationArg = interpolationArgs.at(-1);
-  if (interpolationArgs.length > 1 && lastInterpolationArg instanceof LiteralExpr && lastInterpolationArg.value === '') {
-    interpolationArgs.pop();
-  }
-  if (n < config.constant.length) {
-    return importExpr(config.constant[n]).callFn([...baseArgs, ...interpolationArgs], sourceSpan);
-  } else if (config.variable !== null) {
-    return importExpr(config.variable).callFn([...baseArgs, literalArr(interpolationArgs)], sourceSpan);
-  } else {
-    throw new Error(`AssertionError: unable to call variadic function`);
-  }
-}
-function callVariadicInstruction(config, /** @type {Expression[]} */ baseArgs, /** @type {Expression[]} */ interpolationArgs, /** @type {ParseSourceSpan | null} */ sourceSpan) {
-  return createStatementOp(callVariadicInstructionExpr(config, baseArgs, interpolationArgs, sourceSpan).toStmt());
-}
-
 const GLOBAL_TARGET_RESOLVERS = new Map([['window', Identifiers.resolveWindow], ['document', Identifiers.resolveDocument], ['body', Identifiers.resolveBody]]);
 const DOM_PROPERTY_REMAPPING = new Map([['class', 'className'], ['for', 'htmlFor'], ['formaction', 'formAction'], ['innerHtml', 'innerHTML'], ['readonly', 'readOnly'], ['tabindex', 'tabIndex']]);
 function reify(/** @type {CompilationJob} */ job) {
@@ -20293,6 +18685,15 @@ function reifyCreateOperations(/** @type {CompilationUnit} */ unit, ops) {
         break;
       case OpKind.Element:
         OpList.replace(op, unit.job.mode === TemplateCompilationMode.DomOnly ? domElement(op.handle.slot, op.tag, op.attributes, op.localRefs, op.wholeSourceSpan) : element(op.handle.slot, op.tag, op.attributes, op.localRefs, op.wholeSourceSpan));
+        break;
+      case OpKind.ForeignComponent:
+        const propsMap = op.props.size > 0 ? literalMap(Array.from(op.props.entries()).map(([key, value]) => ({
+          key,
+          value,
+          quoted: isUnsafeObjectKey(key)
+        }))) : null;
+        const propsExpr = propsMap !== null ? arrowFn([], propsMap, DYNAMIC_TYPE) : null;
+        OpList.replace(op, foreignComponent(op.handle.slot, literal(op.constIndex), propsExpr, op.sourceSpan));
         break;
       case OpKind.ElementEnd:
         OpList.replace(op, unit.job.mode === TemplateCompilationMode.DomOnly ? domElementEnd(op.sourceSpan) : elementEnd(op.sourceSpan));
@@ -20332,7 +18733,7 @@ function reifyCreateOperations(/** @type {CompilationUnit} */ unit, ops) {
         OpList.replace(op, op.templateKind === TemplateKind.Block || unit.job.mode === TemplateCompilationMode.DomOnly ? domTemplate(op.handle.slot, variable(childView.fnName), childView.decls, childView.vars, op.tag, op.attributes, op.localRefs, op.startSourceSpan) : template(op.handle.slot, variable(childView.fnName), childView.decls, childView.vars, op.tag, op.attributes, op.localRefs, op.startSourceSpan));
         break;
       case OpKind.DisableBindings:
-        OpList.replace(op, disableBindings());
+        OpList.replace(op, disableBindings$1());
         break;
       case OpKind.EnableBindings:
         OpList.replace(op, enableBindings());
@@ -20390,7 +18791,8 @@ function reifyCreateOperations(/** @type {CompilationUnit} */ unit, ops) {
         break;
       case OpKind.DeferOn:
         let args = [];
-        switch (op.trigger.kind) {
+        const triggerKind = op.trigger.kind;
+        switch (triggerKind) {
           case DeferTriggerKind.Never:
           case DeferTriggerKind.Immediate:
             break;
@@ -20429,7 +18831,10 @@ function reifyCreateOperations(/** @type {CompilationUnit} */ unit, ops) {
             }
             break;
           default:
-            throw new Error(`AssertionError: Unsupported reification of defer trigger kind ${op.trigger.kind}`);
+            {
+              const unhandledTriggerKind = triggerKind;
+              throw new Error(`AssertionError: Unsupported reification of defer trigger kind ${unhandledTriggerKind}`);
+            }
         }
         OpList.replace(op, deferOn(op.trigger.kind, args, op.modifier, op.sourceSpan));
         break;
@@ -20482,6 +18887,22 @@ function reifyCreateOperations(/** @type {CompilationUnit} */ unit, ops) {
         }
         const conditionalBranchCreateChildView = unit.job.views.get(op.xref);
         OpList.replace(op, conditionalBranchCreate(op.handle.slot, variable(conditionalBranchCreateChildView.fnName), conditionalBranchCreateChildView.decls, conditionalBranchCreateChildView.vars, op.tag, op.attributes, op.localRefs, op.startSourceSpan));
+        break;
+      case OpKind.BoundaryErrorCreate:
+        if (!(unit instanceof ViewCompilationUnit)) {
+          throw new Error(`AssertionError: must be compiling a component`);
+        }
+        const boundaryErrorCreateChildView = unit.job.views.get(op.xref);
+        OpList.replace(op, conditionalBranchCreate(op.handle.slot, variable(boundaryErrorCreateChildView.fnName), boundaryErrorCreateChildView.decls, boundaryErrorCreateChildView.vars, null, null, null, op.startSourceSpan));
+        break;
+      case OpKind.BoundaryCreate:
+        if (!(unit instanceof ViewCompilationUnit)) {
+          throw new Error(`AssertionError: must be compiling a component`);
+        }
+        if (Array.isArray(op.localRefs) && op.localRefs.length > 0) {
+          throw new Error(`AssertionError: local refs array should have been extracted into a constant`);
+        }
+        OpList.replace(op, boundaryCreate(op.handle.slot, op.startSourceSpan));
         break;
       case OpKind.RepeaterCreate:
         if (op.handle.slot === null) {
@@ -20598,6 +19019,20 @@ function reifyUpdateOperations(/** @type {CompilationUnit} */ unit, ops) {
         }
         OpList.replace(op, conditional(op.processed, op.contextValue, op.sourceSpan));
         break;
+      case OpKind.Boundary:
+        if (op.processed === null) {
+          throw new Error(`Boundary test was not set.`);
+        }
+        const boundarySlot = op.targetSlot.slot;
+        if (boundarySlot === null) {
+          throw new Error(`AssertionError: Boundary target slot not found`);
+        }
+        const primarySlot = op.guarded.targetSlot.slot;
+        if (primarySlot === null) {
+          throw new Error(`AssertionError: Primary slot not found for boundary`);
+        }
+        OpList.replace(op, boundary(literal(boundarySlot), op.processed, literal(primarySlot), op.sourceSpan));
+        break;
       case OpKind.Repeater:
         OpList.replace(op, repeater(op.collection, op.sourceSpan));
         break;
@@ -20631,6 +19066,12 @@ function reifyControl(op) {
       return nextContext(expr.steps);
     case ExpressionKind.Reference:
       return reference(expr.targetSlot.slot + 1 + expr.offset);
+    case ExpressionKind.ForeignContent:
+      if (!(unit instanceof ViewCompilationUnit)) {
+        throw new Error(`AssertionError: must be compiling a component`);
+      }
+      const parameterized = unit.job.views.get(expr.childrenViewXref).contextVariables.size > 0;
+      return foreignContent(expr.childrenViewHandle.slot, expr.foreignComponentConstIndex, parameterized);
     case ExpressionKind.LexicalRead:
       throw new Error(`AssertionError: unresolved LexicalRead of ${expr.name}`);
     case ExpressionKind.TwoWayBindingSet:
@@ -20700,7 +19141,7 @@ function reifyControl(op) {
   if (consumesDollarEvent) {
     params.push(new FnParam('$event', DYNAMIC_TYPE));
   }
-  return fn(params, handlerStmts, undefined, undefined, name);
+  return fn(params, handlerStmts, DYNAMIC_TYPE, undefined, name);
 }
 /** @returns {Expression} */ function reifyTrackBy(/** @type {CompilationUnit} */ unit, op) {
   if (op.trackByFn !== null) {
@@ -20709,7 +19150,7 @@ function reifyControl(op) {
   const params = [new FnParam('$index', NUMBER_TYPE), new FnParam('$item', DYNAMIC_TYPE)];
   let fn$1;
   if (op.trackByOps === null) {
-    fn$1 = op.usesComponentInstance ? fn(params, [new ReturnStatement(op.track)]) : arrowFn(params, op.track);
+    fn$1 = op.usesComponentInstance ? fn(params, [new ReturnStatement(op.track)], DYNAMIC_TYPE) : arrowFn(params, op.track, DYNAMIC_TYPE);
   } else {
     reifyUpdateOperations(unit, op.trackByOps);
     const statements = [];
@@ -20719,7 +19160,7 @@ function reifyControl(op) {
       }
       statements.push(trackOp.statement);
     }
-    fn$1 = op.usesComponentInstance || statements.length !== 1 || !(statements[0] instanceof ReturnStatement) ? fn(params, statements) : arrowFn(params, statements[0].value);
+    fn$1 = op.usesComponentInstance || statements.length !== 1 || !(statements[0] instanceof ReturnStatement) ? fn(params, statements, DYNAMIC_TYPE) : arrowFn(params, statements[0].value, DYNAMIC_TYPE);
   }
   op.trackByFn = unit.job.pool.getSharedFunctionReference(fn$1, '_forTrack');
   return op.trackByFn;
@@ -20734,7 +19175,7 @@ function reifyControl(op) {
     statements.push(op.statement);
   }
   const body = statements.length === 1 && statements[0] instanceof ReturnStatement ? statements[0].value : statements;
-  return arrowFn([new FnParam(expr.contextName, DYNAMIC_TYPE), new FnParam(expr.currentViewName, DYNAMIC_TYPE)], arrowFn(expr.parameters, body));
+  return arrowFn([new FnParam(expr.contextName, DYNAMIC_TYPE), new FnParam(expr.currentViewName, DYNAMIC_TYPE)], arrowFn(expr.parameters, body, DYNAMIC_TYPE), DYNAMIC_TYPE);
 }
 
 function removeEmptyBindings(/** @type {CompilationJob} */ job) {
@@ -20806,6 +19247,33 @@ function removeUnusedI18nAttributesOps(/** @type {CompilationJob} */ job) {
           OpList.remove(op);
       }
     }
+  }
+}
+
+function resolveBoundaries(job) {
+  for (const unit of job.units) {
+    processUnit(unit);
+  }
+}
+function processUnit(unit) {
+  const boundaryToVariableMap = new Map();
+  for (const op of unit.ops()) {
+    if (op.kind === OpKind.Variable && op.variable.kind === SemanticVariableKind.BoundaryState) {
+      const variable = op.variable;
+      boundaryToVariableMap.set(variable.boundaryXref, op.xref);
+    }
+  }
+  for (const op of unit.ops()) {
+    transformExpressionsInOp(op, expr => {
+      if (expr instanceof BoundaryStateExpr) {
+        const variableXref = boundaryToVariableMap.get(expr.xref);
+        if (variableXref === undefined) {
+          throw new Error(`Could not find variable for boundary ${expr.xref}`);
+        }
+        return new ReadVariableExpr(variableXref);
+      }
+      return expr;
+    }, VisitorContextFlag.None);
   }
 }
 
@@ -20897,6 +19365,40 @@ function transformDollarEvent(ops) {
         }
         return expr;
       }, VisitorContextFlag.InChildOperation);
+    }
+  }
+}
+
+function resolveForeignContent(job) {
+  for (const unit of job.units) {
+    const foreignComponents = new Map();
+    for (const op of unit.create) {
+      if (op.kind === OpKind.ForeignComponent) {
+        foreignComponents.set(op.xref, op);
+      }
+    }
+    for (const op of unit.create) {
+      if (op.kind !== OpKind.Content) {
+        continue;
+      }
+      const target = foreignComponents.get(op.target);
+      if (target === undefined) {
+        throw new Error(`AssertionError: ContentOp target not found`);
+      }
+      const templateName = op.propertyName.charAt(0).toUpperCase() + op.propertyName.slice(1);
+      const templateOp = createTemplateOp(op.view, TemplateKind.NgTemplate, null, templateName, Namespace.HTML, undefined, op.startSourceSpan, op.sourceSpan);
+      OpList.replace(op, templateOp);
+      const foreignContent = new ForeignContentExpr(templateOp.xref, templateOp.handle, target.constIndex);
+      const varXref = job.allocateXrefId();
+      const variable = {
+        kind: SemanticVariableKind.Identifier,
+        name: null,
+        identifier: op.propertyName,
+        local: true
+      };
+      const varOp = createVariableOp(varXref, variable, foreignContent, VariableFlags.None);
+      OpList.insertBefore(varOp, target);
+      target.props.set(op.propertyName, new ReadVariableExpr(varXref));
     }
   }
 }
@@ -21323,7 +19825,7 @@ function resolveSanitizers(/** @type {CompilationJob} */ job) {
         case OpKind.DomProperty:
         case OpKind.TwoWayProperty:
           let sanitizerFn = null;
-          if (Array.isArray(op.securityContext) && op.securityContext.length === 2 && op.securityContext.includes(SecurityContext.URL) && op.securityContext.includes(SecurityContext.RESOURCE_URL)) {
+          if (Array.isArray(op.securityContext) && hasCompositeUrlSecurityContext(op.securityContext)) {
             sanitizerFn = Identifiers.sanitizeUrlOrResourceUrl;
           } else {
             sanitizerFn = sanitizerFns.get(getOnlySecurityContext(op.securityContext)) ?? null;
@@ -21334,14 +19836,39 @@ function resolveSanitizers(/** @type {CompilationJob} */ job) {
     }
   }
 }
-/** @returns {number} */ function getOnlySecurityContext(securityContext) {
-  if (Array.isArray(securityContext)) {
-    if (securityContext.length > 1) {
-      throw Error(`AssertionError: Ambiguous security context`);
+function hasCompositeUrlSecurityContext(securityContext) {
+  let hasUrlContext = false;
+  let hasResourceUrlContext = false;
+  let hasNoneContext = false;
+  for (const context of securityContext) {
+    switch (context) {
+      case SecurityContext.URL:
+        hasUrlContext = true;
+        break;
+      case SecurityContext.RESOURCE_URL:
+        hasResourceUrlContext = true;
+        break;
+      case SecurityContext.NONE:
+        hasNoneContext = true;
+        break;
+      default:
+        return false;
     }
-    return securityContext[0] || SecurityContext.NONE;
   }
-  return securityContext;
+  return (hasUrlContext || hasResourceUrlContext) && hasNoneContext || hasUrlContext && hasResourceUrlContext;
+}
+/** @returns {number} */ function getOnlySecurityContext(securityContext) {
+  if (!Array.isArray(securityContext)) {
+    return securityContext;
+  }
+  if (securityContext.length < 2) {
+    return securityContext[0] ?? SecurityContext.NONE;
+  }
+  const nonNoneSecurityContexts = securityContext.filter(context => context !== SecurityContext.NONE);
+  if (nonNoneSecurityContexts.length > 1) {
+    throw Error(`AssertionError: Ambiguous security context`);
+  }
+  return nonNoneSecurityContexts[0] ?? SecurityContext.NONE;
 }
 
 function removeSafeNavigationMigration(/** @type {CompilationJob} */ job) {
@@ -21409,7 +19936,6 @@ function addSaveRestoreViewOperation(/** @type {ViewCompilationUnit} */ unit, op
 }
 
 function allocateSlots(/** @type {ComponentCompilationJob} */ job) {
-  const slotMap = new Map();
   for (const unit of job.units) {
     let slotCount = 0;
     for (const op of unit.create) {
@@ -21417,7 +19943,6 @@ function allocateSlots(/** @type {ComponentCompilationJob} */ job) {
         continue;
       }
       op.handle.slot = slotCount;
-      slotMap.set(op.xref, op.handle.slot);
       slotCount += op.numSlotsUsed;
     }
     unit.decls = slotCount;
@@ -21478,6 +20003,7 @@ function stripNonrequiredParentheses(/** @type {CompilationJob} */ job) {
     for (const op of unit.ops()) {
       visitExpressionsInOp(op, expr => {
         if (expr instanceof BinaryOperatorExpr) {
+          checkArrowFunctionOperandParens(expr, requiredParens);
           switch (expr.operator) {
             case BinaryOperator.Exponentiation:
               checkExponentiationParens(expr, requiredParens);
@@ -21489,6 +20015,12 @@ function stripNonrequiredParentheses(/** @type {CompilationJob} */ job) {
             case BinaryOperator.Or:
               checkAndOrParens(expr, requiredParens);
           }
+        } else if (expr instanceof ReadPropExpr || expr instanceof ReadKeyExpr) {
+          checkTargetParens(expr.receiver, requiredParens);
+        } else if (expr instanceof InvokeFunctionExpr) {
+          checkTargetParens(expr.fn, requiredParens);
+        } else if (expr instanceof TaggedTemplateLiteralExpr) {
+          checkTargetParens(expr.tag, requiredParens);
         }
       });
     }
@@ -21505,7 +20037,7 @@ function stripNonrequiredParentheses(/** @type {CompilationJob} */ job) {
   }
 }
 function checkExponentiationParens(/** @type {BinaryOperatorExpr} */ expr, requiredParens) {
-  if (expr.lhs instanceof ParenthesizedExpr && expr.lhs.expr instanceof UnaryOperatorExpr) {
+  if (expr.lhs instanceof ParenthesizedExpr && (expr.lhs.expr instanceof UnaryOperatorExpr || isUnaryLikeExpr(expr.lhs.expr))) {
     requiredParens.add(expr.lhs);
   }
 }
@@ -21524,6 +20056,22 @@ function checkAndOrParens(/** @type {BinaryOperatorExpr} */ expr, requiredParens
 }
 function isLogicalAndOr(/** @type {Expression} */ expr) {
   return expr instanceof BinaryOperatorExpr && (expr.operator === BinaryOperator.And || expr.operator === BinaryOperator.Or);
+}
+function checkTargetParens(target, requiredParens) {
+  if (target instanceof ParenthesizedExpr && (isUnaryLikeExpr(target.expr) || target.expr instanceof ArrowFunctionExpr$1 || target.expr instanceof LiteralExpr && typeof target.expr.value === 'number')) {
+    requiredParens.add(target);
+  }
+}
+function checkArrowFunctionOperandParens(expr, requiredParens) {
+  if (expr.lhs instanceof ParenthesizedExpr && expr.lhs.expr instanceof ArrowFunctionExpr$1) {
+    requiredParens.add(expr.lhs);
+  }
+  if (!expr.isAssignment() && expr.rhs instanceof ParenthesizedExpr && expr.rhs.expr instanceof ArrowFunctionExpr$1) {
+    requiredParens.add(expr.rhs);
+  }
+}
+function isUnaryLikeExpr(expr) {
+  return expr instanceof NotExpr || expr instanceof TypeofExpr || expr instanceof VoidExpr;
 }
 
 function specializeStyleBindings(/** @type {CompilationJob} */ job) {
@@ -21579,7 +20127,6 @@ function generateTemporaryVariables(/** @type {CompilationJob} */ job) {
     });
     let count = 0;
     const assigned = new Set();
-    const released = new Set();
     const defs = new Map();
     visitExpressionsInOp(op, (expr, flag) => {
       if (flag & VisitorContextFlag.InChildOperation) {
@@ -21593,7 +20140,6 @@ function generateTemporaryVariables(/** @type {CompilationJob} */ job) {
         assignName(defs, expr);
       } else if (expr instanceof ReadTemporaryExpr) {
         if (finalReads.get(expr.xref) === expr) {
-          released.add(expr.xref);
           count--;
         }
         assignName(defs, expr);
@@ -21808,6 +20354,7 @@ function countVariables(/** @type {CompilationJob} */ job) {
       return op.interpolation.expressions.length;
     case OpKind.I18nExpression:
     case OpKind.Conditional:
+    case OpKind.Boundary:
     case OpKind.DeferWhen:
     case OpKind.StoreLet:
       return 1;
@@ -22011,7 +20558,7 @@ function collectOpInfo(op, predicate) {
     }
     if (expr.kind === ExpressionKind.ReadVariable) {
       variablesUsed.add(expr.xref);
-    } else {
+    } else if (!(flags & VisitorContextFlag.InChildOperation)) {
       fences |= fencesForIrExpression(expr);
     }
   });
@@ -22156,6 +20703,9 @@ function wrapI18nIcus(/** @type {CompilationJob} */ job) {
  */
 /** @type {{ kind: number, fn: any }[]} */ const phases = [{
   kind: CompilationJobKind.Tmpl,
+  fn: resolveForeignContent
+}, {
+  kind: CompilationJobKind.Tmpl,
   fn: removeContentSelectors
 }, {
   kind: CompilationJobKind.Both,
@@ -22210,6 +20760,9 @@ function wrapI18nIcus(/** @type {CompilationJob} */ job) {
   fn: generateConditionalExpressions
 }, {
   kind: CompilationJobKind.Tmpl,
+  fn: generateBoundaryConditions
+}, {
+  kind: CompilationJobKind.Tmpl,
   fn: createPipes
 }, {
   kind: CompilationJobKind.Tmpl,
@@ -22235,6 +20788,9 @@ function wrapI18nIcus(/** @type {CompilationJob} */ job) {
 }, {
   kind: CompilationJobKind.Tmpl,
   fn: generateVariables
+}, {
+  kind: CompilationJobKind.Tmpl,
+  fn: resolveBoundaries
 }, {
   kind: CompilationJobKind.Tmpl,
   fn: saveAndRestoreView
@@ -22357,7 +20913,7 @@ function wrapI18nIcus(/** @type {CompilationJob} */ job) {
   fn: attachSourceLocations
 }, {
   kind: CompilationJobKind.Tmpl,
-  fn: disableBindings$1
+  fn: disableBindings
 }, {
   kind: CompilationJobKind.Both,
   fn: extractPureFunctions
@@ -22410,7 +20966,7 @@ function emitChildViews(/** @type {ViewCompilationUnit} */ parent, /** @type {Co
   }
   const createCond = maybeGenerateRfBlock(1, createStatements);
   const updateCond = maybeGenerateRfBlock(2, updateStatements);
-  return fn([new FnParam(RENDER_FLAGS, NUMBER_TYPE), new FnParam(CONTEXT_NAME, DYNAMIC_TYPE)], [...createCond, ...updateCond], undefined, undefined, view.fnName);
+  return fn([new FnParam(RENDER_FLAGS, NUMBER_TYPE), new FnParam(CONTEXT_NAME, DYNAMIC_TYPE)], [...createCond, ...updateCond], DYNAMIC_TYPE, undefined, view.fnName);
 }
 /** @returns {Statement[]} */ function maybeGenerateRfBlock(/** @type {number} */ flag, /** @type {Statement[]} */ statements) {
   if (statements.length === 0) {
@@ -22441,20 +20997,425 @@ function emitChildViews(/** @type {ViewCompilationUnit} */ parent, /** @type {Co
   }
   const createCond = maybeGenerateRfBlock(1, createStatements);
   const updateCond = maybeGenerateRfBlock(2, updateStatements);
-  return fn([new FnParam(RENDER_FLAGS, NUMBER_TYPE), new FnParam(CONTEXT_NAME, DYNAMIC_TYPE)], [...createCond, ...updateCond], undefined, undefined, job.root.fnName);
+  return fn([new FnParam(RENDER_FLAGS, NUMBER_TYPE), new FnParam(CONTEXT_NAME, DYNAMIC_TYPE)], [...createCond, ...updateCond], DYNAMIC_TYPE, undefined, job.root.fnName);
+}
+
+const PROPERTY_PARTS_SEPARATOR = '.';
+const ATTRIBUTE_PREFIX = 'attr';
+const ANIMATE_PREFIX$1 = 'animate';
+const CLASS_PREFIX = 'class';
+const STYLE_PREFIX = 'style';
+const TEMPLATE_ATTR_PREFIX$1 = '*';
+const LEGACY_ANIMATE_PROP_PREFIX = 'animate-';
+class BindingParser {
+  _exprParser;
+  _schemaRegistry;
+  errors;
+  constructor(_exprParser, _schemaRegistry, errors) {
+    this._exprParser = _exprParser;
+    this._schemaRegistry = _schemaRegistry;
+    this.errors = errors;
+  }
+  /** @returns {ParsedProperty[] | null} */ createBoundHostProperties(properties, /** @type {ParseSourceSpan} */ sourceSpan) {
+    const boundProps = [];
+    for (const propName of Object.keys(properties)) {
+      const expression = properties[propName];
+      if (typeof expression === 'string') {
+        this.parsePropertyBinding(propName, expression, true, false, sourceSpan, sourceSpan.start.offset, undefined, [], boundProps, sourceSpan);
+      } else {
+        this._reportError(`Value of the host property binding "${propName}" needs to be a string representing an expression but got "${expression}" (${typeof expression})`, sourceSpan);
+      }
+    }
+    return boundProps;
+  }
+  /** @returns {ParsedEvent[] | null} */ createDirectiveHostEventAsts(hostListeners, /** @type {ParseSourceSpan} */ sourceSpan) {
+    const targetEvents = [];
+    for (const propName of Object.keys(hostListeners)) {
+      const expression = hostListeners[propName];
+      if (typeof expression === 'string') {
+        this.parseEvent(propName, expression, false, sourceSpan, sourceSpan, [], targetEvents, sourceSpan);
+      } else {
+        this._reportError(`Value of the host listener "${propName}" needs to be a string representing an expression but got "${expression}" (${typeof expression})`, sourceSpan);
+      }
+    }
+    return targetEvents;
+  }
+  /** @returns {ASTWithSource} */ parseInterpolation(/** @type {string} */ value, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {any[] | null} */ interpolatedTokens) {
+    const absoluteOffset = sourceSpan.fullStart.offset;
+    try {
+      const ast = this._exprParser.parseInterpolation(value, sourceSpan, absoluteOffset, interpolatedTokens);
+      if (ast) {
+        this.errors.push(...ast.errors);
+      }
+      return ast;
+    } catch (e) {
+      this._reportError(`${e}`, sourceSpan);
+      return this._exprParser.wrapLiteralPrimitive('ERROR', sourceSpan, absoluteOffset);
+    }
+  }
+  /** @returns {ASTWithSource} */ parseInterpolationExpression(/** @type {string} */ expression, /** @type {ParseSourceSpan} */ sourceSpan) {
+    const absoluteOffset = sourceSpan.start.offset;
+    try {
+      const ast = this._exprParser.parseInterpolationExpression(expression, sourceSpan, absoluteOffset);
+      if (ast) {
+        this.errors.push(...ast.errors);
+      }
+      return ast;
+    } catch (e) {
+      this._reportError(`${e}`, sourceSpan);
+      return this._exprParser.wrapLiteralPrimitive('ERROR', sourceSpan, absoluteOffset);
+    }
+  }
+  parseInlineTemplateBinding(/** @type {string} */ tplKey, /** @type {string} */ tplValue, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {number} */ absoluteValueOffset, /** @type {string[][]} */ targetMatchableAttrs, /** @type {ParsedProperty[]} */ targetProps, /** @type {ParsedVariable[]} */ targetVars, /** @type {boolean} */ isIvyAst) {
+    const absoluteKeyOffset = sourceSpan.start.offset + TEMPLATE_ATTR_PREFIX$1.length;
+    const bindings = this._parseTemplateBindings(tplKey, tplValue, sourceSpan, absoluteKeyOffset, absoluteValueOffset);
+    for (const binding of bindings) {
+      const bindingSpan = moveParseSourceSpan(sourceSpan, binding.sourceSpan);
+      const key = binding.key.source;
+      const keySpan = moveParseSourceSpan(sourceSpan, binding.key.span);
+      if (binding instanceof VariableBinding) {
+        const value = binding.value ? binding.value.source : '$implicit';
+        const valueSpan = binding.value ? moveParseSourceSpan(sourceSpan, binding.value.span) : undefined;
+        targetVars.push(new ParsedVariable(key, value, bindingSpan, keySpan, valueSpan));
+      } else if (binding.value) {
+        const srcSpan = isIvyAst ? bindingSpan : sourceSpan;
+        const valueSpan = moveParseSourceSpan(sourceSpan, binding.value.ast.sourceSpan);
+        this._parsePropertyAst(key, binding.value, false, srcSpan, keySpan, valueSpan, targetMatchableAttrs, targetProps);
+      } else {
+        targetMatchableAttrs.push([key, '']);
+        this.parseLiteralAttr(key, null, keySpan, absoluteValueOffset, undefined, targetMatchableAttrs, targetProps, keySpan);
+      }
+    }
+  }
+  /** @returns {any[]} */ _parseTemplateBindings(/** @type {string} */ tplKey, /** @type {string} */ tplValue, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {number} */ absoluteKeyOffset, /** @type {number} */ absoluteValueOffset) {
+    try {
+      const bindingsResult = this._exprParser.parseTemplateBindings(tplKey, tplValue, sourceSpan, absoluteKeyOffset, absoluteValueOffset);
+      bindingsResult.errors.forEach(e => this.errors.push(e));
+      bindingsResult.warnings.forEach(warning => {
+        this._reportError(warning, sourceSpan, ParseErrorLevel.WARNING);
+      });
+      return bindingsResult.templateBindings;
+    } catch (e) {
+      this._reportError(`${e}`, sourceSpan);
+      return [];
+    }
+  }
+  parseLiteralAttr(/** @type {string} */ name, /** @type {string | null} */ value, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {number} */ absoluteOffset, /** @type {ParseSourceSpan | undefined} */ valueSpan, /** @type {string[][]} */ targetMatchableAttrs, /** @type {ParsedProperty[]} */ targetProps, /** @type {ParseSourceSpan} */ keySpan) {
+    if (isLegacyAnimationLabel(name)) {
+      name = name.substring(1);
+      if (keySpan !== undefined) {
+        keySpan = moveParseSourceSpan(keySpan, new AbsoluteSourceSpan(keySpan.start.offset + 1, keySpan.end.offset));
+      }
+      if (value) {
+        this._reportError(`Assigning animation triggers via @prop="exp" attributes with an expression is invalid.` + ` Use property bindings (e.g. [@prop]="exp") or use an attribute without a value (e.g. @prop) instead.`, sourceSpan, ParseErrorLevel.ERROR);
+      }
+      this._parseLegacyAnimation(name, value, sourceSpan, absoluteOffset, keySpan, valueSpan, targetMatchableAttrs, targetProps);
+    } else {
+      targetProps.push(new ParsedProperty(name, this._exprParser.wrapLiteralPrimitive(value, '', absoluteOffset), ParsedPropertyType.LITERAL_ATTR, sourceSpan, keySpan, valueSpan));
+    }
+  }
+  parsePropertyBinding(/** @type {string} */ name, /** @type {string} */ expression, /** @type {boolean} */ isHost, /** @type {boolean} */ isPartOfAssignmentBinding, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {number} */ absoluteOffset, /** @type {ParseSourceSpan | undefined} */ valueSpan, /** @type {string[][]} */ targetMatchableAttrs, /** @type {ParsedProperty[]} */ targetProps, /** @type {ParseSourceSpan} */ keySpan) {
+    if (name.length === 0) {
+      this._reportError(`Property name is missing in binding`, sourceSpan);
+    }
+    let isLegacyAnimationProp = false;
+    if (name.startsWith(LEGACY_ANIMATE_PROP_PREFIX)) {
+      isLegacyAnimationProp = true;
+      name = name.substring(LEGACY_ANIMATE_PROP_PREFIX.length);
+      if (keySpan !== undefined) {
+        keySpan = moveParseSourceSpan(keySpan, new AbsoluteSourceSpan(keySpan.start.offset + LEGACY_ANIMATE_PROP_PREFIX.length, keySpan.end.offset));
+      }
+    } else if (isLegacyAnimationLabel(name)) {
+      isLegacyAnimationProp = true;
+      name = name.substring(1);
+      if (keySpan !== undefined) {
+        keySpan = moveParseSourceSpan(keySpan, new AbsoluteSourceSpan(keySpan.start.offset + 1, keySpan.end.offset));
+      }
+    }
+    if (isLegacyAnimationProp) {
+      this._parseLegacyAnimation(name, expression, sourceSpan, absoluteOffset, keySpan, valueSpan, targetMatchableAttrs, targetProps);
+    } else if (name.startsWith(`${ANIMATE_PREFIX$1}${PROPERTY_PARTS_SEPARATOR}`)) {
+      this._parseAnimation(name, this.parseBinding(expression, isHost, valueSpan || sourceSpan, absoluteOffset), sourceSpan, keySpan, valueSpan, targetMatchableAttrs, targetProps);
+    } else {
+      this._parsePropertyAst(name, this.parseBinding(expression, isHost, valueSpan || sourceSpan, absoluteOffset), isPartOfAssignmentBinding, sourceSpan, keySpan, valueSpan, targetMatchableAttrs, targetProps);
+    }
+  }
+  /** @returns {boolean} */ parsePropertyInterpolation(/** @type {string} */ name, /** @type {string} */ value, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {ParseSourceSpan | undefined} */ valueSpan, /** @type {string[][]} */ targetMatchableAttrs, /** @type {ParsedProperty[]} */ targetProps, /** @type {ParseSourceSpan} */ keySpan, /** @type {any[] | null} */ interpolatedTokens) {
+    const expr = this.parseInterpolation(value, valueSpan || sourceSpan, interpolatedTokens);
+    if (expr) {
+      this._parsePropertyAst(name, expr, false, sourceSpan, keySpan, valueSpan, targetMatchableAttrs, targetProps);
+      return true;
+    }
+    return false;
+  }
+  _parsePropertyAst(/** @type {string} */ name, ast, /** @type {boolean} */ isPartOfAssignmentBinding, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {ParseSourceSpan} */ keySpan, /** @type {ParseSourceSpan | undefined} */ valueSpan, /** @type {string[][]} */ targetMatchableAttrs, /** @type {ParsedProperty[]} */ targetProps) {
+    targetMatchableAttrs.push([name, ast.source]);
+    targetProps.push(new ParsedProperty(name, ast, isPartOfAssignmentBinding ? ParsedPropertyType.TWO_WAY : ParsedPropertyType.DEFAULT, sourceSpan, keySpan, valueSpan));
+  }
+  _parseAnimation(/** @type {string} */ name, ast, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {ParseSourceSpan} */ keySpan, /** @type {ParseSourceSpan | undefined} */ valueSpan, /** @type {string[][]} */ targetMatchableAttrs, /** @type {ParsedProperty[]} */ targetProps) {
+    targetMatchableAttrs.push([name, ast.source]);
+    targetProps.push(new ParsedProperty(name, ast, ParsedPropertyType.ANIMATION, sourceSpan, keySpan, valueSpan));
+  }
+  _parseLegacyAnimation(/** @type {string} */ name, /** @type {string | null} */ expression, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {number} */ absoluteOffset, /** @type {ParseSourceSpan} */ keySpan, /** @type {ParseSourceSpan | undefined} */ valueSpan, /** @type {string[][]} */ targetMatchableAttrs, /** @type {ParsedProperty[]} */ targetProps) {
+    if (name.length === 0) {
+      this._reportError('Animation trigger is missing', sourceSpan);
+    }
+    const ast = this.parseBinding(expression || 'undefined', false, valueSpan || sourceSpan, absoluteOffset);
+    targetMatchableAttrs.push([name, ast.source]);
+    targetProps.push(new ParsedProperty(name, ast, ParsedPropertyType.LEGACY_ANIMATION, sourceSpan, keySpan, valueSpan));
+  }
+  /** @returns {ASTWithSource} */ parseBinding(/** @type {string} */ value, /** @type {boolean} */ isHostBinding, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {number} */ absoluteOffset) {
+    try {
+      const ast = isHostBinding ? this._exprParser.parseSimpleBinding(value, sourceSpan, absoluteOffset) : this._exprParser.parseBinding(value, sourceSpan, absoluteOffset);
+      if (ast) {
+        this.errors.push(...ast.errors);
+      }
+      return ast;
+    } catch (e) {
+      this._reportError(`${e}`, sourceSpan);
+      return this._exprParser.wrapLiteralPrimitive('ERROR', sourceSpan, absoluteOffset);
+    }
+  }
+  /** @returns {BoundElementProperty} */ createBoundElementProperty(/** @type {string | null} */ elementSelector, /** @type {ParsedProperty} */ boundProp, /** @type {boolean} */ skipValidation = false, /** @type {boolean} */ mapPropertyName = true) {
+    if (boundProp.isLegacyAnimation) {
+      return new BoundElementProperty(boundProp.name, BindingType.LegacyAnimation, SecurityContext.NONE, boundProp.expression, null, boundProp.sourceSpan, boundProp.keySpan, boundProp.valueSpan);
+    }
+    let unit = null;
+    let bindingType = undefined;
+    let boundPropertyName = null;
+    const parts = boundProp.name.split(PROPERTY_PARTS_SEPARATOR);
+    let securityContexts = undefined;
+    if (parts.length > 1) {
+      if (parts[0] == ATTRIBUTE_PREFIX) {
+        boundPropertyName = parts.slice(1).join(PROPERTY_PARTS_SEPARATOR);
+        if (!skipValidation) {
+          this._validatePropertyOrAttributeName(boundPropertyName, boundProp.sourceSpan, true);
+        }
+        securityContexts = calcPossibleSecurityContexts(this._schemaRegistry, elementSelector, boundPropertyName, true);
+        const nsSeparatorIdx = boundPropertyName.indexOf(':');
+        if (nsSeparatorIdx > -1) {
+          const ns = boundPropertyName.substring(0, nsSeparatorIdx);
+          const name = boundPropertyName.substring(nsSeparatorIdx + 1);
+          boundPropertyName = mergeNsAndName(ns, name);
+        }
+        bindingType = BindingType.Attribute;
+      } else if (parts[0] == CLASS_PREFIX) {
+        boundPropertyName = parts.slice(1).join(PROPERTY_PARTS_SEPARATOR);
+        bindingType = BindingType.Class;
+        securityContexts = [SecurityContext.NONE];
+      } else if (parts[0] == STYLE_PREFIX) {
+        unit = parts.length > 2 ? parts[2] : null;
+        const boundName = parts[1];
+        if (!boundName.startsWith('--')) {
+          boundPropertyName = boundName;
+        } else {
+          try {
+            boundPropertyName = namespaceCssVariable(boundName);
+          } catch (e) {
+            this._reportError(e.message, boundProp.sourceSpan);
+          }
+        }
+        bindingType = BindingType.Style;
+        securityContexts = [SecurityContext.STYLE];
+      } else if (parts[0] == ANIMATE_PREFIX$1) {
+        boundPropertyName = boundProp.name;
+        bindingType = BindingType.Animation;
+        securityContexts = [SecurityContext.NONE];
+      }
+    }
+    if (boundPropertyName === null) {
+      const mappedPropName = this._schemaRegistry.getMappedPropName(boundProp.name);
+      boundPropertyName = mapPropertyName ? mappedPropName : boundProp.name;
+      securityContexts = calcPossibleSecurityContexts(this._schemaRegistry, elementSelector, mappedPropName, false);
+      bindingType = boundProp.type === ParsedPropertyType.TWO_WAY ? BindingType.TwoWay : BindingType.Property;
+      if (!skipValidation) {
+        this._validatePropertyOrAttributeName(mappedPropName, boundProp.sourceSpan, false);
+      }
+    }
+    return new BoundElementProperty(boundPropertyName, bindingType, securityContexts[0], boundProp.expression, unit, boundProp.sourceSpan, boundProp.keySpan, boundProp.valueSpan);
+  }
+  parseEvent(/** @type {string} */ name, /** @type {string} */ expression, /** @type {boolean} */ isAssignmentEvent, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {ParseSourceSpan} */ handlerSpan, /** @type {string[][]} */ targetMatchableAttrs, /** @type {ParsedEvent[]} */ targetEvents, /** @type {ParseSourceSpan} */ keySpan) {
+    if (name.length === 0) {
+      this._reportError(`Event name is missing in binding`, sourceSpan);
+    }
+    if (isLegacyAnimationLabel(name)) {
+      name = name.slice(1);
+      if (keySpan !== undefined) {
+        keySpan = moveParseSourceSpan(keySpan, new AbsoluteSourceSpan(keySpan.start.offset + 1, keySpan.end.offset));
+      }
+      this._parseLegacyAnimationEvent(name, expression, sourceSpan, handlerSpan, targetEvents, keySpan);
+    } else {
+      this._parseRegularEvent(name, expression, isAssignmentEvent, sourceSpan, handlerSpan, targetMatchableAttrs, targetEvents, keySpan);
+    }
+  }
+  /** @returns {number[]} */ calcPossibleSecurityContexts(/** @type {string} */ selector, /** @type {string} */ propName, /** @type {boolean} */ isAttribute) {
+    const prop = this._schemaRegistry.getMappedPropName(propName);
+    return calcPossibleSecurityContexts(this._schemaRegistry, selector, prop, isAttribute);
+  }
+  parseEventListenerName(/** @type {string} */ rawName) {
+    const [target, eventName] = splitAtColon(rawName, [null, rawName]);
+    return {
+      eventName: eventName,
+      target
+    };
+  }
+  parseLegacyAnimationEventName(/** @type {string} */ rawName) {
+    const matches = splitAtPeriod(rawName, [rawName, null]);
+    return {
+      eventName: matches[0],
+      phase: matches[1] === null ? null : matches[1].toLowerCase()
+    };
+  }
+  _parseLegacyAnimationEvent(/** @type {string} */ name, /** @type {string} */ expression, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {ParseSourceSpan} */ handlerSpan, /** @type {ParsedEvent[]} */ targetEvents, /** @type {ParseSourceSpan} */ keySpan) {
+    const {
+      eventName,
+      phase
+    } = this.parseLegacyAnimationEventName(name);
+    const ast = this._parseAction(expression, handlerSpan);
+    targetEvents.push(new ParsedEvent(eventName, phase, ParsedEventType.LegacyAnimation, ast, sourceSpan, handlerSpan, keySpan));
+    if (eventName.length === 0) {
+      this._reportError(`Animation event name is missing in binding`, sourceSpan);
+    }
+    if (phase) {
+      if (phase !== 'start' && phase !== 'done') {
+        this._reportError(`The provided animation output phase value "${phase}" for "@${eventName}" is not supported (use start or done)`, sourceSpan);
+      }
+    } else {
+      this._reportError(`The animation trigger output event (@${eventName}) is missing its phase value name (start or done are currently supported)`, sourceSpan);
+    }
+  }
+  _parseRegularEvent(/** @type {string} */ name, /** @type {string} */ expression, /** @type {boolean} */ isAssignmentEvent, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {ParseSourceSpan} */ handlerSpan, /** @type {string[][]} */ targetMatchableAttrs, /** @type {ParsedEvent[]} */ targetEvents, /** @type {ParseSourceSpan} */ keySpan) {
+    const {
+      eventName,
+      target
+    } = this.parseEventListenerName(name);
+    const prevErrorCount = this.errors.length;
+    const ast = this._parseAction(expression, handlerSpan);
+    const isValid = this.errors.length === prevErrorCount;
+    targetMatchableAttrs.push([name, ast.source]);
+    if (isAssignmentEvent && isValid && !this._isAllowedAssignmentEvent(ast)) {
+      this._reportError('Unsupported expression in a two-way binding', sourceSpan);
+    }
+    let eventType = ParsedEventType.Regular;
+    if (isAssignmentEvent) {
+      eventType = ParsedEventType.TwoWay;
+    }
+    if (name.startsWith(`${ANIMATE_PREFIX$1}${PROPERTY_PARTS_SEPARATOR}`)) {
+      eventType = ParsedEventType.Animation;
+    }
+    targetEvents.push(new ParsedEvent(eventName, target, eventType, ast, sourceSpan, handlerSpan, keySpan));
+  }
+  _parseAction(/** @type {string} */ value, /** @type {ParseSourceSpan} */ sourceSpan) {
+    const absoluteOffset = sourceSpan && sourceSpan.start ? sourceSpan.start.offset : 0;
+    try {
+      const ast = this._exprParser.parseAction(value, sourceSpan, absoluteOffset);
+      if (ast) {
+        this.errors.push(...ast.errors);
+      }
+      if (!ast || ast.ast instanceof EmptyExpr$1) {
+        this._reportError(`Empty expressions are not allowed`, sourceSpan);
+        return this._exprParser.wrapLiteralPrimitive('ERROR', sourceSpan, absoluteOffset);
+      }
+      return ast;
+    } catch (e) {
+      this._reportError(`${e}`, sourceSpan);
+      return this._exprParser.wrapLiteralPrimitive('ERROR', sourceSpan, absoluteOffset);
+    }
+  }
+  _reportError(/** @type {string} */ message, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {number} */ level = ParseErrorLevel.ERROR) {
+    this.errors.push(new ParseError(sourceSpan, message, level));
+  }
+  _validatePropertyOrAttributeName(/** @type {string} */ propName, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {boolean} */ isAttr) {
+    const report = isAttr ? this._schemaRegistry.validateAttribute(propName) : this._schemaRegistry.validateProperty(propName);
+    if (report.error) {
+      this._reportError(report.msg, sourceSpan, ParseErrorLevel.ERROR);
+    }
+  }
+  /** @returns {boolean} */ _isAllowedAssignmentEvent(/** @type {AST} */ ast) {
+    if (ast instanceof ASTWithSource) {
+      return this._isAllowedAssignmentEvent(ast.ast);
+    }
+    if (ast instanceof NonNullAssert) {
+      return this._isAllowedAssignmentEvent(ast.expression);
+    }
+    if (ast instanceof Call && ast.args.length === 1 && ast.receiver instanceof PropertyRead && ast.receiver.name === '$any' && ast.receiver.receiver instanceof ImplicitReceiver) {
+      return this._isAllowedAssignmentEvent(ast.args[0]);
+    }
+    if (ast instanceof PropertyRead || ast instanceof KeyedRead) {
+      if (!hasRecursiveSafeReceiver(ast)) {
+        return true;
+      }
+    }
+    return false;
+  }
+}
+/** @returns {boolean} */ function hasRecursiveSafeReceiver(/** @type {AST} */ ast) {
+  if (ast instanceof SafePropertyRead || ast instanceof SafeKeyedRead) {
+    return true;
+  }
+  if (ast instanceof ParenthesizedExpression) {
+    return hasRecursiveSafeReceiver(ast.expression);
+  }
+  if (ast instanceof PropertyRead || ast instanceof KeyedRead || ast instanceof Call) {
+    return hasRecursiveSafeReceiver(ast.receiver);
+  }
+  return false;
+}
+/** @returns {boolean} */ function isLegacyAnimationLabel(/** @type {string} */ name) {
+  return name[0] == '@';
+}
+/** @returns {number[]} */ function calcPossibleSecurityContexts(/** @type {ElementSchemaRegistry} */ registry, /** @type {string | null} */ selector, /** @type {string} */ propName, /** @type {boolean} */ isAttribute) {
+  let ctxs;
+  const [namespaceKey, baseSelector] = selector ? splitNsName(selector, false) : [null, selector];
+  const nameToContext = elName => {
+    const [nsStr, name] = splitNsName(elName, false);
+    const ns = nsStr ?? namespaceKey;
+    const fullName = ns ? `:${ns}:${name}` : name;
+    return registry.securityContext(fullName, propName, isAttribute);
+  };
+  const allKnownElements = registry.allKnownElementNames();
+  if (baseSelector === null) {
+    ctxs = allKnownElements.map(nameToContext);
+  } else {
+    ctxs = [];
+    CssSelector.parse(baseSelector).forEach(selector => {
+      let elementNames = selector.element ? [selector.element] : allKnownElements;
+      if (selector.element && !registry.hasElement(selector.element, [])) {
+        const svgElement = `:${SVG_NAMESPACE}:${selector.element}`;
+        const mathElement = `:${MATH_ML_NAMESPACE}:${selector.element}`;
+        if (registry.hasElement(svgElement, [])) {
+          elementNames = [svgElement];
+        } else if (registry.hasElement(mathElement, [])) {
+          elementNames = [mathElement];
+        }
+      }
+      const notElementNames = new Set(selector.notSelectors.filter(selector => selector.isElementSelector()).map(selector => selector.element?.toLowerCase()));
+      const possibleElementNames = elementNames.filter(elName => {
+        const elNameLowerCase = elName.toLowerCase();
+        return !notElementNames.has(elNameLowerCase) && !notElementNames.has(splitNsName(elNameLowerCase)[1]);
+      });
+      ctxs.push(...possibleElementNames.map(nameToContext));
+    });
+  }
+  return ctxs.length === 0 ? [SecurityContext.NONE] : Array.from(new Set(ctxs)).sort();
+}
+/** @returns {ParseSourceSpan} */ function moveParseSourceSpan(/** @type {ParseSourceSpan} */ sourceSpan, /** @type {AbsoluteSourceSpan} */ absoluteSpan) {
+  const startDiff = absoluteSpan.start - sourceSpan.start.offset;
+  const endDiff = absoluteSpan.end - sourceSpan.end.offset;
+  return new ParseSourceSpan(sourceSpan.start.moveBy(startDiff), sourceSpan.end.moveBy(endDiff), sourceSpan.fullStart.moveBy(startDiff), sourceSpan.details);
 }
 
 const domSchema = new DomElementSchemaRegistry();
 const NG_TEMPLATE_TAG_NAME = 'ng-template';
-const ANIMATE_PREFIX$1 = 'animate.';
+const ANIMATE_PREFIX = 'animate.';
 /** @returns {boolean} */ function isI18nRootNode(meta) {
   return meta instanceof Message;
 }
 /** @returns {boolean} */ function isSingleI18nIcu(meta) {
   return isI18nRootNode(meta) && meta.nodes.length === 1 && meta.nodes[0] instanceof Icu;
 }
-/** @returns {ComponentCompilationJob} */ function ingestComponent(/** @type {string} */ componentName, /** @type {any[]} */ template, /** @type {ConstantPool} */ constantPool, /** @type {number} */ compilationMode, /** @type {string} */ relativeContextFilePath, /** @type {boolean} */ i18nUseExternalIds, deferMeta, /** @type {ReadVarExpr | null} */ allDeferrableDepsFn, /** @type {string | null} */ relativeTemplatePath, /** @type {boolean} */ enableDebugLocations, /** @type {boolean} */ legacyOptionalChaining) {
-  const job = new ComponentCompilationJob(componentName, constantPool, compilationMode, relativeContextFilePath, i18nUseExternalIds, deferMeta, allDeferrableDepsFn, relativeTemplatePath, enableDebugLocations, legacyOptionalChaining);
+/** @returns {ComponentCompilationJob} */ function ingestComponent(/** @type {string} */ componentName, /** @type {any[]} */ template, /** @type {ConstantPool} */ constantPool, /** @type {number} */ compilationMode, /** @type {string} */ relativeContextFilePath, /** @type {boolean} */ i18nUseExternalIds, deferMeta, /** @type {ReadVarExpr | null} */ allDeferrableDepsFn, /** @type {string | null} */ relativeTemplatePath, /** @type {boolean} */ enableDebugLocations, /** @type {boolean} */ legacyOptionalChaining, foreignImports) {
+  const job = new ComponentCompilationJob(componentName, constantPool, compilationMode, relativeContextFilePath, i18nUseExternalIds, deferMeta, allDeferrableDepsFn, relativeTemplatePath, enableDebugLocations, legacyOptionalChaining, foreignImports);
   ingestNodes(job.root, template);
   return job;
 }
@@ -22472,17 +21433,31 @@ const ANIMATE_PREFIX$1 = 'animate.';
     if (property.isAnimation) {
       bindingKind = BindingKind.Animation;
     }
-    const securityContexts = bindingParser.calcPossibleSecurityContexts(input.componentSelector, property.name, bindingKind === BindingKind.Attribute).filter(context => context !== SecurityContext.NONE);
+    const securityContexts = calcHostBindingSecurityContexts(bindingParser, input.componentSelector, property.name, bindingKind === BindingKind.Attribute);
     ingestDomProperty(job, property, bindingKind, securityContexts);
   }
   for (const [name, expr] of Object.entries(input.attributes) ?? []) {
-    const securityContexts = bindingParser.calcPossibleSecurityContexts(input.componentSelector, name, true).filter(context => context !== SecurityContext.NONE);
+    const securityContexts = calcHostBindingSecurityContexts(bindingParser, input.componentSelector, name, true);
     ingestHostAttribute(job, name, expr, securityContexts);
   }
   for (const event of input.events ?? []) {
     ingestHostEvent(job, event);
   }
   return job;
+}
+function calcHostBindingSecurityContexts(bindingParser, selector, name, isAttribute) {
+  const declaringSelectorContexts = bindingParser.calcPossibleSecurityContexts(selector, name, isAttribute);
+  const concreteHostContexts = calcPossibleSecurityContexts(domSchema, null, domSchema.getMappedPropName(name), isAttribute);
+  const concreteHostNonNoneContexts = concreteHostContexts.filter(context => context !== SecurityContext.NONE);
+  const concreteHostNonNoneCount = concreteHostNonNoneContexts.length;
+  const hasConcreteHostNoneContext = concreteHostNonNoneCount !== concreteHostContexts.length;
+  if (hasConcreteHostNoneContext && concreteHostNonNoneCount > 0) {
+    return concreteHostContexts;
+  }
+  if (concreteHostNonNoneContexts.some(context => !declaringSelectorContexts.includes(context))) {
+    return concreteHostContexts;
+  }
+  return declaringSelectorContexts.filter(context => context !== SecurityContext.NONE);
 }
 function ingestDomProperty(/** @type {HostBindingCompilationJob} */ job, /** @type {ParsedProperty} */ property, /** @type {number} */ bindingKind, /** @type {number[]} */ securityContexts) {
   let expression;
@@ -22532,6 +21507,8 @@ function ingestNodes(/** @type {ViewCompilationUnit} */ unit, /** @type {any[]} 
       ingestForBlock(unit, node);
     } else if (node instanceof LetDeclaration$1) {
       ingestLetDeclaration(unit, node);
+    } else if (node instanceof BoundaryBlock) {
+      ingestBoundaryBlock(unit, node);
     } else if (node instanceof Component$1) ; else {
       throw new Error(`Unsupported template node: ${node.constructor.name}`);
     }
@@ -22542,6 +21519,11 @@ function ingestElement(/** @type {ViewCompilationUnit} */ unit, /** @type {Eleme
     throw Error(`Unhandled i18n metadata type for element: ${element.i18n.constructor.name}`);
   }
   const id = unit.job.allocateXrefId();
+  const foreignComp = unit.job.getForeignComponent(element);
+  if (foreignComp) {
+    ingestForeignComponent(unit, id, element, foreignComp);
+    return;
+  }
   const [namespaceKey, elementName] = splitNsName(element.name);
   const startOp = createElementStartOp(elementName, id, namespaceForKey(namespaceKey), element.i18n instanceof TagPlaceholder ? element.i18n : undefined, element.startSourceSpan, element.sourceSpan);
   unit.create.push(startOp);
@@ -22558,6 +21540,39 @@ function ingestElement(/** @type {ViewCompilationUnit} */ unit, /** @type {Eleme
   if (i18nBlockId !== null) {
     OpList.insertBefore(createI18nEndOp(i18nBlockId, element.endSourceSpan ?? element.startSourceSpan), endOp);
   }
+}
+function ingestForeignComponent(unit, id, element, foreignComp) {
+  const props = new Map();
+  for (const attr of element.attributes) {
+    props.set(attr.name, literal(attr.value));
+  }
+  for (const input of element.inputs) {
+    props.set(input.name, convertAst(input.value, unit.job, input.sourceSpan));
+  }
+  const contentBlocks = [];
+  const childNodes = [];
+  for (const child of element.children) {
+    if (child instanceof ContentBlock) {
+      contentBlocks.push(child);
+    } else {
+      childNodes.push(child);
+    }
+  }
+  for (const block of contentBlocks) {
+    const blockView = unit.job.allocateView(unit.xref);
+    for (let i = 0; i < block.variables.length; i++) {
+      blockView.contextVariables.set(block.variables[i].name, i);
+    }
+    ingestNodes(blockView, block.children);
+    unit.create.push(createContentOp(id, blockView.xref, block.name, block.startSourceSpan, block.sourceSpan));
+  }
+  if (childNodes.length > 0) {
+    const childView = unit.job.allocateView(unit.xref);
+    ingestNodes(childView, childNodes);
+    unit.create.push(createContentOp(id, childView.xref, 'children', element.startSourceSpan, element.sourceSpan));
+  }
+  const constIndex = unit.job.addConst(foreignComp.component);
+  unit.create.push(createForeignComponentOp(id, constIndex, props, element.startSourceSpan));
 }
 function ingestTemplate(/** @type {ViewCompilationUnit} */ unit, /** @type {Template} */ tmpl) {
   if (tmpl.i18n !== undefined && !(tmpl.i18n instanceof Message || tmpl.i18n instanceof TagPlaceholder)) {
@@ -22658,6 +21673,36 @@ function ingestIfBlock(/** @type {ViewCompilationUnit} */ unit, /** @type {IfBlo
     ingestNodes(cView, ifCase.children);
   }
   unit.update.push(createConditionalOp(firstXref, null, conditions, ifBlock.sourceSpan));
+}
+function ingestBoundaryBlock(unit, boundaryBlock) {
+  const primaryView = unit.job.allocateView(unit.xref);
+  const primaryTagName = ingestControlFlowInsertionPoint(unit, primaryView.xref, boundaryBlock);
+  const createOp = createBoundaryCreateOp(unit.job.allocateXrefId(), TemplateKind.Block, primaryTagName, 'Boundary', Namespace.HTML, undefined, boundaryBlock.startSourceSpan, boundaryBlock.sourceSpan);
+  unit.create.push(createOp);
+  const primaryCreateOp = createConditionalBranchCreateOp(primaryView.xref, TemplateKind.Block, primaryTagName, 'Primary', Namespace.HTML, undefined, boundaryBlock.startSourceSpan, boundaryBlock.sourceSpan);
+  unit.create.push(primaryCreateOp);
+  let conditions = [];
+  for (const errorBlock of boundaryBlock.errorBlocks) {
+    const errorView = unit.job.allocateView(unit.xref);
+    const branchCreateOp = createBoundaryErrorCreateOp(errorView.xref, TemplateKind.Block, 'Error', undefined, errorBlock.startSourceSpan, errorBlock.sourceSpan, createOp.xref, errorBlock.contextVariables);
+    unit.create.push(branchCreateOp);
+    const caseExpr = errorBlock.expression ? convertAst(errorBlock.expression, unit.job, null) : null;
+    const errorVar = errorBlock.contextVariables.find(v => v.value === '$error');
+    const conditionalCaseExpr = new ConditionalCaseExpr(caseExpr, branchCreateOp.xref, branchCreateOp.handle, errorVar || null);
+    conditions.push(conditionalCaseExpr);
+    for (const variable of errorBlock.contextVariables) {
+      errorView.aliases.add({
+        kind: SemanticVariableKind.Alias,
+        name: null,
+        identifier: variable.name,
+        expression: new ReadPropExpr(new ContextExpr(errorView.xref), variable.value)
+      });
+    }
+    ingestNodes(errorView, errorBlock.children);
+  }
+  const primaryCaseExpr = new ConditionalCaseExpr(null, primaryCreateOp.xref, primaryCreateOp.handle, null);
+  ingestNodes(primaryView, boundaryBlock.children);
+  unit.update.push(createBoundaryOp(createOp.xref, createOp.handle, primaryCreateOp.xref, primaryCaseExpr, conditions, boundaryBlock.sourceSpan));
 }
 function ingestSwitchBlock(/** @type {ViewCompilationUnit} */ unit, /** @type {SwitchBlock} */ switchBlock) {
   if (switchBlock.groups.length === 0) {
@@ -22992,7 +22037,7 @@ function ingestLetDeclaration(/** @type {ViewCompilationUnit} */ unit, node) {
   } else if (ast instanceof SpreadElement) {
     return new SpreadElementExpr(convertAst(ast.expression, job, baseSourceSpan));
   } else if (ast instanceof ArrowFunction) {
-    return updateParameterReferences(arrowFn(ast.parameters.map(arg => new FnParam(arg.name, DYNAMIC_TYPE)), convertAst(ast.body, job, baseSourceSpan)));
+    return updateParameterReferences(arrowFn(ast.parameters.map(arg => new FnParam(arg.name, DYNAMIC_TYPE)), convertAst(ast.body, job, baseSourceSpan), DYNAMIC_TYPE));
   } else {
     throw new Error(`Unhandled expression type "${ast.constructor.name}" in file "${baseSourceSpan?.start.file.url}"`);
   }
@@ -23204,7 +22249,7 @@ function assertIsArray(value) {
     if (root !== null) {
       return null;
     }
-    if (child instanceof Element$1 || child instanceof Template && child.tagName !== null) {
+    if (child instanceof Element$1 && unit.job.getForeignComponent(child) === null || child instanceof Template && child.tagName !== null) {
       root = child;
     } else {
       return null;
@@ -23212,7 +22257,7 @@ function assertIsArray(value) {
   }
   if (root !== null) {
     for (const attr of root.attributes) {
-      if (!attr.name.startsWith(ANIMATE_PREFIX$1)) {
+      if (!attr.name.startsWith(ANIMATE_PREFIX)) {
         const securityContext = domSchema.securityContext(NG_TEMPLATE_TAG_NAME, attr.name, true);
         unit.update.push(createBindingOp(xref, BindingKind.Attribute, attr.name, literal(attr.value), null, securityContext, true, false, null, asMessage(attr.i18n), attr.sourceSpan));
       }
@@ -23223,7 +22268,8 @@ function assertIsArray(value) {
         unit.create.push(createExtractedAttributeOp(xref, BindingKind.Property, null, attr.name, null, null, null, securityContext));
       }
     }
-    const tagName = root instanceof Element$1 ? root.name : root.tagName;
+    const rawTagName = root instanceof Element$1 ? root.name : root.tagName;
+    const tagName = rawTagName ? splitNsName(rawTagName)[1] : null;
     return tagName === NG_TEMPLATE_TAG_NAME ? null : tagName;
   }
   return null;
@@ -23242,13 +22288,7 @@ function updateParameterReferences(/** @type {ArrowFunctionExpr$1} */ root) {
   }, VisitorContextFlag.None);
 }
 
-let ENABLE_TEMPLATE_SOURCE_LOCATIONS = false;
-function setEnableTemplateSourceLocations(/** @type {boolean} */ value) {
-  ENABLE_TEMPLATE_SOURCE_LOCATIONS = value;
-}
-/** @returns {boolean} */ function getTemplateSourceLocationsEnabled() {
-  return ENABLE_TEMPLATE_SOURCE_LOCATIONS;
-}
+const ENABLE_TEMPLATE_SOURCE_LOCATIONS = false;
 
 /** @returns {IfStmt} */ function renderFlagCheckIfStmt(/** @type {number} */ flags, /** @type {Statement[]} */ statements) {
   return ifStmt(variable(RENDER_FLAGS).bitwiseAnd(literal(flags), null), statements);
@@ -23342,7 +22382,7 @@ const queryAdvancePlaceholder = Symbol('queryAdvancePlaceholder');
     createStatements.push(new ExpressionStatement(viewQueryCall));
   }
   const viewQueryFnName = name ? `${name}_Query` : null;
-  return fn([new FnParam(RENDER_FLAGS, NUMBER_TYPE), new FnParam(CONTEXT_NAME, DYNAMIC_TYPE)], [renderFlagCheckIfStmt(1, createStatements), renderFlagCheckIfStmt(2, collapseAdvanceStatements(updateStatements))], INFERRED_TYPE, null, viewQueryFnName);
+  return fn([new FnParam(RENDER_FLAGS, NUMBER_TYPE), new FnParam(CONTEXT_NAME, DYNAMIC_TYPE)], [renderFlagCheckIfStmt(1, createStatements), renderFlagCheckIfStmt(2, collapseAdvanceStatements(updateStatements))], DYNAMIC_TYPE, null, viewQueryFnName);
 }
 /** @returns {Expression} */ function createContentQueriesFunction(/** @type {any[]} */ queries, /** @type {ConstantPool} */ constantPool, /** @type {string | undefined} */ name) {
   const createStatements = [];
@@ -23376,7 +22416,7 @@ const queryAdvancePlaceholder = Symbol('queryAdvancePlaceholder');
     createStatements.push(new ExpressionStatement(contentQueryCall));
   }
   const contentQueriesFnName = name ? `${name}_ContentQueries` : null;
-  return fn([new FnParam(RENDER_FLAGS, NUMBER_TYPE), new FnParam(CONTEXT_NAME, DYNAMIC_TYPE), new FnParam('dirIndex', NUMBER_TYPE)], [renderFlagCheckIfStmt(1, createStatements), renderFlagCheckIfStmt(2, collapseAdvanceStatements(updateStatements))], INFERRED_TYPE, null, contentQueriesFnName);
+  return fn([new FnParam(RENDER_FLAGS, NUMBER_TYPE), new FnParam(CONTEXT_NAME, DYNAMIC_TYPE), new FnParam('dirIndex', NUMBER_TYPE)], [renderFlagCheckIfStmt(1, createStatements), renderFlagCheckIfStmt(2, collapseAdvanceStatements(updateStatements))], DYNAMIC_TYPE, null, contentQueriesFnName);
 }
 
 class HtmlParser extends Parser$1 {
@@ -23386,402 +22426,6 @@ class HtmlParser extends Parser$1 {
   /** @returns {ParseTreeResult} */ parse(/** @type {string} */ source, /** @type {string} */ url, options) {
     return super.parse(source, url, options);
   }
-}
-
-const PROPERTY_PARTS_SEPARATOR = '.';
-const ATTRIBUTE_PREFIX = 'attr';
-const ANIMATE_PREFIX = 'animate';
-const CLASS_PREFIX = 'class';
-const STYLE_PREFIX = 'style';
-const TEMPLATE_ATTR_PREFIX$1 = '*';
-const LEGACY_ANIMATE_PROP_PREFIX = 'animate-';
-class BindingParser {
-  /** @type {Parser} */ _exprParser;
-  /** @type {ElementSchemaRegistry} */ _schemaRegistry;
-  /** @type {ParseError[]} */ errors;
-  constructor(/** @type {Parser} */ _exprParser, /** @type {ElementSchemaRegistry} */ _schemaRegistry, /** @type {ParseError[]} */ errors) {
-    this._exprParser = _exprParser;
-    this._schemaRegistry = _schemaRegistry;
-    this.errors = errors;
-  }
-  /** @returns {ParsedProperty[] | null} */ createBoundHostProperties(properties, /** @type {ParseSourceSpan} */ sourceSpan) {
-    const boundProps = [];
-    for (const propName of Object.keys(properties)) {
-      const expression = properties[propName];
-      if (typeof expression === 'string') {
-        this.parsePropertyBinding(propName, expression, true, false, sourceSpan, sourceSpan.start.offset, undefined, [], boundProps, sourceSpan);
-      } else {
-        this._reportError(`Value of the host property binding "${propName}" needs to be a string representing an expression but got "${expression}" (${typeof expression})`, sourceSpan);
-      }
-    }
-    return boundProps;
-  }
-  /** @returns {ParsedEvent[] | null} */ createDirectiveHostEventAsts(hostListeners, /** @type {ParseSourceSpan} */ sourceSpan) {
-    const targetEvents = [];
-    for (const propName of Object.keys(hostListeners)) {
-      const expression = hostListeners[propName];
-      if (typeof expression === 'string') {
-        this.parseEvent(propName, expression, false, sourceSpan, sourceSpan, [], targetEvents, sourceSpan);
-      } else {
-        this._reportError(`Value of the host listener "${propName}" needs to be a string representing an expression but got "${expression}" (${typeof expression})`, sourceSpan);
-      }
-    }
-    return targetEvents;
-  }
-  /** @returns {ASTWithSource} */ parseInterpolation(/** @type {string} */ value, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {any[] | null} */ interpolatedTokens) {
-    const absoluteOffset = sourceSpan.fullStart.offset;
-    try {
-      const ast = this._exprParser.parseInterpolation(value, sourceSpan, absoluteOffset, interpolatedTokens);
-      if (ast) {
-        this.errors.push(...ast.errors);
-      }
-      return ast;
-    } catch (e) {
-      this._reportError(`${e}`, sourceSpan);
-      return this._exprParser.wrapLiteralPrimitive('ERROR', sourceSpan, absoluteOffset);
-    }
-  }
-  /** @returns {ASTWithSource} */ parseInterpolationExpression(/** @type {string} */ expression, /** @type {ParseSourceSpan} */ sourceSpan) {
-    const absoluteOffset = sourceSpan.start.offset;
-    try {
-      const ast = this._exprParser.parseInterpolationExpression(expression, sourceSpan, absoluteOffset);
-      if (ast) {
-        this.errors.push(...ast.errors);
-      }
-      return ast;
-    } catch (e) {
-      this._reportError(`${e}`, sourceSpan);
-      return this._exprParser.wrapLiteralPrimitive('ERROR', sourceSpan, absoluteOffset);
-    }
-  }
-  parseInlineTemplateBinding(/** @type {string} */ tplKey, /** @type {string} */ tplValue, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {number} */ absoluteValueOffset, /** @type {string[][]} */ targetMatchableAttrs, /** @type {ParsedProperty[]} */ targetProps, /** @type {ParsedVariable[]} */ targetVars, /** @type {boolean} */ isIvyAst) {
-    const absoluteKeyOffset = sourceSpan.start.offset + TEMPLATE_ATTR_PREFIX$1.length;
-    const bindings = this._parseTemplateBindings(tplKey, tplValue, sourceSpan, absoluteKeyOffset, absoluteValueOffset);
-    for (const binding of bindings) {
-      const bindingSpan = moveParseSourceSpan(sourceSpan, binding.sourceSpan);
-      const key = binding.key.source;
-      const keySpan = moveParseSourceSpan(sourceSpan, binding.key.span);
-      if (binding instanceof VariableBinding) {
-        const value = binding.value ? binding.value.source : '$implicit';
-        const valueSpan = binding.value ? moveParseSourceSpan(sourceSpan, binding.value.span) : undefined;
-        targetVars.push(new ParsedVariable(key, value, bindingSpan, keySpan, valueSpan));
-      } else if (binding.value) {
-        const srcSpan = isIvyAst ? bindingSpan : sourceSpan;
-        const valueSpan = moveParseSourceSpan(sourceSpan, binding.value.ast.sourceSpan);
-        this._parsePropertyAst(key, binding.value, false, srcSpan, keySpan, valueSpan, targetMatchableAttrs, targetProps);
-      } else {
-        targetMatchableAttrs.push([key, '']);
-        this.parseLiteralAttr(key, null, keySpan, absoluteValueOffset, undefined, targetMatchableAttrs, targetProps, keySpan);
-      }
-    }
-  }
-  /** @returns {any[]} */ _parseTemplateBindings(/** @type {string} */ tplKey, /** @type {string} */ tplValue, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {number} */ absoluteKeyOffset, /** @type {number} */ absoluteValueOffset) {
-    try {
-      const bindingsResult = this._exprParser.parseTemplateBindings(tplKey, tplValue, sourceSpan, absoluteKeyOffset, absoluteValueOffset);
-      bindingsResult.errors.forEach(e => this.errors.push(e));
-      bindingsResult.warnings.forEach(warning => {
-        this._reportError(warning, sourceSpan, ParseErrorLevel.WARNING);
-      });
-      return bindingsResult.templateBindings;
-    } catch (e) {
-      this._reportError(`${e}`, sourceSpan);
-      return [];
-    }
-  }
-  parseLiteralAttr(/** @type {string} */ name, /** @type {string | null} */ value, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {number} */ absoluteOffset, /** @type {ParseSourceSpan | undefined} */ valueSpan, /** @type {string[][]} */ targetMatchableAttrs, /** @type {ParsedProperty[]} */ targetProps, /** @type {ParseSourceSpan} */ keySpan) {
-    if (isLegacyAnimationLabel(name)) {
-      name = name.substring(1);
-      if (keySpan !== undefined) {
-        keySpan = moveParseSourceSpan(keySpan, new AbsoluteSourceSpan(keySpan.start.offset + 1, keySpan.end.offset));
-      }
-      if (value) {
-        this._reportError(`Assigning animation triggers via @prop="exp" attributes with an expression is invalid.` + ` Use property bindings (e.g. [@prop]="exp") or use an attribute without a value (e.g. @prop) instead.`, sourceSpan, ParseErrorLevel.ERROR);
-      }
-      this._parseLegacyAnimation(name, value, sourceSpan, absoluteOffset, keySpan, valueSpan, targetMatchableAttrs, targetProps);
-    } else {
-      targetProps.push(new ParsedProperty(name, this._exprParser.wrapLiteralPrimitive(value, '', absoluteOffset), ParsedPropertyType.LITERAL_ATTR, sourceSpan, keySpan, valueSpan));
-    }
-  }
-  parsePropertyBinding(/** @type {string} */ name, /** @type {string} */ expression, /** @type {boolean} */ isHost, /** @type {boolean} */ isPartOfAssignmentBinding, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {number} */ absoluteOffset, /** @type {ParseSourceSpan | undefined} */ valueSpan, /** @type {string[][]} */ targetMatchableAttrs, /** @type {ParsedProperty[]} */ targetProps, /** @type {ParseSourceSpan} */ keySpan) {
-    if (name.length === 0) {
-      this._reportError(`Property name is missing in binding`, sourceSpan);
-    }
-    let isLegacyAnimationProp = false;
-    if (name.startsWith(LEGACY_ANIMATE_PROP_PREFIX)) {
-      isLegacyAnimationProp = true;
-      name = name.substring(LEGACY_ANIMATE_PROP_PREFIX.length);
-      if (keySpan !== undefined) {
-        keySpan = moveParseSourceSpan(keySpan, new AbsoluteSourceSpan(keySpan.start.offset + LEGACY_ANIMATE_PROP_PREFIX.length, keySpan.end.offset));
-      }
-    } else if (isLegacyAnimationLabel(name)) {
-      isLegacyAnimationProp = true;
-      name = name.substring(1);
-      if (keySpan !== undefined) {
-        keySpan = moveParseSourceSpan(keySpan, new AbsoluteSourceSpan(keySpan.start.offset + 1, keySpan.end.offset));
-      }
-    }
-    if (isLegacyAnimationProp) {
-      this._parseLegacyAnimation(name, expression, sourceSpan, absoluteOffset, keySpan, valueSpan, targetMatchableAttrs, targetProps);
-    } else if (name.startsWith(`${ANIMATE_PREFIX}${PROPERTY_PARTS_SEPARATOR}`)) {
-      this._parseAnimation(name, this.parseBinding(expression, isHost, valueSpan || sourceSpan, absoluteOffset), sourceSpan, keySpan, valueSpan, targetMatchableAttrs, targetProps);
-    } else {
-      this._parsePropertyAst(name, this.parseBinding(expression, isHost, valueSpan || sourceSpan, absoluteOffset), isPartOfAssignmentBinding, sourceSpan, keySpan, valueSpan, targetMatchableAttrs, targetProps);
-    }
-  }
-  /** @returns {boolean} */ parsePropertyInterpolation(/** @type {string} */ name, /** @type {string} */ value, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {ParseSourceSpan | undefined} */ valueSpan, /** @type {string[][]} */ targetMatchableAttrs, /** @type {ParsedProperty[]} */ targetProps, /** @type {ParseSourceSpan} */ keySpan, /** @type {any[] | null} */ interpolatedTokens) {
-    const expr = this.parseInterpolation(value, valueSpan || sourceSpan, interpolatedTokens);
-    if (expr) {
-      this._parsePropertyAst(name, expr, false, sourceSpan, keySpan, valueSpan, targetMatchableAttrs, targetProps);
-      return true;
-    }
-    return false;
-  }
-  _parsePropertyAst(/** @type {string} */ name, ast, /** @type {boolean} */ isPartOfAssignmentBinding, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {ParseSourceSpan} */ keySpan, /** @type {ParseSourceSpan | undefined} */ valueSpan, /** @type {string[][]} */ targetMatchableAttrs, /** @type {ParsedProperty[]} */ targetProps) {
-    targetMatchableAttrs.push([name, ast.source]);
-    targetProps.push(new ParsedProperty(name, ast, isPartOfAssignmentBinding ? ParsedPropertyType.TWO_WAY : ParsedPropertyType.DEFAULT, sourceSpan, keySpan, valueSpan));
-  }
-  _parseAnimation(/** @type {string} */ name, ast, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {ParseSourceSpan} */ keySpan, /** @type {ParseSourceSpan | undefined} */ valueSpan, /** @type {string[][]} */ targetMatchableAttrs, /** @type {ParsedProperty[]} */ targetProps) {
-    targetMatchableAttrs.push([name, ast.source]);
-    targetProps.push(new ParsedProperty(name, ast, ParsedPropertyType.ANIMATION, sourceSpan, keySpan, valueSpan));
-  }
-  _parseLegacyAnimation(/** @type {string} */ name, /** @type {string | null} */ expression, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {number} */ absoluteOffset, /** @type {ParseSourceSpan} */ keySpan, /** @type {ParseSourceSpan | undefined} */ valueSpan, /** @type {string[][]} */ targetMatchableAttrs, /** @type {ParsedProperty[]} */ targetProps) {
-    if (name.length === 0) {
-      this._reportError('Animation trigger is missing', sourceSpan);
-    }
-    const ast = this.parseBinding(expression || 'undefined', false, valueSpan || sourceSpan, absoluteOffset);
-    targetMatchableAttrs.push([name, ast.source]);
-    targetProps.push(new ParsedProperty(name, ast, ParsedPropertyType.LEGACY_ANIMATION, sourceSpan, keySpan, valueSpan));
-  }
-  /** @returns {ASTWithSource} */ parseBinding(/** @type {string} */ value, /** @type {boolean} */ isHostBinding, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {number} */ absoluteOffset) {
-    try {
-      const ast = isHostBinding ? this._exprParser.parseSimpleBinding(value, sourceSpan, absoluteOffset) : this._exprParser.parseBinding(value, sourceSpan, absoluteOffset);
-      if (ast) {
-        this.errors.push(...ast.errors);
-      }
-      return ast;
-    } catch (e) {
-      this._reportError(`${e}`, sourceSpan);
-      return this._exprParser.wrapLiteralPrimitive('ERROR', sourceSpan, absoluteOffset);
-    }
-  }
-  /** @returns {BoundElementProperty} */ createBoundElementProperty(/** @type {string | null} */ elementSelector, /** @type {ParsedProperty} */ boundProp, /** @type {boolean} */ skipValidation = false, /** @type {boolean} */ mapPropertyName = true) {
-    if (boundProp.isLegacyAnimation) {
-      return new BoundElementProperty(boundProp.name, BindingType.LegacyAnimation, SecurityContext.NONE, boundProp.expression, null, boundProp.sourceSpan, boundProp.keySpan, boundProp.valueSpan);
-    }
-    let unit = null;
-    let bindingType = undefined;
-    let boundPropertyName = null;
-    const parts = boundProp.name.split(PROPERTY_PARTS_SEPARATOR);
-    let securityContexts = undefined;
-    if (parts.length > 1) {
-      if (parts[0] == ATTRIBUTE_PREFIX) {
-        boundPropertyName = parts.slice(1).join(PROPERTY_PARTS_SEPARATOR);
-        if (!skipValidation) {
-          this._validatePropertyOrAttributeName(boundPropertyName, boundProp.sourceSpan, true);
-        }
-        securityContexts = calcPossibleSecurityContexts(this._schemaRegistry, elementSelector, boundPropertyName, true);
-        const nsSeparatorIdx = boundPropertyName.indexOf(':');
-        if (nsSeparatorIdx > -1) {
-          const ns = boundPropertyName.substring(0, nsSeparatorIdx);
-          const name = boundPropertyName.substring(nsSeparatorIdx + 1);
-          boundPropertyName = mergeNsAndName(ns, name);
-        }
-        bindingType = BindingType.Attribute;
-      } else if (parts[0] == CLASS_PREFIX) {
-        boundPropertyName = parts[1];
-        bindingType = BindingType.Class;
-        securityContexts = [SecurityContext.NONE];
-      } else if (parts[0] == STYLE_PREFIX) {
-        unit = parts.length > 2 ? parts[2] : null;
-        boundPropertyName = parts[1];
-        bindingType = BindingType.Style;
-        securityContexts = [SecurityContext.STYLE];
-      } else if (parts[0] == ANIMATE_PREFIX) {
-        boundPropertyName = boundProp.name;
-        bindingType = BindingType.Animation;
-        securityContexts = [SecurityContext.NONE];
-      }
-    }
-    if (boundPropertyName === null) {
-      const mappedPropName = this._schemaRegistry.getMappedPropName(boundProp.name);
-      boundPropertyName = mapPropertyName ? mappedPropName : boundProp.name;
-      securityContexts = calcPossibleSecurityContexts(this._schemaRegistry, elementSelector, mappedPropName, false);
-      bindingType = boundProp.type === ParsedPropertyType.TWO_WAY ? BindingType.TwoWay : BindingType.Property;
-      if (!skipValidation) {
-        this._validatePropertyOrAttributeName(mappedPropName, boundProp.sourceSpan, false);
-      }
-    }
-    return new BoundElementProperty(boundPropertyName, bindingType, securityContexts[0], boundProp.expression, unit, boundProp.sourceSpan, boundProp.keySpan, boundProp.valueSpan);
-  }
-  parseEvent(/** @type {string} */ name, /** @type {string} */ expression, /** @type {boolean} */ isAssignmentEvent, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {ParseSourceSpan} */ handlerSpan, /** @type {string[][]} */ targetMatchableAttrs, /** @type {ParsedEvent[]} */ targetEvents, /** @type {ParseSourceSpan} */ keySpan) {
-    if (name.length === 0) {
-      this._reportError(`Event name is missing in binding`, sourceSpan);
-    }
-    if (isLegacyAnimationLabel(name)) {
-      name = name.slice(1);
-      if (keySpan !== undefined) {
-        keySpan = moveParseSourceSpan(keySpan, new AbsoluteSourceSpan(keySpan.start.offset + 1, keySpan.end.offset));
-      }
-      this._parseLegacyAnimationEvent(name, expression, sourceSpan, handlerSpan, targetEvents, keySpan);
-    } else {
-      this._parseRegularEvent(name, expression, isAssignmentEvent, sourceSpan, handlerSpan, targetMatchableAttrs, targetEvents, keySpan);
-    }
-  }
-  /** @returns {number[]} */ calcPossibleSecurityContexts(/** @type {string} */ selector, /** @type {string} */ propName, /** @type {boolean} */ isAttribute) {
-    const prop = this._schemaRegistry.getMappedPropName(propName);
-    return calcPossibleSecurityContexts(this._schemaRegistry, selector, prop, isAttribute);
-  }
-  parseEventListenerName(/** @type {string} */ rawName) {
-    const [target, eventName] = splitAtColon(rawName, [null, rawName]);
-    return {
-      eventName: eventName,
-      target
-    };
-  }
-  parseLegacyAnimationEventName(/** @type {string} */ rawName) {
-    const matches = splitAtPeriod(rawName, [rawName, null]);
-    return {
-      eventName: matches[0],
-      phase: matches[1] === null ? null : matches[1].toLowerCase()
-    };
-  }
-  _parseLegacyAnimationEvent(/** @type {string} */ name, /** @type {string} */ expression, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {ParseSourceSpan} */ handlerSpan, /** @type {ParsedEvent[]} */ targetEvents, /** @type {ParseSourceSpan} */ keySpan) {
-    const {
-      eventName,
-      phase
-    } = this.parseLegacyAnimationEventName(name);
-    const ast = this._parseAction(expression, handlerSpan);
-    targetEvents.push(new ParsedEvent(eventName, phase, ParsedEventType.LegacyAnimation, ast, sourceSpan, handlerSpan, keySpan));
-    if (eventName.length === 0) {
-      this._reportError(`Animation event name is missing in binding`, sourceSpan);
-    }
-    if (phase) {
-      if (phase !== 'start' && phase !== 'done') {
-        this._reportError(`The provided animation output phase value "${phase}" for "@${eventName}" is not supported (use start or done)`, sourceSpan);
-      }
-    } else {
-      this._reportError(`The animation trigger output event (@${eventName}) is missing its phase value name (start or done are currently supported)`, sourceSpan);
-    }
-  }
-  _parseRegularEvent(/** @type {string} */ name, /** @type {string} */ expression, /** @type {boolean} */ isAssignmentEvent, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {ParseSourceSpan} */ handlerSpan, /** @type {string[][]} */ targetMatchableAttrs, /** @type {ParsedEvent[]} */ targetEvents, /** @type {ParseSourceSpan} */ keySpan) {
-    const {
-      eventName,
-      target
-    } = this.parseEventListenerName(name);
-    const prevErrorCount = this.errors.length;
-    const ast = this._parseAction(expression, handlerSpan);
-    const isValid = this.errors.length === prevErrorCount;
-    targetMatchableAttrs.push([name, ast.source]);
-    if (isAssignmentEvent && isValid && !this._isAllowedAssignmentEvent(ast)) {
-      this._reportError('Unsupported expression in a two-way binding', sourceSpan);
-    }
-    let eventType = ParsedEventType.Regular;
-    if (isAssignmentEvent) {
-      eventType = ParsedEventType.TwoWay;
-    }
-    if (name.startsWith(`${ANIMATE_PREFIX}${PROPERTY_PARTS_SEPARATOR}`)) {
-      eventType = ParsedEventType.Animation;
-    }
-    targetEvents.push(new ParsedEvent(eventName, target, eventType, ast, sourceSpan, handlerSpan, keySpan));
-  }
-  _parseAction(/** @type {string} */ value, /** @type {ParseSourceSpan} */ sourceSpan) {
-    const absoluteOffset = sourceSpan && sourceSpan.start ? sourceSpan.start.offset : 0;
-    try {
-      const ast = this._exprParser.parseAction(value, sourceSpan, absoluteOffset);
-      if (ast) {
-        this.errors.push(...ast.errors);
-      }
-      if (!ast || ast.ast instanceof EmptyExpr$1) {
-        this._reportError(`Empty expressions are not allowed`, sourceSpan);
-        return this._exprParser.wrapLiteralPrimitive('ERROR', sourceSpan, absoluteOffset);
-      }
-      return ast;
-    } catch (e) {
-      this._reportError(`${e}`, sourceSpan);
-      return this._exprParser.wrapLiteralPrimitive('ERROR', sourceSpan, absoluteOffset);
-    }
-  }
-  _reportError(/** @type {string} */ message, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {number} */ level = ParseErrorLevel.ERROR) {
-    this.errors.push(new ParseError(sourceSpan, message, level));
-  }
-  _validatePropertyOrAttributeName(/** @type {string} */ propName, /** @type {ParseSourceSpan} */ sourceSpan, /** @type {boolean} */ isAttr) {
-    const report = isAttr ? this._schemaRegistry.validateAttribute(propName) : this._schemaRegistry.validateProperty(propName);
-    if (report.error) {
-      this._reportError(report.msg, sourceSpan, ParseErrorLevel.ERROR);
-    }
-  }
-  /** @returns {boolean} */ _isAllowedAssignmentEvent(/** @type {AST} */ ast) {
-    if (ast instanceof ASTWithSource) {
-      return this._isAllowedAssignmentEvent(ast.ast);
-    }
-    if (ast instanceof NonNullAssert) {
-      return this._isAllowedAssignmentEvent(ast.expression);
-    }
-    if (ast instanceof Call && ast.args.length === 1 && ast.receiver instanceof PropertyRead && ast.receiver.name === '$any' && ast.receiver.receiver instanceof ImplicitReceiver) {
-      return this._isAllowedAssignmentEvent(ast.args[0]);
-    }
-    if (ast instanceof PropertyRead || ast instanceof KeyedRead) {
-      if (!hasRecursiveSafeReceiver(ast)) {
-        return true;
-      }
-    }
-    return false;
-  }
-}
-/** @returns {boolean} */ function hasRecursiveSafeReceiver(/** @type {AST} */ ast) {
-  if (ast instanceof SafePropertyRead || ast instanceof SafeKeyedRead) {
-    return true;
-  }
-  if (ast instanceof ParenthesizedExpression) {
-    return hasRecursiveSafeReceiver(ast.expression);
-  }
-  if (ast instanceof PropertyRead || ast instanceof KeyedRead || ast instanceof Call) {
-    return hasRecursiveSafeReceiver(ast.receiver);
-  }
-  return false;
-}
-/** @returns {boolean} */ function isLegacyAnimationLabel(/** @type {string} */ name) {
-  return name[0] == '@';
-}
-/** @returns {number[]} */ function calcPossibleSecurityContexts(/** @type {ElementSchemaRegistry} */ registry, /** @type {string | null} */ selector, /** @type {string} */ propName, /** @type {boolean} */ isAttribute) {
-  let ctxs;
-  const [namespaceKey, baseSelector] = selector ? splitNsName(selector, false) : [null, selector];
-  const nameToContext = elName => {
-    const [nsStr, name] = splitNsName(elName, false);
-    const ns = nsStr ?? namespaceKey;
-    const fullName = ns ? `:${ns}:${name}` : name;
-    return registry.securityContext(fullName, propName, isAttribute);
-  };
-  const allKnownElements = registry.allKnownElementNames();
-  if (baseSelector === null) {
-    ctxs = allKnownElements.map(nameToContext);
-  } else {
-    ctxs = [];
-    CssSelector.parse(baseSelector).forEach(selector => {
-      let elementNames = selector.element ? [selector.element] : allKnownElements;
-      if (selector.element && !registry.hasElement(selector.element, [])) {
-        const svgElement = `:${SVG_NAMESPACE}:${selector.element}`;
-        const mathElement = `:${MATH_ML_NAMESPACE}:${selector.element}`;
-        if (registry.hasElement(svgElement, [])) {
-          elementNames = [svgElement];
-        } else if (registry.hasElement(mathElement, [])) {
-          elementNames = [mathElement];
-        }
-      }
-      const notElementNames = new Set(selector.notSelectors.filter(selector => selector.isElementSelector()).map(selector => selector.element?.toLowerCase()));
-      const possibleElementNames = elementNames.filter(elName => {
-        const elNameLowerCase = elName.toLowerCase();
-        return !notElementNames.has(elNameLowerCase) && !notElementNames.has(splitNsName(elNameLowerCase)[1]);
-      });
-      ctxs.push(...possibleElementNames.map(nameToContext));
-    });
-  }
-  return ctxs.length === 0 ? [SecurityContext.NONE] : Array.from(new Set(ctxs)).sort();
-}
-/** @returns {ParseSourceSpan} */ function moveParseSourceSpan(/** @type {ParseSourceSpan} */ sourceSpan, /** @type {AbsoluteSourceSpan} */ absoluteSpan) {
-  const startDiff = absoluteSpan.start - sourceSpan.start.offset;
-  const endDiff = absoluteSpan.end - sourceSpan.end.offset;
-  return new ParseSourceSpan(sourceSpan.start.moveBy(startDiff), sourceSpan.end.moveBy(endDiff), sourceSpan.fullStart.moveBy(startDiff), sourceSpan.details);
 }
 
 /** @returns {boolean} */ function isStyleUrlResolvable(/** @type {string | null} */ url) {
@@ -23797,7 +22441,7 @@ const LINK_STYLE_REL_ATTR = 'rel';
 const LINK_STYLE_HREF_ATTR = 'href';
 const LINK_STYLE_REL_VALUE = 'stylesheet';
 const STYLE_ELEMENT = 'style';
-const SCRIPT_ELEMENTS = new Set([':svg:script', 'script']);
+const SCRIPT_ELEMENT = 'script';
 const NG_NON_BINDABLE_ATTR = 'ngNonBindable';
 const NG_PROJECT_AS = 'ngProjectAs';
 /** @returns {PreparsedElement} */ function preparseElement(/** @type {Element} */ ast) {
@@ -23824,12 +22468,13 @@ const NG_PROJECT_AS = 'ngProjectAs';
   }
   selectAttr ||= '*';
   const nodeName = ast.name.toLowerCase();
+  const nodeNameWithoutNamespace = splitNsName(nodeName)[1];
   let type = PreparsedElementType.OTHER;
   if (isNgContent(nodeName)) {
     type = PreparsedElementType.NG_CONTENT;
   } else if (STYLE_ELEMENT === nodeName) {
     type = PreparsedElementType.STYLE;
-  } else if (SCRIPT_ELEMENTS.has(nodeName)) {
+  } else if (SCRIPT_ELEMENT === nodeNameWithoutNamespace) {
     type = PreparsedElementType.SCRIPT;
   } else if (nodeName == LINK_ELEMENT && relAttr == LINK_STYLE_REL_VALUE) {
     type = PreparsedElementType.STYLESHEET;
@@ -23859,19 +22504,179 @@ class PreparsedElement {
   }
 }
 
+const WHEN_PATTERN = /^(when\s+)(.*)/;
+function isConnectedBoundaryErrorBlock(name) {
+  return name === 'error';
+}
+function createBoundaryBlock(ast, connectedBlocks, visitor, bindingParser) {
+  const errors = [];
+  const errorBlocks = [];
+  if (ast.parameters.length > 0) {
+    errors.push(new ParseError(ast.sourceSpan, '@boundary block cannot have parameters'));
+  }
+  for (let blockIndex = 0; blockIndex < connectedBlocks.length; blockIndex++) {
+    const block = connectedBlocks[blockIndex];
+    if (block.name !== 'error') {
+      errors.push(new ParseError(block.sourceSpan, `Unrecognized @boundary connected block @${block.name}`));
+      continue;
+    }
+    const emptySpan = new ParseSourceSpan(block.startSourceSpan.end, block.startSourceSpan.end);
+    const contextVariables = [new Variable('$error', '$error', emptySpan, emptySpan, emptySpan), new Variable('$reset', '$reset', emptySpan, emptySpan, emptySpan)];
+    let expression = null;
+    for (const param of block.parameters) {
+      const letMatch = param.expression.match(LET_PATTERN);
+      const isAliasMatch = param.expression.match(/^\s*[$A-Z_][0-9A-Z_$]*\s*=/i) !== null;
+      if (letMatch !== null || isAliasMatch) {
+        const expressionToParse = letMatch !== null ? letMatch[1] : param.expression;
+        const variablesSpan = letMatch !== null ? new ParseSourceSpan(param.sourceSpan.start.moveBy(letMatch[0].length - letMatch[1].length), param.sourceSpan.end) : param.sourceSpan;
+        parseLetParameters(param.sourceSpan, expressionToParse, variablesSpan, contextVariables, errors, (name, variableName, sourceSpan) => {
+          if (variableName !== '$error' && variableName !== '$reset') {
+            errors.push(new ParseError(sourceSpan, `Unknown context variable "${variableName}". Only "$error" and "$reset" are allowed`));
+          } else if (contextVariables.some(v => v.name === name)) {
+            errors.push(new ParseError(sourceSpan, `Duplicate "let" parameter variable "${name}"`));
+          }
+        }, '@error block', '$error');
+        continue;
+      }
+      const whenMatch = param.expression.match(WHEN_PATTERN);
+      if (whenMatch) {
+        if (expression !== null) {
+          errors.push(new ParseError(param.sourceSpan, '@error block can only have one "when" expression'));
+        } else {
+          const start = param.expression.indexOf(whenMatch[2]);
+          const end = start + whenMatch[2].length;
+          const expressionAST = bindingParser.parseBinding(param.expression.slice(start, end), false, param.sourceSpan, param.sourceSpan.start.offset + start);
+          expression = expressionAST.ast;
+        }
+        continue;
+      }
+      errors.push(new ParseError(param.sourceSpan, `Unrecognized @error block parameter "${param.expression}"`));
+    }
+    errorBlocks.push(new BoundaryErrorBlock(visitAll(visitor, block.children, block.children), contextVariables, expression, block.nameSpan, block.sourceSpan, block.startSourceSpan, block.endSourceSpan, block.i18n));
+  }
+  let hasUnconditionalErrorBlock = false;
+  for (let i = 0; i < errorBlocks.length; i++) {
+    const errorBlock = errorBlocks[i];
+    if (errorBlock.expression === null) {
+      if (hasUnconditionalErrorBlock) {
+        errors.push(new ParseError(errorBlock.sourceSpan, '@boundary block can only have one unconditional @error block'));
+      } else if (i !== errorBlocks.length - 1) {
+        errors.push(new ParseError(errorBlock.sourceSpan, 'Unconditional @error block must be the last @error block in the boundary chain'));
+      }
+      hasUnconditionalErrorBlock = true;
+    }
+  }
+  let wholeSourceSpan = ast.sourceSpan;
+  const lastErrorBlock = errorBlocks[errorBlocks.length - 1];
+  if (lastErrorBlock !== undefined) {
+    wholeSourceSpan = new ParseSourceSpan(ast.startSourceSpan.start, lastErrorBlock.sourceSpan.end);
+  }
+  const endSourceSpan = errorBlocks.length > 0 ? errorBlocks[errorBlocks.length - 1].endSourceSpan : ast.endSourceSpan;
+  const node = new BoundaryBlock(visitAll(visitor, ast.children, ast.children), errorBlocks, ast.nameSpan, wholeSourceSpan, ast.sourceSpan, ast.startSourceSpan, endSourceSpan, ast.i18n);
+  return {
+    node,
+    errors
+  };
+}
+
+function createContentBlock(ast, visitor) {
+  const errors = [];
+  if (ast.parameters.length < 1 || ast.parameters.length > 2) {
+    errors.push(new ParseError(ast.startSourceSpan, '@content block must have one or two parameters, e.g. ' + '"@content(header)" or "@content(items; let item, index)"'));
+    return {
+      node: null,
+      errors
+    };
+  }
+  const nameParam = ast.parameters[0];
+  const name = nameParam.expression.trim();
+  if (name.includes(',')) {
+    errors.push(new ParseError(ast.startSourceSpan, '@content block must have exactly one name parameter'));
+    return {
+      node: null,
+      errors
+    };
+  }
+  if (!IDENTIFIER_PATTERN.test(name)) {
+    errors.push(new ParseError(nameParam.sourceSpan, '@content name must be a valid JavaScript identifier'));
+    return {
+      node: null,
+      errors
+    };
+  }
+  const variables = parseContentBlockVariables(ast, errors);
+  if (variables === null) {
+    return {
+      node: null,
+      errors
+    };
+  }
+  const node = new ContentBlock(name, variables, visitAll(visitor, ast.children, ast.children), ast.nameSpan, ast.sourceSpan, ast.startSourceSpan, ast.endSourceSpan, ast.i18n);
+  return {
+    node,
+    errors
+  };
+}
+function parseContentBlockVariables(ast, errors) {
+  const variables = [];
+  if (ast.parameters.length < 2) {
+    return variables;
+  }
+  const varsParam = ast.parameters[1];
+  const varsExpr = varsParam.expression.trim();
+  const letMatch = varsExpr.match(LET_PATTERN);
+  if (!letMatch) {
+    errors.push(new ParseError(varsParam.sourceSpan, '@content block variables must start with "let", e.g. "let item, index"'));
+    return null;
+  }
+  const varNames = letMatch[1].split(',').map(v => v.trim());
+  const variablesRawString = letMatch[1];
+  const variablesStartOffset = varsParam.expression.indexOf(variablesRawString);
+  const variablesStartLocation = varsParam.sourceSpan.start.moveBy(variablesStartOffset);
+  let searchIndex = 0;
+  for (let varName of varNames) {
+    if (varName === '') {
+      errors.push(new ParseError(varsParam.sourceSpan, 'Invalid variable name in @content block'));
+      continue;
+    }
+    let varSpan;
+    const index = variablesRawString.indexOf(varName, searchIndex);
+    const varStart = variablesStartLocation.moveBy(index);
+    if (varName.includes('=')) {
+      const eqIndex = varName.indexOf('=');
+      const namePart = varName.substring(0, eqIndex).trim();
+      const fullVarSpan = new ParseSourceSpan(varStart, varStart.moveBy(varName.length));
+      errors.push(new ParseError(fullVarSpan, `@content block variables cannot be assigned a value`));
+      varName = namePart;
+      varSpan = new ParseSourceSpan(varStart, varStart.moveBy(varName.length));
+    } else {
+      varSpan = new ParseSourceSpan(varStart, varStart.moveBy(varName.length));
+    }
+    if (!IDENTIFIER_PATTERN.test(varName)) {
+      errors.push(new ParseError(varSpan, `Variable name "${varName}" must be a valid JavaScript identifier`));
+      searchIndex = index + varName.length;
+      continue;
+    }
+    if (variables.some(v => v.name === varName)) {
+      errors.push(new ParseError(varSpan, `Duplicate variable name "${varName}" in @content block`));
+      searchIndex = index + varName.length;
+      continue;
+    }
+    variables.push(new Variable(varName, '', varSpan, varSpan));
+    searchIndex = index + varName.length;
+  }
+  return variables;
+}
+
 const FOR_LOOP_EXPRESSION_PATTERN = /^\s*([0-9A-Za-z_$]*)\s+of\s+([\S\s]*)/;
 const FOR_LOOP_TRACK_PATTERN = /^track\s+([\S\s]*)/;
 const CONDITIONAL_ALIAS_PATTERN = /^(as\s+)(.*)/;
-const ELSE_IF_PATTERN = /^else[^\S\r\n]+if/;
-const FOR_LOOP_LET_PATTERN = /^let\s+([\S\s]*)/;
-const IDENTIFIER_PATTERN = /^[$A-Z_][0-9A-Z_$]*$/i;
-const CHARACTERS_IN_SURROUNDING_WHITESPACE_PATTERN = /(\s*)(\S+)(\s*)/;
 const ALLOWED_FOR_LOOP_LET_VARIABLES = new Set(['$index', '$first', '$last', '$even', '$odd', '$count']);
 /** @returns {boolean} */ function isConnectedForLoopBlock(/** @type {string} */ name) {
   return name === 'empty';
 }
 /** @returns {boolean} */ function isConnectedIfLoopBlock(/** @type {string} */ name) {
-  return name === 'else' || ELSE_IF_PATTERN.test(name);
+  return name === 'else' || name === 'else if';
 }
 function createIfBlock(/** @type {Block} */ ast, /** @type {Block[]} */ connectedBlocks, visitor, /** @type {BindingParser} */ bindingParser) {
   const errors = validateIfConnectedBlocks(connectedBlocks);
@@ -23881,7 +22686,7 @@ function createIfBlock(/** @type {Block} */ ast, /** @type {Block[]} */ connecte
     branches.push(new IfBlockBranch(mainBlockParams.expression, visitAll(visitor, ast.children, ast.children), mainBlockParams.expressionAlias, ast.sourceSpan, ast.startSourceSpan, ast.endSourceSpan, ast.nameSpan, ast.i18n));
   }
   for (const block of connectedBlocks) {
-    if (ELSE_IF_PATTERN.test(block.name)) {
+    if (block.name === 'else if') {
       const params = parseConditionalBlockParameters(block, errors, bindingParser);
       if (params !== null) {
         const children = visitAll(visitor, block.children, block.children);
@@ -24031,10 +22836,18 @@ function parseForLoopParameters(/** @type {Block} */ block, /** @type {ParseErro
     })
   };
   for (const param of secondaryParams) {
-    const letMatch = param.expression.match(FOR_LOOP_LET_PATTERN);
+    const letMatch = param.expression.match(LET_PATTERN);
     if (letMatch !== null) {
       const variablesSpan = new ParseSourceSpan(param.sourceSpan.start.moveBy(letMatch[0].length - letMatch[1].length), param.sourceSpan.end);
-      parseLetParameter(param.sourceSpan, letMatch[1], variablesSpan, itemName, result.context, errors);
+      parseLetParameters(param.sourceSpan, letMatch[1], variablesSpan, result.context, errors, (name, variableName, sourceSpan) => {
+        if (!ALLOWED_FOR_LOOP_LET_VARIABLES.has(variableName)) {
+          errors.push(new ParseError(sourceSpan, `Unknown "let" parameter variable "${variableName}". The allowed variables are: ${Array.from(ALLOWED_FOR_LOOP_LET_VARIABLES).join(', ')}`));
+        } else if (name === itemName) {
+          errors.push(new ParseError(sourceSpan, `Invalid @for loop "let" parameter. Variable cannot be called "${itemName}"`));
+        } else if (result.context.some(v => v.name === name)) {
+          errors.push(new ParseError(sourceSpan, `Duplicate "let" parameter variable "${variableName}"`));
+        }
+      }, '@for loop');
       continue;
     }
     const trackMatch = param.expression.match(FOR_LOOP_TRACK_PATTERN);
@@ -24065,35 +22878,6 @@ function validateTrackByExpression(expression, /** @type {ParseSourceSpan} */ pa
     errors.push(new ParseError(parseSourceSpan, 'Cannot use pipes in track expressions'));
   }
 }
-function parseLetParameter(/** @type {ParseSourceSpan} */ sourceSpan, /** @type {string} */ expression, /** @type {ParseSourceSpan} */ span, /** @type {string} */ loopItemName, /** @type {Variable[]} */ context, /** @type {ParseError[]} */ errors) {
-  const parts = expression.split(',');
-  let startSpan = span.start;
-  for (const part of parts) {
-    const expressionParts = part.split('=');
-    const name = expressionParts.length === 2 ? expressionParts[0].trim() : '';
-    const variableName = expressionParts.length === 2 ? expressionParts[1].trim() : '';
-    if (name.length === 0 || variableName.length === 0) {
-      errors.push(new ParseError(sourceSpan, `Invalid @for loop "let" parameter. Parameter should match the pattern "<name> = <variable name>"`));
-    } else if (!ALLOWED_FOR_LOOP_LET_VARIABLES.has(variableName)) {
-      errors.push(new ParseError(sourceSpan, `Unknown "let" parameter variable "${variableName}". The allowed variables are: ${Array.from(ALLOWED_FOR_LOOP_LET_VARIABLES).join(', ')}`));
-    } else if (name === loopItemName) {
-      errors.push(new ParseError(sourceSpan, `Invalid @for loop "let" parameter. Variable cannot be called "${loopItemName}"`));
-    } else if (context.some(v => v.name === name)) {
-      errors.push(new ParseError(sourceSpan, `Duplicate "let" parameter variable "${variableName}"`));
-    } else {
-      const [, keyLeadingWhitespace, keyName] = expressionParts[0].match(CHARACTERS_IN_SURROUNDING_WHITESPACE_PATTERN) ?? [];
-      const keySpan = keyLeadingWhitespace !== undefined && expressionParts.length === 2 ? new ParseSourceSpan(startSpan.moveBy(keyLeadingWhitespace.length), startSpan.moveBy(keyLeadingWhitespace.length + keyName.length)) : span;
-      let valueSpan = undefined;
-      if (expressionParts.length === 2) {
-        const [, valueLeadingWhitespace, implicit] = expressionParts[1].match(CHARACTERS_IN_SURROUNDING_WHITESPACE_PATTERN) ?? [];
-        valueSpan = valueLeadingWhitespace !== undefined ? new ParseSourceSpan(startSpan.moveBy(expressionParts[0].length + 1 + valueLeadingWhitespace.length), startSpan.moveBy(expressionParts[0].length + 1 + valueLeadingWhitespace.length + implicit.length)) : undefined;
-      }
-      const sourceSpan = new ParseSourceSpan(keySpan.start, valueSpan?.end ?? keySpan.end);
-      context.push(new Variable(name, variableName, sourceSpan, keySpan, valueSpan));
-    }
-    startSpan = startSpan.moveBy(part.length + 1);
-  }
-}
 /** @returns {ParseError[]} */ function validateIfConnectedBlocks(/** @type {Block[]} */ connectedBlocks) {
   const errors = [];
   let hasElse = false;
@@ -24108,7 +22892,7 @@ function parseLetParameter(/** @type {ParseSourceSpan} */ sourceSpan, /** @type 
         errors.push(new ParseError(block.startSourceSpan, '@else block cannot have parameters'));
       }
       hasElse = true;
-    } else if (!ELSE_IF_PATTERN.test(block.name)) {
+    } else if (block.name !== 'else if') {
       errors.push(new ParseError(block.startSourceSpan, `Unrecognized conditional block @${block.name}`));
     }
   }
@@ -24171,7 +22955,7 @@ function parseConditionalBlockParameters(/** @type {Block} */ block, /** @type {
     const aliasMatch = param.expression.match(CONDITIONAL_ALIAS_PATTERN);
     if (aliasMatch === null) {
       errors.push(new ParseError(param.sourceSpan, `Unrecognized conditional parameter "${param.expression}"`));
-    } else if (block.name !== 'if' && !ELSE_IF_PATTERN.test(block.name)) {
+    } else if (block.name !== 'if' && block.name !== 'else if') {
       errors.push(new ParseError(param.sourceSpan, '"as" expression is only allowed on `@if` and `@else if` blocks'));
     } else if (expressionAlias !== null) {
       errors.push(new ParseError(param.sourceSpan, 'Conditional can only have one "as" expression'));
@@ -24621,6 +23405,7 @@ const MINIMUM_PARAMETER_PATTERN = /^minimum\s/;
 const AFTER_PARAMETER_PATTERN = /^after\s/;
 const WHEN_PARAMETER_PATTERN = /^when\s/;
 const ON_PARAMETER_PATTERN = /^on\s/;
+const NAME_PARAMETER_PATTERN = /^name\s+/;
 /** @returns {boolean} */ function isConnectedDeferLoopBlock(/** @type {string} */ name) {
   return name === 'placeholder' || name === 'loading' || name === 'error';
 }
@@ -24634,7 +23419,8 @@ function createDeferredBlock(/** @type {Block} */ ast, /** @type {Block[]} */ co
   const {
     triggers,
     prefetchTriggers,
-    hydrateTriggers
+    hydrateTriggers,
+    definedName
   } = parsePrimaryTriggers(ast, bindingParser, errors);
   let lastEndSourceSpan = ast.endSourceSpan;
   let endOfLastSourceSpan = ast.sourceSpan.end;
@@ -24644,7 +23430,7 @@ function createDeferredBlock(/** @type {Block} */ ast, /** @type {Block[]} */ co
     endOfLastSourceSpan = lastConnectedBlock.sourceSpan.end;
   }
   const sourceSpanWithConnectedBlocks = new ParseSourceSpan(ast.sourceSpan.start, endOfLastSourceSpan);
-  const node = new DeferredBlock(visitAll(visitor, ast.children, ast.children), triggers, prefetchTriggers, hydrateTriggers, placeholder, loading, error, ast.nameSpan, sourceSpanWithConnectedBlocks, ast.sourceSpan, ast.startSourceSpan, lastEndSourceSpan, ast.i18n);
+  const node = new DeferredBlock(visitAll(visitor, ast.children, ast.children), triggers, prefetchTriggers, hydrateTriggers, placeholder, loading, error, ast.nameSpan, sourceSpanWithConnectedBlocks, ast.sourceSpan, ast.startSourceSpan, lastEndSourceSpan, definedName, ast.i18n);
   return {
     node,
     errors
@@ -24749,6 +23535,7 @@ function parsePrimaryTriggers(/** @type {Block} */ ast, /** @type {BindingParser
   const triggers = {};
   const prefetchTriggers = {};
   const hydrateTriggers = {};
+  let definedName = null;
   for (const param of ast.parameters) {
     if (WHEN_PARAMETER_PATTERN.test(param.expression)) {
       parseWhenTrigger(param, bindingParser, triggers, errors);
@@ -24764,6 +23551,19 @@ function parsePrimaryTriggers(/** @type {Block} */ ast, /** @type {BindingParser
       parseOnTrigger(param, bindingParser, hydrateTriggers, errors);
     } else if (HYDRATE_NEVER_PATTERN.test(param.expression)) {
       parseNeverTrigger(param, hydrateTriggers, errors);
+    } else if (NAME_PARAMETER_PATTERN.test(param.expression)) {
+      if (definedName !== null) {
+        errors.push(new ParseError(param.sourceSpan, 'Cannot specify multiple name parameters'));
+      } else {
+        const name = param.expression.slice(5).trim();
+        if (name.startsWith("'") || name.startsWith('"') || name.endsWith("'") || name.endsWith('"')) {
+          errors.push(new ParseError(param.sourceSpan, 'Block names cannot be quoted in @defer blocks'));
+        } else if (!/^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(name)) {
+          errors.push(new ParseError(param.sourceSpan, `Invalid block name "${name}"`));
+        } else {
+          definedName = name;
+        }
+      }
     } else {
       errors.push(new ParseError(param.sourceSpan, 'Unrecognized trigger'));
     }
@@ -24774,7 +23574,8 @@ function parsePrimaryTriggers(/** @type {Block} */ ast, /** @type {BindingParser
   return {
     triggers,
     prefetchTriggers,
-    hydrateTriggers
+    hydrateTriggers,
+    definedName
   };
 }
 
@@ -25023,15 +23824,24 @@ class HtmlAstToIvyAst {
       case 'switch':
         result = createSwitchBlock(block, this, this.bindingParser);
         break;
+      case 'content':
+        result = createContentBlock(block, this);
+        break;
       case 'for':
         result = createForLoop(block, this.findConnectedBlocks(index, context, isConnectedForLoopBlock), this, this.bindingParser);
         break;
       case 'if':
         result = createIfBlock(block, this.findConnectedBlocks(index, context, isConnectedIfLoopBlock), this, this.bindingParser);
         break;
+      case 'boundary':
+        result = createBoundaryBlock(block, this.findConnectedBlocks(index, context, isConnectedBoundaryErrorBlock), this, this.bindingParser);
+        break;
       default:
         let errorMessage;
-        if (isConnectedDeferLoopBlock(block.name)) {
+        if (isConnectedBoundaryErrorBlock(block.name)) {
+          errorMessage = `@${block.name} block can only be used after an @defer or @boundary block.`;
+          this.processedNodes.add(block);
+        } else if (isConnectedDeferLoopBlock(block.name)) {
           errorMessage = `@${block.name} block can only be used after an @defer block.`;
           this.processedNodes.add(block);
         } else if (isConnectedForLoopBlock(block.name)) {
@@ -25075,7 +23885,7 @@ class HtmlAstToIvyAst {
     const bound = [];
     const literal = [];
     properties.forEach(prop => {
-      const i18n = i18nPropsMeta[prop.name];
+      const i18n = i18nPropsMeta?.get(prop.name);
       if (prop.isLiteral) {
         literal.push(new TextAttribute(prop.name, prop.expression.source || '', prop.sourceSpan, prop.keySpan, prop.valueSpan, i18n));
       } else {
@@ -25095,15 +23905,16 @@ class HtmlAstToIvyAst {
     const variables = [];
     const references = [];
     const attributes = [];
-    const i18nAttrsMeta = {};
     const templateParsedProperties = [];
     const templateVariables = [];
+    let i18nAttrsMeta = null;
     let elementHasInlineTemplate = false;
     for (const attribute of attrs) {
       let hasBinding = false;
       let isTemplateBinding = false;
       if (attribute.i18n) {
-        i18nAttrsMeta[attribute.name] = attribute.i18n;
+        i18nAttrsMeta ??= new Map();
+        i18nAttrsMeta.set(attribute.name, attribute.i18n);
       }
       if (attribute.name.startsWith(TEMPLATE_ATTR_PREFIX)) {
         if (elementHasInlineTemplate) {
@@ -25559,7 +24370,7 @@ function compileComponentFromMetadata(meta, /** @type {ConstantPool} */ constant
     allDeferrableDepsFn = variable(fnName);
   }
   const compilationMode = meta.isStandalone && !meta.hasDirectiveDependencies ? TemplateCompilationMode.DomOnly : TemplateCompilationMode.Full;
-  const tpl = ingestComponent(meta.name, meta.template.nodes, constantPool, compilationMode, meta.relativeContextFilePath, meta.i18nUseExternalIds, meta.defer, allDeferrableDepsFn, meta.relativeTemplatePath, getTemplateSourceLocationsEnabled(), meta.legacyOptionalChaining);
+  const tpl = ingestComponent(meta.name, meta.template.nodes, constantPool, compilationMode, meta.relativeContextFilePath, meta.i18nUseExternalIds, meta.defer, allDeferrableDepsFn, meta.relativeTemplatePath, meta.enableTemplateSourceLocations || ENABLE_TEMPLATE_SOURCE_LOCATIONS, meta.legacyOptionalChaining, meta.foreignImports);
   transform(tpl, CompilationJobKind.Tmpl);
   const templateFn = emitTemplateFn(tpl, constantPool);
   if (tpl.contentSelectors !== null) {
@@ -25569,7 +24380,7 @@ function compileComponentFromMetadata(meta, /** @type {ConstantPool} */ constant
   definitionMap.set('vars', literal(tpl.root.vars));
   if (tpl.consts.length > 0) {
     if (tpl.constsInitializers.length > 0) {
-      definitionMap.set('consts', arrowFn([], [...tpl.constsInitializers, new ReturnStatement(literalArr(tpl.consts))]));
+      definitionMap.set('consts', arrowFn([], [...tpl.constsInitializers, new ReturnStatement(literalArr(tpl.consts))], DYNAMIC_TYPE));
     } else {
       definitionMap.set('consts', literalArr(tpl.consts));
     }
@@ -25589,7 +24400,8 @@ function compileComponentFromMetadata(meta, /** @type {ConstantPool} */ constant
   }
   let hasStyles = !!meta.externalStyles?.length;
   if (meta.styles && meta.styles.length) {
-    const styleValues = meta.encapsulation == ViewEncapsulation$1.Emulated ? compileStyles(meta.styles, CONTENT_ATTR, HOST_ATTR) : meta.styles;
+    const namespacedStyles = meta.styles.map(s => namespaceCssVariables(s));
+    const styleValues = meta.encapsulation == ViewEncapsulation$1.Emulated ? compileStyles(namespacedStyles, CONTENT_ATTR, HOST_ATTR) : namespacedStyles;
     const styleNodes = styleValues.reduce((result, style) => {
       if (style.trim().length > 0) {
         result.push(constantPool.getConstLiteral(literal(style)));
@@ -25644,10 +24456,10 @@ function compileComponentFromMetadata(meta, /** @type {ConstantPool} */ constant
     case 0:
       return list;
     case 1:
-      return arrowFn([], list);
+      return arrowFn([], list, DYNAMIC_TYPE);
     case 2:
       const resolvedList = list.prop('map').callFn([importExpr(Identifiers.resolveForwardRef)]);
-      return arrowFn([], resolvedList);
+      return arrowFn([], resolvedList, DYNAMIC_TYPE);
     case 3:
       throw new Error(`Unsupported with an array of pre-resolved dependencies`);
   }
@@ -25871,12 +24683,12 @@ function validateNoEventBindings(bindings, /** @type {BindingParser} */ bindingP
       hasForwardRef = true;
     }
   }
-  return hasForwardRef ? new FunctionExpr([], [new ReturnStatement(literalArr(expressions))]) : literalArr(expressions);
+  return hasForwardRef ? new FunctionExpr([], [new ReturnStatement(literalArr(expressions))], DYNAMIC_TYPE) : literalArr(expressions);
 }
 /** @returns {LiteralArrayExpr | null} */ function createHostDirectivesMappingArray(mapping) {
   const elements = [];
   for (const publicName in mapping) {
-    if (mapping.hasOwnProperty(publicName)) {
+    if (Object.hasOwn(mapping, publicName)) {
       elements.push(literal(publicName), literal(mapping[publicName]));
     }
   }
@@ -25887,7 +24699,7 @@ function validateNoEventBindings(bindings, /** @type {BindingParser} */ bindingP
   if (meta.mode === 0) {
     for (const dep of meta.dependencies) {
       if (dep.isDeferrable) {
-        const innerFn = arrowFn([new FnParam('m', DYNAMIC_TYPE)], variable('m').prop(dep.isDefaultImport ? 'default' : dep.symbolName));
+        const innerFn = arrowFn([new FnParam('m', DYNAMIC_TYPE)], variable('m').prop(dep.isDefaultImport ? 'default' : dep.symbolName), DYNAMIC_TYPE);
         const importExpr = new DynamicImportExpr(dep.importPath).prop('then').callFn([innerFn], undefined, undefined, [tsIgnoreComment()]);
         depExpressions.push(importExpr);
       } else {
@@ -25900,12 +24712,12 @@ function validateNoEventBindings(bindings, /** @type {BindingParser} */ bindingP
       importPath,
       isDefaultImport
     } of meta.dependencies) {
-      const innerFn = arrowFn([new FnParam('m', DYNAMIC_TYPE)], variable('m').prop(isDefaultImport ? 'default' : symbolName));
+      const innerFn = arrowFn([new FnParam('m', DYNAMIC_TYPE)], variable('m').prop(isDefaultImport ? 'default' : symbolName), DYNAMIC_TYPE);
       const importExpr = new DynamicImportExpr(importPath).prop('then').callFn([innerFn], undefined, undefined, [tsIgnoreComment()]);
       depExpressions.push(importExpr);
     }
   }
-  return arrowFn([], literalArr(depExpressions));
+  return arrowFn([], literalArr(depExpressions), DYNAMIC_TYPE);
 }
 
 class CombinedRecursiveAstVisitor extends RecursiveAstVisitor {
@@ -25936,6 +24748,9 @@ class CombinedRecursiveAstVisitor extends RecursiveAstVisitor {
   }
   visitContent(/** @type {Content} */ content) {
     this.visitAllTemplateNodes(content.children);
+  }
+  visitContentBlock(block) {
+    this.visitAllTemplateNodes(block.children);
   }
   visitBoundAttribute(/** @type {BoundAttribute} */ attribute) {
     this.visit(attribute.value);
@@ -26000,6 +24815,15 @@ class CombinedRecursiveAstVisitor extends RecursiveAstVisitor {
     block.expressionAlias?.visit(this);
     this.visitAllTemplateNodes(block.children);
   }
+  visitBoundaryBlock(block) {
+    this.visitAllTemplateNodes(block.children);
+    this.visitAllTemplateNodes(block.errorBlocks);
+  }
+  visitBoundaryErrorBlock(block) {
+    this.visitAllTemplateNodes(block.contextVariables);
+    block.expression && this.visit(block.expression);
+    this.visitAllTemplateNodes(block.children);
+  }
   visitLetDeclaration(decl) {
     this.visit(decl.value);
   }
@@ -26028,12 +24852,6 @@ class CombinedRecursiveAstVisitor extends RecursiveAstVisitor {
     }
   }
 }
-
-var MatchSource;
-(function (MatchSource) {
-  MatchSource[MatchSource["Selector"] = 0] = "Selector";
-  MatchSource[MatchSource["HostDirective"] = 1] = "HostDirective";
-})(MatchSource || (MatchSource = {}));
 
 class ClassPropertyMapping {
   forwardMap;
@@ -26116,6 +24934,12 @@ function reverseMapFromForwardMap(forwardMap) {
   return reverseMap;
 }
 
+var MatchSource;
+(function (MatchSource) {
+  MatchSource[MatchSource["Selector"] = 0] = "Selector";
+  MatchSource[MatchSource["HostDirective"] = 1] = "HostDirective";
+})(MatchSource || (MatchSource = {}));
+
 /** @returns {string[]} */ function diff(/** @type {string[]} */ fullList, /** @type {string[]} */ itemsToExclude) {
   const exclude = new Set(itemsToExclude);
   return fullList.filter(item => !exclude.has(item));
@@ -26161,14 +24985,17 @@ function findMatchingDirectivesAndPipes(/** @type {string} */ template, /** @typ
 }
 class R3TargetBinder {
   directiveMatcher;
-  constructor(directiveMatcher) {
+  foreignComponentMatcher;
+  constructor(directiveMatcher, foreignComponentMatcher = null) {
     this.directiveMatcher = directiveMatcher;
+    this.foreignComponentMatcher = foreignComponentMatcher;
   }
   bind(target) {
     if (!target.template && !target.host) {
       throw new Error('Empty bound targets are not supported');
     }
     const directives = new Map();
+    const foreignComponents = new Map();
     const eagerDirectives = [];
     const missingDirectives = new Set();
     const bindings = new Map();
@@ -26180,18 +25007,19 @@ class R3TargetBinder {
     const usedPipes = new Set();
     const eagerPipes = new Set();
     const deferBlocks = [];
+    const pipes = new Map();
     const conflictingHostDirectiveBindings = new Map();
     if (target.template) {
       const scope = Scope$1.apply(target.template);
       extractScopedNodeEntities(scope, scopedNodeEntities);
-      DirectiveBinder.apply(target.template, this.directiveMatcher, directives, eagerDirectives, missingDirectives, bindings, references, conflictingHostDirectiveBindings);
-      TemplateBinder.applyWithScope(target.template, scope, expressions, symbols, nestingLevel, usedPipes, eagerPipes, deferBlocks);
+      DirectiveBinder.apply(target.template, this.directiveMatcher, this.foreignComponentMatcher, directives, foreignComponents, eagerDirectives, missingDirectives, bindings, references, conflictingHostDirectiveBindings);
+      TemplateBinder.applyWithScope(target.template, scope, expressions, symbols, nestingLevel, usedPipes, eagerPipes, deferBlocks, pipes);
     }
     if (target.host) {
       directives.set(target.host.node, target.host.directives);
-      TemplateBinder.applyWithScope(target.host.node, Scope$1.apply(target.host.node), expressions, symbols, nestingLevel, usedPipes, eagerPipes, deferBlocks);
+      TemplateBinder.applyWithScope(target.host.node, Scope$1.apply(target.host.node), expressions, symbols, nestingLevel, usedPipes, eagerPipes, deferBlocks, pipes);
     }
-    return new R3BoundTarget(target, directives, eagerDirectives, missingDirectives, bindings, references, expressions, symbols, nestingLevel, scopedNodeEntities, usedPipes, eagerPipes, deferBlocks, conflictingHostDirectiveBindings);
+    return new R3BoundTarget(target, directives, foreignComponents, eagerDirectives, missingDirectives, bindings, references, expressions, symbols, nestingLevel, scopedNodeEntities, usedPipes, eagerPipes, deferBlocks, pipes, conflictingHostDirectiveBindings);
   }
 }
 let Scope$1 = class Scope {
@@ -26227,7 +25055,10 @@ let Scope$1 = class Scope {
       this.visitVariable(nodeOrNodes.item);
       nodeOrNodes.contextVariables.forEach(v => this.visitVariable(v));
       nodeOrNodes.children.forEach(node => node.visit(this));
-    } else if (nodeOrNodes instanceof SwitchBlockCaseGroup || nodeOrNodes instanceof ForLoopBlockEmpty || nodeOrNodes instanceof DeferredBlock || nodeOrNodes instanceof DeferredBlockError || nodeOrNodes instanceof DeferredBlockPlaceholder || nodeOrNodes instanceof DeferredBlockLoading || nodeOrNodes instanceof Content) {
+    } else if (nodeOrNodes instanceof BoundaryErrorBlock) {
+      nodeOrNodes.contextVariables.forEach(v => this.visitVariable(v));
+      nodeOrNodes.children.forEach(node => node.visit(this));
+    } else if (nodeOrNodes instanceof SwitchBlockCaseGroup || nodeOrNodes instanceof ForLoopBlockEmpty || nodeOrNodes instanceof DeferredBlock || nodeOrNodes instanceof DeferredBlockError || nodeOrNodes instanceof DeferredBlockPlaceholder || nodeOrNodes instanceof DeferredBlockLoading || nodeOrNodes instanceof ContentBlock || nodeOrNodes instanceof BoundaryBlock || nodeOrNodes instanceof Content) {
       nodeOrNodes.children.forEach(node => node.visit(this));
     } else if (!(nodeOrNodes instanceof HostElement)) {
       nodeOrNodes.forEach(node => node.visit(this));
@@ -26237,6 +25068,7 @@ let Scope$1 = class Scope {
     this.visitElementLike(element);
   }
   visitTemplate(/** @type {Template} */ template) {
+    this.elementLikeInScope.add(template);
     template.directives.forEach(node => node.visit(this));
     template.references.forEach(node => this.visitReference(node));
     this.ingestScopedNode(template);
@@ -26260,6 +25092,13 @@ let Scope$1 = class Scope {
     this.ingestScopedNode(block);
   }
   visitDeferredBlockLoading(/** @type {DeferredBlockLoading} */ block) {
+    this.ingestScopedNode(block);
+  }
+  visitBoundaryBlock(block) {
+    this.ingestScopedNode(block);
+    block.errorBlocks.forEach(node => node.visit(this));
+  }
+  visitBoundaryErrorBlock(block) {
     this.ingestScopedNode(block);
   }
   visitSwitchBlock(/** @type {SwitchBlock} */ block) {
@@ -26286,6 +25125,9 @@ let Scope$1 = class Scope {
   visitContent(/** @type {Content} */ content) {
     this.ingestScopedNode(content);
   }
+  visitContentBlock(block) {
+    this.ingestScopedNode(block);
+  }
   visitLetDeclaration(decl) {
     this.maybeDeclare(decl);
   }
@@ -26293,6 +25135,7 @@ let Scope$1 = class Scope {
     this.visitElementLike(component);
   }
   visitDirective(/** @type {Directive$1} */ directive) {
+    this.elementLikeInScope.add(directive);
     directive.references.forEach(current => this.visitReference(current));
   }
   visitBoundAttribute(/** @type {BoundAttribute} */ attr) {}
@@ -26308,6 +25151,17 @@ let Scope$1 = class Scope {
     node.references.forEach(current => this.visitReference(current));
     node.children.forEach(current => current.visit(this));
     this.elementLikeInScope.add(node);
+  }
+  getEnclosingDeferBlocks() {
+    const blocks = [];
+    let current = this;
+    while (current !== null) {
+      if (current.rootNode instanceof DeferredBlock) {
+        blocks.push(current.rootNode);
+      }
+      current = current.parentScope;
+    }
+    return blocks.reverse();
   }
   maybeDeclare(thing) {
     if (!this.namedEntities.has(thing.name)) {
@@ -26338,24 +25192,28 @@ let Scope$1 = class Scope {
 };
 class DirectiveBinder {
   directiveMatcher;
+  foreignMatcher;
   directives;
+  foreignComponents;
   /** @type {any[]} */ eagerDirectives;
   missingDirectives;
   bindings;
   references;
   conflictingHostDirectiveBindings;
   isInDeferBlock = false;
-  constructor(directiveMatcher, directives, /** @type {any[]} */ eagerDirectives, missingDirectives, bindings, references, conflictingHostDirectiveBindings) {
+  constructor(directiveMatcher, foreignMatcher, directives, foreignComponents, eagerDirectives, missingDirectives, bindings, references, conflictingHostDirectiveBindings) {
     this.directiveMatcher = directiveMatcher;
+    this.foreignMatcher = foreignMatcher;
     this.directives = directives;
+    this.foreignComponents = foreignComponents;
     this.eagerDirectives = eagerDirectives;
     this.missingDirectives = missingDirectives;
     this.bindings = bindings;
     this.references = references;
     this.conflictingHostDirectiveBindings = conflictingHostDirectiveBindings;
   }
-  static apply(/** @type {any[]} */ template, directiveMatcher, directives, /** @type {any[]} */ eagerDirectives, missingDirectives, bindings, references, conflictingHostDirectiveBindings) {
-    const matcher = new DirectiveBinder(directiveMatcher, directives, eagerDirectives, missingDirectives, bindings, references, conflictingHostDirectiveBindings);
+  static apply(/** @type {any[]} */ template, directiveMatcher, foreignMatcher, directives, foreignComponents, /** @type {any[]} */ eagerDirectives, missingDirectives, bindings, references, conflictingHostDirectiveBindings) {
+    const matcher = new DirectiveBinder(directiveMatcher, foreignMatcher, directives, foreignComponents, eagerDirectives, missingDirectives, bindings, references, conflictingHostDirectiveBindings);
     matcher.ingest(template);
   }
   ingest(/** @type {any[]} */ template) {
@@ -26385,6 +25243,13 @@ class DirectiveBinder {
   visitDeferredBlockLoading(/** @type {DeferredBlockLoading} */ block) {
     block.children.forEach(child => child.visit(this));
   }
+  visitBoundaryBlock(block) {
+    block.children.forEach(child => child.visit(this));
+    block.errorBlocks.forEach(node => node.visit(this));
+  }
+  visitBoundaryErrorBlock(block) {
+    block.children.forEach(child => child.visit(this));
+  }
   visitSwitchBlock(/** @type {SwitchBlock} */ block) {
     block.groups.forEach(node => node.visit(this));
   }
@@ -26412,6 +25277,9 @@ class DirectiveBinder {
   visitContent(/** @type {Content} */ content) {
     content.children.forEach(child => child.visit(this));
   }
+  visitContentBlock(block) {
+    block.children.forEach(child => child.visit(this));
+  }
   visitComponent(/** @type {Component$1} */ node) {
     if (this.directiveMatcher instanceof SelectorlessMatcher) {
       const componentMatches = this.directiveMatcher.match(node.componentName);
@@ -26435,17 +25303,26 @@ class DirectiveBinder {
     }
   }
   visitElementOrTemplate(node) {
+    const matchedDirectives = [];
     if (this.directiveMatcher instanceof SelectorMatcher) {
-      const directives = [];
       const cssSelector = createCssSelectorFromNode(node);
-      this.directiveMatcher.match(cssSelector, (_, results) => directives.push(...results));
-      this.trackSelectorBasedBindingsAndDirectives(node, directives);
+      this.directiveMatcher.match(cssSelector, (_, results) => matchedDirectives.push(...results));
+      this.trackSelectorBasedBindingsAndDirectives(node, matchedDirectives);
     } else {
       node.references.forEach(ref => {
         if (ref.value.trim() === '') {
           this.references.set(ref, node);
         }
       });
+    }
+    if (this.foreignMatcher && node instanceof Element$1) {
+      const foreignMatches = this.foreignMatcher.match(node.name);
+      if (foreignMatches.length > 0) {
+        if (matchedDirectives.length > 0) {
+          throw new Error(`Conflict: Element '${node.name}' matches both an Angular directive and a foreign component.`);
+        }
+        this.foreignComponents.set(node, foreignMatches[0]);
+      }
     }
     node.directives.forEach(directive => directive.visit(this));
     node.children.forEach(child => child.visit(this));
@@ -26609,8 +25486,9 @@ class TemplateBinder extends CombinedRecursiveAstVisitor {
   /** @type {Scope$1} */ scope;
   rootNode;
   /** @type {number} */ level;
+  pipes;
   visitNode = node => node.visit(this);
-  constructor(bindings, symbols, usedPipes, eagerPipes, /** @type {any[]} */ deferBlocks, nestingLevel, /** @type {Scope$1} */ scope, rootNode, /** @type {number} */ level) {
+  constructor(bindings, symbols, usedPipes, eagerPipes, deferBlocks, nestingLevel, scope, rootNode, level, pipes) {
     super();
     this.bindings = bindings;
     this.symbols = symbols;
@@ -26621,10 +25499,11 @@ class TemplateBinder extends CombinedRecursiveAstVisitor {
     this.scope = scope;
     this.rootNode = rootNode;
     this.level = level;
+    this.pipes = pipes;
   }
-  static applyWithScope(nodeOrNodes, /** @type {Scope$1} */ scope, expressions, symbols, nestingLevel, usedPipes, eagerPipes, /** @type {any[]} */ deferBlocks) {
+  static applyWithScope(nodeOrNodes, /** @type {Scope$1} */ scope, expressions, symbols, nestingLevel, usedPipes, eagerPipes, /** @type {any[]} */ deferBlocks, pipes) {
     const template = nodeOrNodes instanceof Template ? nodeOrNodes : null;
-    const binder = new TemplateBinder(expressions, symbols, usedPipes, eagerPipes, deferBlocks, nestingLevel, scope, template, 0);
+    const binder = new TemplateBinder(expressions, symbols, usedPipes, eagerPipes, deferBlocks, nestingLevel, scope, template, 0, pipes);
     binder.ingest(nodeOrNodes);
   }
   ingest(nodeOrNodes) {
@@ -26651,7 +25530,12 @@ class TemplateBinder extends CombinedRecursiveAstVisitor {
       this.deferBlocks.push([nodeOrNodes, this.scope]);
       nodeOrNodes.children.forEach(node => node.visit(this));
       this.nestingLevel.set(nodeOrNodes, this.level);
-    } else if (nodeOrNodes instanceof SwitchBlockCaseGroup || nodeOrNodes instanceof ForLoopBlockEmpty || nodeOrNodes instanceof DeferredBlockError || nodeOrNodes instanceof DeferredBlockPlaceholder || nodeOrNodes instanceof DeferredBlockLoading || nodeOrNodes instanceof Content) {
+    } else if (nodeOrNodes instanceof BoundaryErrorBlock) {
+      nodeOrNodes.contextVariables.forEach(v => this.visitNode(v));
+      nodeOrNodes.expression?.visit(this);
+      nodeOrNodes.children.forEach(node => node.visit(this));
+      this.nestingLevel.set(nodeOrNodes, this.level);
+    } else if (nodeOrNodes instanceof SwitchBlockCaseGroup || nodeOrNodes instanceof ForLoopBlockEmpty || nodeOrNodes instanceof DeferredBlockError || nodeOrNodes instanceof DeferredBlockPlaceholder || nodeOrNodes instanceof DeferredBlockLoading || nodeOrNodes instanceof ContentBlock || nodeOrNodes instanceof BoundaryBlock || nodeOrNodes instanceof Content) {
       nodeOrNodes.children.forEach(node => node.visit(this));
       this.nestingLevel.set(nodeOrNodes, this.level);
     } else if (nodeOrNodes instanceof HostElement) {
@@ -26697,6 +25581,13 @@ class TemplateBinder extends CombinedRecursiveAstVisitor {
   visitDeferredBlockLoading(/** @type {DeferredBlockLoading} */ block) {
     this.ingestScopedNode(block);
   }
+  visitBoundaryBlock(block) {
+    this.ingestScopedNode(block);
+    block.errorBlocks.forEach(node => node.visit(this));
+  }
+  visitBoundaryErrorBlock(block) {
+    this.ingestScopedNode(block);
+  }
   visitSwitchBlockCase(/** @type {SwitchBlockCase} */ block) {
     block.expression?.visit(this);
   }
@@ -26722,6 +25613,9 @@ class TemplateBinder extends CombinedRecursiveAstVisitor {
   visitContent(/** @type {Content} */ content) {
     this.ingestScopedNode(content);
   }
+  visitContentBlock(block) {
+    this.ingestScopedNode(block);
+  }
   visitLetDeclaration(decl) {
     super.visitLetDeclaration(decl);
     if (this.rootNode !== null) {
@@ -26733,6 +25627,7 @@ class TemplateBinder extends CombinedRecursiveAstVisitor {
     if (!this.scope.isDeferred) {
       this.eagerPipes.add(ast.name);
     }
+    this.pipes.set(ast, this.scope.getEnclosingDeferBlocks());
     return super.visitPipe(ast, context);
   }
   visitPropertyRead(/** @type {PropertyRead} */ ast, context) {
@@ -26745,7 +25640,7 @@ class TemplateBinder extends CombinedRecursiveAstVisitor {
   }
   ingestScopedNode(node) {
     const childScope = this.scope.getChildScope(node);
-    const binder = new TemplateBinder(this.bindings, this.symbols, this.usedPipes, this.eagerPipes, this.deferBlocks, this.nestingLevel, childScope, node, this.level + 1);
+    const binder = new TemplateBinder(this.bindings, this.symbols, this.usedPipes, this.eagerPipes, this.deferBlocks, this.nestingLevel, childScope, node, this.level + 1, this.pipes);
     binder.ingest(node);
   }
   maybeMap(ast, /** @type {string} */ name) {
@@ -26761,6 +25656,7 @@ class TemplateBinder extends CombinedRecursiveAstVisitor {
 class R3BoundTarget {
   target;
   directives;
+  foreignComponents;
   /** @type {any[]} */ eagerDirectives;
   missingDirectives;
   bindings;
@@ -26771,12 +25667,14 @@ class R3BoundTarget {
   scopedNodeEntities;
   usedPipes;
   eagerPipes;
+  pipes;
   conflictingHostDirectiveBindings;
   /** @type {DeferredBlock[]} */ deferredBlocks;
   deferredScopes;
-  constructor(target, directives, /** @type {any[]} */ eagerDirectives, missingDirectives, bindings, references, exprTargets, symbols, nestingLevel, scopedNodeEntities, usedPipes, eagerPipes, /** @type {any[]} */ rawDeferred, conflictingHostDirectiveBindings) {
+  constructor(target, directives, foreignComponents, eagerDirectives, missingDirectives, bindings, references, exprTargets, symbols, nestingLevel, scopedNodeEntities, usedPipes, eagerPipes, rawDeferred, pipes, conflictingHostDirectiveBindings) {
     this.target = target;
     this.directives = directives;
+    this.foreignComponents = foreignComponents;
     this.eagerDirectives = eagerDirectives;
     this.missingDirectives = missingDirectives;
     this.bindings = bindings;
@@ -26787,6 +25685,7 @@ class R3BoundTarget {
     this.scopedNodeEntities = scopedNodeEntities;
     this.usedPipes = usedPipes;
     this.eagerPipes = eagerPipes;
+    this.pipes = pipes;
     this.conflictingHostDirectiveBindings = conflictingHostDirectiveBindings;
     this.deferredBlocks = rawDeferred.map(current => current[0]);
     this.deferredScopes = new Map(rawDeferred);
@@ -26796,6 +25695,9 @@ class R3BoundTarget {
   }
   /** @returns {any[] | null} */ getDirectivesOfNode(node) {
     return this.directives.get(node) || null;
+  }
+  getForeignComponent(element) {
+    return this.foreignComponents.get(element) || null;
   }
   getReferenceTarget(/** @type {Reference} */ ref) {
     return this.references.get(ref) || null;
@@ -26868,7 +25770,11 @@ class R3BoundTarget {
     }
     return null;
   }
-  /** @returns {boolean} */ isDeferred(/** @type {Element$1} */ element) {
+  /** @returns {boolean} */ isDeferred(node) {
+    return this.getDeferBlocksOfNode(node).length > 0;
+  }
+  getDeferBlocksOfNode(node) {
+    const blocks = [];
     for (const block of this.deferredBlocks) {
       if (!this.deferredScopes.has(block)) {
         continue;
@@ -26876,13 +25782,17 @@ class R3BoundTarget {
       const stack = [this.deferredScopes.get(block)];
       while (stack.length > 0) {
         const current = stack.pop();
-        if (current.elementLikeInScope.has(element)) {
-          return true;
+        if (current.elementLikeInScope.has(node)) {
+          blocks.push(block);
+          break;
         }
         stack.push(...current.childScopes.values());
       }
     }
-    return false;
+    return blocks;
+  }
+  getDeferBlocksOfPipe(ast) {
+    return this.pipes.get(ast) ?? [];
   }
   /** @returns {boolean} */ referencedDirectiveExists(/** @type {string} */ name) {
     return !this.missingDirectives.has(name);
@@ -26943,14 +25853,14 @@ class ResourceLoader {}
 function compileService(meta, /** @type {boolean} */ resolveForwardRefs) {
   const def = new DefinitionMap();
   def.set('token', meta.type.value);
-  def.set('factory', meta.factory === undefined ? delegateToFactory(meta.type.value, meta.type.value, resolveForwardRefs) : arrowFn([], meta.factory.callFn([])));
+  def.set('factory', meta.factory === undefined ? delegateToFactory(meta.type.value, meta.type.value, resolveForwardRefs) : arrowFn([], meta.factory.callFn([]), DYNAMIC_TYPE));
   if (meta.autoProvided === false) {
     def.set('autoProvided', literal(false));
   }
   const expression = importExpr(Identifiers.defineService).callFn([def.toLiteralMap()], undefined, true);
   return {
     expression,
-    type: createInjectableType(meta.type.type, meta.typeArgumentCount),
+    type: createInjectableType(),
     statements: []
   };
 }
@@ -27065,7 +25975,6 @@ class CompilerFacadeImpl {
       statements
     } = compileService({
       type: wrapReference(facade.type),
-      typeArgumentCount: facade.typeArgumentCount,
       autoProvided: facade.autoProvided,
       factory: facade.factory ? wrapExpression(facade, 'factory') : undefined
     }, true);
@@ -27077,7 +25986,6 @@ class CompilerFacadeImpl {
       statements
     } = compileService({
       type: wrapReference(facade.type),
-      typeArgumentCount: 0,
       autoProvided: facade.autoProvided,
       factory: facade.factory ? wrapExpression(facade, 'factory') : undefined
     }, true);
@@ -27109,7 +26017,9 @@ class CompilerFacadeImpl {
       viewProviders: facade.viewProviders != null ? new WrappedNodeExpr(facade.viewProviders) : null,
       relativeContextFilePath: '',
       i18nUseExternalIds: true,
-      relativeTemplatePath: null
+      relativeTemplatePath: null,
+      foreignImports: null,
+      enableTemplateSourceLocations: false
     };
     const jitExpressionSourceMap = `ng:///${facade.name}.js`;
     return this.compileComponentFromMeta(angularCoreEnv, jitExpressionSourceMap, meta);
@@ -27186,7 +26096,7 @@ function convertDirectiveFacadeToMetadata(facade) {
   const inputsFromType = {};
   const outputsFromType = {};
   for (const field in propMetadata) {
-    if (propMetadata.hasOwnProperty(field)) {
+    if (Object.hasOwn(propMetadata, field)) {
       propMetadata[field].forEach(ann => {
         if (isInput(ann)) {
           inputsFromType[field] = {
@@ -27325,6 +26235,7 @@ function convertDeclareComponentFacadeToMetadata(decl, /** @type {ParseSourceSpa
   const hasDirectiveDependencies = declarations.some(({
     kind
   }) => kind === R3TemplateDependencyKind.Directive || kind === R3TemplateDependencyKind.NgModule);
+  const defaultCdStrategy = getJitChangeDetectionDefaultForVersion(decl.version);
   return {
     ...convertDeclareDirectiveFacadeToMetadata(decl, typeSourceSpan),
     template,
@@ -27333,14 +26244,16 @@ function convertDeclareComponentFacadeToMetadata(decl, /** @type {ParseSourceSpa
     viewProviders: decl.viewProviders !== undefined ? new WrappedNodeExpr(decl.viewProviders) : null,
     animations: decl.animations !== undefined ? new WrappedNodeExpr(decl.animations) : null,
     defer,
-    changeDetection: decl.changeDetection ?? ChangeDetectionStrategy.OnPush,
+    changeDetection: decl.changeDetection ?? defaultCdStrategy,
     encapsulation: decl.encapsulation ?? ViewEncapsulation$1.Emulated,
     declarationListEmitMode: 2,
     relativeContextFilePath: '',
     i18nUseExternalIds: true,
     relativeTemplatePath: null,
     hasDirectiveDependencies,
-    legacyOptionalChaining: decl.legacyOptionalChaining ?? LEGACY_OPTIONAL_CHAINING_DEFAULT
+    legacyOptionalChaining: decl.legacyOptionalChaining ?? LEGACY_OPTIONAL_CHAINING_DEFAULT,
+    foreignImports: null,
+    enableTemplateSourceLocations: false
   };
 }
 function convertDeclarationFacadeToMetadata(declaration) {
@@ -27403,14 +26316,14 @@ function parseJitTemplate(/** @type {string} */ template, /** @type {string} */ 
   };
 }
 function convertToProviderExpression(obj, /** @type {string} */ property) {
-  if (obj.hasOwnProperty(property)) {
+  if (Object.hasOwn(obj, property)) {
     return createMayBeForwardRefExpression(new WrappedNodeExpr(obj[property]), 0);
   } else {
     return undefined;
   }
 }
 function wrapExpression(obj, /** @type {string} */ property) {
-  if (obj.hasOwnProperty(property)) {
+  if (Object.hasOwn(obj, property)) {
     return new WrappedNodeExpr(obj[property]);
   } else {
     return undefined;
@@ -27460,7 +26373,7 @@ function createR3ComponentDeferMetadata(boundTarget, /** @type {any[] | undefine
 function extractHostBindings(propMetadata, /** @type {ParseSourceSpan} */ sourceSpan, host) {
   const bindings = parseHostBindings(host || {});
   for (const field in propMetadata) {
-    if (propMetadata.hasOwnProperty(field)) {
+    if (Object.hasOwn(propMetadata, field)) {
       propMetadata[field].forEach(ann => {
         if (isHostBinding(ann)) {
           bindings.properties[ann.hostPropertyName || field] = getSafePropertyAccessString('this', field);
@@ -27703,7 +26616,7 @@ class _Visitor {
     if (!this._inI18nNode && !this._inIcu) {
       if (!this._inI18nBlock) {
         if (isOpening) {
-          if (!i18nCommentsWarned && console && console.warn) {
+          if (!i18nCommentsWarned && typeof console?.warn === 'function') {
             i18nCommentsWarned = true;
             const details = comment.sourceSpan.details ? `, ${comment.sourceSpan.details}` : '';
             console.warn(`I18n comments are deprecated, use an <ng-container> element instead (${comment.sourceSpan.start}${details})`);
@@ -27888,7 +26801,7 @@ class _Visitor {
       if (attr.name === _I18N_ATTR || attr.name.startsWith(_I18N_ATTR_PREFIX)) {
         return;
       }
-      if (attr.value && attr.value != '' && i18nParsedMessageMeta.hasOwnProperty(attr.name)) {
+      if (attr.value && attr.value != '' && Object.hasOwn(i18nParsedMessageMeta, attr.name)) {
         const {
           meaning,
           description,
@@ -28211,7 +27124,7 @@ class XliffParser {
           this._addError(element, `<${_UNIT_TAG$1}> misses the "id" attribute`);
         } else {
           const id = idAttr.value;
-          if (this._msgIdToHtml.hasOwnProperty(id)) {
+          if (Object.hasOwn(this._msgIdToHtml, id)) {
             this._addError(element, `Duplicated translations for msg ${id}`);
           } else {
             visitAll(this, element.children, null);
@@ -28525,7 +27438,7 @@ class Xliff2Parser {
           this._addError(element, `<${_UNIT_TAG}> misses the "id" attribute`);
         } else {
           const id = idAttr.value;
-          if (this._msgIdToHtml.hasOwnProperty(id)) {
+          if (Object.hasOwn(this._msgIdToHtml, id)) {
             this._addError(element, `Duplicated translations for msg ${id}`);
           } else {
             visitAll(this, element.children, null);
@@ -28767,7 +27680,7 @@ class XtbParser {
           this._addError(element, `<${_TRANSLATION_TAG}> misses the "id" attribute`);
         } else {
           const id = idAttr.value;
-          if (this._msgIdToHtml.hasOwnProperty(id)) {
+          if (Object.hasOwn(this._msgIdToHtml, id)) {
             this._addError(element, `Duplicated translations for msg ${id}`);
           } else {
             const innerTextStart = element.startSourceSpan.end.offset;
@@ -28928,15 +27841,15 @@ class I18nToHtmlVisitor {
   }
   visitIcu(/** @type {Icu} */ icu, context) {
     const cases = Object.keys(icu.cases).map(k => `${k} {${icu.cases[k].visit(this)}}`);
-    const exp = this._srcMsg.placeholders.hasOwnProperty(icu.expression) ? this._srcMsg.placeholders[icu.expression].text : icu.expression;
+    const exp = Object.hasOwn(this._srcMsg.placeholders, icu.expression) ? this._srcMsg.placeholders[icu.expression].text : icu.expression;
     return `{${exp}, ${icu.type}, ${cases.join(' ')}}`;
   }
   /** @returns {string} */ visitPlaceholder(/** @type {Placeholder} */ ph, context) {
     const phName = this._mapper(ph.name);
-    if (this._srcMsg.placeholders.hasOwnProperty(phName)) {
+    if (Object.hasOwn(this._srcMsg.placeholders, phName)) {
       return this._srcMsg.placeholders[phName].text;
     }
-    if (this._srcMsg.placeholderToMessage.hasOwnProperty(phName)) {
+    if (Object.hasOwn(this._srcMsg.placeholderToMessage, phName)) {
       return this._convertToText(this._srcMsg.placeholderToMessage[phName]);
     }
     this._addError(ph, `Unknown placeholder "${ph.name}"`);
@@ -28968,7 +27881,7 @@ class I18nToHtmlVisitor {
       mapper: this._mapper
     });
     this._srcMsg = srcMsg;
-    if (this._i18nNodesByMsgId.hasOwnProperty(id)) {
+    if (Object.hasOwn(this._i18nNodesByMsgId, id)) {
       nodes = this._i18nNodesByMsgId[id];
       this._mapper = name => mapper ? mapper.toInternalName(name) : name;
     } else {
@@ -29070,7 +27983,7 @@ class MessageBundle {
     const mapperVisitor = new MapPlaceholderNames();
     this._messages.forEach(message => {
       const id = serializer.digest(message);
-      if (!messages.hasOwnProperty(id)) {
+      if (!Object.hasOwn(messages, id)) {
         messages[id] = message;
       } else {
         messages[id].sources.push(...message.sources);
@@ -29116,25 +28029,50 @@ class MapPlaceholderNames extends CloneVisitor {
 
 /** @returns {InvokeFunctionExpr} */ function compileClassMetadata(metadata) {
   const fnCall = internalCompileClassMetadata(metadata);
-  return arrowFn([], [devOnlyGuardedExpression(fnCall).toStmt()]).callFn([]);
+  return arrowFn([], [devOnlyGuardedExpression(fnCall).toStmt()], DYNAMIC_TYPE).callFn([]);
 }
 /** @returns {InvokeFunctionExpr} */ function internalCompileClassMetadata(metadata) {
-  return importExpr(Identifiers.setClassMetadata).callFn([metadata.type, metadata.decorators, metadata.ctorParameters ?? literal(null), metadata.propDecorators ?? literal(null)]);
+  return importExpr(Identifiers.setClassMetadata).callFn([metadata.type, metadata.decorators, compileCtorParameters(metadata.ctorParameters, true), metadata.propDecorators ?? literal(null)]);
+}
+function compileCtorParameters(ctorParameters, allowSuppressions) {
+  if (ctorParameters === null) {
+    return literal(null);
+  }
+  if (!Array.isArray(ctorParameters)) {
+    return ctorParameters;
+  }
+  const params = ctorParameters.map(param => {
+    const typeProp = new LiteralMapPropertyAssignment('type', param.type ?? literal(undefined), false);
+    if (allowSuppressions && param.type !== null && param.suppressTypeErrors) {
+      typeProp.leadingComments = [tsIgnoreComment()];
+    }
+    const entries = [typeProp];
+    if (param.decorators !== null) {
+      entries.push(new LiteralMapPropertyAssignment('decorators', param.decorators, false));
+    }
+    return new LiteralMapExpr(entries);
+  });
+  return arrowFn([], literalArr(params), DYNAMIC_TYPE);
 }
 /** @returns {Expression} */ function compileComponentClassMetadata(metadata, /** @type {any[] | null} */ dependencies) {
   if (dependencies === null || dependencies.length === 0) {
     return compileClassMetadata(metadata);
   }
-  return internalCompileSetClassMetadataAsync(metadata, dependencies.map(dep => new FnParam(dep.symbolName, DYNAMIC_TYPE)), compileComponentMetadataAsyncResolver(dependencies));
+  const uniqueDeps = new Map();
+  for (const dep of dependencies) {
+    uniqueDeps.set(dep.symbolName, dep);
+  }
+  const dedupedDependencies = Array.from(uniqueDeps.values());
+  return internalCompileSetClassMetadataAsync(metadata, dedupedDependencies.map(dep => new FnParam(dep.symbolName, DYNAMIC_TYPE)), compileComponentMetadataAsyncResolver(dedupedDependencies));
 }
 /** @returns {Expression} */ function compileOpaqueAsyncClassMetadata(metadata, /** @type {Expression} */ deferResolver, /** @type {string[]} */ deferredDependencyNames) {
   return internalCompileSetClassMetadataAsync(metadata, deferredDependencyNames.map(name => new FnParam(name, DYNAMIC_TYPE)), deferResolver);
 }
 /** @returns {Expression} */ function internalCompileSetClassMetadataAsync(metadata, /** @type {FnParam[]} */ wrapperParams, /** @type {Expression} */ dependencyResolverFn) {
   const setClassMetadataCall = internalCompileClassMetadata(metadata);
-  const setClassMetaWrapper = arrowFn(wrapperParams, [setClassMetadataCall.toStmt()]);
+  const setClassMetaWrapper = arrowFn(wrapperParams, [setClassMetadataCall.toStmt()], DYNAMIC_TYPE);
   const setClassMetaAsync = importExpr(Identifiers.setClassMetadataAsync).callFn([metadata.type, dependencyResolverFn, setClassMetaWrapper]);
-  return arrowFn([], [devOnlyGuardedExpression(setClassMetaAsync).toStmt()]).callFn([]);
+  return arrowFn([], [devOnlyGuardedExpression(setClassMetaAsync).toStmt()], DYNAMIC_TYPE).callFn([]);
 }
 /** @returns {ArrowFunctionExpr$1} */ function compileComponentMetadataAsyncResolver(/** @type {any[]} */ dependencies) {
   const dynamicImports = dependencies.map(({
@@ -29142,10 +28080,10 @@ class MapPlaceholderNames extends CloneVisitor {
     importPath,
     isDefaultImport
   }) => {
-    const innerFn = arrowFn([new FnParam('m', DYNAMIC_TYPE)], variable('m').prop(isDefaultImport ? 'default' : symbolName));
+    const innerFn = arrowFn([new FnParam('m', DYNAMIC_TYPE)], variable('m').prop(isDefaultImport ? 'default' : symbolName), DYNAMIC_TYPE);
     return new DynamicImportExpr(importPath).prop('then').callFn([innerFn], undefined, undefined, [tsIgnoreComment()]);
   });
-  return arrowFn([], literalArr(dynamicImports));
+  return arrowFn([], literalArr(dynamicImports), DYNAMIC_TYPE);
 }
 
 const MINIMUM_PARTIAL_LINKER_VERSION$6 = '12.0.0';
@@ -29153,11 +28091,11 @@ const MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION = '18.0.0';
 /** @returns {Expression} */ function compileDeclareClassMetadata(metadata) {
   const definitionMap = new DefinitionMap();
   definitionMap.set('minVersion', literal(MINIMUM_PARTIAL_LINKER_VERSION$6));
-  definitionMap.set('version', literal('22.0.6'));
+  definitionMap.set('version', literal('22.2.5'));
   definitionMap.set('ngImport', importExpr(Identifiers.core));
   definitionMap.set('type', metadata.type);
   definitionMap.set('decorators', metadata.decorators);
-  definitionMap.set('ctorParameters', metadata.ctorParameters);
+  definitionMap.set('ctorParameters', metadata.ctorParameters === null ? null : compileCtorParameters(metadata.ctorParameters, false));
   definitionMap.set('propDecorators', metadata.propDecorators);
   return importExpr(Identifiers.declareClassMetadata).callFn([definitionMap.toLiteralMap()]);
 }
@@ -29168,14 +28106,14 @@ const MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION = '18.0.0';
   const definitionMap = new DefinitionMap();
   const callbackReturnDefinitionMap = new DefinitionMap();
   callbackReturnDefinitionMap.set('decorators', metadata.decorators);
-  callbackReturnDefinitionMap.set('ctorParameters', metadata.ctorParameters ?? literal(null));
+  callbackReturnDefinitionMap.set('ctorParameters', compileCtorParameters(metadata.ctorParameters, false));
   callbackReturnDefinitionMap.set('propDecorators', metadata.propDecorators ?? literal(null));
   definitionMap.set('minVersion', literal(MINIMUM_PARTIAL_LINKER_DEFER_SUPPORT_VERSION));
-  definitionMap.set('version', literal('22.0.6'));
+  definitionMap.set('version', literal('22.2.5'));
   definitionMap.set('ngImport', importExpr(Identifiers.core));
   definitionMap.set('type', metadata.type);
   definitionMap.set('resolveDeferredDeps', compileComponentMetadataAsyncResolver(dependencies));
-  definitionMap.set('resolveMetadata', arrowFn(dependencies.map(dep => new FnParam(dep.symbolName, DYNAMIC_TYPE)), callbackReturnDefinitionMap.toLiteralMap()));
+  definitionMap.set('resolveMetadata', arrowFn(dependencies.map(dep => new FnParam(dep.symbolName, DYNAMIC_TYPE)), callbackReturnDefinitionMap.toLiteralMap(), DYNAMIC_TYPE));
   return importExpr(Identifiers.declareClassMetadataAsync).callFn([definitionMap.toLiteralMap()]);
 }
 
@@ -29244,7 +28182,7 @@ function createDirectiveDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   const minVersion = getMinimumVersionForPartialOutput(meta);
   definitionMap.set('minVersion', literal(minVersion));
-  definitionMap.set('version', literal('22.0.6'));
+  definitionMap.set('version', literal('22.2.5'));
   definitionMap.set('type', meta.type.value);
   if (meta.isStandalone !== undefined) {
     definitionMap.set('isStandalone', literal(meta.isStandalone));
@@ -29586,7 +28524,7 @@ const MINIMUM_PARTIAL_LINKER_VERSION$5 = '12.0.0';
 function compileDeclareFactoryFunction(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set('minVersion', literal(MINIMUM_PARTIAL_LINKER_VERSION$5));
-  definitionMap.set('version', literal('22.0.6'));
+  definitionMap.set('version', literal('22.2.5'));
   definitionMap.set('ngImport', importExpr(Identifiers.core));
   definitionMap.set('type', meta.type.value);
   definitionMap.set('deps', compileDependencies(meta.deps));
@@ -29602,7 +28540,7 @@ const MINIMUM_PARTIAL_LINKER_VERSION$4 = '12.0.0';
 function compileDeclareInjectableFromMetadata(meta) {
   const definitionMap = createInjectableDefinitionMap(meta);
   const expression = importExpr(Identifiers.declareInjectable).callFn([definitionMap.toLiteralMap()]);
-  const type = createInjectableType(meta.type.type, meta.typeArgumentCount);
+  const type = createInjectableType();
   return {
     expression,
     type,
@@ -29612,7 +28550,7 @@ function compileDeclareInjectableFromMetadata(meta) {
 function createInjectableDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set('minVersion', literal(MINIMUM_PARTIAL_LINKER_VERSION$4));
-  definitionMap.set('version', literal('22.0.6'));
+  definitionMap.set('version', literal('22.2.5'));
   definitionMap.set('ngImport', importExpr(Identifiers.core));
   definitionMap.set('type', meta.type.value);
   if (meta.providedIn !== undefined) {
@@ -29643,7 +28581,7 @@ const MINIMUM_PARTIAL_LINKER_VERSION$3 = '22.0.0';
 function compileDeclareServiceFromMetadata(meta) {
   const definitionMap = createServiceDefinitionMap(meta);
   const expression = importExpr(Identifiers.declareService).callFn([definitionMap.toLiteralMap()]);
-  const type = createInjectableType(meta.type.type, meta.typeArgumentCount);
+  const type = createInjectableType();
   return {
     expression,
     type,
@@ -29653,7 +28591,7 @@ function compileDeclareServiceFromMetadata(meta) {
 function createServiceDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set('minVersion', literal(MINIMUM_PARTIAL_LINKER_VERSION$3));
-  definitionMap.set('version', literal('22.0.6'));
+  definitionMap.set('version', literal('22.2.5'));
   definitionMap.set('ngImport', importExpr(Identifiers.core));
   definitionMap.set('type', meta.type.value);
   if (meta.autoProvided === false) {
@@ -29679,7 +28617,7 @@ function compileDeclareInjectorFromMetadata(meta) {
 function createInjectorDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set('minVersion', literal(MINIMUM_PARTIAL_LINKER_VERSION$2));
-  definitionMap.set('version', literal('22.0.6'));
+  definitionMap.set('version', literal('22.2.5'));
   definitionMap.set('ngImport', importExpr(Identifiers.core));
   definitionMap.set('type', meta.type.value);
   definitionMap.set('providers', meta.providers);
@@ -29709,7 +28647,7 @@ function createNgModuleDefinitionMap(meta) {
     throw new Error('Invalid path! Isolated compilation mode should not get into the partial compilation path');
   }
   definitionMap.set('minVersion', literal(MINIMUM_PARTIAL_LINKER_VERSION$1));
-  definitionMap.set('version', literal('22.0.6'));
+  definitionMap.set('version', literal('22.2.5'));
   definitionMap.set('ngImport', importExpr(Identifiers.core));
   definitionMap.set('type', meta.type.value);
   if (meta.bootstrap.length > 0) {
@@ -29747,7 +28685,7 @@ function compileDeclarePipeFromMetadata(meta) {
 function createPipeDefinitionMap(meta) {
   const definitionMap = new DefinitionMap();
   definitionMap.set('minVersion', literal(MINIMUM_PARTIAL_LINKER_VERSION));
-  definitionMap.set('version', literal('22.0.6'));
+  definitionMap.set('version', literal('22.2.5'));
   definitionMap.set('ngImport', importExpr(Identifiers.core));
   definitionMap.set('type', meta.type.value);
   if (meta.isStandalone !== undefined) {
@@ -29772,7 +28710,7 @@ function createPipeDefinitionMap(meta) {
     debugInfoObject.forbidOrphanRendering = literal(true);
   }
   const fnCall = importExpr(Identifiers.setClassDebugInfo).callFn([debugInfo.type, mapLiteral(debugInfoObject)]);
-  const iife = arrowFn([], [devOnlyGuardedExpression(fnCall).toStmt()]);
+  const iife = arrowFn([], [devOnlyGuardedExpression(fnCall).toStmt()], DYNAMIC_TYPE);
   return iife.callFn([]);
 }
 
@@ -29790,14 +28728,14 @@ function createPipeDefinitionMap(meta) {
   });
   const defaultRead = variable(moduleName).prop('default');
   const replaceCall = importExpr(Identifiers.replaceMetadata).callFn([meta.type, defaultRead, literalArr(namespaces), literalArr(meta.localDependencies.map(l => l.runtimeRepresentation)), variable('import').prop('meta'), variable(idName)]);
-  const replaceCallback = arrowFn([new FnParam(moduleName, DYNAMIC_TYPE)], defaultRead.and(replaceCall));
+  const replaceCallback = arrowFn([new FnParam(moduleName, DYNAMIC_TYPE)], defaultRead.and(replaceCall), DYNAMIC_TYPE);
   const url = importExpr(Identifiers.getReplaceMetadataURL).callFn([variable(idName), variable(timestampName), variable('import').prop('meta').prop('url')]);
-  const importCallback = new DeclareFunctionStmt(importCallbackName, [new FnParam(timestampName, DYNAMIC_TYPE)], [new DynamicImportExpr(url, null, '@vite-ignore').prop('then').callFn([replaceCallback]).toStmt()], null, StmtModifier.Final);
-  const updateCallback = arrowFn([new FnParam(dataName, DYNAMIC_TYPE)], variable(dataName).prop('id').identical(variable(idName)).and(variable(importCallbackName).callFn([variable(dataName).prop('timestamp')])));
+  const importCallback = new DeclareFunctionStmt(importCallbackName, [new FnParam(timestampName, DYNAMIC_TYPE)], [new DynamicImportExpr(url, null, '@vite-ignore').prop('then').callFn([replaceCallback]).toStmt()], DYNAMIC_TYPE, StmtModifier.Final);
+  const updateCallback = arrowFn([new FnParam(dataName, DYNAMIC_TYPE)], variable(dataName).prop('id').identical(variable(idName)).and(variable(importCallbackName).callFn([variable(dataName).prop('timestamp')])), DYNAMIC_TYPE);
   const initialCall = variable(importCallbackName).callFn([variable('Date').prop('now').callFn([])]);
   const hotRead = variable('import').prop('meta').prop('hot');
   const hotListener = hotRead.clone().prop('on').callFn([literal('angular:component-update'), updateCallback]);
-  return arrowFn([], [new DeclareVarStmt(idName, literal(encodeURIComponent(`${meta.filePath}@${meta.className}`)), null, StmtModifier.Final), importCallback, devOnlyGuardedExpression(initialCall).toStmt(), devOnlyGuardedExpression(hotRead.and(hotListener)).toStmt()]).callFn([]);
+  return arrowFn([], [new DeclareVarStmt(idName, literal(encodeURIComponent(`${meta.filePath}@${meta.className}`)), null, StmtModifier.Final), importCallback, devOnlyGuardedExpression(initialCall).toStmt(), devOnlyGuardedExpression(hotRead.and(hotListener)).toStmt()], DYNAMIC_TYPE).callFn([]);
 }
 /** @returns {DeclareFunctionStmt} */ function compileHmrUpdateCallback(/** @type {any[]} */ definitions, /** @type {Statement[]} */ constantStatements, meta) {
   const namespaces = 'ɵɵnamespaces';
@@ -29818,10 +28756,10 @@ function createPipeDefinitionMap(meta) {
       }
     }
   }
-  return new DeclareFunctionStmt(`${meta.className}_UpdateMetadata`, params, body, null, StmtModifier.Final);
+  return new DeclareFunctionStmt(`${meta.className}_UpdateMetadata`, params, body, DYNAMIC_TYPE, StmtModifier.Final);
 }
 
-const VERSION = new Version('22.0.6');
+const VERSION = new Version('22.2.5');
 
 const HOST_BINDING_GUARD_COMMENT_TEXT = 'hostBindingsBlockGuard';
 /** @returns {HostElement | null} */ function createHostElement(/** @type {string} */ type, /** @type {string | null} */ selector, /** @type {ParseSourceSpan} */ nameSpan, /** @type {any[]} */ hostObjectLiteralBindings, /** @type {any[]} */ hostBindingDecorators, /** @type {any[]} */ hostListenerDecorators) {
@@ -30221,7 +29159,10 @@ class TcbExprTranslator {
     return new TcbExpr(`"" + ${exprs.join(' + ')}`);
   }
   /** @returns {TcbExpr} */ visitKeyedRead(/** @type {KeyedRead} */ ast) {
-    const receiver = this.translate(ast.receiver).wrapForTypeChecker();
+    const receiver = this.translate(ast.receiver);
+    if (!this.isStrictSafeNavigationChain(ast.receiver)) {
+      receiver.wrapForTypeChecker();
+    }
     const key = this.translate(ast.key);
     return new TcbExpr(`${receiver.print()}[${key.print()}]`).addParseSpanInfo(ast.sourceSpan);
   }
@@ -30296,8 +29237,19 @@ class TcbExprTranslator {
     return new TcbExpr(`void ${expression.print()}`).addParseSpanInfo(ast.sourceSpan);
   }
   /** @returns {TcbExpr} */ visitPropertyRead(/** @type {PropertyRead} */ ast) {
-    const receiver = this.translate(ast.receiver).wrapForTypeChecker();
-    return new TcbExpr(`${receiver.print()}.${ast.name}`).addParseSpanInfo(ast.nameSpan).wrapForTypeChecker().addParseSpanInfo(ast.sourceSpan);
+    const receiver = this.translate(ast.receiver);
+    const isSafeChain = this.isStrictSafeNavigationChain(ast.receiver);
+    if (!isSafeChain) {
+      receiver.wrapForTypeChecker();
+    }
+    const node = new TcbExpr(`${receiver.print()}.${ast.name}`).addParseSpanInfo(ast.nameSpan);
+    let result;
+    if (isSafeChain) {
+      result = new TcbExpr(node.print());
+    } else {
+      result = node.wrapForTypeChecker();
+    }
+    return result.addParseSpanInfo(ast.sourceSpan);
   }
   /** @returns {TcbExpr} */ visitSafePropertyRead(/** @type {SafePropertyRead} */ ast) {
     let node;
@@ -30335,7 +29287,10 @@ class TcbExprTranslator {
       if (resolved !== null) {
         expr = resolved;
       } else {
-        const propertyReceiver = this.translate(receiver.receiver).wrapForTypeChecker();
+        const propertyReceiver = this.translate(receiver.receiver);
+        if (!this.isStrictSafeNavigationChain(receiver.receiver)) {
+          propertyReceiver.wrapForTypeChecker();
+        }
         expr = new TcbExpr(`${propertyReceiver.print()}.${receiver.name}`).addParseSpanInfo(receiver.nameSpan);
       }
     } else {
@@ -30417,7 +29372,7 @@ class TcbExprTranslator {
     const expr = exprNode.print();
     const args = argNodes.map(node => node.print()).join(', ');
     if (this.config.strictSafeNavigationTypes) {
-      return new TcbExpr(`(${expr}?.(${args}))`);
+      return new TcbExpr(`${expr}?.(${args})`);
     }
     if (VeSafeLhsInferenceBugDetector.veWillInferAnyFor(ast)) {
       return new TcbExpr(`(${expr} as any)(${args})`);
@@ -30426,6 +29381,25 @@ class TcbExprTranslator {
   }
   escapeTemplateLiteral(/** @type {string} */ value) {
     return value.replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\${/g, '$\\{');
+  }
+  isStrictSafeNavigationChain(ast) {
+    if (!this.config.strictSafeNavigationTypes) {
+      return false;
+    }
+    let current = ast;
+    while (current) {
+      if (current instanceof SafePropertyRead || current instanceof SafeKeyedRead || current instanceof SafeCall) {
+        return true;
+      }
+      if (current instanceof PropertyRead || current instanceof KeyedRead || current instanceof Call) {
+        current = current.receiver;
+      } else if (current instanceof NonNullAssert) {
+        current = current.expression;
+      } else {
+        break;
+      }
+    }
+    return false;
   }
 }
 class VeSafeLhsInferenceBugDetector {
@@ -30611,9 +29585,25 @@ class TcbExpressionTranslator {
       if (pipeMeta === null) {
         this.tcb.oobRecorder.missingPipe(this.tcb.id, ast, this.tcb.hostIsStandalone);
         pipe = new TcbExpr('(0 as any)');
-      } else if (pipeMeta.isExplicitlyDeferred && this.tcb.boundTarget.getEagerlyUsedPipes().includes(ast.name)) {
-        this.tcb.oobRecorder.deferredPipeUsedEagerly(this.tcb.id, ast);
-        pipe = new TcbExpr('(0 as any)');
+      } else if (pipeMeta.isExplicitlyDeferred) {
+        const enclosingBlocks = this.tcb.boundTarget.getDeferBlocksOfPipe(ast);
+        const isDeferred = enclosingBlocks.length > 0;
+        if (!isDeferred) {
+          this.tcb.oobRecorder.deferredPipeUsedEagerly(this.tcb.id, ast, null, null);
+          pipe = new TcbExpr('(0 as any)');
+        } else if (pipeMeta.deferredBlocks != null) {
+          const isAllowedInBlock = enclosingBlocks.some(b => b.definedName !== null && pipeMeta.deferredBlocks.has(b.definedName));
+          if (!isAllowedInBlock) {
+            const currentBlockName = enclosingBlocks[enclosingBlocks.length - 1].definedName ?? 'unnamed';
+            const declaredBlocks = Array.from(pipeMeta.deferredBlocks);
+            this.tcb.oobRecorder.deferredPipeUsedEagerly(this.tcb.id, ast, currentBlockName, declaredBlocks);
+            pipe = new TcbExpr('(0 as any)');
+          } else {
+            pipe = this.tcb.env.pipeInst(pipeMeta);
+          }
+        } else {
+          pipe = this.tcb.env.pipeInst(pipeMeta);
+        }
       } else {
         pipe = this.tcb.env.pipeInst(pipeMeta);
       }
@@ -30664,193 +29654,56 @@ class TcbExpressionTranslator {
   }
 }
 
-class TcbTemplateContextOp extends TcbOp {
+class TcbBoundaryOp extends TcbOp {
   /** @type {Context} */ tcb;
   /** @type {Scope} */ scope;
-  constructor(/** @type {Context} */ tcb, /** @type {Scope} */ scope) {
+  block;
+  constructor(tcb, scope, block) {
     super();
     this.tcb = tcb;
     this.scope = scope;
-  }
-  optional = true;
-  /** @returns {TcbExpr} */ execute() {
-    const ctx = new TcbExpr(this.tcb.allocateId());
-    this.scope.addStatement(declareVariable(ctx, new TcbExpr('any')));
-    return ctx;
-  }
-}
-class TcbTemplateBodyOp extends TcbOp {
-  /** @type {Context} */ tcb;
-  /** @type {Scope} */ scope;
-  /** @type {Template} */ template;
-  constructor(/** @type {Context} */ tcb, /** @type {Scope} */ scope, /** @type {Template} */ template) {
-    super();
-    this.tcb = tcb;
-    this.scope = scope;
-    this.template = template;
+    this.block = block;
   }
   get optional() {
     return false;
   }
   /** @returns {null} */ execute() {
-    let guard = null;
-    const directiveGuards = [];
-    this.addDirectiveGuards(directiveGuards, this.template, this.tcb.boundTarget.getDirectivesOfNode(this.template));
-    for (const directive of this.template.directives) {
-      this.addDirectiveGuards(directiveGuards, directive, this.tcb.boundTarget.getDirectivesOfNode(directive));
+    const checkBody = this.tcb.env.config.checkControlFlowBodies;
+    const tryBodyScope = this.scope.createChildScope(this.scope, null, checkBody ? this.block.children : [], null);
+    const tryBlockStr = `{\n${getStatementsBlock(tryBodyScope.render())}}`;
+    if (this.block.errorBlocks.length > 0) {
+      const innerCatchStatements = this.generateCatchBranch(0);
+      const catchBlockStr = `{\n${getStatementsBlock(innerCatchStatements)}}`;
+      const tryStatement = new TcbExpr(`try ${tryBlockStr} catch (err) ${catchBlockStr}`);
+      this.scope.addStatement(tryStatement);
+    } else {
+      this.scope.addStatement(new TcbExpr(tryBlockStr));
     }
-    if (directiveGuards.length > 0) {
-      guard = directiveGuards.reduce((expr, dirGuard) => new TcbExpr(`${expr.print()} && ${dirGuard.print()}`), directiveGuards.pop());
-    }
-    const tmplScope = this.scope.createChildScope(this.scope, this.template, this.template.children, guard);
-    const statements = tmplScope.render();
-    if (statements.length === 0) {
-      return null;
-    }
-    let tmplBlock = `{\n${getStatementsBlock(statements)}}`;
-    if (guard !== null) {
-      tmplBlock = `if (${guard.print()}) ${tmplBlock}`;
-    }
-    this.scope.addStatement(new TcbExpr(tmplBlock));
     return null;
   }
-  addDirectiveGuards(/** @type {TcbExpr[]} */ guards, hostNode, /** @type {any[] | null} */ directives) {
-    if (directives === null || directives.length === 0) {
-      return;
+  generateCatchBranch(index) {
+    const errorBlock = this.block.errorBlocks[index];
+    if (!errorBlock) {
+      return [];
     }
-    const isTemplate = hostNode instanceof Template;
-    for (const dir of directives) {
-      const dirInstId = this.scope.resolve(hostNode, dir);
-      const dirId = this.tcb.env.referenceTcbValue(dir.ref);
-      dir.ngTemplateGuards.forEach(guard => {
-        const boundInput = hostNode.inputs.find(i => i.name === guard.inputName) || (isTemplate ? hostNode.templateAttrs.find(input => {
-          return input instanceof BoundAttribute && input.name === guard.inputName;
-        }) : undefined);
-        if (boundInput !== undefined) {
-          const expr = tcbExpression(boundInput.value, this.tcb, this.scope);
-          expr.markIgnoreDiagnostics();
-          if (guard.type === 'binding') {
-            guards.push(expr);
-          } else {
-            const guardInvoke = new TcbExpr(`${dirId.print()}.ngTemplateGuard_${guard.inputName}(${dirInstId.print()}, ${expr.print()})`);
-            guardInvoke.addParseSpanInfo(boundInput.value.sourceSpan);
-            guards.push(guardInvoke);
-          }
-        }
-      });
-      if (dir.hasNgTemplateContextGuard) {
-        if (this.tcb.env.config.applyTemplateContextGuards) {
-          const ctx = this.scope.resolve(hostNode);
-          const guardInvoke = new TcbExpr(`${dirId.print()}.ngTemplateContextGuard(${dirInstId.print()}, ${ctx.print()})`);
-          guardInvoke.markIgnoreDiagnostics();
-          guardInvoke.addParseSpanInfo(hostNode.sourceSpan);
-          guards.push(guardInvoke);
-        }
-      }
+    const checkBody = this.tcb.env.config.checkControlFlowBodies;
+    const outerScope = this.scope.createChildScope(this.scope, errorBlock, [], null);
+    const resultStatements = [];
+    outerScope.render().forEach(stmt => resultStatements.push(stmt));
+    let expression = null;
+    if (errorBlock.expression) {
+      expression = tcbExpression(errorBlock.expression, this.tcb, outerScope);
     }
-  }
-}
-
-class TcbElementOp extends TcbOp {
-  /** @type {Context} */ tcb;
-  /** @type {Scope} */ scope;
-  /** @type {Element$1} */ element;
-  constructor(/** @type {Context} */ tcb, /** @type {Scope} */ scope, /** @type {Element$1} */ element) {
-    super();
-    this.tcb = tcb;
-    this.scope = scope;
-    this.element = element;
-  }
-  get optional() {
-    return true;
-  }
-  /** @returns {TcbExpr} */ execute() {
-    const id = this.tcb.allocateId();
-    const idNode = new TcbExpr(id);
-    idNode.addParseSpanInfo(this.element.startSourceSpan || this.element.sourceSpan);
-    const initializer = new TcbExpr(`document.createElement("${this.element.name}")`);
-    initializer.addParseSpanInfo(this.element.startSourceSpan || this.element.sourceSpan);
-    const stmt = new TcbExpr(`var ${idNode.print()} = ${initializer.print()}`);
-    stmt.addParseSpanInfo(this.element.startSourceSpan || this.element.sourceSpan);
-    this.scope.addStatement(stmt);
-    return idNode;
-  }
-}
-
-class TcbBlockImplicitVariableOp extends TcbOp {
-  /** @type {Context} */ tcb;
-  /** @type {Scope} */ scope;
-  /** @type {TcbExpr} */ type;
-  /** @type {Variable} */ variable;
-  constructor(/** @type {Context} */ tcb, /** @type {Scope} */ scope, /** @type {TcbExpr} */ type, /** @type {Variable} */ variable) {
-    super();
-    this.tcb = tcb;
-    this.scope = scope;
-    this.type = type;
-    this.variable = variable;
-  }
-  optional = true;
-  /** @returns {TcbExpr} */ execute() {
-    const id = new TcbExpr(this.tcb.allocateId());
-    id.addParseSpanInfo(this.variable.keySpan);
-    const variable = declareVariable(id, this.type);
-    variable.addParseSpanInfo(this.variable.sourceSpan);
-    this.scope.addStatement(variable);
-    return id;
-  }
-}
-class TcbTemplateVariableOp extends TcbOp {
-  /** @type {Context} */ tcb;
-  /** @type {Scope} */ scope;
-  /** @type {Template} */ template;
-  /** @type {Variable} */ variable;
-  constructor(/** @type {Context} */ tcb, /** @type {Scope} */ scope, /** @type {Template} */ template, /** @type {Variable} */ variable) {
-    super();
-    this.tcb = tcb;
-    this.scope = scope;
-    this.template = template;
-    this.variable = variable;
-  }
-  get optional() {
-    return false;
-  }
-  /** @returns {TcbExpr} */ execute() {
-    const ctx = this.scope.resolve(this.template);
-    const id = new TcbExpr(this.tcb.allocateId());
-    const initializer = new TcbExpr(`${ctx.print()}.${this.variable.value || '$implicit'}`);
-    id.addParseSpanInfo(this.variable.keySpan);
-    if (this.variable.valueSpan !== undefined) {
-      initializer.addParseSpanInfo(this.variable.valueSpan).wrapForTypeChecker();
+    const bodyScope = this.scope.createChildScope(outerScope, null, checkBody ? errorBlock.children : [], null);
+    const bodyBlockStr = `{\n${getStatementsBlock(bodyScope.render())}}`;
+    const nextBranchStatements = this.generateCatchBranch(index + 1);
+    if (expression) {
+      const ifStmt = new TcbExpr(`if (${expression.print()}) ${bodyBlockStr}${nextBranchStatements.length > 0 ? ` else {\n${getStatementsBlock(nextBranchStatements)}}` : ''}`);
+      resultStatements.push(ifStmt);
+    } else {
+      resultStatements.push(new TcbExpr(bodyBlockStr));
     }
-    const variable = new TcbExpr(`var ${id.print()} = ${initializer.print()}`);
-    variable.addParseSpanInfo(this.variable.sourceSpan);
-    this.scope.addStatement(variable);
-    return id;
-  }
-}
-class TcbBlockVariableOp extends TcbOp {
-  /** @type {Context} */ tcb;
-  /** @type {Scope} */ scope;
-  /** @type {TcbExpr} */ initializer;
-  /** @type {Variable} */ variable;
-  constructor(/** @type {Context} */ tcb, /** @type {Scope} */ scope, /** @type {TcbExpr} */ initializer, /** @type {Variable} */ variable) {
-    super();
-    this.tcb = tcb;
-    this.scope = scope;
-    this.initializer = initializer;
-    this.variable = variable;
-  }
-  get optional() {
-    return false;
-  }
-  /** @returns {TcbExpr} */ execute() {
-    const id = new TcbExpr(this.tcb.allocateId());
-    id.addParseSpanInfo(this.variable.keySpan);
-    this.initializer.wrapForTypeChecker();
-    const variable = new TcbExpr(`var ${id.print()} = ${this.initializer.print()}`);
-    variable.addParseSpanInfo(this.variable.sourceSpan);
-    this.scope.addStatement(variable);
-    return id;
+    return resultStatements;
   }
 }
 
@@ -30870,271 +29723,89 @@ class TcbComponentContextCompletionOp extends TcbOp {
   }
 }
 
-class TcbReferenceOp extends TcbOp {
+class TcbControlFlowContentProjectionOp extends TcbOp {
   /** @type {Context} */ tcb;
-  /** @type {Scope} */ scope;
-  /** @type {Reference} */ node;
-  host;
-  target;
-  constructor(/** @type {Context} */ tcb, /** @type {Scope} */ scope, /** @type {Reference} */ node, host, target) {
+  element;
+  ngContentSelectors;
+  componentName;
+  category;
+  constructor(tcb, element, ngContentSelectors, componentName) {
     super();
     this.tcb = tcb;
-    this.scope = scope;
-    this.node = node;
-    this.host = host;
-    this.target = target;
-  }
-  optional = true;
-  /** @returns {TcbExpr} */ execute() {
-    const id = new TcbExpr(this.tcb.allocateId());
-    let initializer = this.target instanceof Template || this.target instanceof Element$1 ? this.scope.resolve(this.target) : this.scope.resolve(this.host, this.target);
-    if (this.target instanceof Element$1 && !this.tcb.env.config.checkTypeOfDomReferences || !this.tcb.env.config.checkTypeOfNonDomReferences) {
-      initializer = new TcbExpr(`${initializer.print()} as any`);
-    } else if (this.target instanceof Template) {
-      const templateRef = this.tcb.env.referenceExternalSymbol('@angular/core', 'TemplateRef');
-      initializer = new TcbExpr(`(${initializer.print()} as any as ${templateRef.print()}<any>)`);
-    }
-    initializer.addParseSpanInfo(this.node.sourceSpan);
-    id.addParseSpanInfo(this.node.keySpan);
-    this.scope.addStatement(new TcbExpr(`var ${id.print()} = ${initializer.print()}`));
-    return id;
-  }
-}
-class TcbInvalidReferenceOp extends TcbOp {
-  /** @type {Context} */ tcb;
-  /** @type {Scope} */ scope;
-  constructor(/** @type {Context} */ tcb, /** @type {Scope} */ scope) {
-    super();
-    this.tcb = tcb;
-    this.scope = scope;
-  }
-  optional = true;
-  /** @returns {TcbExpr} */ execute() {
-    const id = new TcbExpr(this.tcb.allocateId());
-    this.scope.addStatement(new TcbExpr(`var ${id.print()} = null! as any`));
-    return id;
-  }
-}
-
-class TcbIfBlockOp extends TcbOp {
-  /** @type {Context} */ tcb;
-  /** @type {Scope} */ scope;
-  /** @type {IfBlock} */ block;
-  expressionScopes = new Map();
-  constructor(/** @type {Context} */ tcb, /** @type {Scope} */ scope, /** @type {IfBlock} */ block) {
-    super();
-    this.tcb = tcb;
-    this.scope = scope;
-    this.block = block;
-  }
-  get optional() {
-    return false;
-  }
-  /** @returns {null} */ execute() {
-    const root = this.generateBranch(0);
-    root && this.scope.addStatement(root);
-    return null;
-  }
-  /** @returns {TcbExpr | undefined} */ generateBranch(/** @type {number} */ index) {
-    const branch = this.block.branches[index];
-    if (!branch) {
-      return undefined;
-    }
-    if (branch.expression === null) {
-      const branchScope = this.getBranchScope(this.scope, branch, index);
-      return new TcbExpr(`{\n${getStatementsBlock(branchScope.render())}}`);
-    }
-    const outerScope = this.scope.createChildScope(this.scope, branch, [], null);
-    outerScope.render().forEach(stmt => this.scope.addStatement(stmt));
-    this.expressionScopes.set(branch, outerScope);
-    let expression = tcbExpression(branch.expression, this.tcb, this.scope);
-    if (branch.expressionAlias !== null) {
-      expression = new TcbExpr(`(${expression.print()}) && ${outerScope.resolve(branch.expressionAlias).print()}`);
-    }
-    const bodyScope = this.getBranchScope(outerScope, branch, index);
-    const ifStatement = `if (${expression.print()}) {\n${getStatementsBlock(bodyScope.render())}}`;
-    const elseBranch = this.generateBranch(index + 1);
-    return new TcbExpr(ifStatement + (elseBranch ? ' else ' + elseBranch.print() : ''));
-  }
-  /** @returns {Scope} */ getBranchScope(/** @type {Scope} */ parentScope, /** @type {IfBlockBranch} */ branch, /** @type {number} */ index) {
-    const checkBody = this.tcb.env.config.checkControlFlowBodies;
-    return this.scope.createChildScope(parentScope, null, checkBody ? branch.children : [], checkBody ? this.generateBranchGuard(index) : null);
-  }
-  /** @returns {TcbExpr | null} */ generateBranchGuard(/** @type {number} */ index) {
-    let guard = null;
-    for (let i = 0; i <= index; i++) {
-      const branch = this.block.branches[i];
-      if (branch.expression === null) {
-        continue;
-      }
-      if (!this.expressionScopes.has(branch)) {
-        throw new Error(`Could not determine expression scope of branch at index ${i}`);
-      }
-      const expressionScope = this.expressionScopes.get(branch);
-      let expression;
-      expression = tcbExpression(branch.expression, this.tcb, expressionScope);
-      if (branch.expressionAlias !== null) {
-        expression = new TcbExpr(`(${expression.print()}) && ${expressionScope.resolve(branch.expressionAlias).print()}`);
-      }
-      expression.markIgnoreDiagnostics();
-      const comparisonExpression = i === index ? expression : new TcbExpr(`!(${expression.print()})`);
-      guard = guard === null ? comparisonExpression : new TcbExpr(`(${guard.print()}) && (${comparisonExpression.print()})`);
-    }
-    return guard;
-  }
-}
-
-class TcbSwitchOp extends TcbOp {
-  /** @type {Context} */ tcb;
-  /** @type {Scope} */ scope;
-  /** @type {SwitchBlock} */ block;
-  constructor(/** @type {Context} */ tcb, /** @type {Scope} */ scope, /** @type {SwitchBlock} */ block) {
-    super();
-    this.tcb = tcb;
-    this.scope = scope;
-    this.block = block;
-  }
-  get optional() {
-    return false;
-  }
-  /** @returns {null} */ execute() {
-    const switchExpression = tcbExpression(this.block.expression, this.tcb, this.scope);
-    const clauses = this.block.groups.flatMap(current => {
-      const checkBody = this.tcb.env.config.checkControlFlowBodies;
-      const clauseScope = this.scope.createChildScope(this.scope, null, checkBody ? current.children : [], checkBody ? this.generateGuard(current, switchExpression) : null);
-      const statements = [...clauseScope.render(), new TcbExpr('break')];
-      return current.cases.map((switchCase, index) => {
-        const statementsStr = getStatementsBlock(index === current.cases.length - 1 ? statements : [], true);
-        const source = switchCase.expression === null ? `default: ${statementsStr}` : `case ${tcbExpression(switchCase.expression, this.tcb, this.scope).print()}: ${statementsStr}`;
-        return new TcbExpr(source);
-      });
-    });
-    if (this.block.exhaustiveCheck) {
-      let translateExpression = this.block.expression;
-      if (this.block.exhaustiveCheck.expression) {
-        translateExpression = this.block.exhaustiveCheck.expression;
-      }
-      const switchValue = tcbExpression(translateExpression, this.tcb, this.scope);
-      const exhaustiveId = this.tcb.allocateId();
-      clauses.push(new TcbExpr(`default: const tcbExhaustive${exhaustiveId}: never = ${switchValue.print()};`));
-    }
-    this.scope.addStatement(new TcbExpr(`switch (${switchExpression.print()}) { ${clauses.map(c => c.print()).join('\n')} }`));
-    return null;
-  }
-  /** @returns {TcbExpr | null} */ generateGuard(/** @type {SwitchBlockCaseGroup} */ group, /** @type {TcbExpr} */ switchValue) {
-    const hasDefault = group.cases.some(c => c.expression === null);
-    if (!hasDefault) {
-      let guard = null;
-      for (const switchCase of group.cases) {
-        if (switchCase.expression !== null) {
-          const expression = tcbExpression(switchCase.expression, this.tcb, this.scope);
-          expression.markIgnoreDiagnostics();
-          const comparison = new TcbExpr(`${switchValue.print()} === ${expression.print()}`);
-          if (guard === null) {
-            guard = comparison;
-          } else {
-            guard = new TcbExpr(`(${guard.print()}) || (${comparison.print()})`);
-          }
-        }
-      }
-      return guard;
-    }
-    let guard = null;
-    for (const currentGroup of this.block.groups) {
-      if (currentGroup === group) {
-        continue;
-      }
-      for (const switchCase of currentGroup.cases) {
-        if (switchCase.expression === null) {
-          continue;
-        }
-        const expression = tcbExpression(switchCase.expression, this.tcb, this.scope);
-        expression.markIgnoreDiagnostics();
-        const comparison = new TcbExpr(`${switchValue.print()} !== ${expression.print()}`);
-        if (guard === null) {
-          guard = comparison;
-        } else {
-          guard = new TcbExpr(`(${guard.print()}) && (${comparison.print()})`);
-        }
-      }
-    }
-    return guard;
-  }
-}
-
-class TcbForOfOp extends TcbOp {
-  /** @type {Context} */ tcb;
-  /** @type {Scope} */ scope;
-  /** @type {ForLoopBlock} */ block;
-  constructor(/** @type {Context} */ tcb, /** @type {Scope} */ scope, /** @type {ForLoopBlock} */ block) {
-    super();
-    this.tcb = tcb;
-    this.scope = scope;
-    this.block = block;
-  }
-  get optional() {
-    return false;
-  }
-  /** @returns {null} */ execute() {
-    const loopScope = this.scope.createChildScope(this.scope, this.block, this.tcb.env.config.checkControlFlowBodies ? this.block.children : [], null);
-    const initializerId = loopScope.resolve(this.block.item);
-    const initializer = new TcbExpr(`const ${initializerId.print()}`);
-    initializer.addParseSpanInfo(this.block.item.keySpan);
-    const expression = new TcbExpr(`${tcbExpression(this.block.expression, this.tcb, this.scope).print()}!`);
-    let statements;
-    if (this.block.trackBy === null) {
-      statements = loopScope.render();
-    } else {
-      const trackTranslator = new TcbForLoopTrackTranslator(this.tcb, loopScope, this.block);
-      const trackExpression = trackTranslator.translate(this.block.trackBy);
-      statements = [...loopScope.render(), trackExpression];
-    }
-    this.scope.addStatement(new TcbExpr(`for (${initializer.print()} of ${expression.print()}) {\n${getStatementsBlock(statements)} }`));
-    return null;
-  }
-}
-class TcbForLoopTrackTranslator extends TcbExpressionTranslator {
-  /** @type {ForLoopBlock} */ block;
-  allowedVariables;
-  constructor(/** @type {Context} */ tcb, /** @type {Scope} */ scope, /** @type {ForLoopBlock} */ block) {
-    super(tcb, scope);
-    this.block = block;
-    this.allowedVariables = new Set([block.item]);
-    for (const variable of block.contextVariables) {
-      if (variable.value === '$index') {
-        this.allowedVariables.add(variable);
-      }
-    }
-  }
-  /** @returns {TcbExpr | null} */ resolve(/** @type {AST} */ ast) {
-    if (ast instanceof PropertyRead && (ast.receiver instanceof ImplicitReceiver || ast.receiver instanceof ThisReceiver)) {
-      const target = this.tcb.boundTarget.getExpressionTarget(ast);
-      if (target !== null && (!(target instanceof Variable) || !this.allowedVariables.has(target))) {
-        this.tcb.oobRecorder.illegalForLoopTrackAccess(this.tcb.id, this.block, ast);
-      }
-    }
-    return super.resolve(ast);
-  }
-}
-
-class TcbLetDeclarationOp extends TcbOp {
-  /** @type {Context} */ tcb;
-  /** @type {Scope} */ scope;
-  node;
-  constructor(/** @type {Context} */ tcb, /** @type {Scope} */ scope, node) {
-    super();
-    this.tcb = tcb;
-    this.scope = scope;
-    this.node = node;
+    this.element = element;
+    this.ngContentSelectors = ngContentSelectors;
+    this.componentName = componentName;
+    this.category = tcb.env.config.controlFlowPreventingContentProjection === 'error' ? OutOfBandDiagnosticCategory.Error : OutOfBandDiagnosticCategory.Warning;
   }
   optional = false;
   /** @returns {TcbExpr} */ execute() {
-    const id = new TcbExpr(this.tcb.allocateId()).addParseSpanInfo(this.node.nameSpan);
-    const value = tcbExpression(this.node.value, this.tcb, this.scope).wrapForTypeChecker();
-    const varStatement = new TcbExpr(`const ${id.print()} = ${value.print()}`);
-    varStatement.addParseSpanInfo(this.node.sourceSpan);
-    this.scope.addStatement(varStatement);
-    return id;
+    const controlFlowToCheck = this.findPotentialControlFlowNodes();
+    if (controlFlowToCheck.length > 0) {
+      const matcher = new SelectorMatcher();
+      for (const selector of this.ngContentSelectors) {
+        if (selector !== '*') {
+          matcher.addSelectables(CssSelector.parse(selector), selector);
+        }
+      }
+      for (const root of controlFlowToCheck) {
+        for (const child of root.children) {
+          if (child instanceof Element$1 || child instanceof Template) {
+            matcher.match(createCssSelectorFromNode(child), (_, originalSelector) => {
+              this.tcb.oobRecorder.controlFlowPreventingContentProjection(this.tcb.id, this.category, child, this.componentName, originalSelector, root, this.tcb.hostPreserveWhitespaces);
+            });
+          }
+        }
+      }
+    }
+    return null;
+  }
+  findPotentialControlFlowNodes() {
+    const result = [];
+    for (const child of this.element.children) {
+      if (child instanceof ForLoopBlock) {
+        if (this.shouldCheck(child)) {
+          result.push(child);
+        }
+        if (child.empty !== null && this.shouldCheck(child.empty)) {
+          result.push(child.empty);
+        }
+      } else if (child instanceof IfBlock) {
+        for (const branch of child.branches) {
+          if (this.shouldCheck(branch)) {
+            result.push(branch);
+          }
+        }
+      } else if (child instanceof SwitchBlock) {
+        for (const current of child.groups) {
+          if (this.shouldCheck(current)) {
+            result.push(current);
+          }
+        }
+      } else if (child instanceof BoundaryBlock) {
+        if (this.shouldCheck(child)) {
+          result.push(child);
+        }
+      }
+    }
+    return result;
+  }
+  /** @returns {boolean} */ shouldCheck(node) {
+    if (node.children.length < 2) {
+      return false;
+    }
+    let hasSeenRootNode = false;
+    for (const child of node.children) {
+      if (child instanceof LetDeclaration$1) {
+        continue;
+      }
+      if (!(child instanceof Text$3) || this.tcb.hostPreserveWhitespaces || child.value.trim().length > 0) {
+        if (hasSeenRootNode) {
+          return true;
+        }
+        hasSeenRootNode = true;
+      }
+    }
+    return false;
   }
 }
 
@@ -31344,6 +30015,8 @@ function checkUnsupportedFieldBindings(node, unsupportedBindingFields, /** @type
       tcb.oobRecorder.formFieldUnsupportedBinding(tcb.id, input);
     } else if (input.type === BindingType.Attribute && unsupportedBindingFields.has(input.name.toLowerCase())) {
       tcb.oobRecorder.formFieldUnsupportedBinding(tcb.id, input);
+    } else if (input.type === BindingType.TwoWay && unsupportedBindingFields.has(input.name)) {
+      tcb.oobRecorder.formFieldUnsupportedBinding(tcb.id, input);
     }
   }
   if (!(node instanceof HostElement)) {
@@ -31405,7 +30078,7 @@ function checkUnsupportedFieldBindings(node, unsupportedBindingFields, /** @type
     }
   };
   if (node instanceof Template) {
-    if (node.tagName === 'ng-template') {
+    if (node.tagName && isNgTemplate(node.tagName)) {
       node.inputs.forEach(processAttribute);
       node.attributes.forEach(processAttribute);
     }
@@ -31527,6 +30200,9 @@ class TcbDirectiveInputsOp extends TcbOp {
           const temp = declareVariable(id, type);
           this.scope.addStatement(temp);
           target = id;
+          if (!this.dir.stringLiteralInputFields.has(fieldName) && attr.keySpan !== null) {
+            this.scope.addStatement(new TcbExpr(`null! as typeof ${dirId.print()}.${fieldName}`).markIgnoreDiagnostics().addParseSpanInfo(attr.keySpan));
+          }
         } else {
           if (dirId === null) {
             dirId = this.scope.resolve(this.node, this.dir);
@@ -31607,285 +30283,6 @@ class TcbUnclaimedInputsOp extends TcbOp {
       }
     }
     return null;
-  }
-}
-
-/** @returns {string} */ function getComponentTagName(/** @type {Component$1} */ node) {
-  return node.tagName || 'ng-component';
-}
-class TcbComponentNodeOp extends TcbOp {
-  /** @type {Context} */ tcb;
-  /** @type {Scope} */ scope;
-  /** @type {Component$1} */ component;
-  optional = true;
-  constructor(/** @type {Context} */ tcb, /** @type {Scope} */ scope, /** @type {Component$1} */ component) {
-    super();
-    this.tcb = tcb;
-    this.scope = scope;
-    this.component = component;
-  }
-  /** @returns {TcbExpr} */ execute() {
-    const id = this.tcb.allocateId();
-    const initializer = new TcbExpr(`document.createElement("${getComponentTagName(this.component)}")`);
-    initializer.addParseSpanInfo(this.component.startSourceSpan || this.component.sourceSpan);
-    this.scope.addStatement(new TcbExpr(`var ${id} = ${initializer.print()}`));
-    return new TcbExpr(id);
-  }
-}
-
-const REGISTRY = new DomElementSchemaRegistry();
-class TcbDomSchemaCheckerOp extends TcbOp {
-  /** @type {Context} */ tcb;
-  element;
-  /** @type {boolean} */ checkElement;
-  claimedInputs;
-  constructor(/** @type {Context} */ tcb, element, /** @type {boolean} */ checkElement, claimedInputs) {
-    super();
-    this.tcb = tcb;
-    this.element = element;
-    this.checkElement = checkElement;
-    this.claimedInputs = claimedInputs;
-  }
-  get optional() {
-    return false;
-  }
-  /** @returns {TcbExpr | null} */ execute() {
-    const element = this.element;
-    const isTemplateElement = element instanceof Element$1 || element instanceof Component$1;
-    const bindings = isTemplateElement ? element.inputs : element.bindings;
-    if (this.checkElement && isTemplateElement) {
-      this.tcb.domSchemaChecker.checkElement(this.tcb.id, this.getTagName(element), element.startSourceSpan, this.tcb.schemas, this.tcb.hostIsStandalone);
-    }
-    for (const binding of bindings) {
-      const isPropertyBinding = binding.type === BindingType.Property || binding.type === BindingType.TwoWay;
-      if (isPropertyBinding && this.claimedInputs?.has(binding.name)) {
-        continue;
-      }
-      if (isPropertyBinding && binding.name !== 'style' && binding.name !== 'class') {
-        const propertyName = REGISTRY.getMappedPropName(binding.name);
-        if (isTemplateElement) {
-          this.tcb.domSchemaChecker.checkTemplateElementProperty(this.tcb.id, this.getTagName(element), propertyName, binding.sourceSpan, this.tcb.schemas, this.tcb.hostIsStandalone);
-        } else {
-          this.tcb.domSchemaChecker.checkHostElementProperty(this.tcb.id, element, propertyName, binding.keySpan, this.tcb.schemas);
-        }
-      }
-    }
-    return null;
-  }
-  /** @returns {string} */ getTagName(node) {
-    return node instanceof Element$1 ? node.name : getComponentTagName(node);
-  }
-}
-
-const EVENT_PARAMETER = '$event';
-/** @returns {TcbExpr} */ function tcbEventHandlerExpression(/** @type {AST} */ ast, /** @type {Context} */ tcb, /** @type {Scope} */ scope) {
-  const translator = new TcbEventHandlerTranslator(tcb, scope);
-  return translator.translate(ast);
-}
-class TcbDirectiveOutputsOp extends TcbOp {
-  /** @type {Context} */ tcb;
-  /** @type {Scope} */ scope;
-  node;
-  /** @type {BoundAttribute[] | null} */ inputs;
-  /** @type {BoundEvent[]} */ outputs;
-  dir;
-  constructor(/** @type {Context} */ tcb, /** @type {Scope} */ scope, node, /** @type {BoundAttribute[] | null} */ inputs, /** @type {BoundEvent[]} */ outputs, dir) {
-    super();
-    this.tcb = tcb;
-    this.scope = scope;
-    this.node = node;
-    this.inputs = inputs;
-    this.outputs = outputs;
-    this.dir = dir;
-  }
-  get optional() {
-    return false;
-  }
-  /** @returns {null} */ execute() {
-    let dirId = null;
-    const outputs = this.dir.outputs;
-    for (const output of this.outputs) {
-      if (output.type === ParsedEventType.LegacyAnimation || !outputs.hasBindingPropertyName(output.name)) {
-        continue;
-      }
-      if (this.tcb.env.config.checkTypeOfOutputEvents && this.inputs !== null && output.name.endsWith('Change')) {
-        const inputName = output.name.slice(0, -6);
-        checkSplitTwoWayBinding(inputName, output, this.inputs, this.tcb);
-      }
-      const field = outputs.getByBindingPropertyName(output.name)[0].classPropertyName;
-      if (dirId === null) {
-        dirId = this.scope.resolve(this.node, this.dir);
-      }
-      const outputField = new TcbExpr(`${dirId.print()}[${TcbExpr.quoteAndEscape(field)}]`);
-      outputField.addParseSpanInfo(output.keySpan);
-      if (this.tcb.env.config.checkTypeOfOutputEvents) {
-        const handler = tcbCreateEventHandler(output, this.tcb, this.scope, 0);
-        const call = new TcbExpr(`${outputField.print()}.subscribe(${handler.print()})`);
-        call.addParseSpanInfo(output.sourceSpan);
-        this.scope.addStatement(call);
-      } else {
-        this.scope.addStatement(outputField);
-        const handler = tcbCreateEventHandler(output, this.tcb, this.scope, 1);
-        this.scope.addStatement(handler);
-      }
-    }
-    return null;
-  }
-}
-class TcbUnclaimedOutputsOp extends TcbOp {
-  /** @type {Context} */ tcb;
-  /** @type {Scope} */ scope;
-  target;
-  /** @type {BoundEvent[]} */ outputs;
-  /** @type {BoundAttribute[] | null} */ inputs;
-  claimedOutputs;
-  constructor(/** @type {Context} */ tcb, /** @type {Scope} */ scope, target, /** @type {BoundEvent[]} */ outputs, /** @type {BoundAttribute[] | null} */ inputs, claimedOutputs) {
-    super();
-    this.tcb = tcb;
-    this.scope = scope;
-    this.target = target;
-    this.outputs = outputs;
-    this.inputs = inputs;
-    this.claimedOutputs = claimedOutputs;
-  }
-  get optional() {
-    return false;
-  }
-  /** @returns {null} */ execute() {
-    let elId = null;
-    for (const output of this.outputs) {
-      if (this.claimedOutputs?.has(output.name)) {
-        continue;
-      }
-      if (this.tcb.env.config.checkTypeOfOutputEvents && this.inputs !== null && output.name.endsWith('Change')) {
-        const inputName = output.name.slice(0, -6);
-        if (checkSplitTwoWayBinding(inputName, output, this.inputs, this.tcb)) {
-          continue;
-        }
-      }
-      if (output.type === ParsedEventType.LegacyAnimation) {
-        const eventType = this.tcb.env.config.checkTypeOfAnimationEvents ? this.tcb.env.referenceExternalSymbol('@angular/animations', 'AnimationEvent').print() : 1;
-        const handler = tcbCreateEventHandler(output, this.tcb, this.scope, eventType);
-        this.scope.addStatement(handler);
-      } else if (output.type === ParsedEventType.Animation) {
-        const eventType = this.tcb.env.referenceExternalSymbol('@angular/core', 'AnimationCallbackEvent');
-        const handler = tcbCreateEventHandler(output, this.tcb, this.scope, eventType.print());
-        this.scope.addStatement(handler);
-      } else if (this.tcb.env.config.checkTypeOfDomEvents) {
-        let target;
-        let domEventAssertion;
-        if (output.target === 'window' || output.target === 'document') {
-          target = new TcbExpr(output.target);
-        } else if (elId === null) {
-          target = elId = this.scope.resolve(this.target);
-        } else {
-          target = elId;
-        }
-        if (this.target instanceof Element$1 && this.target.isVoid && this.tcb.env.config.allowDomEventAssertion) {
-          const assertUtil = this.tcb.env.referenceExternalSymbol('@angular/core', 'ɵassertType');
-          domEventAssertion = new TcbExpr(`${assertUtil.print()}<typeof ${target.print()}>(${EVENT_PARAMETER}.target)`);
-        }
-        const propertyAccess = new TcbExpr(`${target.print()}.addEventListener`).addParseSpanInfo(output.keySpan);
-        const handler = tcbCreateEventHandler(output, this.tcb, this.scope, 0, domEventAssertion);
-        const call = new TcbExpr(`${propertyAccess.print()}(${TcbExpr.quoteAndEscape(output.name)}, ${handler.print()})`);
-        call.addParseSpanInfo(output.sourceSpan);
-        this.scope.addStatement(call);
-      } else {
-        const handler = tcbCreateEventHandler(output, this.tcb, this.scope, 1);
-        this.scope.addStatement(handler);
-      }
-    }
-    return null;
-  }
-}
-class TcbEventHandlerTranslator extends TcbExpressionTranslator {
-  /** @returns {TcbExpr | null} */ resolve(/** @type {AST} */ ast) {
-    if (ast instanceof PropertyRead && ast.receiver instanceof ImplicitReceiver && ast.name === EVENT_PARAMETER) {
-      return new TcbExpr(EVENT_PARAMETER).addParseSpanInfo(ast.nameSpan);
-    }
-    return super.resolve(ast);
-  }
-  /** @returns {boolean} */ isValidLetDeclarationAccess() {
-    return true;
-  }
-}
-/** @returns {TcbExpr} */ function tcbCreateEventHandler(/** @type {BoundEvent} */ event, /** @type {Context} */ tcb, /** @type {Scope} */ scope, eventType, /** @type {TcbExpr | undefined} */ assertionExpression) {
-  const handler = tcbEventHandlerExpression(event.handler, tcb, scope);
-  const statements = [];
-  if (assertionExpression !== undefined) {
-    statements.push(assertionExpression);
-  }
-  statements.push(handler);
-  let eventParamType;
-  if (eventType === 0) {
-    eventParamType = undefined;
-  } else if (eventType === 1) {
-    eventParamType = 'any';
-  } else {
-    eventParamType = eventType;
-  }
-  const guards = scope.guards();
-  let body = `{\n${getStatementsBlock(statements)} }`;
-  if (guards !== null) {
-    body = `{ if (${guards.print()}) ${body} }`;
-  }
-  const eventParam = new TcbExpr(`${EVENT_PARAMETER}${eventParamType === undefined ? '' : ': ' + eventParamType}`);
-  eventParam.addExpressionIdentifier(ExpressionIdentifier.EVENT_PARAMETER);
-  return new TcbExpr(`(${eventParam.print()}): any => ${body}`);
-}
-
-class TcbDirectiveTypeOpBase extends TcbOp {
-  /** @type {Context} */ tcb;
-  /** @type {Scope} */ scope;
-  node;
-  dir;
-  /** @type {number | undefined} */ directiveIndex;
-  constructor(/** @type {Context} */ tcb, /** @type {Scope} */ scope, node, dir, /** @type {number | undefined} */ directiveIndex) {
-    super();
-    this.tcb = tcb;
-    this.scope = scope;
-    this.node = node;
-    this.dir = dir;
-    this.directiveIndex = directiveIndex;
-  }
-  get optional() {
-    return true;
-  }
-  /** @returns {TcbExpr} */ execute() {
-    const rawType = this.tcb.env.referenceTcbValue(this.dir.ref);
-    let type;
-    let span;
-    if (this.dir.isGeneric === false || this.dir.typeParameters === null || this.dir.typeParameters.length === 0) {
-      type = rawType;
-    } else {
-      const typeArguments = Array(this.dir.typeParameters?.length ?? 0).fill('any').join(', ');
-      type = new TcbExpr(`${rawType.print()}<${typeArguments}>`);
-    }
-    if (this.node instanceof HostElement) {
-      span = this.node.sourceSpan;
-    } else {
-      span = this.node.startSourceSpan || this.node.sourceSpan;
-    }
-    const identifier = this.dir.matchSource === MatchSource.HostDirective ? ExpressionIdentifier.HOST_DIRECTIVE : ExpressionIdentifier.DIRECTIVE;
-    const id = new TcbExpr(this.tcb.allocateId()).addExpressionIdentifier(identifier, this.directiveIndex).addParseSpanInfo(span);
-    this.scope.addStatement(declareVariable(id, type));
-    return id;
-  }
-}
-class TcbNonGenericDirectiveTypeOp extends TcbDirectiveTypeOpBase {
-  /** @returns {TcbExpr} */ execute() {
-    if (this.dir.isGeneric) {
-      throw new Error(`Assertion Error: expected ${this.dir.ref.name} not to be generic.`);
-    }
-    return super.execute();
-  }
-}
-class TcbGenericDirectiveTypeWithAnyParamsOp extends TcbDirectiveTypeOpBase {
-  /** @returns {TcbExpr} */ execute() {
-    if (this.dir.typeParameters === null || this.dir.typeParameters.length === 0) {
-      throw new Error(`Assertion Error: expected typeParameters when creating a declaration for ${this.dir.ref.name}`);
-    }
-    return super.execute();
   }
 }
 
@@ -32013,100 +30410,303 @@ class TcbDirectiveCtorCircularFallbackOp extends TcbOp {
   return new TcbExpr(`${typeCtor.print()}(${literal})`);
 }
 
-class TcbControlFlowContentProjectionOp extends TcbOp {
-  /** @type {Context} */ tcb;
-  element;
-  /** @type {string[]} */ ngContentSelectors;
-  /** @type {string} */ componentName;
-  /** @type {number} */ category;
-  constructor(/** @type {Context} */ tcb, element, /** @type {string[]} */ ngContentSelectors, /** @type {string} */ componentName) {
-    super();
-    this.tcb = tcb;
-    this.element = element;
-    this.ngContentSelectors = ngContentSelectors;
-    this.componentName = componentName;
-    this.category = tcb.env.config.controlFlowPreventingContentProjection === 'error' ? OutOfBandDiagnosticCategory.Error : OutOfBandDiagnosticCategory.Warning;
-  }
-  optional = false;
-  /** @returns {null} */ execute() {
-    const controlFlowToCheck = this.findPotentialControlFlowNodes();
-    if (controlFlowToCheck.length > 0) {
-      const matcher = new SelectorMatcher();
-      for (const selector of this.ngContentSelectors) {
-        if (selector !== '*') {
-          matcher.addSelectables(CssSelector.parse(selector), selector);
-        }
-      }
-      for (const root of controlFlowToCheck) {
-        for (const child of root.children) {
-          if (child instanceof Element$1 || child instanceof Template) {
-            matcher.match(createCssSelectorFromNode(child), (_, originalSelector) => {
-              this.tcb.oobRecorder.controlFlowPreventingContentProjection(this.tcb.id, this.category, child, this.componentName, originalSelector, root, this.tcb.hostPreserveWhitespaces);
-            });
-          }
-        }
-      }
-    }
-    return null;
-  }
-  findPotentialControlFlowNodes() {
-    const result = [];
-    for (const child of this.element.children) {
-      if (child instanceof ForLoopBlock) {
-        if (this.shouldCheck(child)) {
-          result.push(child);
-        }
-        if (child.empty !== null && this.shouldCheck(child.empty)) {
-          result.push(child.empty);
-        }
-      } else if (child instanceof IfBlock) {
-        for (const branch of child.branches) {
-          if (this.shouldCheck(branch)) {
-            result.push(branch);
-          }
-        }
-      } else if (child instanceof SwitchBlock) {
-        for (const current of child.groups) {
-          if (this.shouldCheck(current)) {
-            result.push(current);
-          }
-        }
-      }
-    }
-    return result;
-  }
-  /** @returns {boolean} */ shouldCheck(node) {
-    if (node.children.length < 2) {
-      return false;
-    }
-    let hasSeenRootNode = false;
-    for (const child of node.children) {
-      if (!(child instanceof Text$3) || this.tcb.hostPreserveWhitespaces || child.value.trim().length > 0) {
-        if (hasSeenRootNode) {
-          return true;
-        }
-        hasSeenRootNode = true;
-      }
-    }
-    return false;
-  }
-}
-
-class TcbIntersectionObserverOp extends TcbOp {
+class TcbDirectiveTypeOpBase extends TcbOp {
   /** @type {Context} */ tcb;
   /** @type {Scope} */ scope;
-  /** @type {AST} */ options;
-  constructor(/** @type {Context} */ tcb, /** @type {Scope} */ scope, /** @type {AST} */ options) {
+  node;
+  dir;
+  directiveIndex;
+  constructor(tcb, scope, node, dir, directiveIndex) {
     super();
     this.tcb = tcb;
     this.scope = scope;
-    this.options = options;
+    this.node = node;
+    this.dir = dir;
+    this.directiveIndex = directiveIndex;
   }
-  optional = false;
+  get optional() {
+    return true;
+  }
   /** @returns {null} */ execute() {
-    const options = tcbExpression(this.options, this.tcb, this.scope);
-    this.scope.addStatement(new TcbExpr(`new IntersectionObserver(null!, ${options.print()})`));
+    const rawType = this.tcb.env.referenceTcbValue(this.dir.ref);
+    let type;
+    let span;
+    if (this.dir.isGeneric === false || this.dir.typeParameters === null || this.dir.typeParameters.length === 0) {
+      type = rawType;
+    } else {
+      const typeArguments = Array(this.dir.typeParameters?.length ?? 0).fill('any').join(', ');
+      type = new TcbExpr(`${rawType.print()}<${typeArguments}>`);
+    }
+    if (this.node instanceof HostElement) {
+      span = this.node.sourceSpan;
+    } else {
+      span = this.node.startSourceSpan || this.node.sourceSpan;
+    }
+    const identifier = this.dir.matchSource === MatchSource.HostDirective ? ExpressionIdentifier.HOST_DIRECTIVE : ExpressionIdentifier.DIRECTIVE;
+    const id = new TcbExpr(this.tcb.allocateId()).addExpressionIdentifier(identifier, this.directiveIndex).addParseSpanInfo(span);
+    this.scope.addStatement(declareVariable(id, type));
+    return id;
+  }
+}
+class TcbNonGenericDirectiveTypeOp extends TcbDirectiveTypeOpBase {
+  /** @returns {null} */ execute() {
+    if (this.dir.isGeneric) {
+      throw new Error(`Assertion Error: expected ${this.dir.ref.name} not to be generic.`);
+    }
+    return super.execute();
+  }
+}
+class TcbGenericDirectiveTypeWithAnyParamsOp extends TcbDirectiveTypeOpBase {
+  /** @returns {null} */ execute() {
+    if (this.dir.typeParameters === null || this.dir.typeParameters.length === 0) {
+      throw new Error(`Assertion Error: expected typeParameters when creating a declaration for ${this.dir.ref.name}`);
+    }
+    return super.execute();
+  }
+}
+
+class TcbElementOp extends TcbOp {
+  tcb;
+  scope;
+  element;
+  constructor(tcb, scope, element) {
+    super();
+    this.tcb = tcb;
+    this.scope = scope;
+    this.element = element;
+  }
+  get optional() {
+    return true;
+  }
+  /** @returns {TcbExpr} */ execute() {
+    const id = this.tcb.allocateId();
+    const idNode = new TcbExpr(id);
+    idNode.addParseSpanInfo(this.element.startSourceSpan || this.element.sourceSpan);
+    const initializer = new TcbExpr(`document.createElement("${this.element.name}")`);
+    initializer.addParseSpanInfo(this.element.startSourceSpan || this.element.sourceSpan);
+    const stmt = new TcbExpr(`var ${idNode.print()} = ${initializer.print()}`);
+    stmt.addParseSpanInfo(this.element.startSourceSpan || this.element.sourceSpan);
+    this.scope.addStatement(stmt);
+    return idNode;
+  }
+}
+
+const EVENT_PARAMETER = '$event';
+/** @returns {TcbExpr} */ function tcbEventHandlerExpression(/** @type {AST} */ ast, /** @type {Context} */ tcb, /** @type {Scope} */ scope) {
+  const translator = new TcbEventHandlerTranslator(tcb, scope);
+  return translator.translate(ast);
+}
+class TcbDirectiveOutputsOp extends TcbOp {
+  tcb;
+  scope;
+  node;
+  inputs;
+  outputs;
+  dir;
+  constructor(tcb, scope, node, inputs, outputs, dir) {
+    super();
+    this.tcb = tcb;
+    this.scope = scope;
+    this.node = node;
+    this.inputs = inputs;
+    this.outputs = outputs;
+    this.dir = dir;
+  }
+  get optional() {
+    return false;
+  }
+  /** @returns {null} */ execute() {
+    let dirId = null;
+    const outputs = this.dir.outputs;
+    for (const output of this.outputs) {
+      if (output.type === ParsedEventType.LegacyAnimation || !outputs.hasBindingPropertyName(output.name)) {
+        continue;
+      }
+      if (this.tcb.env.config.checkTypeOfOutputEvents && this.inputs !== null && output.name.endsWith('Change')) {
+        const inputName = output.name.slice(0, -6);
+        checkSplitTwoWayBinding(inputName, output, this.inputs, this.tcb);
+      }
+      const field = outputs.getByBindingPropertyName(output.name)[0].classPropertyName;
+      if (dirId === null) {
+        dirId = this.scope.resolve(this.node, this.dir);
+      }
+      const outputField = new TcbExpr(`${dirId.print()}[${TcbExpr.quoteAndEscape(field)}]`);
+      outputField.addParseSpanInfo(output.keySpan);
+      if (this.tcb.env.config.checkTypeOfOutputEvents) {
+        const handler = tcbCreateEventHandler(output, this.tcb, this.scope, 0);
+        const call = new TcbExpr(`${outputField.print()}.subscribe(${handler.print()})`);
+        call.addParseSpanInfo(output.sourceSpan);
+        this.scope.addStatement(call);
+      } else {
+        this.scope.addStatement(outputField);
+        const handler = tcbCreateEventHandler(output, this.tcb, this.scope, 1);
+        this.scope.addStatement(handler);
+      }
+    }
     return null;
+  }
+}
+class TcbUnclaimedOutputsOp extends TcbOp {
+  tcb;
+  scope;
+  target;
+  outputs;
+  inputs;
+  claimedOutputs;
+  hasDirectives;
+  hasComponent;
+  constructor(tcb, scope, target, outputs, inputs, claimedOutputs, hasDirectives = false, hasComponent = false) {
+    super();
+    this.tcb = tcb;
+    this.scope = scope;
+    this.target = target;
+    this.outputs = outputs;
+    this.inputs = inputs;
+    this.claimedOutputs = claimedOutputs;
+    this.hasDirectives = hasDirectives;
+    this.hasComponent = hasComponent;
+  }
+  get optional() {
+    return false;
+  }
+  /** @returns {null} */ execute() {
+    let elId = null;
+    for (const output of this.outputs) {
+      if (this.claimedOutputs?.has(output.name)) {
+        continue;
+      }
+      if (this.tcb.env.config.checkTypeOfOutputEvents && this.inputs !== null && output.name.endsWith('Change')) {
+        const inputName = output.name.slice(0, -6);
+        if (checkSplitTwoWayBinding(inputName, output, this.inputs, this.tcb)) {
+          continue;
+        }
+      }
+      if (this.tcb.env.config.checkUnclaimedEventNames && this.hasDirectives && output.type === ParsedEventType.Regular && output.target === null && this.target instanceof Element$1) {
+        this.tcb.domSchemaChecker.checkTemplateElementEvent(this.tcb.id, this.target.name, output.name, output.keySpan, this.tcb.schemas, this.hasComponent);
+      }
+      if (output.type === ParsedEventType.LegacyAnimation) {
+        const eventType = this.tcb.env.config.checkTypeOfAnimationEvents ? this.tcb.env.referenceExternalSymbol('@angular/animations', 'AnimationEvent').print() : 1;
+        const handler = tcbCreateEventHandler(output, this.tcb, this.scope, eventType);
+        this.scope.addStatement(handler);
+      } else if (output.type === ParsedEventType.Animation) {
+        const eventType = this.tcb.env.referenceExternalSymbol('@angular/core', 'AnimationCallbackEvent');
+        const handler = tcbCreateEventHandler(output, this.tcb, this.scope, eventType.print());
+        this.scope.addStatement(handler);
+      } else if (this.tcb.env.config.checkTypeOfDomEvents) {
+        let target;
+        let domEventAssertion;
+        if (output.target === 'window' || output.target === 'document') {
+          target = new TcbExpr(output.target);
+        } else if (elId === null) {
+          target = elId = this.scope.resolve(this.target);
+        } else {
+          target = elId;
+        }
+        if (this.target instanceof Element$1 && this.target.isVoid && this.tcb.env.config.allowDomEventAssertion) {
+          const assertUtil = this.tcb.env.referenceExternalSymbol('@angular/core', 'ɵassertType');
+          domEventAssertion = new TcbExpr(`${assertUtil.print()}<typeof ${target.print()}>(${EVENT_PARAMETER}.target)`);
+        }
+        const propertyAccess = new TcbExpr(`${target.print()}.addEventListener`).addParseSpanInfo(output.keySpan);
+        const handler = tcbCreateEventHandler(output, this.tcb, this.scope, 0, domEventAssertion);
+        const call = new TcbExpr(`${propertyAccess.print()}(${TcbExpr.quoteAndEscape(output.name)}, ${handler.print()})`);
+        call.addParseSpanInfo(output.sourceSpan);
+        this.scope.addStatement(call);
+      } else {
+        const handler = tcbCreateEventHandler(output, this.tcb, this.scope, 1);
+        this.scope.addStatement(handler);
+      }
+    }
+    return null;
+  }
+}
+class TcbEventHandlerTranslator extends TcbExpressionTranslator {
+  resolve(ast) {
+    if (ast instanceof PropertyRead && ast.receiver instanceof ImplicitReceiver && ast.name === EVENT_PARAMETER) {
+      return new TcbExpr(EVENT_PARAMETER).addParseSpanInfo(ast.nameSpan);
+    }
+    return super.resolve(ast);
+  }
+  /** @returns {boolean} */ isValidLetDeclarationAccess() {
+    return true;
+  }
+}
+/** @returns {TcbExpr} */ function tcbCreateEventHandler(/** @type {BoundEvent} */ event, /** @type {Context} */ tcb, /** @type {Scope} */ scope, eventType, /** @type {TcbExpr | undefined} */ assertionExpression) {
+  const handler = tcbEventHandlerExpression(event.handler, tcb, scope);
+  const statements = [];
+  if (assertionExpression !== undefined) {
+    statements.push(assertionExpression);
+  }
+  statements.push(handler);
+  let eventParamType;
+  if (eventType === 0) {
+    eventParamType = undefined;
+  } else if (eventType === 1) {
+    eventParamType = 'any';
+  } else {
+    eventParamType = eventType;
+  }
+  const guards = scope.guards();
+  let body = `{\n${getStatementsBlock(statements)} }`;
+  if (guards !== null) {
+    body = `{ if (${guards.print()}) ${body} }`;
+  }
+  const eventParam = new TcbExpr(`${EVENT_PARAMETER}${eventParamType === undefined ? '' : ': ' + eventParamType}`);
+  eventParam.addExpressionIdentifier(ExpressionIdentifier.EVENT_PARAMETER);
+  return new TcbExpr(`(${eventParam.print()}): any => ${body}`);
+}
+
+class TcbForOfOp extends TcbOp {
+  tcb;
+  scope;
+  block;
+  constructor(tcb, scope, block) {
+    super();
+    this.tcb = tcb;
+    this.scope = scope;
+    this.block = block;
+  }
+  get optional() {
+    return false;
+  }
+  /** @returns {null} */ execute() {
+    const loopScope = this.scope.createChildScope(this.scope, this.block, this.tcb.env.config.checkControlFlowBodies ? this.block.children : [], null);
+    const initializerId = loopScope.resolve(this.block.item);
+    const initializer = new TcbExpr(`const ${initializerId.print()}`);
+    initializer.addParseSpanInfo(this.block.item.keySpan);
+    const expression = new TcbExpr(`${tcbExpression(this.block.expression, this.tcb, this.scope).print()}!`);
+    let statements;
+    if (this.block.trackBy === null) {
+      statements = loopScope.render();
+    } else {
+      const trackTranslator = new TcbForLoopTrackTranslator(this.tcb, loopScope, this.block);
+      const trackExpression = trackTranslator.translate(this.block.trackBy);
+      statements = [...loopScope.render(), trackExpression];
+    }
+    this.scope.addStatement(new TcbExpr(`for (${initializer.print()} of ${expression.print()}) {\n${getStatementsBlock(statements)} }`));
+    return null;
+  }
+}
+class TcbForLoopTrackTranslator extends TcbExpressionTranslator {
+  block;
+  allowedVariables;
+  constructor(tcb, scope, block) {
+    super(tcb, scope);
+    this.block = block;
+    this.allowedVariables = new Set([block.item]);
+    for (const variable of block.contextVariables) {
+      if (variable.value === '$index') {
+        this.allowedVariables.add(variable);
+      }
+    }
+  }
+  resolve(ast) {
+    if (ast instanceof PropertyRead && (ast.receiver instanceof ImplicitReceiver || ast.receiver instanceof ThisReceiver)) {
+      const target = this.tcb.boundTarget.getExpressionTarget(ast);
+      if (target !== null && (!(target instanceof Variable) || !this.allowedVariables.has(target))) {
+        this.tcb.oobRecorder.illegalForLoopTrackAccess(this.tcb.id, this.block, ast);
+      }
+    }
+    return super.resolve(ast);
   }
 }
 
@@ -32133,6 +30733,468 @@ class TcbHostElementOp extends TcbOp {
     initializer.addParseSpanInfo(this.element.sourceSpan);
     this.scope.addStatement(new TcbExpr(`var ${id} = ${initializer.print()}`));
     return new TcbExpr(id);
+  }
+}
+
+class TcbIfBlockOp extends TcbOp {
+  tcb;
+  scope;
+  block;
+  expressionScopes = new Map();
+  constructor(tcb, scope, block) {
+    super();
+    this.tcb = tcb;
+    this.scope = scope;
+    this.block = block;
+  }
+  get optional() {
+    return false;
+  }
+  /** @returns {TcbExpr} */ execute() {
+    const root = this.generateBranch(0);
+    root && this.scope.addStatement(root);
+    return null;
+  }
+  /** @returns {TcbExpr | undefined} */ generateBranch(/** @type {number} */ index) {
+    const branch = this.block.branches[index];
+    if (!branch) {
+      return undefined;
+    }
+    if (branch.expression === null) {
+      const branchScope = this.getBranchScope(this.scope, branch, index);
+      return new TcbExpr(`{\n${getStatementsBlock(branchScope.render())}}`);
+    }
+    const outerScope = this.scope.createChildScope(this.scope, branch, [], null);
+    outerScope.render().forEach(stmt => this.scope.addStatement(stmt));
+    this.expressionScopes.set(branch, outerScope);
+    let expression = tcbExpression(branch.expression, this.tcb, this.scope);
+    if (branch.expressionAlias !== null) {
+      expression = new TcbExpr(`(${expression.print()}) && ${outerScope.resolve(branch.expressionAlias).print()}`);
+    }
+    const bodyScope = this.getBranchScope(outerScope, branch, index);
+    const ifStatement = `if (${expression.print()}) {\n${getStatementsBlock(bodyScope.render())}}`;
+    const elseBranch = this.generateBranch(index + 1);
+    return new TcbExpr(ifStatement + (elseBranch ? ' else ' + elseBranch.print() : ''));
+  }
+  /** @returns {Scope} */ getBranchScope(/** @type {Scope} */ parentScope, /** @type {IfBlockBranch} */ branch, /** @type {number} */ index) {
+    const checkBody = this.tcb.env.config.checkControlFlowBodies;
+    return this.scope.createChildScope(parentScope, null, checkBody ? branch.children : [], checkBody ? this.generateBranchGuard(index) : null);
+  }
+  /** @returns {TcbExpr | null} */ generateBranchGuard(/** @type {number} */ index) {
+    let guard = null;
+    for (let i = 0; i <= index; i++) {
+      const branch = this.block.branches[i];
+      if (branch.expression === null) {
+        continue;
+      }
+      if (!this.expressionScopes.has(branch)) {
+        throw new Error(`Could not determine expression scope of branch at index ${i}`);
+      }
+      const expressionScope = this.expressionScopes.get(branch);
+      let expression;
+      expression = tcbExpression(branch.expression, this.tcb, expressionScope);
+      if (branch.expressionAlias !== null) {
+        expression = new TcbExpr(`(${expression.print()}) && ${expressionScope.resolve(branch.expressionAlias).print()}`);
+      }
+      expression.markIgnoreDiagnostics();
+      const comparisonExpression = i === index ? expression : new TcbExpr(`!(${expression.print()})`);
+      guard = guard === null ? comparisonExpression : new TcbExpr(`(${guard.print()}) && (${comparisonExpression.print()})`);
+    }
+    return guard;
+  }
+}
+
+class TcbIntersectionObserverOp extends TcbOp {
+  tcb;
+  scope;
+  options;
+  constructor(tcb, scope, options) {
+    super();
+    this.tcb = tcb;
+    this.scope = scope;
+    this.options = options;
+  }
+  optional = false;
+  /** @returns {TcbExpr | null} */ execute() {
+    const options = tcbExpression(this.options, this.tcb, this.scope);
+    this.scope.addStatement(new TcbExpr(`new IntersectionObserver(null!, ${options.print()})`));
+    return null;
+  }
+}
+
+class TcbLetDeclarationOp extends TcbOp {
+  tcb;
+  scope;
+  node;
+  constructor(tcb, scope, node) {
+    super();
+    this.tcb = tcb;
+    this.scope = scope;
+    this.node = node;
+  }
+  optional = false;
+  /** @returns {null} */ execute() {
+    const id = new TcbExpr(this.tcb.allocateId()).addParseSpanInfo(this.node.nameSpan);
+    const value = tcbExpression(this.node.value, this.tcb, this.scope).wrapForTypeChecker();
+    const varStatement = new TcbExpr(`const ${id.print()} = ${value.print()}`);
+    varStatement.addParseSpanInfo(this.node.sourceSpan);
+    this.scope.addStatement(varStatement);
+    return id;
+  }
+}
+
+class TcbReferenceOp extends TcbOp {
+  tcb;
+  scope;
+  node;
+  host;
+  target;
+  constructor(tcb, scope, node, host, target) {
+    super();
+    this.tcb = tcb;
+    this.scope = scope;
+    this.node = node;
+    this.host = host;
+    this.target = target;
+  }
+  optional = true;
+  /** @returns {null} */ execute() {
+    const id = new TcbExpr(this.tcb.allocateId());
+    let initializer = this.target instanceof Template || this.target instanceof Element$1 ? this.scope.resolve(this.target) : this.scope.resolve(this.host, this.target);
+    if (this.target instanceof Element$1 && !this.tcb.env.config.checkTypeOfDomReferences || !this.tcb.env.config.checkTypeOfNonDomReferences) {
+      initializer = new TcbExpr(`${initializer.print()} as any`);
+    } else if (this.target instanceof Template) {
+      const templateRef = this.tcb.env.referenceExternalSymbol('@angular/core', 'TemplateRef');
+      initializer = new TcbExpr(`(${initializer.print()} as any as ${templateRef.print()}<any>)`);
+    }
+    initializer.addParseSpanInfo(this.node.sourceSpan);
+    id.addParseSpanInfo(this.node.keySpan);
+    this.scope.addStatement(new TcbExpr(`var ${id.print()} = ${initializer.print()}`));
+    return id;
+  }
+}
+class TcbInvalidReferenceOp extends TcbOp {
+  tcb;
+  scope;
+  constructor(tcb, scope) {
+    super();
+    this.tcb = tcb;
+    this.scope = scope;
+  }
+  optional = true;
+  /** @returns {TcbExpr} */ execute() {
+    const id = new TcbExpr(this.tcb.allocateId());
+    this.scope.addStatement(new TcbExpr(`var ${id.print()} = null! as any`));
+    return id;
+  }
+}
+
+/** @returns {string} */ function getComponentTagName(/** @type {Component$1} */ node) {
+  return node.tagName || 'ng-component';
+}
+class TcbComponentNodeOp extends TcbOp {
+  tcb;
+  scope;
+  component;
+  optional = true;
+  constructor(tcb, scope, component) {
+    super();
+    this.tcb = tcb;
+    this.scope = scope;
+    this.component = component;
+  }
+  /** @returns {TcbExpr} */ execute() {
+    const id = this.tcb.allocateId();
+    const initializer = new TcbExpr(`document.createElement("${getComponentTagName(this.component)}")`);
+    initializer.addParseSpanInfo(this.component.startSourceSpan || this.component.sourceSpan);
+    this.scope.addStatement(new TcbExpr(`var ${id} = ${initializer.print()}`));
+    return new TcbExpr(id);
+  }
+}
+
+const REGISTRY = new DomElementSchemaRegistry();
+class TcbDomSchemaCheckerOp extends TcbOp {
+  tcb;
+  element;
+  checkElement;
+  claimedInputs;
+  constructor(tcb, element, checkElement, claimedInputs) {
+    super();
+    this.tcb = tcb;
+    this.element = element;
+    this.checkElement = checkElement;
+    this.claimedInputs = claimedInputs;
+  }
+  get optional() {
+    return false;
+  }
+  /** @returns {TcbExpr} */ execute() {
+    const element = this.element;
+    const isTemplateElement = element instanceof Element$1 || element instanceof Component$1;
+    const bindings = isTemplateElement ? element.inputs : element.bindings;
+    if (this.checkElement && isTemplateElement) {
+      this.tcb.domSchemaChecker.checkElement(this.tcb.id, this.getTagName(element), element.startSourceSpan, this.tcb.schemas, this.tcb.hostIsStandalone);
+    }
+    for (const binding of bindings) {
+      const isPropertyBinding = binding.type === BindingType.Property || binding.type === BindingType.TwoWay;
+      if (isPropertyBinding && this.claimedInputs?.has(binding.name)) {
+        continue;
+      }
+      if (isPropertyBinding && binding.name !== 'style' && binding.name !== 'class') {
+        const propertyName = REGISTRY.getMappedPropName(binding.name);
+        if (isTemplateElement) {
+          this.tcb.domSchemaChecker.checkTemplateElementProperty(this.tcb.id, this.getTagName(element), propertyName, binding.sourceSpan, this.tcb.schemas, this.tcb.hostIsStandalone);
+        } else {
+          this.tcb.domSchemaChecker.checkHostElementProperty(this.tcb.id, element, propertyName, binding.keySpan, this.tcb.schemas);
+        }
+      }
+    }
+    return null;
+  }
+  /** @returns {string} */ getTagName(node) {
+    return node instanceof Element$1 ? node.name : getComponentTagName(node);
+  }
+}
+
+class TcbSwitchOp extends TcbOp {
+  tcb;
+  scope;
+  block;
+  constructor(tcb, scope, block) {
+    super();
+    this.tcb = tcb;
+    this.scope = scope;
+    this.block = block;
+  }
+  get optional() {
+    return false;
+  }
+  /** @returns {TcbExpr} */ execute() {
+    const switchExpression = tcbExpression(this.block.expression, this.tcb, this.scope);
+    const clauses = this.block.groups.flatMap(current => {
+      const checkBody = this.tcb.env.config.checkControlFlowBodies;
+      const clauseScope = this.scope.createChildScope(this.scope, null, checkBody ? current.children : [], checkBody ? this.generateGuard(current, switchExpression) : null);
+      const statements = [...clauseScope.render(), new TcbExpr('break')];
+      return current.cases.map((switchCase, index) => {
+        const statementsStr = getStatementsBlock(index === current.cases.length - 1 ? statements : [], true);
+        const source = switchCase.expression === null ? `default: ${statementsStr}` : `case ${tcbExpression(switchCase.expression, this.tcb, this.scope).print()}: ${statementsStr}`;
+        return new TcbExpr(source);
+      });
+    });
+    if (this.block.exhaustiveCheck) {
+      let translateExpression = this.block.expression;
+      if (this.block.exhaustiveCheck.expression) {
+        translateExpression = this.block.exhaustiveCheck.expression;
+      }
+      const switchValue = tcbExpression(translateExpression, this.tcb, this.scope);
+      const exhaustiveId = this.tcb.allocateId();
+      clauses.push(new TcbExpr(`default: const tcbExhaustive${exhaustiveId}: never = ${switchValue.print()};`));
+    }
+    this.scope.addStatement(new TcbExpr(`switch (${switchExpression.print()}) { ${clauses.map(c => c.print()).join('\n')} }`));
+    return null;
+  }
+  /** @returns {TcbExpr | null} */ generateGuard(/** @type {SwitchBlockCaseGroup} */ group, /** @type {TcbExpr} */ switchValue) {
+    const hasDefault = group.cases.some(c => c.expression === null);
+    if (!hasDefault) {
+      let guard = null;
+      for (const switchCase of group.cases) {
+        if (switchCase.expression !== null) {
+          const expression = tcbExpression(switchCase.expression, this.tcb, this.scope);
+          expression.markIgnoreDiagnostics();
+          const comparison = new TcbExpr(`${switchValue.print()} === ${expression.print()}`);
+          if (guard === null) {
+            guard = comparison;
+          } else {
+            guard = new TcbExpr(`(${guard.print()}) || (${comparison.print()})`);
+          }
+        }
+      }
+      return guard;
+    }
+    let guard = null;
+    for (const currentGroup of this.block.groups) {
+      if (currentGroup === group) {
+        continue;
+      }
+      for (const switchCase of currentGroup.cases) {
+        if (switchCase.expression === null) {
+          continue;
+        }
+        const expression = tcbExpression(switchCase.expression, this.tcb, this.scope);
+        expression.markIgnoreDiagnostics();
+        const comparison = new TcbExpr(`${switchValue.print()} !== ${expression.print()}`);
+        if (guard === null) {
+          guard = comparison;
+        } else {
+          guard = new TcbExpr(`(${guard.print()}) && (${comparison.print()})`);
+        }
+      }
+    }
+    return guard;
+  }
+}
+
+class TcbTemplateContextOp extends TcbOp {
+  tcb;
+  scope;
+  constructor(tcb, scope) {
+    super();
+    this.tcb = tcb;
+    this.scope = scope;
+  }
+  optional = true;
+  /** @returns {TcbExpr} */ execute() {
+    const ctx = new TcbExpr(this.tcb.allocateId());
+    this.scope.addStatement(declareVariable(ctx, new TcbExpr('any')));
+    return ctx;
+  }
+}
+class TcbTemplateBodyOp extends TcbOp {
+  tcb;
+  scope;
+  template;
+  constructor(tcb, scope, template) {
+    super();
+    this.tcb = tcb;
+    this.scope = scope;
+    this.template = template;
+  }
+  get optional() {
+    return false;
+  }
+  /** @returns {null} */ execute() {
+    let guard = null;
+    const directiveGuards = [];
+    this.addDirectiveGuards(directiveGuards, this.template, this.tcb.boundTarget.getDirectivesOfNode(this.template));
+    for (const directive of this.template.directives) {
+      this.addDirectiveGuards(directiveGuards, directive, this.tcb.boundTarget.getDirectivesOfNode(directive));
+    }
+    if (directiveGuards.length > 0) {
+      guard = directiveGuards.reduce((expr, dirGuard) => new TcbExpr(`${expr.print()} && ${dirGuard.print()}`), directiveGuards.pop());
+    }
+    const tmplScope = this.scope.createChildScope(this.scope, this.template, this.template.children, guard);
+    const statements = tmplScope.render();
+    if (statements.length === 0) {
+      return null;
+    }
+    let tmplBlock = `{\n${getStatementsBlock(statements)}}`;
+    if (guard !== null) {
+      tmplBlock = `if (${guard.print()}) ${tmplBlock}`;
+    }
+    this.scope.addStatement(new TcbExpr(tmplBlock));
+    return null;
+  }
+  addDirectiveGuards(/** @type {TcbExpr[]} */ guards, hostNode, /** @type {any[] | null} */ directives) {
+    if (directives === null || directives.length === 0) {
+      return;
+    }
+    const isTemplate = hostNode instanceof Template;
+    for (const dir of directives) {
+      const dirInstId = this.scope.resolve(hostNode, dir);
+      const dirId = this.tcb.env.referenceTcbValue(dir.ref);
+      dir.ngTemplateGuards.forEach(guard => {
+        const boundInput = hostNode.inputs.find(i => i.name === guard.inputName) || (isTemplate ? hostNode.templateAttrs.find(input => {
+          return input instanceof BoundAttribute && input.name === guard.inputName;
+        }) : undefined);
+        if (boundInput !== undefined) {
+          const expr = tcbExpression(boundInput.value, this.tcb, this.scope);
+          expr.markIgnoreDiagnostics();
+          if (guard.type === 'binding') {
+            guards.push(expr);
+          } else {
+            const guardInvoke = new TcbExpr(`${dirId.print()}.ngTemplateGuard_${guard.inputName}(${dirInstId.print()}, ${expr.print()})`);
+            guardInvoke.addParseSpanInfo(boundInput.value.sourceSpan);
+            guards.push(guardInvoke);
+          }
+        }
+      });
+      if (dir.hasNgTemplateContextGuard) {
+        if (this.tcb.env.config.applyTemplateContextGuards) {
+          const ctx = this.scope.resolve(hostNode);
+          const guardInvoke = new TcbExpr(`${dirId.print()}.ngTemplateContextGuard(${dirInstId.print()}, ${ctx.print()})`);
+          guardInvoke.markIgnoreDiagnostics();
+          guardInvoke.addParseSpanInfo(hostNode.sourceSpan);
+          guards.push(guardInvoke);
+        }
+      }
+    }
+  }
+}
+
+class TcbBlockImplicitVariableOp extends TcbOp {
+  tcb;
+  scope;
+  type;
+  variable;
+  constructor(tcb, scope, type, variable) {
+    super();
+    this.tcb = tcb;
+    this.scope = scope;
+    this.type = type;
+    this.variable = variable;
+  }
+  optional = true;
+  /** @returns {null} */ execute() {
+    const id = new TcbExpr(this.tcb.allocateId());
+    id.addParseSpanInfo(this.variable.keySpan);
+    const variable = declareVariable(id, this.type);
+    variable.addParseSpanInfo(this.variable.sourceSpan);
+    this.scope.addStatement(variable);
+    return id;
+  }
+}
+class TcbTemplateVariableOp extends TcbOp {
+  tcb;
+  scope;
+  template;
+  variable;
+  constructor(tcb, scope, template, variable) {
+    super();
+    this.tcb = tcb;
+    this.scope = scope;
+    this.template = template;
+    this.variable = variable;
+  }
+  get optional() {
+    return false;
+  }
+  /** @returns {TcbExpr} */ execute() {
+    const ctx = this.scope.resolve(this.template);
+    const id = new TcbExpr(this.tcb.allocateId());
+    const initializer = new TcbExpr(`${ctx.print()}.${this.variable.value || '$implicit'}`);
+    id.addParseSpanInfo(this.variable.keySpan);
+    if (this.variable.valueSpan !== undefined) {
+      initializer.addParseSpanInfo(this.variable.valueSpan).wrapForTypeChecker();
+    }
+    const variable = new TcbExpr(`var ${id.print()} = ${initializer.print()}`);
+    variable.addParseSpanInfo(this.variable.sourceSpan);
+    this.scope.addStatement(variable);
+    return id;
+  }
+}
+class TcbBlockVariableOp extends TcbOp {
+  tcb;
+  scope;
+  initializer;
+  variable;
+  constructor(tcb, scope, initializer, variable) {
+    super();
+    this.tcb = tcb;
+    this.scope = scope;
+    this.initializer = initializer;
+    this.variable = variable;
+  }
+  get optional() {
+    return false;
+  }
+  /** @returns {TcbExpr} */ execute() {
+    const id = new TcbExpr(this.tcb.allocateId());
+    id.addParseSpanInfo(this.variable.keySpan);
+    this.initializer.wrapForTypeChecker();
+    const variable = new TcbExpr(`var ${id.print()} = ${this.initializer.print()}`);
+    variable.addParseSpanInfo(this.variable.sourceSpan);
+    this.scope.addStatement(variable);
+    return id;
   }
 }
 
@@ -32181,6 +31243,18 @@ class Scope {
       } = scopedNode;
       if (expression !== null && expressionAlias !== null) {
         Scope.registerVariable(scope, expressionAlias, new TcbBlockVariableOp(tcb, scope, tcbExpression(expression, tcb, scope), expressionAlias));
+      }
+    } else if (scopedNode instanceof BoundaryErrorBlock) {
+      for (const variable of scopedNode.contextVariables) {
+        let typeExpr;
+        if (variable.value === '$error') {
+          typeExpr = new TcbExpr(`(err as Error)`);
+        } else if (variable.value === '$reset') {
+          typeExpr = new TcbExpr(`(() => {})`);
+        } else {
+          throw new Error(`Unrecognized context variable ${variable.value}`);
+        }
+        Scope.registerVariable(scope, variable, new TcbBlockVariableOp(tcb, scope, typeExpr, variable));
       }
     } else if (scopedNode instanceof ForLoopBlock) {
       const loopInitializer = new TcbExpr(tcb.allocateId());
@@ -32336,6 +31410,8 @@ class Scope {
       this.appendDeferredBlock(node);
     } else if (node instanceof IfBlock) {
       this.opQueue.push(new TcbIfBlockOp(this.tcb, this, node));
+    } else if (node instanceof BoundaryBlock) {
+      this.opQueue.push(new TcbBoundaryOp(this.tcb, this, node));
     } else if (node instanceof SwitchBlock) {
       this.opQueue.push(new TcbSwitchOp(this.tcb, this, node));
     } else if (node instanceof ForLoopBlock) {
@@ -32386,15 +31462,32 @@ class Scope {
     const directives = this.tcb.boundTarget.getDirectivesOfNode(node);
     if (directives === null || directives.length === 0) {
       if (node instanceof Element$1) {
-        this.opQueue.push(new TcbUnclaimedInputsOp(this.tcb, this, node.inputs, node, claimedInputs), new TcbDomSchemaCheckerOp(this.tcb, node, true, claimedInputs));
+        this.opQueue.push(new TcbUnclaimedInputsOp(this.tcb, this, node.inputs, node, claimedInputs));
+        const isForeign = this.tcb.boundTarget.getForeignComponent(node) !== null;
+        if (!isForeign) {
+          this.opQueue.push(new TcbDomSchemaCheckerOp(this.tcb, node, true, claimedInputs));
+        }
       }
       return;
     }
     this.reportConflictingBindings(node);
-    if (node instanceof Element$1) {
-      const isDeferred = this.tcb.boundTarget.isDeferred(node);
-      if (!isDeferred && directives.some(dirMeta => dirMeta.isExplicitlyDeferred)) {
-        this.tcb.oobRecorder.deferredComponentUsedEagerly(this.tcb.id, node);
+    if (node instanceof Element$1 || node instanceof Template) {
+      const enclosingBlocks = this.tcb.boundTarget.getDeferBlocksOfNode(node);
+      const isDeferred = enclosingBlocks.length > 0;
+      for (const dirMeta of directives) {
+        if (!dirMeta.isExplicitlyDeferred) {
+          continue;
+        }
+        if (!isDeferred) {
+          this.tcb.oobRecorder.deferredComponentUsedEagerly(this.tcb.id, node, dirMeta, null, null);
+        } else if (dirMeta.deferredBlocks != null) {
+          const isAllowedInBlock = enclosingBlocks.some(b => b.definedName !== null && dirMeta.deferredBlocks.has(b.definedName));
+          if (!isAllowedInBlock) {
+            const currentBlockName = enclosingBlocks[enclosingBlocks.length - 1].definedName ?? 'unnamed';
+            const declaredBlocks = Array.from(dirMeta.deferredBlocks);
+            this.tcb.oobRecorder.deferredComponentUsedEagerly(this.tcb.id, node, dirMeta, currentBlockName, declaredBlocks);
+          }
+        }
       }
     }
     if (node instanceof Element$1) {
@@ -32438,7 +31531,7 @@ class Scope {
           claimedOutputs.add(outputProperty);
         }
       }
-      this.opQueue.push(new TcbUnclaimedOutputsOp(this.tcb, this, node, events, bindings, claimedOutputs));
+      this.opQueue.push(new TcbUnclaimedOutputsOp(this.tcb, this, node, events, bindings, claimedOutputs, true, directives.some(dir => dir.isComponent)));
     }
   }
   appendInputsOfSelectorlessNode(node) {
@@ -32555,7 +31648,10 @@ class Scope {
             }
           }
         }
-        this.opQueue.push(new TcbDomSchemaCheckerOp(this.tcb, node, !hasDirectives, claimedInputs));
+        const isForeign = this.tcb.boundTarget.getForeignComponent(node) !== null;
+        if (!isForeign) {
+          this.opQueue.push(new TcbDomSchemaCheckerOp(this.tcb, node, !hasDirectives, claimedInputs));
+        }
       }
       this.appendDeepSchemaChecks(node.children);
     }
@@ -32720,7 +31816,383 @@ class Scope {
   return `if (${wrapperExpression}) {\n${statements}\n}`;
 }
 
+var IdentifierKind;
+(function (IdentifierKind) {
+  IdentifierKind[IdentifierKind["Property"] = 0] = "Property";
+  IdentifierKind[IdentifierKind["Method"] = 1] = "Method";
+  IdentifierKind[IdentifierKind["Element"] = 2] = "Element";
+  IdentifierKind[IdentifierKind["Template"] = 3] = "Template";
+  IdentifierKind[IdentifierKind["Attribute"] = 4] = "Attribute";
+  IdentifierKind[IdentifierKind["Reference"] = 5] = "Reference";
+  IdentifierKind[IdentifierKind["Variable"] = 6] = "Variable";
+  IdentifierKind[IdentifierKind["LetDeclaration"] = 7] = "LetDeclaration";
+  IdentifierKind[IdentifierKind["Component"] = 8] = "Component";
+  IdentifierKind[IdentifierKind["Directive"] = 9] = "Directive";
+  IdentifierKind[IdentifierKind["Input"] = 10] = "Input";
+  IdentifierKind[IdentifierKind["Output"] = 11] = "Output";
+  IdentifierKind[IdentifierKind["Pipe"] = 12] = "Pipe";
+})(IdentifierKind || (IdentifierKind = {}));
+
+class IndexingContext {
+  components = new Set();
+  addComponent(info) {
+    this.components.add(info);
+  }
+}
+
+class IndexerVisitor extends CombinedRecursiveAstVisitor {
+  boundTemplate;
+  identifiers = new Set();
+  errors = [];
+  currentAstWithSource = null;
+  targetIdentifierCache = new Map();
+  directiveHostIdentifierCache = new Map();
+  constructor(boundTemplate) {
+    super();
+    this.boundTemplate = boundTemplate;
+  }
+  visitElement(element) {
+    const elementIdentifier = this.directiveHostToIdentifier(element);
+    if (elementIdentifier !== null) {
+      this.identifiers.add(elementIdentifier);
+    }
+    super.visitElement(element);
+  }
+  visitTemplate(template) {
+    const templateIdentifier = this.directiveHostToIdentifier(template);
+    if (templateIdentifier !== null) {
+      this.identifiers.add(templateIdentifier);
+    }
+    super.visitTemplate(template);
+  }
+  visitReference(reference) {
+    const referenceIdentifier = this.targetToIdentifier(reference);
+    if (referenceIdentifier !== null) {
+      this.identifiers.add(referenceIdentifier);
+    }
+    super.visitReference(reference);
+  }
+  visitVariable(variable) {
+    const variableIdentifier = this.targetToIdentifier(variable);
+    if (variableIdentifier !== null) {
+      this.identifiers.add(variableIdentifier);
+    }
+    super.visitVariable(variable);
+  }
+  visitLetDeclaration(decl) {
+    const identifier = this.targetToIdentifier(decl);
+    if (identifier !== null) {
+      this.identifiers.add(identifier);
+    }
+    super.visitLetDeclaration(decl);
+  }
+  visitComponent(component) {
+    const identifier = this.directiveHostToIdentifier(component);
+    if (identifier !== null) {
+      this.identifiers.add(identifier);
+    }
+    super.visitComponent(component);
+  }
+  visitDirective(directive) {
+    const identifier = this.directiveHostToIdentifier(directive);
+    if (identifier !== null) {
+      this.identifiers.add(identifier);
+    }
+    super.visitDirective(directive);
+  }
+  visitPropertyRead(ast) {
+    this.visitIdentifier(ast, IdentifierKind.Property);
+    super.visitPropertyRead(ast, null);
+  }
+  visitPipe(ast) {
+    this.visitPipeIdentifier(ast);
+    super.visitPipe(ast, null);
+  }
+  visitPipeIdentifier(ast) {
+    if (this.currentAstWithSource === null || this.currentAstWithSource.source === null) {
+      return;
+    }
+    const {
+      absoluteOffset,
+      source: expressionStr
+    } = this.currentAstWithSource;
+    const identifierStart = ast.nameSpan.start - absoluteOffset;
+    if (!expressionStr.startsWith(ast.name, identifierStart)) {
+      this.errors.push(new Error(`Impossible state: "${ast.name}" not found in "${expressionStr}" at location ${identifierStart}`));
+      return;
+    }
+    const absoluteStart = absoluteOffset + identifierStart;
+    const span = new AbsoluteSourceSpan(absoluteStart, absoluteStart + ast.name.length);
+    const target = this.boundTemplate.getPipe(ast.name);
+    const identifier = {
+      name: ast.name,
+      span,
+      kind: IdentifierKind.Pipe,
+      target: target ? {
+        node: target.ref.node
+      } : null
+    };
+    this.identifiers.add(identifier);
+  }
+  visitBoundAttribute(attribute) {
+    const identifier = this.bindingToIdentifier(attribute, IdentifierKind.Input);
+    if (identifier !== null) {
+      this.identifiers.add(identifier);
+    }
+    const previous = this.currentAstWithSource;
+    this.currentAstWithSource = {
+      source: attribute.valueSpan?.toString() || null,
+      absoluteOffset: attribute.valueSpan ? attribute.valueSpan.start.offset : -1
+    };
+    this.visit(attribute.value instanceof ASTWithSource ? attribute.value.ast : attribute.value);
+    this.currentAstWithSource = previous;
+  }
+  visitBoundEvent(event) {
+    const identifier = this.bindingToIdentifier(event, IdentifierKind.Output);
+    if (identifier !== null) {
+      this.identifiers.add(identifier);
+    }
+    super.visitBoundEvent(event);
+  }
+  visitTextAttribute(attribute) {
+    const identifier = this.bindingToIdentifier(attribute, IdentifierKind.Input);
+    if (identifier !== null) {
+      this.identifiers.add(identifier);
+    }
+    super.visitTextAttribute(attribute);
+  }
+  bindingToIdentifier(node, kind) {
+    if (!this.boundTemplate.getConsumerOfBinding) {
+      return null;
+    }
+    const consumer = this.boundTemplate.getConsumerOfBinding(node);
+    if (!consumer || consumer instanceof Element$1 || consumer instanceof Template) {
+      return null;
+    }
+    const keySpan = node.keySpan ?? (node instanceof TextAttribute ? node.sourceSpan : null);
+    if (!keySpan) {
+      return null;
+    }
+    const span = new AbsoluteSourceSpan(keySpan.start.offset, keySpan.start.offset + node.name.length);
+    return {
+      name: node.name,
+      span,
+      kind,
+      target: {
+        node: consumer.ref.node
+      }
+    };
+  }
+  directiveHostToIdentifier(node) {
+    if (this.directiveHostIdentifierCache.has(node)) {
+      return this.directiveHostIdentifierCache.get(node);
+    }
+    let name;
+    let kind;
+    if (node instanceof Template) {
+      name = node.tagName ?? 'ng-template';
+      kind = IdentifierKind.Template;
+    } else if (node instanceof Element$1) {
+      name = node.name;
+      kind = IdentifierKind.Element;
+    } else if (node instanceof Component$1) {
+      name = node.fullName;
+      kind = IdentifierKind.Component;
+    } else {
+      name = node.name;
+      kind = IdentifierKind.Directive;
+    }
+    if ((node instanceof Template || node instanceof Element$1) && name.startsWith(':')) {
+      name = name.split(':').pop();
+    }
+    const sourceSpan = node.startSourceSpan;
+    const start = this.getStartLocation(name, sourceSpan);
+    if (start === null) {
+      return null;
+    }
+    const absoluteSpan = new AbsoluteSourceSpan(start, start + name.length);
+    const attributes = node.attributes.map(({
+      name,
+      sourceSpan
+    }) => {
+      return {
+        name,
+        span: new AbsoluteSourceSpan(sourceSpan.start.offset, sourceSpan.end.offset),
+        kind: IdentifierKind.Attribute
+      };
+    });
+    const usedDirectives = this.boundTemplate.getDirectivesOfNode(node) || [];
+    const identifier = {
+      name,
+      span: absoluteSpan,
+      kind,
+      attributes: new Set(attributes),
+      usedDirectives: new Set(usedDirectives.map(dir => {
+        return {
+          node: dir.ref.node,
+          selector: dir.selector
+        };
+      }))
+    };
+    this.directiveHostIdentifierCache.set(node, identifier);
+    return identifier;
+  }
+  targetToIdentifier(node) {
+    if (this.targetIdentifierCache.has(node)) {
+      return this.targetIdentifierCache.get(node);
+    }
+    const {
+      name,
+      sourceSpan
+    } = node;
+    const start = this.getStartLocation(name, sourceSpan);
+    if (start === null) {
+      return null;
+    }
+    const span = new AbsoluteSourceSpan(start, start + name.length);
+    let identifier;
+    if (node instanceof Reference) {
+      const refTarget = this.boundTemplate.getReferenceTarget(node);
+      let target = null;
+      if (refTarget) {
+        let node = null;
+        let directive = null;
+        if (refTarget instanceof Element$1 || refTarget instanceof Template || refTarget instanceof Component$1 || refTarget instanceof Directive$1) {
+          node = this.directiveHostToIdentifier(refTarget);
+        } else {
+          node = this.directiveHostToIdentifier(refTarget.node);
+          directive = refTarget.directive.ref.node;
+        }
+        if (node === null) {
+          return null;
+        }
+        target = {
+          node,
+          directive
+        };
+      }
+      identifier = {
+        name,
+        span,
+        kind: IdentifierKind.Reference,
+        target
+      };
+    } else if (node instanceof Variable) {
+      identifier = {
+        name,
+        span,
+        kind: IdentifierKind.Variable
+      };
+    } else {
+      identifier = {
+        name,
+        span,
+        kind: IdentifierKind.LetDeclaration
+      };
+    }
+    this.targetIdentifierCache.set(node, identifier);
+    return identifier;
+  }
+  getStartLocation(name, context) {
+    const localStr = context.toString();
+    if (!localStr.includes(name)) {
+      this.errors.push(new Error(`Impossible state: "${name}" not found in "${localStr}"`));
+      return null;
+    }
+    return context.start.offset + localStr.indexOf(name);
+  }
+  visit(node) {
+    if (node instanceof ASTWithSource) {
+      const previous = this.currentAstWithSource;
+      this.currentAstWithSource = {
+        source: node.source,
+        absoluteOffset: node.sourceSpan.start
+      };
+      super.visit(node.ast);
+      this.currentAstWithSource = previous;
+    } else {
+      super.visit(node);
+    }
+  }
+  visitIdentifier(ast, kind) {
+    if (this.currentAstWithSource === null || this.currentAstWithSource.source === null) {
+      return;
+    }
+    if (!(ast.receiver instanceof ImplicitReceiver) && !(ast.receiver instanceof ThisReceiver)) {
+      return;
+    }
+    const {
+      absoluteOffset,
+      source: expressionStr
+    } = this.currentAstWithSource;
+    let identifierStart = ast.sourceSpan.start - absoluteOffset;
+    if (ast instanceof PropertyRead) {
+      identifierStart = ast.nameSpan.start - absoluteOffset;
+    }
+    if (!expressionStr.substring(identifierStart).startsWith(ast.name)) {
+      this.errors.push(new Error(`Impossible state: "${ast.name}" not found in "${expressionStr}" at location ${identifierStart}`));
+      return;
+    }
+    const absoluteStart = absoluteOffset + identifierStart;
+    const span = new AbsoluteSourceSpan(absoluteStart, absoluteStart + ast.name.length);
+    const targetAst = this.boundTemplate.getExpressionTarget(ast);
+    const target = targetAst ? this.targetToIdentifier(targetAst) : null;
+    const identifier = {
+      name: ast.name,
+      span,
+      kind,
+      target
+    };
+    this.identifiers.add(identifier);
+  }
+}
+function getIndexerTemplateIdentifiers(boundTemplate) {
+  const visitor = new IndexerVisitor(boundTemplate);
+  const template = boundTemplate.getTemplateAst();
+  if (template !== undefined) {
+    visitAll$1(visitor, template);
+  }
+  return {
+    identifiers: visitor.identifiers,
+    errors: visitor.errors
+  };
+}
+
+function generateIndexerAnalysis(context, adapter) {
+  const analysis = new Map();
+  context.components.forEach(({
+    declaration,
+    selector,
+    boundTemplate,
+    templateMeta
+  }) => {
+    const name = adapter.getName(declaration);
+    const fileName = adapter.getFileName(declaration);
+    let templateFileUrl;
+    if (templateMeta.isInline) {
+      templateFileUrl = fileName;
+    } else {
+      templateFileUrl = templateMeta.file.url;
+    }
+    const {
+      identifiers,
+      errors
+    } = getIndexerTemplateIdentifiers(boundTemplate);
+    analysis.set(declaration, {
+      name,
+      selector,
+      fileUrl: fileName,
+      template: {
+        identifiers,
+        fileUrl: templateFileUrl
+      },
+      errors
+    });
+  });
+  return analysis;
+}
+
 publishFacade(_global);
 
-export { AST, ASTWithName, ASTWithSource, AbsoluteSourceSpan, AbstractEmitterVisitor, ArrayType, ArrowFunction, ArrowFunctionExpr$1 as ArrowFunctionExpr, ArrowFunctionIdentifierParameter, Attribute, Binary, BinaryOperator, BinaryOperatorExpr, BindingPipe, BindingPipeType, BindingType, Block, BlockParameter, BoundElementProperty, BuiltinType, BuiltinTypeName, CUSTOM_ELEMENTS_SCHEMA, Call, Chain, ChangeDetectionStrategy, ClassPropertyMapping, CombinedRecursiveAstVisitor, CommaExpr, Comment, CommentTriviaType, CompilerConfig, CompilerFacadeImpl, Component, Conditional, ConditionalExpr, ConstantPool, CssSelector, DYNAMIC_TYPE, DeclareFunctionStmt, DeclareVarStmt, Directive, DomElementSchemaRegistry, DynamicImportExpr, EOF, Element, ElementSchemaRegistry, EmitterVisitorContext, EmptyExpr$1 as EmptyExpr, Expansion, ExpansionCase, Expression, ExpressionBinding, ExpressionIdentifier, ExpressionStatement, ExpressionType, ExternalExpr, ExternalReference, FactoryTarget, FunctionExpr, HOST_BINDING_GUARD_COMMENT_TEXT, HtmlParser, HtmlTagDefinition, I18NHtmlParser, IfStmt, ImplicitReceiver, InstantiateExpr, Interpolation$1 as Interpolation, InvokeFunctionExpr, JSDocComment, JitEvaluator, KeyedRead, LEGACY_OPTIONAL_CHAINING_DEFAULT, LeadingComment, LetDeclaration, Lexer, LiteralArray, LiteralArrayExpr, LiteralExpr, LiteralMap, LiteralMapExpr, LiteralMapPropertyAssignment, LiteralMapSpreadAssignment, LiteralPrimitive, LocalizedString, MapType, MatchSource, MessageBundle, NONE_TYPE, NO_ERRORS_SCHEMA, NodeWithI18n, NonNullAssert, NotExpr, OutOfBandDiagnosticCategory, ParenthesizedExpr, ParenthesizedExpression, ParseError, ParseErrorLevel, ParseLocation, ParseSourceFile, ParseSourceSpan, ParseSpan, ParseTreeResult, ParsedEvent, ParsedEventType, ParsedProperty, ParsedPropertyType, ParsedVariable, Parser, PrefixNot, PropertyRead, Identifiers as R3Identifiers, R3NgModuleMetadataKind, R3SelectorScopeMode, R3TargetBinder, R3TemplateDependencyKind, ReadKeyExpr, ReadPropExpr, ReadVarExpr, RecursiveAstVisitor, RecursiveVisitor, RegularExpressionLiteral, RegularExpressionLiteralExpr, ResourceLoader, ReturnStatement, SCHEMA, STRING_TYPE, SafeCall, SafeKeyedRead, SafePropertyRead, SelectorContext, SelectorListContext, SelectorMatcher, SelectorlessMatcher, Serializer, SplitInterpolation, SpreadElement, SpreadElementExpr, StartTagComment, Statement, StmtModifier, StringToken, StringTokenKind, TagContentType, TaggedTemplateLiteral, TaggedTemplateLiteralExpr, TcbExpr, TcbGenericContextBehavior, TemplateBindingParseResult, TemplateLiteral, TemplateLiteralElement, TemplateLiteralElementExpr, TemplateLiteralExpr, Text, ThisReceiver, BlockNode as TmplAstBlockNode, BoundAttribute as TmplAstBoundAttribute, BoundDeferredTrigger as TmplAstBoundDeferredTrigger, BoundEvent as TmplAstBoundEvent, BoundText as TmplAstBoundText, Component$1 as TmplAstComponent, Content as TmplAstContent, DeferredBlock as TmplAstDeferredBlock, DeferredBlockError as TmplAstDeferredBlockError, DeferredBlockLoading as TmplAstDeferredBlockLoading, DeferredBlockPlaceholder as TmplAstDeferredBlockPlaceholder, DeferredTrigger as TmplAstDeferredTrigger, Directive$1 as TmplAstDirective, Element$1 as TmplAstElement, ForLoopBlock as TmplAstForLoopBlock, ForLoopBlockEmpty as TmplAstForLoopBlockEmpty, HostElement as TmplAstHostElement, HoverDeferredTrigger as TmplAstHoverDeferredTrigger, Icu$1 as TmplAstIcu, IdleDeferredTrigger as TmplAstIdleDeferredTrigger, IfBlock as TmplAstIfBlock, IfBlockBranch as TmplAstIfBlockBranch, ImmediateDeferredTrigger as TmplAstImmediateDeferredTrigger, InteractionDeferredTrigger as TmplAstInteractionDeferredTrigger, LetDeclaration$1 as TmplAstLetDeclaration, NeverDeferredTrigger as TmplAstNeverDeferredTrigger, RecursiveVisitor$1 as TmplAstRecursiveVisitor, Reference as TmplAstReference, SwitchBlock as TmplAstSwitchBlock, SwitchBlockCase as TmplAstSwitchBlockCase, SwitchBlockCaseGroup as TmplAstSwitchBlockCaseGroup, SwitchExhaustiveCheck as TmplAstSwitchExhaustiveCheck, Template as TmplAstTemplate, Text$3 as TmplAstText, TextAttribute as TmplAstTextAttribute, TimerDeferredTrigger as TmplAstTimerDeferredTrigger, UnknownBlock as TmplAstUnknownBlock, Variable as TmplAstVariable, ViewportDeferredTrigger as TmplAstViewportDeferredTrigger, Token, TokenType, TransplantedType, TreeError, Type, TypeModifier, TypeofExpr, TypeofExpression, Unary, UnaryOperator, UnaryOperatorExpr, VERSION, VariableBinding, Version, ViewEncapsulation$1 as ViewEncapsulation, VoidExpr, VoidExpression, WrappedNodeExpr, Xliff, Xliff2, Xmb, XmlParser, Xtb, _ATTR_TO_PROP, compileClassDebugInfo, compileClassMetadata, compileComponentClassMetadata, compileComponentDeclareClassMetadata, compileComponentFromMetadata, compileDeclareClassMetadata, compileDeclareComponentFromMetadata, compileDeclareDirectiveFromMetadata, compileDeclareFactoryFunction, compileDeclareInjectableFromMetadata, compileDeclareInjectorFromMetadata, compileDeclareNgModuleFromMetadata, compileDeclarePipeFromMetadata, compileDeclareServiceFromMetadata, compileDeferResolverFunction, compileDirectiveFromMetadata, compileFactoryFunction, compileHmrInitializer, compileHmrUpdateCallback, compileInjectable, compileInjector, compileNgModule, compileOpaqueAsyncClassMetadata, compilePipeFromMetadata, compileService, computeMsgId, core, createCssSelectorFromNode, createHostBindingsBlockGuard, createHostElement, createInjectableType, createMayBeForwardRefExpression, delegateToFactory, devOnlyGuardedExpression, emitDistinctChangesOnlyDefaultValue, encapsulateStyle, escapeRegExp, findMatchingDirectivesAndPipes, generateTypeCheckBlock, getHtmlTagDefinition, getNsPrefix, getSafePropertyAccessString, identifierName, isNgContainer, isNgContent, isNgTemplate, isUnsafeObjectKey, jsDocComment, leadingComment, literal, literalMap, makeBindingParser, mergeNsAndName, output_ast as outputAst, parseHostBindings, parseTemplate, preserveWhitespacesDefault, publishFacade, r3JitTypeSourceSpan, sanitizeIdentifier, setEnableTemplateSourceLocations, splitNsName, visitAll$1 as tmplAstVisitAll, verifyHostBindings, visitAll };
+export { AST, ASTWithName, ASTWithSource, AbsoluteSourceSpan, AbstractEmitterVisitor, ArrayType, ArrowFunction, ArrowFunctionExpr$1 as ArrowFunctionExpr, ArrowFunctionIdentifierParameter, Attribute, Binary, BinaryOperator, BinaryOperatorExpr, BindingPipe, BindingPipeType, BindingType, Block, BlockParameter, BoundElementProperty, BuiltinType, BuiltinTypeName, CUSTOM_ELEMENTS_SCHEMA, Call, Chain, ChangeDetectionStrategy, ClassPropertyMapping, CombinedRecursiveAstVisitor, CommaExpr, Comment, CommentTriviaType, CompilerConfig, CompilerFacadeImpl, Component, Conditional, ConditionalExpr, ConstantPool, CssSelector, DYNAMIC_TYPE, DeclareFunctionStmt, DeclareVarStmt, Directive, DomElementSchemaRegistry, DynamicImportExpr, EOF, Element, ElementSchemaRegistry, EmitterVisitorContext, EmptyExpr$1 as EmptyExpr, Expansion, ExpansionCase, Expression, ExpressionBinding, ExpressionIdentifier, ExpressionStatement, ExpressionType, ExternalExpr, ExternalReference, FactoryTarget, FunctionExpr, HOST_BINDING_GUARD_COMMENT_TEXT, HtmlParser, HtmlTagDefinition, I18NHtmlParser, IdentifierKind, IfStmt, ImplicitReceiver, IndexerVisitor, IndexingContext, InstantiateExpr, Interpolation$1 as Interpolation, InvokeFunctionExpr, JSDocComment, JitEvaluator, KeyedRead, LEGACY_OPTIONAL_CHAINING_DEFAULT, LeadingComment, LetDeclaration, Lexer, LiteralArray, LiteralArrayExpr, LiteralExpr, LiteralMap, LiteralMapExpr, LiteralMapPropertyAssignment, LiteralMapSpreadAssignment, LiteralPrimitive, LocalizedString, MapType, MatchSource, MessageBundle, NONE_TYPE, NO_ERRORS_SCHEMA, NodeWithI18n, NonNullAssert, NotExpr, OutOfBandDiagnosticCategory, ParenthesizedExpr, ParenthesizedExpression, ParseError, ParseErrorLevel, ParseLocation, ParseSourceFile, ParseSourceSpan, ParseSpan, ParseTreeResult, ParsedEvent, ParsedEventType, ParsedProperty, ParsedPropertyType, ParsedVariable, Parser, PrefixNot, PropertyRead, Identifiers as R3Identifiers, R3NgModuleMetadataKind, R3SelectorScopeMode, R3TargetBinder, R3TemplateDependencyKind, ReadKeyExpr, ReadPropExpr, ReadVarExpr, RecursiveAstVisitor, RecursiveVisitor, RegularExpressionLiteral, RegularExpressionLiteralExpr, ResourceLoader, ReturnStatement, SCHEMA, STRING_TYPE, SafeCall, SafeKeyedRead, SafePropertyRead, SelectorContext, SelectorListContext, SelectorMatcher, SelectorlessMatcher, Serializer, SplitInterpolation, SpreadElement, SpreadElementExpr, StartTagComment, Statement, StmtModifier, StringToken, StringTokenKind, TagContentType, TaggedTemplateLiteral, TaggedTemplateLiteralExpr, TcbExpr, TcbGenericContextBehavior, TemplateBindingParseResult, TemplateLiteral, TemplateLiteralElement, TemplateLiteralElementExpr, TemplateLiteralExpr, Text, ThisReceiver, BlockNode as TmplAstBlockNode, BoundAttribute as TmplAstBoundAttribute, BoundDeferredTrigger as TmplAstBoundDeferredTrigger, BoundEvent as TmplAstBoundEvent, BoundText as TmplAstBoundText, BoundaryBlock as TmplAstBoundaryBlock, BoundaryErrorBlock as TmplAstBoundaryErrorBlock, Component$1 as TmplAstComponent, Content as TmplAstContent, ContentBlock as TmplAstContentBlock, DeferredBlock as TmplAstDeferredBlock, DeferredBlockError as TmplAstDeferredBlockError, DeferredBlockLoading as TmplAstDeferredBlockLoading, DeferredBlockPlaceholder as TmplAstDeferredBlockPlaceholder, DeferredTrigger as TmplAstDeferredTrigger, Directive$1 as TmplAstDirective, Element$1 as TmplAstElement, ForLoopBlock as TmplAstForLoopBlock, ForLoopBlockEmpty as TmplAstForLoopBlockEmpty, HostElement as TmplAstHostElement, HoverDeferredTrigger as TmplAstHoverDeferredTrigger, Icu$1 as TmplAstIcu, IdleDeferredTrigger as TmplAstIdleDeferredTrigger, IfBlock as TmplAstIfBlock, IfBlockBranch as TmplAstIfBlockBranch, ImmediateDeferredTrigger as TmplAstImmediateDeferredTrigger, InteractionDeferredTrigger as TmplAstInteractionDeferredTrigger, LetDeclaration$1 as TmplAstLetDeclaration, NeverDeferredTrigger as TmplAstNeverDeferredTrigger, RecursiveVisitor$1 as TmplAstRecursiveVisitor, Reference as TmplAstReference, SwitchBlock as TmplAstSwitchBlock, SwitchBlockCase as TmplAstSwitchBlockCase, SwitchBlockCaseGroup as TmplAstSwitchBlockCaseGroup, SwitchExhaustiveCheck as TmplAstSwitchExhaustiveCheck, Template as TmplAstTemplate, Text$3 as TmplAstText, TextAttribute as TmplAstTextAttribute, TimerDeferredTrigger as TmplAstTimerDeferredTrigger, UnknownBlock as TmplAstUnknownBlock, Variable as TmplAstVariable, ViewportDeferredTrigger as TmplAstViewportDeferredTrigger, Token, TokenType, TransplantedType, TreeError, Type, TypeModifier, TypeofExpr, TypeofExpression, Unary, UnaryOperator, UnaryOperatorExpr, VERSION, VariableBinding, Version, ViewEncapsulation$1 as ViewEncapsulation, VoidExpr, VoidExpression, WrappedNodeExpr, Xliff, Xliff2, Xmb, XmlParser, Xtb, _ATTR_TO_PROP, compileClassDebugInfo, compileClassMetadata, compileComponentClassMetadata, compileComponentDeclareClassMetadata, compileComponentFromMetadata, compileDeclareClassMetadata, compileDeclareComponentFromMetadata, compileDeclareDirectiveFromMetadata, compileDeclareFactoryFunction, compileDeclareInjectableFromMetadata, compileDeclareInjectorFromMetadata, compileDeclareNgModuleFromMetadata, compileDeclarePipeFromMetadata, compileDeclareServiceFromMetadata, compileDeferResolverFunction, compileDirectiveFromMetadata, compileFactoryFunction, compileHmrInitializer, compileHmrUpdateCallback, compileInjectable, compileInjector, compileNgModule, compileOpaqueAsyncClassMetadata, compilePipeFromMetadata, compileService, computeMsgId, core, createCssSelectorFromNode, createHostBindingsBlockGuard, createHostElement, createInjectableType, createMayBeForwardRefExpression, delegateToFactory, devOnlyGuardedExpression, emitDistinctChangesOnlyDefaultValue, encapsulateStyle, escapeRegExp, findMatchingDirectivesAndPipes, generateIndexerAnalysis, generateTypeCheckBlock, getHtmlTagDefinition, getIndexerTemplateIdentifiers, getNsPrefix, getSafePropertyAccessString, identifierName, isNgContainer, isNgContent, isNgTemplate, isUnsafeObjectKey, jsDocComment, leadingComment, literal, literalMap, makeBindingParser, mergeNsAndName, output_ast as outputAst, parseHostBindings, parseTemplate, preserveWhitespacesDefault, publishFacade, r3JitTypeSourceSpan, sanitizeIdentifier, splitNsName, visitAll$1 as tmplAstVisitAll, verifyHostBindings, visitAll };
 //# sourceMappingURL=compiler.mjs.map

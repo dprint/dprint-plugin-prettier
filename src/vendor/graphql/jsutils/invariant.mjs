@@ -3,4 +3,4 @@ export function invariant(/** @type {boolean} */ condition, /** @type {undefined
         throw new Error(message ?? 'Unexpected invariant triggered.');
     }
 }
-//# sourceMappingURL=invariant.js.map
+//# sourceMappingURL=invariant.mjs.map

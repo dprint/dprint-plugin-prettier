@@ -20,13 +20,17 @@ declare namespace flowNative {
     decorators: int,
     tokens: int,
     returnOutsideFunction: int,
-    assertOperator: int,
     enums: int,
     records: int,
     types: int,
     sourceType: int,
     typesPragmaDetection: int,
     last: int,
+    babel: int,
+    enumTransform: int,
+    enumRuntime: int,
+    reactRuntimeTarget: int,
+    throwOnParseErrors: int,
   ): int;
   function resultFree(result: int): void;
   function resultError(result: int): string | undefined;

@@ -1,3 +1,4 @@
+import { invariant } from "../../jsutils/invariant.mjs";
 import { isPromise } from "../../jsutils/isPromise.mjs";
 import { Queue } from "./Queue.mjs";
 export function createWorkQueue(initialWork) {
@@ -103,8 +104,13 @@ export function createWorkQueue(initialWork) {
         }
         visited.add(group);
         const parent = group.parent;
-        if (parent !== undefined && groupSet.has(parent)) {
-            addGroup(parent, groupSet, newRootGroups, visited, parentTask);
+        if (parent !== undefined) {
+            if (groupSet.has(parent)) {
+                addGroup(parent, groupSet, newRootGroups, visited, parentTask);
+            }
+            if (!groupNodes.has(parent)) {
+                return;
+            }
         }
         const groupNode = {
             childGroups: [],
@@ -145,7 +151,7 @@ export function createWorkQueue(initialWork) {
         for (const newGroup of newGroups) {
             const newGroupState = groupNodes.get(newGroup);
             if (newGroupState) {
-                if (newGroupState.pending === 0) {
+                if (newGroupState.tasks.size === 0) {
                     groupNodes.delete(newGroup);
                     pruneEmptyGroups(newGroupState.childGroups, nonEmptyNewGroups);
                 }
@@ -157,14 +163,22 @@ export function createWorkQueue(initialWork) {
         return nonEmptyNewGroups;
     }
     function startNewWork(newGroups, newStreams) {
-        for (const group of newGroups) {
+        const groupEvents = [];
+        const groupsToStart = [...newGroups];
+        const streamsToStart = [...newStreams];
+        for (const group of groupsToStart) {
             rootGroups.add(group);
             startGroup(group);
+            const groupNode = groupNodes.get(group);
+            if (groupNode) {
+                maybeFinishGroup(group, groupNode, groupEvents, groupsToStart, streamsToStart);
+            }
         }
-        for (const stream of newStreams) {
+        for (const stream of streamsToStart) {
             rootStreams.add(stream);
             startStream(stream);
         }
+        return groupEvents;
     }
     function startGroup(group) {
         const groupNode = groupNodes.get(group);
@@ -175,15 +189,18 @@ export function createWorkQueue(initialWork) {
         }
     }
     function startTask(task) {
-        if (taskNodes.has(task)) {
-            return;
+        const alreadyStarted = taskNodes.has(task);
+        if (!alreadyStarted) {
+            taskNodes.set(task, {
+                value: undefined,
+                childStreams: [],
+            });
         }
-        taskNodes.set(task, {
-            value: undefined,
-            childStreams: [],
-        });
         try {
             const result = task.computation.result();
+            if (alreadyStarted) {
+                return;
+            }
             if (isPromise(result)) {
                 result.then((resolved) => {
                     pushGraphEvent({ kind: 'TASK_SUCCESS', task, result: resolved });
@@ -252,9 +269,10 @@ export function createWorkQueue(initialWork) {
         const { task, result } = graphEvent;
         const { value, work } = result;
         const taskNode = taskNodes.get(task);
-        if (taskNode) {
-            taskNode.value = value;
+        if (!taskNode) {
+            return [];
         }
+        taskNode.value = value;
         maybeIntegrateWork(work, task);
         const groupEvents = [];
         const newGroups = [];
@@ -263,27 +281,34 @@ export function createWorkQueue(initialWork) {
             const groupNode = groupNodes.get(group);
             if (groupNode) {
                 groupNode.pending--;
-                if (rootGroups.has(group) && groupNode.pending === 0) {
-                    const { groupValuesEvent, groupSuccessEvent, newGroups: childNewGroups, newStreams: childNewStreams, } = finishGroupSuccess(group, groupNode);
-                    if (groupValuesEvent) {
-                        groupEvents.push(groupValuesEvent);
-                    }
-                    groupEvents.push(groupSuccessEvent);
-                    newGroups.push(...childNewGroups);
-                    newStreams.push(...childNewStreams);
-                }
+                maybeFinishGroup(group, groupNode, groupEvents, newGroups, newStreams);
             }
         }
-        startNewWork(newGroups, newStreams);
-        return groupEvents;
+        return [...groupEvents, ...startNewWork(newGroups, newStreams)];
+    }
+    function maybeFinishGroup(group, groupNode, groupEvents, newGroups, newStreams) {
+        if (!rootGroups.has(group)) {
+            return;
+        }
+        if (groupNode.pending === 0) {
+            const { groupValuesEvent, groupSuccessEvent, newGroups: childNewGroups, newStreams: childNewStreams, } = finishGroupSuccess(group, groupNode);
+            if (groupValuesEvent) {
+                groupEvents.push(groupValuesEvent);
+            }
+            groupEvents.push(groupSuccessEvent);
+            newGroups.push(...childNewGroups);
+            newStreams.push(...childNewStreams);
+        }
     }
     function taskFailure(graphEvent) {
         const { task, error } = graphEvent;
-        taskNodes.delete(task);
+        if (!taskNodes.has(task)) {
+            return [];
+        }
         const groupFailureEvents = [];
         for (const group of task.groups) {
             const groupNode = groupNodes.get(group);
-            if (groupNode) {
+            if (groupNode && rootGroups.has(group)) {
                 groupFailureEvents.push(finishGroupFailure(group, groupNode, error));
             }
         }
@@ -297,7 +322,9 @@ export function createWorkQueue(initialWork) {
         for (const { value, work } of items) {
             const { newGroups: itemNewGroups, newStreams: itemNewStreams } = maybeIntegrateWork(work);
             const nonEmptyNewGroups = pruneEmptyGroups(itemNewGroups);
-            startNewWork(nonEmptyNewGroups, itemNewStreams);
+            const groupEvents = startNewWork(nonEmptyNewGroups, itemNewStreams);
+            if (!(groupEvents.length === 0))
+                invariant(false);
             values.push(value);
             newGroups.push(...nonEmptyNewGroups);
             newStreams.push(...itemNewStreams);
@@ -350,10 +377,10 @@ export function createWorkQueue(initialWork) {
     }
     function finishGroupFailure(group, groupNode, error) {
         removeGroup(group, groupNode);
-        rootGroups.delete(group);
         return { kind: 'GROUP_FAILURE', group, error };
     }
     function removeGroup(group, groupNode) {
+        rootGroups.delete(group);
         groupNodes.delete(group);
         for (const task of groupNode.tasks) {
             if (task.groups.every((taskGroup) => !groupNodes.has(taskGroup))) {
@@ -375,4 +402,4 @@ export function createWorkQueue(initialWork) {
         taskNodes.delete(task);
     }
 }
-//# sourceMappingURL=WorkQueue.js.map
+//# sourceMappingURL=WorkQueue.mjs.map

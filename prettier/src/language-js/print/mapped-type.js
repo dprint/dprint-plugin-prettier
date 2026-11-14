@@ -6,6 +6,7 @@ import {
   ifBreak,
   indent,
   line,
+  lineSuffixBoundary,
   softline,
 } from "../../document/index.js";
 import { printDanglingComments } from "../../main/comments/print.js";
@@ -13,7 +14,11 @@ import hasNewline from "../../utilities/has-newline.js";
 import hasNewlineInRange from "../../utilities/has-newline-in-range.js";
 import { locEnd, locStart } from "../location/index.js";
 import { isLineComment } from "../utilities/comment-types.js";
-import { CommentCheckFlags, getComments } from "../utilities/comments.js";
+import {
+  CommentCheckFlags,
+  getComments,
+  hasComment,
+} from "../utilities/comments.js";
 import { stripComments } from "../utilities/strip-comments.js";
 import { printClassMemberSemicolon } from "./class.js";
 
@@ -40,12 +45,41 @@ function printFlowMappedTypeOptionalModifier(optional) {
 
 function printFlowMappedTypeProperty(/** @type {AstPath} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
+  const hasTrailingVarianceComment = hasComment(
+    node.variance,
+    CommentCheckFlags.Trailing,
+  );
+  const hasTrailingVarianceLineComment = hasComment(
+    node.variance,
+    CommentCheckFlags.Trailing | CommentCheckFlags.Line,
+  );
+  const spaceAfterVariance =
+    !hasTrailingVarianceLineComment &&
+    (hasTrailingVarianceComment ||
+      (node.variance &&
+        node.variance.kind !== "plus" &&
+        node.variance.kind !== "minus"))
+      ? " "
+      : "";
   return [
     group([
-      node.variance ? print("variance") : "",
+      node.variance
+        ? [
+            node.varianceOp ?? "",
+            print("variance"),
+            lineSuffixBoundary,
+            spaceAfterVariance,
+          ]
+        : "",
       group([
         "[",
-        indent([softline, print("keyTparam"), " in ", print("sourceType")]),
+        indent([
+          softline,
+          print("keyTparam"),
+          " in ",
+          print("sourceType"),
+          node.nameType ? [" as ", print("nameType")] : "",
+        ]),
         softline,
         "]",
       ]),
@@ -109,26 +143,31 @@ function printTypeScriptMappedType(/** @type {AstPath} */ path, /** @type {impor
       indent([
         options.bracketSpacing ? line : softline,
         ...danglingCommentsDoc,
-        node.readonly
-          ? [printTypeScriptMappedTypeModifier(node.readonly, "readonly"), " "]
-          : "",
         group([
-          "[",
-          indent([
+          node.readonly
+            ? [
+                printTypeScriptMappedTypeModifier(node.readonly, "readonly"),
+                " ",
+              ]
+            : "",
+          group([
+            "[",
+            indent([
+              softline,
+              print("key"),
+              " in ",
+              print("constraint"),
+              node.nameType ? [" as ", print("nameType")] : "",
+            ]),
             softline,
-            print("key"),
-            " in ",
-            print("constraint"),
-            node.nameType ? [" as ", print("nameType")] : "",
+            "]",
           ]),
-          softline,
-          "]",
+          node.optional
+            ? printTypeScriptMappedTypeModifier(node.optional, "?")
+            : "",
+          node.typeAnnotation ? ": " : "",
+          print("typeAnnotation"),
         ]),
-        node.optional
-          ? printTypeScriptMappedTypeModifier(node.optional, "?")
-          : "",
-        node.typeAnnotation ? ": " : "",
-        print("typeAnnotation"),
         options.semi ? ifBreak(";") : "",
       ]),
       options.bracketSpacing ? line : softline,

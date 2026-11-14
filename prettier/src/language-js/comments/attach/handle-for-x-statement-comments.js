@@ -1,14 +1,38 @@
 // @nts-check
-import { addLeadingComment } from "../../../main/comments/utilities.js";
-import { locStart } from "../../location/index.js";
+import {
+  addLeadingComment,
+  addTrailingComment,
+} from "../../../main/comments/utilities.js";
+import { locEnd, locStart } from "../../location/index.js";
 import { stripComments } from "../../utilities/strip-comments.js";
 
 /** @returns {boolean} */ function handleForXStatementComments(/** @type {import("../handle-comments.js").CommentContext} */ {
   comment,
   enclosingNode,
+  precedingNode,
   followingNode,
   options,
 }) {
+  if (
+    (enclosingNode?.type === "ForInStatement" ||
+      enclosingNode?.type === "ForOfStatement") &&
+    precedingNode === enclosingNode.left &&
+    followingNode === enclosingNode.right
+  ) {
+    const keywordIndex = stripComments(options).indexOf(
+      enclosingNode.type === "ForInStatement" ? "in" : "of",
+      locEnd(precedingNode),
+    );
+
+    if (locStart(comment) > keywordIndex) {
+      addLeadingComment(followingNode, comment);
+    } else {
+      addTrailingComment(precedingNode, comment);
+    }
+
+    return true;
+  }
+
   if (
     (enclosingNode?.type === "ForInStatement" ||
       enclosingNode?.type === "ForOfStatement" ||
@@ -22,8 +46,7 @@ import { stripComments } from "../../utilities/strip-comments.js";
     );
 
     if (locStart(comment) > closingParenthesisIndex) {
-      addLeadingComment(followingNode, comment);
-      return true;
+      return addLeadingComment(followingNode, comment);
     }
   }
 

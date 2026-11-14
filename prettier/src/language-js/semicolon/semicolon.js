@@ -1,4 +1,5 @@
 // @nts-check
+import { locStart } from "../location/index.js";
 import needsParentheses from "../parentheses/needs-parentheses.js";
 import { shouldPrintParamsWithoutParens } from "../print/function.js";
 import {
@@ -7,7 +8,7 @@ import {
 } from "../utilities/left-side.js";
 import { isJsxElement } from "../utilities/node-types.js";
 
-/** @returns {boolean} */ function shouldExpressionStatementPrintLeadingSemicolon(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options) {
+/** @returns {boolean} */ function isEligibleForLeadingSemicolon(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options) {
   if (options.semi) {
     return false;
   }
@@ -26,18 +27,41 @@ import { isJsxElement } from "../utilities/node-types.js";
   /** @type {{ key: any, parent: import("../types/estree.js").Node }} */ const { key, parent } = path;
   if (
     // `Program.directives` don't need leading semicolon
-    ((key === "body" &&
+    (key === "body" &&
       (parent.type === "Program" ||
         parent.type === "BlockStatement" ||
         parent.type === "StaticBlock" ||
         parent.type === "TSModuleBlock")) ||
-      (key === "consequent" && parent.type === "SwitchCase")) &&
-    path.call(() => expressionNeedsAsiProtection(path, options), "expression")
+    (key === "consequent" && parent.type === "SwitchCase")
   ) {
     return true;
   }
 
   return false;
+}
+
+/** @returns {boolean} */ function shouldExpressionStatementPrintLeadingSemicolon(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options) {
+  return (
+    isEligibleForLeadingSemicolon(path, options) &&
+    path.call(() => expressionNeedsAsiProtection(path, options), "expression")
+  );
+}
+
+const ASI_HAZARD_START_CHARACTERS = new Set("[(`+-/<:");
+/*
+`prettier-ignore`d nodes print their original text verbatim, so ASI
+protection can't be decided from the AST alone: parentheses that are
+redundant (and dropped when formatting normally, eg `(new Widget).run()`)
+are invisible to `expressionNeedsAsiProtection`, while the verbatim text
+still starts with `(`.
+*/
+function shouldIgnoredExpressionStatementPrintLeadingSemicolon(path, options) {
+  if (!isEligibleForLeadingSemicolon(path, options)) {
+    return false;
+  }
+
+  const leadingCharacter = options.originalText[locStart(path.node)];
+  return ASI_HAZARD_START_CHARACTERS.has(leadingCharacter);
 }
 
 function expressionNeedsAsiProtection(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, options) {
@@ -133,4 +157,5 @@ export {
   isSingleJsxExpressionStatementInMarkdown,
   isSingleVueEventBindingExpressionStatement,
   shouldExpressionStatementPrintLeadingSemicolon,
+  shouldIgnoredExpressionStatementPrintLeadingSemicolon,
 };

@@ -6,6 +6,7 @@ import { assertValidSchema } from "../type/validate.mjs";
 import { TypeInfo, visitWithTypeInfo } from "../utilities/TypeInfo.mjs";
 import { shouldTrace, validateChannel } from "../diagnostics.mjs";
 import { specifiedRules, specifiedSDLRules } from "./specifiedRules.mjs";
+import { validationAbortedError } from "./validationAbortedError.mjs";
 import { SDLValidationContext, ValidationContext, } from "./ValidationContext.mjs";
 const QueryDocumentKeysToValidate = mapValue(QueryDocumentKeys, (keys) => keys.filter((key) => key !== 'description'));
 const tooManyValidationErrorsError = new GraphQLError('Too many validation errors, error limit reached. Validation aborted.');
@@ -17,6 +18,7 @@ export function validate(schema, documentAST, rules = specifiedRules, options) {
 function validateImpl(schema, documentAST, rules, options) {
     const maxErrors = options?.maxErrors ?? 100;
     const hideSuggestions = options?.hideSuggestions ?? false;
+    const allowEmptySelectionSets = options?.allowEmptySelectionSets ?? true;
     assertValidSchema(schema);
     const errors = [];
     const typeInfo = new TypeInfo(schema);
@@ -25,14 +27,14 @@ function validateImpl(schema, documentAST, rules, options) {
             throw tooManyValidationErrorsError;
         }
         errors.push(error);
-    }, hideSuggestions);
+    }, { hideSuggestions, allowEmptySelectionSets });
     const visitor = visitInParallel(rules.map((rule) => rule(context)));
     try {
         visit(documentAST, visitWithTypeInfo(typeInfo, visitor), QueryDocumentKeysToValidate);
     }
     catch (e) {
-        if (e === tooManyValidationErrorsError) {
-            errors.push(tooManyValidationErrorsError);
+        if (e === tooManyValidationErrorsError || e === validationAbortedError) {
+            errors.push(e);
         }
         else {
             throw e;
@@ -61,4 +63,4 @@ export function assertValidSDLExtension(documentAST, schema) {
         throw new Error(errors.map((error) => error.message).join('\n\n'));
     }
 }
-//# sourceMappingURL=validate.js.map
+//# sourceMappingURL=validate.mjs.map

@@ -11,6 +11,7 @@ import {
   isCallExpression,
   isChainElementWrapper,
   isMemberExpression,
+  isNonNullExpression,
   isNumericLiteral,
 } from "../utilities/node-types.js";
 import { stripChainElementWrappers } from "../utilities/strip-chain-element-wrappers.js";
@@ -26,7 +27,7 @@ const isCallExpressionWithArguments = /** @returns {boolean} */ (/** @type {impo
   for (const ancestor of ancestors) {
     if (!(
       (isMemberExpression(ancestor) && ancestor.object === child) ||
-      (ancestor.type === "TSNonNullExpression" && ancestor.expression === child)
+      (isNonNullExpression(ancestor) && ancestor.expression === child)
     )) {
       return ancestor.type === "NewExpression" && ancestor.callee === child;
     }
@@ -42,8 +43,7 @@ function printMemberExpression(/** @type {AstPath} */ path, /** @type {import(".
   const lookupDoc = printMemberLookup(path, options, print);
   /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   const firstNonMemberParent = path.findAncestor(
-    /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node) =>
-      !(isMemberExpression(node) || node.type === "TSNonNullExpression"),
+    (node) => !(isMemberExpression(node) || isNonNullExpression(node)),
   );
   const firstNonChainElementWrapperParent = path.findAncestor(
     /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node) => !isChainElementWrapper(node),

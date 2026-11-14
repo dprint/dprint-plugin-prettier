@@ -20,4 +20,4 @@ export class Source {
 /** @returns {boolean} */ export function isSource(/** @type {string} */ source) {
     return instanceOf(source, sourceSymbol, Source);
 }
-//# sourceMappingURL=source.js.map
+//# sourceMappingURL=source.mjs.map

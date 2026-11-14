@@ -66,47 +66,47 @@ import { resolveEnd } from './resolve-end.js';
     }
     if (badChar)
         onError(0, 'BAD_SCALAR_START', `Plain value cannot start with ${badChar}`);
-    return foldLines(source);
+    return unfoldLines(source);
 }
 /** @returns {string} */ function singleQuotedValue(/** @type {string} */ source, /** @type {(rel: number, code: string, msg: string) => void} */ onError) {
     if (source[source.length - 1] !== "'" || source.length === 1)
         onError(source.length, 'MISSING_CHAR', "Missing closing 'quote");
-    return foldLines(source.slice(1, -1)).replace(/''/g, "'");
+    return unfoldLines(source.slice(1, -1)).replace(/''/g, "'");
 }
-/** @returns {string} */ function foldLines(/** @type {string} */ source) {
-    /**
-     * The negative lookbehind here and in the `re` RegExp is to
-     * prevent causing a polynomial search time in certain cases.
-     *
-     * The try-catch is for Safari, which doesn't support this yet:
-     * https://caniuse.com/js-regexp-lookbehind
-     */
-    /** @type {RegExp} */ let first;
-    /** @type {RegExp} */ let line;
-    try {
-        first = new RegExp('(.*?)(?<![ \t])[ \t]*\r?\n', 'sy');
-        line = new RegExp('[ \t]*(.*?)(?:(?<![ \t])[ \t]*)?\r?\n', 'sy');
-    }
-    catch {
-        first = /(.*?)[ \t]*\r?\n/sy;
-        line = /[ \t]*(.*?)[ \t]*\r?\n/sy;
-    }
-    let match = first.exec(source);
+/** @returns {string} */ function unfoldLines(/** @type {string} */ source) {
+    /** @type {RegExp} */ const line = /(.*?)\r?\n/sy;
+    let match = line.exec(source);
     if (!match)
         return source;
-    /** @type {string} */ let res = match[1];
+    /**
+     * The negative lookbehinds in these RegExps are to
+     * prevent causing a polynomial search time in certain cases.
+     *
+     * The try-catch is for Safari < 16.4 and other old browsers:
+     * https://caniuse.com/js-regexp-lookbehind
+     */
+    let trimEnd, trimBoth;
+    try {
+        trimEnd = new RegExp('(?<![ \t])[ \t]+$');
+        trimBoth = new RegExp('^[ \t]+|(?<![ \t])[ \t]+$', 'g');
+    }
+    catch {
+        trimEnd = /[ \t]+$/;
+        trimBoth = /^[ \t]+|[ \t]+$/g;
+    }
+    /** @type {string} */ let res = match[1].replace(trimEnd, '');
     /** @type {string} */ let sep = ' ';
-    /** @type {number} */ let pos = first.lastIndex;
-    line.lastIndex = pos;
+    /** @type {number} */ let pos = line.lastIndex;
     while ((match = line.exec(source))) {
-        if (match[1] === '') {
+        const lm = match[1].replace(trimBoth, '');
+        if (lm === '') {
             if (sep === '\n')
                 res += sep;
             else
                 sep = '\n';
         }
         else {
-            res += sep + match[1];
+            res += sep + lm;
             sep = ' ';
         }
         pos = line.lastIndex;

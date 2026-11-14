@@ -1,6 +1,6 @@
 {
   "name": "angular-html-parser",
-  "version": "10.12.0",
+  "version": "10.13.0",
   "description": "A HTML parser extracted from Angular with some modifications",
   "repository": "https://github.com/prettier/angular-html-parser",
   "homepage": "https://github.com/prettier/angular-html-parser/blob/HEAD/packages/angular-html-parser#readme",

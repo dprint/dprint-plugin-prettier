@@ -2,7 +2,7 @@
 import { conditions, step, workflow } from "@david/gagen";
 
 // the version of prettier whose typed source is in ./prettier
-const prettierVersion = "3.9.10";
+const prettierVersion = "3.10.1";
 const wasiSdkVersion = "29";
 const wasiSdkDir = `wasi-sdk-${wasiSdkVersion}.0-x86_64-linux`;
 const binaryenVersion = "version_133";

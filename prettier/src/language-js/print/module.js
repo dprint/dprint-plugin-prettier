@@ -17,7 +17,10 @@ import { CommentCheckFlags, hasComment } from "../utilities/comments.js";
 import { createTypeCheckFunction } from "../utilities/create-type-check-function.js";
 import { isShorthandSpecifier } from "../utilities/is-shorthand-specifier.js";
 import { needsHardlineAfterDanglingComment } from "../utilities/needs-hardline-after-dangling-comment.js";
-import { isStringLiteral } from "../utilities/node-types.js";
+import {
+  isNamespaceSpecifier,
+  isStringLiteral,
+} from "../utilities/node-types.js";
 import { stripComments } from "../utilities/strip-comments.js";
 import { printDecoratorsBeforeExport } from "./decorators.js";
 import {
@@ -28,8 +31,8 @@ import {
 import { printObject } from "./object.js";
 
 /**
- * @import {Doc} from "../../document/index.js"
- */
+@import {Doc} from "../../document/index.js"
+*/
 
 /*
 - `ImportDeclaration`
@@ -67,6 +70,7 @@ const isDefaultExport = /** @returns {boolean} */ (/** @type {import("../types/e
     printDecoratorsBeforeExport(path, options, print),
     printDeclareToken(path),
     "export",
+    node.phase ? ` ${node.phase}` : "",
     isDefaultExport(node) ? " default" : "",
   ];
 
@@ -110,6 +114,7 @@ const isDefaultExport = /** @returns {boolean} */ (/** @type {import("../types/e
 
 const shouldOmitSemicolon = createTypeCheckFunction([
   "ClassDeclaration",
+  "StructDeclaration",
   "ComponentDeclaration",
   "FunctionDeclaration",
   "TSInterfaceDeclaration",
@@ -174,18 +179,16 @@ function printModuleSpecifiers(/** @type {AstPath} */ path, /** @type {import(".
     const standaloneSpecifiers = [];
     const groupedSpecifiers = [];
 
-    path.each(() => {
-      const specifierType = path.node.type;
+    path.each(({ node }) => {
       if (
-        specifierType === "ExportNamespaceSpecifier" ||
-        specifierType === "ExportDefaultSpecifier" ||
-        specifierType === "ImportNamespaceSpecifier" ||
-        specifierType === "ImportDefaultSpecifier"
+        isNamespaceSpecifier(node) ||
+        node.type === "ExportDefaultSpecifier" ||
+        node.type === "ImportDefaultSpecifier"
       ) {
         standaloneSpecifiers.push(print());
       } else if (
-        specifierType === "ExportSpecifier" ||
-        specifierType === "ImportSpecifier"
+        node.type === "ExportSpecifier" ||
+        node.type === "ImportSpecifier"
       ) {
         groupedSpecifiers.push(print());
       } else {
@@ -328,15 +331,17 @@ function printImportAttributes(/** @type {AstPath} */ path, /** @type {import(".
   /** @type {string} */ const rightSideProperty = isImportSpecifier ? "local" : "exported";
   const leftSideNode = node[leftSideProperty];
   const rightSideNode = node[rightSideProperty];
-  /** @type {import("../../document/index.js").Doc} */
+  /** @type {Doc} */
   let left = "";
   /** @type {import("../../document/index.js").Doc} */
   let right = "";
-  if (
-    type === "ExportNamespaceSpecifier" ||
-    type === "ImportNamespaceSpecifier"
-  ) {
-    left = "*";
+  if (isNamespaceSpecifier(node)) {
+    // @ts-expect-error -- Missing
+    if (node.exportsFilter) {
+      left = printObject(path, options, print);
+    } else {
+      left = "*";
+    }
   } else if (leftSideNode) {
     left = print(leftSideProperty);
   }

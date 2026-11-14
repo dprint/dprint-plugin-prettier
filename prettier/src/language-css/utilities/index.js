@@ -51,6 +51,19 @@ const wideKeywords = new Set(["initial", "inherit", "unset", "revert"]);
   return wideKeywords.has(value.toLowerCase());
 }
 
+const nthPseudoClasses = new Set([
+  ":nth-child",
+  ":nth-last-child",
+  ":nth-of-type",
+  ":nth-last-of-type",
+]);
+function isNthPseudoClassNode(node) {
+  return (
+    node?.type === "selector-pseudo" &&
+    nthPseudoClasses.has(node.value.toLowerCase())
+  );
+}
+
 /** @returns {boolean | undefined} */ function isKeyframeAtRuleKeywords(/** @type {AstPath} */ path, /** @type {string} */ value) {
   const atRuleAncestorNode = path.findAncestor(
     /** @returns {boolean} */ (/** @type {import("../types.js").CssNode} */ node) => node.type === "css-atrule",
@@ -248,10 +261,34 @@ function isDetachedRulesetCallNode(/** @type {import("../types.js").CssNode} */ 
   return node?.raws?.before === "";
 }
 
+// The SCSS parser attaches a comment before a map entry to that entry's group
+function skipLeadingComments(groups) {
+  const start = groups.findIndex((group) => group.type !== "value-comment");
+  return start === -1 ? [] : groups.slice(start);
+}
+
 /** @returns {boolean} */ function isKeyValuePairNode(/** @type {import("../types.js").CssNode} */ node) {
   return (
     node.type === "value-comma_group" &&
-    node.groups?.[1]?.type === "value-colon"
+    node.groups &&
+    skipLeadingComments(node.groups)[1]?.type === "value-colon"
+  );
+}
+
+// `key: (…)` in an open paren group: the paren group dedents the whole entry,
+// since its value is already indented by its own parentheses
+function isDedentedMapEntryNode(node, parentNode) {
+  if (
+    parentNode?.type !== "value-paren_group" ||
+    !parentNode.open ||
+    !isKeyValuePairNode(node)
+  ) {
+    return false;
+  }
+
+  const [key, , value] = skipLeadingComments(node.groups);
+  return (
+    key.type !== "value-paren_group" && value?.type === "value-paren_group"
   );
 }
 
@@ -439,6 +476,7 @@ export {
   isColonNode,
   isColorAdjusterFuncNode,
   isConfigurationNode,
+  isDedentedMapEntryNode,
   isDetachedRulesetCallNode,
   isDetachedRulesetDeclarationNode,
   isDivisionNode,
@@ -455,6 +493,7 @@ export {
   isMathOperatorNode,
   isMediaAndSupportsKeywords,
   isMultiplicationNode,
+  isNthPseudoClassNode,
   isParenGroupNode,
   isPostcssSimpleVarNode,
   isRelationalOperatorNode,

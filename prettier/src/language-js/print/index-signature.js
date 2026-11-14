@@ -21,13 +21,15 @@ function printIndexSignature(/** @type {import("../../../../prettier/src/common/
   const isClassMember = path.key === "body" && path.parent.type === "ClassBody";
 
   return [
-    // `static` only allowed in class member
-    isClassMember && node.static ? "static " : "",
-    node.readonly ? "readonly " : "",
-    "[",
-    node.parameters ? parametersGroup : "",
-    "]",
-    printTypeAnnotationProperty(path, print),
+    group([
+      // `static` only allowed in class member
+      isClassMember && node.static ? "static " : "",
+      node.readonly ? "readonly " : "",
+      "[",
+      node.parameters ? parametersGroup : "",
+      "]",
+      printTypeAnnotationProperty(path, print),
+    ]),
     printClassMemberSemicolon(path, options),
   ];
 }

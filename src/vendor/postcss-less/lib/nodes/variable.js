@@ -5,7 +5,7 @@
 /** @type {RegExp} */ const beforePattern = /^:(\s+)?/;
 // const bracketsPattern = /\{/;
 
-module.exports = (/** @type {import("postcss/lib/node")} */ node) => {
+export function convertVariable(/** @type {import("postcss/lib/node")} */ node) {
   const { name, params = '' } = node;
 
   // situations like @page :last { color: red } should default to the built-in AtRule
@@ -32,4 +32,4 @@ module.exports = (/** @type {import("postcss/lib/node")} */ node) => {
     node.raws.afterName = (node.raws.afterName || '') + match;
     node.variable = true;
   }
-};
+}

@@ -3,6 +3,7 @@ import { TagContentType } from "./compiler/src/ml_parser/tags.mjs";
 import { getHtmlTagDefinition } from "./compiler/src/ml_parser/html_tags.mjs";
 import { ParseLocation, ParseSourceFile, ParseSourceSpan } from "./compiler/src/parse_util.mjs";
 import { RecursiveVisitor, visitAll } from "./compiler/src/ml_parser/ast.mjs";
+import { TokenType } from "./compiler/src/ml_parser/tokens.mjs";
 import { SUPPORTED_BLOCKS } from "./compiler/src/ml_parser/lexer.mjs";
 import { HtmlParser } from "./compiler/src/ml_parser/html_parser.mjs";
 import { XmlParser } from "./compiler/src/ml_parser/xml_parser.mjs";
@@ -27,4 +28,4 @@ function parseXml(input) {
 	return xmlParser.parse(input, "angular-xml-parser");
 }
 //#endregion
-export { ParseLocation, ParseSourceFile, ParseSourceSpan, RecursiveVisitor, SUPPORTED_BLOCKS as SUPPORTED_ANGULAR_BLOCKS, TagContentType, getHtmlTagDefinition, parseHtml as parse, parseHtml, parseXml, visitAll };
+export { ParseLocation, ParseSourceFile, ParseSourceSpan, RecursiveVisitor, SUPPORTED_BLOCKS as SUPPORTED_ANGULAR_BLOCKS, TagContentType, TokenType, getHtmlTagDefinition, parseHtml as parse, parseHtml, parseXml, visitAll };

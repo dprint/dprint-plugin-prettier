@@ -9,7 +9,7 @@ import CSS_UNITS from "./css-units.evaluate.js";
   return CSS_UNITS.has(lowercased) ? CSS_UNITS.get(lowercased) : unit;
 }
 
-const STRING_REGEX = /(["'])(?:(?!\1)[^\\]|\\.)*\1/gs;
+const STRING_REGEX = /(?<quote>["'])(?:(?!\k<quote>)[^\\]|\\.)*\k<quote>/gs;
 const NUMBER_REGEX = /(?:\d*\.\d+|\d+\.?)(?:e[+-]?\d+)?/gi;
 const STANDARD_UNIT_REGEX = /[a-z]+/gi;
 const WORD_PART_REGEX = /[$@]?[_a-z\u0080-\uFFFF][\w\u0080-\uFFFF-]*/gi;
@@ -25,6 +25,10 @@ const WORD_PART_REGEX = /[$@]?[_a-z\u0080-\uFFFF][\w\u0080-\uFFFF-]*/gi;
 
 /** @returns {string} */ function adjustStrings(/** @type {string} */ value, /** @type {CssOptions} */ options) {
   return value.replaceAll(STRING_REGEX, /** @returns {string} */ (match) => printString(match, options));
+}
+
+function removeQuotedStrings(value) {
+  return value.replaceAll(STRING_REGEX, "");
 }
 
 /** @returns {string} */ function quoteAttributeValue(/** @type {string} */ value, /** @type {CssOptions} */ options) {
@@ -88,5 +92,6 @@ export {
   printCssNumber,
   printUnit,
   quoteAttributeValue,
+  removeQuotedStrings,
   shouldPrintTrailingComma,
 };

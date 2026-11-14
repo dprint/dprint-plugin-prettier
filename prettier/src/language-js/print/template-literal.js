@@ -27,6 +27,7 @@ import {
   isBinaryCastExpression,
   isBinaryish,
   isMemberExpression,
+  isTemplateLiteralType,
 } from "../utilities/node-types.js";
 import { stripChainElementWrappers } from "../utilities/strip-chain-element-wrappers.js";
 
@@ -37,6 +38,7 @@ import { stripChainElementWrappers } from "../utilities/strip-chain-element-wrap
 /*
 - `TemplateLiteral`
 - `TSTemplateLiteralType` (TypeScript)
+- `TemplateLiteralTypeAnnotation` (Flow)
 */
 function printTemplateLiteral(/** @type {AstPath} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   if (isJestEachTemplateLiteral(path)) {
@@ -206,6 +208,7 @@ function getTemplateLiteralExpressionIndent(/** @type {AstPath} */ path, /** @ty
 /*
 - `TemplateLiteral`
 - `TSTemplateLiteralType` (TypeScript)
+- `TemplateLiteralTypeAnnotation` (Flow)
 */
 function printTemplateExpression(
   /** @type {AstPath} */ path,
@@ -233,6 +236,7 @@ function printTemplateExpression(
     /** @type {string} */ const renderedExpression = printDocToString(expressionDoc, {
       ...options,
       printWidth: Number.POSITIVE_INFINITY,
+      endOfLine: "lf",
     }).formatted;
 
     // ... unless one will be introduced anyway, e.g. by a nested function.
@@ -294,7 +298,7 @@ function printTemplateExpression(
 function printTemplateExpressions(/** @type {AstPath} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   return path.map(
     () => printTemplateExpression(path, options, print),
-    path.node.type === "TSTemplateLiteralType" ? "types" : "expressions",
+    isTemplateLiteralType(path.node) ? "types" : "expressions",
   );
 }
 

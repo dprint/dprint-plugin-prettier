@@ -1,9 +1,9 @@
 import { AccumulatorMap } from "../../jsutils/AccumulatorMap.mjs";
-import { getBySet } from "../../jsutils/getBySet.mjs";
 import { invariant } from "../../jsutils/invariant.mjs";
 import { isSameSet } from "../../jsutils/isSameSet.mjs";
 import { memoize1 } from "../../jsutils/memoize1.mjs";
 import { memoize2 } from "../../jsutils/memoize2.mjs";
+import { SetMap } from "../../jsutils/SetMap.mjs";
 import { IncrementalExecutor } from "../incremental/IncrementalExecutor.mjs";
 import { BranchingIncrementalPublisher } from "./BranchingIncrementalPublisher.mjs";
 const buildBranchingExecutionPlanFromInitial = memoize1((groupedFieldSet) => buildBranchingExecutionPlan(groupedFieldSet));
@@ -37,7 +37,7 @@ export class BranchingIncrementalExecutor extends IncrementalExecutor {
 }
 function buildBranchingExecutionPlan(originalGroupedFieldSet, parentDeferUsages = new Set()) {
     const groupedFieldSet = new AccumulatorMap();
-    const newGroupedFieldSets = new Map();
+    const newGroupedFieldSets = new SetMap();
     for (const [responseKey, fieldGroup] of originalGroupedFieldSet) {
         for (const fieldDetails of fieldGroup) {
             const deferUsage = fieldDetails.deferUsage;
@@ -48,11 +48,7 @@ function buildBranchingExecutionPlan(originalGroupedFieldSet, parentDeferUsages 
                 groupedFieldSet.add(responseKey, fieldDetails);
             }
             else {
-                let newGroupedFieldSet = getBySet(newGroupedFieldSets, deferUsageSet);
-                if (newGroupedFieldSet === undefined) {
-                    newGroupedFieldSet = new AccumulatorMap();
-                    newGroupedFieldSets.set(deferUsageSet, newGroupedFieldSet);
-                }
+                const newGroupedFieldSet = newGroupedFieldSets.getOrInsertComputed(deferUsageSet, () => new AccumulatorMap());
                 newGroupedFieldSet.add(responseKey, fieldDetails);
             }
         }
@@ -62,4 +58,4 @@ function buildBranchingExecutionPlan(originalGroupedFieldSet, parentDeferUsages 
         newGroupedFieldSets,
     };
 }
-//# sourceMappingURL=BranchingIncrementalExecutor.js.map
+//# sourceMappingURL=BranchingIncrementalExecutor.mjs.map

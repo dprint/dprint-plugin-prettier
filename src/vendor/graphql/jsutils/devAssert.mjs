@@ -3,4 +3,4 @@ export function devAssert(/** @type {boolean} */ condition, /** @type {string} *
         throw new Error(message);
     }
 }
-//# sourceMappingURL=devAssert.js.map
+//# sourceMappingURL=devAssert.mjs.map

@@ -47,14 +47,12 @@ import { isSingleLineComment } from "./utilities.js";
     locEnd(comment),
   );
   if (nextCharacter === ")") {
-    addTrailingComment(precedingNode, comment);
-    return true;
+    return addTrailingComment(precedingNode, comment);
   }
 
   // if comment is positioned between the condition and its body
   if (followingNode === enclosingNode.consequent) {
-    addLeadingComment(followingNode, comment);
-    return true;
+    return addLeadingComment(followingNode, comment);
   }
 
   if (
@@ -90,8 +88,7 @@ function handleCommentsBetween(/** @type {import("../handle-comments.js").Commen
 
   // if comment is positioned after the `else` token
   if (locStart(comment) >= elseTokenIndex) {
-    addLeadingComment(followingNode, comment);
-    return true;
+    return addLeadingComment(followingNode, comment);
   }
 
   const isConsequentBlockStatement = precedingNode.type === "BlockStatement";
@@ -110,12 +107,10 @@ function handleCommentsBetween(/** @type {import("../handle-comments.js").Commen
     //   else if (cond2) expr2; // comment A
     //   else expr3;
 
-    addTrailingComment(precedingNode, comment);
-    return true;
+    return addTrailingComment(precedingNode, comment);
   }
 
-  addDanglingComment(enclosingNode, comment);
-  return true;
+  return addDanglingComment(enclosingNode, comment);
 }
 
 export { handleIfStatementComments };

@@ -9,31 +9,24 @@ let PreviousMap = require('./previous-map')
 let Root = require('./root')
 let Rule = require('./rule')
 
-/** @returns {any} */ function fromJSON(/** @type {any} */ json, /** @type {any} */ inputs) {
-  if (Array.isArray(json)) return json.map(/** @returns {any} */ n => fromJSON(n))
-
-  let { inputs: ownInputs, ...defaults } = json
-  if (ownInputs) {
-    inputs = []
-    for (let input of ownInputs) {
-      /** @type {any} */ let inputHydrated = { ...input, __proto__: Input.prototype }
-      if (inputHydrated.map) {
-        inputHydrated.map = {
-          ...inputHydrated.map,
-          __proto__: PreviousMap.prototype
-        }
+function hydrateInputs(json, inputs) {
+  if (!json.inputs) return inputs
+  return json.inputs.map(input => {
+    let inputHydrated = { ...input, __proto__: Input.prototype }
+    if (inputHydrated.map) {
+      inputHydrated.map = {
+        ...inputHydrated.map,
+        __proto__: PreviousMap.prototype
       }
-      inputs.push(inputHydrated)
     }
-  }
-  // Rehydrate children separately and attach them after construction.
-  // Passing them through the container constructor would re-run insertion
-  // spacing normalization and overwrite each child's own `raws.before`.
-  /** @type {import("./node")[] | undefined} */ let nodes
-  if (defaults.nodes) {
-    nodes = json.nodes.map(/** @returns {any} */ (/** @type {any} */ n) => fromJSON(n, inputs))
-    delete defaults.nodes
-  }
+    return inputHydrated
+  })
+}
+
+function constructNode(json, inputs, children) {
+  let defaults = { ...json }
+  delete defaults.inputs
+  delete defaults.nodes
   if (defaults.source) {
     let { inputId, ...source } = defaults.source
     defaults.source = source
@@ -57,12 +50,58 @@ let Rule = require('./rule')
     throw new Error('Unknown node type: ' + json.type)
   }
 
-  if (nodes) {
-    node.nodes = nodes
-    for (let child of nodes) child.parent = node
+  // Rehydrated children are attached after construction. Passing them
+  // through the container constructor would re-run insertion spacing
+  // normalization and overwrite each child's own `raws.before`.
+  if (children) {
+    node.nodes = children
+    for (let child of children) child.parent = node
   }
 
   return node
+}
+
+function fromJSON(json, inputs) {
+  if (Array.isArray(json)) return json.map(n => fromJSON(n))
+
+  // An explicit stack instead of recursive calls to survive deeply
+  // nested trees. Children are rehydrated before their parent node
+  // is constructed.
+  let result
+  let stack = [
+    { childIndex: 0, children: [], inputs: hydrateInputs(json, inputs), json }
+  ]
+
+  while (stack.length > 0) {
+    let frame = stack[stack.length - 1]
+    let jsonNodes = frame.json.nodes
+
+    if (jsonNodes && frame.childIndex < jsonNodes.length) {
+      let childJson = jsonNodes[frame.childIndex]
+      frame.childIndex += 1
+      stack.push({
+        childIndex: 0,
+        children: [],
+        inputs: hydrateInputs(childJson, frame.inputs),
+        json: childJson
+      })
+      continue
+    }
+
+    stack.pop()
+    let node = constructNode(
+      frame.json,
+      frame.inputs,
+      jsonNodes ? frame.children : undefined
+    )
+    if (stack.length > 0) {
+      stack[stack.length - 1].children.push(node)
+    } else {
+      result = node
+    }
+  }
+
+  return result
 }
 
 module.exports = fromJSON

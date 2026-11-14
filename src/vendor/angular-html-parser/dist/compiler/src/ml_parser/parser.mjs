@@ -3,6 +3,7 @@ import { getNsPrefix, mergeNsAndName, splitNsName } from "./tags.mjs";
 import { ParseError, ParseSourceSpan } from "../parse_util.mjs";
 import { Attribute, Block, BlockParameter, CDATA, Comment, Component, Directive, DocType, Element, Expansion, ExpansionCase, LetDeclaration, StartTagComment, Text } from "./ast.mjs";
 import { NAMED_ENTITIES } from "./entities.mjs";
+import "./tokens.mjs";
 import { tokenize } from "./lexer.mjs";
 /**
  * @import {Token} from "angular-html-parser-types"

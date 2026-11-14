@@ -8,7 +8,7 @@ import { suggestionList } from "../jsutils/suggestionList.mjs";
 import { ensureGraphQLError } from "../error/ensureGraphQLError.mjs";
 import { GraphQLError } from "../error/GraphQLError.mjs";
 import { Kind } from "../language/kinds.mjs";
-import { print } from "../language/printer.mjs";
+import { printForError as print } from "../language/printer.mjs";
 import { assertLeafType, isInputObjectType, isListType, isNonNullType, isRequiredInputField, } from "../type/definition.mjs";
 import { replaceVariables } from "./replaceVariables.mjs";
 export function validateInputValue(inputValue, type, onError, hideSuggestions) {
@@ -263,4 +263,4 @@ function getCaughtErrorMessage(caughtError) {
 function getOneOfInputObjectErrorMessage(type) {
     return `Within OneOf Input Object type "${type}", exactly one field must be specified, and the value for that field must be non-null.`;
 }
-//# sourceMappingURL=validateInputValue.js.map
+//# sourceMappingURL=validateInputValue.mjs.map

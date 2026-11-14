@@ -163,28 +163,32 @@ module.exports = [/** @this {FlowParserDeserializer} @returns {FlowNode} */ func
     id: this.deserializeNode()
   };
 }, /** @this {FlowParserDeserializer} @returns {FlowNode} */ function () {
-  return {
+  const node = {
     type: 'ClassDeclaration',
-    loc: this.addEmptyLoc(),
-    id: this.deserializeNode(),
-    typeParameters: this.deserializeNode(),
-    superClass: this.deserializeNode(),
-    implements: this.deserializeNodeList(),
-    body: this.deserializeNode(),
-    superTypeArguments: this.deserializeNode(),
-    decorators: this.deserializeNodeList()
+    loc: this.addEmptyLoc()
   };
+  node.id = this.deserializeNode();
+  node.typeParameters = this.deserializeNode();
+  node.superClass = this.deserializeNode();
+  node.implements = this.deserializeNodeList();
+  node.body = this.deserializeNode();
+  node.superTypeArguments = this.deserializeNode();
+  node.decorators = this.deserializeNodeList();
+  if (this.deserializeBoolean()) node['abstract'] = true;
+  return node;
 }, /** @this {FlowParserDeserializer} @returns {FlowNode} */ function () {
-  return {
+  const node = {
     type: 'ComponentDeclaration',
-    loc: this.addEmptyLoc(),
-    body: this.deserializeNode(),
-    id: this.deserializeNode(),
-    params: this.deserializeNodeList(),
-    rendersType: this.deserializeNode(),
-    typeParameters: this.deserializeNode(),
-    async: this.deserializeBoolean()
+    loc: this.addEmptyLoc()
   };
+  node.body = this.deserializeNode();
+  node.id = this.deserializeNode();
+  if (this.deserializeBoolean()) node['implicitDeclare'] = true;
+  node.params = this.deserializeNodeList();
+  node.rendersType = this.deserializeNode();
+  node.typeParameters = this.deserializeNode();
+  node.async = this.deserializeBoolean();
+  return node;
 }, /** @this {FlowParserDeserializer} @returns {FlowNode} */ function () {
   return {
     type: 'HookDeclaration',
@@ -197,12 +201,14 @@ module.exports = [/** @this {FlowParserDeserializer} @returns {FlowNode} */ func
     async: this.deserializeBoolean()
   };
 }, /** @this {FlowParserDeserializer} @returns {FlowNode} */ function () {
-  return {
+  const node = {
     type: 'EnumDeclaration',
-    loc: this.addEmptyLoc(),
-    id: this.deserializeNode(),
-    body: this.deserializeNode()
+    loc: this.addEmptyLoc()
   };
+  node.id = this.deserializeNode();
+  node.body = this.deserializeNode();
+  if (this.deserializeBoolean()) node['const'] = true;
+  return node;
 }, /** @this {FlowParserDeserializer} @returns {FlowNode} */ function () {
   return {
     type: 'InterfaceDeclaration',
@@ -236,7 +242,8 @@ module.exports = [/** @this {FlowParserDeserializer} @returns {FlowNode} */ func
     specifiers: this.deserializeNodeList(),
     source: this.deserializeNode(),
     importKind: this.deserializeString(),
-    attributes: this.deserializeNodeList()
+    attributes: this.deserializeNodeList(),
+    phase: this.deserializeString()
   };
 }, /** @this {FlowParserDeserializer} @returns {FlowNode} */ function () {
   return {
@@ -281,34 +288,50 @@ module.exports = [/** @this {FlowParserDeserializer} @returns {FlowNode} */ func
     expression: this.deserializeNode()
   };
 }, /** @this {FlowParserDeserializer} @returns {FlowNode} */ function () {
-  return {
+  const node = {
     type: 'ExportNamedDeclaration',
-    loc: this.addEmptyLoc(),
-    declaration: this.deserializeNode(),
-    specifiers: this.deserializeNodeList(),
-    source: this.deserializeNode(),
-    exportKind: this.deserializeString()
+    loc: this.addEmptyLoc()
   };
+  node.declaration = this.deserializeNode();
+  node.specifiers = this.deserializeNodeList();
+  node.source = this.deserializeNode();
+  node.exportKind = this.deserializeString();
+  {
+    const value = this.deserializeNodeList();
+    if (value.length > 0) node['attributes'] = value;
+  }
+  return node;
 }, /** @this {FlowParserDeserializer} @returns {FlowNode} */ function () {
-  return {
+  const node = {
     type: 'ExportDefaultDeclaration',
-    loc: this.addEmptyLoc(),
-    declaration: this.deserializeNode()
+    loc: this.addEmptyLoc()
   };
+  node.declaration = this.deserializeNode();
+  {
+    const value = this.deserializeString();
+    if (value != null) node['exportKind'] = value;
+  }
+  return node;
 }, /** @this {FlowParserDeserializer} @returns {FlowNode} */ function () {
-  return {
+  const node = {
     type: 'ExportAllDeclaration',
-    loc: this.addEmptyLoc(),
-    source: this.deserializeNode(),
-    exported: this.deserializeNode(),
-    exportKind: this.deserializeString()
+    loc: this.addEmptyLoc()
   };
+  node.source = this.deserializeNode();
+  node.exported = this.deserializeNode();
+  node.exportKind = this.deserializeString();
+  {
+    const value = this.deserializeNodeList();
+    if (value.length > 0) node['attributes'] = value;
+  }
+  return node;
 }, /** @this {FlowParserDeserializer} @returns {FlowNode} */ function () {
   return {
     type: 'ExportSpecifier',
     loc: this.addEmptyLoc(),
     exported: this.deserializeNode(),
-    local: this.deserializeNode()
+    local: this.deserializeNode(),
+    exportKind: this.deserializeString()
   };
 }, /** @this {FlowParserDeserializer} @returns {FlowNode} */ function () {
   return {
@@ -367,6 +390,7 @@ module.exports = [/** @this {FlowParserDeserializer} @returns {FlowNode} */ func
     body: this.deserializeNode(),
     typeParameters: this.deserializeNode(),
     returnType: this.deserializeNode(),
+    generator: this.deserializeBoolean(),
     async: this.deserializeBoolean(),
     id: this.deserializeNode(),
     predicate: this.deserializeNode(),
@@ -488,7 +512,8 @@ module.exports = [/** @this {FlowParserDeserializer} @returns {FlowNode} */ func
     type: 'ImportExpression',
     loc: this.addEmptyLoc(),
     source: this.deserializeNode(),
-    options: this.deserializeNode()
+    options: this.deserializeNode(),
+    phase: this.deserializeString()
   };
 }, /** @this {FlowParserDeserializer} @returns {FlowNode} */ function () {
   return {
@@ -498,12 +523,16 @@ module.exports = [/** @this {FlowParserDeserializer} @returns {FlowNode} */ func
     property: this.deserializeNode()
   };
 }, /** @this {FlowParserDeserializer} @returns {FlowNode} */ function () {
-  return {
+  const node = {
     type: 'TaggedTemplateExpression',
-    loc: this.addEmptyLoc(),
-    tag: this.deserializeNode(),
-    quasi: this.deserializeNode()
+    loc: this.addEmptyLoc()
   };
+  node.tag = this.deserializeNode();
+  node.quasi = this.deserializeNode();
+  if (this.deserializeBoolean()) {
+    node['typeArguments'] = this.deserializeNode();
+  }
+  return node;
 }, /** @this {FlowParserDeserializer} @returns {FlowNode} */ function () {
   return {
     type: 'TemplateLiteral',
@@ -552,8 +581,7 @@ module.exports = [/** @this {FlowParserDeserializer} @returns {FlowNode} */ func
   return {
     type: 'NonNullExpression',
     loc: this.addEmptyLoc(),
-    argument: this.deserializeNode(),
-    chain: this.deserializeBoolean()
+    expression: this.deserializeNode()
   };
 }, /** @this {FlowParserDeserializer} @returns {FlowNode} */ function () {
   return {
@@ -631,19 +659,23 @@ module.exports = [/** @this {FlowParserDeserializer} @returns {FlowNode} */ func
     optional: this.deserializeBoolean()
   };
 }, /** @this {FlowParserDeserializer} @returns {FlowNode} */ function () {
-  return {
+  const node = {
     type: 'ObjectPattern',
-    loc: this.addEmptyLoc(),
-    properties: this.deserializeNodeList(),
-    typeAnnotation: this.deserializeNode()
+    loc: this.addEmptyLoc()
   };
+  node.properties = this.deserializeNodeList();
+  node.typeAnnotation = this.deserializeNode();
+  if (this.deserializeBoolean()) node['optional'] = true;
+  return node;
 }, /** @this {FlowParserDeserializer} @returns {FlowNode} */ function () {
-  return {
+  const node = {
     type: 'ArrayPattern',
-    loc: this.addEmptyLoc(),
-    elements: this.deserializeNodeList(),
-    typeAnnotation: this.deserializeNode()
+    loc: this.addEmptyLoc()
   };
+  node.elements = this.deserializeNodeList();
+  node.typeAnnotation = this.deserializeNode();
+  if (this.deserializeBoolean()) node['optional'] = true;
+  return node;
 }, /** @this {FlowParserDeserializer} @returns {FlowNode} */ function () {
   return {
     type: 'RestElement',
@@ -675,17 +707,19 @@ module.exports = [/** @this {FlowParserDeserializer} @returns {FlowNode} */ func
     argument: this.deserializeNode()
   };
 }, /** @this {FlowParserDeserializer} @returns {FlowNode} */ function () {
-  return {
+  const node = {
     type: 'ClassExpression',
-    loc: this.addEmptyLoc(),
-    id: this.deserializeNode(),
-    typeParameters: this.deserializeNode(),
-    superClass: this.deserializeNode(),
-    implements: this.deserializeNodeList(),
-    body: this.deserializeNode(),
-    superTypeArguments: this.deserializeNode(),
-    decorators: this.deserializeNodeList()
+    loc: this.addEmptyLoc()
   };
+  node.id = this.deserializeNode();
+  node.typeParameters = this.deserializeNode();
+  node.superClass = this.deserializeNode();
+  node.implements = this.deserializeNodeList();
+  node.body = this.deserializeNode();
+  node.superTypeArguments = this.deserializeNode();
+  node.decorators = this.deserializeNodeList();
+  if (this.deserializeBoolean()) node['abstract'] = true;
+  return node;
 }, /** @this {FlowParserDeserializer} @returns {FlowNode} */ function () {
   return {
     type: 'ClassBody',
@@ -697,7 +731,7 @@ module.exports = [/** @this {FlowParserDeserializer} @returns {FlowNode} */ func
     type: 'ClassImplements',
     loc: this.addEmptyLoc(),
     id: this.deserializeNode(),
-    typeParameters: this.deserializeNode()
+    typeArguments: this.deserializeNode()
   };
 }, /** @this {FlowParserDeserializer} @returns {FlowNode} */ function () {
   return {
@@ -756,38 +790,52 @@ module.exports = [/** @this {FlowParserDeserializer} @returns {FlowNode} */ func
     decorators: this.deserializeNodeList()
   };
 }, /** @this {FlowParserDeserializer} @returns {FlowNode} */ function () {
-  return {
+  const node = {
     type: 'DeclareMethodDefinition',
-    loc: this.addEmptyLoc(),
-    key: this.deserializeNode(),
-    value: this.deserializeNode(),
-    static: this.deserializeBoolean(),
-    optional: this.deserializeBoolean(),
-    computed: this.deserializeBoolean(),
-    kind: this.deserializeString(),
-    override: this.deserializeBoolean()
+    loc: this.addEmptyLoc()
   };
+  node.key = this.deserializeNode();
+  node.value = this.deserializeNode();
+  node.static = this.deserializeBoolean();
+  node.optional = this.deserializeBoolean();
+  node.computed = this.deserializeBoolean();
+  node.kind = this.deserializeString();
+  node.override = this.deserializeBoolean();
+  {
+    const value = this.deserializeString();
+    if (value != null) node['tsAccessibility'] = value;
+  }
+  return node;
 }, /** @this {FlowParserDeserializer} @returns {FlowNode} */ function () {
-  return {
+  const node = {
     type: 'AbstractMethodDefinition',
-    loc: this.addEmptyLoc(),
-    key: this.deserializeNode(),
-    value: this.deserializeNode(),
-    computed: this.deserializeBoolean(),
-    override: this.deserializeBoolean(),
-    tsAccessibility: this.deserializeString()
+    loc: this.addEmptyLoc()
   };
+  node.key = this.deserializeNode();
+  node.value = this.deserializeNode();
+  node.computed = this.deserializeBoolean();
+  if (this.deserializeBoolean()) node['override'] = true;
+  {
+    const value = this.deserializeString();
+    if (value != null) node['tsAccessibility'] = value;
+  }
+  return node;
 }, /** @this {FlowParserDeserializer} @returns {FlowNode} */ function () {
-  return {
+  const node = {
     type: 'AbstractPropertyDefinition',
-    loc: this.addEmptyLoc(),
-    key: this.deserializeNode(),
-    value: this.deserializeNode(),
-    computed: this.deserializeBoolean(),
-    variance: this.deserializeNode(),
-    override: this.deserializeBoolean(),
-    tsAccessibility: this.deserializeString()
+    loc: this.addEmptyLoc()
   };
+  node.key = this.deserializeNode();
+  node.value = this.deserializeNode();
+  node.typeAnnotation = this.deserializeNode();
+  node.computed = this.deserializeBoolean();
+  node.variance = this.deserializeNode();
+  if (this.deserializeBoolean()) node['override'] = true;
+  {
+    const value = this.deserializeString();
+    if (value != null) node['tsAccessibility'] = value;
+  }
+  return node;
 }, /** @this {FlowParserDeserializer} @returns {FlowNode} */ function () {
   return {
     type: 'SwitchCase',
@@ -811,51 +859,61 @@ module.exports = [/** @this {FlowParserDeserializer} @returns {FlowNode} */ func
     shorthand: this.deserializeBoolean()
   };
 }, /** @this {FlowParserDeserializer} @returns {FlowNode} */ function () {
-  return {
+  const node = {
     type: 'DeclareVariable',
-    loc: this.addEmptyLoc(),
-    declarations: this.deserializeNodeList(),
-    kind: this.deserializeString(),
-    implicitDeclare: this.deserializeBoolean()
+    loc: this.addEmptyLoc()
   };
+  node.declarations = this.deserializeNodeList();
+  node.kind = this.deserializeString();
+  if (this.deserializeBoolean()) node['implicitDeclare'] = true;
+  return node;
 }, /** @this {FlowParserDeserializer} @returns {FlowNode} */ function () {
-  return {
+  const node = {
     type: 'DeclareFunction',
-    loc: this.addEmptyLoc(),
-    id: this.deserializeNode(),
-    implicitDeclare: this.deserializeBoolean(),
-    predicate: this.deserializeNode()
+    loc: this.addEmptyLoc()
   };
+  node.id = this.deserializeNode();
+  {
+    const value = this.deserializeNode();
+    if (value != null) node['typeAnnotation'] = value;
+  }
+  if (this.deserializeBoolean()) node['implicitDeclare'] = true;
+  node.predicate = this.deserializeNode();
+  return node;
 }, /** @this {FlowParserDeserializer} @returns {FlowNode} */ function () {
-  return {
+  const node = {
     type: 'DeclareClass',
-    loc: this.addEmptyLoc(),
-    id: this.deserializeNode(),
-    typeParameters: this.deserializeNode(),
-    extends: this.deserializeNodeList(),
-    implements: this.deserializeNodeList(),
-    mixins: this.deserializeNodeList(),
-    body: this.deserializeNode(),
-    implicitDeclare: this.deserializeBoolean()
+    loc: this.addEmptyLoc()
   };
+  node.id = this.deserializeNode();
+  node.typeParameters = this.deserializeNode();
+  node.extends = this.deserializeNodeList();
+  node.implements = this.deserializeNodeList();
+  node.mixins = this.deserializeNodeList();
+  node.body = this.deserializeNode();
+  if (this.deserializeBoolean()) node['implicitDeclare'] = true;
+  if (this.deserializeBoolean()) node['abstract'] = true;
+  return node;
 }, /** @this {FlowParserDeserializer} @returns {FlowNode} */ function () {
-  return {
+  const node = {
     type: 'DeclareComponent',
-    loc: this.addEmptyLoc(),
-    id: this.deserializeNode(),
-    params: this.deserializeNodeList(),
-    rest: this.deserializeNode(),
-    rendersType: this.deserializeNode(),
-    typeParameters: this.deserializeNode(),
-    implicitDeclare: this.deserializeBoolean()
+    loc: this.addEmptyLoc()
   };
+  node.id = this.deserializeNode();
+  node.params = this.deserializeNodeList();
+  node.rest = this.deserializeNode();
+  node.rendersType = this.deserializeNode();
+  node.typeParameters = this.deserializeNode();
+  if (this.deserializeBoolean()) node['implicitDeclare'] = true;
+  return node;
 }, /** @this {FlowParserDeserializer} @returns {FlowNode} */ function () {
-  return {
+  const node = {
     type: 'DeclareHook',
-    loc: this.addEmptyLoc(),
-    id: this.deserializeNode(),
-    implicitDeclare: this.deserializeBoolean()
+    loc: this.addEmptyLoc()
   };
+  node.id = this.deserializeNode();
+  if (this.deserializeBoolean()) node['implicitDeclare'] = true;
+  return node;
 }, /** @this {FlowParserDeserializer} @returns {FlowNode} */ function () {
   return {
     type: 'DeclareModule',
@@ -870,59 +928,66 @@ module.exports = [/** @this {FlowParserDeserializer} @returns {FlowNode} */ func
     typeAnnotation: this.deserializeNode()
   };
 }, /** @this {FlowParserDeserializer} @returns {FlowNode} */ function () {
-  return {
+  const node = {
     type: 'DeclareExportDeclaration',
-    loc: this.addEmptyLoc(),
-    default: this.deserializeBoolean(),
-    declaration: this.deserializeNode(),
-    specifiers: this.deserializeNodeList(),
-    source: this.deserializeNode(),
-    implicitDeclare: this.deserializeBoolean()
+    loc: this.addEmptyLoc()
   };
+  node.default = this.deserializeBoolean();
+  node.declaration = this.deserializeNode();
+  node.specifiers = this.deserializeNodeList();
+  node.source = this.deserializeNode();
+  if (this.deserializeBoolean()) node['implicitDeclare'] = true;
+  return node;
 }, /** @this {FlowParserDeserializer} @returns {FlowNode} */ function () {
-  return {
+  const node = {
     type: 'DeclareExportAllDeclaration',
-    loc: this.addEmptyLoc(),
-    source: this.deserializeNode(),
-    implicitDeclare: this.deserializeBoolean()
+    loc: this.addEmptyLoc()
   };
+  node.source = this.deserializeNode();
+  if (this.deserializeBoolean()) node['implicitDeclare'] = true;
+  return node;
 }, /** @this {FlowParserDeserializer} @returns {FlowNode} */ function () {
-  return {
+  const node = {
     type: 'DeclareNamespace',
-    loc: this.addEmptyLoc(),
-    global: this.deserializeBoolean(),
-    id: this.deserializeNode(),
-    body: this.deserializeNode(),
-    implicitDeclare: this.deserializeBoolean(),
-    keyword: this.deserializeString()
+    loc: this.addEmptyLoc()
   };
+  node.global = this.deserializeBoolean();
+  node.id = this.deserializeNode();
+  node.body = this.deserializeNode();
+  if (this.deserializeBoolean()) node['implicitDeclare'] = true;
+  node.keyword = this.deserializeString();
+  return node;
 }, /** @this {FlowParserDeserializer} @returns {FlowNode} */ function () {
-  return {
+  const node = {
     type: 'DeclareInterface',
-    loc: this.addEmptyLoc(),
-    id: this.deserializeNode(),
-    typeParameters: this.deserializeNode(),
-    body: this.deserializeNode(),
-    extends: this.deserializeNodeList(),
-    implicitDeclare: this.deserializeBoolean()
+    loc: this.addEmptyLoc()
   };
+  node.id = this.deserializeNode();
+  node.typeParameters = this.deserializeNode();
+  node.body = this.deserializeNode();
+  node.extends = this.deserializeNodeList();
+  if (this.deserializeBoolean()) node['implicitDeclare'] = true;
+  return node;
 }, /** @this {FlowParserDeserializer} @returns {FlowNode} */ function () {
-  return {
+  const node = {
     type: 'DeclareTypeAlias',
-    loc: this.addEmptyLoc(),
-    id: this.deserializeNode(),
-    typeParameters: this.deserializeNode(),
-    right: this.deserializeNode(),
-    implicitDeclare: this.deserializeBoolean()
+    loc: this.addEmptyLoc()
   };
+  node.id = this.deserializeNode();
+  node.typeParameters = this.deserializeNode();
+  node.right = this.deserializeNode();
+  if (this.deserializeBoolean()) node['implicitDeclare'] = true;
+  return node;
 }, /** @this {FlowParserDeserializer} @returns {FlowNode} */ function () {
-  return {
+  const node = {
     type: 'DeclareEnum',
-    loc: this.addEmptyLoc(),
-    id: this.deserializeNode(),
-    body: this.deserializeNode(),
-    implicitDeclare: this.deserializeBoolean()
+    loc: this.addEmptyLoc()
   };
+  node.id = this.deserializeNode();
+  node.body = this.deserializeNode();
+  if (this.deserializeBoolean()) node['implicitDeclare'] = true;
+  if (this.deserializeBoolean()) node['const'] = true;
+  return node;
 }, /** @this {FlowParserDeserializer} @returns {FlowNode} */ function () {
   return {
     type: 'TypeAnnotation',
@@ -1103,7 +1168,7 @@ module.exports = [/** @this {FlowParserDeserializer} @returns {FlowNode} */ func
     type: 'GenericTypeAnnotation',
     loc: this.addEmptyLoc(),
     id: this.deserializeNode(),
-    typeParameters: this.deserializeNode()
+    typeArguments: this.deserializeNode()
   };
 }, /** @this {FlowParserDeserializer} @returns {FlowNode} */ function () {
   return {
@@ -1120,17 +1185,21 @@ module.exports = [/** @this {FlowParserDeserializer} @returns {FlowNode} */ func
     id: this.deserializeNode()
   };
 }, /** @this {FlowParserDeserializer} @returns {FlowNode} */ function () {
-  return {
+  const node = {
     type: 'TypeofTypeAnnotation',
-    loc: this.addEmptyLoc(),
-    argument: this.deserializeNode(),
-    typeArguments: this.deserializeNode()
+    loc: this.addEmptyLoc()
   };
+  node.argument = this.deserializeNode();
+  {
+    const value = this.deserializeNode();
+    if (value != null) node['typeArguments'] = value;
+  }
+  return node;
 }, /** @this {FlowParserDeserializer} @returns {FlowNode} */ function () {
   return {
     type: 'ImportType',
     loc: this.addEmptyLoc(),
-    argument: this.deserializeNode()
+    source: this.deserializeNode()
   };
 }, /** @this {FlowParserDeserializer} @returns {FlowNode} */ function () {
   return {
@@ -1167,18 +1236,30 @@ module.exports = [/** @this {FlowParserDeserializer} @returns {FlowNode} */ func
     exact: this.deserializeBoolean()
   };
 }, /** @this {FlowParserDeserializer} @returns {FlowNode} */ function () {
-  return {
+  const node = {
     type: 'ObjectTypeProperty',
-    loc: this.addEmptyLoc(),
-    key: this.deserializeNode(),
-    value: this.deserializeNode(),
-    method: this.deserializeBoolean(),
-    optional: this.deserializeBoolean(),
-    static: this.deserializeBoolean(),
-    proto: this.deserializeBoolean(),
-    variance: this.deserializeNode(),
-    kind: this.deserializeString()
+    loc: this.addEmptyLoc()
   };
+  node.key = this.deserializeNode();
+  node.value = this.deserializeNode();
+  node.method = this.deserializeBoolean();
+  node.optional = this.deserializeBoolean();
+  node.static = this.deserializeBoolean();
+  node.proto = this.deserializeBoolean();
+  node.variance = this.deserializeNode();
+  node.kind = this.deserializeString();
+  if (this.deserializeBoolean()) node['computed'] = true;
+  if (this.deserializeBoolean()) node['abstract'] = true;
+  if (this.deserializeBoolean()) node['override'] = true;
+  {
+    const value = this.deserializeString();
+    if (value != null) node['tsAccessibility'] = value;
+  }
+  {
+    const value = this.deserializeNode();
+    if (value != null) node['init'] = value;
+  }
+  return node;
 }, /** @this {FlowParserDeserializer} @returns {FlowNode} */ function () {
   return {
     type: 'ObjectTypeSpreadProperty',
@@ -1193,7 +1274,8 @@ module.exports = [/** @this {FlowParserDeserializer} @returns {FlowNode} */ func
     key: this.deserializeNode(),
     value: this.deserializeNode(),
     static: this.deserializeBoolean(),
-    variance: this.deserializeNode()
+    variance: this.deserializeNode(),
+    optional: this.deserializeBoolean()
   };
 }, /** @this {FlowParserDeserializer} @returns {FlowNode} */ function () {
   return {
@@ -1209,7 +1291,9 @@ module.exports = [/** @this {FlowParserDeserializer} @returns {FlowNode} */ func
     keyTparam: this.deserializeNode(),
     propType: this.deserializeNode(),
     sourceType: this.deserializeNode(),
+    nameType: this.deserializeNode(),
     variance: this.deserializeNode(),
+    varianceOp: this.deserializeString(),
     optional: this.deserializeString()
   };
 }, /** @this {FlowParserDeserializer} @returns {FlowNode} */ function () {
@@ -1258,7 +1342,7 @@ module.exports = [/** @this {FlowParserDeserializer} @returns {FlowNode} */ func
     type: 'InterfaceExtends',
     loc: this.addEmptyLoc(),
     id: this.deserializeNode(),
-    typeParameters: this.deserializeNode()
+    typeArguments: this.deserializeNode()
   };
 }, /** @this {FlowParserDeserializer} @returns {FlowNode} */ function () {
   return {
@@ -1699,17 +1783,18 @@ module.exports = [/** @this {FlowParserDeserializer} @returns {FlowNode} */ func
     supertype: this.deserializeNode()
   };
 }, /** @this {FlowParserDeserializer} @returns {FlowNode} */ function () {
-  return {
+  const node = {
     type: 'DeclareOpaqueType',
-    loc: this.addEmptyLoc(),
-    id: this.deserializeNode(),
-    typeParameters: this.deserializeNode(),
-    impltype: this.deserializeNode(),
-    lowerBound: this.deserializeNode(),
-    upperBound: this.deserializeNode(),
-    supertype: this.deserializeNode(),
-    implicitDeclare: this.deserializeBoolean()
+    loc: this.addEmptyLoc()
   };
+  node.id = this.deserializeNode();
+  node.typeParameters = this.deserializeNode();
+  node.impltype = this.deserializeNode();
+  node.lowerBound = this.deserializeNode();
+  node.upperBound = this.deserializeNode();
+  node.supertype = this.deserializeNode();
+  if (this.deserializeBoolean()) node['implicitDeclare'] = true;
+  return node;
 }, /** @this {FlowParserDeserializer} @returns {FlowNode} */ function () {
   return {
     type: 'EnumBody',
@@ -1751,18 +1836,19 @@ module.exports = [/** @this {FlowParserDeserializer} @returns {FlowNode} */ func
     optional: this.deserializeBoolean()
   };
 }, /** @this {FlowParserDeserializer} @returns {FlowNode} */ function () {
-  return {
+  const node = {
     type: 'DeclareComponent',
-    loc: this.addEmptyLoc(),
-    body: this.deserializeNode(),
-    id: this.deserializeNode(),
-    implicitDeclare: this.deserializeBoolean(),
-    params: this.deserializeNodeList(),
-    rest: this.deserializeNode(),
-    rendersType: this.deserializeNode(),
-    typeParameters: this.deserializeNode(),
-    async: this.deserializeBoolean()
+    loc: this.addEmptyLoc()
   };
+  node.body = this.deserializeNode();
+  node.id = this.deserializeNode();
+  if (this.deserializeBoolean()) node['implicitDeclare'] = true;
+  node.params = this.deserializeNodeList();
+  node.rest = this.deserializeNode();
+  node.rendersType = this.deserializeNode();
+  node.typeParameters = this.deserializeNode();
+  node.async = this.deserializeBoolean();
+  return node;
 }, /** @this {FlowParserDeserializer} @returns {FlowNode} */ function () {
   return {
     type: 'ThisTypeAnnotation',
@@ -1773,5 +1859,645 @@ module.exports = [/** @this {FlowParserDeserializer} @returns {FlowNode} */ func
     type: 'ChainExpression',
     loc: this.addEmptyLoc(),
     expression: this.deserializeNode()
+  };
+}, function () {
+  return {
+    type: 'ExpressionStatement',
+    loc: this.addEmptyLoc(),
+    expression: this.deserializeNode()
+  };
+}, function () {
+  return {
+    type: 'BlockStatement',
+    loc: this.addEmptyLoc(),
+    body: this.deserializeNodeList(),
+    directives: this.deserializeNodeList()
+  };
+}, function () {
+  return {
+    type: 'Directive',
+    loc: this.addEmptyLoc(),
+    value: this.deserializeNode()
+  };
+}, function () {
+  const loc = this.addEmptyLoc();
+  const value = this.deserializeString();
+  const rawValue = this.deserializeString();
+  const raw = this.deserializeString();
+  return {
+    type: 'DirectiveLiteral',
+    loc,
+    value,
+    extra: {
+      rawValue,
+      raw
+    }
+  };
+}, function () {
+  return {
+    type: 'ObjectProperty',
+    loc: this.addEmptyLoc(),
+    computed: this.deserializeBoolean(),
+    key: this.deserializeNode(),
+    value: this.deserializeNode(),
+    method: this.deserializeBoolean(),
+    shorthand: this.deserializeBoolean()
+  };
+}, function () {
+  const node = {
+    type: 'ObjectMethod',
+    loc: this.addEmptyLoc()
+  };
+  node.kind = this.deserializeString();
+  node.method = this.deserializeBoolean();
+  node.computed = this.deserializeBoolean();
+  node.key = this.deserializeNode();
+  node.id = this.deserializeNode();
+  node.params = this.deserializeNodeList();
+  node.body = this.deserializeNode();
+  node.async = this.deserializeBoolean();
+  node.generator = this.deserializeBoolean();
+  {
+    const value = this.deserializeNode();
+    if (value != null) node['returnType'] = value;
+  }
+  {
+    const value = this.deserializeNode();
+    if (value != null) node['typeParameters'] = value;
+  }
+  if (this.deserializeBoolean()) {
+    node['variance'] = this.deserializeNode();
+  }
+  return node;
+}, function () {
+  const node = {
+    type: 'ClassMethod',
+    loc: this.addEmptyLoc()
+  };
+  node.kind = this.deserializeString();
+  node.computed = this.deserializeBoolean();
+  node.static = this.deserializeBoolean();
+  node.key = this.deserializeNode();
+  node.id = this.deserializeNode();
+  node.params = this.deserializeNodeList();
+  node.body = this.deserializeNode();
+  node.async = this.deserializeBoolean();
+  node.generator = this.deserializeBoolean();
+  {
+    const value = this.deserializeNode();
+    if (value != null) node['returnType'] = value;
+  }
+  {
+    const value = this.deserializeNode();
+    if (value != null) node['typeParameters'] = value;
+  }
+  {
+    const value = this.deserializeNode();
+    if (value != null) node['predicate'] = value;
+  }
+  return node;
+}, function () {
+  const node = {
+    type: 'ClassPrivateMethod',
+    loc: this.addEmptyLoc()
+  };
+  node.kind = this.deserializeString();
+  node.static = this.deserializeBoolean();
+  node.key = this.deserializeNode();
+  node.id = this.deserializeNode();
+  node.params = this.deserializeNodeList();
+  node.body = this.deserializeNode();
+  node.async = this.deserializeBoolean();
+  node.generator = this.deserializeBoolean();
+  {
+    const value = this.deserializeNode();
+    if (value != null) node['returnType'] = value;
+  }
+  {
+    const value = this.deserializeNode();
+    if (value != null) node['typeParameters'] = value;
+  }
+  {
+    const value = this.deserializeNode();
+    if (value != null) node['predicate'] = value;
+  }
+  return node;
+}, function () {
+  const node = {
+    type: 'ClassProperty',
+    loc: this.addEmptyLoc()
+  };
+  node.key = this.deserializeNode();
+  node.value = this.deserializeNode();
+  {
+    const value = this.deserializeNode();
+    if (value != null) node['typeAnnotation'] = value;
+  }
+  node.static = this.deserializeBoolean();
+  node.variance = this.deserializeNode();
+  if (this.deserializeBoolean()) node['declare'] = true;
+  if (this.deserializeBoolean()) node['optional'] = true;
+  node.computed = this.deserializeBoolean();
+  return node;
+}, function () {
+  const node = {
+    type: 'ClassPrivateProperty',
+    loc: this.addEmptyLoc()
+  };
+  node.key = this.deserializeNode();
+  node.value = this.deserializeNode();
+  {
+    const value = this.deserializeNode();
+    if (value != null) node['typeAnnotation'] = value;
+  }
+  node.static = this.deserializeBoolean();
+  node.variance = this.deserializeNode();
+  return node;
+}, function () {
+  return {
+    type: 'PrivateName',
+    loc: this.addEmptyLoc(),
+    id: this.deserializeNode()
+  };
+}, function () {
+  const loc = this.addEmptyLoc();
+  const value = this.deserializeString();
+  const rawValue = value;
+  const raw = this.deserializeString();
+  return {
+    type: 'StringLiteral',
+    loc,
+    value,
+    extra: {
+      rawValue,
+      raw
+    }
+  };
+}, function () {
+  const loc = this.addEmptyLoc();
+  const value = this.deserializeNumber();
+  const raw = this.deserializeString();
+  return {
+    type: 'NumericLiteral',
+    loc,
+    value,
+    extra: {
+      rawValue: value,
+      raw
+    }
+  };
+}, function () {
+  const loc = this.addEmptyLoc();
+  const value = this.deserializeString();
+  const rawValue = value;
+  const raw = this.deserializeString();
+  return {
+    type: 'BigIntLiteral',
+    loc,
+    value,
+    extra: {
+      rawValue,
+      raw
+    }
+  };
+}, function () {
+  return {
+    type: 'BooleanLiteral',
+    loc: this.addEmptyLoc(),
+    value: this.deserializeBoolean()
+  };
+}, function () {
+  return {
+    type: 'NullLiteral',
+    loc: this.addEmptyLoc()
+  };
+}, function () {
+  const loc = this.addEmptyLoc();
+  const raw = this.deserializeString();
+  const pattern = this.deserializeString();
+  const flags = this.deserializeString();
+  return {
+    type: 'RegExpLiteral',
+    loc,
+    extra: {
+      raw
+    },
+    pattern,
+    flags
+  };
+}, function () {
+  return {
+    type: 'Import',
+    loc: this.addEmptyLoc()
+  };
+}, function () {
+  return {
+    type: 'TupleTypeAnnotation',
+    loc: this.addEmptyLoc(),
+    types: this.deserializeNodeList()
+  };
+}, function () {
+  const loc = this.addEmptyLoc();
+  const value = this.deserializeString();
+  const rawValue = value;
+  const raw = this.deserializeString();
+  return {
+    type: 'StringLiteralTypeAnnotation',
+    loc,
+    value,
+    extra: {
+      rawValue,
+      raw
+    }
+  };
+}, function () {
+  const loc = this.addEmptyLoc();
+  const value = this.deserializeNumber();
+  const raw = this.deserializeString();
+  return {
+    type: 'NumberLiteralTypeAnnotation',
+    loc,
+    value,
+    extra: {
+      rawValue: value,
+      raw
+    }
+  };
+}, function () {
+  const loc = this.addEmptyLoc();
+  const bigint = this.deserializeString();
+  const raw = this.deserializeString();
+  let value = null;
+  if (bigint != null && typeof BigInt === 'function') {
+    try {
+      value = BigInt(bigint);
+    } catch (error) {
+      value = null;
+    }
+  }
+  return {
+    type: 'BigIntLiteralTypeAnnotation',
+    loc,
+    value,
+    extra: {
+      rawValue: bigint,
+      raw
+    }
+  };
+}, function () {
+  return {
+    type: 'BooleanLiteralTypeAnnotation',
+    loc: this.addEmptyLoc(),
+    value: this.deserializeBoolean()
+  };
+}, function () {
+  const loc = this.addEmptyLoc();
+  const value = this.deserializeString();
+  const rawValue = value;
+  const raw = this.deserializeString();
+  return {
+    type: 'JSXText',
+    loc,
+    value,
+    extra: {
+      rawValue,
+      raw
+    }
+  };
+}, function () {
+  const node = {
+    type: 'ClassDeclaration',
+    loc: this.addEmptyLoc()
+  };
+  node.id = this.deserializeNode();
+  {
+    const value = this.deserializeNode();
+    if (value != null) node['typeParameters'] = value;
+  }
+  node.superClass = this.deserializeNode();
+  {
+    const value = this.deserializeNodeList();
+    if (value.length > 0) node['implements'] = value;
+  }
+  node.body = this.deserializeNode();
+  {
+    const value = this.deserializeNode();
+    if (value != null) node['superTypeParameters'] = value;
+  }
+  {
+    const value = this.deserializeNodeList();
+    if (value.length > 0) node['decorators'] = value;
+  }
+  return node;
+}, function () {
+  const node = {
+    type: 'ClassExpression',
+    loc: this.addEmptyLoc()
+  };
+  node.id = this.deserializeNode();
+  {
+    const value = this.deserializeNode();
+    if (value != null) node['typeParameters'] = value;
+  }
+  node.superClass = this.deserializeNode();
+  {
+    const value = this.deserializeNodeList();
+    if (value.length > 0) node['implements'] = value;
+  }
+  node.body = this.deserializeNode();
+  {
+    const value = this.deserializeNode();
+    if (value != null) node['superTypeParameters'] = value;
+  }
+  {
+    const value = this.deserializeNodeList();
+    if (value.length > 0) node['decorators'] = value;
+  }
+  return node;
+}, function () {
+  const node = {
+    type: 'FunctionDeclaration',
+    loc: this.addEmptyLoc()
+  };
+  node.id = this.deserializeNode();
+  node.params = this.deserializeNodeList();
+  node.body = this.deserializeNode();
+  {
+    const value = this.deserializeNode();
+    if (value != null) node['typeParameters'] = value;
+  }
+  {
+    const value = this.deserializeNode();
+    if (value != null) node['returnType'] = value;
+  }
+  node.generator = this.deserializeBoolean();
+  node.async = this.deserializeBoolean();
+  {
+    const value = this.deserializeNode();
+    if (value != null) node['predicate'] = value;
+  }
+  if (this.deserializeBoolean()) node['__componentDeclaration'] = true;
+  if (this.deserializeBoolean()) node['__hookDeclaration'] = true;
+  return node;
+}, function () {
+  const node = {
+    type: 'FunctionExpression',
+    loc: this.addEmptyLoc()
+  };
+  node.id = this.deserializeNode();
+  node.params = this.deserializeNodeList();
+  node.body = this.deserializeNode();
+  {
+    const value = this.deserializeNode();
+    if (value != null) node['typeParameters'] = value;
+  }
+  {
+    const value = this.deserializeNode();
+    if (value != null) node['returnType'] = value;
+  }
+  node.generator = this.deserializeBoolean();
+  node.async = this.deserializeBoolean();
+  {
+    const value = this.deserializeNode();
+    if (value != null) node['predicate'] = value;
+  }
+  return node;
+}, function () {
+  const node = {
+    type: 'ArrowFunctionExpression',
+    loc: this.addEmptyLoc()
+  };
+  node.params = this.deserializeNodeList();
+  node.body = this.deserializeNode();
+  {
+    const value = this.deserializeNode();
+    if (value != null) node['typeParameters'] = value;
+  }
+  {
+    const value = this.deserializeNode();
+    if (value != null) node['returnType'] = value;
+  }
+  node.async = this.deserializeBoolean();
+  node.id = this.deserializeNode();
+  {
+    const value = this.deserializeNode();
+    if (value != null) node['predicate'] = value;
+  }
+  return node;
+}, function () {
+  return {
+    type: 'MemberExpression',
+    loc: this.addEmptyLoc(),
+    object: this.deserializeNode(),
+    property: this.deserializeNode(),
+    computed: this.deserializeBoolean()
+  };
+}, function () {
+  return {
+    type: 'ArrayExpression',
+    loc: this.addEmptyLoc(),
+    elements: this.deserializeNodeList()
+  };
+}, function () {
+  const node = {
+    type: 'RestElement',
+    loc: this.addEmptyLoc()
+  };
+  node.argument = this.deserializeNode();
+  if (this.deserializeBoolean()) {
+    node['typeAnnotation'] = this.deserializeNode();
+  }
+  return node;
+}, function () {
+  return {
+    type: 'OpaqueType',
+    loc: this.addEmptyLoc(),
+    id: this.deserializeNode(),
+    typeParameters: this.deserializeNode(),
+    impltype: this.deserializeNode(),
+    supertype: this.deserializeNode()
+  };
+}, function () {
+  const node = {
+    type: 'DeclareOpaqueType',
+    loc: this.addEmptyLoc()
+  };
+  node.id = this.deserializeNode();
+  node.typeParameters = this.deserializeNode();
+  node.impltype = this.deserializeNode();
+  node.supertype = this.deserializeNode();
+  if (this.deserializeBoolean()) node['implicitDeclare'] = true;
+  return node;
+}, function () {
+  const node = {
+    type: 'ExportAllDeclaration',
+    loc: this.addEmptyLoc()
+  };
+  node.source = this.deserializeNode();
+  node.exportKind = this.deserializeString();
+  {
+    const value = this.deserializeNodeList();
+    if (value.length > 0) node['attributes'] = value;
+  }
+  return node;
+}, function () {
+  return {
+    type: 'DeclareVariable',
+    loc: this.addEmptyLoc(),
+    id: this.deserializeNode()
+  };
+}, function () {
+  const node = {
+    type: 'Identifier',
+    loc: this.addEmptyLoc()
+  };
+  node.name = this.deserializeString();
+  {
+    const value = this.deserializeNode();
+    if (value != null) node['typeAnnotation'] = value;
+  }
+  if (this.deserializeBoolean()) node['optional'] = true;
+  return node;
+}, function () {
+  const node = {
+    type: 'ObjectPattern',
+    loc: this.addEmptyLoc()
+  };
+  node.properties = this.deserializeNodeList();
+  {
+    const value = this.deserializeNode();
+    if (value != null) node['typeAnnotation'] = value;
+  }
+  if (this.deserializeBoolean()) {
+    node['optional'] = this.deserializeBoolean();
+  }
+  return node;
+}, function () {
+  const node = {
+    type: 'ArrayPattern',
+    loc: this.addEmptyLoc()
+  };
+  node.elements = this.deserializeNodeList();
+  {
+    const value = this.deserializeNode();
+    if (value != null) node['typeAnnotation'] = value;
+  }
+  if (this.deserializeBoolean()) {
+    node['optional'] = this.deserializeBoolean();
+  }
+  return node;
+}, function () {
+  const node = {
+    type: 'CallExpression',
+    loc: this.addEmptyLoc()
+  };
+  node.callee = this.deserializeNode();
+  {
+    const value = this.deserializeNode();
+    if (value != null) node['typeArguments'] = value;
+  }
+  node.arguments = this.deserializeNodeList();
+  if (this.deserializeBoolean()) node['optional'] = true;
+  return node;
+}, function () {
+  const node = {
+    type: 'OptionalCallExpression',
+    loc: this.addEmptyLoc()
+  };
+  node.callee = this.deserializeNode();
+  {
+    const value = this.deserializeNode();
+    if (value != null) node['typeArguments'] = value;
+  }
+  node.arguments = this.deserializeNodeList();
+  node.optional = this.deserializeBoolean();
+  return node;
+}, function () {
+  const node = {
+    type: 'ImportDeclaration',
+    loc: this.addEmptyLoc()
+  };
+  node.specifiers = this.deserializeNodeList();
+  node.source = this.deserializeNode();
+  node.importKind = this.deserializeString();
+  {
+    const value = this.deserializeNodeList();
+    if (value.length > 0) node['attributes'] = value;
+  }
+  {
+    const value = this.deserializeString();
+    if (value != null) node['phase'] = value;
+  }
+  return node;
+}, function () {
+  const node = {
+    type: 'ExportNamedDeclaration',
+    loc: this.addEmptyLoc()
+  };
+  {
+    const value = this.deserializeNode();
+    if (value != null) node['declaration'] = value;
+  }
+  node.specifiers = this.deserializeNodeList();
+  node.source = this.deserializeNode();
+  node.exportKind = this.deserializeString();
+  {
+    const value = this.deserializeNodeList();
+    if (value.length > 0) node['attributes'] = value;
+  }
+  return node;
+}, function () {
+  return {
+    type: 'JSXOpeningElement',
+    loc: this.addEmptyLoc(),
+    name: this.deserializeNode(),
+    attributes: this.deserializeNodeList(),
+    selfClosing: this.deserializeBoolean()
+  };
+}, function () {
+  return {
+    type: 'TypeofTypeAnnotation',
+    loc: this.addEmptyLoc(),
+    argument: this.deserializeNode()
+  };
+}, function () {
+  this.addEmptyLoc();
+  return this.deserializeEnumRuntime();
+}, function () {
+  return {
+    type: 'Program',
+    loc: this.addEmptyLoc(),
+    body: this.deserializeNodeList(),
+    directives: this.deserializeNodeList(),
+    sourceType: this.deserializeString(),
+    interpreter: this.deserializeNode()
+  };
+}, function () {
+  return {
+    type: 'File',
+    loc: this.addEmptyLoc(),
+    program: this.deserializeNode(),
+    comments: this.deserializeComments()
+  };
+}, function () {
+  return {
+    type: 'GenericTypeAnnotation',
+    loc: this.addEmptyLoc(),
+    id: this.deserializeNode(),
+    typeParameters: this.deserializeNode()
+  };
+}, function () {
+  return {
+    type: 'InterfaceExtends',
+    loc: this.addEmptyLoc(),
+    id: this.deserializeNode(),
+    typeParameters: this.deserializeNode()
+  };
+}, function () {
+  return {
+    type: 'ClassImplements',
+    loc: this.addEmptyLoc(),
+    id: this.deserializeNode(),
+    typeParameters: this.deserializeNode()
   };
 }];

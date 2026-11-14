@@ -15,4 +15,4 @@
 /** @returns {boolean} */ export function isNameContinue(/** @type {number} */ code) {
     return isLetter(code) || isDigit(code) || code === 0x005f;
 }
-//# sourceMappingURL=characterClasses.js.map
+//# sourceMappingURL=characterClasses.mjs.map

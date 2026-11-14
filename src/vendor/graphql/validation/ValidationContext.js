@@ -1,15 +1,18 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ValidationContext = exports.SDLValidationContext = exports.ASTValidationContext = void 0;
+const SetMap_ts_1 = require("../jsutils/SetMap.js");
 const kinds_ts_1 = require("../language/kinds.js");
 const visitor_ts_1 = require("../language/visitor.js");
 const TypeInfo_ts_1 = require("../utilities/TypeInfo.js");
+const validationAbortedError_ts_1 = require("./validationAbortedError.js");
 class ASTValidationContext {
     constructor(ast, onError) {
+        this._remainingFragmentWork = 50_000;
         this._ast = ast;
         this._fragments = undefined;
         this._fragmentSpreads = new Map();
-        this._recursivelyReferencedFragments = new Map();
+        this._recursivelyReferencedFragments = new SetMap_ts_1.SetMap();
         this._onError = onError;
     }
     get [Symbol.toStringTag]() {
@@ -58,28 +61,35 @@ class ASTValidationContext {
         return spreads;
     }
     getRecursivelyReferencedFragments(operation) {
-        let fragments = this._recursivelyReferencedFragments.get(operation);
+        return this.getRecursivelyReferencedFragmentsForOperations([operation]);
+    }
+    getRecursivelyReferencedFragmentsForOperations(operations) {
+        const fragmentNames = new Set(operations.flatMap(({ selectionSet }) => this.getFragmentSpreads(selectionSet).map(({ name }) => name.value)));
+        let fragments = this._recursivelyReferencedFragments.get(fragmentNames);
         if (!fragments) {
             fragments = [];
-            const collectedNames = new Set();
-            const nodesToVisit = [operation.selectionSet];
-            let node;
-            while ((node = nodesToVisit.pop())) {
-                for (const spread of this.getFragmentSpreads(node)) {
-                    const fragName = spread.name.value;
-                    if (!collectedNames.has(fragName)) {
-                        collectedNames.add(fragName);
-                        const fragment = this.getFragment(fragName);
-                        if (fragment) {
-                            fragments.push(fragment);
-                            nodesToVisit.push(fragment.selectionSet);
-                        }
+            this.spendFragmentWork(fragmentNames.size);
+            const collectedNames = new Set(fragmentNames);
+            for (const fragName of collectedNames) {
+                const fragment = this.getFragment(fragName);
+                if (fragment) {
+                    fragments.push(fragment);
+                    const spreads = this.getFragmentSpreads(fragment.selectionSet);
+                    this.spendFragmentWork(spreads.length);
+                    for (const spread of spreads) {
+                        collectedNames.add(spread.name.value);
                     }
                 }
             }
-            this._recursivelyReferencedFragments.set(operation, fragments);
+            this._recursivelyReferencedFragments.set(fragmentNames, fragments);
         }
         return fragments;
+    }
+    spendFragmentWork(cost) {
+        this._remainingFragmentWork -= cost;
+        if (this._remainingFragmentWork < 0) {
+            throw validationAbortedError_ts_1.validationAbortedError;
+        }
     }
 }
 exports.ASTValidationContext = ASTValidationContext;
@@ -100,19 +110,27 @@ class SDLValidationContext extends ASTValidationContext {
 }
 exports.SDLValidationContext = SDLValidationContext;
 class ValidationContext extends ASTValidationContext {
-    constructor(schema, ast, typeInfo, onError, hideSuggestions) {
+    constructor(schema, ast, typeInfo, onError, hideSuggestionsOrOptions) {
+        const options = typeof hideSuggestionsOrOptions === 'boolean'
+            ? { hideSuggestions: hideSuggestionsOrOptions }
+            : (hideSuggestionsOrOptions ?? {});
+        const { hideSuggestions, allowEmptySelectionSets } = options;
         super(ast, onError);
         this._schema = schema;
         this._typeInfo = typeInfo;
         this._variableUsages = new Map();
         this._recursiveVariableUsages = new Map();
         this._hideSuggestions = hideSuggestions ?? false;
+        this._allowEmptySelectionSets = allowEmptySelectionSets ?? true;
     }
     get [Symbol.toStringTag]() {
         return 'ValidationContext';
     }
     get hideSuggestions() {
         return this._hideSuggestions;
+    }
+    get allowEmptySelectionSets() {
+        return this._allowEmptySelectionSets;
     }
     getSchema() {
         return this._schema;
@@ -131,23 +149,14 @@ class ValidationContext extends ASTValidationContext {
                         const fragmentSignature = typeInfo.getFragmentSignatureByName()(fragmentDefinition.name.value);
                         fragmentVariableDefinition =
                             fragmentSignature?.variableDefinitions.get(variable.name.value);
-                        newUsages.push({
-                            node: variable,
-                            type: typeInfo.getInputType(),
-                            parentType: typeInfo.getParentInputType(),
-                            defaultValue: undefined,
-                            fragmentVariableDefinition,
-                        });
                     }
-                    else {
-                        newUsages.push({
-                            node: variable,
-                            type: typeInfo.getInputType(),
-                            parentType: typeInfo.getParentInputType(),
-                            defaultValue: typeInfo.getDefaultValue(),
-                            fragmentVariableDefinition: undefined,
-                        });
-                    }
+                    newUsages.push({
+                        node: variable,
+                        type: typeInfo.getInputType(),
+                        parentType: typeInfo.getParentInputType(),
+                        defaultValue: typeInfo.getDefaultValue(),
+                        fragmentVariableDefinition,
+                    });
                 },
             }));
             usages = newUsages;
@@ -158,10 +167,19 @@ class ValidationContext extends ASTValidationContext {
     getRecursiveVariableUsages(operation) {
         let usages = this._recursiveVariableUsages.get(operation);
         if (!usages) {
-            usages = this.getVariableUsages(operation);
-            for (const frag of this.getRecursivelyReferencedFragments(operation)) {
-                usages = usages.concat(this.getVariableUsages(frag));
+            const fragments = this.getRecursivelyReferencedFragments(operation);
+            let fragmentUsages = this._recursiveVariableUsages.get(fragments);
+            if (!fragmentUsages) {
+                this.spendFragmentWork(fragments.length);
+                fragmentUsages = fragments.flatMap((frag) => {
+                    const localUsages = this.getVariableUsages(frag);
+                    this.spendFragmentWork(localUsages.length);
+                    return localUsages;
+                });
+                this._recursiveVariableUsages.set(fragments, fragmentUsages);
             }
+            this.spendFragmentWork(fragmentUsages.length);
+            usages = this.getVariableUsages(operation).concat(fragmentUsages);
             this._recursiveVariableUsages.set(operation, usages);
         }
         return usages;

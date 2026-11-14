@@ -10,7 +10,7 @@ import { suggestionList } from "../jsutils/suggestionList.mjs";
 import { toObjMapWithSymbols } from "../jsutils/toObjMap.mjs";
 import { GraphQLError } from "../error/GraphQLError.mjs";
 import { Kind } from "../language/kinds.mjs";
-import { print } from "../language/printer.mjs";
+import { printForError as print } from "../language/printer.mjs";
 import { valueFromASTUntyped } from "../utilities/valueFromASTUntyped.mjs";
 import { assertEnumValueName, assertName } from "./assertName.mjs";
 export function isType(type) {
@@ -780,4 +780,4 @@ export function isRequiredInputField(field) {
         field.defaultValue === undefined &&
         field.default === undefined);
 }
-//# sourceMappingURL=definition.js.map
+//# sourceMappingURL=definition.mjs.map

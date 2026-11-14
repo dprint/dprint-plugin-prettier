@@ -15,4 +15,4 @@ const isMixinToken = /** @returns {boolean} */ (/** @type {any[]} */ token) => {
   );
 };
 
-module.exports = { isMixinToken };
+export { isMixinToken };

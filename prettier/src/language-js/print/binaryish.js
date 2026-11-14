@@ -16,12 +16,15 @@ import {
   softline,
 } from "../../document/index.js";
 import { printComments } from "../../main/comments/print.js";
+import { getOrInsertComputed } from "../../utilities/get-or-insert.js";
 import { CommentCheckFlags, hasComment } from "../utilities/comments.js";
 import { hasLeadingOwnLineComment } from "../utilities/has-leading-own-line-comment.js";
+import { hasNode } from "../utilities/has-node.js";
 import { isBooleanTypeCoercion } from "../utilities/is-boolean-type-coercion.js";
 import { isObjectProperty } from "../utilities/is-object-property.js";
 import { isTypeCastComment } from "../utilities/is-type-cast-comment.js";
 import {
+  isAbstractPropertyDefinition,
   isArrayExpression,
   isBinaryish,
   isCallOrNewExpression,
@@ -29,12 +32,41 @@ import {
   isMemberExpression,
   isObjectExpression,
   isReturnOrThrowStatement,
+  isUnaryLikeNode,
 } from "../utilities/node-types.js";
 import { shouldFlatten } from "../utilities/should-flatten.js";
 
 /** @import {Doc} from "../../document/index.js" */
 
 /** @type {number} */ let uid = 0;
+
+function isInlineLogicalExpression(node) {
+  if (node.type !== "LogicalExpression") {
+    return false;
+  }
+
+  if (!shouldInlineLogicalExpression(node)) {
+    return false;
+  }
+
+  if (
+    isBinaryish(node.left) &&
+    shouldFlatten(node.operator, node.left.operator)
+  ) {
+    return isInlineLogicalExpression(node.left);
+  }
+
+  return true;
+}
+
+const topicReferenceCheckResult = new WeakMap();
+const isHackStylePipeline = (path) =>
+  path.node.type === "BinaryExpression" &&
+  path.node.operator === "|>" &&
+  getOrInsertComputed(topicReferenceCheckResult, path.root, () =>
+    hasNode(path.node, (node) => node.type === "TopicReference"),
+  );
+
 /*
 - `BinaryExpression`
 - `LogicalExpression`
@@ -48,8 +80,6 @@ function printBinaryishExpression(/** @type {AstPath} */ path, /** @type {import
       parent.type === "WhileStatement" ||
       parent.type === "SwitchStatement" ||
       parent.type === "DoWhileStatement");
-  const isHackPipeline =
-    node.operator === "|>" && path.root.extra?.__isUsingHackPipeline;
 
   const parts = printBinaryishExpressions(
     path,
@@ -73,7 +103,7 @@ function printBinaryishExpression(/** @type {AstPath} */ path, /** @type {import
     return parts;
   }
 
-  if (isHackPipeline) {
+  if (isHackStylePipeline(path)) {
     return group(parts);
   }
 
@@ -97,7 +127,7 @@ function printBinaryishExpression(/** @type {AstPath} */ path, /** @type {import
   // Avoid indenting sub-expressions in some cases where the first sub-expression is already
   // indented accordingly. We should indent sub-expressions where the first case isn't indented.
   /** @type {boolean} */ const shouldNotIndent =
-    isReturnOrThrowStatement(parent) ||
+    (key === "argument" && isUnaryLikeNode(parent)) ||
     (parent.type === "JSXExpressionContainer" &&
       grandparent.type === "JSXAttribute") ||
     (node.operator !== "|" && parent.type === "JsExpressionRoot") ||
@@ -112,7 +142,6 @@ function printBinaryishExpression(/** @type {AstPath} */ path, /** @type {import
       !isReturnOrThrowStatement(grandparent) &&
       !isCallOrNewExpression(grandparent)) ||
     parent.type === "TemplateLiteral" ||
-    (key === "argument" && parent.type === "UnaryExpression") ||
     (key === "arguments" && isBooleanTypeCoercion(parent));
 
   /** @type {boolean | undefined} */ const shouldIndentIfInlining =
@@ -120,23 +149,16 @@ function printBinaryishExpression(/** @type {AstPath} */ path, /** @type {import
     parent.type === "VariableDeclarator" ||
     parent.type === "ClassProperty" ||
     parent.type === "PropertyDefinition" ||
-    parent.type === "TSAbstractPropertyDefinition" ||
+    isAbstractPropertyDefinition(parent) ||
     parent.type === "ClassPrivateProperty" ||
     isObjectProperty(parent);
 
-  /** @type {boolean} */ const samePrecedenceSubExpression =
-    isBinaryish(node.left) && shouldFlatten(node.operator, node.left.operator);
-
   if (
     shouldNotIndent ||
-    (shouldInlineLogicalExpression(node) && !samePrecedenceSubExpression) ||
+    isInlineLogicalExpression(node) ||
     (!shouldInlineLogicalExpression(node) && shouldIndentIfInlining)
   ) {
     return group(parts);
-  }
-
-  if (parts.length === 0) {
-    return "";
   }
 
   // If the right part is a JSX node, we include it in a separate group to
@@ -151,10 +173,7 @@ function printBinaryishExpression(/** @type {AstPath} */ path, /** @type {import
   /** @type {boolean} */ const hasJsx = isJsxElement(node.right);
 
   const firstGroupIndex = parts.findIndex(
-    /** @returns {boolean} */ (part) =>
-      typeof part !== "string" &&
-      !Array.isArray(part) &&
-      part.type === DOC_TYPE_GROUP,
+    (part) => getDocType(part) === DOC_TYPE_GROUP,
   );
 
   // Separate the leftmost expression, possibly with its leading comments.
@@ -204,40 +223,60 @@ function printBinaryishExpressions(
 ) {
   /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
 
-  // Simply print the node normally.
   if (!isBinaryish(node)) {
     return [group(print())];
   }
 
-  /** @type{Doc[]} */
+  // Flatten left-associative chains without recursing into every left node.
+  const flattenedLeft = [];
+  let currentNode = node;
+  while (isBinaryish(currentNode.left)) {
+    const leftNode = currentNode.left;
+    const operator =
+      "operator" in currentNode ? currentNode.operator : undefined;
+    const leftOperator = "operator" in leftNode ? leftNode.operator : undefined;
+    if (!shouldFlatten(operator, leftOperator)) {
+      break;
+    }
+
+    flattenedLeft.push("left");
+    currentNode = leftNode;
+  }
+
+  /** @type {Doc[]} */
   let parts = [];
-
-  // We treat BinaryExpression and LogicalExpression nodes the same.
-
-  // Put all operators with the same precedence level in the same
-  // group. The reason we only need to do this with the `left`
-  // expression is because given an expression like `1 + 2 - 3`, it
-  // is always parsed like `((1 + 2) - 3)`, meaning the `left` side
-  // is where the rest of the expression will exist. Binary
-  // expressions on the right side mean they have a difference
-  // precedence level and should be treated as a separate group, so
-  // print them normally. (This doesn't hold for the `**` operator,
-  // which is unique in that it is right-associative.)
-  // @ts-expect-error -- FIXME
-  if (shouldFlatten(node.operator, node.left.operator)) {
-    // Flatten them out by recursively calling this function.
+  for (let depth = flattenedLeft.length; depth >= 0; depth--) {
     parts = path.call(
       () =>
-        printBinaryishExpressions(
+        printBinaryishExpressionPart(
           path,
           options,
           print,
-          /* isNested */ true,
+          parts,
+          isNested || depth !== 0,
           isInsideParenthesis,
         ),
-      "left",
+      ...flattenedLeft.slice(0, depth),
     );
-  } else {
+  }
+
+  return parts;
+}
+
+/** @returns {Doc[]} */
+function printBinaryishExpressionPart(
+  /** @type {AstPath} */ path,
+  /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options,
+  /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print,
+  /** @type {Doc[]} */ parts,
+  /** @type {boolean} */ isNested,
+  /** @type {boolean} */ isInsideParenthesis,
+) {
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
+
+  // The innermost expression prints its left operand. Every outer expression
+  // adds an operator and right operand to the already flattened parts.
+  if (parts.length === 0) {
     parts.push(group(print("left")));
   }
 
@@ -283,9 +322,7 @@ function printBinaryishExpressions(
         : [" ", print("right"), rightSuffix],
     ];
   } else {
-    const isHackPipeline =
-      operator === "|>" && path.root.extra?.__isUsingHackPipeline;
-    const rightContent = isHackPipeline
+    const rightContent = isHackStylePipeline(path)
       ? path.call(
           () =>
             printBinaryishExpressions(

@@ -1,9 +1,7 @@
 // @nts-check
-/* eslint-disable import/no-extraneous-dependencies */
+import Stringifier from 'postcss/lib/stringifier';
 
-const Stringifier = require('postcss/lib/stringifier');
-
-module.exports = class LessStringifier extends Stringifier {
+export class LessStringifier extends Stringifier {
   atrule(/** @type {import("postcss/lib/node")} */ node, /** @type {undefined | boolean} */ semicolon) {
     if (!node.mixin && !node.variable && !node.function) {
       super.atrule(node, semicolon);
@@ -28,7 +26,8 @@ module.exports = class LessStringifier extends Stringifier {
     if (node.nodes) {
       this.block(node, name + params + important);
     } else {
-      /** @type {string} */ const end = (node.raws.between || '') + important + (semicolon ? ';' : '');
+      /** @type {string} */ const end =
+        (node.raws.between || '') + important + (semicolon ? ';' : '');
       this.builder(name + params + end, node);
     }
   }
@@ -42,4 +41,4 @@ module.exports = class LessStringifier extends Stringifier {
       super.comment(node);
     }
   }
-};
+}

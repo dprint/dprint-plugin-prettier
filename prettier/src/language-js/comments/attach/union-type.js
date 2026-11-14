@@ -21,11 +21,10 @@ import { isSingleLineBlockComment } from "../attach/utilities.js";
 }
 
 function addLeadingCommentToPossibleUnionType(/** @type {import("../../types/estree.js").Node} */ node, context) {
-  addLeadingComment(
+  return addLeadingComment(
     shouldAttachToUnionTypeFirstElement(node, context) ? node.types[0] : node,
     context.comment,
   );
-  return true;
 }
 
 export {

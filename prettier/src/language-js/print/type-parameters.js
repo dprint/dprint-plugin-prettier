@@ -171,6 +171,8 @@ function printTypeParameter(/** @type {AstPath} */ path, /** @type {import("../p
   if (node.bound) {
     if (node.usesExtendsBound) {
       parts.push(" extends ");
+    } else {
+      parts.push(": ");
     }
 
     parts.push(printTypeAnnotationProperty(path, print, "bound"));

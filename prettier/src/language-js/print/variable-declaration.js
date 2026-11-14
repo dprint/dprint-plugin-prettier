@@ -1,5 +1,6 @@
 import { group, hardline, indent, line } from "../../document/index.js";
 import { hasComment } from "../utilities/comments.js";
+import { isForXStatementInitializer } from "../utilities/is-for-x-statement-initializer.js";
 import { printDeclareToken, printSemicolon } from "./miscellaneous.js";
 
 function printVariableDeclaration(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
@@ -9,11 +10,7 @@ function printVariableDeclaration(/** @type {import("../../../../prettier/src/co
   // We generally want to terminate all variable declarations with a
   // semicolon, except when they in the () part of for loops.
 
-  const isForXStatementInitializer =
-    (path.key === "init" && path.parent.type === "ForStatement") ||
-    (path.key === "left" &&
-      (path.parent.type === "ForInStatement" ||
-        path.parent.type === "ForOfStatement"));
+  const isForXInitializer = isForXStatementInitializer(path);
 
   const hasValue = /** @type {import("../types/estree.js").Node[]} */ (node.declarations).some((/** @type {import("../types/estree.js").Node} */ declarator) => declarator.init);
 
@@ -35,11 +32,11 @@ function printVariableDeclaration(/** @type {import("../../../../prettier/src/co
         .slice(1)
         .map((doc) => [
           ",",
-          hasValue && !isForXStatementInitializer ? hardline : line,
+          hasValue && !isForXInitializer ? hardline : line,
           doc,
         ]),
     ),
-    isForXStatementInitializer ? "" : printSemicolon(options),
+    isForXInitializer ? "" : printSemicolon(options),
   ]);
 }
 

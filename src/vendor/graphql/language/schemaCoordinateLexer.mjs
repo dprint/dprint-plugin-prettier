@@ -56,4 +56,4 @@ function readNextToken(/** @type {Lexer} */ lexer, /** @type {number} */ start) 
     }
     return createToken(lexer, TokenKind.EOF, bodyLength, bodyLength);
 }
-//# sourceMappingURL=schemaCoordinateLexer.js.map
+//# sourceMappingURL=schemaCoordinateLexer.mjs.map

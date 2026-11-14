@@ -24,6 +24,7 @@ import {
   isCallExpression,
   isFunctionOrArrowExpression,
   isMemberExpression,
+  isNonNullExpression,
   isNumericLiteral,
 } from "../utilities/node-types.js";
 import { printBindExpressionCallee } from "./bind-expression.js";
@@ -132,10 +133,7 @@ function printMemberChain(/** @type {AstPath} */ path, /** @type {import("../../
       !needsParentheses(path, options)
     ) {
       path.call(rec, "expression");
-    } else if (
-      node.type === "TSNonNullExpression" &&
-      !needsParentheses(path, options)
-    ) {
+    } else if (isNonNullExpression(node) && !needsParentheses(path, options)) {
       printedNodes.unshift({
         node,
         printed: printComments(path, "!", options),
@@ -195,7 +193,7 @@ function printMemberChain(/** @type {AstPath} */ path, /** @type {import("../../
   /** @type {number} */ let i = 1;
   for (; i < printedNodes.length; ++i) {
     if (
-      printedNodes[i].node.type === "TSNonNullExpression" ||
+      isNonNullExpression(printedNodes[i].node) ||
       printedNodes[i].node.type === "ChainExpression" ||
       isCallExpression(printedNodes[i].node) ||
       (isMemberExpression(printedNodes[i].node) &&
@@ -252,7 +250,11 @@ function printMemberChain(/** @type {AstPath} */ path, /** @type {import("../../
     }
     currentGroup.push(printedNodes[i]);
 
-    if (hasComment(printedNodes[i].node, CommentCheckFlags.Trailing)) {
+    if (
+      hasComment(printedNodes[i].node, CommentCheckFlags.Trailing) &&
+      // Non-null assertions cannot follow a line break.
+      !isNonNullExpression(printedNodes[i + 1]?.node)
+    ) {
       groups.push(currentGroup);
       currentGroup = [];
       hasSeenCallExpression = false;
@@ -295,11 +297,12 @@ function printMemberChain(/** @type {AstPath} */ path, /** @type {import("../../
     if (groups[0].length === 1) {
       /** @type {import("../types/estree.js").Node} */ const firstNode = groups[0][0].node;
       return (
-        firstNode.type === "ThisExpression" ||
-        (firstNode.type === "Identifier" &&
-          (isFactory(firstNode.name) ||
-            (isExpressionStatement && isShort(firstNode.name)) ||
-            hasComputed))
+        (firstNode.type === "ThisExpression" ||
+          (firstNode.type === "Identifier" &&
+            (isFactory(firstNode.name) ||
+              (isExpressionStatement && isShort(firstNode.name)) ||
+              hasComputed))) &&
+        !hasComment(firstNode, CommentCheckFlags.Trailing)
       );
     }
 

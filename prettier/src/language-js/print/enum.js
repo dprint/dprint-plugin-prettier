@@ -11,23 +11,6 @@ function printFlowEnumBody(/** @type {import("../../../../prettier/src/common/as
   ];
 }
 
-function printLegacyFlowEnumBody(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
-  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
-  return [
-    node.type === "EnumSymbolBody" || node.explicitType
-      ? `of ${node.type
-          .slice(
-            // `Enum`
-            4,
-            // `Body`
-            -4,
-          )
-          .toLowerCase()} `
-      : "",
-    printObject(path, options, print),
-  ];
-}
-
 /*
 - `EnumBooleanMember`(flow)
 - `EnumNumberMember`(flow)
@@ -69,9 +52,4 @@ function printEnumDeclaration(/** @type {import("../../../../prettier/src/common
   ];
 }
 
-export {
-  printEnumDeclaration,
-  printEnumMember,
-  printFlowEnumBody,
-  printLegacyFlowEnumBody,
-};
+export { printEnumDeclaration, printEnumMember, printFlowEnumBody };

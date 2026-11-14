@@ -20,6 +20,11 @@ const knownFailedTests = [
   // comment-parser 1.4.9 doesn't take a type right after a tag, as in `@type{...}`
   "jsdoc main.test.ts: Bad defined name",
 ];
+// where the plugin runs out of stack and Prettier from npm does not: 2,000 operands that are added, which Prettier
+// from npm also runs out of stack for with the typescript parser when prettier-plugin-jsdoc is not there, so how
+// deep the stack goes decides it rather than how the code is formatted
+const knownStackOverflows =
+  /^jsdoc prettier: js[\\/]binary-expression[\\/]long-chain snippet #0( \(.+\))? \[typescript\]$/;
 const lock = rootDir.join("plugins/package-lock.json").readJsonSync<{
   packages: Record<string, { version: string }>;
 }>();
@@ -68,7 +73,11 @@ Deno.test({
     } finally {
       pool.terminate();
     }
-    const differing = results.filter(result => !result.same);
+    const isKnownOverflow = (result: PluginCaseResult) =>
+      knownStackOverflows.test(`${result.name} [${result.parser}]`)
+      && result.actual === "error: RangeError: Maximum call stack size exceeded";
+    const differing = results.filter(result => !result.same && !isKnownOverflow(result));
+    const overflowing = results.filter(result => !result.same && isKnownOverflow(result));
     const diffsDir = testsDir.join("diffs");
     if (diffsDir.existsSync()) {
       diffsDir.removeSync({ recursive: true });
@@ -79,7 +88,8 @@ Deno.test({
       diffsDir.join(fileName + ".prettier").writeTextSync(result.expected);
       diffsDir.join(fileName + ".plugin").writeTextSync(result.actual);
     }
-    $.log(`${cases.length} cases, ${differing.length} differ`);
+    $.log(`${cases.length} cases, ${differing.length} differ, ${overflowing.length} run out of stack as is known`);
+    assert(overflowing.length > 0, "Nothing runs out of stack any more, so take knownStackOverflows out.");
     assert(
       differing.length === 0,
       `${differing.length} of ${cases.length} cases differ (see ${diffsDir}):\n`

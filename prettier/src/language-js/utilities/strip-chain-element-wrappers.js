@@ -9,8 +9,13 @@ import { isChainElementWrapper } from "./node-types.js";
 */
 
 /**
-@param {import("../types/estree.js").Node} node
-@returns {import("../types/estree.js").Node}
+@param {Node} node
+@returns {Exclude<
+  Node,
+  | NodeMap["ChainExpression"]
+  | NodeMap["TSNonNullExpression"]
+  | NodeMap["NonNullExpression"],
+>}
 */
 function stripChainElementWrappers(node) {
   while (isChainElementWrapper(node)) {

@@ -1,6 +1,6 @@
 // @nts-check
 import { isObjectLike } from "../jsutils/isObjectLike.mjs";
-import { getLocation } from "../language/location.mjs";
+import { getLocations } from "../language/location.mjs";
 import { printLocation, printSourceLocation, } from "../language/printLocation.mjs";
 export class GraphQLError extends Error {
     constructor(/** @type {string} */ message, options = {}) {
@@ -21,8 +21,8 @@ export class GraphQLError extends Error {
         /** @type {any[]} */ this.positions = positions ?? nodeLocations?.map((loc) => loc.start);
         /** @type {any[]} */ this.locations =
             positions && source
-                ? positions.map((/** @type {number} */ pos) => getLocation(source, pos))
-                : nodeLocations?.map((loc) => getLocation(loc.source, loc.start));
+                ? getLocations(positions.map((start) => ({ source, start })))
+                : nodeLocations && getLocations(nodeLocations);
         const originalExtensions = isObjectLike(underlyingError?.extensions)
             ? underlyingError.extensions
             : undefined;
@@ -94,4 +94,4 @@ export class GraphQLError extends Error {
 function undefinedIfEmpty(array) {
     return array === undefined || array.length === 0 ? undefined : array;
 }
-//# sourceMappingURL=GraphQLError.js.map
+//# sourceMappingURL=GraphQLError.mjs.map

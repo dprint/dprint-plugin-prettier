@@ -1,5 +1,6 @@
 // @nts-check
 import { createTypeCheckFunction } from "../utilities/create-type-check-function.js";
+import { isNonNullExpression } from "../utilities/node-types.js";
 
 /**
 @import AstPath from "../../common/ast-path.js"
@@ -10,7 +11,6 @@ function shouldAddParenthesesToChainExpression(/** @type {import("../../../../pr
   /** @type {{ key: any, parent: import("../types/estree.js").Node }} */ const { key, parent } = path;
 
   return (
-    (key === "expression" && parent.type === "TSNonNullExpression") ||
     (key === "object" &&
       parent.type === "MemberExpression" &&
       !parent.optional) ||
@@ -18,7 +18,8 @@ function shouldAddParenthesesToChainExpression(/** @type {import("../../../../pr
       parent.type === "CallExpression" &&
       !parent.optional) ||
     (key === "callee" && parent.type === "NewExpression") ||
-    (key === "tag" && parent.type === "TaggedTemplateExpression")
+    (key === "tag" && parent.type === "TaggedTemplateExpression") ||
+    (key === "expression" && isNonNullExpression(parent))
   );
 }
 
@@ -36,7 +37,7 @@ function isBabelOptionalChainRoot(path) {
   /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
 
   let child = node;
-  while (child.type === "TSNonNullExpression") {
+  while (isNonNullExpression(child)) {
     child = child.expression;
 
     if (isParenthesized(child)) {
@@ -53,10 +54,14 @@ function isBabelOptionalChainRoot(path) {
   }
 
   return !(
-    path.key === "expression" && path.parent.type === "TSNonNullExpression"
+    path.key === "expression" && isNonNullExpression(path.parent)
     // We should exclude if it's in `OptionalCallExpression` or `OptionalMemberExpression`
     // But in these cases it should not matter, since we don't need parentheses anyway
   );
+}
+
+function isChainExpressionRoot(path) {
+  return path.node.type === "ChainExpression" || isBabelOptionalChainRoot(path);
 }
 
 /**
@@ -65,8 +70,7 @@ function isBabelOptionalChainRoot(path) {
 */
 function shouldAddParenthesesToChainElement(path) {
   return (
-    (path.node.type === "ChainExpression" || isBabelOptionalChainRoot(path)) &&
-    shouldAddParenthesesToChainExpression(path)
+    isChainExpressionRoot(path) && shouldAddParenthesesToChainExpression(path)
   );
 }
 

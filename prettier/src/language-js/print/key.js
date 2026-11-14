@@ -5,6 +5,7 @@ import { getOrInsertComputed } from "../../utilities/get-or-insert.js";
 import printNumber from "../../utilities/print-number.js";
 import printString from "../../utilities/print-string.js";
 import { getRaw } from "../utilities/get-raw.js";
+import { isMethodSignatureWithNewKey } from "../utilities/is-method-signature-with-new-key.js";
 import { isNumericLiteral, isStringLiteral } from "../utilities/node-types.js";
 
 /**
@@ -36,7 +37,7 @@ const isTypeScript = /** @returns {boolean} */ (/** @type {import("../print-opti
 function isKeySafeToQuote(node, options) {
   const key = getKey(node);
   if (key.type === "Identifier") {
-    return true;
+    return !isMethodSignatureWithNewKey(node);
   }
 
   if (!isNumericLiteral(key)) {
@@ -101,7 +102,7 @@ function isKeySafeToQuote(node, options) {
     return false;
   }
 
-  if (node.type === "TSMethodSignature" && value === "new") {
+  if (isMethodSignatureWithNewKey(node)) {
     return false;
   }
 

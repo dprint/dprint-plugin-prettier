@@ -4,7 +4,10 @@
 // Lines are lined up with their names left out, so that the minified names of a bundle may differ between the
 // versions; the comments go in front of the same tokens of the new line, and the names in them are renamed to what
 // the new version calls them. The types of lines that were not lined up are written to <out>.unmatched.txt. Set
-// CARRY_CONTEXT to a number of lines around a line that have to line up as well, for where the code changed.
+// CARRY_CONTEXT to a number of lines around a line that have to line up as well, for where the code changed, and
+// CARRY_UNMINIFIED=1 for a library that is not minified, which lines up the lines with their names and keeps the
+// names in the types. Lines of the typed version that are only `@typedef` comments are put in front of the line that
+// the line after them lines up with, and the names that they define are kept.
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
@@ -26,9 +29,17 @@ const typeWords = new Set(
     + "keyof Object String Number Boolean Iterable IterableIterator Generator").split(" "),
 );
 const tagWords = new Set(["type", "returns", "param", "template", "inline"]);
+const isUnminified = process.env.CARRY_UNMINIFIED === "1";
+const typedefPattern = /^\s*\/\*\*\s*@typedef\s.*\}\s*([A-Za-z_$][\w$]*)\s*\*\/\s*$/;
+for (const line of typedLines) {
+  const match = typedefPattern.exec(line);
+  if (match != null) typeWords.add(match[1]);
+}
 
 const typedOf = pairTypedLines();
-const newOf = pairLines(oldLines.map(normalizeLine), newLines.map(normalizeLine));
+const newOf = isUnminified
+  ? pairLines(oldLines, newLines)
+  : pairLines(oldLines.map(normalizeLine), newLines.map(normalizeLine));
 const votes = new Map();
 for (const [o, n] of newOf) {
   const oldNames = names(oldLines[o]);
@@ -65,6 +76,15 @@ for (const [o, typed] of typedOf) {
     out[n] = carried;
     stats.carried++;
   }
+}
+// the typedef lines go in front of where the old line after them is now, the last first so that the indexes hold
+for (const { oldIndex, lines } of insertedTypedefs().reverse()) {
+  const n = oldIndex >= oldLines.length ? out.length : newOf.get(oldIndex);
+  if (n === undefined) {
+    unmatchedLines.push(...lines);
+    continue;
+  }
+  out.splice(n, 0, ...lines);
 }
 if (typedLines[0].startsWith("// @nts-check") && !out[0].startsWith("// @nts-check")) out.unshift("// @nts-check");
 fs.writeFileSync(outPath, out.join("\n"));
@@ -113,7 +133,7 @@ function rename(comment, local) {
     if (before != null || colon != null || typeWords.has(name) || tagWords.has(name)) {
       return all;
     }
-    const mapped = local.get(name) ?? globalName(name);
+    const mapped = local.get(name) ?? globalName(name) ?? (isUnminified ? name : undefined);
     if (mapped == null) {
       failed = true;
       unnamed.set(name, (unnamed.get(name) ?? 0) + 1);
@@ -149,6 +169,18 @@ function pairTypedLines() {
     for (let i = 0; i < hunk.oldCount; i++) pairs.set(hunk.oldStart + i, typedLines[hunk.newStart + i]);
   }
   return pairs;
+}
+
+/** The lines that the typed version adds that are only `@typedef` comments, by the old line that comes after them. */
+function insertedTypedefs() {
+  const result = [];
+  for (const hunk of diffHunks(oldLines, typedLines)) {
+    if (hunk.oldCount !== 0) continue;
+    const lines = typedLines.slice(hunk.newStart, hunk.newStart + hunk.newCount)
+      .filter(line => typedefPattern.test(line));
+    if (lines.length > 0) result.push({ oldIndex: hunk.oldStart, lines });
+  }
+  return result;
 }
 
 /** Maps the index of each line of the first text to the line of the second that it is the same as. */

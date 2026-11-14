@@ -6,4 +6,4 @@ import { GraphQLError } from "./GraphQLError.mjs";
         positions: [position],
     });
 }
-//# sourceMappingURL=syntaxError.js.map
+//# sourceMappingURL=syntaxError.mjs.map

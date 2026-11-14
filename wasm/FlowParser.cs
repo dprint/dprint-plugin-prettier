@@ -33,12 +33,14 @@ static unsafe partial class Program
         public static void free(int address) => flow_free((uint)address);
 
         public static int parse(int source, int sourceLength, int filename, int filenameLength, int componentSyntax,
-            int matchSyntax, int decorators, int tokens, int returnOutsideFunction, int assertOperator, int enums,
-            int records, int types, int sourceType, int typesPragmaDetection, int last) =>
+            int matchSyntax, int decorators, int tokens, int returnOutsideFunction, int enums, int records, int types,
+            int sourceType, int typesPragmaDetection, int last, int babel, int enumTransform, int enumRuntime,
+            int reactRuntimeTarget, int throwOnParseErrors) =>
             (int)flow_parse((uint)source, (uint)sourceLength, (uint)filename, (uint)filenameLength,
                 (uint)componentSyntax, (uint)matchSyntax, (uint)decorators, (uint)tokens, (uint)returnOutsideFunction,
-                (uint)assertOperator, (uint)enums, (uint)records, (uint)types, (uint)sourceType,
-                (uint)typesPragmaDetection, (uint)last);
+                (uint)enums, (uint)records, (uint)types, (uint)sourceType, (uint)typesPragmaDetection, (uint)last,
+                (uint)babel, (uint)enumTransform, (uint)enumRuntime, (uint)reactRuntimeTarget,
+                (uint)throwOnParseErrors);
 
         public static void resultFree(int result) => flow_result_free((uint)result);
 
@@ -74,8 +76,9 @@ static unsafe partial class Program
         [DllImport("flowparser")] private static extern void flow_free(uint address);
         [DllImport("flowparser")] private static extern uint flow_parse(uint source, uint sourceSize, uint filename,
             uint filenameSize, uint componentSyntax, uint matchSyntax, uint decorators, uint tokens,
-            uint returnOutsideFunction, uint assertOperator, uint enums, uint records, uint types, uint sourceType,
-            uint typesPragmaDetection, uint last);
+            uint returnOutsideFunction, uint enums, uint records, uint types, uint sourceType, uint typesPragmaDetection,
+            uint last, uint babel, uint enumTransform, uint enumRuntime, uint reactRuntimeTarget,
+            uint throwOnParseErrors);
         [DllImport("flowparser")] private static extern void flow_result_free(uint result);
         [DllImport("flowparser")] private static extern uint flow_result_error(uint result);
         [DllImport("flowparser")] private static extern uint flow_result_error_line(uint result);

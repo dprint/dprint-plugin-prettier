@@ -1,0 +1,15 @@
+query Q($id:ID!,$first:Int=10,$filter:Filter={status:OPEN,tags:["a","b"]})@cached{user(id:$id){...UserFields friends(first:$first,after:null)@include(if:$withFriends){edges{node{id name}}}}}
+fragment UserFields on User{id,name,email}
+"""
+A description
+"""
+type User implements Node&Entity@key(fields:"id"){id:ID! name:String posts(first:Int=10,orderBy:PostOrder={field:CREATED_AT,direction:DESC}):[Post!]!@deprecated(reason:"no")}
+interface Node{id:ID!}
+union SearchResult=User|Post|Comment
+enum Status{OPEN CLOSED}
+input Filter{status:Status=OPEN tags:[String!]}
+scalar Date@specifiedBy(url:"https://example.com")
+directive@cached(ttl:Int)on QUERY|FIELD
+extend type Query{me:User}
+schema{query:Query mutation:Mutation}
+subscription{messageAdded(room:"a"){id text}}

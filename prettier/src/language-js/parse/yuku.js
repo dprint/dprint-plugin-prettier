@@ -1,16 +1,18 @@
 import indexToPosition from "index-to-position";
-import { parse as yukuParse } from "yuku-parser";
+import { parse as yukuParse } from "yuku";
 import createError from "../../common/parser-create-error.js";
 import { tryCombinationsSync } from "../../utilities/try-combinations.js";
 import postprocess from "./postprocess/index.js";
 import createParser from "./utilities/create-parser.js";
+import { isDtsFile } from "./utilities/is-dts-file.js";
 import jsxRegexp from "./utilities/jsx-regexp.evaluate.js";
+import { shouldEnableJsx } from "./utilities/jsx-support.js";
 import {
   getSourceType,
   SOURCE_TYPE_COMBINATIONS,
 } from "./utilities/source-types.js";
 
-/** @import {ParseOptions} from "yuku-parser" */
+/** @import {ParseOptions} from "yuku" */
 
 function createParseError(error, { text }) {
   if (typeof error?.start !== "number" || typeof error?.end !== "number") {
@@ -38,10 +40,11 @@ function createParseError(error, { text }) {
 */
 function parseWithOptions(text, options) {
   const result = yukuParse(text, {
+    analyze: false,
     preserveParens: true,
-    allowReturnOutsideFunction: true,
     semanticErrors: false,
     attachComments: false,
+    tokens: false,
     ...options,
   });
 
@@ -60,11 +63,7 @@ function parseJs(text, /** @type {import("../../../../prettier/src/language-js/p
   const combinations = (
     sourceType ? [sourceType] : SOURCE_TYPE_COMBINATIONS
   ).map(
-    (sourceType) => () =>
-      parseWithOptions(text, {
-        sourceType: sourceType === "commonjs" ? "script" : sourceType,
-        lang: "jsx",
-      }),
+    (sourceType) => () => parseWithOptions(text, { sourceType, lang: "jsx" }),
   );
 
   let result;
@@ -91,18 +90,21 @@ function parseJs(text, /** @type {import("../../../../prettier/src/language-js/p
 function getLanguageCombinations(text, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options) {
   const filepath = options?.filepath;
 
-  if (typeof filepath === "string") {
-    if (/\.(?:jsx|tsx)$/i.test(filepath)) {
-      return ["tsx"];
-    }
-
-    if (filepath.toLowerCase().endsWith(".d.ts")) {
-      return ["dts"];
-    }
+  if (isDtsFile(filepath)) {
+    return ["dts"];
   }
 
-  const shouldEnableJsx = jsxRegexp.test(text);
-  return shouldEnableJsx ? ["tsx", "ts", "dts"] : ["ts", "tsx", "dts"];
+  const isTsx = shouldEnableJsx(filepath);
+
+  if (isTsx === true) {
+    return ["tsx"];
+  }
+
+  if (isTsx === false) {
+    return ["ts"];
+  }
+
+  return jsxRegexp.test(text) ? ["tsx", "ts", "dts"] : ["ts", "tsx", "dts"];
 }
 
 function parseTs(text, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrintOptions} */ options) {
@@ -115,11 +117,7 @@ function parseTs(text, /** @type {import("../../../../prettier/src/language-js/p
     sourceType ? [sourceType] : SOURCE_TYPE_COMBINATIONS
   ).flatMap((sourceType) =>
     languageCombinations.map(
-      (lang) => () =>
-        parseWithOptions(text, {
-          sourceType: sourceType === "commonjs" ? "script" : sourceType,
-          lang,
-        }),
+      (lang) => () => parseWithOptions(text, { sourceType, lang }),
     ),
   );
 

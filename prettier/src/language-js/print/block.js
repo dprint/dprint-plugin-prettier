@@ -4,6 +4,7 @@ import { printDanglingComments } from "../../main/comments/print.js";
 import isNonEmptyArray from "../../utilities/is-non-empty-array.js";
 import { CommentCheckFlags, hasComment } from "../utilities/comments.js";
 import { isNextLineEmpty } from "../utilities/is-next-line-empty.js";
+import { isModuleDeclaration } from "../utilities/node-types.js";
 import { printStatementSequence } from "./statement-sequence.js";
 
 /** @import AstPath from "../../common/ast-path.js" */
@@ -50,8 +51,7 @@ function printBlock(/** @type {AstPath} */ path, /** @type {import("../print-opt
       parent.type === "DoExpression" ||
       parent.type === "ModuleExpression" ||
       (parent.type === "CatchClause" && !parentParent.finalizer) ||
-      parent.type === "TSModuleDeclaration" ||
-      parent.type === "DeclareModule" ||
+      isModuleDeclaration(parent) ||
       parent.type === "MatchStatementCase" ||
       node.type === "StaticBlock"
     )) {

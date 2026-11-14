@@ -25,9 +25,7 @@ import {
   needsToBorrowParentClosingTagStartMarker,
   needsToBorrowPrevClosingTagEndMarker,
   printClosingTag,
-  printClosingTagSuffix,
   printOpeningTag,
-  printOpeningTagPrefix,
 } from "./tag.js";
 
 function printElement(/** @type {AstPath} */ path, /** @type {import("../print-options.js").HtmlPrintOptions} */ options, /** @type {(selector?: any, args?: any) => any} */ print) {
@@ -35,11 +33,9 @@ function printElement(/** @type {AstPath} */ path, /** @type {import("../print-o
 
   if (shouldPreserveContent(node, options)) {
     return [
-      printOpeningTagPrefix(node, options),
       group(printOpeningTag(path, options, print)),
       replaceEndOfLine(getNodeContent(node, options)),
       ...printClosingTag(node, options),
-      printClosingTagSuffix(node, options),
     ];
   }
   /**

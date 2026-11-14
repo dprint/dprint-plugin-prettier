@@ -18,6 +18,8 @@ class Lexer {
         /** @type {Token} */ this.token = startOfFileToken;
         this.line = 1;
         /** @type {number} */ this.lineStart = 0;
+        this._maxComments = undefined;
+        this._commentCount = 0;
     }
     get [Symbol.toStringTag]() {
         return 'Lexer';
@@ -184,6 +186,14 @@ function readNextToken(/** @type {Lexer} */ lexer, /** @type {number} */ start) 
     return createToken(lexer, tokenKind_ts_1.TokenKind.EOF, bodyLength, bodyLength);
 }
 function readComment(/** @type {Lexer} */ lexer, /** @type {number} */ start) {
+    const maxComments = lexer._maxComments;
+    if (maxComments !== undefined) {
+        const nextCommentCount = lexer._commentCount + 1;
+        if (nextCommentCount > maxComments) {
+            throw (0, syntaxError_ts_1.syntaxError)(lexer.source, start, `Document contains more than ${maxComments} comments. Parsing aborted.`);
+        }
+        lexer._commentCount = nextCommentCount;
+    }
     const body = lexer.source.body;
     /** @type {number} */ const bodyLength = body.length;
     let position = start + 1;

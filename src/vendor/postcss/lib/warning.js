@@ -1,17 +1,21 @@
 'use strict'
 
-/**
- * @property {any} [node] given with the options
- * @property {number} [index] given with the options
- * @property {string} [plugin] given with the options
- * @property {string} [word] given with the options
- */
+let Container = require('./container')
+let { my } = require('./symbols')
+
 class Warning {
   constructor(/** @type {string} */ text, /** @type {any} */ opts = {}) {
     /** @type {string} */ this.type = 'warning'
     /** @type {string} */ this.text = text
 
     if (opts.node && opts.node.source) {
+      if (!opts.node[my]) {
+        // The node comes from another PostCSS copy in node_modules, so it does
+        // not have this copy’s methods. Container#normalize() rebuilds such
+        // nodes on insert, but a node passed straight to Result#warn() never
+        // goes through it.
+        Container.rebuild(opts.node)
+      }
       let range = opts.node.rangeBy(opts)
       /** @type {number | undefined} */ this.line = range.start.line
       /** @type {number | undefined} */ this.column = range.start.column
@@ -27,6 +31,7 @@ class Warning {
       return this.node.error(this.text, {
         index: this.index,
         plugin: this.plugin,
+        start: this.start,
         word: this.word
       }).message
     }

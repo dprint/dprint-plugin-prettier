@@ -21,6 +21,9 @@ const additionalVisitorKeys = {
   TSJSDocUnknownType: [],
   TSJSDocNullableType: ["typeAnnotation"],
   TSJSDocNonNullableType: ["typeAnnotation"],
+
+  // flow-parser@0.337.0
+  EnumBigIntBody: ["members"],
 };
 
 const excludeVisitorKeys = {
@@ -30,6 +33,9 @@ const excludeVisitorKeys = {
 
   // Flow node from Babel
   TupleTypeAnnotation: ["types"],
+  ClassImplements: ["typeParameters"],
+  GenericTypeAnnotation: ["typeParameters"],
+  InterfaceExtends: ["typeParameters"],
 };
 
 const excludeNodeTypes = [
@@ -41,24 +47,7 @@ const excludeNodeTypes = [
   "ExperimentalSpreadProperty",
 
   // From flow-parser
-  "AbstractMethodDefinition",
-  "AbstractPropertyDefinition",
-  "ConstructorTypeAnnotation",
-  "DeclareClassExtendsCall",
   "DeclareMethodDefinition",
-  "ExportAssignment",
-  "ExternalModuleReference",
-  "ImportEqualsDeclaration",
-  "ImportType",
-  "NamespaceExportDeclaration",
-  "NonNullExpression",
-  "ObjectTypePrivateField",
-  "ParameterProperty",
-  "RendersMaybeType",
-  "RendersStarType",
-  "RendersType",
-  "TemplateLiteralTypeAnnotation",
-  "TupleTypeElement",
 ];
 
 let visitorKeys = unionVisitorKeys(

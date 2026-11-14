@@ -1,7 +1,11 @@
 // @nts-check
 import { CommentCheckFlags, hasComment } from "../utilities/comments.js";
 import { isSimpleType } from "../utilities/is-simple-type.js";
-import { isObjectType, isUnionType } from "../utilities/node-types.js";
+import {
+  isObjectType,
+  isTypeAnnotation,
+  isUnionType,
+} from "../utilities/node-types.js";
 import { shouldHugUnionType } from "./union-type.js";
 
 /** @import AstPath from "../../common/ast-path.js" */
@@ -43,10 +47,7 @@ function printTypeAnnotationProperty(
 
   /** @type {boolean} */ let shouldPrintLeadingSpace = false;
 
-  if (
-    typeAnnotation.type === "TSTypeAnnotation" ||
-    typeAnnotation.type === "TypeAnnotation"
-  ) {
+  if (isTypeAnnotation(typeAnnotation)) {
     const firstToken = path.call(getTypeAnnotationFirstToken, propertyName);
 
     if (
@@ -100,6 +101,12 @@ const getTypeAnnotationFirstToken = /** @returns {string} */ (/** @type {AstPath
       /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node) => node.type === "TypeAnnotation",
       /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node, key) => key === "typeAnnotation" && node.type === "Identifier",
       /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node, key) => key === "id" && node.type === "DeclareFunction",
+    ) ||
+    // Anonymous ambient default-export functions carry the signature directly.
+    path.match(
+      (node) => node.type === "TypeAnnotation",
+      (node, key) =>
+        key === "typeAnnotation" && node.type === "DeclareFunction",
     ) ||
     /*
     Flow

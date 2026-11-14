@@ -148,12 +148,10 @@ export class TypeInfo {
                 break;
             }
             case Kind.LIST: {
-                const listType = getNullableType(this.getInputType());
-                const itemType = isListType(listType)
-                    ? listType.ofType
-                    : undefined;
+                const inputType = this.getInputType();
+                const listType = inputType && getNullableType(inputType);
                 this._defaultValueStack.push(undefined);
-                this._inputTypeStack.push(isInputType(itemType) ? itemType : undefined);
+                this._inputTypeStack.push(listType && isListType(listType) ? listType.ofType : undefined);
                 break;
             }
             case Kind.OBJECT_FIELD: {
@@ -276,4 +274,4 @@ export function visitWithTypeInfo(typeInfo, visitor) {
         },
     };
 }
-//# sourceMappingURL=TypeInfo.js.map
+//# sourceMappingURL=TypeInfo.mjs.map

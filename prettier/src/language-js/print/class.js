@@ -21,7 +21,12 @@ import needsParentheses from "../parentheses/needs-parentheses.js";
 import { isNonEmptyClassBody } from "../utilities/class-members.js";
 import { CommentCheckFlags, hasComment } from "../utilities/comments.js";
 import { createTypeCheckFunction } from "../utilities/create-type-check-function.js";
-import { isMemberExpression } from "../utilities/node-types.js";
+import { hasNodeIgnoreComment } from "../utilities/has-node-ignore-comment.js";
+import {
+  isAbstractPropertyDefinition,
+  isJsxElement,
+  isMemberExpression,
+} from "../utilities/node-types.js";
 import { stripChainElementWrappers } from "../utilities/strip-chain-element-wrappers.js";
 import { printAssignment } from "./assignment.js";
 import { printClassMemberDecorators, printDecorators } from "./decorators.js";
@@ -53,6 +58,7 @@ const isInterface = createTypeCheckFunction([
 /*
 - `ClassDeclaration`
 - `ClassExpression`
+- `StructDeclaration`
 - `DeclareClass`(flow)
 - `DeclareInterface`(flow)
 - `InterfaceDeclaration`(flow)
@@ -78,13 +84,14 @@ const isInterface = createTypeCheckFunction([
 function printClassWithoutDecorators(/** @type {AstPath} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
   const isPrintingInterface = isInterface(node);
-  const isPrintingRecord = node.type === "RecordDeclaration";
 
   const keyword = isPrintingInterface
     ? "interface"
-    : isPrintingRecord
+    : node.type === "RecordDeclaration"
       ? "record"
-      : "class";
+      : node.type === "StructDeclaration"
+        ? "struct"
+        : "class";
 
   /** @type {Doc[]} */
   const parts = [printDeclareToken(path), printAbstractToken(path), keyword];
@@ -113,18 +120,21 @@ function printClassWithoutDecorators(/** @type {AstPath} */ path, /** @type {imp
   }
 
   if (node.superClass) {
-    const printed = [
-      printSuperClass(path, options, print),
-      print("superTypeArguments"),
+    let printed = [printSuperClass(path, options, print)];
+    if (node.superTypeArguments) {
+      printed.push(print("superTypeArguments"));
+    }
+
+    printed = [
+      "extends ",
+      isJsxElement(node.superClass) && !hasNodeIgnoreComment(node.superClass)
+        ? printed
+        : path.call(() => printComments(path, printed, options), "superClass"),
     ];
-    const printedWithComments = path.call(
-      () => ["extends ", printComments(path, printed, options)],
-      "superClass",
-    );
     if (groupMode) {
-      extendsParts.push(line, group(printedWithComments));
+      extendsParts.push(line, group(printed));
     } else {
-      extendsParts.push(" ", printedWithComments);
+      extendsParts.push(" ", printed);
     }
   } else {
     extendsParts.push(printHeritageClauses(path, options, print, "extends"));
@@ -213,7 +223,7 @@ function shouldPrintClassInGroupModeWithoutCache(/** @type {AstPath} */ path) {
     // `ClassImplements` seem not allow `QualifiedTypeIdentifier`
     (heritage.type === "InterfaceExtends" &&
       heritage.id.type === "QualifiedTypeIdentifier" &&
-      !heritage.typeParameters) ||
+      !heritage.typeArguments) ||
     ((heritage.type === "TSClassImplements" ||
       heritage.type === "TSInterfaceHeritage") &&
       isMemberExpression(heritage.expression) &&
@@ -307,6 +317,7 @@ function printSuperClass(/** @type {AstPath} */ path, /** @type {import("../prin
 - `AccessorProperty`
 - `TSAbstractAccessorProperty` (TypeScript)
 - `TSAbstractPropertyDefinition` (TypeScript)
+- `AbstractPropertyDefinition` (Flow)
 */
 /** @returns {any[]} */ function printClassProperty(/** @type {AstPath} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
   /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
@@ -348,7 +359,7 @@ function printSuperClass(/** @type {AstPath} */ path, /** @type {import("../prin
   );
 
   /** @type {boolean} */ const isAbstractProperty =
-    node.type === "TSAbstractPropertyDefinition" ||
+    isAbstractPropertyDefinition(node) ||
     node.type === "TSAbstractAccessorProperty";
 
   return [

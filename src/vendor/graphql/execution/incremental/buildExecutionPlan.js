@@ -1,22 +1,18 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.buildExecutionPlan = buildExecutionPlan;
-const getBySet_ts_1 = require("../../jsutils/getBySet.js");
 const isSameSet_ts_1 = require("../../jsutils/isSameSet.js");
+const SetMap_ts_1 = require("../../jsutils/SetMap.js");
 function buildExecutionPlan(originalGroupedFieldSet, parentDeferUsages = new Set()) {
     const groupedFieldSet = new Map();
-    const newGroupedFieldSets = new Map();
+    const newGroupedFieldSets = new SetMap_ts_1.SetMap();
     for (const [responseKey, fieldDetailsList] of originalGroupedFieldSet) {
         const filteredDeferUsageSet = getFilteredDeferUsageSet(fieldDetailsList);
         if ((0, isSameSet_ts_1.isSameSet)(filteredDeferUsageSet, parentDeferUsages)) {
             groupedFieldSet.set(responseKey, fieldDetailsList);
             continue;
         }
-        let newGroupedFieldSet = (0, getBySet_ts_1.getBySet)(newGroupedFieldSets, filteredDeferUsageSet);
-        if (newGroupedFieldSet === undefined) {
-            newGroupedFieldSet = new Map();
-            newGroupedFieldSets.set(filteredDeferUsageSet, newGroupedFieldSet);
-        }
+        const newGroupedFieldSet = newGroupedFieldSets.getOrInsertComputed(filteredDeferUsageSet, () => new Map());
         newGroupedFieldSet.set(responseKey, fieldDetailsList);
     }
     return {

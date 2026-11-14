@@ -6,4 +6,4 @@
         .map((key) => (typeof key === 'number' ? `[${key}]` : `.${key}`))
         .join('')}`;
 }
-//# sourceMappingURL=printPathArray.js.map
+//# sourceMappingURL=printPathArray.mjs.map

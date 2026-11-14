@@ -385,10 +385,8 @@ function printOpeningTagStart(/** @type {import("../parse/ast.js").Node} */ node
       }
 
       const start = locStart(node);
-      return options.originalText.slice(
-        start,
-        start + HTML5_DOCTYPE_START_MARKER.length,
-      );
+      const text = /** @type {string} */ (options.originalText);
+      return text.slice(start, start + HTML5_DOCTYPE_START_MARKER.length);
     }
 
     case "angularIcuExpression":

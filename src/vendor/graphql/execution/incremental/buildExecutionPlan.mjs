@@ -1,19 +1,15 @@
-import { getBySet } from "../../jsutils/getBySet.mjs";
 import { isSameSet } from "../../jsutils/isSameSet.mjs";
+import { SetMap } from "../../jsutils/SetMap.mjs";
 export function buildExecutionPlan(originalGroupedFieldSet, parentDeferUsages = new Set()) {
     const groupedFieldSet = new Map();
-    const newGroupedFieldSets = new Map();
+    const newGroupedFieldSets = new SetMap();
     for (const [responseKey, fieldDetailsList] of originalGroupedFieldSet) {
         const filteredDeferUsageSet = getFilteredDeferUsageSet(fieldDetailsList);
         if (isSameSet(filteredDeferUsageSet, parentDeferUsages)) {
             groupedFieldSet.set(responseKey, fieldDetailsList);
             continue;
         }
-        let newGroupedFieldSet = getBySet(newGroupedFieldSets, filteredDeferUsageSet);
-        if (newGroupedFieldSet === undefined) {
-            newGroupedFieldSet = new Map();
-            newGroupedFieldSets.set(filteredDeferUsageSet, newGroupedFieldSet);
-        }
+        const newGroupedFieldSet = newGroupedFieldSets.getOrInsertComputed(filteredDeferUsageSet, () => new Map());
         newGroupedFieldSet.set(responseKey, fieldDetailsList);
     }
     return {
@@ -43,4 +39,4 @@ function getFilteredDeferUsageSet(fieldDetailsList) {
     }
     return filteredDeferUsageSet;
 }
-//# sourceMappingURL=buildExecutionPlan.js.map
+//# sourceMappingURL=buildExecutionPlan.mjs.map

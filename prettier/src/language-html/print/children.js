@@ -95,6 +95,16 @@ function printBetweenLine(/** @type {import("../parse/ast.js").Node} */ prevNode
   }
 
   if (
+    needsToBorrowPrevClosingTagEndMarker(nextNode) &&
+    prevNode.kind === "element" &&
+    prevNode.children.length === 1 &&
+    prevNode.firstChild.kind === "interpolation" &&
+    prevNode.hasLeadingSpaces
+  ) {
+    return "";
+  }
+
+  if (
     (needsToBorrowNextOpeningTagStartMarker(prevNode) &&
       (hasPrettierIgnore(nextNode) ||
         /**
