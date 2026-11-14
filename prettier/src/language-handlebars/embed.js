@@ -2,13 +2,13 @@
 /** @import {GlimmerNode, GlimmerPath} from "./print-types.js" */
 import { isPlainTextStyleOrScriptElement } from "./utilities.js";
 
-function getAttribute(node, name) {
+function getAttribute(node, /** @type {string} */ name) {
   return node.attributes.find(
-    (attribute) => attribute.type === "AttrNode" && attribute.name === name,
+    /** @returns {boolean} */ (attribute) => attribute.type === "AttrNode" && attribute.name === name,
   );
 }
 
-function getTextValue(attribute) {
+/** @returns {string | undefined} */ function getTextValue(attribute) {
   return attribute.value.type === "TextNode"
     ? attribute.value.chars
     : undefined;

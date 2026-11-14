@@ -176,7 +176,7 @@ const voidMap = new Set(['area', 'base', 'br', 'col', 'command', 'embed', 'hr', 
  * Examples when false:
  *  - Link (component)
  */
-function isVoidTag(tag) {
+/** @returns {boolean} */ function isVoidTag(/** @type {string} */ tag) {
   return voidMap.has(tag.toLowerCase()) && tag[0]?.toLowerCase() === tag[0];
 }
 class Printer {
@@ -660,13 +660,13 @@ function asPresentArray(list, message = `unexpected empty list`) {
 function getLast(/** @type {any[]} */ list) {
   return list.length === 0 ? undefined : list[list.length - 1];
 }
-function getFirst(list) {
+function getFirst(/** @type {any[]} */ list) {
   return list.length === 0 ? undefined : list[0];
 }
 
 // import Logger from './logger';
 
-function assert(test, msg) {
+function assert(test, /** @type {string | undefined} */ msg) {
 }
 
 const assign = Object.assign;
@@ -794,15 +794,15 @@ Visitor.prototype = {
     visitPartial.call(this, partial);
     this.acceptKey(partial, 'program');
   },
-  ContentStatement: function /* content */ () {},
-  CommentStatement: function /* comment */ () {},
+  ContentStatement: /** @this {HbsVisitor} */ function /* content */ () {},
+  CommentStatement: /** @this {HbsVisitor} */ function /* comment */ () {},
   SubExpression: visitSubExpression,
-  PathExpression: function /* path */ () {},
-  StringLiteral: function /* string */ () {},
-  NumberLiteral: function /* number */ () {},
-  BooleanLiteral: function /* bool */ () {},
-  UndefinedLiteral: function /* literal */ () {},
-  NullLiteral: function /* literal */ () {},
+  PathExpression: /** @this {HbsVisitor} */ function /* path */ () {},
+  StringLiteral: /** @this {HbsVisitor} */ function /* string */ () {},
+  NumberLiteral: /** @this {HbsVisitor} */ function /* number */ () {},
+  BooleanLiteral: /** @this {HbsVisitor} */ function /* bool */ () {},
+  UndefinedLiteral: /** @this {HbsVisitor} */ function /* literal */ () {},
+  NullLiteral: /** @this {HbsVisitor} */ function /* literal */ () {},
   Hash: /** @this {HbsVisitor} */ function (/** @type {HbsNode} */ hash) {
     this.acceptArray(hash.pairs);
   },
@@ -1257,7 +1257,7 @@ var parser = (/** @returns {JisonParser} */ function () {
       93: 'PRIVATE_SEP'
     },
     productions_: [0, [3, 2], [4, 1], [7, 1], [7, 1], [7, 1], [7, 1], [7, 1], [7, 1], [7, 1], [13, 1], [10, 3], [16, 5], [9, 4], [9, 4], [24, 6], [27, 6], [38, 6], [43, 2], [45, 3], [45, 1], [26, 3], [8, 3], [8, 5], [8, 5], [11, 5], [12, 3], [60, 5], [50, 1], [50, 1], [64, 1], [64, 1], [66, 3], [66, 5], [49, 1], [72, 3], [65, 3], [78, 3], [20, 1], [20, 1], [20, 1], [20, 1], [20, 1], [20, 1], [20, 1], [83, 2], [91, 1], [91, 1], [82, 3], [82, 1], [90, 3], [90, 1], [6, 0], [6, 2], [17, 0], [17, 2], [21, 0], [21, 2], [22, 0], [22, 1], [25, 0], [25, 1], [28, 0], [28, 1], [30, 0], [30, 2], [31, 0], [31, 1], [32, 0], [32, 1], [35, 0], [35, 2], [36, 0], [36, 1], [37, 0], [37, 1], [40, 0], [40, 2], [41, 0], [41, 1], [42, 0], [42, 1], [46, 0], [46, 1], [51, 0], [51, 2], [52, 0], [52, 1], [54, 0], [54, 2], [55, 0], [55, 1], [58, 0], [58, 2], [59, 0], [59, 1], [62, 0], [62, 2], [63, 0], [63, 1], [69, 0], [69, 2], [70, 0], [70, 1], [71, 1], [71, 2], [76, 0], [76, 2], [80, 1], [80, 2]],
-    performAction: function anonymous(yytext, yyleng, yylineno, yy, yystate /* action[1] */, $$ /* vstack */, _$ /* lstack */) {
+    performAction: /** @this {JisonValue} */ function anonymous(/** @type {string} */ yytext, /** @type {number} */ yyleng, /** @type {number} */ yylineno, /** @type {JisonShared} */ yy, /** @type {number} */ yystate /* action[1] */, /** @type {any[]} */ $$ /* vstack */, /** @type {any[]} */ _$ /* lstack */) {
       /* this == yyval */
 
       /** @type {number} */ var $0 = $$.length - 1;
@@ -2211,7 +2211,7 @@ var parser = (/** @returns {JisonParser} */ function () {
         TERROR = 2,
         EOF = 1;
       var args = lstack.slice.call(arguments, 1);
-      var lexer = Object.create(this.lexer);
+      var lexer = /** @type {JisonLexer} */ (Object.create(this.lexer));
       var sharedState = {
         yy: {}
       };
@@ -2246,7 +2246,7 @@ var parser = (/** @returns {JisonParser} */ function () {
         state,
         action,
         r,
-        yyval = {},
+        yyval = /** @type {JisonValue} */ ({}),
         p,
         len,
         newState,
@@ -2454,8 +2454,9 @@ var parser = (/** @returns {JisonParser} */ function () {
         return pre + this.upcomingInput() + '\n' + c + '^';
       },
       // test the lexed token: return FALSE when not a match, otherwise return token
-      test_match: function (match, indexed_rule) {
-        var token, lines, backup;
+      test_match: /** @this {JisonLexer} */ function (/** @type {RegExpMatchArray} */ match, /** @type {number} */ indexed_rule) {
+        var token, backup;
+        /** @type {RegExpMatchArray | null} */ var lines;
         if (this.options.backtrack_lexer) {
           // save context
           backup = {
@@ -2526,14 +2527,17 @@ var parser = (/** @returns {JisonParser} */ function () {
         if (!this._input) {
           this.done = true;
         }
-        var token, match, tempMatch, index;
+        var token;
+        /** @type {RegExpMatchArray | false | undefined} */ var match;
+        /** @type {RegExpMatchArray | null} */ var tempMatch;
+        /** @type {number} */ var index;
         if (!this._more) {
           this.yytext = '';
           this.match = '';
         }
         var rules = this._currentRules();
         for (var i = 0; i < rules.length; i++) {
-          tempMatch = this._input.match(this.rules[rules[i]]);
+          tempMatch = this._input.match(/** @type {RegExp} */ (this.rules[rules[i]]));
           if (tempMatch && (!match || tempMatch[0].length > match[0].length)) {
             match = tempMatch;
             index = i;
@@ -5397,11 +5401,11 @@ const C1_REPLACEMENTS = {
   159: 376
 };
 var EntityParser = class {
-  named;
-  constructor(named) {
+  /** @type {Record<string, string>} */ named;
+  constructor(/** @type {Record<string, string>} */ named) {
     this.named = named;
   }
-  parse(entity) {
+  /** @returns {string | undefined} */ parse(/** @type {string} */ entity) {
     if (!entity) return;
     let matches = entity.match(HEXCHARCODE);
     if (matches) return decodeNumericCharRef(parseInt(matches[1], 16));
@@ -5411,7 +5415,7 @@ var EntityParser = class {
     if (matches) return this.named[matches[1]];
   }
 };
-function decodeNumericCharRef(codePoint) {
+/** @returns {string} */ function decodeNumericCharRef(/** @type {number} */ codePoint) {
   if (codePoint === 0 || codePoint > 1114111 || codePoint >= 55296 && codePoint <= 57343) return "�";
   return String.fromCodePoint(C1_REPLACEMENTS[codePoint] || codePoint);
 }
@@ -5419,25 +5423,25 @@ function decodeNumericCharRef(codePoint) {
 //#region src/utils.ts
 const WSP = /[\t\n\f ]/;
 const CRLF = /\r\n?/g;
-function isSpace$1(char) {
+/** @returns {boolean} */ function isSpace$1(/** @type {string} */ char) {
   return WSP.test(char);
 }
-function preprocessInput(input) {
+/** @returns {string} */ function preprocessInput(/** @type {string} */ input) {
   return input.replace(CRLF, "\n");
 }
 //#endregion
 //#region src/evented-tokenizer.ts
 var EventedTokenizer = class {
-  delegate;
-  entityParser;
-  mode;
-  state = "beforeData";
-  line = -1;
-  column = -1;
-  input = "";
-  index = -1;
-  tagNameBuffer = "";
-  constructor(delegate, entityParser, mode = "precompile") {
+  /** @type {TokenizerEventHandlers} */ delegate;
+  /** @type {EntityParser} */ entityParser;
+  /** @type {string} */ mode;
+  /** @type {string} */ state = "beforeData";
+  /** @type {number} */ line = -1;
+  /** @type {number} */ column = -1;
+  /** @type {string} */ input = "";
+  /** @type {number} */ index = -1;
+  /** @type {string} */ tagNameBuffer = "";
+  constructor(/** @type {TokenizerEventHandlers} */ delegate, entityParser, mode = "precompile") {
     this.delegate = delegate;
     this.entityParser = entityParser;
     this.mode = mode;
@@ -5452,7 +5456,7 @@ var EventedTokenizer = class {
     this.column = 0;
     this.delegate.reset();
   }
-  transitionTo(state) {
+  transitionTo(/** @type {string} */ state) {
     this.state = state;
   }
   tokenize(input) {
@@ -5460,7 +5464,7 @@ var EventedTokenizer = class {
     this.tokenizePart(input);
     this.tokenizeEOF();
   }
-  tokenizePart(input) {
+  tokenizePart(/** @type {string} */ input) {
     this.input += preprocessInput(input);
     while (this.index < this.input.length) {
       let handler = this.states[this.state];
@@ -5476,10 +5480,10 @@ var EventedTokenizer = class {
       this.transitionTo("beforeData");
     }
   }
-  peek() {
+  /** @returns {string} */ peek() {
     return this.input.charAt(this.index);
   }
-  consume() {
+  /** @returns {string} */ consume() {
     let char = this.peek();
     this.index++;
     if (char === "\n") {
@@ -5506,16 +5510,16 @@ var EventedTokenizer = class {
   markTagStart() {
     this.delegate.tagOpen();
   }
-  appendToTagName(char) {
+  appendToTagName(/** @type {string} */ char) {
     this.tagNameBuffer += char;
     this.delegate.appendToTagName(char);
   }
-  isIgnoredEndTag() {
+  /** @returns {boolean} */ isIgnoredEndTag() {
     let tag = this.tagNameBuffer;
     return tag === "title" && this.input.substring(this.index, this.index + 8) !== "</title>" || tag === "style" && this.input.substring(this.index, this.index + 8) !== "</style>" || tag === "script" && this.input.substring(this.index, this.index + 9) !== "<\/script>";
   }
   states = {
-    beforeData() {
+    /** @this {EventedTokenizer} */ beforeData() {
       let char = this.peek();
       if (char === "<" && !this.isIgnoredEndTag()) {
         this.transitionTo("tagOpen");
@@ -5530,7 +5534,7 @@ var EventedTokenizer = class {
         this.delegate.beginData();
       }
     },
-    data() {
+    /** @this {EventedTokenizer} */ data() {
       let char = this.peek();
       let tag = this.tagNameBuffer;
       if (char === "<" && !this.isIgnoredEndTag()) {
@@ -5546,7 +5550,7 @@ var EventedTokenizer = class {
         this.delegate.appendToData(char);
       }
     },
-    tagOpen() {
+    /** @this {EventedTokenizer} */ tagOpen() {
       let char = this.consume();
       if (char === "!") this.transitionTo("markupDeclarationOpen");else if (char === "/") this.transitionTo("endTagOpen");else if (!isSpace$1(char)) {
         this.transitionTo("tagName");
@@ -5555,7 +5559,7 @@ var EventedTokenizer = class {
         this.appendToTagName(char);
       }
     },
-    markupDeclarationOpen() {
+    /** @this {EventedTokenizer} */ markupDeclarationOpen() {
       let char = this.consume();
       if (char === "-" && this.peek() === "-") {
         this.consume();
@@ -5572,24 +5576,24 @@ var EventedTokenizer = class {
         if (this.delegate.beginDoctype) this.delegate.beginDoctype();
       }
     },
-    doctype() {
+    /** @this {EventedTokenizer} */ doctype() {
       if (isSpace$1(this.consume())) this.transitionTo("beforeDoctypeName");
     },
-    beforeDoctypeName() {
+    /** @this {EventedTokenizer} */ beforeDoctypeName() {
       let char = this.consume();
       if (isSpace$1(char)) return;else {
         this.transitionTo("doctypeName");
         if (this.delegate.appendToDoctypeName) this.delegate.appendToDoctypeName(char.toLowerCase());
       }
     },
-    doctypeName() {
+    /** @this {EventedTokenizer} */ doctypeName() {
       let char = this.consume();
       if (isSpace$1(char)) this.transitionTo("afterDoctypeName");else if (char === ">") {
         if (this.delegate.endDoctype) this.delegate.endDoctype();
         this.transitionTo("beforeData");
       } else if (this.delegate.appendToDoctypeName) this.delegate.appendToDoctypeName(char.toLowerCase());
     },
-    afterDoctypeName() {
+    /** @this {EventedTokenizer} */ afterDoctypeName() {
       let char = this.consume();
       if (isSpace$1(char)) return;else if (char === ">") {
         if (this.delegate.endDoctype) this.delegate.endDoctype();
@@ -5609,7 +5613,7 @@ var EventedTokenizer = class {
         if (isPublic) this.transitionTo("afterDoctypePublicKeyword");else if (isSystem) this.transitionTo("afterDoctypeSystemKeyword");
       }
     },
-    afterDoctypePublicKeyword() {
+    /** @this {EventedTokenizer} */ afterDoctypePublicKeyword() {
       let char = this.peek();
       if (isSpace$1(char)) {
         this.transitionTo("beforeDoctypePublicIdentifier");
@@ -5626,56 +5630,56 @@ var EventedTokenizer = class {
         this.transitionTo("beforeData");
       }
     },
-    doctypePublicIdentifierDoubleQuoted() {
+    /** @this {EventedTokenizer} */ doctypePublicIdentifierDoubleQuoted() {
       let char = this.consume();
       if (char === "\"") this.transitionTo("afterDoctypePublicIdentifier");else if (char === ">") {
         if (this.delegate.endDoctype) this.delegate.endDoctype();
         this.transitionTo("beforeData");
       } else if (this.delegate.appendToDoctypePublicIdentifier) this.delegate.appendToDoctypePublicIdentifier(char);
     },
-    doctypePublicIdentifierSingleQuoted() {
+    /** @this {EventedTokenizer} */ doctypePublicIdentifierSingleQuoted() {
       let char = this.consume();
       if (char === "'") this.transitionTo("afterDoctypePublicIdentifier");else if (char === ">") {
         if (this.delegate.endDoctype) this.delegate.endDoctype();
         this.transitionTo("beforeData");
       } else if (this.delegate.appendToDoctypePublicIdentifier) this.delegate.appendToDoctypePublicIdentifier(char);
     },
-    afterDoctypePublicIdentifier() {
+    /** @this {EventedTokenizer} */ afterDoctypePublicIdentifier() {
       let char = this.consume();
       if (isSpace$1(char)) this.transitionTo("betweenDoctypePublicAndSystemIdentifiers");else if (char === ">") {
         if (this.delegate.endDoctype) this.delegate.endDoctype();
         this.transitionTo("beforeData");
       } else if (char === "\"") this.transitionTo("doctypeSystemIdentifierDoubleQuoted");else if (char === "'") this.transitionTo("doctypeSystemIdentifierSingleQuoted");
     },
-    betweenDoctypePublicAndSystemIdentifiers() {
+    /** @this {EventedTokenizer} */ betweenDoctypePublicAndSystemIdentifiers() {
       let char = this.consume();
       if (isSpace$1(char)) return;else if (char === ">") {
         if (this.delegate.endDoctype) this.delegate.endDoctype();
         this.transitionTo("beforeData");
       } else if (char === "\"") this.transitionTo("doctypeSystemIdentifierDoubleQuoted");else if (char === "'") this.transitionTo("doctypeSystemIdentifierSingleQuoted");
     },
-    doctypeSystemIdentifierDoubleQuoted() {
+    /** @this {EventedTokenizer} */ doctypeSystemIdentifierDoubleQuoted() {
       let char = this.consume();
       if (char === "\"") this.transitionTo("afterDoctypeSystemIdentifier");else if (char === ">") {
         if (this.delegate.endDoctype) this.delegate.endDoctype();
         this.transitionTo("beforeData");
       } else if (this.delegate.appendToDoctypeSystemIdentifier) this.delegate.appendToDoctypeSystemIdentifier(char);
     },
-    doctypeSystemIdentifierSingleQuoted() {
+    /** @this {EventedTokenizer} */ doctypeSystemIdentifierSingleQuoted() {
       let char = this.consume();
       if (char === "'") this.transitionTo("afterDoctypeSystemIdentifier");else if (char === ">") {
         if (this.delegate.endDoctype) this.delegate.endDoctype();
         this.transitionTo("beforeData");
       } else if (this.delegate.appendToDoctypeSystemIdentifier) this.delegate.appendToDoctypeSystemIdentifier(char);
     },
-    afterDoctypeSystemIdentifier() {
+    /** @this {EventedTokenizer} */ afterDoctypeSystemIdentifier() {
       let char = this.consume();
       if (isSpace$1(char)) return;else if (char === ">") {
         if (this.delegate.endDoctype) this.delegate.endDoctype();
         this.transitionTo("beforeData");
       }
     },
-    commentStart() {
+    /** @this {EventedTokenizer} */ commentStart() {
       let char = this.consume();
       if (char === "-") this.transitionTo("commentStartDash");else if (char === ">") {
         this.delegate.finishComment();
@@ -5685,7 +5689,7 @@ var EventedTokenizer = class {
         this.transitionTo("comment");
       }
     },
-    commentStartDash() {
+    /** @this {EventedTokenizer} */ commentStartDash() {
       let char = this.consume();
       if (char === "-") this.transitionTo("commentEnd");else if (char === ">") {
         this.delegate.finishComment();
@@ -5695,18 +5699,18 @@ var EventedTokenizer = class {
         this.transitionTo("comment");
       }
     },
-    comment() {
+    /** @this {EventedTokenizer} */ comment() {
       let char = this.consume();
       if (char === "-") this.transitionTo("commentEndDash");else this.delegate.appendToCommentData(char);
     },
-    commentEndDash() {
+    /** @this {EventedTokenizer} */ commentEndDash() {
       let char = this.consume();
       if (char === "-") this.transitionTo("commentEnd");else {
         this.delegate.appendToCommentData("-" + char);
         this.transitionTo("comment");
       }
     },
-    commentEnd() {
+    /** @this {EventedTokenizer} */ commentEnd() {
       let char = this.consume();
       if (char === ">") {
         this.delegate.finishComment();
@@ -5716,14 +5720,14 @@ var EventedTokenizer = class {
         this.transitionTo("comment");
       }
     },
-    tagName() {
+    /** @this {EventedTokenizer} */ tagName() {
       let char = this.consume();
       if (isSpace$1(char)) this.transitionTo("beforeAttributeName");else if (char === "/") this.transitionTo("selfClosingStartTag");else if (char === ">") {
         this.delegate.finishTag();
         this.transitionTo("beforeData");
       } else this.appendToTagName(char);
     },
-    endTagName() {
+    /** @this {EventedTokenizer} */ endTagName() {
       let char = this.consume();
       if (isSpace$1(char)) {
         this.transitionTo("beforeAttributeName");
@@ -5737,7 +5741,7 @@ var EventedTokenizer = class {
         this.tagNameBuffer = "";
       } else this.appendToTagName(char);
     },
-    beforeAttributeName() {
+    /** @this {EventedTokenizer} */ beforeAttributeName() {
       let char = this.peek();
       if (isSpace$1(char)) {
         this.consume();
@@ -5760,7 +5764,7 @@ var EventedTokenizer = class {
         this.delegate.beginAttribute();
       }
     },
-    attributeName() {
+    /** @this {EventedTokenizer} */ attributeName() {
       let char = this.peek();
       if (isSpace$1(char)) {
         this.transitionTo("afterAttributeName");
@@ -5788,7 +5792,7 @@ var EventedTokenizer = class {
         this.delegate.appendToAttributeName(char);
       }
     },
-    afterAttributeName() {
+    /** @this {EventedTokenizer} */ afterAttributeName() {
       let char = this.peek();
       if (isSpace$1(char)) {
         this.consume();
@@ -5816,7 +5820,7 @@ var EventedTokenizer = class {
         this.delegate.appendToAttributeName(char);
       }
     },
-    beforeAttributeValue() {
+    /** @this {EventedTokenizer} */ beforeAttributeValue() {
       let char = this.peek();
       if (isSpace$1(char)) this.consume();else if (char === "\"") {
         this.transitionTo("attributeValueDoubleQuoted");
@@ -5839,21 +5843,21 @@ var EventedTokenizer = class {
         this.delegate.appendToAttributeValue(char);
       }
     },
-    attributeValueDoubleQuoted() {
+    /** @this {EventedTokenizer} */ attributeValueDoubleQuoted() {
       let char = this.consume();
       if (char === "\"") {
         this.delegate.finishAttributeValue();
         this.transitionTo("afterAttributeValueQuoted");
       } else if (char === "&") this.delegate.appendToAttributeValue(this.consumeCharRef() || "&");else this.delegate.appendToAttributeValue(char);
     },
-    attributeValueSingleQuoted() {
+    /** @this {EventedTokenizer} */ attributeValueSingleQuoted() {
       let char = this.consume();
       if (char === "'") {
         this.delegate.finishAttributeValue();
         this.transitionTo("afterAttributeValueQuoted");
       } else if (char === "&") this.delegate.appendToAttributeValue(this.consumeCharRef() || "&");else this.delegate.appendToAttributeValue(char);
     },
-    attributeValueUnquoted() {
+    /** @this {EventedTokenizer} */ attributeValueUnquoted() {
       let char = this.peek();
       if (isSpace$1(char)) {
         this.delegate.finishAttributeValue();
@@ -5876,7 +5880,7 @@ var EventedTokenizer = class {
         this.delegate.appendToAttributeValue(char);
       }
     },
-    afterAttributeValueQuoted() {
+    /** @this {EventedTokenizer} */ afterAttributeValueQuoted() {
       let char = this.peek();
       if (isSpace$1(char)) {
         this.consume();
@@ -5890,7 +5894,7 @@ var EventedTokenizer = class {
         this.transitionTo("beforeData");
       } else this.transitionTo("beforeAttributeName");
     },
-    selfClosingStartTag() {
+    /** @this {EventedTokenizer} */ selfClosingStartTag() {
       if (this.peek() === ">") {
         this.consume();
         this.delegate.markTagAsSelfClosing();
@@ -5898,7 +5902,7 @@ var EventedTokenizer = class {
         this.transitionTo("beforeData");
       } else this.transitionTo("beforeAttributeName");
     },
-    endTagOpen() {
+    /** @this {EventedTokenizer} */ endTagOpen() {
       let char = this.consume();
       if (!isSpace$1(char)) {
         this.transitionTo("endTagName");
@@ -5967,9 +5971,10 @@ const BROKEN_KIND = 'Broken';
 
 /**
  * These kinds  describe spans that don't have a concrete location in the original source.
+ * @returns {boolean}
  */
 
-function isInvisible(kind) {
+function isInvisible(/** @type {string} */ kind) {
   return kind !== CHAR_OFFSET_KIND && kind !== HBS_POSITION_KIND;
 }
 
@@ -5991,7 +5996,7 @@ class WhenList {
   }
   first(/** @type {string} */ kind) {
     for (const when of this._whens) {
-      const value = when.match(kind);
+      const value = /** @type {When} */ (when).match(kind);
       if (isPresentArray(value)) {
         return value[0];
       }
@@ -6050,14 +6055,14 @@ class Matcher {
   // checking so that matchers can ensure they've actually covered all the cases (and TypeScript
   // will treat it as an exhaustive match).
 
-  when(left, right,
+  /** @returns {Matcher} */ when(/** @type {string} */ left, /** @type {string} */ right,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   callback) {
-    this._whens.get(left, () => new When()).add(right, callback);
+    this._whens.get(left, /** @returns {When} */ () => new When()).add(right, callback);
     return this;
   }
 }
-function patternFor(kind) {
+/** @returns {string} */ function patternFor(/** @type {string} */ kind) {
   switch (kind) {
     case BROKEN_KIND:
     case INTERNAL_SYNTHETIC_KIND:
@@ -6208,7 +6213,7 @@ class SourceSpan {
   /** @returns {SourceSpan} */ static broken(pos = BROKEN_LOCATION) {
     return new InvisibleSpan(BROKEN_KIND, pos).wrap();
   }
-  isInvisible;
+  /** @type {boolean} */ isInvisible;
   constructor(/** @type {CharPositionSpan | HbsSpan | InvisibleSpan} */ data) {
     this.data = data;
     this.isInvisible = isInvisible(data.kind);
@@ -6251,14 +6256,14 @@ class SourceSpan {
   /**
    * Create a new span with the current span's end and a new beginning.
    */
-  withStart(other) {
+  /** @returns {SourceSpan} */ withStart(/** @type {SourceOffset} */ other) {
     return span(other.data, this.data.getEnd());
   }
 
   /**
    * Create a new span with the current span's beginning and a new ending.
    */
-  withEnd(other) {
+  /** @returns {SourceSpan} */ withEnd(/** @type {SourceOffset} */ other) {
     return span(this.data.getStart(), other.data);
   }
   /** @returns {string} */ asString() {
@@ -6268,7 +6273,7 @@ class SourceSpan {
   /**
    * Convert this `SourceSpan` into a `SourceSlice`.
    */
-  toSlice(expected) {
+  /** @returns {SourceSlice} */ toSlice(/** @type {undefined | string} */ expected) {
     const chars = this.data.asString();
     assert(expected === undefined || expected === chars, `unexpectedly found ${JSON.stringify(chars)} when slicing source, ` + `but expected ${JSON.stringify(expected)}`);
     return new SourceSlice({
@@ -6339,19 +6344,19 @@ class SourceSpan {
   serialize() {
     return this.data.serialize();
   }
-  slice({
+  /** @returns {SourceSpan} */ slice({
     skipStart = 0,
     skipEnd = 0
   }) {
     return span(this.getStart().move(skipStart).data, this.getEnd().move(-skipEnd).data);
   }
-  sliceStartChars({
+  /** @returns {SourceSpan} */ sliceStartChars({
     skipStart = 0,
     chars
   }) {
     return span(this.getStart().move(skipStart).data, this.getStart().move(skipStart + chars).data);
   }
-  sliceEndChars({
+  /** @returns {SourceSpan} */ sliceEndChars({
     skipEnd = 0,
     chars
   }) {
@@ -6360,9 +6365,9 @@ class SourceSpan {
 }
 class CharPositionSpan {
   kind = CHAR_OFFSET_KIND;
-  #locPosSpan = null;
+  /** @type {HbsSpan | "BROKEN" | null} */ #locPosSpan = null;
   constructor(/** @type {Source} */ source, /** @type {CharPositions} */ charPositions) {
-    this.source = source;
+    /** @type {Source} */ this.source = source;
     this.charPositions = charPositions;
   }
   /** @returns {SourceSpan} */ wrap() {
@@ -6419,12 +6424,12 @@ class CharPositionSpan {
 }
 class HbsSpan {
   kind = HBS_POSITION_KIND;
-  #charPosSpan = null;
+  /** @type {CharPositionSpan | "BROKEN" | null} */ #charPosSpan = null;
 
   // the source location from Handlebars + AST Plugins -- could be wrong
   #providedHbsLoc;
   constructor(/** @type {Source} */ source, /** @type {HbsPositions} */ hbsPositions, providedHbsLoc = null) {
-    this.source = source;
+    /** @type {Source} */ this.source = source;
     this.hbsPositions = hbsPositions;
     this.#providedHbsLoc = providedHbsLoc;
   }
@@ -6501,12 +6506,12 @@ class HbsSpan {
   }
 }
 class InvisibleSpan {
-  constructor(kind,
+  constructor(/** @type {string} */ kind,
   // whatever was provided, possibly broken
   loc,
   // if the span represents a synthetic string
   /** @type {undefined | null | string} */ string = null) {
-    this.kind = kind;
+    /** @type {string} */ this.kind = kind;
     this.loc = loc;
     this.string = string;
   }
@@ -6556,13 +6561,13 @@ class InvisibleSpan {
     return BROKEN_LOCATION;
   }
 }
-const span = match(m => m.when(HBS_POSITION_KIND, HBS_POSITION_KIND, (left, right) => new HbsSpan(left.source, {
+const span = match(/** @returns {Matcher} */ (/** @type {Matcher} */ m) => m.when(HBS_POSITION_KIND, HBS_POSITION_KIND, /** @returns {SourceSpan} */ (/** @type {HbsPosition} */ left, /** @type {HbsPosition} */ right) => new HbsSpan(left.source, {
   start: left,
   end: right
-}).wrap()).when(CHAR_OFFSET_KIND, CHAR_OFFSET_KIND, (left, right) => new CharPositionSpan(left.source, {
+}).wrap()).when(CHAR_OFFSET_KIND, CHAR_OFFSET_KIND, /** @returns {SourceSpan} */ (/** @type {CharPosition} */ left, /** @type {CharPosition} */ right) => new CharPositionSpan(left.source, {
   start: left,
   end: right
-}).wrap()).when(CHAR_OFFSET_KIND, HBS_POSITION_KIND, (left, right) => {
+}).wrap()).when(CHAR_OFFSET_KIND, HBS_POSITION_KIND, /** @returns {SourceSpan} */ (/** @type {CharPosition} */ left, /** @type {HbsPosition} */ right) => {
   const rightCharPos = right.toCharPos();
   if (rightCharPos === null) {
     return new InvisibleSpan(BROKEN_KIND, BROKEN_LOCATION).wrap();
@@ -6606,6 +6611,7 @@ class SourceOffset {
    * Create a `SourceOffset` from a Handlebars `SourcePosition`. It's stored as-is, and converted
    * into a character offset on demand, which avoids unnecessarily computing the offset of every
    * `SourceLocation`, but also means that broken `SourcePosition`s are not always detected.
+   * @returns {SourceOffset}
    */
   static forHbsPos(/** @type {Source} */ source, pos) {
     return new HbsPosition(source, pos, null).wrap();
@@ -6616,7 +6622,7 @@ class SourceOffset {
    * calling code determined (or knows) that the `SourceLocation` doesn't correspond correctly to
    * any part of the source.
    */
-  static broken(pos = UNKNOWN_POSITION) {
+  /** @returns {SourceOffset} */ static broken(pos = UNKNOWN_POSITION) {
     return new InvisiblePosition(BROKEN_KIND, pos).wrap();
   }
   constructor(/** @type {HbsPosition | CharPosition | InvisiblePosition} */ data) {
@@ -6641,7 +6647,7 @@ class SourceOffset {
    * Otherwise, two `SourceOffset`s are equivalent if their successfully computed character offsets
    * are the same.
    */
-  eql(right) {
+  /** @returns {boolean} */ eql(/** @type {SourceOffset} */ right) {
     return eql(this.data, right.data);
   }
 
@@ -6699,10 +6705,10 @@ class CharPosition {
   kind = CHAR_OFFSET_KIND;
 
   /** Computed from char offset */
-  _locPos = null;
-  constructor(source, charPos) {
-    this.source = source;
-    this.charPos = charPos;
+  /** @type {HbsPosition | "BROKEN" | null} */ _locPos = null;
+  constructor(/** @type {Source} */ source, /** @type {number} */ charPos) {
+    /** @type {Source} */ this.source = source;
+    /** @type {number} */ this.charPos = charPos;
   }
 
   /**
@@ -6757,9 +6763,9 @@ class CharPosition {
 }
 class HbsPosition {
   kind = HBS_POSITION_KIND;
-  _charPos;
+  /** @type {CharPosition | "BROKEN" | null} */ _charPos;
   constructor(/** @type {Source} */ source, /** @type {SourcePosition} */ hbsPos, /** @type {undefined | null | number} */ charPos = null) {
-    this.source = source;
+    /** @type {Source} */ this.source = source;
     this.hbsPos = hbsPos;
     this._charPos = charPos === null ? null : new CharPosition(source, charPos);
   }
@@ -6800,22 +6806,22 @@ class HbsPosition {
    *
    * {@see CharPosition} for the alternative.
    */
-  toHbsPos() {
+  /** @returns {HbsPosition} */ toHbsPos() {
     return this;
   }
 }
 class InvisiblePosition {
-  constructor(kind,
+  constructor(/** @type {string} */ kind,
   // whatever was provided, possibly broken
   pos) {
-    this.kind = kind;
+    /** @type {string} */ this.kind = kind;
     this.pos = pos;
   }
 
   /**
    * A broken position cannot be turned into a {@see CharacterPosition}.
    */
-  toCharPos() {
+  /** @returns {null} */ toCharPos() {
     return null;
   }
 
@@ -6842,7 +6848,7 @@ class InvisiblePosition {
  *
  * @see {SourceOffset#eql}
  */
-const eql = match(m => m.when(HBS_POSITION_KIND, HBS_POSITION_KIND, ({
+const eql = match(/** @returns {Matcher} */ (/** @type {Matcher} */ m) => m.when(HBS_POSITION_KIND, HBS_POSITION_KIND, ({
   hbsPos: left
 }, {
   hbsPos: right
@@ -6864,7 +6870,7 @@ const eql = match(m => m.when(HBS_POSITION_KIND, HBS_POSITION_KIND, ({
  * by the minifier in builder).
  */
 
-function setLocalDebugType(type, ...brand) {
+function setLocalDebugType(/** @type {string} */ type, ...brand) {
 }
 
 class Source {
@@ -6873,10 +6879,10 @@ class Source {
   }
 
   /** Char offset of each `\n` in the source. */
-  #newlineOffsets;
+  /** @type {number[]} */ #newlineOffsets;
   constructor(/** @type {string} */ source, /** @type {undefined | string} */ module = 'an unknown module') {
-    this.source = source;
-    this.module = module;
+    /** @type {string} */ this.source = source;
+    /** @type {string} */ this.module = module;
     setLocalDebugType('syntax:source', this);
     this.#newlineOffsets = computeNewlineOffsets(source);
   }
@@ -6897,7 +6903,7 @@ class Source {
       column
     });
   }
-  spanFor({
+  /** @returns {SourceSpan} */ spanFor({
     start,
     end
   }) {
@@ -6920,7 +6926,7 @@ class Source {
       column: offset - this.#lineStartFor(lineIdx)
     };
   }
-  charPosFor({
+  /** @returns {number | null} */ charPosFor({
     line,
     column
   }) {
@@ -6935,22 +6941,22 @@ class Source {
     }
     return lineEnd;
   }
-  #lineStartFor(lineIdx) {
+  /** @returns {number} */ #lineStartFor(/** @type {number} */ lineIdx) {
     if (lineIdx === 0) return 0;
     const prevNl = this.#newlineOffsets[lineIdx - 1];
     return prevNl === undefined ? 0 : prevNl + 1;
   }
 }
-function computeNewlineOffsets(source) {
-  const offsets = [];
+/** @returns {number[]} */ function computeNewlineOffsets(/** @type {string} */ source) {
+  /** @type {number[]} */ const offsets = [];
   for (let i = source.indexOf('\n'); i !== -1; i = source.indexOf('\n', i + 1)) {
     offsets.push(i);
   }
   return offsets;
 }
 
-/** Lower-bound binary search: smallest i with arr[i] >= target, else arr.length. */
-function lowerBound(arr, target) {
+/** Lower-bound binary search: smallest i with arr[i] >= target, else arr.length. @returns {number} */
+function lowerBound(/** @type {number[]} */ arr, /** @type {number} */ target) {
   let lo = 0;
   let hi = arr.length;
   while (lo < hi) {
@@ -6982,7 +6988,7 @@ class SpanList {
     }
   }
 }
-function loc(span) {
+/** @returns {SourceSpan} */ function loc(span) {
   if (Array.isArray(span)) {
     let first = getFirst(span);
     let last = getLast(span);
@@ -6993,13 +6999,13 @@ function loc(span) {
     return span.loc;
   }
 }
-function hasSpan(span) {
+/** @returns {boolean} */ function hasSpan(span) {
   if (Array.isArray(span) && span.length === 0) {
     return false;
   }
   return true;
 }
-function maybeLoc(location, fallback) {
+/** @returns {SourceSpan} */ function maybeLoc(location, /** @type {SourceSpan} */ fallback) {
   if (hasSpan(location)) {
     return loc(location);
   } else {
@@ -7092,8 +7098,8 @@ function cannotReplaceOrRemoveInKeyHandlerYet(node, key) {
 
 class WalkerPath {
   node;
-  parent;
-  parentKey;
+  /** @type {WalkerPath | null} */ parent;
+  /** @type {string | null} */ parentKey;
   constructor(node, /** @type {undefined | null | WalkerPath} */ parent = null, /** @type {undefined | null | string} */ parentKey = null) {
     this.node = node;
     this.parent = parent;
@@ -7145,7 +7151,7 @@ function getExitFunction(handler) {
     return handler.exit;
   }
 }
-function getKeyHandler(handler, key) {
+function getKeyHandler(handler, /** @type {string} */ key) {
   let keyVisitor = typeof handler !== 'function' ? handler.keys : undefined;
   if (keyVisitor === undefined) return;
   let keyHandler = keyVisitor[key];
@@ -7154,7 +7160,7 @@ function getKeyHandler(handler, key) {
   }
   return keyVisitor.All;
 }
-function getNodeHandler(visitor, nodeType) {
+function getNodeHandler(visitor, /** @type {string} */ nodeType) {
   // eslint-disable-next-line @typescript-eslint/no-deprecated
   if (visitor.Program) {
     if (nodeType === 'Template' && !visitor.Template || nodeType === 'Block' && !visitor.Block) {
@@ -7169,7 +7175,7 @@ function getNodeHandler(visitor, nodeType) {
   }
   return visitor.All;
 }
-function visitNode(visitor, path) {
+function visitNode(visitor, /** @type {WalkerPath} */ path) {
   let {
     node,
     parent,
@@ -7210,7 +7216,7 @@ function visitNode(visitor, path) {
   }
   return result;
 }
-function get(node, key) {
+function get(node, /** @type {string | undefined} */ key) {
   return node[key];
 }
 function set(node, key, value) {
@@ -7570,7 +7576,7 @@ function buildAtName(name, loc) {
     loc: buildLoc(loc || null)
   });
 }
-function buildVar(name, loc) {
+/** @returns {import("glimmer-ast-types").GlimmerNode} */ function buildVar(/** @type {string} */ name, loc) {
   return b.var({
     name,
     loc: buildLoc(loc || null)
@@ -7658,7 +7664,7 @@ function buildBlockParams(params) {
     loc: SourceSpan.synthetic(p)
   }) : p);
 }
-function buildBlockItself(body = [], params = [], chained = false, loc) {
+/** @returns {import("glimmer-ast-types").GlimmerNode} */ function buildBlockItself(body = [], params = [], /** @type {undefined | boolean} */ chained = false, loc) {
   return b.blockItself({
     body,
     params: buildBlockParams(params),
@@ -7780,7 +7786,7 @@ function buildLegacyPath({
     type: 'PathExpression',
     head,
     tail,
-    get original() {
+    /** @returns {string} */ get original() {
       const head = this.head.original;
       return this.tail.length === 0 ? head : `${head}.${this.tail.join('.')}`;
     },
@@ -7887,7 +7893,7 @@ class Builders {
       body,
       params,
       /** @returns {any[]} */ get blockParams() {
-        return this.params.map(p => p.name);
+        return this.params.map(/** @returns {string} */ p => p.name);
       },
       set blockParams(params) {
         this.params = params.map(name => {
@@ -8015,7 +8021,7 @@ class Builders {
         this.path.original = name;
       },
       /** @returns {any[]} */ get blockParams() {
-        return this.params.map(p => p.name);
+        return this.params.map(/** @returns {string} */ p => p.name);
       },
       set blockParams(params) {
         this.params = params.map(name => {
@@ -8230,10 +8236,10 @@ class Parser {
   /** @type {GlimmerPendingAttribute | null} */ currentAttribute = null;
   /** @type {GlimmerPendingNode | null} */ currentNode = null;
   /** @type {EventedTokenizer} */ tokenizer;
-  constructor(source, entityParser = new EntityParser(html5_named_char_refs_default), mode = 'precompile') {
+  constructor(/** @type {Source} */ source, entityParser = new EntityParser(html5_named_char_refs_default), mode = 'precompile') {
     this.source = source;
     this.lines = source.source.split(/\r\n?|\n/u);
-    this.tokenizer = new EventedTokenizer(this, entityParser, mode);
+    this.tokenizer = new EventedTokenizer(/** @type {TokenizerEventHandlers} */ (this), entityParser, mode);
   }
   /** @returns {SourceOffset} */ offset() {
     let {
@@ -8542,8 +8548,8 @@ class HandlebarsNodeVisitors extends Parser {
       case 'attributeName':
       case 'afterAttributeName':
         this.assertNotInEndTag('mustaches', mustache.loc);
-        this.beginAttributeValue(false);
-        this.finishAttributeValue();
+        /** @type {TokenizerEventHandlers} */ (this).beginAttributeValue(false);
+        /** @type {TokenizerEventHandlers} */ (this).finishAttributeValue();
         addElementModifier(this.currentStartTag, mustache);
         tokenizer.transitionTo('beforeAttributeName');
         break;
@@ -8554,7 +8560,7 @@ class HandlebarsNodeVisitors extends Parser {
 
       // Attribute values
       case 'beforeAttributeValue':
-        this.beginAttributeValue(false);
+        /** @type {TokenizerEventHandlers} */ (this).beginAttributeValue(false);
         this.appendDynamicAttributeValuePart(mustache);
         tokenizer.transitionTo('attributeValueUnquoted');
         break;
@@ -8577,8 +8583,9 @@ class HandlebarsNodeVisitors extends Parser {
    * If the HTML tokenizer is inside an HTML comment, append the source of `node` to the comment
    * and return true. The tokenizer may be part-way through a `-` or `--` sequence that is not
    * followed by `>`, so those characters are flushed first, as the tokenizer itself would do.
+   * @returns {boolean}
    */
-  appendToHtmlComment(node) {
+  appendToHtmlComment(/** @type {HbsNode} */ node) {
     let pending;
     switch (this.tokenizer.state) {
       case 'comment':
@@ -8595,11 +8602,11 @@ class HandlebarsNodeVisitors extends Parser {
       default:
         return false;
     }
-    this.appendToCommentData(pending + this.sourceForNode(node));
+    /** @type {TokenizerEventHandlers} */ (this).appendToCommentData(pending + this.sourceForNode(node));
     this.tokenizer.transitionTo('comment');
     return true;
   }
-  assertNotInEndTag(what, loc) {
+  assertNotInEndTag(/** @type {string} */ what, /** @type {SourceSpan} */ loc) {
     if (this.currentTag.type === 'EndTag') {
       throw generateSyntaxError(`Invalid end tag: closing tag must not contain ${what}`, loc);
     }
@@ -8818,7 +8825,7 @@ class HandlebarsNodeVisitors extends Parser {
     });
   }
 }
-function calculateRightStrippedOffsets(original, value) {
+function calculateRightStrippedOffsets(/** @type {string} */ original, /** @type {string} */ value) {
   if (value === '') {
     // if it is empty, just return the count of newlines
     // in original
@@ -8838,7 +8845,7 @@ function calculateRightStrippedOffsets(original, value) {
     columns: unwrap(lines[lineCount]).length
   };
 }
-function updateTokenizerLocation(tokenizer, content) {
+function updateTokenizerLocation(/** @type {EventedTokenizer} */ tokenizer, content) {
   let line = content.loc.start.line;
   let column = content.loc.start.column;
   const offsets = calculateRightStrippedOffsets(content.original, content.value);
@@ -8945,8 +8952,8 @@ function repairBlock(/** @type {Source} */ source, /** @type {HbsNode} */ block,
   return /[\t\n\f ]/u.test(char);
 }
 class TokenizerEventHandlers extends HandlebarsNodeVisitors {
-  tagOpenLine = 0;
-  tagOpenColumn = 0;
+  /** @type {number} */ tagOpenLine = 0;
+  /** @type {number} */ tagOpenColumn = 0;
   reset() {
     this.currentNode = null;
   }
@@ -9160,7 +9167,7 @@ class TokenizerEventHandlers extends HandlebarsNodeVisitors {
 
       // the tokenizer line/column have already been advanced, correct location info
       if (char === '\n') {
-        loc = lastPart ? lastPart.loc.getEnd() : this.currentAttr.valueSpan.getStart();
+        loc = lastPart ? /** @type {SourceOffset} */ (lastPart.loc.getEnd()) : this.currentAttr.valueSpan.getStart();
       } else {
         loc = loc.move(-1);
       }
@@ -9214,7 +9221,7 @@ class TokenizerEventHandlers extends HandlebarsNodeVisitors {
       state: 'PossibleAs'
     };
     const handlers = {
-      PossibleAs: next => {
+      PossibleAs: (/** @type {string} */ next) => {
         assert(state.state === 'PossibleAs');
         if (isSpace(next)) {
           // " as ..."
@@ -9235,7 +9242,7 @@ class TokenizerEventHandlers extends HandlebarsNodeVisitors {
           };
         }
       },
-      BeforeStartPipe: next => {
+      BeforeStartPipe: (/** @type {string} */ next) => {
         assert(state.state === 'BeforeStartPipe');
         if (isSpace(next)) {
           this.tokenizer.consume();
@@ -9253,7 +9260,7 @@ class TokenizerEventHandlers extends HandlebarsNodeVisitors {
           };
         }
       },
-      BeforeBlockParamName: next => {
+      BeforeBlockParamName: (/** @type {string} */ next) => {
         assert(state.state === 'BeforeBlockParamName');
         if (isSpace(next)) {
           this.tokenizer.consume();
@@ -9293,7 +9300,7 @@ class TokenizerEventHandlers extends HandlebarsNodeVisitors {
           this.tokenizer.consume();
         }
       },
-      BlockParamName: next => {
+      BlockParamName: (/** @type {string} */ next) => {
         assert(state.state === 'BlockParamName');
         if (next === '') {
           // The HTML tokenizer ran out of characters, so we are either
@@ -9333,7 +9340,7 @@ class TokenizerEventHandlers extends HandlebarsNodeVisitors {
           this.tokenizer.consume();
         }
       },
-      AfterEndPipe: next => {
+      AfterEndPipe: (/** @type {string} */ next) => {
         assert(state.state === 'AfterEndPipe');
         if (isSpace(next)) {
           this.tokenizer.consume();
@@ -9449,7 +9456,7 @@ class CodemodEntityParser extends EntityParser {
   constructor() {
     super({});
   }
-  parse() {
+  /** @returns {string | undefined} */ parse() {
     return undefined;
   }
 }
