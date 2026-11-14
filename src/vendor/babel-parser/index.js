@@ -3443,7 +3443,7 @@ const flow = superClass => class FlowParserMixin extends superClass {
   /** @returns {boolean} */ shouldParseAsyncArrow() {
     return this.match(10) || super.shouldParseAsyncArrow();
   }
-  parseMaybeAssign(/** @type {ExpressionErrors | undefined | null} */ refExpressionErrors, isParenItem) {
+  parseMaybeAssign(/** @type {ExpressionErrors | undefined | null} */ refExpressionErrors, /** @type {boolean | undefined} */ isParenItem) {
     let state = null;
     /** @type {TryParseResult | undefined} */
     let jsx;
@@ -5740,7 +5740,7 @@ class Tokenizer extends CommentsParser {
   skipSpace() {
     const spaceStart = this.state.pos;
     const attachComment = (this.optionFlags & 8192) > 0;
-    let comments;
+    /** @type {any[] | undefined} */ let comments;
     loop: while (this.state.pos < this.length) {
       const ch = this.input.charCodeAt(this.state.pos);
       switch (ch) {
@@ -13649,7 +13649,7 @@ const typescript = superClass => class TypeScriptParserMixin extends superClass 
     }
     return super.parseAsyncArrowFromCallExpression(node, call);
   }
-  parseMaybeAssign(/** @type {ExpressionErrors | undefined | null} */ refExpressionErrors, isParenItem) {
+  parseMaybeAssign(/** @type {ExpressionErrors | undefined | null} */ refExpressionErrors, /** @type {boolean | undefined} */ isParenItem) {
     let state;
     /** @type {TryParseResult | undefined} */
     let jsx;

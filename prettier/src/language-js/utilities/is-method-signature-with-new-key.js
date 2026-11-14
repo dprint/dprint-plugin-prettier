@@ -5,12 +5,12 @@ import { isStringLiteral } from "./node-types.js";
 @import {Node} from "../types/estree.js"
 */
 
-const isIdentifierNew = (node) =>
+const isIdentifierNew = /** @returns {boolean} */ (/** @type {Node} */ node) =>
   node.type === "Identifier" && node.name === "new";
-const isStringLiteralNew = /** @returns {boolean} */ (node) =>
+const isStringLiteralNew = /** @returns {boolean} */ (/** @type {Node} */ node) =>
   isStringLiteral(node) && node.value === "new";
 
-/** @returns {boolean} */ function isFlowMethodSignatureWithNewKey(node) {
+/** @returns {boolean} */ function isFlowMethodSignatureWithNewKey(/** @type {Node} */ node) {
   return (
     node.type === "ObjectTypeProperty" &&
     node.method &&
@@ -19,7 +19,7 @@ const isStringLiteralNew = /** @returns {boolean} */ (node) =>
   );
 }
 
-/** @returns {boolean} */ function isTsMethodSignatureWithNewKey(node) {
+/** @returns {boolean} */ function isTsMethodSignatureWithNewKey(/** @type {Node} */ node) {
   return (
     node.type === "TSMethodSignature" &&
     !node.computed &&

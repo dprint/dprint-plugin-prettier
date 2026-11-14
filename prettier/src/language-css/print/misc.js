@@ -27,7 +27,7 @@ const WORD_PART_REGEX = /[$@]?[_a-z\u0080-\uFFFF][\w\u0080-\uFFFF-]*/gi;
   return value.replaceAll(STRING_REGEX, /** @returns {string} */ (match) => printString(match, options));
 }
 
-function removeQuotedStrings(value) {
+/** @returns {string} */ function removeQuotedStrings(/** @type {string} */ value) {
   return value.replaceAll(STRING_REGEX, "");
 }
 

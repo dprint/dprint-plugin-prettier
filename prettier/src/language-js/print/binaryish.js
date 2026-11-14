@@ -40,7 +40,7 @@ import { shouldFlatten } from "../utilities/should-flatten.js";
 
 /** @type {number} */ let uid = 0;
 
-/** @returns {boolean} */ function isInlineLogicalExpression(node) {
+/** @returns {boolean} */ function isInlineLogicalExpression(/** @type {import("../types/estree.js").Node} */ node) {
   if (node.type !== "LogicalExpression") {
     return false;
   }
@@ -228,13 +228,13 @@ function printBinaryishExpressions(
   }
 
   // Flatten left-associative chains without recursing into every left node.
-  const flattenedLeft = [];
-  let currentNode = node;
+  /** @type {string[]} */ const flattenedLeft = [];
+  /** @type {import("../types/estree.js").Node} */ let currentNode = node;
   while (isBinaryish(currentNode.left)) {
-    const leftNode = currentNode.left;
-    const operator =
+    /** @type {import("../types/estree.js").Node} */ const leftNode = currentNode.left;
+    /** @type {string | undefined} */ const operator =
       "operator" in currentNode ? currentNode.operator : undefined;
-    const leftOperator = "operator" in leftNode ? leftNode.operator : undefined;
+    /** @type {string | undefined} */ const leftOperator = "operator" in leftNode ? leftNode.operator : undefined;
     if (!shouldFlatten(operator, leftOperator)) {
       break;
     }
@@ -247,7 +247,7 @@ function printBinaryishExpressions(
   let parts = [];
   for (let depth = flattenedLeft.length; depth >= 0; depth--) {
     parts = path.call(
-      () =>
+      /** @returns {Doc[]} */ () =>
         printBinaryishExpressionPart(
           path,
           options,

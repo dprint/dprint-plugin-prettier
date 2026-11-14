@@ -2,7 +2,7 @@
 import { shouldAddContentEnd } from "../location/index.js";
 import { isForXStatementInitializer } from "../utilities/is-for-x-statement-initializer.js";
 
-/** @returns {boolean} */ function shouldPrintSemicolon(node) {
+/** @returns {boolean} */ function shouldPrintSemicolon(/** @type {import("../types/estree.js").Node} */ node) {
   if (shouldAddContentEnd(node) && node.__contentEnd) {
     return true;
   }
@@ -36,7 +36,7 @@ import { isForXStatementInitializer } from "../utilities/is-for-x-statement-init
   return false;
 }
 
-/** @returns {boolean} */ function shouldIgnoredNodePrintSemicolon(path) {
+/** @returns {boolean} */ function shouldIgnoredNodePrintSemicolon(/** @type {import("../../common/ast-path.js").default} */ path) {
   return !isForXStatementInitializer(path) && shouldPrintSemicolon(path.node);
 }
 
