@@ -38,6 +38,8 @@ export type CompileData = {
 }
 
 export type Config = {
+  afterExit: Array<Handle>
+  beforeEnter: Array<Handle>
   canContainEols: Array<string>
   enter: Handles
   exit: Handles
@@ -45,6 +47,8 @@ export type Config = {
 }
 
 export type Extension = {
+  afterExit?: Handle | null | undefined
+  beforeEnter?: Handle | null | undefined
   canContainEols?: Array<string> | null | undefined
   enter?: Handles | null | undefined
   exit?: Handles | null | undefined
