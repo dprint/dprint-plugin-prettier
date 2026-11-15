@@ -41,19 +41,7 @@ async function normalizeFormatOptions(options, opts = {}) {
     }
   }
 
-  const supportOptions = getSupportInfo({
-    plugins: options.plugins,
-    showDeprecated: true,
-  }).options;
-
-  const defaults = {
-    ...formatOptionsHiddenDefaults,
-    ...Object.fromEntries(
-      supportOptions
-        .filter(/** @returns {boolean} */ (optionInfo) => optionInfo.default !== undefined)
-        .map(/** @returns {any[]} */ (option) => [option.name, option.default]),
-    ),
-  };
+  const { supportOptions, defaults } = getSupportOptions(options.plugins);
 
   const parserPlugin = getParserPluginByParserName(
     rawOptions.plugins,
@@ -95,6 +83,44 @@ async function normalizeFormatOptions(options, opts = {}) {
     passThrough: Object.keys(formatOptionsHiddenDefaults),
     ...opts,
   });
+}
+
+// (dprint-plugin-prettier: the options of the plugins and their defaults are worked out once for each list of plugins,
+// rather than for each file and each embedded language, as they only depend on the plugins; see docs/upgrading.md)
+/** @type {WeakMap<object, { supportOptions: any[], defaults: Record<string, any> }>} */
+const supportOptionsByPlugins = new WeakMap();
+const supportOptionsWithoutPlugins = { plugins: undefined, support: undefined };
+
+/** @returns {{ supportOptions: any[], defaults: Record<string, any> }} */
+function getSupportOptions(/** @type {any} */ plugins) {
+  if (plugins == null) {
+    supportOptionsWithoutPlugins.support ??= computeSupportOptions(plugins);
+    return supportOptionsWithoutPlugins.support;
+  }
+  let support = supportOptionsByPlugins.get(plugins);
+  if (support === undefined) {
+    support = computeSupportOptions(plugins);
+    supportOptionsByPlugins.set(plugins, support);
+  }
+  return support;
+}
+
+/** @returns {{ supportOptions: any[], defaults: Record<string, any> }} */
+function computeSupportOptions(/** @type {any} */ plugins) {
+  const supportOptions = getSupportInfo({
+    plugins,
+    showDeprecated: true,
+  }).options;
+
+  const defaults = {
+    ...formatOptionsHiddenDefaults,
+    ...Object.fromEntries(
+      supportOptions
+        .filter(/** @returns {boolean} */ (optionInfo) => optionInfo.default !== undefined)
+        .map(/** @returns {any[]} */ (option) => [option.name, option.default]),
+    ),
+  };
+  return { supportOptions, defaults };
 }
 
 export default normalizeFormatOptions;

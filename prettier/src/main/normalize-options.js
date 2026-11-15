@@ -52,7 +52,9 @@ function normalizeOptions(
           !passThrough.includes(key) ? undefined : { [key]: value }
       : (/** @type {string} */ key, value) => ({ [key]: value });
 
-  const schemas = optionInfosToSchemas(optionInfos, { isCLI, FlagSchema });
+  const schemas = isCLI
+    ? optionInfosToSchemas(optionInfos, { isCLI, FlagSchema })
+    : getSchemas(optionInfos);
   /** @type {import("../../../src/vendor/vnopts/lib/normalize.js").Normalizer} */ const normalizer = new vnopts.Normalizer(schemas, {
     logger,
     unknown,
@@ -74,6 +76,22 @@ function normalizeOptions(
   }
 
   return normalized;
+}
+
+// (dprint-plugin-prettier: the schemas of the options that formatting is given are created once for each list of
+// them, which normalizeFormatOptions keeps for each list of plugins, rather than for each file; see
+// docs/upgrading.md)
+/** @type {WeakMap<object, any[]>} */
+const schemasByOptionInfos = new WeakMap();
+
+/** @returns {any[]} */
+function getSchemas(/** @type {any} */ optionInfos) {
+  let schemas = schemasByOptionInfos.get(optionInfos);
+  if (schemas === undefined) {
+    schemas = optionInfosToSchemas(optionInfos, { isCLI: false, FlagSchema: undefined });
+    schemasByOptionInfos.set(optionInfos, schemas);
+  }
+  return schemas;
 }
 
 /** @returns {any[]} */ function optionInfosToSchemas(/** @type {NamedOptionInfo[]} */ optionInfos, /** @type {{isCLI: boolean, FlagSchema: any}} */ { isCLI, FlagSchema }) {

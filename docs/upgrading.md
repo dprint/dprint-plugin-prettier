@@ -3,8 +3,9 @@
 The plugin is Prettier's source compiled with [nts](https://github.com/dsherret/nts), so an upgrade brings in the new
 source and its packages, and keeps the types that make the compiled code fast. The rule throughout is that Prettier's
 code is only given types and is never changed: where the plugin formats differently, either a type is wrong (remove
-it) or nts compiles something wrongly (fix nts). This was written while upgrading 3.4.2 to 3.9.10, and lists what
-went wrong then.
+it) or nts compiles something wrongly (fix nts). The few exceptions, where Prettier works out the same thing again
+for every file, are listed under [changes to the code](#changes-to-the-code). This was written while upgrading 3.4.2
+to 3.9.10, and lists what went wrong then.
 
 ## Checklist
 
@@ -141,6 +142,22 @@ conflicts took the upstream side of typed lines, `@typedef` and `@import` blocks
 calling `path.call` by name converts the function it is given each time. Most lost lines can be put back from the
 old copy where the code is the same, and the rest typed by hand or recorded again (section 8). The plugin is only as
 fast as before when every package has at least as many types as before.
+
+### Changes to the code
+
+Apart from types, Prettier's code is changed only where it works out what only depends on the plugins again for
+every file, and each change is marked with a comment that starts `(dprint-plugin-prettier:`. A merge keeps them where
+the code around them did not change; where it did, make the change again on the new code, or drop it if the code no
+longer works it out.
+
+- `src/main/normalize-format-options.js`: `getSupportInfo`'s options and their defaults are kept for each list of
+  plugins (`getSupportOptions`), rather than made again for each file and for each embedded language. They only
+  depend on the plugins, which the plugin gives as the same array each time.
+- `src/main/normalize-options.js`: the vnopts schemas of a list of options are kept for that list (`getSchemas`),
+  except for the CLI's. With the options above kept, each file used the same list.
+
+Together these were about a tenth of what formatting the JS files allocated (vnopts' schemas and normalizing,
+`getSupportInfo` and `normalizeOptionSettings`).
 
 ## 4. The TypeScript parser
 
