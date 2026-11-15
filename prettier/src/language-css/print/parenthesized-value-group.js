@@ -38,8 +38,8 @@ import { shouldPrintTrailingComma } from "./misc.js";
     return false;
   }
 
-  const nodes = node.type === "value-comma_group" ? node.groups : [node];
-  const lastValue = nodes.findLast((child) => child.type !== "value-comment");
+  /** @type {any[]} */ const nodes = node.type === "value-comma_group" ? node.groups : [node];
+  const lastValue = nodes.findLast(/** @returns {boolean} */ (/** @type {any} */ child) => child.type !== "value-comment");
 
   if (!lastValue) {
     return false;

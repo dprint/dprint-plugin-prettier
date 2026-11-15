@@ -330,7 +330,7 @@ const isClassLikeNode = createTypeCheckFunction([
 
   if (isClassLikeNode(enclosingNode)) {
     // @ts-expect-error -- Safe
-    const { decorators } = enclosingNode;
+    /** @type {{ decorators?: Node[] }} */ const { decorators } = enclosingNode;
     if (isNonEmptyArray(decorators) && followingNode?.type !== "Decorator") {
       return addTrailingComment(decorators.at(-1), comment);
     }
@@ -946,7 +946,7 @@ function handleLastUnionElementInExpression(/** @type {CommentContext} */ {
       isIntersectionType(enclosingNode) ||
       isUnionType(enclosingNode))
   ) {
-    return addTrailingComment(precedingNode.types.at(-1), comment);
+    return addTrailingComment(/** @type {Node[]} */ (precedingNode.types).at(-1), comment);
   }
   return false;
 }
@@ -1049,8 +1049,8 @@ function handlePropertySignatureComments(context) {
     return false;
   }
 
-  let keyNode;
-  let valueNode;
+  /** @type {Node | undefined} */ let keyNode;
+  /** @type {Node | undefined} */ let valueNode;
   switch (enclosingNode?.type) {
     case "TSPropertySignature":
       keyNode = enclosingNode.key;
@@ -1179,7 +1179,7 @@ function handleArrowExpressionComments(/** @type {CommentContext} */ {
   return false;
 }
 
-function getEnclosingAssignmentChainExpressionStatement(node, ancestors) {
+/** @returns {Node | undefined} */ function getEnclosingAssignmentChainExpressionStatement(/** @type {Node} */ node, /** @type {Node[]} */ ancestors) {
   let child = node;
 
   for (const ancestor of ancestors) {

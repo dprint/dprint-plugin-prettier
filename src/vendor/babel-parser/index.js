@@ -5072,7 +5072,7 @@ class CommentsParser extends BaseParser {
     }
   }
   replaceNodeInPendingComments(/** @type {Node} */ oldNode, /** @type {Node} */ newNode) {
-    for (const commentWS of this.state.commentStack) {
+    for (const commentWS of /** @type {Parser} */ (this).state.commentStack) {
       if (commentWS.leadingNode === oldNode) commentWS.leadingNode = newNode;
       if (commentWS.trailingNode === oldNode) commentWS.trailingNode = newNode;
     }
@@ -5639,7 +5639,7 @@ class Tokenizer extends CommentsParser {
     return this.nextTokenStartSince(this.state.pos);
   }
   /** @returns {int} */ nextTokenStartSince(/** @type {int} */ pos) {
-    const skipWhiteSpaceRe = this.inModule || !(this.optionFlags & 16384) ? skipWhiteSpace : skipWhiteSpaceAnnexB;
+    const skipWhiteSpaceRe = /** @type {Parser} */ (this).inModule || !(/** @type {Parser} */ (this).optionFlags & 16384) ? skipWhiteSpace : skipWhiteSpaceAnnexB;
     skipWhiteSpaceRe.lastIndex = pos;
     return skipWhiteSpaceRe.test(this.input) ? skipWhiteSpaceRe.lastIndex : pos;
   }
@@ -5739,7 +5739,7 @@ class Tokenizer extends CommentsParser {
   }
   skipSpace() {
     const spaceStart = this.state.pos;
-    const attachComment = (this.optionFlags & 8192) > 0;
+    const attachComment = (/** @type {Parser} */ (this).optionFlags & 8192) > 0;
     /** @type {any[] | undefined} */ let comments;
     loop: while (this.state.pos < this.length) {
       const ch = this.input.charCodeAt(this.state.pos);
@@ -6262,7 +6262,7 @@ class Tokenizer extends CommentsParser {
     /** @type {number | null} */ let code;
     for (;;) {
       code = this.input.charCodeAt(pos);
-      let digit;
+      /** @type {number} */ let digit;
       if (code >= 48 && code <= 57) {
         digit = code - 48;
       } else {
@@ -6285,7 +6285,7 @@ class Tokenizer extends CommentsParser {
     const start = this.state.pos;
     const startLoc = this.state.curPosition();
     this.state.pos += 2;
-    let val = this.readLiteralInt(radix);
+    /** @type {number | null} */ let val = this.readLiteralInt(radix);
     const end = this.state.pos;
     if (val == null) {
       this.raise(Errors.InvalidDigit, createPositionWithColumnOffset(startLoc, 2), {
@@ -6303,7 +6303,7 @@ class Tokenizer extends CommentsParser {
         this.finishToken(135, str);
         return;
       }
-      val = Number(radix !== 16 && this.optionFlags & 4096 ? str.replace(radix === 2 ? /[2-9]/g : /[89]/g, "0") : str);
+      val = Number(radix !== 16 && /** @type {Parser} */ (this).optionFlags & 4096 ? str.replace(radix === 2 ? /[2-9]/g : /[89]/g, "0") : str);
     }
     this.finishToken(134, val);
   }
@@ -6780,6 +6780,7 @@ class ProductionParameterHandler {
 /** @returns {int} */ function functionFlags(/** @type {boolean} */ isAsync, /** @type {boolean} */ isGenerator) {
   return (isAsync ? 2 : 0) | (isGenerator ? 1 : 0);
 }
+/** @typedef {{ scopeDepth: int, prodParamDepth: int, classScopeDepth: int, expressionScopeDepth: int }} ScopeStacksSnapshot How deep the stacks of scopes were before a part that may be parsed again. */
 class UtilParser extends Tokenizer {
   addExtra(/** @type {Node} */ node, /** @type {string} */ key, /** @type {any} */ value, /** @type {boolean} */ enumerable = true) {
     if (!node) return;
@@ -6849,7 +6850,7 @@ class UtilParser extends Tokenizer {
       this.unexpected(loc, type);
     }
   }
-  snapshotScopeStacks() {
+  /** @returns {ScopeStacksSnapshot} */ snapshotScopeStacks() {
     return {
       scopeDepth: this.scope.scopeStack.length,
       prodParamDepth: this.prodParam.stacks.length,
@@ -6857,7 +6858,7 @@ class UtilParser extends Tokenizer {
       expressionScopeDepth: this.expressionScope.stack.length
     };
   }
-  restoreScopeStacks(snapshot) {
+  restoreScopeStacks(/** @type {ScopeStacksSnapshot} */ snapshot) {
     const {
       scope
     } = this;
@@ -8199,7 +8200,7 @@ class ExpressionParser extends LValParser {
     const node = this.startNodeAt(startLoc);
     node.object = base;
     this.next();
-    const callee = this.parseNoCallExpr(base => {
+    const callee = this.parseNoCallExpr((/** @type {Node} */ base) => {
       throw this.raise(Errors.UnsupportedBindRHS, base);
     });
     if (callee.type === "Super" || callee.type === "Import") {
@@ -8307,7 +8308,7 @@ class ExpressionParser extends LValParser {
     }
     return node;
   }
-  /** @returns {Node} */ parseNoCallExpr(onUnparenthesizedImportExpression) {
+  /** @returns {Node} */ parseNoCallExpr(/** @type {(base: Node) => void} */ onUnparenthesizedImportExpression) {
     const startLoc = this.state.startLoc;
     const isImport = this.match(79);
     this.state.canStartArrow = false;
@@ -8396,7 +8397,7 @@ class ExpressionParser extends LValParser {
           node = this.startNode();
           this.next();
           node.object = null;
-          const callee = node.callee = this.parseNoCallExpr(base => {
+          const callee = node.callee = this.parseNoCallExpr((/** @type {Node} */ base) => {
             throw this.raise(Errors.UnsupportedBind, base);
           });
           if (callee.type === "MemberExpression") {
@@ -8781,7 +8782,7 @@ class ExpressionParser extends LValParser {
     return this.finishNode(node, "NewExpression");
   }
   parseNewCallee(/** @type {Node} */ node) {
-    const callee = this.parseNoCallExpr(base => {
+    const callee = this.parseNoCallExpr((/** @type {Node} */ base) => {
       this.raise(Errors.ImportCallNotNewExpression, base, base);
     });
     node.callee = callee;
@@ -9313,7 +9314,7 @@ class ExpressionParser extends LValParser {
         case 8:
           if (!delegating) break;
         case 54:
-          if (this.options.annexB && !delegating) break;
+          if (/** @type {Parser} */ (this).options.annexB && !delegating) break;
         default:
           argument = this.parseMaybeAssign();
       }
@@ -9468,7 +9469,7 @@ function createExportedTokens(tokens) {
 }
 class StatementParser extends ExpressionParser {
   /** @returns {Node} */ parseTopLevel(/** @type {Node} */ file, /** @type {Node} */ program) {
-    file.program = this.parseProgram(program, 138, this.options.sourceType === "module" ? "module" : "script");
+    file.program = this.parseProgram(program, 138, /** @type {Parser} */ (this).options.sourceType === "module" ? "module" : "script");
     file.comments = this.comments;
     if (/** @type {Parser} */ (this).optionFlags & 512) {
       file.tokens = createExportedTokens(this.tokens);
@@ -11043,10 +11044,10 @@ class StatementParser extends ExpressionParser {
     }
     return this.parseIdentifier(true);
   }
-  toNamespaceExportsFilter(specifiers) {
+  /** @returns {Node[]} */ toNamespaceExportsFilter(/** @type {Node[]} */ specifiers) {
     const seen = new Set();
-    return specifiers.map(specifier => {
-      let name, alias, kind;
+    return specifiers.map(/** @returns {Node} */ (/** @type {Node} */ specifier) => {
+      /** @type {Node} */ let name, /** @type {Node} */ alias, /** @type {string | undefined} */ kind;
       if (specifier.type === "ImportSpecifier") {
         ({
           imported: name,

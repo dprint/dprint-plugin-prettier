@@ -84,7 +84,7 @@ function postprocess(ast, options) {
     delete ast.hashbang;
   }
 
-  let typeCastCommentsEnds;
+  /** @type {number[] | undefined} */ let typeCastCommentsEnds;
 
   ast = visitNode(ast, {
     onEnter(/** @type {import("../../types/estree.js").Node} */ node) {
@@ -116,7 +116,7 @@ function postprocess(ast, options) {
 
             // Keep ParenthesizedExpression nodes only if they have Closure-style type cast comments.
             const previousCommentEnd = typeCastCommentsEnds.findLast(
-              /** @returns {boolean} */ (end) => end <= start,
+              /** @returns {boolean} */ (/** @type {number} */ end) => end <= start,
             );
             shouldKeepParenthesizedExpression =
               previousCommentEnd &&

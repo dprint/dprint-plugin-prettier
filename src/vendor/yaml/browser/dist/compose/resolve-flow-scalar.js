@@ -85,7 +85,7 @@ import { resolveEnd } from './resolve-end.js';
      * The try-catch is for Safari < 16.4 and other old browsers:
      * https://caniuse.com/js-regexp-lookbehind
      */
-    let trimEnd, trimBoth;
+    /** @type {RegExp} */ let trimEnd, /** @type {RegExp} */ trimBoth;
     try {
         trimEnd = new RegExp('(?<![ \t])[ \t]+$');
         trimBoth = new RegExp('^[ \t]+|(?<![ \t])[ \t]+$', 'g');
@@ -98,7 +98,7 @@ import { resolveEnd } from './resolve-end.js';
     /** @type {string} */ let sep = ' ';
     /** @type {number} */ let pos = line.lastIndex;
     while ((match = line.exec(source))) {
-        const lm = match[1].replace(trimBoth, '');
+        /** @type {string} */ const lm = match[1].replace(trimBoth, '');
         if (lm === '') {
             if (sep === '\n')
                 res += sep;

@@ -96,7 +96,7 @@ const namesNeedParenthesesAsExpressionOfBinaryCastExpression = new Set([
 
   if (node.name === "await") {
     /** @type {import("../types/estree.js").Node | undefined} */ const statement = path.findAncestor(
-      /** @returns {boolean} */ (node) => node.type === "ExpressionStatement",
+      /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node) => node.type === "ExpressionStatement",
     );
     if (statement) {
       const { expression } = statement;
@@ -116,7 +116,7 @@ const namesNeedParenthesesAsExpressionOfBinaryCastExpression = new Set([
     key === "expression" &&
     isBinaryCastExpression(parent) &&
     namesNeedParenthesesAsExpressionOfBinaryCastExpression.has(node.name) &&
-    path.findAncestor(/** @returns {boolean} */ (node) => !isBinaryCastExpression(node)).type ===
+    /** @type {import("../types/estree.js").Node} */ (path.findAncestor(/** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node) => !isBinaryCastExpression(node))).type ===
       "ExpressionStatement"
   ) {
     return true;

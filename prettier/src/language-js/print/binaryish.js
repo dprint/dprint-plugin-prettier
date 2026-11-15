@@ -60,11 +60,11 @@ import { shouldFlatten } from "../utilities/should-flatten.js";
 }
 
 const topicReferenceCheckResult = new WeakMap();
-const isHackStylePipeline = /** @returns {boolean} */ (path) =>
-  path.node.type === "BinaryExpression" &&
-  path.node.operator === "|>" &&
+const isHackStylePipeline = /** @returns {boolean} */ (/** @type {AstPath} */ path) =>
+  /** @type {import("../types/estree.js").Node} */ (path.node).type === "BinaryExpression" &&
+  /** @type {import("../types/estree.js").Node} */ (path.node).operator === "|>" &&
   getOrInsertComputed(topicReferenceCheckResult, path.root, /** @returns {boolean} */ () =>
-    hasNode(path.node, /** @returns {boolean} */ (node) => node.type === "TopicReference"),
+    hasNode(path.node, /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node) => node.type === "TopicReference"),
   );
 
 /*

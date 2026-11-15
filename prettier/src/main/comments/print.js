@@ -125,7 +125,7 @@ function printTrailingComment(/** @type {AstPath} */ path, /** @type {import("..
  * @returns {Doc}
  */
 function printDanglingComments(
-  path,
+  /** @type {AstPath} */ path,
   /** @type {import("../../../../prettier/src/main/format-options.js").FormatOptions} */ options,
   danglingCommentsPrintOptions = {},
 ) {
@@ -134,7 +134,7 @@ function printDanglingComments(
     indent: shouldIndent = false,
     marker,
     filter = returnTrue,
-    separator = ({ comment }) =>
+    separator = /** @returns {Doc} */ (/** @type {{ comment: any }} */ { comment }) =>
       isPreviousLineEmpty(originalText, locStart(comment))
         ? [hardline, hardline]
         : hardline,
@@ -155,8 +155,8 @@ function printDanglingComments(
     return "";
   }
 
-  const parts = [];
-  let previous;
+  /** @type {Doc[]} */ const parts = [];
+  /** @type {any} */ let previous;
   path.each(({ node: comment }) => {
     if (!danglingComments.has(comment)) {
       return;

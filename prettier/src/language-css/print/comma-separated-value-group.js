@@ -263,7 +263,7 @@ function printCommaSeparatedValueGroup(/** @type {AstPath} */ path, /** @type {C
       //       ^
       if (
         (iNode.type === "value-word" || iNode.type === "value-atword") &&
-        iNode.value.endsWith("[$") &&
+        /** @type {string} */ (iNode.value).endsWith("[$") &&
         iNextNode?.type === "value-atword"
       ) {
         continue;
@@ -278,7 +278,7 @@ function printCommaSeparatedValueGroup(/** @type {AstPath} */ path, /** @type {C
         iNode.value === "$" &&
         (iPrevNode?.type === "value-word" ||
           iPrevNode?.type === "value-atword") &&
-        iPrevNode.value.endsWith("[") &&
+        /** @type {string} */ (iPrevNode.value).endsWith("[") &&
         iNextNode?.type === "value-atword"
       ) {
         continue;

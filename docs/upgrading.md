@@ -17,7 +17,9 @@ went wrong then.
 6. [Map new imports](#6-new-imports) in `src/nts.json`, and regenerate `src/generated`.
 7. [Build and test](#7-building-and-testing) until `deno task test:prettier` has no differences.
 8. [Add types to new code](#8-types-for-new-code) where it is slow, and test again.
-9. [Measure](#9-measuring) against Prettier on Node.
+9. [Record the profiles again](#9-the-profiles): the reads of `src/sites.json` and the expressions of
+   `src/regexes.json`.
+10. [Measure](#10-measuring) against Prettier on Node.
 
 ## 1. The version
 
@@ -320,7 +322,23 @@ What went wrong when the parsers were annotated at 3.9.10, all of which `test:pr
   parameter (yaml-unist-parser's `tokens`), a slice to an element past the end of an array (micromark's
   subtokenizer, which looped forever), and `concat` on an array literal of a JavaScript file.
 
-## 9. Measuring
+## 9. The profiles
+
+Two files in `src` say what a run of the plugin did, and both go stale when the source changes:
+
+- **`src/sites.json`** lists the places that read a property by name and what they nearly always read, so that nts
+  compiles them to a check of the class and a field. Each place is keyed by its module and its position in the source,
+  so any change above a read moves it out of the profile, even a JSDoc type. After 3.10.1 was merged, only 1,711 of
+  the 5,034 places still matched, and JavaScript formatted about 7% slower until the profile was recorded again.
+  Record it with a build of a probe that formats the files of every language with `formatWithCursor` (as the
+  benchmark probe of nts's `docs/performance.md` does), compiled with `--site-stats` and run with `NTS_SITE_STATS`
+  set to the file to write, and record it last, after every type is in.
+- **`src/regexes.json`** lists the regular expressions that are compiled with the program rather than run by .NET's
+  interpreter, by their pattern and flags. A pattern that changed in the new source is no longer found and falls back
+  to the interpreter, which made CSS 7% slower at 3.10.1 (its string pattern got a named group). Run the plugin with
+  `NTS_REGEX_STATS` set to a file to list what the corpus spends on each expression, and put the changed patterns in.
+
+## 10. Measuring
 
 Time the plugin against Prettier on the same files, as `docs/performance.md` of nts does: a copy of DefinitelyTyped
 that Prettier from npm has formatted, checked with `dprint check --incremental=false` and `DPRINT_MAX_THREADS=1`

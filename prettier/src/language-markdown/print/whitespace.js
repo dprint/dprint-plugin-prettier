@@ -292,7 +292,8 @@ function printWhitespaceNode(/** @type {AstPath} */ path, /** @type {MarkdownOpt
  * @param {AstPath} path
  * @returns {boolean} `true` if a line break around a CJ character are removed by some browsers but converted to a space by others.
  */
-function isLineBreakAmbiguous(path) {
+/** @returns {boolean} */ function isLineBreakAmbiguous(/** @type {AstPath} */ path) {
+  /** @type {AdjacentNodes} */
   const { previous, next } = path;
   // All browsers treat a line break between a CJ letter and a non-CJ character as
   // equivalent to a space. However, Prettier v3 intentionally decided that, in
@@ -348,7 +349,7 @@ function isLineBreakAmbiguous(path) {
  * @param {AstPath} path
  * @returns {boolean}
  */
-function isNextTokenFakeSetextH2Line(path) {
+/** @returns {boolean} */ function isNextTokenFakeSetextH2Line(/** @type {AstPath} */ path) {
   if (!isNewLine(path.node) || path.next.value !== "-") {
     return false;
   }
