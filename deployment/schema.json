@@ -451,7 +451,6 @@
       "default": false,
       "x-example": {
         "input": [
-          "/** @format */",
           "const value   =   5"
         ]
       }
