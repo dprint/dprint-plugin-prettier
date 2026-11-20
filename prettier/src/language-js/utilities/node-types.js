@@ -1,0 +1,232 @@
+import { createTypeCheckFunction } from "./create-type-check-function.js";
+
+/**
+@import {
+  Node,
+  NodeMap,
+  Comment,
+  NumericLiteral,
+  StringLiteral,
+  RegExpLiteral,
+  BigIntLiteral,
+} from "../types/estree.js";
+*/
+
+export const isBinaryCastExpression = createTypeCheckFunction([
+  // TS
+  "TSAsExpression",
+  "TSSatisfiesExpression",
+  // Flow
+  "AsExpression",
+  "AsConstExpression",
+  "SatisfiesExpression",
+]);
+
+export const isSatisfiesExpression = createTypeCheckFunction([
+  "SatisfiesExpression",
+  "TSSatisfiesExpression",
+]);
+
+export const isUnionType = createTypeCheckFunction([
+  "TSUnionType",
+  "UnionTypeAnnotation",
+]);
+
+export const isIntersectionType = createTypeCheckFunction([
+  "TSIntersectionType",
+  "IntersectionTypeAnnotation",
+]);
+
+export const isTupleType = createTypeCheckFunction([
+  "TupleTypeAnnotation",
+  "TSTupleType",
+]);
+
+export const isConditionalType = createTypeCheckFunction([
+  "TSConditionalType",
+  "ConditionalTypeAnnotation",
+]);
+
+export const isTemplateLiteralType = createTypeCheckFunction([
+  "TSTemplateLiteralType",
+  "TemplateLiteralTypeAnnotation",
+]);
+
+export const isImportType = createTypeCheckFunction([
+  "TSImportType",
+  "ImportType",
+]);
+
+export const isExternalModuleReference = createTypeCheckFunction([
+  "TSExternalModuleReference",
+  "ExternalModuleReference",
+]);
+
+export const isTypeAlias = createTypeCheckFunction([
+  "TSTypeAliasDeclaration",
+  "TypeAlias",
+]);
+
+export const isReturnOrThrowStatement = createTypeCheckFunction([
+  "ReturnStatement",
+  "ThrowStatement",
+]);
+
+export const isUnaryLikeNode = createTypeCheckFunction([
+  "ReturnStatement",
+  "ThrowStatement",
+  "YieldExpression",
+  "UnaryExpression",
+]);
+
+export const isExportDeclaration = createTypeCheckFunction([
+  "ExportDefaultDeclaration",
+  "DeclareExportDeclaration",
+  "ExportNamedDeclaration",
+  "ExportAllDeclaration",
+  "DeclareExportAllDeclaration",
+]);
+
+export const isExportAssignment = createTypeCheckFunction([
+  "TSExportAssignment",
+  "ExportAssignment",
+]);
+
+export const isAbstractMethodDefinition = createTypeCheckFunction([
+  "AbstractMethodDefinition",
+  "TSAbstractMethodDefinition",
+]);
+
+export const isAbstractPropertyDefinition = createTypeCheckFunction([
+  "AbstractPropertyDefinition",
+  "TSAbstractPropertyDefinition",
+]);
+
+export const isParameterProperty = createTypeCheckFunction([
+  "TSParameterProperty",
+  "ParameterProperty",
+]);
+
+export const isNonNullExpression = createTypeCheckFunction([
+  "TSNonNullExpression",
+  "NonNullExpression",
+]);
+
+/** @param {Node | undefined | null} node */
+export const isOptionalTupleMember = (node) =>
+  node?.type === "TSOptionalType" ||
+  (node?.type === "TupleTypeElement" && node.optional === true);
+
+// These two functions exists because we used support `recordAndTuple`
+// Feel free to check `node.type` instead
+// https://github.com/prettier/prettier/pull/17363
+export const isArrayExpression = createTypeCheckFunction(["ArrayExpression"]);
+export const isObjectExpression = createTypeCheckFunction(["ObjectExpression"]);
+
+export const isLiteral = createTypeCheckFunction([
+  "Literal",
+  "BooleanLiteral",
+  "BigIntLiteral", // Babel, flow use `BigIntLiteral` too
+  "DirectiveLiteral",
+  "NullLiteral",
+  "NumericLiteral",
+  "RegExpLiteral",
+  "StringLiteral",
+]);
+
+export const isObjectType = createTypeCheckFunction([
+  "ObjectTypeAnnotation",
+  "TSTypeLiteral",
+  "TSMappedType",
+]);
+
+export const isFunctionOrArrowExpression = createTypeCheckFunction([
+  "FunctionExpression",
+  "ArrowFunctionExpression",
+]);
+
+export const isJsxElement = createTypeCheckFunction([
+  "JSXElement",
+  "JSXFragment",
+]);
+
+export const isBinaryish = createTypeCheckFunction([
+  "BinaryExpression",
+  "LogicalExpression",
+  "NGPipeExpression",
+]);
+
+export const isCallExpression = createTypeCheckFunction([
+  "CallExpression",
+  "OptionalCallExpression",
+]);
+
+export const isMemberExpression = createTypeCheckFunction([
+  "MemberExpression",
+  "OptionalMemberExpression",
+]);
+
+export const isCallOrNewExpression = createTypeCheckFunction([
+  "CallExpression",
+  "OptionalCallExpression",
+  "NewExpression",
+]);
+
+export const isCallLikeExpression = createTypeCheckFunction([
+  "CallExpression",
+  "OptionalCallExpression",
+  "NewExpression",
+  "ImportExpression",
+]);
+
+export const isChainElementWrapper = createTypeCheckFunction([
+  "ChainExpression",
+  "TSNonNullExpression",
+  "NonNullExpression",
+]);
+
+export const isArrayType = createTypeCheckFunction([
+  "TSArrayType",
+  "ArrayTypeAnnotation",
+]);
+
+export const isTypeParameterInstantiation = createTypeCheckFunction([
+  "TSTypeParameterInstantiation",
+  "TypeParameterInstantiation",
+]);
+
+export const isTypeAnnotation = createTypeCheckFunction([
+  "TSTypeAnnotation",
+  "TypeAnnotation",
+]);
+
+export const isModuleDeclaration = createTypeCheckFunction([
+  "TSModuleDeclaration",
+  "DeclareModule",
+  "DeclareNamespace",
+]);
+
+export const isConstructorType = createTypeCheckFunction([
+  "TSConstructorType",
+  "ConstructorTypeAnnotation",
+]);
+
+export const isClass = createTypeCheckFunction([
+  "ClassDeclaration",
+  "ClassExpression",
+]);
+
+export const isNamespaceSpecifier = createTypeCheckFunction([
+  "ImportNamespaceSpecifier",
+  "ExportNamespaceSpecifier",
+]);
+
+export const isEnumDeclaration = createTypeCheckFunction([
+  "TSEnumDeclaration",
+  "EnumDeclaration",
+  "DeclareEnum",
+]);
+
+export const isEnumBody = createTypeCheckFunction(["TSEnumBody", "EnumBody"]);
+
+export * from "./literal.js";

@@ -1,0 +1,53 @@
+import htmlWhitespace from "../../utilities/html-whitespace.js";
+import { isPlainTextStyleOrScriptElement } from "../utilities.js";
+
+function massageAstNode(/** @type {import("../print-types.js").GlimmerNode} */ original, cloned, /** @type {import("../print-types.js").GlimmerNode} */ parent) {
+  // (Glimmer/HTML) ignore TextNode
+  if (original.type === "TextNode") {
+    const trimmed = original.chars.trim();
+    if (!trimmed) {
+      return null;
+    }
+
+    // CSS/JS will be formatted
+    if (
+      isPlainTextStyleOrScriptElement(parent) &&
+      parent.children[0] === original
+    ) {
+      cloned.chars = "";
+    } else {
+      cloned.chars = htmlWhitespace.split(trimmed).join(" ");
+    }
+  }
+
+  if (original.type === "ElementNode") {
+    delete cloned.startTag;
+    delete cloned.openTag;
+    delete cloned.parts;
+    delete cloned.endTag;
+    delete cloned.closeTag;
+    delete cloned.nameNode;
+    delete cloned.body;
+    delete cloned.blockParamNodes;
+    delete cloned.params;
+    delete cloned.path;
+  }
+
+  if (original.type === "Block") {
+    delete cloned.blockParamNodes;
+    delete cloned.params;
+  }
+
+  // `class` is reformatted
+  if (original.type === "AttrNode" && original.name.toLowerCase() === "class") {
+    delete cloned.value;
+  }
+
+  if (original.type === "PathExpression") {
+    cloned.head = original.head.original;
+  }
+}
+
+massageAstNode.ignoredProperties = new Set(["loc", "selfClosing"]);
+
+export { massageAstNode };

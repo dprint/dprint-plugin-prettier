@@ -1,0 +1,7 @@
+{"name":"sample","version":"1.0.0",
+  // a comment
+  "nested":{"array":[1,2,3,{"deep":true,"values":[null,false,1.5e10,-0.0,"text with \"quotes\" and é"]}],"empty":{},"emptyArray":[]},
+  "long":["aaaaaaaaaaaaaaaaaaaa","bbbbbbbbbbbbbbbbbbbbbbbb","cccccccccccccccccccccc","dddddddddddddddddddddd","eeeeeeeeeeeeeeee"],
+
+
+  "scripts":{"build":"tsc -p .","test":"node --test"}}

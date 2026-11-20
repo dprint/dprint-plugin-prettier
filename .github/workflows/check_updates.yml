@@ -11,22 +11,18 @@ jobs:
     name: check updates
     if: github.repository == 'dprint/dprint-plugin-prettier'
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 10
 
     steps:
       - name: Clone repository
         uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.GH_DPRINTBOT_PAT }}
 
       - uses: denoland/setup-deno@v2
-      - uses: dsherret/rust-toolchain-file@v1
 
-      - name: Run script
-        run: |
-          git config user.email "dprintbot@users.noreply.github.com"
-          git config user.name "dprintbot"
-          deno run -A ./scripts/update.ts
+      # fails when there's a newer prettier or prettier plugin, which emails the
+      # person who last changed the schedule above, so that it's upgraded by hand
+      - name: Check for updates
+        run: deno run -A ./scripts/check_updates.ts
 
   # This is necessary to prevent GH automatically dsiabling this workflow after 60 days.
   workflow-keepalive:

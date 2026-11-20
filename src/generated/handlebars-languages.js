@@ -1,0 +1,1 @@
+export default [{ "name": "Handlebars", "type": "markup", "aceMode": "handlebars", "extensions": [".handlebars", ".hbs"], "tmScope": "text.html.handlebars", "aliases": ["hbs", "htmlbars"], "parsers": ["glimmer"], "vscodeLanguageIds": ["handlebars"], "linguistLanguageId": 155 }];

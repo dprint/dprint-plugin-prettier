@@ -1,0 +1,13 @@
+@charset "utf-8";
+@import url("foo.css") screen and (orientation:landscape);
+:root{--main-color:#06c;--accent:  calc(var(--a)*2 + 10px);--empty:;}
+a,a:hover,.very-long-selector-name-number-one>.very-long-selector-name-number-two~.very-long-selector-name-number-three+li::before{color:RED;background:URL(image.png) no-repeat,linear-gradient(to right,rgba(255,255,255,0) 0%,#FFF 100%);margin:0 AUTO!important}
+@media (min-width:100px) and (max-width:200px),print{.grid{display:grid;grid-template-areas:"header header" "sidebar main";grid-template-columns:[full-start] minmax(1em,1fr) [main-start] minmax(0,40em) [main-end] minmax(1em,1fr) [full-end]}}
+@font-face{font-family:'Open Sans';src:url(a.woff2)format("woff2"),url(a.woff)format("woff")}
+@supports (display:grid) and (not (display:inline-grid)){div{float:none}}
+.a{transition:opacity .3s ease,transform .3s ease;content:"\201C";width:calc(100% - (2*var(--gap,1.5E3px)))}
+
+
+.b::after{content:'it\'s'}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360DEG)}}
+.parent{&:hover{color:blue}.child &{color:green}@media (width>=600px){padding:1rem}}

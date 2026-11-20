@@ -1,0 +1,13 @@
+# The functions of the plugin's module that wasm-opt is not to inline, as regular expressions that match their names
+# in the link map, which order-functions.mjs marks. wasm-opt inlines every function that has one caller, whatever its
+# size, which gives the caller a frame with room for both. Where a recursion that goes as deep as the code is nested
+# runs through the caller, that is on every level: TypeScript's parser converts `a + a + ... + a` through converter and
+# convertNode for each `+`, and with these inlined the plugin ran out of stack in dprint at 940 operands rather than
+# 1,850 (2,000 is one of Prettier's tests). Keeping them made no measurable difference to how fast files format.
+#
+# the clauses of a switch statement that nts moves out of a long function, which it does so that they have frames of
+# their own
+_g____nts_clause\d+_
+# what converter calls besides convertNode
+_typescript_Fl____private_i$
+_typescript_Fl__registerTSNodeInNodeMap$

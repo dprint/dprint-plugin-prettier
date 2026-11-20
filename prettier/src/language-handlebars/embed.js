@@ -1,0 +1,74 @@
+// @nts-check
+/** @import {GlimmerNode, GlimmerPath} from "./print-types.js" */
+import { isPlainTextStyleOrScriptElement } from "./utilities.js";
+
+function getAttribute(node, /** @type {string} */ name) {
+  return node.attributes.find(
+    /** @returns {boolean} */ (attribute) => attribute.type === "AttrNode" && attribute.name === name,
+  );
+}
+
+/** @returns {string | undefined} */ function getTextValue(attribute) {
+  return attribute.value.type === "TextNode"
+    ? attribute.value.chars
+    : undefined;
+}
+
+function getScriptTextToDocOptions(node) {
+  if (getAttribute(node, "src")) {
+    return;
+  }
+
+  const typeAttribute = getAttribute(node, "type");
+  const type = typeAttribute ? getTextValue(typeAttribute) : undefined;
+
+  if (!typeAttribute || type === "module" || type === "text/javascript") {
+    return {
+      parser: "babel",
+      __embeddedInHtml: true,
+      __babelSourceType: type === "module" ? "module" : "script",
+    };
+  }
+}
+
+function getStyleTextToDocOptions(node) {
+  const langAttribute = getAttribute(node, "lang");
+  if (!langAttribute || getTextValue(langAttribute) === "css") {
+    return { parser: "css" };
+  }
+}
+
+function embed(/** @type {GlimmerPath} */ path /* , options*/) {
+  /** @type {{ node: import("./print-types.js").GlimmerNode }} */ const { node } = path;
+
+  if (node.type !== "TextNode") {
+    return;
+  }
+
+  /** @type {{ parent: import("./print-types.js").GlimmerNode }} */ const { parent } = path;
+
+  if (!(
+    isPlainTextStyleOrScriptElement(parent) && parent.children[0] === node
+  )) {
+    return;
+  }
+
+  const textToDocOptions =
+    parent.tag === "style"
+      ? getStyleTextToDocOptions(parent)
+      : getScriptTextToDocOptions(parent);
+
+  if (!textToDocOptions) {
+    return;
+  }
+
+  return async (textToDoc) => {
+    const content = node.chars;
+    if (!content.trim()) {
+      return "";
+    }
+    return await textToDoc(content, textToDocOptions);
+  };
+}
+
+export default embed;

@@ -1,0 +1,194 @@
+// @nts-check
+import { preprocess as parseGlimmer } from "@glimmer/syntax";
+import createError from "../common/parser-create-error.js";
+import parseFrontMatter from "../main/front-matter/parse.js";
+import { locEnd, locStart } from "./loc.js";
+
+/**
+@import {AST, PreprocessOptions} from "@glimmer/syntax";
+@typedef {AST.SourcePosition & {offset: number}} SourcePosition
+@typedef {{start: SourcePosition, end: SourcePosition}} SourceLocation
+@typedef {Omit<AST.BaseNode, "type" | "loc"> & {
+  type: "FrontMatter",
+  loc: SourceLocation,
+}} GlimmerFrontMatter
+*/
+
+/* from the following template: `non-escaped mustache \\{{helper}}`
+ * glimmer parser will produce an AST missing a backslash
+ * so here we add it back
+ * */
+function addBackslash(/** @type {import("./print-types.js").GlimmerNode} */ node) {
+  const childrenOrBody = node.children ?? node.body;
+  if (childrenOrBody) {
+    for (let i = 0; i < childrenOrBody.length - 1; i++) {
+      if (
+        childrenOrBody[i].type === "TextNode" &&
+        childrenOrBody[i + 1].type === "MustacheStatement"
+      ) {
+        childrenOrBody[i].chars = childrenOrBody[i].chars.replace(
+          /\\$/,
+          "\\\\",
+        );
+      }
+    }
+  }
+}
+
+const isIndex = /** @returns {boolean} */ (/** @type {number} */ value) => Number.isSafeInteger(value) && value >= 0;
+// a node of glimmer's tree, whose location is a span of the source
+/** @typedef {{ loc: InstanceType<typeof import("@glimmer/syntax").src.SourceSpan> }} GlimmerLocated */
+// Add `offset` to `loc.{start,end}`
+const setOffset = (/** @type {GlimmerLocated} */ node) => {
+  const { start, end } = node.loc;
+
+  start.offset = node.loc.getStart().offset;
+  end.offset = node.loc.getEnd().offset;
+
+  /* c8 ignore next 6 */
+  if (
+    process.env.NODE_ENV !== "production" &&
+    (!isIndex(start.offset) || !isIndex(end.offset))
+  ) {
+    throw new TypeError("Can't not locate node.");
+  }
+};
+
+// Combine plugins to reduce traverse https://github.com/glimmerjs/glimmer-vm/blob/cdfb8f93d7ff0b504c8e9eab293f656a9b942025/packages/%40glimmer/syntax/lib/parser/tokenizer-event-handlers.ts#L442-L451
+const glimmerPrettierParsePlugin = (/* options*/) => ({
+  name: "glimmerPrettierParsePlugin",
+  visitor: {
+    All(/** @type {import("./print-types.js").GlimmerNode} */ node) {
+      setOffset(node);
+      addBackslash(node);
+    },
+  },
+});
+
+/** @type {PreprocessOptions} */
+const glimmerParseOptions = {
+  mode: "codemod",
+  plugins: { ast: [glimmerPrettierParsePlugin] },
+};
+
+function parse(/** @type {string | undefined} */ text) {
+  const { frontMatter, content: textToParse } = parseFrontMatter(text);
+
+  let ast;
+  try {
+    ast = parseGlimmer(textToParse, glimmerParseOptions);
+  } catch (error) {
+    const location = getErrorLocation(error);
+
+    if (location) {
+      const message = getErrorMessage(error);
+
+      throw createError(message, { loc: location, cause: error });
+    }
+
+    /* c8 ignore next */
+    throw error;
+  }
+
+  if (frontMatter) {
+    /** @type {GlimmerFrontMatter} */
+    const glimmerFrontMatter = {
+      ...frontMatter,
+      type: "FrontMatter",
+      loc: {
+        start: {
+          ...frontMatter.start,
+          offset: frontMatter.start.index,
+        },
+        end: {
+          ...frontMatter.end,
+          offset: frontMatter.end.index,
+        },
+      },
+    };
+    // @ts-expect-error -- not a real "Node"
+    ast.body.unshift(glimmerFrontMatter);
+  }
+
+  return ast;
+}
+
+/** @returns {string} */ function getErrorMessage(error) {
+  const { message } = error;
+  const lines = message.split("\n");
+
+  /*
+  This kind of errors are like:
+
+  ```
+  Parse error on line 2:
+  <A >x, {{@name}
+  --------------^
+  Expecting ...
+  ```
+  */
+  if (
+    lines.length >= 4 &&
+    /^Parse error on line \d+:$/.test(lines[0]) &&
+    /^-*\^$/.test(lines.at(-2))
+  ) {
+    return lines.at(-1);
+  }
+
+  /*
+  This kind of errors are like:
+
+  ```
+  Unclosed element \`@name\`:
+
+  |
+  |  <{@name>
+  |
+
+  (error occurred in 'an unknown module' @ line 3 : column 0)
+  ```
+  */
+  if (
+    lines.length >= 4 &&
+    /:\s?$/.test(lines[0]) &&
+    /^\(error occurred in '.*?' @ line \d+ : column \d+\)$/.test(
+      lines.at(-1),
+    ) &&
+    lines[1] === "" &&
+    lines.at(-2) === "" &&
+    lines.slice(2, -2).every(/** @returns {boolean} */ (/** @type {string} */ line) => line.startsWith("|"))
+  ) {
+    return lines[0].trim().slice(0, -1);
+  }
+
+  /* c8 ignore next */
+  return message;
+}
+
+function getErrorLocation(error) {
+  const { location, hash } = error;
+  if (location) {
+    const { start, end } = location;
+    return {
+      start: { line: start.line, column: start.column + 1 },
+      end:
+        typeof end.line === "number"
+          ? { line: end.line, column: end.column + 1 }
+          : undefined,
+    };
+  }
+
+  if (hash) {
+    const {
+      loc: { last_line, last_column },
+    } = hash;
+    return { start: { line: last_line, column: last_column + 1 } };
+  }
+}
+
+export const glimmer = {
+  parse,
+  astFormat: "glimmer",
+  locStart,
+  locEnd,
+};

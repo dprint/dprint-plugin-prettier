@@ -1,0 +1,59 @@
+// @nts-check
+import emojiRegex from "emoji-regex";
+import {
+  // @ts-expect-error -- Private
+  _isFullwidth as isFullwidth,
+  // @ts-expect-error -- Private
+  _isWide as isWide,
+} from "get-east-asian-width";
+import { isNarrowEmojiCharacter } from "narrow-emojis";
+
+const notAsciiRegex = /[^\x20-\x7F]/;
+// Exclude [`Spacing Mark`](https://www.compart.com/en/unicode/category/Mc) because spacing marks contribute horizontal width.
+const zeroWidthMarkRegex = /[\p{Nonspacing_Mark}\p{Enclosing_Mark}]/u;
+
+// Similar to https://github.com/sindresorhus/string-width
+// We don't strip ansi, always treat ambiguous width characters as having narrow width.
+/**
+ * @param {string} text
+ * @returns {number}
+ */
+function getStringWidth(text) {
+  if (!text) {
+    return 0;
+  }
+
+  // shortcut to avoid needless string `RegExp`s, replacements, and allocations
+  if (!notAsciiRegex.test(text)) {
+    return text.length;
+  }
+
+  let width = 0;
+  text = text.replace(emojiRegex(), /** @returns {string} */ (character) => {
+    width += isNarrowEmojiCharacter(character) ? 1 : 2;
+    return "";
+  });
+
+  // Use `Intl.Segmenter` when we drop support for Node.js v14
+  // https://github.com/prettier/prettier/pull/14793#discussion_r1185840038
+  // https://github.com/sindresorhus/string-width/pull/47
+  for (const character of text) {
+    const codePoint = character.codePointAt(0);
+
+    // Ignore control characters
+    if (codePoint <= 0x1f || (codePoint >= 0x7f && codePoint <= 0x9f)) {
+      continue;
+    }
+
+    // Ignore zero-width marks, including combining marks and variation selectors
+    if (zeroWidthMarkRegex.test(character)) {
+      continue;
+    }
+
+    width += isFullwidth(codePoint) || isWide(codePoint) ? 2 : 1;
+  }
+
+  return width;
+}
+
+export default getStringWidth;

@@ -1,5 +1,7 @@
-js/node/dist/
-target
+/target
 node_modules
-.parcel-cache
+/wasm/bin
+/wasm/obj
+deployment/npm/plugin.wasm
+deployment/npm/LICENSE
 .vscode

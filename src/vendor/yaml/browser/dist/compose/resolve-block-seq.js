@@ -1,0 +1,50 @@
+// @nts-check
+import { YAMLSeq } from '../nodes/YAMLSeq.js';
+import { resolveProps } from './resolve-props.js';
+import { flowIndentCheck } from './util-flow-indent-check.js';
+
+/** @returns {YAMLSeq | import("../schema/yaml-1.1/omap.js").YAMLOMap} */ function resolveBlockSeq(/** @type {import("./compose-node.js").ComposeNodes} */ { composeNode, composeEmptyNode }, /** @type {import("yaml-cst-types").ComposeContext} */ ctx, /** @type {import("yaml-cst-types").Token} */ bs, /** @type {import("yaml-cst-types").ComposeErrorHandler} */ onError, /** @type {import("yaml-cst-types").SchemaTag | undefined} */ tag) {
+    const NodeClass = tag?.nodeClass ?? YAMLSeq;
+    /** @type {YAMLSeq} */ const seq = new NodeClass(ctx.schema);
+    if (ctx.atRoot)
+        ctx.atRoot = false;
+    if (ctx.atKey)
+        ctx.atKey = false;
+    let offset = bs.offset;
+    /** @type {number | null} */ let commentEnd = null;
+    for (const { start, value } of bs.items) {
+        const props = resolveProps(start, {
+            indicator: 'seq-item-ind',
+            next: value,
+            offset,
+            onError,
+            parentIndent: bs.indent,
+            startOnNewline: true
+        });
+        if (!props.found) {
+            if (props.anchor || props.tag || value) {
+                if (value?.type === 'block-seq')
+                    onError(props.end, 'BAD_INDENT', 'All sequence items must start at the same column');
+                else
+                    onError(offset, 'MISSING_CHAR', 'Sequence item without - indicator');
+            }
+            else {
+                commentEnd = props.end;
+                if (props.comment)
+                    seq.comment = props.comment;
+                continue;
+            }
+        }
+        const node = value
+            ? composeNode(ctx, value, props, onError)
+            : composeEmptyNode(ctx, props.end, start, null, props, onError);
+        if (ctx.schema.compat)
+            flowIndentCheck(bs.indent, value, onError);
+        offset = node.range[2];
+        seq.items.push(node);
+    }
+    seq.range = [bs.offset, offset, commentEnd ?? offset];
+    return seq;
+}
+
+export { resolveBlockSeq };

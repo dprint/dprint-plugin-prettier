@@ -1,0 +1,43 @@
+{
+  "name": "flow-parser",
+  "version": "0.339.0",
+  "description": "JavaScript parser written in OCaml. Produces ESTree AST",
+  "homepage": "https://flow.org",
+  "license": "MIT",
+  "author": {
+    "name": "Flow Team",
+    "email": "flow@fb.com"
+  },
+  "files": [
+    "babel-plugin.js",
+    "dist",
+    "README.md"
+  ],
+  "main": "dist/index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/meta/flow.git",
+    "directory": "packages/flow-parser"
+  },
+  "scripts": {
+    "test": "node test/run_tests.js"
+  },
+  "dependencies": {
+    "flow-estree": "0.339.0"
+  },
+  "devDependencies": {
+    "@babel/generator": "7.7.4",
+    "@babel/parser": "7.7.4",
+    "@babel/types": "7.7.4",
+    "chalk": "^4.1.2",
+    "espree": "9.3.2",
+    "flow-enums-runtime": "0.0.6",
+    "hermes-estree": "0.36.1",
+    "hermes-parser": "0.36.1",
+    "minimist": ">=1.2.6",
+    "string-width": "4.2.3"
+  },
+  "engines": {
+    "node": ">=0.4.0"
+  }
+}

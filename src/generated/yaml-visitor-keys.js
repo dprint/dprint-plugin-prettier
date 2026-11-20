@@ -1,0 +1,6 @@
+const shared0 = ["children", "anchor", "tag", "indicatorComment", "leadingComments", "middleComments", "trailingComment", "endComments"];
+const shared1 = ["anchor", "tag", "indicatorComment", "leadingComments", "middleComments", "trailingComment", "endComments"];
+const shared2 = ["key", "value", "children", "anchor", "tag", "indicatorComment", "leadingComments", "middleComments", "trailingComment", "endComments"];
+const shared3 = ["content", "children", "anchor", "tag", "indicatorComment", "leadingComments", "middleComments", "trailingComment", "endComments"];
+const shared4 = ["indicatorComment", "leadingComments", "middleComments", "trailingComment", "endComments"];
+export default { "root": shared0, "document": ["head", "body", "children", "anchor", "tag", "indicatorComment", "leadingComments", "middleComments", "trailingComment", "endComments"], "documentHead": shared0, "documentBody": shared0, "directive": shared1, "alias": shared1, "blockLiteral": shared1, "blockFolded": shared0, "plain": shared0, "quoteSingle": shared1, "quoteDouble": shared1, "mapping": shared0, "mappingItem": shared2, "mappingKey": shared3, "mappingValue": shared3, "sequence": shared0, "sequenceItem": shared3, "flowMapping": shared0, "flowMappingItem": shared2, "flowSequence": shared0, "flowSequenceItem": shared3, "comment": shared1, "tag": shared4, "anchor": shared4 };

@@ -1,0 +1,24 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.NoUndefinedVariablesRule = NoUndefinedVariablesRule;
+const GraphQLError_ts_1 = require("../../error/GraphQLError.js");
+function NoUndefinedVariablesRule(context) {
+    return {
+        OperationDefinition(operation) {
+            const variableNameDefined = new Set(operation.variableDefinitions?.map((node) => node.variable.name.value));
+            const usages = context.getRecursiveVariableUsages(operation);
+            for (const { node, fragmentVariableDefinition } of usages) {
+                if (fragmentVariableDefinition) {
+                    continue;
+                }
+                const varName = node.name.value;
+                if (!variableNameDefined.has(varName)) {
+                    context.reportError(new GraphQLError_ts_1.GraphQLError(operation.name
+                        ? `Variable "$${varName}" is not defined by operation "${operation.name.value}".`
+                        : `Variable "$${varName}" is not defined.`, { nodes: [node, operation] }));
+                }
+            }
+        },
+    };
+}
+//# sourceMappingURL=NoUndefinedVariablesRule.js.map

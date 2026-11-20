@@ -1,0 +1,27 @@
+// @nts-check
+import htmlEventAttributesArray from "@prettier/html-event-attributes";
+import { getUnescapedAttributeValue } from "../utilities/index.js";
+import { formatAttributeValue } from "./utilities.js";
+
+/**
+@import {AttributePath, AttributeValuePredicate, AttributeValuePrint} from "./attribute.js"
+*/
+
+const htmlEventAttributes = new Set(htmlEventAttributesArray);
+
+/** @type {AttributeValuePredicate} */
+const isEventHandler = /** @returns {boolean} */ (/** @type {AttributePath} */ { node }, /** @type {import("../print-options.js").HtmlPrintOptions} */ options) =>
+  htmlEventAttributes.has(node.fullName) &&
+  !options.parentParser &&
+  !node.value.includes("{{");
+
+/** @type {AttributeValuePrint} */
+const printEventHandler = (textToDoc, print, path /* , options*/) =>
+  formatAttributeValue(
+    getUnescapedAttributeValue(path.node),
+    textToDoc,
+    { parser: "babel", __isHtmlInlineEventHandler: true },
+    /** @returns {boolean} */ () => false,
+  );
+
+export { isEventHandler, printEventHandler };

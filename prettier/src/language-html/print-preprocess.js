@@ -1,0 +1,515 @@
+// @nts-check
+import { ParseSourceSpan, TokenType } from "angular-html-parser";
+import htmlWhitespace from "../utilities/html-whitespace.js";
+import isNonEmptyArray from "../utilities/is-non-empty-array.js";
+import {
+  canHaveInterpolation,
+  getLeadingAndTrailingHtmlWhitespace,
+  getNodeCssStyleDisplay,
+  isDanglingSpaceSensitiveNode,
+  isIndentationSensitiveNode,
+  isLeadingSpaceSensitiveNode,
+  isTrailingSpaceSensitiveNode,
+  isWhitespaceSensitiveNode,
+} from "./utilities/index.js";
+
+const PREPROCESS_PIPELINE = [
+  convertAngularNonBindableNodesToText,
+  removeIgnorableFirstLf,
+  mergeIfConditionalStartEndCommentIntoElementOpeningTag,
+  mergeAdjacentTextNodes,
+  extractInterpolation,
+  extractWhitespaces,
+  addCssDisplay,
+  addIsSelfClosing,
+  addHasHtmComponentClosingTag,
+  addIsSpaceSensitive,
+  mergeSimpleElementIntoText,
+];
+
+/** @returns {import("./parse/ast.js").Node} */ function preprocess(/** @type {import("./parse/ast.js").Node} */ ast, /** @type {import("./print-options.js").HtmlPrintOptions} */ options) {
+  for (const fn of PREPROCESS_PIPELINE) {
+    fn(ast, options);
+  }
+
+  return ast;
+}
+
+function removeIgnorableFirstLf(/** @type {import("./parse/ast.js").Node} */ ast /* , options */) {
+  ast.walk((/** @type {import("./parse/ast.js").Node} */ node) => {
+    if (
+      node.kind === "element" &&
+      node.tagDefinition.ignoreFirstLf &&
+      node.children.length > 0 &&
+      node.children[0].kind === "text" &&
+      node.children[0].value[0] === "\n"
+    ) {
+      const text = node.children[0];
+      if (text.value.length === 1) {
+        node.removeChild(text);
+      } else {
+        text.value = text.value.slice(1);
+        text.sourceSpan = new ParseSourceSpan(
+          text.sourceSpan.start.moveBy(1),
+          text.sourceSpan.end,
+        );
+      }
+    }
+  });
+}
+
+function mergeIfConditionalStartEndCommentIntoElementOpeningTag(
+  /** @type {import("./parse/ast.js").Node} */ ast /* , options */,
+) {
+  /**
+   *     <!--[if ...]><!--><target><!--<![endif]-->
+   */
+  const isTarget = /** @returns {boolean} */ (/** @type {import("./parse/ast.js").Node} */ node) =>
+    node.kind === "element" &&
+    node.prev?.kind === "ieConditionalStartComment" &&
+    node.prev.sourceSpan.end.offset === node.startSourceSpan.start.offset &&
+    node.firstChild?.kind === "ieConditionalEndComment" &&
+    node.firstChild.sourceSpan.start.offset === node.startSourceSpan.end.offset;
+  ast.walk((/** @type {import("./parse/ast.js").Node} */ node) => {
+    if (node.children) {
+      for (let i = 0; i < node.children.length; i++) {
+        const child = node.children[i];
+        if (!isTarget(child)) {
+          continue;
+        }
+
+        const ieConditionalStartComment = child.prev;
+        const ieConditionalEndComment = child.firstChild;
+
+        // ieConditionalStartComment
+        node.removeChild(ieConditionalStartComment);
+        i--; // because a node was removed
+
+        /** @type {import("../../../src/vendor/angular-html-parser/dist/compiler/src/parse_util.mjs").ParseSourceSpan} */ const startSourceSpan = new ParseSourceSpan(
+          ieConditionalStartComment.sourceSpan.start,
+          ieConditionalEndComment.sourceSpan.end,
+        );
+        /** @type {import("../../../src/vendor/angular-html-parser/dist/compiler/src/parse_util.mjs").ParseSourceSpan} */ const sourceSpan = new ParseSourceSpan(
+          startSourceSpan.start,
+          child.sourceSpan.end,
+        );
+
+        child.condition = ieConditionalStartComment.condition;
+        child.sourceSpan = sourceSpan;
+        child.startSourceSpan = startSourceSpan;
+        child.removeChild(ieConditionalEndComment);
+      }
+    }
+  });
+}
+
+function convertAngularNonBindableNodesToText(ast, options) {
+  if (
+    options.parser !== "angular" ||
+    !options.originalText.includes("ngNonBindable")
+  ) {
+    return;
+  }
+
+  ast.walk((/** @type {import("./parse/ast.js").Node} */ node) => {
+    if (
+      node.kind === "element" &&
+      Object.hasOwn(node.attrMap, "ngNonBindable")
+    ) {
+      convertAngularNonBindableChildren(node, options);
+    }
+  });
+}
+
+// TODO: Avoid recursive call
+function convertAngularNonBindableChildren(/** @type {import("./parse/ast.js").Node} */ node, options) {
+  const { children } = node;
+  if (!children) {
+    return;
+  }
+
+  for (let i = 0; i < children.length; i++) {
+    const child = children[i];
+
+    if (child.kind === "angularControlFlowBlock") {
+      convertAngularNonBindableChildren(child, options);
+
+      const replacements = [];
+      let { start } = child.sourceSpan;
+      for (const blockChild of child.children) {
+        if (start.offset < blockChild.sourceSpan.start.offset) {
+          /** @type {import("../../../src/vendor/angular-html-parser/dist/compiler/src/parse_util.mjs").ParseSourceSpan} */ const sourceSpan = new ParseSourceSpan(
+            start,
+            blockChild.sourceSpan.start,
+          );
+          replacements.push(createOriginalTextNode(sourceSpan, options));
+        }
+
+        replacements.push(blockChild);
+        start = blockChild.sourceSpan.end;
+      }
+
+      if (start.offset < child.sourceSpan.end.offset) {
+        const sourceSpan = new ParseSourceSpan(start, child.sourceSpan.end);
+        replacements.push(createOriginalTextNode(sourceSpan, options));
+      }
+
+      for (const replacement of replacements) {
+        node.insertChildBefore(child, replacement);
+      }
+      node.removeChild(child);
+
+      i += replacements.length - 1;
+      continue;
+    }
+
+    if (child.kind === "angularLetDeclaration") {
+      node.replaceChild(
+        child,
+        createOriginalTextNode(child.sourceSpan, options),
+      );
+      continue;
+    }
+
+    convertAngularNonBindableChildren(child, options);
+  }
+}
+
+function createOriginalTextNode(/** @type {import("../../../src/vendor/angular-html-parser/dist/compiler/src/parse_util.mjs").ParseSourceSpan} */ sourceSpan, options) {
+  return {
+    kind: "text",
+    value: options.originalText.slice(
+      sourceSpan.start.offset,
+      sourceSpan.end.offset,
+    ),
+    sourceSpan,
+  };
+}
+
+function mergeAdjacentTextNodes(/** @type {import("./parse/ast.js").Node} */ ast /* , options */) {
+  ast.walk((/** @type {import("./parse/ast.js").Node} */ node) => {
+    if (node.children) {
+      for (let i = 0; i < node.children.length; i++) {
+        const child = node.children[i];
+
+        const prevChild = child.prev;
+        if (child.kind !== "text" || prevChild?.kind !== "text") {
+          continue;
+        }
+
+        prevChild.value += child.value;
+        prevChild.sourceSpan = new ParseSourceSpan(
+          prevChild.sourceSpan.start,
+          child.sourceSpan.end,
+        );
+
+        node.removeChild(child);
+        i--; // because a node was removed
+      }
+    }
+  });
+}
+
+function mergeSimpleElementIntoText(/** @type {import("./parse/ast.js").Node} */ ast /* , options */) {
+  const isSimpleElement = /** @returns {boolean} */ (/** @type {import("./parse/ast.js").Node} */ node) =>
+    node.kind === "element" &&
+    node.attrs.length === 0 &&
+    !isNonEmptyArray(node.startTagComments) &&
+    node.children.length === 1 &&
+    node.firstChild.kind === "text" &&
+    !htmlWhitespace.hasWhitespaceCharacter(node.children[0].value) &&
+    !node.firstChild.hasLeadingSpaces &&
+    !node.firstChild.hasTrailingSpaces &&
+    node.isLeadingSpaceSensitive &&
+    !node.hasLeadingSpaces &&
+    node.isTrailingSpaceSensitive &&
+    !node.hasTrailingSpaces &&
+    node.prev?.kind === "text" &&
+    node.next?.kind === "text";
+  ast.walk((/** @type {import("./parse/ast.js").Node} */ node) => {
+    if (node.children) {
+      for (let i = 0; i < node.children.length; i++) {
+        const child = node.children[i];
+        if (!isSimpleElement(child)) {
+          continue;
+        }
+
+        const prevChild = child.prev;
+        const nextChild = child.next;
+        prevChild.value +=
+          `<${child.rawName}>` +
+          child.firstChild.value +
+          `</${child.rawName}>` +
+          nextChild.value;
+        prevChild.sourceSpan = new ParseSourceSpan(
+          prevChild.sourceSpan.start,
+          nextChild.sourceSpan.end,
+        );
+        prevChild.isTrailingSpaceSensitive = nextChild.isTrailingSpaceSensitive;
+        prevChild.hasTrailingSpaces = nextChild.hasTrailingSpaces;
+
+        node.removeChild(child);
+        i--; // because a node was removed
+        node.removeChild(nextChild);
+      }
+    }
+  });
+}
+
+function extractInterpolation(/** @type {import("./parse/ast.js").Node} */ ast, /** @type {import("./print-options.js").HtmlPrintOptions} */ options) {
+  if (options.parser === "html") {
+    return;
+  }
+
+  ast.walk((/** @type {import("./parse/ast.js").Node} */ node) => {
+    if (!canHaveInterpolation(node, options)) {
+      return;
+    }
+
+    for (const child of node.children) {
+      if (child.kind !== "text") {
+        continue;
+      }
+
+      let startSourceSpan = child.sourceSpan.start;
+      let endSourceSpan;
+      const components = splitInterpolation(child);
+
+      for (
+        let i = 0;
+        i < components.length;
+        i++, startSourceSpan = endSourceSpan
+      ) {
+        const value = components[i];
+
+        if (i % 2 === 0) {
+          endSourceSpan = startSourceSpan.moveBy(value.length);
+          if (value.length > 0) {
+            node.insertChildBefore(child, {
+              kind: "text",
+              value,
+              sourceSpan: new ParseSourceSpan(startSourceSpan, endSourceSpan),
+            });
+          }
+          continue;
+        }
+
+        endSourceSpan = startSourceSpan.moveBy(value.length + 4); // `{{` + `}}`
+        node.insertChildBefore(child, {
+          kind: "interpolation",
+          sourceSpan: new ParseSourceSpan(startSourceSpan, endSourceSpan),
+          children:
+            value.length === 0
+              ? []
+              : [
+                  {
+                    kind: "text",
+                    value,
+                    sourceSpan: new ParseSourceSpan(
+                      startSourceSpan.moveBy(2),
+                      endSourceSpan.moveBy(-2),
+                    ),
+                  },
+                ],
+        });
+      }
+
+      node.removeChild(child);
+    }
+  });
+}
+
+function splitInterpolation(/** @type {import("./parse/ast.js").Node} */ node) {
+  const interpolationTokens = node.tokens?.filter(
+    /** @returns {boolean} */ (token) =>
+      token.type === TokenType.INTERPOLATION && token.parts.length === 3,
+  );
+
+  if (!interpolationTokens?.some(/** @returns {boolean} */ (token) => token.parts[1].includes("}}"))) {
+    return node.value.split(/\{\{(.+?)\}\}/s);
+  }
+
+  const components = [];
+  const { content } = node.sourceSpan.start.file;
+  let startOffset = node.sourceSpan.start.offset;
+
+  for (const { parts, sourceSpan } of interpolationTokens) {
+    components.push(
+      content.slice(startOffset, sourceSpan.start.offset),
+      content.slice(
+        sourceSpan.start.offset + parts[0].length,
+        sourceSpan.end.offset - parts[2].length,
+      ),
+    );
+
+    startOffset = sourceSpan.end.offset;
+  }
+
+  components.push(content.slice(startOffset, node.sourceSpan.end.offset));
+
+  return components;
+}
+
+/**
+ * - add `hasLeadingSpaces` field
+ * - add `hasTrailingSpaces` field
+ * - add `hasDanglingSpaces` field for parent nodes
+ * - add `isWhitespaceSensitive`, `isIndentationSensitive` field for text nodes
+ * - remove insensitive whitespaces
+ */
+function extractWhitespaces(/** @type {import("./parse/ast.js").Node} */ ast, /** @type {import("./print-options.js").HtmlPrintOptions} */ options) {
+  ast.walk((/** @type {import("./parse/ast.js").Node} */ node) => {
+    const children = node.$children;
+
+    if (!children) {
+      return;
+    }
+
+    if (
+      children.length === 0 ||
+      (children.length === 1 &&
+        children[0].kind === "text" &&
+        htmlWhitespace.trim(children[0].value).length === 0)
+    ) {
+      node.hasDanglingSpaces = children.length > 0;
+      node.$children = [];
+      return;
+    }
+
+    const isWhitespaceSensitive = isWhitespaceSensitiveNode(node, options);
+    /** @type {boolean} */ const isIndentationSensitive = isIndentationSensitiveNode(node);
+
+    if (!isWhitespaceSensitive) {
+      for (let i = 0; i < children.length; i++) {
+        const child = children[i];
+        if (child.kind !== "text") {
+          continue;
+        }
+
+        const { leadingWhitespace, text, trailingWhitespace } =
+          getLeadingAndTrailingHtmlWhitespace(child.value);
+
+        const prevChild = child.prev;
+        const nextChild = child.next;
+
+        if (!text) {
+          node.removeChild(child);
+          i--; // because a node was removed
+
+          if (leadingWhitespace || trailingWhitespace) {
+            if (prevChild) {
+              prevChild.hasTrailingSpaces = true;
+            }
+            if (nextChild) {
+              nextChild.hasLeadingSpaces = true;
+            }
+          }
+        } else {
+          child.value = text;
+          child.sourceSpan = new ParseSourceSpan(
+            child.sourceSpan.start.moveBy(leadingWhitespace.length),
+            child.sourceSpan.end.moveBy(-trailingWhitespace.length),
+          );
+
+          if (leadingWhitespace) {
+            if (prevChild) {
+              prevChild.hasTrailingSpaces = true;
+            }
+            child.hasLeadingSpaces = true;
+          }
+          if (trailingWhitespace) {
+            child.hasTrailingSpaces = true;
+            if (nextChild) {
+              nextChild.hasLeadingSpaces = true;
+            }
+          }
+        }
+      }
+    }
+
+    node.isWhitespaceSensitive = isWhitespaceSensitive;
+    node.isIndentationSensitive = isIndentationSensitive;
+  });
+}
+
+function addIsSelfClosing(/** @type {import("./parse/ast.js").Node} */ ast /* , options */) {
+  ast.walk((/** @type {import("./parse/ast.js").Node} */ node) => {
+    node.isSelfClosing =
+      !node.children ||
+      (node.kind === "element" &&
+        (node.tagDefinition.isVoid ||
+          // self-closing
+          (node.endSourceSpan &&
+            node.startSourceSpan.start === node.endSourceSpan.start &&
+            node.startSourceSpan.end === node.endSourceSpan.end)));
+  });
+}
+
+function addHasHtmComponentClosingTag(/** @type {import("./parse/ast.js").Node} */ ast, /** @type {import("./print-options.js").HtmlPrintOptions} */ options) {
+  ast.walk((/** @type {import("./parse/ast.js").Node} */ node) => {
+    if (node.kind !== "element") {
+      return;
+    }
+
+    node.hasHtmComponentClosingTag =
+      node.endSourceSpan &&
+      /^<\s*\/\s*\/\s*>$/.test(
+        options.originalText.slice(
+          node.endSourceSpan.start.offset,
+          node.endSourceSpan.end.offset,
+        ),
+      );
+  });
+}
+
+function addCssDisplay(/** @type {import("./parse/ast.js").Node} */ ast, /** @type {import("./print-options.js").HtmlPrintOptions} */ options) {
+  ast.walk((/** @type {import("./parse/ast.js").Node} */ node) => {
+    node.cssDisplay = getNodeCssStyleDisplay(node, options);
+  });
+}
+
+/**
+ * - add `isLeadingSpaceSensitive` field
+ * - add `isTrailingSpaceSensitive` field
+ * - add `isDanglingSpaceSensitive` field for parent nodes
+ */
+function addIsSpaceSensitive(/** @type {import("./parse/ast.js").Node} */ ast, /** @type {import("./print-options.js").HtmlPrintOptions} */ options) {
+  ast.walk((/** @type {import("./parse/ast.js").Node} */ node) => {
+    const { children } = node;
+    if (!children) {
+      return;
+    }
+    if (children.length === 0) {
+      node.isDanglingSpaceSensitive = isDanglingSpaceSensitiveNode(
+        node,
+        options,
+      );
+      return;
+    }
+    for (const child of children) {
+      child.isLeadingSpaceSensitive = isLeadingSpaceSensitiveNode(
+        child,
+        options,
+      );
+      child.isTrailingSpaceSensitive = isTrailingSpaceSensitiveNode(
+        child,
+        options,
+      );
+    }
+    for (let index = 0; index < children.length; index++) {
+      const child = children[index];
+      child.isLeadingSpaceSensitive =
+        index === 0
+          ? child.isLeadingSpaceSensitive
+          : child.prev.isTrailingSpaceSensitive &&
+            child.isLeadingSpaceSensitive;
+      child.isTrailingSpaceSensitive =
+        index === children.length - 1
+          ? child.isTrailingSpaceSensitive
+          : child.next.isLeadingSpaceSensitive &&
+            child.isTrailingSpaceSensitive;
+    }
+  });
+}
+
+export default preprocess;

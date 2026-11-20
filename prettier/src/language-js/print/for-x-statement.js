@@ -1,0 +1,22 @@
+import { align, group, lineSuffixBoundary } from "../../document/index.js";
+import { printForXStatementBody } from "./clause.js";
+
+function printForXStatement(/** @type {import("../../../../prettier/src/common/ast-path.js").default} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options, /** @type {import("../../../../prettier/src/language-js/print-options.js").JsPrint} */ print) {
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
+  const isForOfStatement = node.type === "ForOfStatement";
+  return group([
+    "for",
+    isForOfStatement && node.await ? " await" : "",
+    " (",
+    print("left"),
+    align(1, lineSuffixBoundary),
+    " ",
+    isForOfStatement ? "of" : "in",
+    " ",
+    print("right"),
+    ")",
+    printForXStatementBody(path, options, print),
+  ]);
+}
+
+export { printForXStatement };

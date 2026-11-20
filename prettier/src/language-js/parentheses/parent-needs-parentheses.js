@@ -1,0 +1,278 @@
+// @nts-check
+import isNonEmptyArray from "../../utilities/is-non-empty-array.js";
+import { hasNode } from "../utilities/has-node.js";
+import {
+  getLeftSidePathName,
+  hasNakedLeftSide,
+} from "../utilities/left-side.js";
+import {
+  isCallExpression,
+  isMemberExpression,
+  isReturnOrThrowStatement,
+} from "../utilities/node-types.js";
+import { returnArgumentHasLeadingComment } from "../utilities/return-statement-has-leading-comment.js";
+import { stripChainElementWrappers } from "../utilities/strip-chain-element-wrappers.js";
+
+/**
+ * @import AstPath from "../../common/ast-path.js"
+ */
+
+// TODO[@fisker]: Remove `needsParentheses`
+
+/**
+@param {AstPath} path
+@param {import("../print-options.js").JsPrintOptions} options
+@param {(path: AstPath, options: import("../print-options.js").JsPrintOptions) => boolean} needsParentheses
+@returns {boolean | undefined}
+*/
+function parentNeedsParentheses(path, options, needsParentheses) {
+  /** @type {{ node: import("../types/estree.js").Node, key: any, parent: import("../types/estree.js").Node }} */ const { node, key, parent } = path;
+
+  switch (parent.type) {
+    case "ReturnStatement":
+    case "ThrowStatement":
+    case "YieldExpression":
+      if (willArgumentBreakAndAddParentheses(path, options)) {
+        return false;
+      }
+      break;
+
+    case "ParenthesizedExpression":
+      return false;
+    case "ClassDeclaration":
+    case "ClassExpression":
+    case "StructDeclaration":
+      // Add parens around the extends clause of a class. It is needed for almost
+      // all expressions.
+      if (key === "superClass") {
+        const superClass = stripChainElementWrappers(node);
+        if (
+          superClass.type === "ArrowFunctionExpression" ||
+          superClass.type === "AssignmentExpression" ||
+          superClass.type === "AwaitExpression" ||
+          superClass.type === "BinaryExpression" ||
+          superClass.type === "ConditionalExpression" ||
+          superClass.type === "LogicalExpression" ||
+          superClass.type === "NewExpression" ||
+          superClass.type === "ObjectExpression" ||
+          superClass.type === "SequenceExpression" ||
+          superClass.type === "TaggedTemplateExpression" ||
+          superClass.type === "UnaryExpression" ||
+          superClass.type === "UpdateExpression" ||
+          superClass.type === "YieldExpression" ||
+          (superClass.type === "ClassExpression" &&
+            isNonEmptyArray(superClass.decorators))
+        ) {
+          return true;
+        }
+      }
+      break;
+
+    case "ExportDefaultDeclaration":
+      // `export default function` or `export default class` can't be followed by
+      // anything after. So an expression like `export default (function(){}).toString()`
+      // needs to be followed by a parentheses
+      if (shouldWrapFunctionForExportDefault(path, options, needsParentheses)) {
+        return true;
+      }
+      break;
+
+    case "Decorator":
+      if (
+        key === "expression" &&
+        !canDecoratorExpressionUnparenthesized(node)
+      ) {
+        return true;
+      }
+      break;
+
+    case "TypeAnnotation":
+      if (
+        path.match(
+          undefined,
+          undefined,
+          /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node, key) =>
+            key === "returnType" && node.type === "ArrowFunctionExpression",
+        ) &&
+        !(
+          node.type === "NullableTypeAnnotation" &&
+          path.call(/** @returns {boolean} */ () => needsParentheses(path, options), "typeAnnotation")
+        ) &&
+        includesFunctionTypeInObjectType(node)
+      ) {
+        return true;
+      }
+      break;
+
+    case "VariableDeclarator":
+      // Legacy syntax
+      // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Errors/Invalid_for-in_initializer
+      // `for (var a = 1 in b);`
+      if (
+        key === "init" &&
+        path.match(
+          undefined,
+          undefined,
+          /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node, key) =>
+            key === "declarations" && node.type === "VariableDeclaration",
+          /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node, key) => key === "left" && node.type === "ForInStatement",
+        )
+      ) {
+        return true;
+      }
+      break;
+
+    case "BinaryExpression":
+      if (
+        !(
+          key === "right" &&
+          node.type === "TSInstantiationExpression" &&
+          (parent.operator === "instanceof" || parent.operator === "in")
+        ) &&
+        endsWithInstantiationExpression(node)
+      ) {
+        return true;
+      }
+
+      break;
+
+    case "TSInstantiationExpression":
+      if (
+        key === "expression" &&
+        (node.type === "AwaitExpression" || node.type === "YieldExpression")
+      ) {
+        return true;
+      }
+
+      break;
+  }
+}
+
+/** @returns {boolean} */ function endsWithInstantiationExpression(/** @type {import("../types/estree.js").Node | undefined} */ node) {
+  while (node) {
+    if (
+      node.type === "UnaryExpression" ||
+      node.type === "AwaitExpression" ||
+      node.type === "YieldExpression"
+    ) {
+      node = node.argument;
+    } else if (node.type === "TSTypeAssertion") {
+      node = node.expression;
+    } else {
+      break;
+    }
+  }
+
+  return node?.type === "TSInstantiationExpression";
+}
+
+/** @returns {boolean} */ function willArgumentBreakAndAddParentheses(/** @type {AstPath} */ path, /** @type {import("../print-options.js").JsPrintOptions} */ options) {
+  /** @type {{ key: any, parent: import("../types/estree.js").Node }} */ const { key, parent } = path;
+  if (!(
+    key === "argument" &&
+    (isReturnOrThrowStatement(parent) || parent.type === "YieldExpression")
+  )) {
+    return false;
+  }
+
+  /*
+  When `ReturnStatement`, `ThrowStatement`, or `YieldExpression` breaks, parentheses will be added around it's argument.
+  So don't need add parentheses again.
+  But we can't know how the argument printed, so only matches cases that will break for sure
+  */
+
+  /** @type {{ node: import("../types/estree.js").Node }} */ const { node } = path;
+
+  if (
+    (node.type === "SequenceExpression" ||
+      node.type === "AssignmentExpression") &&
+    returnArgumentHasLeadingComment(node, options)
+  ) {
+    return true;
+  }
+
+  return false;
+}
+
+/**
+ * @param {AstPath} path
+ * @param {import("../print-options.js").JsPrintOptions} options
+ * @param {(path: AstPath, options: import("../print-options.js").JsPrintOptions) => boolean} needsParentheses
+ * @returns {boolean}
+ */
+function shouldWrapFunctionForExportDefault(path, options, needsParentheses) {
+  /** @type {{ node: import("../types/estree.js").Node, parent: import("../types/estree.js").Node }} */ const { node, parent } = path;
+
+  if (node.type === "FunctionExpression" || node.type === "ClassExpression") {
+    return (
+      parent.type === "ExportDefaultDeclaration" ||
+      // in some cases the function is already wrapped
+      // (e.g. `export default (function() {})();`)
+      // in this case we don't need to add extra parens
+      !needsParentheses(path, options)
+    );
+  }
+
+  if (
+    !hasNakedLeftSide(node) ||
+    (parent.type !== "ExportDefaultDeclaration" &&
+      needsParentheses(path, options))
+  ) {
+    return false;
+  }
+
+  return path.call(
+    /** @returns {boolean} */ () => shouldWrapFunctionForExportDefault(path, options, needsParentheses),
+    ...getLeftSidePathName(node),
+  );
+}
+
+// Based on babel implementation
+// https://github.com/nicolo-ribaudo/babel/blob/c4b88a4e5005364255f7e964fe324cf7bfdfb019/packages/babel-generator/src/node/index.ts#L111
+/** @returns {boolean} */ function canDecoratorExpressionUnparenthesized(/** @type {import("../types/estree.js").Node} */ node) {
+  if (node.type === "ChainExpression") {
+    node = node.expression;
+  }
+
+  return (
+    isDecoratorMemberExpression(node) ||
+    (isCallExpression(node) &&
+      // @ts-expect-error -- doesn't exists on `CallExpression`
+      !node.optional &&
+      isDecoratorMemberExpression(node.callee))
+  );
+}
+
+/** @returns {boolean} */ function isDecoratorMemberExpression(/** @type {import("../types/estree.js").Node} */ node) {
+  if (node.type === "Identifier") {
+    return true;
+  }
+
+  if (isMemberExpression(node)) {
+    return (
+      !node.computed &&
+      // @ts-expect-error -- doesn't exists on `MemberExpression`
+      !node.optional &&
+      node.property.type === "Identifier" &&
+      isDecoratorMemberExpression(node.object)
+    );
+  }
+
+  return false;
+}
+
+/** @returns {boolean} */ function includesFunctionTypeInObjectType(/** @type {import("../types/estree.js").Node} */ node) {
+  return hasNode(
+    node,
+    /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node) =>
+      node.type === "ObjectTypeAnnotation" &&
+      hasNode(
+        node,
+        /** @returns {boolean} */ (/** @type {import("../types/estree.js").Node} */ node) =>
+          node.type === "FunctionTypeAnnotation" ||
+          node.type === "ConstructorTypeAnnotation",
+      ),
+  );
+}
+
+export { parentNeedsParentheses };

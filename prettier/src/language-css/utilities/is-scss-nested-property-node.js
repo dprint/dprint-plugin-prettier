@@ -1,0 +1,20 @@
+// @nts-check
+/** @import { CssOptions } from "./index.js" */
+/** @returns {boolean} */ function isScssNestedPropertyNode(/** @type {import("../types.js").CssNode} */ node, /** @type {CssOptions} */ options) {
+  if (options.parser !== "scss") {
+    return false;
+  }
+
+  /* c8 ignore next 3 */
+  if (!node.selector) {
+    return false;
+  }
+
+  return node.selector
+    .replace(/\/\*.*?\*\//, "")
+    .replace(/\/\/.*\n/, "")
+    .trimEnd()
+    .endsWith(":");
+}
+
+export default isScssNestedPropertyNode;
