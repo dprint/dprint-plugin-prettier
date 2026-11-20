@@ -1,0 +1,34 @@
+name: check_updates
+
+on:
+  workflow_dispatch:
+  schedule:
+    # do this three times a week
+    - cron: "0 7 * * 1,3,5"
+
+jobs:
+  build:
+    name: check updates
+    if: github.repository == 'dprint/dprint-plugin-prettier'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v4
+
+      - uses: denoland/setup-deno@v2
+
+      # fails when there's a newer prettier or prettier plugin, which emails the
+      # person who last changed the schedule above, so that it's upgraded by hand
+      - name: Check for updates
+        run: deno run -A ./scripts/check_updates.ts
+
+  # This is necessary to prevent GH automatically dsiabling this workflow after 60 days.
+  workflow-keepalive:
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    steps:
+      - uses: liskin/gh-workflow-keepalive@f72ff1a1336129f29bf0166c0fd0ca6cf1bcb38c
