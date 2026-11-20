@@ -8,7 +8,7 @@
     <LangVersion>15.0</LangVersion>
     <AssemblyName>dprint-plugin-prettier</AssemblyName>
     <!-- the version of the plugin, which dprint is told -->
-    <Version>0.72.0</Version>
+    <Version>0.73.0</Version>
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <InvariantGlobalization>true</InvariantGlobalization>
