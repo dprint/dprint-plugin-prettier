@@ -350,6 +350,12 @@ Two files in `src` say what a run of the plugin did, and both go stale when the 
   Record it with a build of a probe that formats the files of every language with `formatWithCursor` (as the
   benchmark probe of nts's `docs/performance.md` does), compiled with `--site-stats` and run with `NTS_SITE_STATS`
   set to the file to write, and record it last, after every type is in.
+
+  The position is in the text that nts compiles, after it has rewritten the module, not in the file. For a small
+  change to one module (prettier-plugin-svelte 4.1.1 to 4.2.0), the keys can be moved instead of recorded again: run
+  nts (`deno run -A nts/nts.js src/main.ts --no-aot --no-build` in an empty folder) with `NTS_REACH_DUMP` set to a
+  folder, once with the old module and once with the new one, which writes the text of each module, and then
+  `deno run -A scripts/move-site-keys.ts src/sites.json <module key prefix> <old text> <new text>`.
 - **`src/regexes.json`** lists the regular expressions that are compiled with the program rather than run by .NET's
   interpreter, by their pattern and flags. A pattern that changed in the new source is no longer found and falls back
   to the interpreter, which made CSS 7% slower at 3.10.1 (its string pattern got a named group). Run the plugin with

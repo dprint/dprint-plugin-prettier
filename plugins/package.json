@@ -6,7 +6,7 @@
   "dependencies": {
     "prettier": "3.10.1",
     "prettier-plugin-jsdoc": "1.8.1",
-    "prettier-plugin-svelte": "4.1.1",
+    "prettier-plugin-svelte": "4.2.0",
     "svelte": "5.57.2"
   }
 }

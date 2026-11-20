@@ -78,6 +78,7 @@ const blockElements = [
     'hr',
     'li',
     'main',
+    'menu',
     'nav',
     'ol',
     'p',
@@ -319,6 +320,31 @@ function printWithPrependedAttributeLine(node, options, print) {
     return (path) => path.getNode().name !== snippedTagContentAttribute
         ? [getAttributeLine(node, options), path.call(print)]
         : '';
+}
+/**
+ * Prints the comments of an opening tag that has no attributes they could be attached to,
+ * e.g. `<div /* comment *\/>` (attached as dangling comments on the element in `embed`).
+ */
+function printDanglingTagComments(node) {
+    var _a, _b;
+    const { line, hardline, breakParent, dedent } = doc.builders;
+    const comments = ((_a = node.comments) !== null && _a !== void 0 ? _a : []).filter((comment) => !comment.leading && !comment.trailing);
+    const parts = [];
+    const hasTrailingLineComment = ((_b = comments[comments.length - 1]) === null || _b === void 0 ? void 0 : _b.type) === 'Line';
+    comments.forEach((comment) => {
+        if (comment.type === 'Line') {
+            parts.push(line, '//' + comment.value.replace(/\r$/, ''), breakParent);
+        }
+        else {
+            parts.push(line, '/*' + comment.value + '*/');
+        }
+    });
+    // Always terminate a final line comment, even when the tag hugs its content.
+    // The element printer omits its normal separator when this supplies one.
+    if (hasTrailingLineComment) {
+        parts.push(dedent(hardline));
+    }
+    return { doc: parts, hasTrailingLineComment };
 }
 
 /**
@@ -755,11 +781,23 @@ function trimChildren(children) {
     }
 }
 /**
- * Check if given node's start tag should hug its first child. This is the case for inline elements when there's
- * no whitespace between the `>` and the first child.
+ * Svelte trims element edges except in preformatted content, head titles, and components
+ * with preserveWhitespace enabled. Strict sensitivity also keeps the previous hugging behavior.
  * @returns {boolean}
  */
-function shouldHugStart(node, /** @type {boolean} */ isSupportedLanguage, options) {
+function canIgnoreElementEdgeWhitespace(node, options, path) {
+    var _a;
+    const root = path.stack[0];
+    return (options.htmlWhitespaceSensitivity !== 'strict' &&
+        !((_a = root.options) === null || _a === void 0 ? void 0 : _a.preserveWhitespace) &&
+        node.type !== 'TitleElement' &&
+        !isPreTagContent(path));
+}
+/**
+ * Check whether whitespace sensitivity requires the opening tag to hug its first child.
+ * @returns {boolean}
+ */
+function shouldHugStart(node, /** @type {boolean} */ isSupportedLanguage, options, path) {
     if (!isSupportedLanguage) {
         return true;
     }
@@ -777,17 +815,19 @@ function shouldHugStart(node, /** @type {boolean} */ isSupportedLanguage, option
         return true;
     }
     if (options.htmlWhitespaceSensitivity === 'ignore') {
+        return false;
+    }
+    if (canIgnoreElementEdgeWhitespace(node, options, path)) {
         return false;
     }
     const firstChild = children[0];
     return !isTextNodeStartingWithWhitespace(firstChild);
 }
 /**
- * Check if given node's end tag should hug its last child. This is the case for inline elements when there's
- * no whitespace between the last child and the `</`.
+ * Check whether whitespace sensitivity requires the closing tag to hug its last child.
  * @returns {boolean}
  */
-function shouldHugEnd(node, /** @type {boolean} */ isSupportedLanguage, options) {
+function shouldHugEnd(node, /** @type {boolean} */ isSupportedLanguage, options, path) {
     if (!isSupportedLanguage) {
         return true;
     }
@@ -805,6 +845,9 @@ function shouldHugEnd(node, /** @type {boolean} */ isSupportedLanguage, options)
         return true;
     }
     if (options.htmlWhitespaceSensitivity === 'ignore') {
+        return false;
+    }
+    if (canIgnoreElementEdgeWhitespace(node, options, path)) {
         return false;
     }
     const lastChild = children[children.length - 1];
@@ -951,7 +994,12 @@ function removeAndGetLeadingComments(ast, current) {
         siblings.splice(siblings.indexOf(comment), 1);
     }
     for (const text of newlines) {
-        siblings.splice(siblings.indexOf(text), 1);
+        // Placeholders for adjacent comments are not in the AST, and
+        // splice(-1, 1) would remove the last node instead.
+        const index = siblings.indexOf(text);
+        if (index !== -1) {
+            siblings.splice(index, 1);
+        }
     }
     return comments
         .map((comment, i) => ({
@@ -968,7 +1016,7 @@ const { join, line, group, indent, dedent, softline, hardline, fill, breakParent
 let ignoreNext = false;
 let ignoreRange = false;
 function print(path, options, print) {
-    var _a, _b, _c, _d, _e, _f;
+    var _a, _b, _c, _d;
     const bracketSameLine = isBracketSameLine(options);
     const n = path.node;
     if (!n) {
@@ -1086,6 +1134,8 @@ function print(path, options, print) {
                     isDoctypeTag);
             // Order important: print attributes first
             const attributes = path.map(printWithPrependedAttributeLine(node, options, print), 'attributes');
+            const { doc: danglingComments, hasTrailingLineComment } = printDanglingTagComments(node);
+            attributes.push(...danglingComments);
             const attributeLine = getAttributeLine(node, options);
             const possibleThisBinding = node.type === 'SvelteComponent' && node.expression
                 ? [attributeLine, 'this=', ...printJsExpression()]
@@ -1107,7 +1157,7 @@ function print(path, options, print) {
                                 // Preserve <svelte:element this={"literal"}>
                                 // because in Svelte 6 this="literal" will be invalid
                                 if (expression_wrapped) {
-                                    return [open, `"${literal_value}"`, close];
+                                    return [open, printJS(path, print, 'tag'), close];
                                 }
                                 return [`"${literal_value}"`];
                             }
@@ -1122,9 +1172,14 @@ function print(path, options, print) {
                     indent(group([
                         possibleThisBinding,
                         ...attributes,
-                        bracketSameLine || isDoctypeTag ? '' : dedent(line),
+                        bracketSameLine || isDoctypeTag || hasTrailingLineComment
+                            ? ''
+                            : dedent(line),
                     ])),
-                    ...[bracketSameLine && !isDoctypeTag ? ' ' : '', `${isDoctypeTag ? '' : '/'}>`],
+                    ...[
+                        bracketSameLine && !isDoctypeTag && !hasTrailingLineComment ? ' ' : '',
+                        `${isDoctypeTag ? '' : '/'}>`,
+                    ],
                 ]);
             }
             const children = element_children;
@@ -1133,8 +1188,8 @@ function print(path, options, print) {
             // Is a function which is invoked later because printChildren will manipulate child nodes
             // which would wrongfully change the other checks about hugging etc done beforehand
             let body;
-            const hugStart = shouldHugStart(node, isSupportedLanguage, options);
-            const hugEnd = shouldHugEnd(node, isSupportedLanguage, options);
+            const hugStart = shouldHugStart(node, isSupportedLanguage, options, path);
+            const hugEnd = shouldHugEnd(node, isSupportedLanguage, options, path);
             if (isEmpty) {
                 body =
                     isInlineElement(path, options, node) &&
@@ -1162,9 +1217,11 @@ function print(path, options, print) {
                 indent(group([
                     possibleThisBinding,
                     ...attributes,
-                    hugStart && !isEmpty
+                    hasTrailingLineComment || (hugStart && !isEmpty)
                         ? ''
-                        : !bracketSameLine && !isPreTagContent(path)
+                        : !bracketSameLine &&
+                            !isPreTagContent(path) &&
+                            (attributes.length > 0 || possibleThisBinding !== '')
                             ? dedent(softline)
                             : '',
                 ])),
@@ -1181,7 +1238,10 @@ function print(path, options, print) {
                 ]);
             }
             if (hugStart && hugEnd) {
-                const huggedContent = [softline, group(['>', body(), `</${node.name}`])];
+                const huggedContent = [
+                    hasTrailingLineComment ? '' : softline,
+                    group(['>', body(), `</${node.name}`]),
+                ];
                 const omitSoftlineBeforeClosingTag = (isEmpty && !bracketSameLine) ||
                     canOmitSoftlineBeforeClosingTag(node, path, options);
                 return group([
@@ -1209,13 +1269,16 @@ function print(path, options, print) {
                         noHugSeparatorEnd = hardline;
                         didSetEndSeparator = true;
                     }
-                    else if (isInlineElement(path, options, node)) {
+                    else if (isInlineElement(path, options, node) &&
+                        isTextNodeStartingWithWhitespace(firstChild)) {
                         noHugSeparatorStart = line;
                     }
                     trimTextNodeLeft(firstChild);
                 }
                 if (!hugEnd && lastChild && lastChild.type === 'Text') {
-                    if (isInlineElement(path, options, node) && !didSetEndSeparator) {
+                    if (isInlineElement(path, options, node) &&
+                        !didSetEndSeparator &&
+                        isTextNodeEndingWithWhitespace(lastChild)) {
                         noHugSeparatorEnd = line;
                     }
                     trimTextNodeRight(lastChild);
@@ -1224,7 +1287,7 @@ function print(path, options, print) {
             if (hugStart) {
                 return group([
                     ...openingTag,
-                    indent([softline, group(['>', body()])]),
+                    indent([hasTrailingLineComment ? '' : softline, group(['>', body()])]),
                     noHugSeparatorEnd,
                     `</${node.name}>`,
                 ]);
@@ -1339,10 +1402,10 @@ function print(path, options, print) {
         case 'AwaitBlock': {
             const pending_children = (_b = (_a = node.pending) === null || _a === void 0 ? void 0 : _a.nodes) !== null && _b !== void 0 ? _b : [];
             const then_children = (_d = (_c = node.then) === null || _c === void 0 ? void 0 : _c.nodes) !== null && _d !== void 0 ? _d : [];
-            const catch_children = (_f = (_e = node.catch) === null || _e === void 0 ? void 0 : _e.nodes) !== null && _f !== void 0 ? _f : [];
             const hasPendingBlock = pending_children.some(/** @returns {boolean} */ (n) => !isEmptyTextNode(n));
             const hasThenBlock = then_children.some(/** @returns {boolean} */ (n) => !isEmptyTextNode(n));
-            const hasCatchBlock = catch_children.some(/** @returns {boolean} */ (n) => !isEmptyTextNode(n));
+            // Keep an empty `{:catch}`: without one, Svelte rethrows the rejection
+            const hasCatchBlock = !!node.catch;
             let block = [];
             if (!hasPendingBlock && hasThenBlock) {
                 block.push(group([
@@ -2474,6 +2537,7 @@ function attachAttributeComments(ast, /** @type {string} */ original_text) {
     walkAndAttach(ast.fragment, commentsByStart, original_text);
 }
 function walkAndAttach(node, commentsByStart, /** @type {string} */ original_text) {
+    var _a;
     if (!node || typeof node !== 'object')
         return;
     if ('attributes' in node && Array.isArray(node.attributes) && node.attributes.length > 0) {
@@ -2486,11 +2550,28 @@ function walkAndAttach(node, commentsByStart, /** @type {string} */ original_tex
             attachCommentsInRange(attrs[i].end, attrs[i + 1].start, attrs[i], attrs[i + 1], commentsByStart);
         }
         const last_attr = attrs[attrs.length - 1];
-        const opening_tag_end = original_text && typeof node.end === 'number'
-            ? original_text.indexOf('>', last_attr.end)
-            : -1;
-        if (opening_tag_end >= 0 && opening_tag_end <= node.end) {
+        const opening_tag_end = findOpeningTagEnd(original_text, last_attr.end, node.end, commentsByStart);
+        if (opening_tag_end >= 0) {
             attachCommentsInRange(last_attr.end, opening_tag_end, last_attr, null, commentsByStart);
+        }
+    }
+    else if ('attributes' in node &&
+        Array.isArray(node.attributes) &&
+        typeof node.name === 'string') {
+        // No attributes: comments between the tag name and `>` have nothing to attach to,
+        // so keep them on the element itself and let the element printer print them.
+        // Start after `this={...}` of <svelte:element>/<svelte:component>, whose comments
+        // are printed along with that expression.
+        const this_expression = (_a = node.tag) !== null && _a !== void 0 ? _a : node.expression;
+        const tag_name_end = Math.max(node.start + 1 + node.name.length, typeof (this_expression === null || this_expression === void 0 ? void 0 : this_expression.end) === 'number' ? this_expression.end : 0);
+        const opening_tag_end = findOpeningTagEnd(original_text, tag_name_end, node.end, commentsByStart);
+        if (opening_tag_end >= 0) {
+            for (const [start, comment] of commentsByStart) {
+                if (start >= tag_name_end && comment.end <= opening_tag_end) {
+                    util.addDanglingComment(node, comment, undefined);
+                    commentsByStart.delete(start);
+                }
+            }
         }
     }
     // Recurse into children and block branches
@@ -2537,6 +2618,30 @@ function attachCommentsInRange(/** @type {number} */ rangeStart, /** @type {numb
             commentsByStart.delete(start);
         }
     }
+}
+/**
+ * Returns the position of the `>` that ends an opening tag, starting the search at `from`
+ * (which must be past the last attribute). Skips over comments, so that a `>` inside a
+ * comment isn't mistaken for the end of the tag. Returns -1 if not found.
+ * @returns {number}
+ */
+function findOpeningTagEnd(original_text, /** @type {number} */ from, limit, commentsByStart) {
+    if (!original_text || typeof limit !== 'number')
+        return -1;
+    let pos = from;
+    while (pos < limit) {
+        const comment = commentsByStart.get(pos);
+        if (comment) {
+            pos = comment.end;
+        }
+        else if (original_text[pos] === '>') {
+            return pos;
+        }
+        else {
+            pos++;
+        }
+    }
+    return -1;
 }
 
 const babelParser = parsers$1.babel;

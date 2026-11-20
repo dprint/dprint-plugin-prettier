@@ -144,8 +144,13 @@ class WorkerPool {
 /** Clones a plugin's repository at a ref the first time, without its history. */
 async function cloneRepo(repo: { name: string; url: string; ref: string }) {
   const repoDir = testsDir.join(repo.name);
+  // the ref that the clone is of, so that it's cloned again when the plugin's version changes
+  const refPath = testsDir.join(`${repo.name}.ref`);
   if (repoDir.join(".git").existsSync()) {
-    return;
+    if (refPath.existsSync() && refPath.readTextSync() === repo.ref) {
+      return;
+    }
+    repoDir.removeSync({ recursive: true });
   }
   $.logStep("Cloning", `${repo.name} at ${repo.ref}`);
   const partialDir = testsDir.join(`${repo.name}.partial`);
@@ -157,4 +162,5 @@ async function cloneRepo(repo: { name: string; url: string; ref: string }) {
   await $`git fetch --quiet --depth 1 ${repo.url} ${repo.ref}`.cwd(partialDir);
   await $`git checkout --quiet FETCH_HEAD`.cwd(partialDir);
   partialDir.renameSync(repoDir);
+  refPath.writeTextSync(repo.ref);
 }
