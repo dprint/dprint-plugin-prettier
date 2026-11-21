@@ -166,4 +166,3 @@ export type ResolvedProps = {
   end: number;
   start: number;
 };
-

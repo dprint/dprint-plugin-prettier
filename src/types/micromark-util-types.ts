@@ -1,4 +1,4 @@
-import type {Event} from './micromark-events.js'
+import type { Event } from "./micromark-events.js";
 
 // Note: this file is authored manually, not generated from `index.js`.
 
@@ -12,7 +12,7 @@ import type {Event} from './micromark-events.js'
  * Negative integers are used instead of certain sequences of characters (such
  * as line endings and tabs).
  */
-export type Code = int | null
+export type Code = int | null;
 
 /**
  * A chunk is either a character code or a slice of a buffer in the form of a
@@ -21,7 +21,7 @@ export type Code = int | null
  * Chunks are used because strings are more efficient storage that character
  * codes, but limited in what they can represent.
  */
-export type Chunk = Code | string
+export type Chunk = Code | string;
 
 /**
  * Enumeration of the content types.
@@ -67,7 +67,7 @@ export type Chunk = Code | string
  * It exists in things such as identifiers (media references, definitions),
  * titles, or URLs.
  */
-export type ContentType = 'content' | 'document' | 'flow' | 'string' | 'text'
+export type ContentType = "content" | "document" | "flow" | "string" | "text";
 
 /**
  * A location in the document (`line`/`column`/`offset`) and chunk (`_index`,
@@ -97,27 +97,27 @@ export interface Point {
   /**
    * Position in a string chunk (or `-1` when pointing to a numeric chunk).
    */
-  _bufferIndex: number
+  _bufferIndex: number;
 
   /**
    * Position in a list of chunks.
    */
-  _index: int
+  _index: int;
 
   /**
    * 1-indexed line number.
    */
-  line: int
+  line: int;
 
   /**
    * 1-indexed column number.
    */
-  column: number
+  column: number;
 
   /**
    * 0-indexed position in the document.
    */
-  offset: number
+  offset: number;
 }
 
 /**
@@ -154,32 +154,32 @@ export interface Token {
   /**
    * Token type.
    */
-  type: TokenType
+  type: TokenType;
 
   /**
    * Point where the token starts.
    */
-  start: Point
+  start: Point;
 
   /**
    * Point where the token ends.
    */
-  end: Point
+  end: Point;
 
   /**
    * The previous token in a list of linked tokens.
    */
-  previous?: Token | undefined
+  previous?: Token | undefined;
 
   /**
    * The next token in a list of linked tokens.
    */
-  next?: Token | undefined
+  next?: Token | undefined;
 
   /**
    * Declares a token as having content of a certain type.
    */
-  contentType?: ContentType | undefined
+  contentType?: ContentType | undefined;
 
   /**
    * Declares that trailing whitespace is sensitive,
@@ -188,7 +188,7 @@ export interface Token {
    * Normally,
    * trailing spaces and tabs are dropped.
    */
-  _contentTypeTextTrailing?: boolean | undefined
+  _contentTypeTextTrailing?: boolean | undefined;
 
   /**
    * Connected tokenizer.
@@ -197,7 +197,7 @@ export interface Token {
    * A child tokenizer is needed to tokenize them, which is stored on those
    * tokens.
    */
-  _tokenizer?: TokenizeContext | undefined
+  _tokenizer?: TokenizeContext | undefined;
 
   /**
    * Field to help parse attention.
@@ -205,7 +205,7 @@ export interface Token {
    * Depending on the character before sequences (`**`), the sequence can open,
    * close, both, or none.
    */
-  _open?: boolean | undefined
+  _open?: boolean | undefined;
 
   /**
    * Field to help parse attention.
@@ -213,7 +213,7 @@ export interface Token {
    * Depending on the character before sequences (`**`), the sequence can open,
    * close, both, or none.
    */
-  _close?: boolean | undefined
+  _close?: boolean | undefined;
 
   /**
    * Field to help parse GFM task lists.
@@ -221,7 +221,7 @@ export interface Token {
    * This boolean is used internally to figure out if a token is in the first
    * content of a list item construct.
    */
-  _isInFirstContentOfListItem?: boolean | undefined
+  _isInFirstContentOfListItem?: boolean | undefined;
 
   /**
    * Field to help parse containers.
@@ -229,14 +229,14 @@ export interface Token {
    * This boolean is used internally to figure out if a token is a container
    * token.
    */
-  _container?: boolean | undefined
+  _container?: boolean | undefined;
 
   /**
    * Field to help parse lists.
    *
    * This boolean is used internally to figure out if a list is loose or not.
    */
-  _loose?: boolean | undefined
+  _loose?: boolean | undefined;
 
   /**
    * Field to help parse links.
@@ -244,7 +244,7 @@ export interface Token {
    * This boolean is used internally to figure out if a link opening
    * can’t be used (because links in links are incorrect).
    */
-  _inactive?: boolean | undefined
+  _inactive?: boolean | undefined;
 
   /**
    * Field to help parse links.
@@ -252,15 +252,15 @@ export interface Token {
    * This boolean is used internally to figure out if a link opening is
    * balanced: it’s not a link opening but has a balanced closing.
    */
-  _balanced?: boolean | undefined
+  _balanced?: boolean | undefined;
 
   // (dprint-plugin-prettier: the fields that micromark-extension-gfm-table, mdast-util-from-markdown and
   // micromark-extension-gfm-autolink-literal give tokens, which their declarations add to the interface)
-  _align?: Array<'center' | 'left' | 'none' | 'right'> | undefined
+  _align?: Array<"center" | "left" | "none" | "right"> | undefined;
 
-  _spread?: boolean | undefined
+  _spread?: boolean | undefined;
 
-  _gfmAutolinkLiteralWalkedInto?: boolean | undefined
+  _gfmAutolinkLiteralWalkedInto?: boolean | undefined;
 }
 
 /**
@@ -269,7 +269,7 @@ export interface Token {
  * Tokens can “contain” other tokens, even though they are stored in a flat
  * list, through `enter`ing before them, and `exit`ing after them.
  */
-export type {Event}
+export type { Event };
 
 /**
  * Open a token.
@@ -283,8 +283,8 @@ export type {Event}
  */
 export type Enter = (
   type: TokenType,
-  fields?: Omit<Partial<Token>, 'type'> | undefined
-) => Token
+  fields?: Omit<Partial<Token>, "type"> | undefined,
+) => Token;
 
 /**
  * Close a token.
@@ -294,7 +294,7 @@ export type Enter = (
  * @returns
  *   Token.
  */
-export type Exit = (type: TokenType) => Token
+export type Exit = (type: TokenType) => Token;
 
 /**
  * Deal with the character and move to the next.
@@ -302,7 +302,7 @@ export type Exit = (type: TokenType) => Token
  * @param code
  *   Current code.
  */
-export type Consume = (code: Code) => undefined
+export type Consume = (code: Code) => undefined;
 
 /**
  * Attempt deals with several values, and tries to parse according to those
@@ -325,8 +325,8 @@ export type Consume = (code: Code) => undefined
 export type Attempt = (
   construct: Array<Construct> | ConstructRecord | Construct,
   ok: State,
-  nok?: State | undefined
-) => State
+  nok?: State | undefined,
+) => State;
 
 /**
  * A context object to transition the state machine.
@@ -335,32 +335,32 @@ export interface Effects {
   /**
    * Try to tokenize a construct.
    */
-  attempt: Attempt
+  attempt: Attempt;
 
   /**
    * Attempt, then revert.
    */
-  check: Attempt
+  check: Attempt;
 
   /**
    * Deal with the character and move to the next.
    */
-  consume: Consume
+  consume: Consume;
 
   /**
    * Start a new token.
    */
-  enter: Enter
+  enter: Enter;
 
   /**
    * End a started token.
    */
-  exit: Exit
+  exit: Exit;
 
   /**
    * Interrupt is used for stuff right after a line of content.
    */
-  interrupt: Attempt
+  interrupt: Attempt;
 }
 
 /**
@@ -383,7 +383,7 @@ export interface Effects {
  * @returns
  *   Next state.
  */
-export type State = (code: Code) => State | undefined
+export type State = (code: Code) => State | undefined;
 
 /**
  * A resolver handles and cleans events coming from `tokenize`.
@@ -397,8 +397,8 @@ export type State = (code: Code) => State | undefined
  */
 export type Resolver = (
   events: Array<Event>,
-  context: TokenizeContext
-) => Array<Event>
+  context: TokenizeContext,
+) => Array<Event>;
 
 /**
  * A tokenize function sets up a state machine to handle character codes streaming in.
@@ -418,8 +418,8 @@ export type Tokenizer = (
   this: TokenizeContext,
   effects: Effects,
   ok: State,
-  nok: State
-) => State
+  nok: State,
+) => State;
 
 /**
  * Like a tokenizer, but without `ok` or `nok`.
@@ -431,7 +431,7 @@ export type Tokenizer = (
  * @returns
  *   First state.
  */
-export type Initializer = (this: TokenizeContext, effects: Effects) => State
+export type Initializer = (this: TokenizeContext, effects: Effects) => State;
 
 /**
  * Like a tokenizer, but without `ok` or `nok`, and returning `undefined`.
@@ -445,7 +445,7 @@ export type Initializer = (this: TokenizeContext, effects: Effects) => State
  * @returns
  *   Nothing.
  */
-export type Exiter = (this: TokenizeContext, effects: Effects) => undefined
+export type Exiter = (this: TokenizeContext, effects: Effects) => undefined;
 
 /**
  * Guard whether `code` can come before the construct.
@@ -461,7 +461,7 @@ export type Exiter = (this: TokenizeContext, effects: Effects) => undefined
  * @returns
  *   Whether `code` is allowed before.
  */
-export type Previous = (this: TokenizeContext, code: Code) => boolean
+export type Previous = (this: TokenizeContext, code: Code) => boolean;
 
 /**
  * An object describing how to parse a markdown construct.
@@ -470,40 +470,40 @@ export type Previous = (this: TokenizeContext, code: Code) => boolean
 // members have types, as constructs are written out by code that is not checked as well, and its functions that are
 // called on the tokenize context are given it first)
 export type Construct = {
-  add?: 'after' | 'before' | undefined
-  concrete?: boolean | undefined
-  continuation?: Construct | undefined
-  exit?: Exiter | undefined
-  name?: string | undefined
-  partial?: boolean | undefined
-  previous?: Previous | undefined
-  resolveAll?: Resolver | undefined
-  resolveTo?: Resolver | undefined
-  resolve?: Resolver | undefined
-  tokenize: Tokenizer
-}
+  add?: "after" | "before" | undefined;
+  concrete?: boolean | undefined;
+  continuation?: Construct | undefined;
+  exit?: Exiter | undefined;
+  name?: string | undefined;
+  partial?: boolean | undefined;
+  previous?: Previous | undefined;
+  resolveAll?: Resolver | undefined;
+  resolveTo?: Resolver | undefined;
+  resolve?: Resolver | undefined;
+  tokenize: Tokenizer;
+};
 
 /**
  * Like a construct, but `tokenize` does not accept `ok` or `nok`.
  */
 export type InitialConstruct = {
-  add?: 'after' | 'before' | undefined
-  concrete?: boolean | undefined
-  continuation?: Construct | undefined
-  exit?: Exiter | undefined
-  name?: string | undefined
-  partial?: boolean | undefined
-  previous?: Previous | undefined
-  resolveAll?: Resolver | undefined
-  resolveTo?: Resolver | undefined
-  resolve?: Resolver | undefined
-  tokenize: Initializer
-}
+  add?: "after" | "before" | undefined;
+  concrete?: boolean | undefined;
+  continuation?: Construct | undefined;
+  exit?: Exiter | undefined;
+  name?: string | undefined;
+  partial?: boolean | undefined;
+  previous?: Previous | undefined;
+  resolveAll?: Resolver | undefined;
+  resolveTo?: Resolver | undefined;
+  resolve?: Resolver | undefined;
+  tokenize: Initializer;
+};
 
 /**
  * Several constructs, mapped from their initial codes.
  */
-export type ConstructRecord = any
+export type ConstructRecord = any;
 
 /**
  * State shared between container calls.
@@ -514,37 +514,37 @@ export interface ContainerState {
   /**
    * Special field to close the current flow (or containers).
    */
-  _closeFlow?: boolean | undefined
+  _closeFlow?: boolean | undefined;
 
   /**
    * Whether there are further blank lines, used by lists.
    */
-  furtherBlankLines?: boolean | undefined
+  furtherBlankLines?: boolean | undefined;
 
   /**
    * Whether there first line is blank, used by lists.
    */
-  initialBlankLine?: boolean | undefined
+  initialBlankLine?: boolean | undefined;
 
   /**
    * Current marker, used by lists.
    */
-  marker?: Code | undefined
+  marker?: Code | undefined;
 
   /**
    * Used by block quotes.
    */
-  open?: boolean | undefined
+  open?: boolean | undefined;
 
   /**
    * Current size, used by lists.
    */
-  size?: number | undefined
+  size?: number | undefined;
 
   /**
    * Current token type, used by lists.
    */
-  type?: TokenType | undefined
+  type?: TokenType | undefined;
 }
 
 /**
@@ -574,18 +574,18 @@ export type TokenizeContext = {
    *
    * The above list interrupts the table.
    */
-  _gfmTableDynamicInterruptHack?: boolean
+  _gfmTableDynamicInterruptHack?: boolean;
 
   /**
    * Internal boolean shared with `micromark-extension-gfm-task-list-item` to
    * signal whether the tokenizer is tokenizing the first content of a list item
    * construct.
    */
-  _gfmTasklistFirstContentOfListItem?: boolean | undefined
+  _gfmTasklistFirstContentOfListItem?: boolean | undefined;
 
   // (dprint-plugin-prettier: what micromark-core-commonmark's declarations add to the interface: the starts of labels
   // that the label end looks for)
-  _labelStarts?: Array<Token> | undefined
+  _labelStarts?: Array<Token> | undefined;
 
   /**
    * Declares that trailing whitespace is sensitive,
@@ -594,12 +594,12 @@ export type TokenizeContext = {
    * Normally,
    * trailing spaces and tabs are dropped.
    */
-  _contentTypeTextTrailing?: boolean | undefined
+  _contentTypeTextTrailing?: boolean | undefined;
 
   /**
    * Current code.
    */
-  code: Code
+  code: Code;
 
   /**
    * Share state set when parsing containers.
@@ -608,19 +608,19 @@ export type TokenizeContext = {
    * continued lines (`continuation.tokenize`), and finally `exit`.
    * This record can be used to store some information between these hooks.
    */
-  containerState?: ContainerState | undefined
+  containerState?: ContainerState | undefined;
 
   /**
    * The current construct.
    *
    * Constructs that are not `partial` are set here.
    */
-  currentConstruct?: Construct | undefined
+  currentConstruct?: Construct | undefined;
 
   /**
    * Current list of events.
    */
-  events: Array<Event>
+  events: Array<Event>;
 
   /**
    * Whether we’re currently interrupting.
@@ -634,17 +634,17 @@ export type TokenizeContext = {
    *
    * At 2:1, we’re “interrupting”.
    */
-  interrupt?: boolean | undefined
+  interrupt?: boolean | undefined;
 
   /**
    * The relevant parsing context.
    */
-  parser: ParseContext
+  parser: ParseContext;
 
   /**
    * The previous code.
    */
-  previous: Code
+  previous: Code;
 
   /**
    * Define a skip
@@ -660,7 +660,7 @@ export type TokenizeContext = {
    * @returns
    *   Nothing.
    */
-  defineSkip: (point: Point) => undefined
+  defineSkip: (point: Point) => undefined;
 
   /**
    * Get the current place.
@@ -668,7 +668,7 @@ export type TokenizeContext = {
    * @returns
    *   Current point.
    */
-  now: () => Point
+  now: () => Point;
 
   /**
    * Get the source text that spans a token (or location).
@@ -681,9 +681,9 @@ export type TokenizeContext = {
    *   Serialized chunks.
    */
   sliceSerialize: (
-    token: Pick<Token, 'end' | 'start'>,
-    expandTabs?: boolean | undefined
-  ) => string
+    token: Pick<Token, "end" | "start">,
+    expandTabs?: boolean | undefined,
+  ) => string;
 
   /**
    * Get the chunks that span a token (or location).
@@ -693,7 +693,7 @@ export type TokenizeContext = {
    * @returns
    *   List of chunks.
    */
-  sliceStream: (token: Pick<Token, 'end' | 'start'>) => Array<Chunk>
+  sliceStream: (token: Pick<Token, "end" | "start">) => Array<Chunk>;
 
   /**
    * Write a slice of chunks.
@@ -705,8 +705,8 @@ export type TokenizeContext = {
    * @returns
    *   Events.
    */
-  write: (slice: Array<Chunk>) => Array<Event>
-}
+  write: (slice: Array<Chunk>) => Array<Event>;
+};
 
 /**
  * Encodings supported by `TextEncoder`.
@@ -718,31 +718,31 @@ export type TokenizeContext = {
 export type Encoding =
   // Encodings supported in Node by default or when built with the small-icu option.
   // Does not include aliases.
-  | 'utf-8' // Always supported in Node.
-  | 'utf-16le' // Always supported in Node.
-  | 'utf-16be' // Not supported when ICU is disabled.
+  | "utf-8" // Always supported in Node.
+  | "utf-16le" // Always supported in Node.
+  | "utf-16be" // Not supported when ICU is disabled.
   // Everything else (depends on browser, or full ICU data).
   // eslint-disable-next-line @typescript-eslint/ban-types
-  | (string & {})
+  | (string & {});
 
 /**
  * Contents of the file.
  *
  * Can either be text, or a `Uint8Array` like structure.
  */
-export type Value = Uint8Array | string
+export type Value = Uint8Array | string;
 
 /**
  * A syntax extension changes how markdown is tokenized.
  *
  * See: <https://github.com/micromark/micromark#syntaxextension>
  */
-export type Extension = any
+export type Extension = any;
 
 /**
  * A filtered, combined, extension.
  */
-export type NormalizedExtension = any
+export type NormalizedExtension = any;
 
 /**
  * A full, filtereed, normalized, extension.
@@ -750,16 +750,16 @@ export type NormalizedExtension = any
 // (dprint-plugin-prettier: what `combineExtensions` makes of micromark's constructs and the extensions, a record of
 // records that hold an array of constructs for each code, written out as such rather than made from `Extension`)
 export type FullNormalizedExtension = {
-  attentionMarkers: {null: Array<Code>}
-  contentInitial: Record<string, Array<Construct>>
-  disable: {null: Array<string>}
-  document: Record<string, Array<Construct>>
-  flowInitial: Record<string, Array<Construct>>
-  flow: Record<string, Array<Construct>>
-  insideSpan: {null: Array<{resolveAll?: Resolver | undefined}>}
-  string: Record<string, Array<Construct>>
-  text: Record<string, Array<Construct>>
-}
+  attentionMarkers: { null: Array<Code> };
+  contentInitial: Record<string, Array<Construct>>;
+  disable: { null: Array<string> };
+  document: Record<string, Array<Construct>>;
+  flowInitial: Record<string, Array<Construct>>;
+  flow: Record<string, Array<Construct>>;
+  insideSpan: { null: Array<{ resolveAll?: Resolver | undefined }> };
+  string: Record<string, Array<Construct>>;
+  text: Record<string, Array<Construct>>;
+};
 
 /**
  * Create a context.
@@ -769,36 +769,36 @@ export type FullNormalizedExtension = {
  * @returns
  *   Context.
  */
-export type Create = (from?: Omit<Point, '_bufferIndex' | '_index'> | undefined) => TokenizeContext
+export type Create = (from?: Omit<Point, "_bufferIndex" | "_index"> | undefined) => TokenizeContext;
 
 /**
  * Config defining how to parse.
  */
-export type ParseOptions = any
+export type ParseOptions = any;
 
 /**
  * A context object that helps w/ parsing markdown.
  */
 export type ParseContext = {
-  constructs: FullNormalizedExtension
-  content: Create
-  document: Create
-  flow: Create
-  string: Create
-  text: Create
-  defined: Array<string>
-  lazy: Record<number, boolean>
-}
+  constructs: FullNormalizedExtension;
+  content: Create;
+  document: Create;
+  flow: Create;
+  string: Create;
+  text: Create;
+  defined: Array<string>;
+  lazy: Record<number, boolean>;
+};
 
 /**
  * HTML compiler context.
  */
-export type CompileContext = any
+export type CompileContext = any;
 
 /**
  * Serialize micromark events as HTML.
  */
-export type Compile = any
+export type Compile = any;
 
 /**
  * Handle one token.
@@ -808,7 +808,7 @@ export type Compile = any
  * @returns
  *   Nothing.
  */
-export type Handle = any
+export type Handle = any;
 
 /**
  * Handle the whole document.
@@ -816,52 +816,52 @@ export type Handle = any
  * @returns
  *   Nothing.
  */
-export type DocumentHandle = any
+export type DocumentHandle = any;
 
 /**
  * Token types mapping to handles.
  */
-export type Handles = any
+export type Handles = any;
 
 /**
  * Normalized extenion.
  */
-export type HtmlExtension = any
+export type HtmlExtension = any;
 
 /**
  * An HTML extension changes how markdown tokens are serialized.
  */
-export type NormalizedHtmlExtension = any
+export type NormalizedHtmlExtension = any;
 
 /**
  * Definition.
  */
-export type Definition = any
+export type Definition = any;
 
 /**
  * State tracked to compile events as HTML.
  */
-export type CompileData = any
+export type CompileData = any;
 
 /**
  * Type of line ending in markdown.
  */
-export type LineEnding = '\r' | '\n' | '\r\n'
+export type LineEnding = "\r" | "\n" | "\r\n";
 
 /**
  * Compile options.
  */
-export type CompileOptions = any
+export type CompileOptions = any;
 
 /**
  * Configuration.
  */
-export type Options = CompileOptions & ParseOptions
+export type Options = CompileOptions & ParseOptions;
 
 /**
  * Enum of allowed token types.
  */
-export type TokenType = keyof TokenTypeMap
+export type TokenType = keyof TokenTypeMap;
 
 // Note: when changing the next interface, you likely also have to change
 // `micromark-util-symbol`.
@@ -870,110 +870,110 @@ export type TokenType = keyof TokenTypeMap
  */
 export interface TokenTypeMap {
   // Note: these are compiled away.
-  attentionSequence: 'attentionSequence' // To do: remove.
-  space: 'space' // To do: remove.
+  attentionSequence: "attentionSequence"; // To do: remove.
+  space: "space"; // To do: remove.
 
-  data: 'data'
-  whitespace: 'whitespace'
-  lineEnding: 'lineEnding'
-  lineEndingBlank: 'lineEndingBlank'
-  linePrefix: 'linePrefix'
-  lineSuffix: 'lineSuffix'
-  atxHeading: 'atxHeading'
-  atxHeadingSequence: 'atxHeadingSequence'
-  atxHeadingText: 'atxHeadingText'
-  autolink: 'autolink'
-  autolinkEmail: 'autolinkEmail'
-  autolinkMarker: 'autolinkMarker'
-  autolinkProtocol: 'autolinkProtocol'
-  characterEscape: 'characterEscape'
-  characterEscapeValue: 'characterEscapeValue'
-  characterReference: 'characterReference'
-  characterReferenceMarker: 'characterReferenceMarker'
-  characterReferenceMarkerNumeric: 'characterReferenceMarkerNumeric'
-  characterReferenceMarkerHexadecimal: 'characterReferenceMarkerHexadecimal'
-  characterReferenceValue: 'characterReferenceValue'
-  codeFenced: 'codeFenced'
-  codeFencedFence: 'codeFencedFence'
-  codeFencedFenceSequence: 'codeFencedFenceSequence'
-  codeFencedFenceInfo: 'codeFencedFenceInfo'
-  codeFencedFenceMeta: 'codeFencedFenceMeta'
-  codeFlowValue: 'codeFlowValue'
-  codeIndented: 'codeIndented'
-  codeText: 'codeText'
-  codeTextData: 'codeTextData'
-  codeTextPadding: 'codeTextPadding'
-  codeTextSequence: 'codeTextSequence'
-  content: 'content'
-  definition: 'definition'
-  definitionDestination: 'definitionDestination'
-  definitionDestinationLiteral: 'definitionDestinationLiteral'
-  definitionDestinationLiteralMarker: 'definitionDestinationLiteralMarker'
-  definitionDestinationRaw: 'definitionDestinationRaw'
-  definitionDestinationString: 'definitionDestinationString'
-  definitionLabel: 'definitionLabel'
-  definitionLabelMarker: 'definitionLabelMarker'
-  definitionLabelString: 'definitionLabelString'
-  definitionMarker: 'definitionMarker'
-  definitionTitle: 'definitionTitle'
-  definitionTitleMarker: 'definitionTitleMarker'
-  definitionTitleString: 'definitionTitleString'
-  emphasis: 'emphasis'
-  emphasisSequence: 'emphasisSequence'
-  emphasisText: 'emphasisText'
-  escapeMarker: 'escapeMarker'
-  hardBreakEscape: 'hardBreakEscape'
-  hardBreakTrailing: 'hardBreakTrailing'
-  htmlFlow: 'htmlFlow'
-  htmlFlowData: 'htmlFlowData'
-  htmlText: 'htmlText'
-  htmlTextData: 'htmlTextData'
-  image: 'image'
-  label: 'label'
-  labelText: 'labelText'
-  labelLink: 'labelLink'
-  labelImage: 'labelImage'
-  labelMarker: 'labelMarker'
-  labelImageMarker: 'labelImageMarker'
-  labelEnd: 'labelEnd'
-  link: 'link'
-  paragraph: 'paragraph'
-  reference: 'reference'
-  referenceMarker: 'referenceMarker'
-  referenceString: 'referenceString'
-  resource: 'resource'
-  resourceDestination: 'resourceDestination'
-  resourceDestinationLiteral: 'resourceDestinationLiteral'
-  resourceDestinationLiteralMarker: 'resourceDestinationLiteralMarker'
-  resourceDestinationRaw: 'resourceDestinationRaw'
-  resourceDestinationString: 'resourceDestinationString'
-  resourceMarker: 'resourceMarker'
-  resourceTitle: 'resourceTitle'
-  resourceTitleMarker: 'resourceTitleMarker'
-  resourceTitleString: 'resourceTitleString'
-  setextHeading: 'setextHeading'
-  setextHeadingText: 'setextHeadingText'
-  setextHeadingLine: 'setextHeadingLine'
-  setextHeadingLineSequence: 'setextHeadingLineSequence'
-  strong: 'strong'
-  strongSequence: 'strongSequence'
-  strongText: 'strongText'
-  thematicBreak: 'thematicBreak'
-  thematicBreakSequence: 'thematicBreakSequence'
-  blockQuote: 'blockQuote'
-  blockQuotePrefix: 'blockQuotePrefix'
-  blockQuoteMarker: 'blockQuoteMarker'
-  blockQuotePrefixWhitespace: 'blockQuotePrefixWhitespace'
-  listOrdered: 'listOrdered'
-  listUnordered: 'listUnordered'
-  listItemIndent: 'listItemIndent'
-  listItemMarker: 'listItemMarker'
-  listItemPrefix: 'listItemPrefix'
-  listItemPrefixWhitespace: 'listItemPrefixWhitespace'
-  listItemValue: 'listItemValue'
-  chunkDocument: 'chunkDocument'
-  chunkContent: 'chunkContent'
-  chunkFlow: 'chunkFlow'
-  chunkText: 'chunkText'
-  chunkString: 'chunkString'
+  data: "data";
+  whitespace: "whitespace";
+  lineEnding: "lineEnding";
+  lineEndingBlank: "lineEndingBlank";
+  linePrefix: "linePrefix";
+  lineSuffix: "lineSuffix";
+  atxHeading: "atxHeading";
+  atxHeadingSequence: "atxHeadingSequence";
+  atxHeadingText: "atxHeadingText";
+  autolink: "autolink";
+  autolinkEmail: "autolinkEmail";
+  autolinkMarker: "autolinkMarker";
+  autolinkProtocol: "autolinkProtocol";
+  characterEscape: "characterEscape";
+  characterEscapeValue: "characterEscapeValue";
+  characterReference: "characterReference";
+  characterReferenceMarker: "characterReferenceMarker";
+  characterReferenceMarkerNumeric: "characterReferenceMarkerNumeric";
+  characterReferenceMarkerHexadecimal: "characterReferenceMarkerHexadecimal";
+  characterReferenceValue: "characterReferenceValue";
+  codeFenced: "codeFenced";
+  codeFencedFence: "codeFencedFence";
+  codeFencedFenceSequence: "codeFencedFenceSequence";
+  codeFencedFenceInfo: "codeFencedFenceInfo";
+  codeFencedFenceMeta: "codeFencedFenceMeta";
+  codeFlowValue: "codeFlowValue";
+  codeIndented: "codeIndented";
+  codeText: "codeText";
+  codeTextData: "codeTextData";
+  codeTextPadding: "codeTextPadding";
+  codeTextSequence: "codeTextSequence";
+  content: "content";
+  definition: "definition";
+  definitionDestination: "definitionDestination";
+  definitionDestinationLiteral: "definitionDestinationLiteral";
+  definitionDestinationLiteralMarker: "definitionDestinationLiteralMarker";
+  definitionDestinationRaw: "definitionDestinationRaw";
+  definitionDestinationString: "definitionDestinationString";
+  definitionLabel: "definitionLabel";
+  definitionLabelMarker: "definitionLabelMarker";
+  definitionLabelString: "definitionLabelString";
+  definitionMarker: "definitionMarker";
+  definitionTitle: "definitionTitle";
+  definitionTitleMarker: "definitionTitleMarker";
+  definitionTitleString: "definitionTitleString";
+  emphasis: "emphasis";
+  emphasisSequence: "emphasisSequence";
+  emphasisText: "emphasisText";
+  escapeMarker: "escapeMarker";
+  hardBreakEscape: "hardBreakEscape";
+  hardBreakTrailing: "hardBreakTrailing";
+  htmlFlow: "htmlFlow";
+  htmlFlowData: "htmlFlowData";
+  htmlText: "htmlText";
+  htmlTextData: "htmlTextData";
+  image: "image";
+  label: "label";
+  labelText: "labelText";
+  labelLink: "labelLink";
+  labelImage: "labelImage";
+  labelMarker: "labelMarker";
+  labelImageMarker: "labelImageMarker";
+  labelEnd: "labelEnd";
+  link: "link";
+  paragraph: "paragraph";
+  reference: "reference";
+  referenceMarker: "referenceMarker";
+  referenceString: "referenceString";
+  resource: "resource";
+  resourceDestination: "resourceDestination";
+  resourceDestinationLiteral: "resourceDestinationLiteral";
+  resourceDestinationLiteralMarker: "resourceDestinationLiteralMarker";
+  resourceDestinationRaw: "resourceDestinationRaw";
+  resourceDestinationString: "resourceDestinationString";
+  resourceMarker: "resourceMarker";
+  resourceTitle: "resourceTitle";
+  resourceTitleMarker: "resourceTitleMarker";
+  resourceTitleString: "resourceTitleString";
+  setextHeading: "setextHeading";
+  setextHeadingText: "setextHeadingText";
+  setextHeadingLine: "setextHeadingLine";
+  setextHeadingLineSequence: "setextHeadingLineSequence";
+  strong: "strong";
+  strongSequence: "strongSequence";
+  strongText: "strongText";
+  thematicBreak: "thematicBreak";
+  thematicBreakSequence: "thematicBreakSequence";
+  blockQuote: "blockQuote";
+  blockQuotePrefix: "blockQuotePrefix";
+  blockQuoteMarker: "blockQuoteMarker";
+  blockQuotePrefixWhitespace: "blockQuotePrefixWhitespace";
+  listOrdered: "listOrdered";
+  listUnordered: "listUnordered";
+  listItemIndent: "listItemIndent";
+  listItemMarker: "listItemMarker";
+  listItemPrefix: "listItemPrefix";
+  listItemPrefixWhitespace: "listItemPrefixWhitespace";
+  listItemValue: "listItemValue";
+  chunkDocument: "chunkDocument";
+  chunkContent: "chunkContent";
+  chunkFlow: "chunkFlow";
+  chunkText: "chunkText";
+  chunkString: "chunkString";
 }

@@ -44,12 +44,15 @@ for (let i = 0; i < definedCount; i++) {
 const functionNames = Buffer.concat([u32(definedCount), ...entries]);
 const nameContent = Buffer.concat([vec(Buffer.from("name")), Buffer.from([1]), vec(functionNames)]);
 const kept = sections.filter(s => !(s.id === 0 && s.name === "name"));
-fs.writeFileSync(outPath, Buffer.concat([
-  bytes.subarray(0, 8),
-  ...kept.map(s => bytes.subarray(s.headerStart, s.end)),
-  Buffer.from([0]),
-  vec(nameContent),
-]));
+fs.writeFileSync(
+  outPath,
+  Buffer.concat([
+    bytes.subarray(0, 8),
+    ...kept.map(s => bytes.subarray(s.headerStart, s.end)),
+    Buffer.from([0]),
+    vec(nameContent),
+  ]),
+);
 console.log("functions", definedCount, "named first", rankByIndex.size, "kept", keptCount);
 
 /** Gives the sections of a module: their id, the custom ones' name, and where their header, content and end are. */

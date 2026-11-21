@@ -59,29 +59,28 @@ Deno.test("the plugin's configuration comes before what all plugins share", () =
 });
 
 Deno.test("prettier's names come before dprint's", () => {
-  formatter.setConfig({}, {
-    lineWidth: 60,
-    printWidth: 90,
-    indentWidth: 3,
-    tabWidth: 8,
-    newLineKind: "crlf",
-    endOfLine: "cr",
-  });
+  formatter.setConfig(
+    {},
+    { lineWidth: 60, printWidth: 90, indentWidth: 3, tabWidth: 8, newLineKind: "crlf", endOfLine: "cr" },
+  );
   assertEquals(formatter.getConfigDiagnostics(), []);
   assertEquals(formatter.getResolvedConfig().main, { printWidth: 90, tabWidth: 8, useTabs: false, endOfLine: "cr" });
   assertEquals(formatter.formatText({ filePath: "file.js", fileText: "a\nb" }), "a;\rb;\r");
 });
 
 Deno.test("resolves the options of extensions, of prettier and of the Prettier plugins", () => {
-  formatter.setConfig({}, {
-    semi: false,
-    "TS.semi": true,
-    "d.ts.singleQuote": true,
-    "json.tabWidth": 4,
-    "plugin.jsDoc": true,
-    jsdocSpaces: 2,
-    custom: [1, { a: null }],
-  });
+  formatter.setConfig(
+    {},
+    {
+      semi: false,
+      "TS.semi": true,
+      "d.ts.singleQuote": true,
+      "json.tabWidth": 4,
+      "plugin.jsDoc": true,
+      jsdocSpaces: 2,
+      custom: [1, { a: null }],
+    },
+  );
   assertEquals(formatter.getConfigDiagnostics(), []);
   assertEquals(formatter.getResolvedConfig(), {
     main: { ...defaultOptions, semi: false, jsdocSpaces: 2, custom: [1, { a: null }] },
@@ -103,16 +102,19 @@ Deno.test("resolves the options of extensions, of prettier and of the Prettier p
 });
 
 Deno.test("says what is wrong with each setting of the wrong type and goes on with its default", () => {
-  formatter.setConfig({}, {
-    lineWidth: "a",
-    indentWidth: true,
-    useTabs: 1,
-    newLineKind: 5,
-    endOfLine: 1,
-    tabWidth: "x",
-    printWidth: null,
-    "plugin.jsDoc": "yes",
-  });
+  formatter.setConfig(
+    {},
+    {
+      lineWidth: "a",
+      indentWidth: true,
+      useTabs: 1,
+      newLineKind: 5,
+      endOfLine: 1,
+      tabWidth: "x",
+      printWidth: null,
+      "plugin.jsDoc": "yes",
+    },
+  );
   assertEquals(formatter.getConfigDiagnostics(), [
     { propertyName: "plugin.jsDoc", message: "Expected a boolean, but found \"yes\"." },
     { propertyName: "lineWidth", message: "Expected a number, but found \"a\"." },

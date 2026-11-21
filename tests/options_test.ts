@@ -189,12 +189,10 @@ Deno.test("an option for the files of an extension", async () => {
   for (const sample of samples) {
     const extension = sample.fileName.slice(sample.fileName.lastIndexOf(".") + 1);
     // the option is given for every file and then taken back for the files of the sample's extension
-    formatter.setConfig({}, {
-      tabWidth: 8,
-      semi: false,
-      [`${extension.toUpperCase()}.tabWidth`]: 3,
-      [`${extension}.semi`]: true,
-    });
+    formatter.setConfig(
+      {},
+      { tabWidth: 8, semi: false, [`${extension.toUpperCase()}.tabWidth`]: 3, [`${extension}.semi`]: true },
+    );
     assertEquals(formatter.getConfigDiagnostics(), []);
     assertEquals(
       formatter.formatText({ filePath: sample.fileName, fileText: sample.text }),
@@ -233,12 +231,10 @@ Deno.test("the options of dprint's own names", async () => {
       }),
       sample.fileName,
     );
-    formatter.setConfig({ lineWidth: 50, indentWidth: 3, useTabs: true, newLineKind: "crlf" }, {
-      lineWidth: 70,
-      indentWidth: 5,
-      useTabs: false,
-      newLineKind: "auto",
-    });
+    formatter.setConfig(
+      { lineWidth: 50, indentWidth: 3, useTabs: true, newLineKind: "crlf" },
+      { lineWidth: 70, indentWidth: 5, useTabs: false, newLineKind: "auto" },
+    );
     const crlfText = sample.text.replaceAll("\n", "\r\n");
     assertEquals(
       formatter.formatText({ filePath: sample.fileName, fileText: crlfText }),

@@ -8,6 +8,7 @@
     "prettier",
     "src/vendor",
     "src/shims",
+    "src/sites.json",
     "src/generated",
     "src/prettier-plugins",
     "tests/specs",
@@ -17,9 +18,9 @@
     ".github/workflows/*.generated.yml"
   ],
   "plugins": [
-    "npm:@dprint/typescript@0.96.1",
-    "npm:@dprint/json@0.23.0",
-    "npm:@dprint/markdown@0.22.1",
-    "npm:@dprint/prettier@0.70.0/plugin.json@97c0dccf54ed5b7343e7a3f6418e77bd80afcd2b74beed3a632689d47e392ddc"
+    "npm:@dprint/typescript@0.101.0",
+    "npm:@dprint/json@0.26.0",
+    "npm:@dprint/markdown@0.29.0",
+    "npm:@dprint/prettier@0.73.1"
   ]
 }
