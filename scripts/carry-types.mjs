@@ -230,8 +230,10 @@ function diffHunks(a, b) {
 }
 
 function normalizeLine(line) {
-  return line.replace(/(\.\s*)?(#?[A-Za-z_$][\w$]*)(\s*:)?/g, (all, dot, name, colon) =>
-    dot != null || keywords.has(name) ? all : "_" + (colon ?? ""));
+  return line.replace(
+    /(\.\s*)?(#?[A-Za-z_$][\w$]*)(\s*:)?/g,
+    (all, dot, name, colon) => dot != null || keywords.has(name) ? all : "_" + (colon ?? ""),
+  );
 }
 
 /** The names of a line that are not property names, in order. */

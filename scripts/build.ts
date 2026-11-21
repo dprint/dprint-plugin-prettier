@@ -51,7 +51,9 @@ $.logStep("Compiling", "the collector's memory functions");
 const gcEnvPath = await buildGcEnv();
 
 $.logStep("Compiling", "the Wasm module with NativeAOT-LLVM");
-await $`dotnet publish Plugin.csproj -c Release -r wasi-wasm -p:NtsOutDir=${ntsOutDir.join("dist")} -p:FlowParserLib=${flowLibPath} -p:GcEnvObject=${gcEnvPath}`
+await $`dotnet publish Plugin.csproj -c Release -r wasi-wasm -p:NtsOutDir=${
+  ntsOutDir.join("dist")
+} -p:FlowParserLib=${flowLibPath} -p:GcEnvObject=${gcEnvPath}`
   .cwd(wasmDir)
   .stdout(targetDir.join("publish.log"));
 
@@ -60,7 +62,9 @@ const publishedPath = wasmDir.join("bin/Release/net10.0/wasi-wasm/publish/dprint
 const patchedPath = targetDir.join("patched.wasm");
 await $`node ${wasmDir.join("patch-shadow-stack.mjs")} ${publishedPath} ${patchedPath}`;
 const orderedPath = targetDir.join("ordered.wasm");
-await $`node ${wasmDir.join("order-functions.mjs")} ${patchedPath} ${targetDir.join("link.map")} ${wasmDir.join("hot-functions.txt")} ${wasmDir.join("kept-functions.txt")} ${orderedPath}`;
+await $`node ${wasmDir.join("order-functions.mjs")} ${patchedPath} ${targetDir.join("link.map")} ${
+  wasmDir.join("hot-functions.txt")
+} ${wasmDir.join("kept-functions.txt")} ${orderedPath}`;
 const binaryen = Deno.env.get("BINARYEN");
 const wasmOptName = Deno.build.os === "windows" ? "wasm-opt.exe" : "wasm-opt";
 const wasmOpt = binaryen == null ? wasmOptName : $.path(binaryen).join(wasmOptName).toString();
@@ -87,7 +91,9 @@ async function buildFlowParser() {
   const flowDir = targetDir.join("flow");
   flowDir.mkdirSync({ recursive: true });
   const wasmPath = flowDir.join("flow_parser.wasm");
-  await $`node ${wasmDir.join("flow/extract-wasm.mjs")} ${rootDir.join("prettier/node_modules/flow-parser/dist/FlowParserWASM.js")} ${wasmPath}`;
+  await $`node ${wasmDir.join("flow/extract-wasm.mjs")} ${
+    rootDir.join("prettier/node_modules/flow-parser/dist/FlowParserWASM.js")
+  } ${wasmPath}`;
   const wabt = Deno.env.get("WABT");
   if (wabt == null) {
     throw new Error("Expected the WABT environment variable to give the folder of WABT, for wasm2c.");
@@ -113,7 +119,9 @@ async function buildFlowParser() {
   await $`${clang} ${flags} -c ${wasmDir.join("flow/flow_parser_glue.c")} -o ${flowDir.join("flow_parser_glue.o")}`;
   const libPath = flowDir.join("libflowparser.a");
   if (libPath.existsSync()) libPath.removeSync();
-  await $`${wasiSdk.join(`bin/llvm-ar${exe}`)} rcs ${libPath} ${flowDir.join("flow_parser.o")} ${flowDir.join("flow_parser_glue.o")}`;
+  await $`${wasiSdk.join(`bin/llvm-ar${exe}`)} rcs ${libPath} ${flowDir.join("flow_parser.o")} ${
+    flowDir.join("flow_parser_glue.o")
+  }`;
   return libPath;
 }
 
@@ -124,6 +132,8 @@ async function buildGcEnv() {
   const wasiSdk = $.path(Deno.env.get("WASI_SDK_PATH")!);
   const exe = Deno.build.os === "windows" ? ".exe" : "";
   const objectPath = gcDir.join("gcenv.wasm.o");
-  await $`${wasiSdk.join(`bin/clang++${exe}`)} --target=wasm32-wasip1 --sysroot=${wasiSdk.join("share/wasi-sysroot")} -O2 -mbulk-memory -fno-exceptions -fno-rtti -c ${wasmDir.join("gc/gcenv.wasm.cpp")} -o ${objectPath}`;
+  await $`${wasiSdk.join(`bin/clang++${exe}`)} --target=wasm32-wasip1 --sysroot=${
+    wasiSdk.join("share/wasi-sysroot")
+  } -O2 -mbulk-memory -fno-exceptions -fno-rtti -c ${wasmDir.join("gc/gcenv.wasm.cpp")} -o ${objectPath}`;
   return objectPath;
 }
