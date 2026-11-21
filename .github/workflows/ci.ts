@@ -1,5 +1,5 @@
 #!/usr/bin/env -S deno run -A
-import { conditions, step, workflow } from "@david/gagen";
+import { conditions, job, workflow } from "@david/gagen";
 
 // the version of prettier whose typed source is in ./prettier
 const prettierVersion = "3.10.1";
@@ -11,12 +11,160 @@ const wabtVersion = "1.0.42";
 
 const isTag = conditions.isTag();
 
-const getTagVersion = step({
-  id: "get_tag_version",
-  name: "Get tag version",
+// the build job uploads these for the release jobs, which are separate so that
+// a failed GitHub release or npm publish can be rerun without the other
+const releaseArtifactsName = "release-artifacts";
+const releaseArtifactPaths = ["target/plugin.wasm", "deployment/schema.json"];
+const downloadReleaseArtifactsStep = {
+  name: "Download release artifacts",
+  uses: "actions/download-artifact@v8",
+  // the paths of the artifact are relative to the repository root
+  with: { name: releaseArtifactsName, path: "." },
+};
+
+const buildJob = job("build", {
+  name: "build",
+  // the NativeAOT-LLVM compiler is only published for Linux and Windows hosts
+  runsOn: "ubuntu-latest",
+  permissions: { contents: "read" },
+  steps: [
+    { name: "Checkout", uses: "actions/checkout@v6" },
+    { uses: "denoland/setup-deno@v2" },
+    {
+      uses: "actions/setup-dotnet@v5",
+      with: { "dotnet-version": "11.0.x" },
+    },
+    {
+      uses: "actions/setup-node@v6",
+      with: { "node-version": "24.x" },
+    },
+    {
+      name: "Install WASI SDK, Binaryen and WABT",
+      run: [
+        `curl -sSfL https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-${wasiSdkVersion}/${wasiSdkDir}.tar.gz | tar xz -C "$RUNNER_TEMP"`,
+        `echo "WASI_SDK_PATH=$RUNNER_TEMP/${wasiSdkDir}" >> "$GITHUB_ENV"`,
+        `curl -sSfL https://github.com/WebAssembly/binaryen/releases/download/${binaryenVersion}/binaryen-${binaryenVersion}-x86_64-linux.tar.gz | tar xz -C "$RUNNER_TEMP"`,
+        `echo "BINARYEN=$RUNNER_TEMP/binaryen-${binaryenVersion}/bin" >> "$GITHUB_ENV"`,
+        `curl -sSfL https://github.com/WebAssembly/wabt/releases/download/${wabtVersion}/wabt-${wabtVersion}-linux-x64.tar.gz | tar xz -C "$RUNNER_TEMP"`,
+        `echo "WABT=$RUNNER_TEMP/wabt-${wabtVersion}" >> "$GITHUB_ENV"`,
+      ],
+    },
+    {
+      name: "Lint workflow generation",
+      if: isTag.not(),
+      run: [
+        "./.github/workflows/ci.ts --lint",
+        "./.github/workflows/release.ts --lint",
+      ],
+    },
+    { name: "Install prettier's and the prettier plugins' dependencies", run: "deno task setup" },
+    { name: "Build", run: "deno task build" },
+    {
+      // adds the outputs of the schema's code examples, which the release uploads with the schema
+      name: "Generate config schema",
+      run:
+        "deno run -A --minimum-dependency-age=0 jsr:@dprint/automation@0.14.4/tasks/publish-schema target/plugin.wasm deployment/schema.json --extension ts",
+    },
+    { name: "Test", run: "deno task test" },
+    {
+      // formats the tests of prettier's repository with the plugin and with prettier, which must come out the same
+      name: "Test prettier's tests",
+      run: "deno task test:prettier",
+    },
+    {
+      // formats the tests of the prettier plugins that the plugin includes, and prettier's tests of javascript with
+      // prettier-plugin-jsdoc, with the plugin and with prettier, which must come out the same
+      name: "Test the prettier plugins' tests",
+      run: "deno task test:plugins",
+    },
+    {
+      name: "Setup and test npm deployment",
+      run: [
+        "cd deployment/npm",
+        "npm install",
+        "node setup.js",
+        "npm run test",
+      ],
+    },
+    {
+      name: "Upload release artifacts",
+      if: isTag,
+      uses: "actions/upload-artifact@v7",
+      with: {
+        name: releaseArtifactsName,
+        path: releaseArtifactPaths.join("\n"),
+        "if-no-files-found": "error",
+      },
+    },
+  ],
+});
+
+const githubReleaseJob = job("github_release", {
+  name: "github_release",
   if: isTag,
-  run: "echo TAG_VERSION=${GITHUB_REF/refs\\/tags\\//} >> $GITHUB_OUTPUT",
-  outputs: ["TAG_VERSION"],
+  needs: [buildJob],
+  runsOn: "ubuntu-latest",
+  permissions: { contents: "write" },
+  steps: [
+    { name: "Checkout", uses: "actions/checkout@v6" },
+    { uses: "denoland/setup-deno@v2" },
+    downloadReleaseArtifactsStep,
+    {
+      name: "Pre-release",
+      run: [
+        "# update config schema to have version",
+        `sed -i "s/dprint-plugin-prettier\\/0.0.0/dprint-plugin-prettier\\/$GITHUB_REF_NAME/" deployment/schema.json`,
+        "# create release notes",
+        `deno run -A ./scripts/generate_release_notes.ts ${prettierVersion} > \${{ github.workspace }}-CHANGELOG.txt`,
+      ],
+    },
+    {
+      name: "Release",
+      // gh uploads the assets to a draft and then publishes it, which immutable releases require
+      env: { GH_TOKEN: "${{ secrets.GITHUB_TOKEN }}" },
+      run: [
+        `gh release create "$GITHUB_REF_NAME" --verify-tag --title "$GITHUB_REF_NAME"`,
+        "--notes-file ${{ github.workspace }}-CHANGELOG.txt",
+        ...releaseArtifactPaths,
+      ].join(" \\\n  "),
+    },
+  ],
+});
+
+const npmPublishJob = job("npm_publish", {
+  name: "npm_publish",
+  if: isTag,
+  needs: [buildJob],
+  runsOn: "ubuntu-latest",
+  // id-token: write is required for npm --provenance
+  permissions: { contents: "read", "id-token": "write" },
+  steps: [
+    { name: "Checkout", uses: "actions/checkout@v6" },
+    {
+      uses: "actions/setup-node@v6",
+      with: { "node-version": "24.x", "registry-url": "https://registry.npmjs.org" },
+    },
+    downloadReleaseArtifactsStep,
+    {
+      name: "Setup npm package",
+      // copies in the plugin and updates the npm package to have the version
+      run: "cd deployment/npm && node setup.js sync-version",
+    },
+    {
+      // npm trusted publishing (OIDC) requires npm >= 11.5.1.
+      name: "Upgrade npm",
+      run: "npm install --global npm@latest",
+    },
+    {
+      name: "Publish npm package",
+      // publish from within the directory because npm treats a path
+      // like "deployment/npm" as a GitHub repository
+      run: [
+        "cd deployment/npm",
+        "npm publish --access public --provenance",
+      ],
+    },
+  ],
 });
 
 workflow({
@@ -30,115 +178,7 @@ workflow({
     group: "${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}",
     cancelInProgress: true,
   },
-  jobs: [{
-    id: "build",
-    name: "build",
-    // the NativeAOT-LLVM compiler is only published for Linux and Windows hosts
-    runsOn: "ubuntu-latest",
-    // id-token: write is required for npm --provenance
-    permissions: { contents: "write", "id-token": "write" },
-    steps: [
-      { name: "Checkout", uses: "actions/checkout@v6" },
-      { uses: "denoland/setup-deno@v2" },
-      {
-        uses: "actions/setup-dotnet@v5",
-        with: { "dotnet-version": "11.0.x" },
-      },
-      {
-        uses: "actions/setup-node@v6",
-        with: { "node-version": "24.x", "registry-url": "https://registry.npmjs.org" },
-      },
-      {
-        name: "Install WASI SDK, Binaryen and WABT",
-        run: [
-          `curl -sSfL https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-${wasiSdkVersion}/${wasiSdkDir}.tar.gz | tar xz -C "$RUNNER_TEMP"`,
-          `echo "WASI_SDK_PATH=$RUNNER_TEMP/${wasiSdkDir}" >> "$GITHUB_ENV"`,
-          `curl -sSfL https://github.com/WebAssembly/binaryen/releases/download/${binaryenVersion}/binaryen-${binaryenVersion}-x86_64-linux.tar.gz | tar xz -C "$RUNNER_TEMP"`,
-          `echo "BINARYEN=$RUNNER_TEMP/binaryen-${binaryenVersion}/bin" >> "$GITHUB_ENV"`,
-          `curl -sSfL https://github.com/WebAssembly/wabt/releases/download/${wabtVersion}/wabt-${wabtVersion}-linux-x64.tar.gz | tar xz -C "$RUNNER_TEMP"`,
-          `echo "WABT=$RUNNER_TEMP/wabt-${wabtVersion}" >> "$GITHUB_ENV"`,
-        ],
-      },
-      {
-        name: "Lint workflow generation",
-        if: isTag.not(),
-        run: [
-          "./.github/workflows/ci.ts --lint",
-          "./.github/workflows/release.ts --lint",
-        ],
-      },
-      { name: "Install prettier's and the prettier plugins' dependencies", run: "deno task setup" },
-      { name: "Build", run: "deno task build" },
-      {
-        // adds the outputs of the schema's code examples, which the release uploads with the schema
-        name: "Generate config schema",
-        run:
-          "deno run -A --minimum-dependency-age=0 jsr:@dprint/automation@0.14.4/tasks/publish-schema target/plugin.wasm deployment/schema.json --extension ts",
-      },
-      { name: "Test", run: "deno task test" },
-      {
-        // formats the tests of prettier's repository with the plugin and with prettier, which must come out the same
-        name: "Test prettier's tests",
-        run: "deno task test:prettier",
-      },
-      {
-        // formats the tests of the prettier plugins that the plugin includes, and prettier's tests of javascript with
-        // prettier-plugin-jsdoc, with the plugin and with prettier, which must come out the same
-        name: "Test the prettier plugins' tests",
-        run: "deno task test:plugins",
-      },
-      {
-        name: "Setup and test npm deployment",
-        run: [
-          "cd deployment/npm",
-          "npm install",
-          "node setup.js",
-          "npm run test",
-        ],
-      },
-      getTagVersion,
-      {
-        name: "Pre-release",
-        if: isTag,
-        run: [
-          "# update config schema to have version",
-          `sed -i 's/dprint-plugin-prettier\\/0.0.0/dprint-plugin-prettier\\/${getTagVersion.outputs.TAG_VERSION}/' deployment/schema.json`,
-          "# update the npm package to have version",
-          "(cd deployment/npm && node setup.js sync-version)",
-          "# create release notes",
-          `deno run -A ./scripts/generate_release_notes.ts ${prettierVersion} > \${{ github.workspace }}-CHANGELOG.txt`,
-        ],
-      },
-      {
-        name: "Release",
-        if: isTag,
-        // gh uploads the assets to a draft and then publishes it, which immutable releases require
-        env: { GH_TOKEN: "${{ secrets.GITHUB_TOKEN }}" },
-        run: [
-          `gh release create "$GITHUB_REF_NAME" --verify-tag --title "$GITHUB_REF_NAME"`,
-          "--notes-file ${{ github.workspace }}-CHANGELOG.txt",
-          "deployment/npm/plugin.wasm",
-          "deployment/schema.json",
-        ].join(" \\\n  "),
-      },
-      {
-        // npm trusted publishing (OIDC) requires npm >= 11.5.1.
-        name: "Upgrade npm",
-        if: isTag,
-        run: "npm install --global npm@latest",
-      },
-      {
-        name: "Publish npm package",
-        if: isTag,
-        // publish from within the directory because npm treats a path
-        // like "deployment/npm" as a GitHub repository
-        run: [
-          "cd deployment/npm",
-          "npm publish --access public --provenance",
-        ],
-      },
-    ],
-  }],
+  jobs: [buildJob, githubReleaseJob, npmPublishJob],
 }).writeOrLint({
   filePath: new URL("./ci.generated.yml", import.meta.url),
   header: "# GENERATED BY ./ci.ts -- DO NOT DIRECTLY EDIT",
